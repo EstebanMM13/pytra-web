@@ -15,7 +15,7 @@ npm ci
 npm start          # ng serve on http://localhost:4200
 ```
 
-> By default the dev server talks to the **production API**, because the API origin is hard-coded (see [Configuration](#configuration)).
+> The dev server talks to a **local API** on `http://localhost:8080` (run [pytra-api](https://github.com/EstebanMM13/pytra-api) locally). Production builds use the Railway API. See [Configuration](#configuration).
 
 ## Features
 
@@ -47,7 +47,7 @@ The UI text is in Spanish, served through ngx-translate (`public/i18n/es.json`).
 ```
 src/app/
 ├── core/                 # Cross-cutting, no UI
-│   ├── api-base-url.ts   # API origin
+│   ├── api-base-url.ts   # API origin (read from src/environments)
 │   ├── guards/           # authGuard, guestGuard
 │   ├── interceptors/     # Adds the JWT to API requests
 │   ├── models/           # API DTO types
@@ -70,18 +70,30 @@ src/app/
 | `npm start` | Dev server (`ng serve`) |
 | `npm run build` | Production build to `dist/pytra-web/browser` |
 | `npm run watch` | Development build in watch mode |
-| `npm test` | Unit tests (`ng test`, Vitest) |
+| `npm test` | Unit tests (`ng test`, Vitest on jsdom) |
+
+**CI:** `.github/workflows/ci.yml` runs `npm ci`, `npm run build` and `ng test --watch=false` on Node 24 for every push and pull request to `master`.
 
 ## Configuration
 
 | Setting | Where | Value |
 |---|---|---|
-| API origin | `src/app/core/api-base-url.ts` | `https://pytra-api-production.up.railway.app` (hard-coded) |
-| API in CSP | `nginx.conf.template` (`connect-src`) | Same origin as above |
+| API origin (development) | `src/environments/environment.ts` | `http://localhost:8080` |
+| API origin (production) | `src/environments/environment.production.ts` | `https://pytra-api-production.up.railway.app` |
+| API in CSP | `nginx.conf.template` (`connect-src`) | Same origin as production |
 | App id / deep-link scheme | `capacitor.config.ts`, `android/app/build.gradle`, `AndroidManifest.xml` | `com.estebanmm13.pytra` |
 | OAuth deep link | `AndroidManifest.xml`, `core/services/native-oauth.service.ts` | `com.estebanmm13.pytra://oauth-callback` |
 
-**Using a local API:** temporarily set `API_ORIGIN` in `api-base-url.ts` to `http://localhost:8080`. The API's default CORS and `FRONTEND_URL` already allow `http://localhost:4200`. If you change the origin for a deployed build, update `connect-src` in `nginx.conf.template` too.
+`src/app/core/api-base-url.ts` exports `API_ORIGIN` / `API_BASE_URL` from the active environment file. The `production` build configuration (the default for `ng build` / `npm run build`) swaps `environment.ts` for `environment.production.ts` through `fileReplacements` in `angular.json`, so:
+
+| Command | Configuration | API origin |
+|---|---|---|
+| `npm start` (`ng serve`) | development | `http://localhost:8080` |
+| `ng build --configuration development`, `npm run watch` | development | `http://localhost:8080` |
+| `npm run build`, Docker image | production | Railway |
+| Android app (`npm run build` + `npx cap sync android`) | production | Railway |
+
+The API's default CORS and `FRONTEND_URL` already allow `http://localhost:4200`. If you change the production origin, update `connect-src` in `nginx.conf.template` too (nginx only serves production builds).
 
 The JWT is stored in `localStorage` and sent by the auth interceptor.
 
@@ -128,6 +140,5 @@ railway up --service pytra-web --environment production --detach
 
 ## Known limitations
 
-- **Hard-coded API origin:** `ng serve` uses the production API unless you edit `api-base-url.ts`. There are no Angular environment files.
 - **Debug APK only:** there is no release signing configuration.
 - **Single UI language:** Spanish only, no language switcher.

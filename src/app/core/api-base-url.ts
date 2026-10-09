@@ -1,4 +1,6 @@
-// Backend en Railway — misma URL para PC y móvil, con HTTPS real, sin IPs,
-// túneles ni depender de que el PC esté encendido.
-export const API_ORIGIN = 'https://pytra-api-production.up.railway.app';
+import { environment } from '../../environments/environment';
+
+// API origin per build configuration: localhost for `ng serve`, Railway for production builds
+// (web and Android). See src/environments/.
+export const API_ORIGIN = environment.apiOrigin;
 export const API_BASE_URL = `${API_ORIGIN}/api/v1`;

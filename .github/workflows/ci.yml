@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NG_CLI_ANALYTICS: 'false'
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Same major as the Dockerfile's build stage (node:24-alpine).
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Production configuration: environment.production.ts (Railway API origin).
+      - name: Build
+        run: npm run build
+
+      # Vitest on jsdom, no browser needed.
+      - name: Unit tests
+        run: npx ng test --watch=false
