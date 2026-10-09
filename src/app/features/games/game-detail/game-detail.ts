@@ -1,19 +1,73 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Experience, ExperienceRequest } from '../../../core/models/experience.model';
+import {
+  LucideChevronLeft,
+  LucideClock,
+  LucideDownload,
+  LucideLayers,
+  LucidePencil,
+  LucidePlay,
+  LucidePlus,
+  LucideStar,
+  LucideTrophy,
+} from '@lucide/angular';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Experience } from '../../../core/models/experience.model';
 import { Game } from '../../../core/models/game.model';
 import { OnlinePlaytime } from '../../../core/models/online-playtime.model';
 import { ExperienceService } from '../../../core/services/experience.service';
 import { GameService } from '../../../core/services/game.service';
 import { OnlinePlaytimeService } from '../../../core/services/online-playtime.service';
+import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
 import { Navbar } from '../../../shared/navbar/navbar';
-import { ExperienceForm } from '../experience-form/experience-form';
 import { HoursPipe } from '../../../shared/pipes/hours.pipe';
+import { RatingPipe } from '../../../shared/pipes/rating.pipe';
+import { ToastService } from '../../../shared/toast/toast.service';
+import { RunRow } from '../../../shared/ui/run-row';
+import { SectionHeader } from '../../../shared/ui/section-header';
+import { Skeleton } from '../../../shared/ui/skeleton';
+import { StatCard } from '../../../shared/ui/stat-card';
+import { StatusPill } from '../../../shared/ui/status-pill';
+import { formatDayMonthYear, formatRunPeriod } from '../../../shared/utils/run-dates';
+import { GameEditDialog } from '../game-edit-dialog/game-edit-dialog';
+
+/** Newest run first: end date, else start date, else stored year; ties by id. */
+function byRecencyDesc(a: Experience, b: Experience): number {
+  const key = (e: Experience) => e.endDate ?? e.startDate ?? (e.year ? `${e.year}-01-01` : '');
+  return key(b).localeCompare(key(a)) || b.id - a.id;
+}
+
+/** Saga order: release date (undated last), then name. */
+function byRelease(a: Game, b: Game): number {
+  const ra = a.releaseDate ?? '9999';
+  const rb = b.releaseDate ?? '9999';
+  return ra.localeCompare(rb) || a.name.localeCompare(b.name);
+}
 
 @Component({
   selector: 'app-game-detail',
-  imports: [ReactiveFormsModule, RouterLink, Navbar, ExperienceForm, HoursPipe],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    TranslatePipe,
+    Navbar,
+    HoursPipe,
+    RatingPipe,
+    RunRow,
+    SectionHeader,
+    Skeleton,
+    StatCard,
+    StatusPill,
+    GameEditDialog,
+    LucideChevronLeft,
+    LucideLayers,
+    LucidePencil,
+    LucidePlus,
+    LucideDownload,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-detail.html',
 })
 export class GameDetail {
@@ -22,112 +76,229 @@ export class GameDetail {
   private readonly gameService = inject(GameService);
   private readonly experienceService = inject(ExperienceService);
   private readonly onlinePlaytimeService = inject(OnlinePlaytimeService);
+  private readonly runFormLauncher = inject(RunFormLauncher);
+  private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
-  readonly gameId = Number(this.route.snapshot.paramMap.get('id'));
+  protected readonly icons = { runs: LucidePlay, hours: LucideClock, rating: LucideStar, platinum: LucideTrophy };
 
+  readonly gameId = signal(0);
   readonly game = signal<Game | null>(null);
-  readonly experiences = signal<Experience[]>([]);
+  /** `null` while loading. */
+  readonly experiences = signal<Experience[] | null>(null);
   readonly onlinePlaytime = signal<OnlinePlaytime | null>(null);
-  readonly loading = signal(true);
-  readonly error = signal<string | null>(null);
-
-  readonly showExperienceForm = signal(false);
-  readonly editingExperience = signal<Experience | null>(null);
+  readonly sagaGames = signal<Game[]>([]);
+  readonly loadError = signal(false);
+  readonly editing = signal(false);
+  readonly savingOnline = signal(false);
 
   readonly onlinePlaytimeForm = this.fb.group({
-    totalHours: this.fb.control(0, [Validators.required, Validators.min(0)]),
-    generalRating: this.fb.control<number | null>(null),
-    notes: this.fb.control(''),
+    totalHours: this.fb.control<number | null>(0, [Validators.required, Validators.min(0)]),
+    // The API stores the online rating as an integer 0–10.
+    generalRating: this.fb.control<number | null>(null, [
+      Validators.min(0),
+      Validators.max(10),
+      Validators.pattern(/^\d+$/),
+    ]),
+  });
+
+  protected readonly runs = computed(() => [...(this.experiences() ?? [])].sort(byRecencyDesc));
+
+  protected readonly ratings = computed(() =>
+    this.runs()
+      .map((r) => r.rating)
+      .filter((r): r is number => r !== null),
+  );
+
+  protected readonly stats = computed(() => {
+    const runs = this.runs();
+    const ratings = this.ratings();
+    const runHours = runs.reduce((sum, r) => sum + (r.hours ?? 0), 0);
+    return {
+      runs: runs.length,
+      totalHours: runHours + (this.onlinePlaytime()?.totalHours ?? 0),
+      avgRating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
+      bestRating: ratings.length ? Math.max(...ratings) : null,
+      platinum: runs.some((r) => r.platinum),
+    };
+  });
+
+  /** Highlighted only when there is something to compare against. */
+  protected readonly bestRunId = computed(() => {
+    const runs = this.runs();
+    const best = this.stats().bestRating;
+    if (runs.length < 2 || best === null) {
+      return null;
+    }
+    return runs.find((r) => r.rating === best)?.id ?? null;
+  });
+
+  protected readonly platforms = computed(() => [...new Set(this.runs().map((r) => r.platform))]);
+
+  protected readonly platformNames = computed(() =>
+    this.platforms()
+      .map((p) => this.translate.instant(`platform.${p}`) as string)
+      .join(', '),
+  );
+
+  protected readonly metaLine = computed(() => {
+    const g = this.game();
+    if (!g) {
+      return '';
+    }
+    return [
+      g.developer,
+      g.releaseDate?.slice(0, 4),
+      g.genres.map((genre) => genre.name).join(', '),
+      this.platformNames(),
+    ]
+      .filter((part) => !!part)
+      .join(' · ');
+  });
+
+  protected readonly sagaPosition = computed(() => {
+    const games = this.sagaGames();
+    const index = games.findIndex((g) => g.id === this.gameId());
+    return index >= 0 ? { index: index + 1, total: games.length } : null;
   });
 
   constructor() {
-    this.load();
+    this.route.paramMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      this.load(Number(params.get('id')));
+    });
+
+    this.runFormLauncher.saved$.pipe(takeUntilDestroyed()).subscribe(({ experience }) => {
+      if (experience.gameId === this.gameId()) {
+        this.loadRuns();
+      }
+    });
   }
 
-  private load(): void {
-    this.gameService.findById(this.gameId).subscribe({
+  private load(id: number): void {
+    this.gameId.set(id);
+    this.game.set(null);
+    this.experiences.set(null);
+    this.onlinePlaytime.set(null);
+    this.sagaGames.set([]);
+    this.loadError.set(false);
+    this.editing.set(false);
+
+    this.gameService.findById(id).subscribe({
       next: (game) => {
         this.game.set(game);
-        this.loading.set(false);
+        this.loadOnlinePlaytime(game);
+        this.loadSaga(game);
+      },
+      error: () => this.loadError.set(true),
+    });
+    this.loadRuns();
+  }
 
-        // Las horas online solo tienen sentido para juegos ONLINE/HYBRID —
-        // un SINGLEPLAYER nunca llega a tener OnlinePlaytime en el backend.
-        if (game.category !== 'SINGLEPLAYER') {
-          this.onlinePlaytimeService.findByGame(this.gameId).subscribe({
-            next: (playtime) => {
-              this.onlinePlaytime.set(playtime);
-              this.onlinePlaytimeForm.setValue({
-                totalHours: playtime.totalHours,
-                generalRating: playtime.generalRating,
-                notes: playtime.notes ?? '',
-              });
-            },
-            error: () => {
-              // 404: todavía no hay horas online registradas para este juego.
-            },
-          });
+  private loadRuns(): void {
+    const id = this.gameId();
+    this.experienceService.findAllByGame(id).subscribe({
+      next: (runs) => {
+        if (id === this.gameId()) {
+          this.experiences.set(runs);
         }
       },
+      error: () => this.experiences.set([]),
+    });
+  }
+
+  private loadOnlinePlaytime(game: Game): void {
+    // Online hours only exist for ONLINE/HYBRID games; a SINGLEPLAYER game never has them.
+    if (game.category === 'SINGLEPLAYER') {
+      return;
+    }
+    this.onlinePlaytimeForm.reset({ totalHours: 0, generalRating: null });
+    this.onlinePlaytimeService.findByGame(game.id).subscribe({
+      next: (playtime) => {
+        this.onlinePlaytime.set(playtime);
+        this.onlinePlaytimeForm.setValue({
+          totalHours: playtime.totalHours,
+          generalRating: playtime.generalRating,
+        });
+      },
       error: () => {
-        this.error.set('No se pudo cargar el juego.');
-        this.loading.set(false);
+        // 404: no online hours recorded for this game yet.
       },
     });
-
-    this.experienceService.findAllByGame(this.gameId).subscribe((experiences) =>
-      this.experiences.set(experiences)
-    );
   }
 
-  openCreateExperienceForm(): void {
-    this.editingExperience.set(null);
-    this.showExperienceForm.set(true);
-  }
-
-  openEditExperienceForm(experience: Experience): void {
-    this.editingExperience.set(experience);
-    this.showExperienceForm.set(true);
-  }
-
-  cancelExperienceForm(): void {
-    this.showExperienceForm.set(false);
-  }
-
-  submitExperience(request: ExperienceRequest): void {
-    const editing = this.editingExperience();
-    const request$ = editing
-      ? this.experienceService.update(editing.id, request)
-      : this.experienceService.create(this.gameId, request);
-
-    request$.subscribe({
-      next: (experience) => {
-        this.experiences.update((list) =>
-          editing ? list.map((e) => (e.id === editing.id ? experience : e)) : [...list, experience]
-        );
-        this.showExperienceForm.set(false);
-      },
-      error: () => this.error.set('No se pudo guardar la partida.'),
+  /** Sibling games come from the user's game list (the saga endpoints only return names). */
+  private loadSaga(game: Game): void {
+    if (game.sagaId === null) {
+      return;
+    }
+    this.gameService.findAll().subscribe({
+      next: (games) => this.sagaGames.set(games.filter((g) => g.sagaId === game.sagaId).sort(byRelease)),
+      error: () => {},
     });
   }
 
-  removeExperience(experience: Experience): void {
-    if (!confirm('¿Borrar esta partida?')) return;
-
-    this.experienceService.delete(experience.id).subscribe({
-      next: () => this.experiences.update((list) => list.filter((e) => e.id !== experience.id)),
-      error: () => this.error.set('No se pudo borrar la partida.'),
-    });
+  protected runMeta(run: Experience): string {
+    const locale = this.translate.currentLang() === 'en' ? 'en-US' : 'es-ES';
+    return [
+      this.translate.instant(`platform.${run.platform}`) as string,
+      formatRunPeriod(run.startDate, run.endDate, locale) ?? (run.year ? String(run.year) : null),
+      run.platinum ? '🏆' : null,
+      run.replay ? (this.translate.instant('run.replay') as string) : null,
+    ]
+      .filter((part) => !!part)
+      .join(' · ');
   }
 
-  submitOnlinePlaytime(): void {
-    if (this.onlinePlaytimeForm.invalid) {
+  protected releaseDate(game: Game): string {
+    return formatDayMonthYear(game.releaseDate);
+  }
+
+  protected genreNames(game: Game): string {
+    return game.genres.map((g) => g.name).join(', ');
+  }
+
+  protected newRun(): void {
+    this.runFormLauncher.openNewRun(this.gameId());
+  }
+
+  protected onGameSaved(game: Game): void {
+    const sagaChanged = game.sagaId !== this.game()?.sagaId;
+    this.game.set(game);
+    this.editing.set(false);
+    if (sagaChanged) {
+      this.sagaGames.set([]);
+      this.loadSaga(game);
+    } else {
+      this.sagaGames.update((list) => list.map((g) => (g.id === game.id ? game : g)).sort(byRelease));
+    }
+    this.loadOnlinePlaytime(game);
+  }
+
+  protected submitOnlinePlaytime(): void {
+    if (this.onlinePlaytimeForm.invalid || this.savingOnline()) {
       this.onlinePlaytimeForm.markAllAsTouched();
       return;
     }
-
-    this.onlinePlaytimeService.upsert(this.gameId, this.onlinePlaytimeForm.getRawValue()).subscribe({
-      next: (playtime) => this.onlinePlaytime.set(playtime),
-      error: () => this.error.set('No se pudieron guardar las horas online.'),
-    });
+    const raw = this.onlinePlaytimeForm.getRawValue();
+    this.savingOnline.set(true);
+    this.onlinePlaytimeService
+      .upsert(this.gameId(), {
+        totalHours: raw.totalHours ?? 0,
+        generalRating: raw.generalRating,
+        // Keep fields this card does not edit.
+        lastSessionAt: this.onlinePlaytime()?.lastSessionAt ?? null,
+        notes: this.onlinePlaytime()?.notes ?? null,
+      })
+      .subscribe({
+        next: (playtime) => {
+          this.onlinePlaytime.set(playtime);
+          this.savingOnline.set(false);
+          this.toast.success(this.translate.instant('game.online.saved'));
+        },
+        error: () => {
+          this.savingOnline.set(false);
+          this.toast.error(this.translate.instant('game.online.error'));
+        },
+      });
   }
 }

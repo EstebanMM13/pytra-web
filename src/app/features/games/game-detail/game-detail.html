@@ -1,168 +1,308 @@
 <app-navbar />
 
-<div class="mx-auto max-w-3xl px-6 py-10">
-  <a routerLink="/games" class="mb-4 inline-block text-sm text-muted hover:underline">
-    ← Volver a Games
-  </a>
-
-  @if (error()) {
-    <p class="mb-4 text-sm text-danger">{{ error() }}</p>
-  }
-
-  @if (loading()) {
-    <p class="text-muted">Cargando...</p>
-  } @else if (game(); as g) {
-    <div class="mb-8">
-      @if (g.coverImageUrl) {
-        <img
-          [src]="g.coverImageUrl"
-          [alt]="g.name"
-          class="mb-4 h-48 w-full rounded-xl object-cover sm:h-64"
-        />
-      }
-
-      <h1 class="mb-1 text-2xl font-semibold text-text">{{ g.name }}</h1>
-      <p class="mb-4 text-sm text-muted">
-        {{ g.category ?? 'Sin categoría' }}
-        @if (g.reviewStatus === 'PENDING_REVIEW') {
-          · pendiente de revisión
-        }
-      </p>
-
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div class="rounded-xl border border-border bg-surface p-4">
-          <p class="text-xs font-medium text-muted">Saga</p>
-          @if (g.sagaId) {
-            <a [routerLink]="['/sagas', g.sagaId]" class="mt-1 block text-text-2 hover:underline">
-              {{ g.sagaName }}
-            </a>
-          } @else {
-            <p class="mt-1 text-faint">Sin saga</p>
-          }
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4">
-          <p class="text-xs font-medium text-muted">Desarrollador</p>
-          <p class="mt-1 text-text-2">{{ g.developer ?? '—' }}</p>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4">
-          <p class="text-xs font-medium text-muted">Publisher</p>
-          <p class="mt-1 text-text-2">{{ g.publisher ?? '—' }}</p>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4">
-          <p class="text-xs font-medium text-muted">Géneros</p>
-          <p class="mt-1 text-text-2">
-            {{ g.genres.length > 0 ? g.genres.map((genre) => genre.name).join(', ') : '—' }}
-          </p>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4">
-          <p class="text-xs font-medium text-muted">Fecha de salida</p>
-          <p class="mt-1 text-text-2">{{ g.releaseDate ?? '—' }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Online Playtime: solo para juegos ONLINE/HYBRID -->
-    @if (g.category !== 'SINGLEPLAYER') {
-      <div class="mb-8 rounded-xl border border-border bg-surface p-6">
-        <h2 class="mb-4 text-lg font-semibold text-text">Horas online</h2>
-        <form [formGroup]="onlinePlaytimeForm" (ngSubmit)="submitOnlinePlaytime()" class="flex items-end gap-4">
-          <div>
-            <label class="mb-1 block text-sm font-medium text-text-2">Horas totales</label>
-            <input
-              type="number"
-              step="0.5"
-              formControlName="totalHours"
-              class="w-32 rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
-            />
-          </div>
-          <div>
-            <label class="mb-1 block text-sm font-medium text-text-2">Valoración (0-10)</label>
-            <input
-              type="number"
-              min="0"
-              max="10"
-              formControlName="generalRating"
-              class="w-24 rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
-            />
-          </div>
-          <button
-            type="submit"
-            class="rounded-lg bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark"
-          >
-            {{ onlinePlaytime() ? 'Actualizar' : 'Guardar' }}
-          </button>
-        </form>
+<main
+  class="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-3 pb-8 md:gap-[26px] md:px-6 md:pt-8 md:pb-12 lg:px-10"
+>
+  <!-- Breadcrumb + mobile actions -->
+  <div class="flex items-center justify-between">
+    <a routerLink="/games" class="flex items-center gap-1.5 rounded-md text-[13px] text-muted hover:text-text">
+      <svg lucideChevronLeft [size]="16"></svg>
+      {{ 'game.breadcrumb' | translate }}
+    </a>
+    @if (game()) {
+      <div class="flex items-center gap-1 text-text-3 md:hidden">
+        <button
+          type="button"
+          (click)="editing.set(true)"
+          class="rounded-lg p-2 hover:text-text"
+          [attr.aria-label]="'game.editAria' | translate"
+        >
+          <svg lucidePencil [size]="20"></svg>
+        </button>
+        <button
+          type="button"
+          (click)="newRun()"
+          class="rounded-lg p-2 text-brand-light hover:text-brand-lighter"
+          [attr.aria-label]="'game.newRun' | translate"
+        >
+          <svg lucidePlus [size]="22"></svg>
+        </button>
       </div>
     }
+  </div>
 
-    <!-- Experiences -->
-    <div class="rounded-xl border border-border bg-surface p-6">
-      <div class="mb-4 flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-text">Partidas</h2>
-        @if (!showExperienceForm()) {
-          <button
-            type="button"
-            (click)="openCreateExperienceForm()"
-            class="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-dark"
+  @if (loadError()) {
+    <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
+      {{ 'game.loadError' | translate }}
+    </p>
+  } @else if (game(); as g) {
+    <!-- Title block -->
+    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
+      <div class="min-w-0">
+        @if (g.sagaId !== null && g.sagaName) {
+          <a
+            [routerLink]="['/sagas', g.sagaId]"
+            class="mb-1 flex w-fit items-center gap-1.5 rounded-md text-[13px] font-medium text-brand-light hover:underline md:mb-2 md:text-sm"
           >
-            + Nueva partida
-          </button>
+            <svg lucideLayers [size]="15" class="hidden md:block"></svg>
+            @if (sagaPosition(); as pos) {
+              <span class="hidden md:inline">
+                {{ 'game.sagaPosition' | translate: { saga: g.sagaName, index: pos.index, total: pos.total } }}
+              </span>
+              <span class="md:hidden">{{ 'game.saga' | translate: { saga: g.sagaName } }}</span>
+            } @else {
+              {{ 'game.saga' | translate: { saga: g.sagaName } }}
+            }
+          </a>
+        }
+        <h1 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] md:text-[40px] md:tracking-[-0.03em]">
+          {{ g.name }}
+        </h1>
+        @if (metaLine()) {
+          <p class="mt-1.5 text-[13px] text-muted md:mt-2.5 md:text-[15px] md:text-text-3">{{ metaLine() }}</p>
         }
       </div>
+      <div class="hidden shrink-0 gap-2.5 md:flex">
+        <button
+          type="button"
+          (click)="editing.set(true)"
+          class="flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong"
+        >
+          <svg lucidePencil [size]="14"></svg>
+          {{ 'game.edit' | translate }}
+        </button>
+        <button
+          type="button"
+          (click)="newRun()"
+          class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+        >
+          <svg lucidePlus [size]="15"></svg>
+          {{ 'game.newRun' | translate }}
+        </button>
+      </div>
+    </div>
 
-      @if (showExperienceForm()) {
-        <div class="mb-6">
-          <app-experience-form
-            [initial]="editingExperience()"
-            (save)="submitExperience($event)"
-            (cancel)="cancelExperienceForm()"
-          />
-        </div>
-      }
+    @if (g.reviewStatus === 'PENDING_REVIEW') {
+      <a
+        routerLink="/steam"
+        class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-[13px] text-gold-tint-fg hover:opacity-90"
+      >
+        <svg lucideDownload [size]="14"></svg>
+        {{ 'game.pendingReview' | translate }}
+        <span class="font-medium underline">{{ 'game.reviewInSteam' | translate }}</span>
+      </a>
+    }
 
-      @if (experiences().length === 0) {
-        <p class="text-muted">Todavía no hay partidas registradas.</p>
-      } @else {
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          @for (experience of experiences(); track experience.id) {
-            <div class="rounded-xl border border-border p-4">
-              <a [routerLink]="['/games', gameId, 'experiences', experience.id]" class="block hover:underline">
-                <p class="font-medium text-text-2">
-                  {{ experience.runLabel }}
-                  @if (experience.platinum) {
-                    🏆
-                  }
-                </p>
-                <p class="text-sm text-muted">
-                  {{ experience.status }} · {{ experience.platform }}
-                  @if (experience.hours) {
-                    · {{ experience.hours | hours }}
-                  }
-                  @if (experience.rating !== null) {
-                    · {{ experience.rating }}/10
-                  }
-                </p>
+    <!-- Stats -->
+    @if (experiences() !== null) {
+      @let s = stats();
+      <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-5">
+        <app-stat-card [icon]="icons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
+        <app-stat-card [icon]="icons.hours" [label]="'game.stats.totalHours' | translate" [value]="s.totalHours | hours" />
+        <app-stat-card
+          [icon]="icons.rating"
+          [label]="'game.stats.avgRating' | translate"
+          [value]="s.avgRating | rating"
+          valueClass="font-mono text-gold"
+        />
+        <app-stat-card
+          [icon]="icons.rating"
+          [label]="'game.stats.bestRating' | translate"
+          [value]="s.bestRating | rating"
+          valueClass="font-mono text-gold"
+        />
+        <app-stat-card
+          [icon]="icons.platinum"
+          [label]="'game.stats.platinum' | translate"
+          [value]="s.platinum ? '🏆' : '—'"
+        />
+      </section>
+      <section class="grid grid-cols-3 gap-2 md:hidden">
+        <app-stat-card
+          compact
+          [label]="'game.stats.avg' | translate"
+          [value]="s.avgRating | rating"
+          valueClass="font-mono text-gold"
+        />
+        <app-stat-card compact [label]="'game.stats.hours' | translate" [value]="s.totalHours | hours" />
+        <app-stat-card compact [label]="'game.stats.runs' | translate" [value]="s.runs" />
+      </section>
+    } @else {
+      <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-5">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <app-skeleton class="h-[94px] rounded-xl" />
+        }
+      </section>
+      <section class="grid grid-cols-3 gap-2 md:hidden">
+        @for (i of [1, 2, 3]; track i) {
+          <app-skeleton class="h-[66px] rounded-xl" />
+        }
+      </section>
+    }
+
+    <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <!-- Runs -->
+      <section class="self-start md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+        <app-section-header class="mb-3 md:mb-4" [label]="'game.runs' | translate" />
+        <div class="flex flex-col gap-2.5">
+          @if (experiences() === null) {
+            @for (i of [1, 2]; track i) {
+              <app-skeleton class="h-[74px] rounded-[10px]" />
+            }
+          } @else {
+            @for (run of runs(); track run.id) {
+              <a [routerLink]="['/games', g.id, 'experiences', run.id]" class="block rounded-[10px]">
+                <app-run-row
+                  class="hover:border-border-strong max-md:bg-surface!"
+                  [title]="run.runLabel"
+                  [meta]="runMeta(run)"
+                  [hours]="run.hours"
+                  [rating]="run.rating"
+                  [best]="run.id === bestRunId()"
+                >
+                  <span class="hidden sm:block"><app-status-pill [status]="run.status" /></span>
+                </app-run-row>
               </a>
-              <div class="mt-2 flex gap-3 text-sm">
-                <button
-                  type="button"
-                  (click)="openEditExperienceForm(experience)"
-                  class="font-medium text-text-3 hover:underline"
-                >
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  (click)="removeExperience(experience)"
-                  class="font-medium text-danger hover:underline"
-                >
-                  Borrar
+            } @empty {
+              <div
+                class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center"
+              >
+                <p class="text-sm font-medium text-text-2">{{ 'game.noRuns' | translate }}</p>
+                <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
+                  {{ 'game.firstRun' | translate }}
                 </button>
               </div>
-            </div>
+            }
           }
         </div>
-      }
+      </section>
+
+      <div class="flex flex-col gap-5">
+        <!-- Game sheet -->
+        <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+          <app-section-header class="mb-3" [label]="'game.sheet' | translate" />
+          <dl class="text-sm">
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.developer' | translate }}</dt>
+              <dd class="truncate text-right">{{ g.developer ?? '—' }}</dd>
+            </div>
+            @if (g.publisher) {
+              <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+                <dt class="shrink-0 text-muted">{{ 'game.publisher' | translate }}</dt>
+                <dd class="truncate text-right">{{ g.publisher }}</dd>
+              </div>
+            }
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.release' | translate }}</dt>
+              <dd class="truncate text-right font-mono">{{ releaseDate(g) }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.genre' | translate }}</dt>
+              <dd class="truncate text-right">{{ genreNames(g) || '—' }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.platforms' | translate }}</dt>
+              <dd class="truncate text-right">{{ platformNames() || '—' }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.category' | translate }}</dt>
+              <dd class="truncate text-right">{{ g.category ? ('category.' + g.category | translate) : '—' }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <!-- Online hours (ONLINE / HYBRID games) -->
+        @if (g.category && g.category !== 'SINGLEPLAYER') {
+          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+            <app-section-header class="mb-3" [label]="'game.online.title' | translate">
+              <span class="font-mono text-[15px]">{{ onlinePlaytime()?.totalHours | hours }}</span>
+            </app-section-header>
+            <form
+              [formGroup]="onlinePlaytimeForm"
+              (ngSubmit)="submitOnlinePlaytime()"
+              novalidate
+              class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-end gap-2.5"
+            >
+              <label class="flex min-w-0 flex-col gap-1.5 text-xs text-muted">
+                {{ 'game.online.hours' | translate }}
+                <input
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="any"
+                  formControlName="totalHours"
+                  class="h-10 w-full rounded-lg border border-border bg-bg px-3 font-mono text-sm text-text"
+                />
+              </label>
+              <label class="flex min-w-0 flex-col gap-1.5 text-xs text-muted">
+                {{ 'game.online.rating' | translate }}
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  max="10"
+                  step="1"
+                  formControlName="generalRating"
+                  placeholder="—"
+                  class="h-10 w-full rounded-lg border border-border bg-bg px-3 font-mono text-sm text-gold"
+                />
+              </label>
+              <button
+                type="submit"
+                [disabled]="savingOnline()"
+                class="h-10 rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
+              >
+                {{ (onlinePlaytime() ? 'game.online.update' : 'game.online.save') | translate }}
+              </button>
+            </form>
+            @if (onlinePlaytimeForm.invalid && onlinePlaytimeForm.touched) {
+              <p class="mt-2 text-xs text-danger">{{ 'game.online.invalid' | translate }}</p>
+            }
+          </section>
+        }
+
+        <!-- Other games of the saga -->
+        @if (sagaGames().length > 1) {
+          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+            <app-section-header class="mb-3" [label]="'game.inSaga' | translate" />
+            <ul class="text-sm">
+              @for (sg of sagaGames(); track sg.id) {
+                <li class="flex items-center justify-between gap-4 border-t border-divider py-[9px]">
+                  @if (sg.id === g.id) {
+                    <span class="truncate text-brand-lighter" aria-current="page">{{ sg.name }}</span>
+                    @if (stats().bestRating !== null) {
+                      <span class="shrink-0 font-mono text-gold">{{ stats().bestRating | rating }}</span>
+                    }
+                  } @else {
+                    <a [routerLink]="['/games', sg.id]" class="truncate hover:underline">{{ sg.name }}</a>
+                    @if (sg.bestRating != null) {
+                      <span class="shrink-0 font-mono text-gold">{{ sg.bestRating | rating }}</span>
+                    } @else if (sg.lastExperienceStatus) {
+                      <span class="shrink-0 text-xs text-brand-lighter">
+                        {{ 'status.' + sg.lastExperienceStatus | translate }}
+                      </span>
+                    } @else if (sg.experienceCount === 0) {
+                      <span class="shrink-0 text-xs text-faint">{{ 'game.notPlayed' | translate }}</span>
+                    } @else if (sg.releaseDate) {
+                      <span class="shrink-0 font-mono text-xs text-faint">{{ sg.releaseDate.slice(0, 4) }}</span>
+                    }
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+    </div>
+
+    @if (editing()) {
+      <app-game-edit-dialog [game]="g" (saved)="onGameSaved($event)" (closed)="editing.set(false)" />
+    }
+  } @else {
+    <div class="flex flex-col gap-3">
+      <app-skeleton class="h-5 w-40 rounded-md" />
+      <app-skeleton class="h-11 w-80 max-w-full rounded-lg" />
+      <app-skeleton class="h-5 w-64 max-w-full rounded-md" />
     </div>
   }
-</div>
+</main>

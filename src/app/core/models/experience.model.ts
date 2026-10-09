@@ -21,13 +21,6 @@ export interface Experience {
   updatedAt: string;
 }
 
-/** Campos que ExperienceForm necesita para precargar edición. */
-export type ExperienceFormData = Pick<
-  Experience,
-  | 'runLabel' | 'year' | 'status' | 'rating' | 'hours' | 'startDate' | 'endDate'
-  | 'platform' | 'platinum' | 'replay' | 'summary' | 'pros' | 'cons' | 'notes'
->;
-
 export interface ExperienceRequest {
   runLabel: string;
   year?: number | null;

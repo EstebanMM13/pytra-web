@@ -12,8 +12,9 @@ import {
   LucideWifi,
 } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, catchError, of } from 'rxjs';
-import { MostPlayedGame, SagaStat, StatsSummary, TopRatedExperience, YearStat } from '../../core/models/stats.model';
+import { InProgressExperience, MostPlayedGame, SagaStat, StatsSummary, TopRatedExperience, YearStat } from '../../core/models/stats.model';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { SteamService } from '../../core/services/steam.service';
@@ -27,19 +28,9 @@ import { SectionHeader } from '../../shared/ui/section-header';
 import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
+import { formatDayMonthYear } from '../../shared/utils/run-dates';
 
 type PlayMode = 'single' | 'online';
-
-/** A run in progress, as shown in "Jugando ahora". */
-export interface PlayingRun {
-  experienceId: number;
-  gameId: number;
-  gameName: string;
-  runLabel: string;
-  platform: string;
-  startDate: string | null;
-  hours: number | null;
-}
 
 const RANKING_SIZE = 5;
 const MAX_YEARS = 10;
@@ -95,12 +86,8 @@ export class Dashboard {
   readonly mostPlayedOnline = signal<MostPlayedGame[] | null>(null);
   readonly steamPendingCount = signal(0);
 
-  /**
-   * Runs with status EN_CURSO. The API has no cross-game endpoint for them yet
-   * (only /games/{id}/experiences), so this stays empty and the section shows its
-   * empty state. Fill it once an endpoint such as GET /experiences?status=EN_CURSO exists.
-   */
-  readonly playing = signal<PlayingRun[]>([]);
+  /** Runs with status EN_CURSO (`/stats/in-progress`); `null` while loading. */
+  readonly playing = signal<InProgressExperience[] | null>(null);
 
   protected readonly playMode = signal<PlayMode>('single');
   protected readonly playModeOptions: SegmentedOption<PlayMode>[] = [
@@ -160,6 +147,13 @@ export class Dashboard {
   });
 
   constructor() {
+    this.load();
+    // A run created/edited from the form changes the totals and "Jugando ahora".
+    this.runFormLauncher.saved$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
+  }
+
+  private load(): void {
+    orEmpty(this.statsService.getInProgress()).subscribe((runs) => this.playing.set(runs));
     this.statsService.getSummary().subscribe({
       next: (s) => this.summary.set(s),
       error: () => this.summaryFailed.set(true),
@@ -177,6 +171,14 @@ export class Dashboard {
     orEmpty(this.steamService.getPending()).subscribe((games) =>
       this.steamPendingCount.set(games.length),
     );
+  }
+
+  protected playingMeta(run: InProgressExperience): string {
+    const parts = [run.runLabel, this.translate.instant(`platform.${run.platform}`) as string];
+    if (run.startDate) {
+      parts.push(this.translate.instant('common.since', { date: formatDayMonthYear(run.startDate) }) as string);
+    }
+    return parts.join(' · ');
   }
 
   protected newRun(): void {

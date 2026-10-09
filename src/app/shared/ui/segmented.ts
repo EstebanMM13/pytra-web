@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, booleanAttribute, input, model } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 
 export interface SegmentedOption<T extends string = string> {
@@ -16,9 +16,9 @@ export interface SegmentedOption<T extends string = string> {
   imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'inline-flex shrink-0 border border-border bg-bg',
+    class: 'shrink-0 border border-border bg-bg',
     role: 'radiogroup',
-    '[class]': "size() === 'sm' ? 'rounded-[7px] p-0.5' : 'rounded-lg p-[3px]'",
+    '[class]': "[size() === 'sm' ? 'rounded-[7px] p-0.5' : 'rounded-lg p-[3px]', stretch() ? 'flex w-full' : 'inline-flex']",
   },
   template: `
     @for (option of options(); track option.value) {
@@ -29,6 +29,7 @@ export interface SegmentedOption<T extends string = string> {
         (click)="value.set(option.value)"
         class="font-medium whitespace-nowrap"
         [class]="[
+          stretch() ? 'min-w-0 flex-1 truncate' : '',
           size() === 'sm' ? 'rounded-[5px] px-2 py-[3px] text-xs' : 'rounded-md px-3 py-1.5 text-[13px]',
           option.value === value()
             ? tone() === 'neutral'
@@ -47,4 +48,6 @@ export class Segmented<T extends string = string> {
   readonly value = model.required<T>();
   readonly tone = input<'brand' | 'neutral'>('brand');
   readonly size = input<'sm' | 'md'>('md');
+  /** Fill the available width with equal-width options (forms). */
+  readonly stretch = input(false, { transform: booleanAttribute });
 }

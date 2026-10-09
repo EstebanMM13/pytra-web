@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
 import {
   GenreStat,
+  InProgressExperience,
   MostPlayedGame,
   SagaStat,
   StatsSummary,
@@ -22,6 +23,11 @@ export class StatsService {
 
   getByYear(): Observable<YearStat[]> {
     return this.http.get<YearStat[]>(`${this.baseUrl}/by-year`);
+  }
+
+  /** EN_CURSO runs across all games, most recently started first. */
+  getInProgress(): Observable<InProgressExperience[]> {
+    return this.http.get<InProgressExperience[]>(`${this.baseUrl}/in-progress`);
   }
 
   getBySaga(): Observable<SagaStat[]> {

@@ -1,0 +1,97 @@
+<app-modal-sheet
+  [title]="'game.editTitle' | translate"
+  [saveLabel]="'game.saveEdit' | translate"
+  [saving]="saving()"
+  (save)="submit()"
+  (closed)="closed.emit()"
+>
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4 md:gap-[18px]">
+    <div class="flex flex-col gap-2">
+      <label for="game-edit-name" class="text-[13px] text-text-3">{{ 'game.form.name' | translate }}</label>
+      <input
+        id="game-edit-name"
+        data-autofocus
+        type="text"
+        formControlName="name"
+        class="game-edit-input"
+        [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched"
+      />
+      @if (form.controls.name.invalid && form.controls.name.touched) {
+        <p class="text-xs text-danger">{{ 'game.form.nameRequired' | translate }}</p>
+      }
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-3.5">
+      <div class="flex flex-col gap-2">
+        <label for="game-edit-developer" class="text-[13px] text-text-3">{{ 'game.form.developer' | translate }}</label>
+        <input id="game-edit-developer" type="text" formControlName="developer" class="game-edit-input" />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="game-edit-publisher" class="text-[13px] text-text-3">{{ 'game.form.publisher' | translate }}</label>
+        <input id="game-edit-publisher" type="text" formControlName="publisher" class="game-edit-input" />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="game-edit-release" class="text-[13px] text-text-3">{{ 'game.form.releaseDate' | translate }}</label>
+        <input id="game-edit-release" type="date" formControlName="releaseDate" class="game-edit-input font-mono" />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="game-edit-saga" class="text-[13px] text-text-3">{{ 'game.form.saga' | translate }}</label>
+        <select id="game-edit-saga" formControlName="sagaId" class="game-edit-input">
+          <option [ngValue]="null">{{ 'game.form.noSaga' | translate }}</option>
+          @for (saga of sagas(); track saga.id) {
+            <option [ngValue]="saga.id">{{ saga.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <span id="game-edit-category" class="text-[13px] text-text-3">{{ 'game.form.category' | translate }}</span>
+      <app-segmented
+        stretch
+        aria-labelledby="game-edit-category"
+        [options]="categoryOptions"
+        [value]="category()"
+        (valueChange)="category.set($event)"
+      />
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <span id="game-edit-genres" class="text-[13px] text-text-3">{{ 'game.form.genres' | translate }}</span>
+      <div class="flex flex-wrap gap-2" role="group" aria-labelledby="game-edit-genres">
+        @for (genre of genres(); track genre.id) {
+          <button
+            type="button"
+            [attr.aria-pressed]="selectedGenreIds().has(genre.id)"
+            (click)="toggleGenre(genre.id)"
+            class="rounded-full border px-3.5 py-[7px] text-[13px]"
+            [class]="
+              selectedGenreIds().has(genre.id)
+                ? 'border-brand bg-brand-tint text-brand-lighter'
+                : 'border-border text-text-2 hover:border-border-strong'
+            "
+          >
+            {{ genre.name }}
+          </button>
+        }
+      </div>
+      <div class="flex gap-2">
+        <input
+          type="text"
+          [formControl]="newGenreName"
+          (keydown.enter)="$event.preventDefault(); addGenre()"
+          [placeholder]="'game.form.newGenre' | translate"
+          [attr.aria-label]="'game.form.newGenre' | translate"
+          class="game-edit-input min-w-0 flex-1"
+        />
+        <button
+          type="button"
+          (click)="addGenre()"
+          class="shrink-0 rounded-lg border border-border px-4 text-sm text-text-2 hover:border-border-strong"
+        >
+          {{ 'game.form.addGenre' | translate }}
+        </button>
+      </div>
+    </div>
+  </form>
+</app-modal-sheet>

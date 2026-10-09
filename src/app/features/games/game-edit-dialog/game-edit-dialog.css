@@ -1,0 +1,25 @@
+/* Inputs: roomy 16px fields on mobile (no iOS zoom), compact on web (md+). */
+.game-edit-input {
+  height: 50px;
+  width: 100%;
+  border: 1px solid var(--pt-border);
+  border-radius: 12px;
+  background: var(--pt-surface);
+  padding: 0 14px;
+  font-size: 16px;
+  color: var(--pt-text);
+  color-scheme: inherit;
+}
+
+.game-edit-input[aria-invalid='true'] {
+  border-color: var(--pt-danger);
+}
+
+@media (width >= 48rem) {
+  .game-edit-input {
+    height: 46px;
+    border-radius: 10px;
+    background: var(--pt-bg);
+    font-size: 15px;
+  }
+}

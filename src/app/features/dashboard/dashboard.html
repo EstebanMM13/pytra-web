@@ -66,7 +66,7 @@
         [value]="s.averageRating | rating"
         valueClass="font-mono text-gold"
       />
-      <app-stat-card compact [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
+      <app-stat-card compact [label]="'dashboard.stats.replays' | translate" [value]="s.replayCount" />
       <app-stat-card
         compact
         [label]="'🏆 ' + ('dashboard.stats.platinums' | translate)"
@@ -84,12 +84,17 @@
     <section class="md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
       <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
       <div class="flex flex-col gap-2.5">
+        @if (playing() === null) {
+          @for (i of [1, 2]; track i) {
+            <app-skeleton class="h-[74px] rounded-[10px]" />
+          }
+        } @else {
         @for (run of playing(); track run.experienceId) {
           <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl">
             <app-run-row
               class="hover:border-border-strong max-md:bg-surface!"
               [title]="run.gameName"
-              [meta]="run.runLabel + ' · ' + run.platform"
+              [meta]="playingMeta(run)"
               [hours]="run.hours"
             />
           </a>
@@ -100,6 +105,7 @@
               {{ 'dashboard.startRun' | translate }}
             </button>
           </div>
+        }
         }
       </div>
     </section>

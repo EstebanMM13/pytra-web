@@ -1,1 +1,9 @@
 <router-outlet />
+
+@for (request of runFormRequests(); track request) {
+  @defer {
+    <app-run-form [request]="request" />
+  }
+}
+
+<app-toast-host />

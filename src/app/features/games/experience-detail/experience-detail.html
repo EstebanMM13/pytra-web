@@ -1,103 +1,248 @@
 <app-navbar />
 
-<div class="mx-auto max-w-3xl px-6 py-10">
-  <a [routerLink]="['/games', gameId]" class="mb-4 inline-block text-sm text-muted hover:underline">
-    ← Volver a {{ game()?.name ?? 'juego' }}
-  </a>
-
-  @if (error()) {
-    <p class="mb-4 text-sm text-danger">{{ error() }}</p>
-  }
-
-  @if (loading()) {
-    <p class="text-muted">Cargando...</p>
-  } @else if (experience(); as e) {
-    <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-2xl font-semibold text-text">
-        {{ game()?.name }} — {{ e.runLabel }}
-      </h1>
-      @if (!editing()) {
+<main
+  class="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-3 pb-8 md:gap-[26px] md:px-6 md:pt-8 md:pb-12 lg:px-10"
+>
+  <!-- Breadcrumb + mobile actions -->
+  <div class="flex items-center justify-between gap-4">
+    <a
+      [routerLink]="['/games', gameId()]"
+      class="flex min-w-0 items-center gap-1.5 rounded-md text-[13px] text-muted hover:text-text"
+    >
+      <svg lucideChevronLeft [size]="16" class="shrink-0"></svg>
+      <span class="truncate">{{ game()?.name ?? ('game.breadcrumb' | translate) }}</span>
+    </a>
+    @if (experience()) {
+      <div class="flex items-center gap-1 text-text-3 md:hidden">
         <button
           type="button"
-          (click)="startEdit()"
-          class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-text-2 hover:bg-hover"
+          (click)="remove()"
+          [disabled]="deleting()"
+          class="rounded-lg p-2 hover:text-danger"
+          [attr.aria-label]="'run.delete' | translate"
         >
-          Editar
+          <svg lucideTrash2 [size]="19"></svg>
         </button>
-      }
+        <button
+          type="button"
+          (click)="edit()"
+          class="rounded-lg p-2 hover:text-text"
+          [attr.aria-label]="'run.edit' | translate"
+        >
+          <svg lucidePencil [size]="20"></svg>
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (loadError()) {
+    <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
+      {{ 'run.loadError' | translate }}
+    </p>
+  } @else if (experience(); as e) {
+    <!-- Title block -->
+    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
+      <div class="min-w-0">
+        <p class="mb-1 text-[13px] font-medium text-brand-light md:mb-2 md:text-sm">
+          @if (game()?.sagaName; as saga) {
+            {{ 'game.saga' | translate: { saga } }} ·
+          }
+          {{ e.runLabel }}
+        </p>
+        <h1 class="text-[26px] leading-tight font-semibold tracking-[-0.02em] md:text-[40px] md:tracking-[-0.03em]">
+          @if (game(); as g) {
+            {{ g.name }}
+          } @else {
+            <app-skeleton class="h-10 w-72 max-w-full rounded-lg" />
+          }
+        </h1>
+        <div class="mt-3 flex flex-wrap gap-1.5 md:mt-3.5 md:gap-2">
+          <app-status-pill [status]="e.status" />
+          @if (e.platinum) {
+            <span class="rounded-full bg-gold-tint px-2.5 py-1 text-xs font-medium text-gold-tint-fg">
+              {{ 'run.platinum' | translate }}
+            </span>
+          }
+          <span class="rounded-full border border-border px-2.5 py-[3px] text-xs text-text-3">
+            {{ 'platform.' + e.platform | translate }}
+          </span>
+          @if (e.replay) {
+            <span class="rounded-full border border-border px-2.5 py-[3px] text-xs text-text-3">
+              {{ 'run.replay' | translate }}
+            </span>
+          }
+        </div>
+      </div>
+      <div class="hidden shrink-0 gap-2.5 md:flex">
+        <button
+          type="button"
+          (click)="remove()"
+          [disabled]="deleting()"
+          class="flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong hover:text-danger disabled:opacity-60"
+        >
+          <svg lucideTrash2 [size]="14"></svg>
+          {{ 'run.delete' | translate }}
+        </button>
+        <button
+          type="button"
+          (click)="edit()"
+          class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+        >
+          <svg lucidePencil [size]="14"></svg>
+          {{ 'run.edit' | translate }}
+        </button>
+      </div>
     </div>
 
-    @if (editing()) {
-      <app-experience-form [initial]="e" (save)="save($event)" (cancel)="cancelEdit()" />
-    } @else {
+    <!-- Mobile: mini stats + date strip -->
+    <section class="grid grid-cols-3 gap-2 md:hidden">
+      <app-stat-card
+        compact
+        [label]="'run.rating' | translate"
+        [value]="e.rating | rating"
+        valueClass="font-mono text-gold"
+      />
+      <app-stat-card compact [label]="'run.hours' | translate" [value]="e.hours | hours" valueClass="font-mono" />
+      <app-stat-card compact [label]="'run.duration' | translate" [value]="durationLabel(true)" valueClass="font-mono" />
+    </section>
+    @if (e.startDate || e.endDate) {
+      <div
+        class="flex items-center gap-2.5 rounded-xl border border-border px-3.5 py-3 font-mono text-[13px] text-text-3 md:hidden"
+      >
+        <svg lucideCalendar [size]="16" class="shrink-0 text-brand-light"></svg>
+        {{ date(e.startDate) }}
+        <span class="h-px flex-1 bg-border" aria-hidden="true"></span>
+        {{ date(e.endDate) }}
+      </div>
+    }
 
-    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-      <div class="rounded-xl border border-border bg-surface p-4">
-        <p class="text-xs font-medium text-muted">Juego</p>
-        <p class="mt-1 text-text-2">{{ game()?.name }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-surface p-4">
-        <p class="text-xs font-medium text-muted">Nota</p>
-        <p class="mt-1 text-text-2">{{ e.rating ?? '—' }}{{ e.rating !== null ? '/10' : '' }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-surface p-4">
-        <p class="text-xs font-medium text-muted">Horas</p>
-        <p class="mt-1 text-text-2">{{ e.hours | hours }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-surface p-4">
-        <p class="text-xs font-medium text-muted">Plataforma</p>
-        <p class="mt-1 text-text-2">{{ e.platform }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-surface p-4">
-        <p class="text-xs font-medium text-muted">Inicio</p>
-        <p class="mt-1 text-text-2">{{ e.startDate ?? '—' }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-surface p-4">
-        <p class="text-xs font-medium text-muted">Fin</p>
-        <p class="mt-1 text-text-2">{{ e.endDate ?? '—' }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-surface p-4">
-        <p class="text-xs font-medium text-muted">Estado</p>
-        <p class="mt-1 text-text-2">{{ e.status }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-surface p-4">
-        <p class="text-xs font-medium text-muted">Platino</p>
-        <p class="mt-1 text-text-2">{{ e.platinum ? 'Sí' : 'No' }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-surface p-4">
-        <p class="text-xs font-medium text-muted">Replay</p>
-        <p class="mt-1 text-text-2">{{ e.replay ? 'Sí' : 'No' }}</p>
+    <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <!-- Review -->
+      <section
+        class="flex flex-col gap-3.5 self-start md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[26px]"
+      >
+        <app-section-header [label]="'run.summary' | translate" />
+        @if (e.summary) {
+          <p class="text-[15px] leading-[1.55] whitespace-pre-line text-text-2 md:text-base md:leading-[1.65]">
+            {{ e.summary }}
+          </p>
+        } @else {
+          <p class="text-sm text-faint">{{ 'run.noSummary' | translate }}</p>
+        }
+
+        @if (pros().length || cons().length) {
+          <!-- Web: two sub-cards -->
+          <div class="mt-2.5 hidden grid-cols-2 gap-4 md:grid">
+            <div class="rounded-[10px] border border-border bg-bg p-[18px]">
+              <h3 class="mb-3 text-[13px] font-semibold tracking-[0.06em] text-success uppercase">
+                {{ 'run.best' | translate }}
+              </h3>
+              <ul class="flex flex-col gap-2.5 text-sm text-text-2">
+                @for (item of pros(); track $index) {
+                  <li class="flex gap-2.5">
+                    <svg lucidePlus [size]="16" class="mt-0.5 shrink-0 text-success"></svg>{{ item }}
+                  </li>
+                } @empty {
+                  <li class="text-faint">—</li>
+                }
+              </ul>
+            </div>
+            <div class="rounded-[10px] border border-border bg-bg p-[18px]">
+              <h3 class="mb-3 text-[13px] font-semibold tracking-[0.06em] text-danger uppercase">
+                {{ 'run.worst' | translate }}
+              </h3>
+              <ul class="flex flex-col gap-2.5 text-sm text-text-2">
+                @for (item of cons(); track $index) {
+                  <li class="flex gap-2.5">
+                    <svg lucideMinus [size]="16" class="mt-0.5 shrink-0 text-danger"></svg>{{ item }}
+                  </li>
+                } @empty {
+                  <li class="text-faint">—</li>
+                }
+              </ul>
+            </div>
+          </div>
+
+          <!-- Mobile: one combined list -->
+          <app-section-header class="mt-1 md:hidden" [label]="'run.bestWorst' | translate" />
+          <ul class="flex flex-col gap-2 text-sm text-text-2 md:hidden">
+            @for (item of pros(); track $index) {
+              <li class="flex gap-2.5">
+                <svg lucidePlus [size]="16" class="mt-0.5 shrink-0 text-success"></svg>{{ item }}
+              </li>
+            }
+            @for (item of cons(); track $index) {
+              <li class="flex gap-2.5">
+                <svg lucideMinus [size]="16" class="mt-0.5 shrink-0 text-danger"></svg>{{ item }}
+              </li>
+            }
+          </ul>
+        }
+
+        @if (e.notes) {
+          <app-section-header class="mt-2" [label]="'run.notes' | translate" />
+          <p class="text-[15px] leading-[1.6] whitespace-pre-line text-text-2">{{ e.notes }}</p>
+        }
+      </section>
+
+      <!-- Web sidebar: rating + data -->
+      <div class="hidden flex-col gap-5 md:flex">
+        <section class="rounded-[14px] border border-border bg-surface p-[22px]">
+          <p class="text-[13px] text-muted">{{ 'run.rating' | translate }}</p>
+          @if (e.rating !== null) {
+            <p class="mt-1.5 flex items-baseline gap-2">
+              <span class="font-mono text-[52px] leading-none font-semibold tracking-[-0.03em] text-gold">
+                {{ e.rating | rating }}
+              </span>
+              <span class="text-base text-faint">{{ 'run.outOf' | translate }}</span>
+            </p>
+            <div class="mt-3 h-1 rounded-sm bg-bg" aria-hidden="true">
+              <div class="h-1 rounded-sm bg-gold" [style.width.%]="e.rating * 10"></div>
+            </div>
+            @if (rank(); as r) {
+              <p class="mt-2.5 text-[13px] text-muted">{{ 'run.rank' | translate: { rank: r } }}</p>
+            }
+          } @else {
+            <p class="mt-2 text-[22px] font-semibold text-faint">{{ 'run.noRating' | translate }}</p>
+          }
+        </section>
+
+        <section class="rounded-[14px] border border-border bg-surface p-[22px]">
+          <app-section-header class="mb-2.5" [label]="'run.data' | translate" />
+          <dl class="text-sm">
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="text-muted">{{ 'run.platform' | translate }}</dt>
+              <dd class="font-mono">{{ 'platform.' + e.platform | translate }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="text-muted">{{ 'run.start' | translate }}</dt>
+              <dd class="font-mono">{{ date(e.startDate) }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="text-muted">{{ 'run.end' | translate }}</dt>
+              <dd class="font-mono">{{ date(e.endDate) }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="text-muted">{{ 'run.duration' | translate }}</dt>
+              <dd class="font-mono">{{ durationLabel(false) }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="text-muted">{{ 'run.hours' | translate }}</dt>
+              <dd class="font-mono">{{ e.hours | hours }}</dd>
+            </div>
+          </dl>
+        </section>
       </div>
     </div>
-
-    @if (e.summary) {
-      <div class="mb-6">
-        <h2 class="mb-2 font-semibold text-text">Resumen y opinión</h2>
-        <p class="whitespace-pre-line text-text-2">{{ e.summary }}</p>
-      </div>
-    }
-
-    @if (e.pros) {
-      <div class="mb-6">
-        <h2 class="mb-2 font-semibold text-text">Lo mejor</h2>
-        <p class="whitespace-pre-line text-text-2">{{ e.pros }}</p>
-      </div>
-    }
-
-    @if (e.cons) {
-      <div class="mb-6">
-        <h2 class="mb-2 font-semibold text-text">Lo peor</h2>
-        <p class="whitespace-pre-line text-text-2">{{ e.cons }}</p>
-      </div>
-    }
-
-    @if (e.notes) {
-      <div>
-        <h2 class="mb-2 font-semibold text-text">Notas</h2>
-        <p class="whitespace-pre-line text-text-2">{{ e.notes }}</p>
-      </div>
-    }
-
-    }
+  } @else {
+    <div class="flex flex-col gap-3">
+      <app-skeleton class="h-5 w-40 rounded-md" />
+      <app-skeleton class="h-11 w-80 max-w-full rounded-lg" />
+      <app-skeleton class="h-7 w-64 max-w-full rounded-full" />
+    </div>
+    <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <app-skeleton class="h-64 rounded-[14px]" />
+      <app-skeleton class="hidden h-64 rounded-[14px] md:block" />
+    </div>
   }
-</div>
+</main>

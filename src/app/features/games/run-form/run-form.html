@@ -1,0 +1,283 @@
+<app-modal-sheet
+  [title]="(isEdit() ? 'runForm.editTitle' : 'runForm.newTitle') | translate"
+  [saveLabel]="(saving() ? 'runForm.saving' : 'runForm.save') | translate"
+  [saving]="saving()"
+  (save)="submit()"
+  (closed)="close()"
+>
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4 md:gap-[18px]">
+    <!-- Game + run label -->
+    <div class="grid grid-cols-[minmax(0,1fr)_96px] gap-3 md:grid-cols-[minmax(0,1fr)_120px] md:gap-3.5">
+      <div class="relative flex min-w-0 flex-col gap-2">
+        <label for="run-form-game" class="text-[13px] text-text-3">{{ 'runForm.game' | translate }}</label>
+        @if (locked()) {
+          <div
+            id="run-form-game"
+            class="flex min-h-[50px] items-center gap-2.5 rounded-xl border border-border bg-surface px-3.5 text-base md:min-h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+            [attr.aria-readonly]="true"
+          >
+            @if (lockedGame(); as g) {
+              <span class="min-w-0 flex-1 truncate text-text">{{ g.name }}</span>
+              @if (g.sagaName) {
+                <span class="hidden shrink-0 truncate text-xs text-brand-light sm:inline">
+                  {{ 'game.saga' | translate: { saga: g.sagaName } }}
+                </span>
+              }
+            } @else {
+              <span class="h-4 w-40 animate-pulse rounded bg-border"></span>
+            }
+          </div>
+        } @else {
+          <div
+            class="flex items-center gap-2.5 rounded-xl border bg-surface px-3.5 md:rounded-[10px] md:bg-bg"
+            [class]="showError('gameId') ? 'border-danger' : 'border-border'"
+          >
+            <svg lucideSearch [size]="16" class="shrink-0 text-muted"></svg>
+            <input
+              id="run-form-game"
+              data-autofocus
+              type="text"
+              role="combobox"
+              autocomplete="off"
+              aria-autocomplete="list"
+              aria-controls="run-form-game-list"
+              [attr.aria-expanded]="listOpen()"
+              [attr.aria-activedescendant]="listOpen() && results().length ? 'run-form-game-' + activeIndex() : null"
+              [attr.aria-invalid]="showError('gameId')"
+              [value]="query()"
+              (input)="onQuery($any($event.target).value)"
+              (focus)="listOpen.set(true)"
+              (blur)="listOpen.set(false); form.controls.gameId.markAsTouched()"
+              (keydown)="onGameKeydown($event)"
+              [placeholder]="'runForm.gamePlaceholder' | translate"
+              class="h-[50px] min-w-0 flex-1 border-0 bg-transparent text-base text-text focus:shadow-none md:h-[46px] md:text-[15px]"
+            />
+            @if (selectedGame()?.sagaName; as saga) {
+              <span class="hidden shrink-0 truncate text-xs text-brand-light sm:inline">
+                {{ 'game.saga' | translate: { saga } }}
+              </span>
+            }
+          </div>
+          @if (listOpen()) {
+            <ul
+              id="run-form-game-list"
+              role="listbox"
+              (mousedown)="$event.preventDefault()"
+              class="absolute inset-x-0 top-full z-10 mt-1.5 max-h-64 overflow-y-auto rounded-xl border border-border bg-surface p-1.5 shadow-[0_16px_40px_#0008]"
+            >
+              @if (games() === null) {
+                <li class="px-3 py-4 text-center text-sm text-muted">{{ 'search.loading' | translate }}</li>
+              } @else {
+                @for (game of results(); track game.id; let i = $index) {
+                  <li
+                    [id]="'run-form-game-' + i"
+                    role="option"
+                    [attr.aria-selected]="i === activeIndex()"
+                    (click)="selectGame(game)"
+                    (mousemove)="activeIndex.set(i)"
+                    class="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
+                    [class.bg-brand-tint]="i === activeIndex()"
+                  >
+                    <span
+                      class="min-w-0 flex-1 truncate"
+                      [class]="i === activeIndex() ? 'text-brand-lighter' : 'text-text-2'"
+                    >
+                      {{ game.name }}
+                    </span>
+                    @if (game.sagaName) {
+                      <span class="shrink-0 truncate text-xs text-faint">{{ game.sagaName }}</span>
+                    }
+                  </li>
+                } @empty {
+                  <li class="px-3 py-4 text-center text-sm text-muted">{{ 'runForm.noGames' | translate }}</li>
+                }
+              }
+            </ul>
+          }
+        }
+        @if (showError('gameId')) {
+          <p class="text-xs text-danger">{{ 'runForm.errors.game' | translate }}</p>
+        }
+      </div>
+
+      <div class="flex min-w-0 flex-col gap-2">
+        <label for="run-form-label" class="text-[13px] text-text-3">{{ 'runForm.run' | translate }}</label>
+        <input
+          id="run-form-label"
+          type="text"
+          formControlName="runLabel"
+          [attr.data-autofocus]="locked() ? '' : null"
+          [attr.aria-invalid]="showError('runLabel')"
+          class="h-[50px] w-full rounded-xl border bg-surface px-3.5 font-mono text-base text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+          [class]="showError('runLabel') ? 'border-danger' : 'border-border'"
+        />
+        @if (showError('runLabel')) {
+          <p class="text-xs text-danger">{{ 'runForm.errors.runLabel' | translate }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="flex flex-col gap-2">
+      <span id="run-form-status" class="text-[13px] text-text-3">{{ 'runForm.status' | translate }}</span>
+      <app-segmented
+        stretch
+        aria-labelledby="run-form-status"
+        [options]="statusOptions"
+        [value]="status()"
+        (valueChange)="setStatus($event)"
+      />
+    </div>
+
+    <!-- Platform -->
+    <div class="flex flex-col gap-2">
+      <span id="run-form-platform" class="text-[13px] text-text-3">{{ 'runForm.platform' | translate }}</span>
+      <div role="radiogroup" aria-labelledby="run-form-platform" class="flex flex-wrap gap-2">
+        @for (p of platforms; track p) {
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="platform() === p"
+            (click)="setPlatform(p)"
+            class="rounded-full border px-3.5 py-[9px] text-sm md:py-[7px] md:text-[13px]"
+            [class]="
+              platform() === p
+                ? 'border-brand bg-brand-tint text-brand-lighter'
+                : 'border-border text-text-2 hover:border-border-strong'
+            "
+          >
+            {{ 'platform.' + p | translate }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Dates, hours, rating: grouped list on mobile, 4 columns on web -->
+    <div class="flex flex-col gap-2">
+      <div
+        class="divide-y divide-border rounded-xl border border-border bg-surface md:grid md:grid-cols-4 md:gap-3.5 md:divide-y-0 md:rounded-none md:border-0 md:bg-transparent"
+      >
+        <label class="run-form-cell">
+          <span>{{ 'runForm.start' | translate }}</span>
+          <input type="date" formControlName="startDate" class="run-form-cell-input" [attr.aria-invalid]="dateRangeError()" />
+        </label>
+        <label class="run-form-cell">
+          <span>{{ 'runForm.end' | translate }}</span>
+          <input
+            type="date"
+            formControlName="endDate"
+            class="run-form-cell-input"
+            [attr.aria-invalid]="dateRangeError()"
+            (input)="endSuggested.set(false)"
+          />
+        </label>
+        <label class="run-form-cell">
+          <span>{{ 'runForm.hours' | translate }}</span>
+          <input
+            type="number"
+            inputmode="decimal"
+            min="0"
+            step="any"
+            formControlName="hours"
+            placeholder="0"
+            class="run-form-cell-input"
+            [attr.aria-invalid]="showError('hours')"
+          />
+        </label>
+        <label class="run-form-cell">
+          <span>{{ 'runForm.rating' | translate }}</span>
+          <input
+            type="number"
+            inputmode="decimal"
+            min="0"
+            max="10"
+            step="0.01"
+            formControlName="rating"
+            [placeholder]="(status() === 'EN_CURSO' ? 'runForm.ratingPlaceholder' : 'runForm.ratingRange') | translate"
+            class="run-form-cell-input text-gold!"
+            [attr.aria-invalid]="showError('rating')"
+          />
+        </label>
+      </div>
+      @if (endSuggested()) {
+        <p class="text-xs text-muted">{{ 'runForm.endSuggested' | translate }}</p>
+      }
+      @if (dateRangeError()) {
+        <p class="text-xs text-danger">{{ 'runForm.errors.dates' | translate }}</p>
+      }
+      @if (showError('hours')) {
+        <p class="text-xs text-danger">{{ 'runForm.errors.hours' | translate }}</p>
+      }
+      @if (showError('rating')) {
+        <p class="text-xs text-danger">{{ 'runForm.errors.rating' | translate }}</p>
+      }
+    </div>
+
+    <!-- Summary -->
+    <div class="flex flex-col gap-2">
+      <label for="run-form-summary" class="text-[13px] text-text-3">{{ 'runForm.summary' | translate }}</label>
+      <textarea
+        id="run-form-summary"
+        formControlName="summary"
+        rows="3"
+        [placeholder]="'runForm.summaryPlaceholder' | translate"
+        class="run-form-textarea"
+      ></textarea>
+    </div>
+
+    <!-- Toggles + reveal -->
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
+      <div class="divide-y divide-border rounded-xl border border-border bg-surface md:contents">
+        <button type="button" role="switch" [attr.aria-checked]="platinum()" (click)="toggle('platinum')" class="run-form-switch">
+          <span class="run-form-track" [class]="platinum() ? 'bg-brand' : 'bg-border'">
+            <span class="run-form-thumb" [class]="platinum() ? 'translate-x-[18px] bg-white md:translate-x-4' : 'bg-muted'"></span>
+          </span>
+          <span>{{ 'runForm.platinum' | translate }}</span>
+        </button>
+        <button type="button" role="switch" [attr.aria-checked]="replay()" (click)="toggle('replay')" class="run-form-switch">
+          <span class="run-form-track" [class]="replay() ? 'bg-brand' : 'bg-border'">
+            <span class="run-form-thumb" [class]="replay() ? 'translate-x-[18px] bg-white md:translate-x-4' : 'bg-muted'"></span>
+          </span>
+          <span>{{ 'runForm.replay' | translate }}</span>
+        </button>
+      </div>
+      <button
+        type="button"
+        (click)="showMore.set(!showMore())"
+        [attr.aria-expanded]="showMore()"
+        class="self-start text-[13px] text-brand-light hover:underline md:ml-auto md:self-auto"
+      >
+        {{ (showMore() ? 'runForm.less' : 'runForm.more') | translate }}
+      </button>
+    </div>
+
+    @if (showMore()) {
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-3.5">
+        <div class="flex flex-col gap-2">
+          <label for="run-form-pros" class="text-[13px] text-success">{{ 'runForm.pros' | translate }}</label>
+          <textarea
+            id="run-form-pros"
+            formControlName="pros"
+            rows="4"
+            [placeholder]="'runForm.linesHint' | translate"
+            class="run-form-textarea"
+          ></textarea>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label for="run-form-cons" class="text-[13px] text-danger">{{ 'runForm.cons' | translate }}</label>
+          <textarea
+            id="run-form-cons"
+            formControlName="cons"
+            rows="4"
+            [placeholder]="'runForm.linesHint' | translate"
+            class="run-form-textarea"
+          ></textarea>
+        </div>
+        <div class="flex flex-col gap-2 md:col-span-2">
+          <label for="run-form-notes" class="text-[13px] text-text-3">{{ 'runForm.notes' | translate }}</label>
+          <textarea id="run-form-notes" formControlName="notes" rows="3" class="run-form-textarea"></textarea>
+        </div>
+      </div>
+    }
+  </form>
+</app-modal-sheet>
