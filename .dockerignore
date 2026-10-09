@@ -1,0 +1,10 @@
+node_modules
+android
+dist
+.angular
+.git
+*.log
+.env*
+.vscode
+*.md
+resources
