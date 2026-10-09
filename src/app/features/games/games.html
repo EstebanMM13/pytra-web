@@ -1,0 +1,203 @@
+<app-navbar />
+
+<div class="mx-auto max-w-3xl px-6 py-10">
+  <div class="mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-semibold text-slate-900">Games</h1>
+    @if (!showForm()) {
+      <button
+        type="button"
+        (click)="openCreateForm()"
+        class="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark"
+      >
+        + Añadir juego
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="mb-4 text-sm text-red-600">{{ error() }}</p>
+  }
+
+  @if (showForm()) {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="mb-8 space-y-4 rounded-xl border border-slate-200 bg-surface p-6"
+    >
+      <div>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Nombre</label>
+        <input
+          type="text"
+          formControlName="name"
+          class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="mb-1 block text-sm font-medium text-slate-700">Desarrollador</label>
+          <input
+            type="text"
+            formControlName="developer"
+            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium text-slate-700">Distribuidora</label>
+          <input
+            type="text"
+            formControlName="publisher"
+            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="mb-1 block text-sm font-medium text-slate-700">Fecha de lanzamiento</label>
+          <input
+            type="date"
+            formControlName="releaseDate"
+            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium text-slate-700">Categoría</label>
+          <select
+            formControlName="category"
+            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+          >
+            @for (c of categories; track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Saga (opcional)</label>
+        <select
+          formControlName="sagaId"
+          class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+        >
+          <option [ngValue]="null">Sin saga</option>
+          @for (saga of sagas(); track saga.id) {
+            <option [ngValue]="saga.id">{{ saga.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-slate-700">URL de portada (opcional)</label>
+        <input
+          type="text"
+          formControlName="coverImageUrl"
+          class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+        />
+        @if (form.controls.coverImageUrl.value) {
+          <img
+            [src]="form.controls.coverImageUrl.value"
+            alt="Vista previa de la portada"
+            class="mt-2 h-32 rounded-lg object-cover"
+          />
+        }
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Géneros</label>
+        <div class="mb-2 flex flex-wrap gap-2">
+          @for (genre of genres(); track genre.id) {
+            <button
+              type="button"
+              (click)="toggleGenre(genre.id)"
+              class="rounded-full border px-3 py-1 text-sm transition"
+              [class]="
+                selectedGenreIds().has(genre.id)
+                  ? 'border-brand bg-brand text-white'
+                  : 'border-slate-300 text-slate-600 hover:border-slate-400'
+              "
+            >
+              {{ genre.name }}
+            </button>
+          }
+        </div>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            [formControl]="newGenreName"
+            placeholder="Nuevo género"
+            class="flex-1 rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-1.5 text-sm focus:border-brand-light focus:outline-none"
+          />
+          <button
+            type="button"
+            (click)="addGenre()"
+            class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Añadir
+          </button>
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button
+          type="submit"
+          class="rounded-lg bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark"
+        >
+          Guardar
+        </button>
+        <button
+          type="button"
+          (click)="cancelForm()"
+          class="rounded-lg border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (loading()) {
+    <p class="text-slate-500">Cargando...</p>
+  } @else if (games().length === 0) {
+    <p class="text-slate-500">Todavía no tienes juegos.</p>
+  } @else {
+    <ul class="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-surface">
+      @for (game of games(); track game.id) {
+        <li class="flex items-center justify-between px-4 py-3">
+          <div>
+            <a [routerLink]="['/games', game.id]" class="font-medium text-slate-800 hover:underline">
+              {{ game.name }}
+            </a>
+            <p class="text-sm text-slate-500">
+              {{ game.category ?? 'Sin categoría (pendiente)' }}
+              @if (game.sagaName) {
+                · {{ game.sagaName }}
+              }
+              @if (gameGenreNames(game); as names) {
+                @if (names) {
+                  · {{ names }}
+                }
+              }
+            </p>
+          </div>
+          <div class="flex gap-3 text-sm">
+            <button
+              type="button"
+              (click)="openEditForm(game)"
+              class="font-medium text-slate-600 hover:underline"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              (click)="remove(game)"
+              class="font-medium text-red-600 hover:underline"
+            >
+              Borrar
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

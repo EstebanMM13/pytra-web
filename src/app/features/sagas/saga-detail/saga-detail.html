@@ -1,0 +1,39 @@
+<app-navbar />
+
+<div class="mx-auto max-w-3xl px-6 py-10">
+  <a routerLink="/sagas" class="mb-4 inline-block text-sm text-slate-500 hover:underline">
+    ← Volver a Sagas
+  </a>
+
+  @if (error()) {
+    <p class="mb-4 text-sm text-red-600">{{ error() }}</p>
+  }
+
+  @if (saga(); as s) {
+    <h1 class="mb-6 text-2xl font-semibold text-slate-900">{{ s.name }}</h1>
+  }
+
+  @if (loading()) {
+    <p class="text-slate-500">Cargando...</p>
+  } @else if (games().length === 0) {
+    <p class="text-slate-500">Todavía no hay juegos en esta saga.</p>
+  } @else {
+    <ul class="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-surface">
+      @for (game of games(); track game.id) {
+        <li class="px-4 py-3">
+          <a [routerLink]="['/games', game.id]" class="font-medium text-slate-800 hover:underline">
+            {{ game.name }}
+          </a>
+          <p class="text-sm text-slate-500">
+            {{ game.category ?? 'Sin categoría (pendiente)' }}
+            @if (gameGenreNames(game); as names) {
+              @if (names) {
+                · {{ names }}
+              }
+            }
+          </p>
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -1,0 +1,135 @@
+<app-navbar />
+
+<div class="mx-auto max-w-2xl px-6 py-10">
+  <h1 class="mb-6 text-2xl font-semibold text-slate-900">Steam</h1>
+
+  @if (error()) {
+    <p class="mb-4 text-sm text-red-600">{{ error() }}</p>
+  }
+
+  <div class="mb-8 flex gap-3 rounded-xl border border-slate-200 bg-surface p-6">
+    <button
+      type="button"
+      (click)="connect()"
+      [disabled]="connecting()"
+      class="rounded-lg bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark disabled:opacity-50"
+    >
+      Conectar con Steam
+    </button>
+    <button
+      type="button"
+      (click)="sync()"
+      [disabled]="syncing()"
+      class="rounded-lg border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+    >
+      Sincronizar ahora
+    </button>
+  </div>
+
+  @if (syncResult(); as result) {
+    <p class="mb-6 text-sm text-slate-600">
+      {{ result.gamesScanned }} juegos revisados · {{ result.newGamesPending }} nuevos pendientes de
+      revisar · {{ result.gamesUpdated }} actualizados.
+    </p>
+  }
+
+  <h2 class="mb-4 text-lg font-semibold text-slate-900">Pendientes de revisar</h2>
+
+  @if (loading()) {
+    <p class="text-slate-500">Cargando...</p>
+  } @else if (pending().length === 0) {
+    <p class="text-slate-500">No hay juegos pendientes de revisión.</p>
+  } @else {
+    <ul class="space-y-3">
+      @for (game of pending(); track game.id) {
+        <li class="rounded-xl border border-slate-200 bg-surface p-4">
+          @if (confirmingId() === game.id) {
+            <form [formGroup]="confirmForm" (ngSubmit)="confirm()" class="space-y-4">
+              <div>
+                <label class="mb-1 block text-sm font-medium text-slate-700">Nombre</label>
+                <input
+                  type="text"
+                  formControlName="name"
+                  class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="mb-1 block text-sm font-medium text-slate-700">Categoría</label>
+                  <select
+                    formControlName="category"
+                    class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+                  >
+                    @for (c of categories; track c) {
+                      <option [value]="c">{{ c }}</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label class="mb-1 block text-sm font-medium text-slate-700">Saga (opcional)</label>
+                  <select
+                    formControlName="sagaId"
+                    class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+                  >
+                    <option [ngValue]="null">Sin saga</option>
+                    @for (saga of sagas(); track saga.id) {
+                      <option [ngValue]="saga.id">{{ saga.name }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-sm font-medium text-slate-700">Géneros</label>
+                <div class="flex flex-wrap gap-2">
+                  @for (genre of genres(); track genre.id) {
+                    <button
+                      type="button"
+                      (click)="toggleGenre(genre.id)"
+                      class="rounded-full border px-3 py-1 text-sm transition"
+                      [class]="
+                        selectedGenreIds().has(genre.id)
+                          ? 'border-brand bg-brand text-white'
+                          : 'border-slate-300 text-slate-600 hover:border-slate-400'
+                      "
+                    >
+                      {{ genre.name }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <button
+                  type="submit"
+                  class="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark"
+                >
+                  Confirmar
+                </button>
+                <button
+                  type="button"
+                  (click)="cancelConfirm()"
+                  class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          } @else {
+            <div class="flex items-center justify-between">
+              <span class="text-slate-800">{{ game.name }}</span>
+              <button
+                type="button"
+                (click)="openConfirmForm(game)"
+                class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Revisar
+              </button>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

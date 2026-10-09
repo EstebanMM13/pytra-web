@@ -1,0 +1,151 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4 rounded-lg border border-slate-200 p-4">
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Nombre de la partida</label>
+      <input
+        type="text"
+        formControlName="runLabel"
+        placeholder="Run 1"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      />
+    </div>
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Año</label>
+      <input
+        type="number"
+        formControlName="year"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      />
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Estado</label>
+      <select
+        formControlName="status"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      >
+        @for (s of statuses; track s) {
+          <option [value]="s">{{ s }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Plataforma</label>
+      <select
+        formControlName="platform"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      >
+        @for (p of platforms; track p) {
+          <option [value]="p">{{ p }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Horas</label>
+      <input
+        type="number"
+        step="0.5"
+        formControlName="hours"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      />
+    </div>
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Valoración (0-10)</label>
+      <input
+        type="number"
+        min="0"
+        max="10"
+        formControlName="rating"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      />
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Inicio</label>
+      <input
+        type="date"
+        formControlName="startDate"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      />
+    </div>
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Fin</label>
+      <input
+        type="date"
+        formControlName="endDate"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      />
+    </div>
+  </div>
+
+  <div class="flex gap-6">
+    <label class="flex items-center gap-2 text-sm text-slate-700">
+      <input type="checkbox" formControlName="platinum" />
+      Platino
+    </label>
+    <label class="flex items-center gap-2 text-sm text-slate-700">
+      <input type="checkbox" formControlName="replay" />
+      Rejugada
+    </label>
+  </div>
+
+  <div>
+    <label class="mb-1 block text-sm font-medium text-slate-700">Resumen y opinión</label>
+    <textarea
+      formControlName="summary"
+      rows="3"
+      class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+    ></textarea>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Lo mejor</label>
+      <textarea
+        formControlName="pros"
+        rows="3"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      ></textarea>
+    </div>
+    <div>
+      <label class="mb-1 block text-sm font-medium text-slate-700">Lo peor</label>
+      <textarea
+        formControlName="cons"
+        rows="3"
+        class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      ></textarea>
+    </div>
+  </div>
+
+  <div>
+    <label class="mb-1 block text-sm font-medium text-slate-700">Notas</label>
+    <textarea
+      formControlName="notes"
+      rows="2"
+      class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+    ></textarea>
+  </div>
+
+  <div class="flex gap-3">
+    <button
+      type="submit"
+      class="rounded-lg bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark"
+    >
+      Guardar
+    </button>
+    <button
+      type="button"
+      (click)="cancel.emit()"
+      class="rounded-lg border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50"
+    >
+      Cancelar
+    </button>
+  </div>
+</form>

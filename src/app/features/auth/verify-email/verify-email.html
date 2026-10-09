@@ -1,0 +1,18 @@
+<div class="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+  <div class="w-full max-w-sm rounded-xl bg-surface p-8 text-center shadow-sm">
+    @switch (status()) {
+      @case ('verifying') {
+        <p class="text-slate-600">{{ 'auth.verifyEmail.verifying' | translate }}</p>
+      }
+      @case ('success') {
+        <p class="mb-4 text-green-700">{{ 'auth.verifyEmail.success' | translate }}</p>
+        <a routerLink="/login" class="font-medium text-slate-900 hover:underline">
+          {{ 'auth.register.login' | translate }}
+        </a>
+      }
+      @case ('error') {
+        <p class="text-red-600">{{ 'auth.verifyEmail.error' | translate }}</p>
+      }
+    }
+  </div>
+</div>

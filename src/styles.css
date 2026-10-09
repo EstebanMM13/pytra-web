@@ -1,3 +1,32 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+@theme {
+  --color-brand: #724dce;
+  --color-brand-dark: #5d3dab;
+  --color-brand-light: #9d7cff;
+  --color-ink: #1c1a17;
+
+  /* Fondo de tarjetas/paneles — separado de "white" porque ese token también
+     lo usa el texto de los botones de marca (fondo morado, texto blanco). */
+  --color-surface: #242220;
+
+  /* La paleta slate de Tailwind se redefine entera a tonos oscuros cálidos
+     (a juego con el "ink" de marca) para que toda la app sea dark sin tener
+     que tocar cada plantilla: border/divide/text de slate-* ya quedan bien. */
+  --color-slate-50: #2a2824;
+  --color-slate-200: #3a3732;
+  --color-slate-300: #4a4740;
+  --color-slate-400: #76726a;
+  --color-slate-500: #938e84;
+  --color-slate-600: #b0aba1;
+  --color-slate-700: #cfc9be;
+  --color-slate-800: #e8e3d9;
+  --color-slate-900: #f7f3ea;
+}
+
+body {
+  background-color: var(--color-ink);
+  color-scheme: dark;
+}

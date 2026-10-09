@@ -1,0 +1,51 @@
+{
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "identifier": "Usuario o email",
+      "password": "Contraseña",
+      "submit": "Entrar",
+      "noAccount": "¿No tienes cuenta?",
+      "register": "Regístrate",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "withGoogle": "Continuar con Google"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "username": "Usuario",
+      "email": "Email",
+      "password": "Contraseña",
+      "submit": "Crear cuenta",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "login": "Inicia sesión",
+      "success": "Cuenta creada. Revisa tu email para verificarla."
+    },
+    "verifyEmail": {
+      "verifying": "Verificando tu email...",
+      "success": "Email verificado. Ya puedes iniciar sesión.",
+      "error": "El enlace de verificación no es válido o ha caducado."
+    },
+    "forgotPassword": {
+      "title": "Recuperar contraseña",
+      "email": "Email",
+      "submit": "Enviar enlace",
+      "sent": "Si ese email existe, te hemos enviado un enlace de recuperación."
+    },
+    "resetPassword": {
+      "title": "Nueva contraseña",
+      "newPassword": "Nueva contraseña",
+      "submit": "Cambiar contraseña",
+      "success": "Contraseña actualizada. Ya puedes iniciar sesión."
+    },
+    "oauthCallback": {
+      "processing": "Completando inicio de sesión...",
+      "error": "No se pudo completar el inicio de sesión."
+    },
+    "errors": {
+      "invalidCredentials": "Usuario o contraseña incorrectos.",
+      "emailNotVerified": "Verifica tu email antes de iniciar sesión.",
+      "duplicateUser": "Ese usuario o email ya está en uso.",
+      "generic": "Algo salió mal. Inténtalo de nuevo."
+    }
+  }
+}

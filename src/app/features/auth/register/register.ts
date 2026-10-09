@@ -1,0 +1,46 @@
+import { Component, inject, signal } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
+import { AuthService } from '../../../core/services/auth.service';
+
+@Component({
+  selector: 'app-register',
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
+  templateUrl: './register.html',
+})
+export class Register {
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly authService = inject(AuthService);
+
+  readonly form = this.fb.group({
+    username: this.fb.control('', Validators.required),
+    email: this.fb.control('', [Validators.required, Validators.email]),
+    password: this.fb.control('', [Validators.required, Validators.minLength(8)]),
+  });
+
+  readonly submitting = signal(false);
+  readonly submitted = signal(false);
+  readonly errorKey = signal<string | null>(null);
+
+  submit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.submitting.set(true);
+    this.errorKey.set(null);
+
+    this.authService.register(this.form.getRawValue()).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.submitted.set(true);
+      },
+      error: (err) => {
+        this.submitting.set(false);
+        this.errorKey.set(err.status === 409 ? 'auth.errors.duplicateUser' : 'auth.errors.generic');
+      },
+    });
+  }
+}

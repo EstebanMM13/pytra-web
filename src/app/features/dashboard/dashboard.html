@@ -1,0 +1,134 @@
+<app-navbar />
+
+<div class="mx-auto max-w-4xl px-6 py-10">
+  @if (loading()) {
+    <p class="text-slate-500">Cargando estadísticas...</p>
+  } @else {
+    @if (summary(); as s) {
+      <div class="mb-8 grid grid-cols-3 gap-4 sm:grid-cols-6">
+        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
+          <p class="text-2xl font-semibold text-slate-900">{{ s.totalGames }}</p>
+          <p class="text-xs text-slate-500">Juegos</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
+          <p class="text-2xl font-semibold text-slate-900">{{ s.totalSagas }}</p>
+          <p class="text-xs text-slate-500">Sagas</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
+          <p class="text-2xl font-semibold text-slate-900">{{ s.totalExperiences }}</p>
+          <p class="text-xs text-slate-500">Partidas</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
+          <p class="text-2xl font-semibold text-slate-900">{{ s.totalSingleplayerHours }}h</p>
+          <p class="text-xs text-slate-500">Singleplayer</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
+          <p class="text-2xl font-semibold text-slate-900">{{ s.totalOnlineHours }}h</p>
+          <p class="text-xs text-slate-500">Online</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
+          <p class="text-2xl font-semibold text-slate-900">{{ s.totalPlatinums }}</p>
+          <p class="text-xs text-slate-500">Platinos</p>
+        </div>
+      </div>
+    }
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div class="rounded-xl border border-slate-200 bg-surface p-5">
+        <h2 class="mb-3 font-semibold text-slate-900">Mejor valorados</h2>
+        @if (topRated().length === 0) {
+          <p class="text-sm text-slate-500">Sin datos todavía.</p>
+        } @else {
+          <ul class="space-y-2 text-sm">
+            @for (item of topRated(); track item.gameId + item.runLabel) {
+              <li class="flex justify-between">
+                <span class="text-slate-700">{{ item.gameName }} — {{ item.runLabel }}</span>
+                <span class="font-medium text-slate-900">{{ item.rating }}/10</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-surface p-5">
+        <h2 class="mb-3 font-semibold text-slate-900">Más jugados (singleplayer)</h2>
+        @if (mostPlayedSingleplayer().length === 0) {
+          <p class="text-sm text-slate-500">Sin datos todavía.</p>
+        } @else {
+          <ul class="space-y-2 text-sm">
+            @for (item of mostPlayedSingleplayer(); track item.gameId) {
+              <li class="flex justify-between">
+                <span class="text-slate-700">{{ item.gameName }}</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-surface p-5">
+        <h2 class="mb-3 font-semibold text-slate-900">Más jugados (online)</h2>
+        @if (mostPlayedOnline().length === 0) {
+          <p class="text-sm text-slate-500">Sin datos todavía.</p>
+        } @else {
+          <ul class="space-y-2 text-sm">
+            @for (item of mostPlayedOnline(); track item.gameId) {
+              <li class="flex justify-between">
+                <span class="text-slate-700">{{ item.gameName }}</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-surface p-5">
+        <h2 class="mb-3 font-semibold text-slate-900">Por saga</h2>
+        @if (bySaga().length === 0) {
+          <p class="text-sm text-slate-500">Sin datos todavía.</p>
+        } @else {
+          <ul class="space-y-2 text-sm">
+            @for (item of bySaga(); track item.sagaId ?? item.sagaName) {
+              <li class="flex justify-between">
+                <span class="text-slate-700">{{ item.sagaName }} ({{ item.gameCount }})</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-surface p-5">
+        <h2 class="mb-3 font-semibold text-slate-900">Por género</h2>
+        @if (byGenre().length === 0) {
+          <p class="text-sm text-slate-500">Sin datos todavía.</p>
+        } @else {
+          <ul class="space-y-2 text-sm">
+            @for (item of byGenre(); track item.genreId) {
+              <li class="flex justify-between">
+                <span class="text-slate-700">{{ item.genreName }} ({{ item.gameCount }})</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="rounded-xl border border-slate-200 bg-surface p-5">
+        <h2 class="mb-3 font-semibold text-slate-900">Por año</h2>
+        @if (byYear().length === 0) {
+          <p class="text-sm text-slate-500">Sin datos todavía.</p>
+        } @else {
+          <ul class="space-y-2 text-sm">
+            @for (item of byYear(); track item.year) {
+              <li class="flex justify-between">
+                <span class="text-slate-700">{{ item.year }} ({{ item.experienceCount }})</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,51 @@
+{
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "identifier": "Username or email",
+      "password": "Password",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up",
+      "forgotPassword": "Forgot your password?",
+      "withGoogle": "Continue with Google"
+    },
+    "register": {
+      "title": "Create account",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in",
+      "success": "Account created. Check your email to verify it."
+    },
+    "verifyEmail": {
+      "verifying": "Verifying your email...",
+      "success": "Email verified. You can sign in now.",
+      "error": "This verification link is invalid or has expired."
+    },
+    "forgotPassword": {
+      "title": "Recover password",
+      "email": "Email",
+      "submit": "Send link",
+      "sent": "If that email exists, we've sent a recovery link."
+    },
+    "resetPassword": {
+      "title": "New password",
+      "newPassword": "New password",
+      "submit": "Change password",
+      "success": "Password updated. You can sign in now."
+    },
+    "oauthCallback": {
+      "processing": "Completing sign in...",
+      "error": "Could not complete sign in."
+    },
+    "errors": {
+      "invalidCredentials": "Incorrect username or password.",
+      "emailNotVerified": "Verify your email before signing in.",
+      "duplicateUser": "That username or email is already in use.",
+      "generic": "Something went wrong. Please try again."
+    }
+  }
+}

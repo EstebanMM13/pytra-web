@@ -1,0 +1,54 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject } from '@angular/core';
+import { Observable, tap } from 'rxjs';
+import { API_BASE_URL } from '../api-base-url';
+import {
+  ExchangeCodeTokenRequest,
+  ForgotPasswordRequest,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  ResetPasswordRequest,
+} from '../models/auth.model';
+import { TokenStorageService } from './token-storage.service';
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly tokenStorage = inject(TokenStorageService);
+
+  readonly isAuthenticated = computed(() => this.tokenStorage.token() !== null);
+
+  register(request: RegisterRequest): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${API_BASE_URL}/auth/register`, request);
+  }
+
+  login(request: LoginRequest): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${API_BASE_URL}/auth/login`, request)
+      .pipe(tap((response) => this.tokenStorage.setToken(response.token)));
+  }
+
+  verifyEmail(token: string): Observable<void> {
+    return this.http.get<void>(`${API_BASE_URL}/auth/verify-email`, { params: { token } });
+  }
+
+  forgotPassword(request: ForgotPasswordRequest): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${API_BASE_URL}/auth/forgot-password`, request);
+  }
+
+  resetPassword(request: ResetPasswordRequest): Observable<void> {
+    return this.http.post<void>(`${API_BASE_URL}/auth/reset-password`, request);
+  }
+
+  exchangeCode(request: ExchangeCodeTokenRequest): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${API_BASE_URL}/auth/exchange-code`, request)
+      .pipe(tap((response) => this.tokenStorage.setToken(response.token)));
+  }
+
+  logout(): void {
+    this.tokenStorage.clearToken();
+  }
+}

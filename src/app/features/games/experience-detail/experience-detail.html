@@ -1,0 +1,103 @@
+<app-navbar />
+
+<div class="mx-auto max-w-3xl px-6 py-10">
+  <a [routerLink]="['/games', gameId]" class="mb-4 inline-block text-sm text-slate-500 hover:underline">
+    ← Volver a {{ game()?.name ?? 'juego' }}
+  </a>
+
+  @if (error()) {
+    <p class="mb-4 text-sm text-red-600">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="text-slate-500">Cargando...</p>
+  } @else if (experience(); as e) {
+    <div class="mb-6 flex items-center justify-between">
+      <h1 class="text-2xl font-semibold text-slate-900">
+        {{ game()?.name }} — {{ e.runLabel }}
+      </h1>
+      @if (!editing()) {
+        <button
+          type="button"
+          (click)="startEdit()"
+          class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Editar
+        </button>
+      }
+    </div>
+
+    @if (editing()) {
+      <app-experience-form [initial]="e" (save)="save($event)" (cancel)="cancelEdit()" />
+    } @else {
+
+    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div class="rounded-xl border border-slate-200 bg-surface p-4">
+        <p class="text-xs font-medium text-slate-500">Juego</p>
+        <p class="mt-1 text-slate-800">{{ game()?.name }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-surface p-4">
+        <p class="text-xs font-medium text-slate-500">Nota</p>
+        <p class="mt-1 text-slate-800">{{ e.rating ?? '—' }}{{ e.rating !== null ? '/10' : '' }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-surface p-4">
+        <p class="text-xs font-medium text-slate-500">Horas</p>
+        <p class="mt-1 text-slate-800">{{ e.hours ?? 0 }}h</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-surface p-4">
+        <p class="text-xs font-medium text-slate-500">Plataforma</p>
+        <p class="mt-1 text-slate-800">{{ e.platform }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-surface p-4">
+        <p class="text-xs font-medium text-slate-500">Inicio</p>
+        <p class="mt-1 text-slate-800">{{ e.startDate ?? '—' }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-surface p-4">
+        <p class="text-xs font-medium text-slate-500">Fin</p>
+        <p class="mt-1 text-slate-800">{{ e.endDate ?? '—' }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-surface p-4">
+        <p class="text-xs font-medium text-slate-500">Estado</p>
+        <p class="mt-1 text-slate-800">{{ e.status }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-surface p-4">
+        <p class="text-xs font-medium text-slate-500">Platino</p>
+        <p class="mt-1 text-slate-800">{{ e.platinum ? 'Sí' : 'No' }}</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-surface p-4">
+        <p class="text-xs font-medium text-slate-500">Replay</p>
+        <p class="mt-1 text-slate-800">{{ e.replay ? 'Sí' : 'No' }}</p>
+      </div>
+    </div>
+
+    @if (e.summary) {
+      <div class="mb-6">
+        <h2 class="mb-2 font-semibold text-slate-900">Resumen y opinión</h2>
+        <p class="whitespace-pre-line text-slate-700">{{ e.summary }}</p>
+      </div>
+    }
+
+    @if (e.pros) {
+      <div class="mb-6">
+        <h2 class="mb-2 font-semibold text-slate-900">Lo mejor</h2>
+        <p class="whitespace-pre-line text-slate-700">{{ e.pros }}</p>
+      </div>
+    }
+
+    @if (e.cons) {
+      <div class="mb-6">
+        <h2 class="mb-2 font-semibold text-slate-900">Lo peor</h2>
+        <p class="whitespace-pre-line text-slate-700">{{ e.cons }}</p>
+      </div>
+    }
+
+    @if (e.notes) {
+      <div>
+        <h2 class="mb-2 font-semibold text-slate-900">Notas</h2>
+        <p class="whitespace-pre-line text-slate-700">{{ e.notes }}</p>
+      </div>
+    }
+
+    }
+  }
+</div>
