@@ -1,16 +1,16 @@
 <app-navbar />
 
 <div class="mx-auto max-w-3xl px-6 py-10">
-  <a routerLink="/games" class="mb-4 inline-block text-sm text-slate-500 hover:underline">
+  <a routerLink="/games" class="mb-4 inline-block text-sm text-muted hover:underline">
     ← Volver a Games
   </a>
 
   @if (error()) {
-    <p class="mb-4 text-sm text-red-600">{{ error() }}</p>
+    <p class="mb-4 text-sm text-danger">{{ error() }}</p>
   }
 
   @if (loading()) {
-    <p class="text-slate-500">Cargando...</p>
+    <p class="text-muted">Cargando...</p>
   } @else if (game(); as g) {
     <div class="mb-8">
       @if (g.coverImageUrl) {
@@ -21,8 +21,8 @@
         />
       }
 
-      <h1 class="mb-1 text-2xl font-semibold text-slate-900">{{ g.name }}</h1>
-      <p class="mb-4 text-sm text-slate-500">
+      <h1 class="mb-1 text-2xl font-semibold text-text">{{ g.name }}</h1>
+      <p class="mb-4 text-sm text-muted">
         {{ g.category ?? 'Sin categoría' }}
         @if (g.reviewStatus === 'PENDING_REVIEW') {
           · pendiente de revisión
@@ -30,59 +30,59 @@
       </p>
 
       <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div class="rounded-xl border border-slate-200 bg-surface p-4">
-          <p class="text-xs font-medium text-slate-500">Saga</p>
+        <div class="rounded-xl border border-border bg-surface p-4">
+          <p class="text-xs font-medium text-muted">Saga</p>
           @if (g.sagaId) {
-            <a [routerLink]="['/sagas', g.sagaId]" class="mt-1 block text-slate-800 hover:underline">
+            <a [routerLink]="['/sagas', g.sagaId]" class="mt-1 block text-text-2 hover:underline">
               {{ g.sagaName }}
             </a>
           } @else {
-            <p class="mt-1 text-slate-400">Sin saga</p>
+            <p class="mt-1 text-faint">Sin saga</p>
           }
         </div>
-        <div class="rounded-xl border border-slate-200 bg-surface p-4">
-          <p class="text-xs font-medium text-slate-500">Desarrollador</p>
-          <p class="mt-1 text-slate-800">{{ g.developer ?? '—' }}</p>
+        <div class="rounded-xl border border-border bg-surface p-4">
+          <p class="text-xs font-medium text-muted">Desarrollador</p>
+          <p class="mt-1 text-text-2">{{ g.developer ?? '—' }}</p>
         </div>
-        <div class="rounded-xl border border-slate-200 bg-surface p-4">
-          <p class="text-xs font-medium text-slate-500">Publisher</p>
-          <p class="mt-1 text-slate-800">{{ g.publisher ?? '—' }}</p>
+        <div class="rounded-xl border border-border bg-surface p-4">
+          <p class="text-xs font-medium text-muted">Publisher</p>
+          <p class="mt-1 text-text-2">{{ g.publisher ?? '—' }}</p>
         </div>
-        <div class="rounded-xl border border-slate-200 bg-surface p-4">
-          <p class="text-xs font-medium text-slate-500">Géneros</p>
-          <p class="mt-1 text-slate-800">
+        <div class="rounded-xl border border-border bg-surface p-4">
+          <p class="text-xs font-medium text-muted">Géneros</p>
+          <p class="mt-1 text-text-2">
             {{ g.genres.length > 0 ? g.genres.map((genre) => genre.name).join(', ') : '—' }}
           </p>
         </div>
-        <div class="rounded-xl border border-slate-200 bg-surface p-4">
-          <p class="text-xs font-medium text-slate-500">Fecha de salida</p>
-          <p class="mt-1 text-slate-800">{{ g.releaseDate ?? '—' }}</p>
+        <div class="rounded-xl border border-border bg-surface p-4">
+          <p class="text-xs font-medium text-muted">Fecha de salida</p>
+          <p class="mt-1 text-text-2">{{ g.releaseDate ?? '—' }}</p>
         </div>
       </div>
     </div>
 
     <!-- Online Playtime: solo para juegos ONLINE/HYBRID -->
     @if (g.category !== 'SINGLEPLAYER') {
-      <div class="mb-8 rounded-xl border border-slate-200 bg-surface p-6">
-        <h2 class="mb-4 text-lg font-semibold text-slate-900">Horas online</h2>
+      <div class="mb-8 rounded-xl border border-border bg-surface p-6">
+        <h2 class="mb-4 text-lg font-semibold text-text">Horas online</h2>
         <form [formGroup]="onlinePlaytimeForm" (ngSubmit)="submitOnlinePlaytime()" class="flex items-end gap-4">
           <div>
-            <label class="mb-1 block text-sm font-medium text-slate-700">Horas totales</label>
+            <label class="mb-1 block text-sm font-medium text-text-2">Horas totales</label>
             <input
               type="number"
               step="0.5"
               formControlName="totalHours"
-              class="w-32 rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+              class="w-32 rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
             />
           </div>
           <div>
-            <label class="mb-1 block text-sm font-medium text-slate-700">Valoración (0-10)</label>
+            <label class="mb-1 block text-sm font-medium text-text-2">Valoración (0-10)</label>
             <input
               type="number"
               min="0"
               max="10"
               formControlName="generalRating"
-              class="w-24 rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+              class="w-24 rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
             />
           </div>
           <button
@@ -96,9 +96,9 @@
     }
 
     <!-- Experiences -->
-    <div class="rounded-xl border border-slate-200 bg-surface p-6">
+    <div class="rounded-xl border border-border bg-surface p-6">
       <div class="mb-4 flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-slate-900">Partidas</h2>
+        <h2 class="text-lg font-semibold text-text">Partidas</h2>
         @if (!showExperienceForm()) {
           <button
             type="button"
@@ -121,19 +121,19 @@
       }
 
       @if (experiences().length === 0) {
-        <p class="text-slate-500">Todavía no hay partidas registradas.</p>
+        <p class="text-muted">Todavía no hay partidas registradas.</p>
       } @else {
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           @for (experience of experiences(); track experience.id) {
-            <div class="rounded-xl border border-slate-200 p-4">
+            <div class="rounded-xl border border-border p-4">
               <a [routerLink]="['/games', gameId, 'experiences', experience.id]" class="block hover:underline">
-                <p class="font-medium text-slate-800">
+                <p class="font-medium text-text-2">
                   {{ experience.runLabel }}
                   @if (experience.platinum) {
                     🏆
                   }
                 </p>
-                <p class="text-sm text-slate-500">
+                <p class="text-sm text-muted">
                   {{ experience.status }} · {{ experience.platform }}
                   @if (experience.hours) {
                     · {{ experience.hours | hours }}
@@ -147,14 +147,14 @@
                 <button
                   type="button"
                   (click)="openEditExperienceForm(experience)"
-                  class="font-medium text-slate-600 hover:underline"
+                  class="font-medium text-text-3 hover:underline"
                 >
                   Editar
                 </button>
                 <button
                   type="button"
                   (click)="removeExperience(experience)"
-                  class="font-medium text-red-600 hover:underline"
+                  class="font-medium text-danger hover:underline"
                 >
                   Borrar
                 </button>

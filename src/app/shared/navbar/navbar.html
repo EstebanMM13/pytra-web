@@ -1,39 +1,156 @@
-<nav class="border-b border-slate-200 bg-surface px-6 py-3">
-  <div class="mx-auto flex max-w-5xl items-center justify-between">
-    <a routerLink="/dashboard" class="flex items-center">
-      <img src="brand/lockup-horizontal-dark-bg.png" alt="Pytra" class="h-8 w-auto" />
-    </a>
+<!-- Web (md+) -->
+<nav
+  class="hidden h-[62px] items-center justify-between gap-4 border-b border-border bg-nav px-6 md:flex lg:px-10"
+  [attr.aria-label]="'nav.mainNav' | translate"
+>
+  <a routerLink="/dashboard" class="flex shrink-0 items-center rounded-md">
+    <img src="brand/lockup-horizontal-dark-bg.png" alt="Pytra" class="h-[30px] w-auto light:hidden" />
+    <img src="brand/lockup-horizontal-light-bg.png" alt="Pytra" class="hidden h-[30px] w-auto light:block" />
+  </a>
 
-    <div class="flex items-center gap-6 text-sm font-medium text-slate-600">
+  <div class="flex items-center gap-1 text-sm font-medium">
+    @for (tab of webTabs; track tab.path) {
       <a
-        routerLink="/dashboard"
-        routerLinkActive="text-brand-light"
-        class="hover:text-brand-light"
+        [routerLink]="tab.path"
+        routerLinkActive="bg-brand-tint !text-brand-lighter"
+        ariaCurrentWhenActive="page"
+        class="rounded-lg px-3 py-2 text-text-3 hover:text-text lg:px-3.5"
       >
-        Dashboard
+        {{ tab.labelKey | translate }}
       </a>
-      <a routerLink="/sagas" routerLinkActive="text-brand-light" class="hover:text-brand-light">
-        Sagas
-      </a>
-      <a routerLink="/games" routerLinkActive="text-brand-light" class="hover:text-brand-light">
-        Games
-      </a>
-      <a routerLink="/steam" routerLinkActive="text-brand-light" class="hover:text-brand-light">
-        Steam
-      </a>
-      @if (displayName(); as name) {
-        <a
-          routerLink="/profile"
-          routerLinkActive="border-brand-light text-brand-light"
-          class="max-w-24 truncate rounded-full border border-slate-200 bg-ink px-3 py-1 text-xs text-slate-700 hover:border-brand-light hover:text-brand-light sm:max-w-48"
-          [title]="name"
-        >
-          {{ name }}
-        </a>
-      }
-      <button type="button" (click)="logout()" class="text-slate-400 hover:text-slate-900">
-        Cerrar sesión
-      </button>
-    </div>
+    }
+  </div>
+
+  <div class="flex shrink-0 items-center gap-3">
+    <button
+      type="button"
+      (click)="searchOpen.set(true)"
+      class="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-[13px] text-faint hover:border-border-strong lg:w-[200px]"
+      [attr.aria-label]="'nav.search' | translate"
+    >
+      <svg lucideSearch [size]="15" class="shrink-0"></svg>
+      <span class="hidden lg:inline">{{ 'nav.search' | translate }}</span>
+      <kbd class="ml-auto hidden font-mono text-[11px] lg:inline">{{ shortcutLabel }}</kbd>
+    </button>
+
+    <button
+      type="button"
+      (click)="newRun()"
+      class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+      [attr.aria-label]="'nav.newRunAria' | translate"
+    >
+      <svg lucidePlus [size]="15"></svg>
+      {{ 'nav.newRun' | translate }}
+    </button>
+
+    <a
+      routerLink="/profile"
+      class="flex size-[34px] items-center justify-center rounded-full bg-brand-tint text-[13px] font-semibold text-brand-lighter"
+      [attr.aria-label]="'nav.profile' | translate"
+      [title]="displayName() ?? ''"
+    >
+      {{ initial() }}
+    </a>
   </div>
 </nav>
+
+<!-- Mobile header (< md) -->
+<header
+  class="flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top)+14px)] pb-1 md:hidden"
+>
+  <a routerLink="/dashboard" class="flex items-center rounded-md">
+    <img src="brand/lockup-horizontal-dark-bg.png" alt="Pytra" class="h-[26px] w-auto light:hidden" />
+    <img src="brand/lockup-horizontal-light-bg.png" alt="Pytra" class="hidden h-[26px] w-auto light:block" />
+  </a>
+
+  <div class="relative">
+    <button
+      type="button"
+      (click)="menuOpen.set(!menuOpen())"
+      class="flex size-[34px] items-center justify-center rounded-full bg-brand-tint text-[13px] font-semibold text-brand-lighter"
+      [attr.aria-label]="'nav.menu' | translate"
+      aria-haspopup="menu"
+      [attr.aria-expanded]="menuOpen()"
+    >
+      {{ initial() }}
+    </button>
+
+    @if (menuOpen()) {
+      <div class="fixed inset-0 z-40" (click)="menuOpen.set(false)" aria-hidden="true"></div>
+      <div
+        role="menu"
+        class="absolute top-11 right-0 z-50 w-52 animate-modal-in overflow-hidden rounded-xl border border-border bg-surface py-1 text-sm"
+      >
+        @if (displayName(); as name) {
+          <p class="truncate border-b border-divider px-4 py-2.5 text-xs text-muted">{{ name }}</p>
+        }
+        <a
+          role="menuitem"
+          routerLink="/steam"
+          (click)="menuOpen.set(false)"
+          class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
+        >
+          <svg lucideDownload [size]="16" class="text-brand-light"></svg>
+          {{ 'nav.steam' | translate }}
+        </a>
+        <a
+          role="menuitem"
+          routerLink="/profile"
+          (click)="menuOpen.set(false)"
+          class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
+        >
+          <svg lucideUser [size]="16" class="text-brand-light"></svg>
+          {{ 'nav.profile' | translate }}
+        </a>
+        <button
+          role="menuitem"
+          type="button"
+          (click)="logout()"
+          class="flex w-full items-center gap-3 border-t border-divider px-4 py-2.5 text-danger hover:bg-hover"
+        >
+          <svg lucideLogOut [size]="16"></svg>
+          {{ 'nav.logout' | translate }}
+        </button>
+      </div>
+    }
+  </div>
+</header>
+
+<!-- Mobile tab bar (< md) -->
+<nav
+  class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 items-start border-t border-border bg-nav pt-2.5 pb-[max(env(safe-area-inset-bottom),12px)] text-[11px] text-muted md:hidden"
+  [attr.aria-label]="'nav.mainNav' | translate"
+>
+  @for (tab of mobileTabsLeft; track tab.path) {
+    <ng-container *ngTemplateOutlet="tabItem; context: { $implicit: tab }" />
+  }
+  <div class="flex justify-center">
+    <button
+      type="button"
+      (click)="newRun()"
+      class="-mt-[26px] flex size-[54px] items-center justify-center rounded-[18px] border-4 border-bg bg-brand text-white shadow-[0_8px_24px_#724DCE66] hover:bg-brand-dark"
+      [attr.aria-label]="'nav.newRunAria' | translate"
+    >
+      <svg lucidePlus [size]="26"></svg>
+    </button>
+  </div>
+  @for (tab of mobileTabsRight; track tab.path) {
+    <ng-container *ngTemplateOutlet="tabItem; context: { $implicit: tab }" />
+  }
+</nav>
+
+<ng-template #tabItem let-tab>
+  <a
+    [routerLink]="tab.path"
+    routerLinkActive="!text-brand-lighter"
+    ariaCurrentWhenActive="page"
+    class="flex flex-col items-center gap-1 rounded-md"
+  >
+    <svg [lucideIcon]="tab.icon" [size]="22"></svg>
+    {{ tab.labelKey | translate }}
+  </a>
+</ng-template>
+
+@if (searchOpen()) {
+  <app-game-search (closed)="searchOpen.set(false)" />
+}

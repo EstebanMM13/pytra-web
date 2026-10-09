@@ -5,12 +5,16 @@ export interface StatsSummary {
   totalSingleplayerHours: number;
   totalOnlineHours: number;
   totalPlatinums: number;
+  /** Mean rating of rated runs. Optional until the API ships it. */
+  averageRating?: number | null;
 }
 
 export interface YearStat {
   year: number;
   totalHours: number;
   experienceCount: number;
+  /** Mean rating of the year's rated runs. Optional until the API ships it. */
+  averageRating?: number | null;
 }
 
 export interface SagaStat {

@@ -1,11 +1,11 @@
-<div class="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+<div class="flex min-h-screen items-center justify-center bg-hover px-4">
   <div class="w-full max-w-sm rounded-xl bg-surface p-8 text-center shadow-sm">
     @switch (status()) {
       @case ('verifying') {
-        <p class="text-slate-600">{{ 'auth.verifyEmail.verifying' | translate }}</p>
+        <p class="text-text-3">{{ 'auth.verifyEmail.verifying' | translate }}</p>
       }
       @case ('success') {
-        <p class="mb-6 text-green-700">{{ 'auth.verifyEmail.success' | translate }}</p>
+        <p class="mb-6 text-success">{{ 'auth.verifyEmail.success' | translate }}</p>
         <a
           routerLink="/login"
           class="inline-block w-full rounded-lg bg-brand py-2 font-medium text-white transition hover:bg-brand-dark"
@@ -14,17 +14,17 @@
         </a>
       }
       @case ('expired') {
-        <p class="mb-4 text-red-600">{{ 'auth.verifyEmail.expired' | translate }}</p>
+        <p class="mb-4 text-danger">{{ 'auth.verifyEmail.expired' | translate }}</p>
         <div class="text-left">
           <app-resend-verification />
         </div>
       }
       @case ('invalid') {
-        <p class="mb-4 text-red-600">{{ 'auth.verifyEmail.invalid' | translate }}</p>
+        <p class="mb-4 text-danger">{{ 'auth.verifyEmail.invalid' | translate }}</p>
         <div class="mb-4 text-left">
           <app-resend-verification />
         </div>
-        <a routerLink="/login" class="font-medium text-slate-900 hover:underline">
+        <a routerLink="/login" class="font-medium text-text hover:underline">
           {{ 'auth.verifyEmail.goToLogin' | translate }}
         </a>
       }

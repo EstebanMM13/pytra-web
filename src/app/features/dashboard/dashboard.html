@@ -1,140 +1,205 @@
 <app-navbar />
 
-<div class="mx-auto max-w-4xl px-6 py-10">
-  @if (displayName(); as name) {
-    <h1 class="mb-6 truncate text-xl font-semibold text-slate-900">
-      {{ 'dashboard.greeting' | translate: { name } }}
-    </h1>
-  }
-
-  @if (loading()) {
-    <p class="text-slate-500">Cargando estadísticas...</p>
-  } @else {
-    @if (summary(); as s) {
-      <div class="mb-8 grid grid-cols-3 gap-4 sm:grid-cols-6">
-        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
-          <p class="text-2xl font-semibold text-slate-900">{{ s.totalGames }}</p>
-          <p class="text-xs text-slate-500">Juegos</p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
-          <p class="text-2xl font-semibold text-slate-900">{{ s.totalSagas }}</p>
-          <p class="text-xs text-slate-500">Sagas</p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
-          <p class="text-2xl font-semibold text-slate-900">{{ s.totalExperiences }}</p>
-          <p class="text-xs text-slate-500">Partidas</p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
-          <p class="text-2xl font-semibold text-slate-900">{{ s.totalSingleplayerHours | hours }}</p>
-          <p class="text-xs text-slate-500">Singleplayer</p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
-          <p class="text-2xl font-semibold text-slate-900">{{ s.totalOnlineHours | hours }}</p>
-          <p class="text-xs text-slate-500">Online</p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
-          <p class="text-2xl font-semibold text-slate-900">{{ s.totalPlatinums }}</p>
-          <p class="text-xs text-slate-500">Platinos</p>
-        </div>
-      </div>
-    }
-
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <div class="rounded-xl border border-slate-200 bg-surface p-5">
-        <h2 class="mb-3 font-semibold text-slate-900">Mejor valorados</h2>
-        @if (topRated().length === 0) {
-          <p class="text-sm text-slate-500">Sin datos todavía.</p>
-        } @else {
-          <ul class="space-y-2 text-sm">
-            @for (item of topRated(); track item.gameId + item.runLabel) {
-              <li class="flex justify-between">
-                <span class="text-slate-700">{{ item.gameName }} — {{ item.runLabel }}</span>
-                <span class="font-medium text-slate-900">{{ item.rating }}/10</span>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-
-      <div class="rounded-xl border border-slate-200 bg-surface p-5">
-        <h2 class="mb-3 font-semibold text-slate-900">Más jugados (singleplayer)</h2>
-        @if (mostPlayedSingleplayer().length === 0) {
-          <p class="text-sm text-slate-500">Sin datos todavía.</p>
-        } @else {
-          <ul class="space-y-2 text-sm">
-            @for (item of mostPlayedSingleplayer(); track item.gameId) {
-              <li class="flex justify-between">
-                <span class="text-slate-700">{{ item.gameName }}</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-
-      <div class="rounded-xl border border-slate-200 bg-surface p-5">
-        <h2 class="mb-3 font-semibold text-slate-900">Más jugados (online)</h2>
-        @if (mostPlayedOnline().length === 0) {
-          <p class="text-sm text-slate-500">Sin datos todavía.</p>
-        } @else {
-          <ul class="space-y-2 text-sm">
-            @for (item of mostPlayedOnline(); track item.gameId) {
-              <li class="flex justify-between">
-                <span class="text-slate-700">{{ item.gameName }}</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-
-      <div class="rounded-xl border border-slate-200 bg-surface p-5">
-        <h2 class="mb-3 font-semibold text-slate-900">Por saga</h2>
-        @if (bySaga().length === 0) {
-          <p class="text-sm text-slate-500">Sin datos todavía.</p>
-        } @else {
-          <ul class="space-y-2 text-sm">
-            @for (item of bySaga(); track item.sagaId ?? item.sagaName) {
-              <li class="flex justify-between">
-                <span class="text-slate-700">{{ item.sagaName }} ({{ item.gameCount }})</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-
-      <div class="rounded-xl border border-slate-200 bg-surface p-5">
-        <h2 class="mb-3 font-semibold text-slate-900">Por género</h2>
-        @if (byGenre().length === 0) {
-          <p class="text-sm text-slate-500">Sin datos todavía.</p>
-        } @else {
-          <ul class="space-y-2 text-sm">
-            @for (item of byGenre(); track item.genreId) {
-              <li class="flex justify-between">
-                <span class="text-slate-700">{{ item.genreName }} ({{ item.gameCount }})</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
-              </li>
-            }
-          </ul>
-        }
-      </div>
-
-      <div class="rounded-xl border border-slate-200 bg-surface p-5">
-        <h2 class="mb-3 font-semibold text-slate-900">Por año</h2>
-        @if (byYear().length === 0) {
-          <p class="text-sm text-slate-500">Sin datos todavía.</p>
-        } @else {
-          <ul class="space-y-2 text-sm">
-            @for (item of byYear(); track item.year) {
-              <li class="flex justify-between">
-                <span class="text-slate-700">{{ item.year }} ({{ item.experienceCount }})</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
-              </li>
-            }
-          </ul>
-        }
-      </div>
+<main class="mx-auto flex max-w-7xl flex-col gap-[18px] px-5 pt-3 pb-8 md:gap-7 md:px-6 md:pt-8 md:pb-12 lg:px-10 lg:pt-10">
+  <!-- Greeting + Steam notice -->
+  <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div class="min-w-0">
+      <p class="mb-1.5 hidden text-sm text-muted md:block">{{ today() }}</p>
+      @if (displayName(); as name) {
+        <h1 class="truncate text-[26px] font-semibold tracking-[-0.02em] md:text-[30px]">
+          {{ 'dashboard.greeting' | translate: { name } }}
+        </h1>
+      } @else {
+        <app-skeleton class="h-9 w-56 rounded-lg" />
+      }
     </div>
-  }
-</div>
+    @if (steamPendingCount() > 0) {
+      <a
+        routerLink="/steam"
+        class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-[13px] text-gold-tint-fg hover:opacity-90 md:self-auto"
+      >
+        <svg lucideDownload [size]="14"></svg>
+        {{ 'dashboard.steamPending' | translate: { count: steamPendingCount() } }}
+        <svg lucideArrowRight [size]="14"></svg>
+      </a>
+    }
+  </div>
+
+  <!-- Stats: web (6 cards) -->
+  <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-6">
+    @if (summary(); as s) {
+      <app-stat-card [icon]="icons.games" [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
+      <app-stat-card [icon]="icons.sagas" [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
+      <app-stat-card [icon]="icons.runs" [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" />
+      <app-stat-card
+        [icon]="icons.single"
+        [label]="'dashboard.stats.singleHours' | translate"
+        [value]="s.totalSingleplayerHours | hours"
+      />
+      <app-stat-card
+        [icon]="icons.online"
+        [label]="'dashboard.stats.onlineHours' | translate"
+        [value]="s.totalOnlineHours | hours"
+      />
+      <app-stat-card
+        [icon]="icons.rating"
+        [label]="'dashboard.stats.avgRating' | translate"
+        [value]="s.averageRating | rating"
+        valueClass="font-mono text-gold"
+      />
+    } @else if (!summaryFailed()) {
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <app-skeleton class="h-[94px] rounded-xl" />
+      }
+    }
+  </section>
+
+  <!-- Stats: mobile (3 x 2 mini cards) -->
+  <section class="grid grid-cols-3 gap-2 md:hidden">
+    @if (summary(); as s) {
+      <app-stat-card compact [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
+      <app-stat-card compact [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" />
+      <app-stat-card compact [label]="'dashboard.stats.hours' | translate" [value]="totalHours() | hours" />
+      <app-stat-card
+        compact
+        [label]="'dashboard.stats.avg' | translate"
+        [value]="s.averageRating | rating"
+        valueClass="font-mono text-gold"
+      />
+      <app-stat-card compact [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
+      <app-stat-card
+        compact
+        [label]="'🏆 ' + ('dashboard.stats.platinums' | translate)"
+        [value]="s.totalPlatinums"
+      />
+    } @else if (!summaryFailed()) {
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <app-skeleton class="h-[66px] rounded-xl" />
+      }
+    }
+  </section>
+
+  <!-- Playing now + hours per year -->
+  <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <section class="md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+      <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
+      <div class="flex flex-col gap-2.5">
+        @for (run of playing(); track run.experienceId) {
+          <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl">
+            <app-run-row
+              class="hover:border-border-strong max-md:bg-surface!"
+              [title]="run.gameName"
+              [meta]="run.runLabel + ' · ' + run.platform"
+              [hours]="run.hours"
+            />
+          </a>
+        } @empty {
+          <div class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center">
+            <p class="text-sm font-medium text-text-2">{{ 'dashboard.nothingPlaying' | translate }}</p>
+            <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
+              {{ 'dashboard.startRun' | translate }}
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="flex flex-col md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+      <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
+        @if (yearBars()?.length && summary()?.averageRating != null) {
+          <span class="hidden text-xs text-muted md:inline">{{ 'dashboard.avgRatingHint' | translate }}</span>
+        }
+      </app-section-header>
+      @if (yearBars(); as bars) {
+        @if (bars.length) {
+          <div class="hidden md:block">
+            <app-mini-bar-chart [bars]="bars" [height]="190" />
+          </div>
+          <div class="md:hidden">
+            <app-mini-bar-chart [bars]="bars" [height]="96" dense />
+          </div>
+        } @else {
+          <p class="py-8 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
+        }
+      } @else {
+        <app-skeleton class="h-24 rounded-lg md:h-[190px]" />
+      }
+    </section>
+  </div>
+
+  <!-- Rankings -->
+  <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3">
+    <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+      <app-section-header class="mb-3.5" [label]="'dashboard.topRated' | translate" />
+      @if (topRated(); as items) {
+        @for (item of items; track item.gameId + item.runLabel; let i = $index) {
+          <a
+            [routerLink]="['/games', item.gameId]"
+            class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
+          >
+            <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
+            <span class="min-w-0 flex-1 truncate text-text-2">
+              {{ item.gameName }} <span class="text-faint">· {{ item.runLabel }}</span>
+            </span>
+            <span class="font-mono font-medium text-gold">{{ item.rating | rating }}</span>
+          </a>
+        } @empty {
+          <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+        }
+      } @else {
+        <ng-container *ngTemplateOutlet="listSkeleton" />
+      }
+    </section>
+
+    <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+      <app-section-header class="mb-3.5" [label]="'dashboard.mostPlayed' | translate">
+        <app-segmented size="sm" tone="neutral" [options]="playModeOptions" [(value)]="playMode" />
+      </app-section-header>
+      @if (mostPlayed(); as items) {
+        @for (item of items; track item.gameId) {
+          <a [routerLink]="['/games', item.gameId]" class="block border-t border-divider py-[9px] text-sm hover:bg-hover">
+            <span class="flex justify-between gap-3">
+              <span class="min-w-0 truncate text-text-2">{{ item.gameName }}</span>
+              <span class="shrink-0 font-mono">{{ item.totalHours | hours }}</span>
+            </span>
+            <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
+              <span class="block h-[3px] rounded-sm bg-brand-light" [style.width.%]="barWidth(item.totalHours)"></span>
+            </span>
+          </a>
+        } @empty {
+          <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+        }
+      } @else {
+        <ng-container *ngTemplateOutlet="listSkeleton" />
+      }
+    </section>
+
+    <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+      <app-section-header class="mb-3.5" [label]="'dashboard.bySaga' | translate" />
+      @if (topSagas(); as items) {
+        @for (item of items; track item.sagaId) {
+          <a
+            [routerLink]="['/sagas', item.sagaId]"
+            class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
+          >
+            <span class="min-w-0 flex-1 truncate text-text-2">{{ item.sagaName }}</span>
+            <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translate: { count: item.gameCount } }}</span>
+            <span class="w-16 shrink-0 text-right font-mono">{{ item.totalHours | hours }}</span>
+          </a>
+        } @empty {
+          <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+        }
+      } @else {
+        <ng-container *ngTemplateOutlet="listSkeleton" />
+      }
+    </section>
+  </div>
+</main>
+
+<ng-template #listSkeleton>
+  <div class="flex flex-col gap-2.5">
+    @for (i of [1, 2, 3, 4, 5]; track i) {
+      <app-skeleton class="h-6 rounded-md" />
+    }
+  </div>
+</ng-template>

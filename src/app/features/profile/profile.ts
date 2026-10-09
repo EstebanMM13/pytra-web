@@ -1,18 +1,32 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { AuthService } from '../../core/services/auth.service';
+import { ThemePreference, ThemeService } from '../../core/services/theme.service';
 import { UserService } from '../../core/services/user.service';
 import { usernameValidators } from '../../core/validators/username';
 import { Navbar } from '../../shared/navbar/navbar';
+import { SectionHeader } from '../../shared/ui/section-header';
+import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 
 @Component({
   selector: 'app-profile',
-  imports: [Navbar, ReactiveFormsModule, TranslatePipe],
+  imports: [Navbar, ReactiveFormsModule, TranslatePipe, SectionHeader, Segmented],
   templateUrl: './profile.html',
 })
 export class Profile {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly userService = inject(UserService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  protected readonly theme = inject(ThemeService);
+
+  protected readonly themeOptions: SegmentedOption<ThemePreference>[] = [
+    { value: 'dark', label: 'theme.dark' },
+    { value: 'light', label: 'theme.light' },
+    { value: 'system', label: 'theme.system' },
+  ];
 
   protected readonly user = this.userService.currentUser;
 
@@ -56,5 +70,10 @@ export class Profile {
         this.errorKey.set(err.status === 409 ? 'profile.usernameTaken' : 'auth.errors.generic');
       },
     });
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

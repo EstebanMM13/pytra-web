@@ -1,32 +1,207 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles: fonts, semantic design tokens (dark default + light) and base rules. */
+
+/* Self-hosted fonts (CSP font-src 'self', works offline on Android). Latin subset covers Spanish. */
+@import '@fontsource/geist/latin-400.css';
+@import '@fontsource/geist/latin-500.css';
+@import '@fontsource/geist/latin-600.css';
+@import '@fontsource/geist/latin-700.css';
+@import '@fontsource/geist-mono/latin-400.css';
+@import '@fontsource/geist-mono/latin-500.css';
 
 @import 'tailwindcss';
 
-@theme {
-  --color-brand: #724dce;
-  --color-brand-dark: #5d3dab;
-  --color-brand-light: #9d7cff;
-  --color-ink: #1c1a17;
+/* `light:` variant, e.g. `hidden light:block` for the light-mode logo. */
+@custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
 
-  /* Fondo de tarjetas/paneles — separado de "white" porque ese token también
-     lo usa el texto de los botones de marca (fondo morado, texto blanco). */
-  --color-surface: #242220;
+/*
+ * Raw theme values. Dark is the default; `[data-theme="light"]` on <html> switches
+ * every token at once (set by ThemeService / main.ts before bootstrap).
+ */
+:root {
+  --pt-bg: #1c1a17;
+  --pt-nav: #211f1c;
+  --pt-surface: #242220;
+  --pt-border: #3a3732;
+  --pt-border-strong: #4a4740;
+  --pt-divider: #2f2c28;
+  --pt-hover: #2a2824;
 
-  /* La paleta slate de Tailwind se redefine entera a tonos oscuros cálidos
-     (a juego con el "ink" de marca) para que toda la app sea dark sin tener
-     que tocar cada plantilla: border/divide/text de slate-* ya quedan bien. */
-  --color-slate-50: #2a2824;
-  --color-slate-200: #3a3732;
-  --color-slate-300: #4a4740;
-  --color-slate-400: #76726a;
-  --color-slate-500: #938e84;
-  --color-slate-600: #b0aba1;
-  --color-slate-700: #cfc9be;
-  --color-slate-800: #e8e3d9;
-  --color-slate-900: #f7f3ea;
+  --pt-text: #f7f3ea;
+  --pt-text-2: #e8e3d9;
+  --pt-text-3: #b0aba1;
+  --pt-muted: #938e84;
+  --pt-faint: #76726a;
+
+  --pt-brand: #724dce;
+  --pt-brand-dark: #5d3dab;
+  --pt-brand-light: #9d7cff;
+  --pt-brand-lighter: #b9a2ff;
+  --pt-brand-tint: #2f2b3d;
+
+  --pt-gold: #e2ae5f;
+  --pt-gold-line: #e2ae5f66;
+  --pt-gold-tint: #3a2f1c;
+  --pt-gold-tint-fg: #e2ae5f;
+  --pt-gold-card: #2a2418;
+  --pt-gold-card-border: #5a4a2c;
+
+  --pt-success: #8fd6a5;
+  --pt-success-bg: #1f3326;
+  --pt-danger: #f08b8b;
+  --pt-danger-bg: #3a1f1f;
+  --pt-danger-solid: #c24545;
+  --pt-neutral: #b0aba1;
+  --pt-neutral-bg: #2c2a27;
+
+  --pt-overlay: #0d0c0bcc;
+
+  color-scheme: dark;
 }
 
-body {
-  background-color: var(--color-ink);
-  color-scheme: dark;
+:root[data-theme='light'] {
+  --pt-bg: #f7f4ee;
+  --pt-nav: #ffffff;
+  --pt-surface: #ffffff;
+  --pt-border: #e4dfd5;
+  --pt-border-strong: #d2ccc0;
+  --pt-divider: #efebe3;
+  --pt-hover: #fbf9f5;
+
+  --pt-text: #1c1a17;
+  --pt-text-2: #2e2b27;
+  --pt-text-3: #5f5a52;
+  --pt-muted: #6b665e;
+  --pt-faint: #8a857c;
+
+  --pt-brand: #724dce;
+  --pt-brand-dark: #5d3dab;
+  /* Icons, links and focus use the solid brand in light mode for contrast. */
+  --pt-brand-light: #724dce;
+  --pt-brand-lighter: #5b3bb0;
+  --pt-brand-tint: #eee8fb;
+
+  --pt-gold: #94661f;
+  --pt-gold-line: #94661f55;
+  --pt-gold-tint: #f6ebd7;
+  --pt-gold-tint-fg: #7e5617;
+  --pt-gold-card: #fbf3e4;
+  --pt-gold-card-border: #e6d2a8;
+
+  --pt-success: #2d7444;
+  --pt-success-bg: #e3f2e7;
+  --pt-danger: #b23b3b;
+  --pt-danger-bg: #f8e5e5;
+  --pt-danger-solid: #b23b3b;
+  --pt-neutral: #5f5a52;
+  --pt-neutral-bg: #efebe3;
+
+  --pt-overlay: #1c1a1799;
+
+  color-scheme: light;
+}
+
+@theme {
+  /* Modal entrance: fade + 8px rise, 200ms. */
+  --animate-modal-in: modal-in 200ms ease-out;
+
+  @keyframes modal-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+}
+
+/* Tailwind utilities (bg-surface, text-muted, border-border...) resolve to the live variables. */
+@theme inline {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-bg: var(--pt-bg);
+  --color-nav: var(--pt-nav);
+  --color-surface: var(--pt-surface);
+  --color-border: var(--pt-border);
+  --color-border-strong: var(--pt-border-strong);
+  --color-divider: var(--pt-divider);
+  --color-hover: var(--pt-hover);
+
+  --color-text: var(--pt-text);
+  --color-text-2: var(--pt-text-2);
+  --color-text-3: var(--pt-text-3);
+  --color-muted: var(--pt-muted);
+  --color-faint: var(--pt-faint);
+
+  --color-brand: var(--pt-brand);
+  --color-brand-dark: var(--pt-brand-dark);
+  --color-brand-light: var(--pt-brand-light);
+  --color-brand-lighter: var(--pt-brand-lighter);
+  --color-brand-tint: var(--pt-brand-tint);
+
+  --color-gold: var(--pt-gold);
+  --color-gold-line: var(--pt-gold-line);
+  --color-gold-tint: var(--pt-gold-tint);
+  --color-gold-tint-fg: var(--pt-gold-tint-fg);
+  --color-gold-card: var(--pt-gold-card);
+  --color-gold-card-border: var(--pt-gold-card-border);
+
+  --color-success: var(--pt-success);
+  --color-success-bg: var(--pt-success-bg);
+  --color-danger: var(--pt-danger);
+  --color-danger-bg: var(--pt-danger-bg);
+  --color-danger-solid: var(--pt-danger-solid);
+  --color-neutral: var(--pt-neutral);
+  --color-neutral-bg: var(--pt-neutral-bg);
+
+  --color-overlay: var(--pt-overlay);
+}
+
+@layer base {
+  html,
+  body {
+    background-color: var(--pt-bg);
+    color: var(--pt-text);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color-scheme: inherit;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    transition-property: color, background-color, border-color;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  /* Input focus per design: brand-light border + soft brand halo. */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--pt-brand-light);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pt-brand) 20%, transparent);
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--pt-brand-light);
+    outline-offset: 2px;
+  }
+
+  ::placeholder {
+    color: var(--pt-faint);
+  }
+}
+
+/* Reserve room for the fixed mobile tab bar on screens that render the app chrome. */
+@media (width < 48rem) {
+  body:has(app-navbar) {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
 }

@@ -1,12 +1,12 @@
-<div class="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+<div class="flex min-h-screen items-center justify-center bg-hover px-4">
   <div class="w-full max-w-sm rounded-xl bg-surface p-8 text-center shadow-sm">
     @if (failed()) {
-      <p class="mb-4 text-red-600">{{ errorKey() | translate }}</p>
-      <a routerLink="/login" class="font-medium text-slate-900 hover:underline">
+      <p class="mb-4 text-danger">{{ errorKey() | translate }}</p>
+      <a routerLink="/login" class="font-medium text-text hover:underline">
         {{ 'auth.register.login' | translate }}
       </a>
     } @else {
-      <p class="text-slate-600">{{ 'auth.oauthCallback.processing' | translate }}</p>
+      <p class="text-text-3">{{ 'auth.oauthCallback.processing' | translate }}</p>
     }
   </div>
 </div>

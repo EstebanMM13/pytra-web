@@ -67,6 +67,16 @@ export const routes: Routes = [
       import('./features/games/experience-detail/experience-detail').then((m) => m.ExperienceDetail),
   },
   {
+    path: 'years',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/years/years').then((m) => m.Years),
+  },
+  {
+    path: 'years/:year',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/years/years').then((m) => m.Years),
+  },
+  {
     path: 'steam',
     canActivate: [authGuard],
     loadComponent: () => import('./features/steam/steam').then((m) => m.Steam),

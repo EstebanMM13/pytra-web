@@ -2,7 +2,7 @@
 
 <div class="mx-auto max-w-3xl px-6 py-10">
   <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-2xl font-semibold text-slate-900">Games</h1>
+    <h1 class="text-2xl font-semibold text-text">Games</h1>
     @if (!showForm()) {
       <button
         type="button"
@@ -15,57 +15,57 @@
   </div>
 
   @if (error()) {
-    <p class="mb-4 text-sm text-red-600">{{ error() }}</p>
+    <p class="mb-4 text-sm text-danger">{{ error() }}</p>
   }
 
   @if (showForm()) {
     <form
       [formGroup]="form"
       (ngSubmit)="submit()"
-      class="mb-8 space-y-4 rounded-xl border border-slate-200 bg-surface p-6"
+      class="mb-8 space-y-4 rounded-xl border border-border bg-surface p-6"
     >
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Nombre</label>
+        <label class="mb-1 block text-sm font-medium text-text-2">Nombre</label>
         <input
           type="text"
           formControlName="name"
-          class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+          class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
         />
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Desarrollador</label>
+          <label class="mb-1 block text-sm font-medium text-text-2">Desarrollador</label>
           <input
             type="text"
             formControlName="developer"
-            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+            class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
           />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Distribuidora</label>
+          <label class="mb-1 block text-sm font-medium text-text-2">Distribuidora</label>
           <input
             type="text"
             formControlName="publisher"
-            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+            class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
           />
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Fecha de lanzamiento</label>
+          <label class="mb-1 block text-sm font-medium text-text-2">Fecha de lanzamiento</label>
           <input
             type="date"
             formControlName="releaseDate"
-            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+            class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
           />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Categoría</label>
+          <label class="mb-1 block text-sm font-medium text-text-2">Categoría</label>
           <select
             formControlName="category"
-            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+            class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
           >
             @for (c of categories; track c) {
               <option [value]="c">{{ c }}</option>
@@ -75,10 +75,10 @@
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Saga (opcional)</label>
+        <label class="mb-1 block text-sm font-medium text-text-2">Saga (opcional)</label>
         <select
           formControlName="sagaId"
-          class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+          class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
         >
           <option [ngValue]="null">Sin saga</option>
           @for (saga of sagas(); track saga.id) {
@@ -88,11 +88,11 @@
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">URL de portada (opcional)</label>
+        <label class="mb-1 block text-sm font-medium text-text-2">URL de portada (opcional)</label>
         <input
           type="text"
           formControlName="coverImageUrl"
-          class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+          class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
         />
         @if (form.controls.coverImageUrl.value) {
           <img
@@ -104,7 +104,7 @@
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Géneros</label>
+        <label class="mb-1 block text-sm font-medium text-text-2">Géneros</label>
         <div class="mb-2 flex flex-wrap gap-2">
           @for (genre of genres(); track genre.id) {
             <button
@@ -114,7 +114,7 @@
               [class]="
                 selectedGenreIds().has(genre.id)
                   ? 'border-brand bg-brand text-white'
-                  : 'border-slate-300 text-slate-600 hover:border-slate-400'
+                  : 'border-border text-text-3 hover:border-border-strong'
               "
             >
               {{ genre.name }}
@@ -126,12 +126,12 @@
             type="text"
             [formControl]="newGenreName"
             placeholder="Nuevo género"
-            class="flex-1 rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-1.5 text-sm focus:border-brand-light focus:outline-none"
+            class="flex-1 rounded-lg border border-border bg-bg text-text-2 px-3 py-1.5 text-sm focus:border-brand-light focus:outline-none"
           />
           <button
             type="button"
             (click)="addGenre()"
-            class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-text-2 hover:bg-hover"
           >
             Añadir
           </button>
@@ -148,7 +148,7 @@
         <button
           type="button"
           (click)="cancelForm()"
-          class="rounded-lg border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50"
+          class="rounded-lg border border-border px-4 py-2 font-medium text-text-2 hover:bg-hover"
         >
           Cancelar
         </button>
@@ -157,18 +157,18 @@
   }
 
   @if (loading()) {
-    <p class="text-slate-500">Cargando...</p>
+    <p class="text-muted">Cargando...</p>
   } @else if (games().length === 0) {
-    <p class="text-slate-500">Todavía no tienes juegos.</p>
+    <p class="text-muted">Todavía no tienes juegos.</p>
   } @else {
-    <ul class="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-surface">
+    <ul class="divide-y divide-divider rounded-xl border border-border bg-surface">
       @for (game of games(); track game.id) {
         <li class="flex items-center justify-between px-4 py-3">
           <div>
-            <a [routerLink]="['/games', game.id]" class="font-medium text-slate-800 hover:underline">
+            <a [routerLink]="['/games', game.id]" class="font-medium text-text-2 hover:underline">
               {{ game.name }}
             </a>
-            <p class="text-sm text-slate-500">
+            <p class="text-sm text-muted">
               {{ game.category ?? 'Sin categoría (pendiente)' }}
               @if (game.sagaName) {
                 · {{ game.sagaName }}
@@ -184,14 +184,14 @@
             <button
               type="button"
               (click)="openEditForm(game)"
-              class="font-medium text-slate-600 hover:underline"
+              class="font-medium text-text-3 hover:underline"
             >
               Editar
             </button>
             <button
               type="button"
               (click)="remove(game)"
-              class="font-medium text-red-600 hover:underline"
+              class="font-medium text-danger hover:underline"
             >
               Borrar
             </button>

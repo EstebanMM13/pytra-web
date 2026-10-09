@@ -1,58 +1,58 @@
-<div class="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+<div class="flex min-h-screen items-center justify-center bg-hover px-4">
   <div class="w-full max-w-sm rounded-xl bg-surface p-8 shadow-sm">
-    <h1 class="mb-6 text-2xl font-semibold text-slate-900">{{ 'auth.register.title' | translate }}</h1>
+    <h1 class="mb-6 text-2xl font-semibold text-text">{{ 'auth.register.title' | translate }}</h1>
 
     @if (registeredEmail(); as email) {
       <div class="space-y-4">
-        <p class="text-sm text-green-700">{{ 'auth.register.checkEmail' | translate: { email } }}</p>
-        <p class="text-sm text-slate-500">{{ 'auth.register.checkSpam' | translate }}</p>
+        <p class="text-sm text-success">{{ 'auth.register.checkEmail' | translate: { email } }}</p>
+        <p class="text-sm text-muted">{{ 'auth.register.checkSpam' | translate }}</p>
         <app-resend-verification [email]="email" [startCooldown]="true" />
       </div>
     } @else {
       <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">
+          <label class="mb-1 block text-sm font-medium text-text-2">
             {{ 'auth.register.username' | translate }}
           </label>
           <input
             type="text"
             formControlName="username"
             autocomplete="username"
-            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+            class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
           />
           <p
             class="mt-1 text-xs"
-            [class.text-red-600]="form.controls.username.touched && form.controls.username.invalid"
-            [class.text-slate-500]="!(form.controls.username.touched && form.controls.username.invalid)"
+            [class.text-danger]="form.controls.username.touched && form.controls.username.invalid"
+            [class.text-muted]="!(form.controls.username.touched && form.controls.username.invalid)"
           >
             {{ 'auth.register.usernameHint' | translate }}
           </p>
         </div>
 
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">
+          <label class="mb-1 block text-sm font-medium text-text-2">
             {{ 'auth.register.email' | translate }}
           </label>
           <input
             type="email"
             formControlName="email"
-            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+            class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
           />
         </div>
 
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">
+          <label class="mb-1 block text-sm font-medium text-text-2">
             {{ 'auth.register.password' | translate }}
           </label>
           <input
             type="password"
             formControlName="password"
-            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+            class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
           />
         </div>
 
         @if (errorKey()) {
-          <p class="text-sm text-red-600">{{ errorKey()! | translate }}</p>
+          <p class="text-sm text-danger">{{ errorKey()! | translate }}</p>
         }
 
         <button
@@ -65,9 +65,9 @@
       </form>
     }
 
-    <p class="mt-6 text-center text-sm text-slate-500">
+    <p class="mt-6 text-center text-sm text-muted">
       {{ 'auth.register.hasAccount' | translate }}
-      <a routerLink="/login" class="font-medium text-slate-900 hover:underline">
+      <a routerLink="/login" class="font-medium text-text hover:underline">
         {{ 'auth.register.login' | translate }}
       </a>
     </p>

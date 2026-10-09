@@ -67,7 +67,29 @@
     }
   },
   "dashboard": {
-    "greeting": "Hola, {{name}}"
+    "greeting": "Hola, {{name}}",
+    "steamPending": "{{count}} juegos de Steam por revisar",
+    "stats": {
+      "games": "Juegos",
+      "sagas": "Sagas",
+      "runs": "Partidas",
+      "singleHours": "Horas single",
+      "onlineHours": "Horas online",
+      "avgRating": "Nota media",
+      "hours": "Horas",
+      "avg": "Media",
+      "platinums": "Platinos"
+    },
+    "playingNow": "Jugando ahora",
+    "nothingPlaying": "Nada en curso",
+    "startRun": "Empieza una partida",
+    "hoursByYear": "Horas por año",
+    "avgRatingHint": "nota media en dorado",
+    "topRated": "Mejor valorados",
+    "mostPlayed": "Más jugados",
+    "bySaga": "Por saga",
+    "single": "Single",
+    "online": "Online"
   },
   "profile": {
     "title": "Perfil",
@@ -79,7 +101,9 @@
     "saved": "Usuario actualizado.",
     "usernameTaken": "Ese usuario ya está en uso.",
     "usernameRequired": "El usuario es obligatorio.",
-    "loading": "Cargando perfil..."
+    "loading": "Cargando perfil...",
+    "preferences": "Preferencias",
+    "theme": "Tema"
   },
   "steam": {
     "title": "Steam",
@@ -151,5 +175,49 @@
       "duplicateName": "Ya tienes un juego con ese nombre.",
       "linkSyncInProgress": "No se pudo cambiar de cuenta de Steam porque hay una sincronización en curso. Espera a que termine e inténtalo de nuevo."
     }
+  },
+  "nav": {
+    "home": "Inicio",
+    "games": "Juegos",
+    "sagas": "Sagas",
+    "years": "Años",
+    "steam": "Steam",
+    "profile": "Perfil",
+    "search": "Buscar juego",
+    "newRun": "Partida",
+    "newRunAria": "Nueva partida",
+    "account": "Cuenta",
+    "logout": "Cerrar sesión",
+    "menu": "Menú de cuenta",
+    "mainNav": "Navegación principal"
+  },
+  "search": {
+    "title": "Buscar juego",
+    "placeholder": "Escribe el nombre de un juego…",
+    "empty": "Ningún juego coincide.",
+    "loading": "Cargando juegos…",
+    "hint": "Enter para abrir · Esc para cerrar",
+    "close": "Cerrar"
+  },
+  "status": {
+    "EN_CURSO": "En curso",
+    "COMPLETADO": "Completado",
+    "ABANDONADO": "Abandonado",
+    "PENDIENTE": "Pendiente"
+  },
+  "common": {
+    "best": "Mejor",
+    "noData": "Sin datos todavía.",
+    "games": "{{count}} juegos",
+    "since": "desde {{date}}"
+  },
+  "years": {
+    "title": "Resumen anual",
+    "comingSoon": "El resumen por años llegará pronto."
+  },
+  "theme": {
+    "dark": "Oscuro",
+    "light": "Claro",
+    "system": "Sistema"
   }
 }

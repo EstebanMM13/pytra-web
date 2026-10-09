@@ -1,14 +1,14 @@
 <app-navbar />
 
 <div class="mx-auto max-w-2xl px-6 py-10">
-  <h1 class="mb-6 text-2xl font-semibold text-slate-900">Sagas</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-text">Sagas</h1>
 
   <form [formGroup]="createForm" (ngSubmit)="create()" class="mb-8 flex gap-2">
     <input
       type="text"
       formControlName="name"
       placeholder="Nombre de la saga"
-      class="flex-1 rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+      class="flex-1 rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
     />
     <button
       type="submit"
@@ -19,15 +19,15 @@
   </form>
 
   @if (error()) {
-    <p class="mb-4 text-sm text-red-600">{{ error() }}</p>
+    <p class="mb-4 text-sm text-danger">{{ error() }}</p>
   }
 
   @if (loading()) {
-    <p class="text-slate-500">Cargando...</p>
+    <p class="text-muted">Cargando...</p>
   } @else if (sagas().length === 0) {
-    <p class="text-slate-500">Todavía no tienes sagas.</p>
+    <p class="text-muted">Todavía no tienes sagas.</p>
   } @else {
-    <ul class="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-surface">
+    <ul class="divide-y divide-divider rounded-xl border border-border bg-surface">
       @for (saga of sagas(); track saga.id) {
         <li class="flex items-center justify-between px-4 py-3">
           @if (editingId() === saga.id) {
@@ -35,22 +35,22 @@
               <input
                 type="text"
                 formControlName="name"
-                class="flex-1 rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-1.5 focus:border-brand-light focus:outline-none"
+                class="flex-1 rounded-lg border border-border bg-bg text-text-2 px-3 py-1.5 focus:border-brand-light focus:outline-none"
               />
-              <button type="submit" class="text-sm font-medium text-slate-900 hover:underline">
+              <button type="submit" class="text-sm font-medium text-text hover:underline">
                 Guardar
               </button>
               <button
                 type="button"
                 (click)="cancelEdit()"
-                class="text-sm text-slate-400 hover:underline"
+                class="text-sm text-faint hover:underline"
               >
                 Cancelar
               </button>
             </form>
           } @else {
             <div>
-              <a [routerLink]="['/sagas', saga.id]" class="text-slate-800 hover:underline">
+              <a [routerLink]="['/sagas', saga.id]" class="text-text-2 hover:underline">
                 {{ saga.name }}
               </a>
             </div>
@@ -58,14 +58,14 @@
               <button
                 type="button"
                 (click)="startEdit(saga)"
-                class="font-medium text-slate-600 hover:underline"
+                class="font-medium text-text-3 hover:underline"
               >
                 Renombrar
               </button>
               <button
                 type="button"
                 (click)="remove(saga)"
-                class="font-medium text-red-600 hover:underline"
+                class="font-medium text-danger hover:underline"
               >
                 Borrar
               </button>

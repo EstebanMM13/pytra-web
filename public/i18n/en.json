@@ -67,7 +67,29 @@
     }
   },
   "dashboard": {
-    "greeting": "Hi, {{name}}"
+    "greeting": "Hi, {{name}}",
+    "steamPending": "{{count}} Steam games to review",
+    "stats": {
+      "games": "Games",
+      "sagas": "Sagas",
+      "runs": "Runs",
+      "singleHours": "Single hours",
+      "onlineHours": "Online hours",
+      "avgRating": "Average rating",
+      "hours": "Hours",
+      "avg": "Average",
+      "platinums": "Platinums"
+    },
+    "playingNow": "Playing now",
+    "nothingPlaying": "Nothing in progress",
+    "startRun": "Start a run",
+    "hoursByYear": "Hours per year",
+    "avgRatingHint": "average rating in gold",
+    "topRated": "Top rated",
+    "mostPlayed": "Most played",
+    "bySaga": "By saga",
+    "single": "Single",
+    "online": "Online"
   },
   "profile": {
     "title": "Profile",
@@ -79,7 +101,9 @@
     "saved": "Username updated.",
     "usernameTaken": "That username is already taken.",
     "usernameRequired": "Username is required.",
-    "loading": "Loading profile..."
+    "loading": "Loading profile...",
+    "preferences": "Preferences",
+    "theme": "Theme"
   },
   "steam": {
     "title": "Steam",
@@ -151,5 +175,49 @@
       "duplicateName": "You already have a game with that name.",
       "linkSyncInProgress": "Could not switch Steam accounts because a sync is running. Wait for it to finish and try again."
     }
+  },
+  "nav": {
+    "home": "Home",
+    "games": "Games",
+    "sagas": "Sagas",
+    "years": "Years",
+    "steam": "Steam",
+    "profile": "Profile",
+    "search": "Search game",
+    "newRun": "Run",
+    "newRunAria": "New run",
+    "account": "Account",
+    "logout": "Log out",
+    "menu": "Account menu",
+    "mainNav": "Main navigation"
+  },
+  "search": {
+    "title": "Search game",
+    "placeholder": "Type a game name…",
+    "empty": "No game matches.",
+    "loading": "Loading games…",
+    "hint": "Enter to open · Esc to close",
+    "close": "Close"
+  },
+  "status": {
+    "EN_CURSO": "In progress",
+    "COMPLETADO": "Completed",
+    "ABANDONADO": "Dropped",
+    "PENDIENTE": "Pending"
+  },
+  "common": {
+    "best": "Best",
+    "noData": "No data yet.",
+    "games": "{{count}} games",
+    "since": "since {{date}}"
+  },
+  "years": {
+    "title": "Yearly summary",
+    "comingSoon": "The yearly summary is coming soon."
+  },
+  "theme": {
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
   }
 }

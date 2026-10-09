@@ -1,36 +1,36 @@
 <app-navbar />
 
 <div class="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-10">
-  <h1 class="mb-6 text-2xl font-semibold text-slate-900">{{ 'steam.title' | translate }}</h1>
+  <h1 class="mb-6 text-2xl font-semibold text-text">{{ 'steam.title' | translate }}</h1>
 
   @if (errorKey(); as key) {
-    <p class="mb-4 rounded-lg border border-red-300 px-4 py-3 text-sm text-red-600" role="alert">
+    <p class="mb-4 rounded-lg border border-danger/50 px-4 py-3 text-sm text-danger" role="alert">
       {{ key | translate }}
     </p>
   }
   @if (noticeKey(); as key) {
-    <p class="mb-4 rounded-lg border border-emerald-300 px-4 py-3 text-sm text-emerald-600" role="status">
+    <p class="mb-4 rounded-lg border border-success/50 px-4 py-3 text-sm text-success" role="status">
       {{ key | translate }}
     </p>
   }
 
   <!-- Account status -->
-  <section class="mb-6 rounded-xl border border-slate-200 bg-surface p-4 sm:p-6">
+  <section class="mb-6 rounded-xl border border-border bg-surface p-4 sm:p-6">
     @if (statusLoading()) {
-      <p class="text-slate-500">{{ 'steam.loading' | translate }}</p>
+      <p class="text-muted">{{ 'steam.loading' | translate }}</p>
     } @else if (status(); as s) {
       @if (!s.configured) {
-        <p class="mb-4 rounded-lg border border-amber-300 px-3 py-2 text-sm text-amber-600">
+        <p class="mb-4 rounded-lg border border-gold/50 px-3 py-2 text-sm text-gold">
           {{ 'steam.notConfigured' | translate }}
         </p>
       }
 
       @if (s.linked) {
-        <p class="text-slate-800">
+        <p class="text-text-2">
           {{ 'steam.linkedAs' | translate }}
           <span class="font-semibold break-all">{{ s.personaName || s.steamId }}</span>
         </p>
-        <p class="mt-1 text-sm text-slate-500">
+        <p class="mt-1 text-sm text-muted">
           {{ 'steam.lastSync' | translate }}:
           @if (s.lastSyncAt) {
             {{ s.lastSyncAt | date: 'dd/MM/yyyy HH:mm' }}
@@ -40,21 +40,21 @@
         </p>
 
         @if (confirmingUnlink()) {
-          <div class="mt-4 rounded-lg border border-red-300 p-4">
-            <p class="mb-3 text-sm text-slate-700">{{ 'steam.unlinkConfirm' | translate }}</p>
+          <div class="mt-4 rounded-lg border border-danger/50 p-4">
+            <p class="mb-3 text-sm text-text-2">{{ 'steam.unlinkConfirm' | translate }}</p>
             <div class="flex flex-wrap gap-3">
               <button
                 type="button"
                 (click)="unlink()"
                 [disabled]="unlinking()"
-                class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                class="rounded-lg bg-danger-solid px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
               >
                 {{ 'steam.unlinkYes' | translate }}
               </button>
               <button
                 type="button"
                 (click)="cancelUnlink()"
-                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-2 hover:bg-hover"
               >
                 {{ 'steam.cancel' | translate }}
               </button>
@@ -73,14 +73,14 @@
             <button
               type="button"
               (click)="askUnlink()"
-              class="rounded-lg border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:bg-slate-50"
+              class="rounded-lg border border-border px-4 py-2 font-medium text-text-2 hover:bg-hover"
             >
               {{ 'steam.unlink' | translate }}
             </button>
           </div>
         }
       } @else {
-        <p class="mb-4 text-slate-600">{{ 'steam.notLinked' | translate }}</p>
+        <p class="mb-4 text-text-3">{{ 'steam.notLinked' | translate }}</p>
         <button
           type="button"
           (click)="connect()"
@@ -96,8 +96,8 @@
   <!-- Last sync result -->
   @if (syncResult(); as result) {
     @if (result.profilePrivate) {
-      <section class="mb-6 rounded-xl border border-amber-300 p-4 text-sm text-slate-700 sm:p-6">
-        <p class="mb-2 font-semibold text-amber-600">{{ 'steam.private.title' | translate }}</p>
+      <section class="mb-6 rounded-xl border border-gold/50 p-4 text-sm text-text-2 sm:p-6">
+        <p class="mb-2 font-semibold text-gold">{{ 'steam.private.title' | translate }}</p>
         <p class="mb-2">{{ 'steam.private.intro' | translate }}</p>
         <ol class="list-decimal space-y-1 pl-5">
           <li>{{ 'steam.private.step1' | translate }}</li>
@@ -107,8 +107,8 @@
         <p class="mt-2">{{ 'steam.private.retry' | translate }}</p>
       </section>
     } @else {
-      <section class="mb-6 rounded-xl border border-slate-200 bg-surface p-4 text-sm text-slate-600">
-        <p class="mb-2 font-medium text-slate-800">{{ 'steam.result.title' | translate }}</p>
+      <section class="mb-6 rounded-xl border border-border bg-surface p-4 text-sm text-text-3">
+        <p class="mb-2 font-medium text-text-2">{{ 'steam.result.title' | translate }}</p>
         <ul class="grid grid-cols-1 gap-1 sm:grid-cols-2">
           <li>{{ 'steam.result.scanned' | translate: { count: result.gamesScanned } }}</li>
           <li>{{ 'steam.result.newPending' | translate: { count: result.newGamesPending } }}</li>
@@ -118,10 +118,10 @@
             <li>{{ 'steam.result.ignored' | translate: { count: result.ignored } }}</li>
           }
           @if (result.skipped > 0) {
-            <li class="text-amber-600">{{ 'steam.result.skipped' | translate: { count: result.skipped } }}</li>
+            <li class="text-gold">{{ 'steam.result.skipped' | translate: { count: result.skipped } }}</li>
           }
           @if (result.errored > 0) {
-            <li class="text-red-600">{{ 'steam.result.errored' | translate: { count: result.errored } }}</li>
+            <li class="text-danger">{{ 'steam.result.errored' | translate: { count: result.errored } }}</li>
           }
         </ul>
       </section>
@@ -129,33 +129,33 @@
   }
 
   <!-- Pending review -->
-  <h2 class="mb-4 text-lg font-semibold text-slate-900">{{ 'steam.pendingTitle' | translate }}</h2>
+  <h2 class="mb-4 text-lg font-semibold text-text">{{ 'steam.pendingTitle' | translate }}</h2>
 
   @if (loading()) {
-    <p class="text-slate-500">{{ 'steam.loading' | translate }}</p>
+    <p class="text-muted">{{ 'steam.loading' | translate }}</p>
   } @else if (pending().length === 0) {
-    <p class="text-slate-500">{{ 'steam.noPending' | translate }}</p>
+    <p class="text-muted">{{ 'steam.noPending' | translate }}</p>
   } @else {
     <ul class="space-y-3">
       @for (game of pending(); track game.id) {
-        <li class="rounded-xl border border-slate-200 bg-surface p-4">
+        <li class="rounded-xl border border-border bg-surface p-4">
           @if (confirmingId() === game.id) {
             <form [formGroup]="confirmForm" (ngSubmit)="confirm()" class="space-y-4">
               <div>
-                <label class="mb-1 block text-sm font-medium text-slate-700">{{ 'steam.form.name' | translate }}</label>
+                <label class="mb-1 block text-sm font-medium text-text-2">{{ 'steam.form.name' | translate }}</label>
                 <input
                   type="text"
                   formControlName="name"
-                  class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+                  class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
                 />
               </div>
 
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label class="mb-1 block text-sm font-medium text-slate-700">{{ 'steam.form.category' | translate }}</label>
+                  <label class="mb-1 block text-sm font-medium text-text-2">{{ 'steam.form.category' | translate }}</label>
                   <select
                     formControlName="category"
-                    class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+                    class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
                   >
                     @for (c of categories; track c) {
                       <option [value]="c">{{ c }}</option>
@@ -163,10 +163,10 @@
                   </select>
                 </div>
                 <div>
-                  <label class="mb-1 block text-sm font-medium text-slate-700">{{ 'steam.form.saga' | translate }}</label>
+                  <label class="mb-1 block text-sm font-medium text-text-2">{{ 'steam.form.saga' | translate }}</label>
                   <select
                     formControlName="sagaId"
-                    class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+                    class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
                   >
                     <option [ngValue]="null">{{ 'steam.form.noSaga' | translate }}</option>
                     @for (saga of sagas(); track saga.id) {
@@ -177,7 +177,7 @@
               </div>
 
               <div>
-                <label class="mb-1 block text-sm font-medium text-slate-700">{{ 'steam.form.genres' | translate }}</label>
+                <label class="mb-1 block text-sm font-medium text-text-2">{{ 'steam.form.genres' | translate }}</label>
                 <div class="flex flex-wrap gap-2">
                   @for (genre of genres(); track genre.id) {
                     <button
@@ -187,7 +187,7 @@
                       [class]="
                         selectedGenreIds().has(genre.id)
                           ? 'border-brand bg-brand text-white'
-                          : 'border-slate-300 text-slate-600 hover:border-slate-400'
+                          : 'border-border text-text-3 hover:border-border-strong'
                       "
                     >
                       {{ genre.name }}
@@ -206,7 +206,7 @@
                 <button
                   type="button"
                   (click)="cancelConfirm()"
-                  class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-2 hover:bg-hover"
                 >
                   {{ 'steam.cancel' | translate }}
                 </button>
@@ -214,12 +214,12 @@
             </form>
           } @else {
             <div class="flex flex-wrap items-center justify-between gap-3">
-              <span class="min-w-0 break-words text-slate-800">{{ game.name }}</span>
+              <span class="min-w-0 break-words text-text-2">{{ game.name }}</span>
               <div class="flex shrink-0 gap-2">
                 <button
                   type="button"
                   (click)="openConfirmForm(game)"
-                  class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-text-2 hover:bg-hover"
                 >
                   {{ 'steam.review' | translate }}
                 </button>
@@ -227,7 +227,7 @@
                   type="button"
                   (click)="ignore(game)"
                   [disabled]="busyGameId() === game.id"
-                  class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                  class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted hover:bg-hover disabled:opacity-50"
                 >
                   {{ 'steam.ignore' | translate }}
                 </button>
@@ -241,18 +241,18 @@
 
   <!-- Ignored apps -->
   @if (ignoredApps().length > 0) {
-    <h2 class="mt-8 mb-4 text-lg font-semibold text-slate-900">{{ 'steam.ignoredTitle' | translate }}</h2>
-    <p class="mb-3 text-sm text-slate-500">{{ 'steam.ignoredHint' | translate }}</p>
+    <h2 class="mt-8 mb-4 text-lg font-semibold text-text">{{ 'steam.ignoredTitle' | translate }}</h2>
+    <p class="mb-3 text-sm text-muted">{{ 'steam.ignoredHint' | translate }}</p>
     <ul class="space-y-2">
       @for (app of ignoredApps(); track app.appId) {
         <li
-          class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-surface px-4 py-3"
+          class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3"
         >
-          <span class="min-w-0 break-words text-slate-600">{{ app.name }}</span>
+          <span class="min-w-0 break-words text-text-3">{{ app.name }}</span>
           <button
             type="button"
             (click)="unignore(app)"
-            class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-text-2 hover:bg-hover"
           >
             {{ 'steam.unignore' | translate }}
           </button>
