@@ -75,6 +75,9 @@ export class NativeOAuthService {
     const error = params.get('error');
     if (code) queryParams['code'] = code;
     if (error) queryParams['error'] = error;
+    // Forwarded as-is: /oauth-callback only honours whitelisted values.
+    const next = params.get('next');
+    if (next) queryParams['next'] = next;
 
     Browser.close().catch(() => undefined);
     this.zone.run(() => this.router.navigate(['/oauth-callback'], { queryParams, replaceUrl: true }));
