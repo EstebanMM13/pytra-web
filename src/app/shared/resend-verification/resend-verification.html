@@ -1,0 +1,39 @@
+<div class="space-y-3 rounded-lg border border-slate-200 p-4">
+  <p class="text-sm text-slate-600">{{ 'auth.resendVerification.prompt' | translate }}</p>
+
+  <div>
+    <label for="resend-email" class="mb-1 block text-sm font-medium text-slate-700">
+      {{ 'auth.register.email' | translate }}
+    </label>
+    <input
+      id="resend-email"
+      type="email"
+      autocomplete="email"
+      [formControl]="emailControl"
+      class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+    />
+    @if (emailControl.touched && emailControl.invalid) {
+      <p class="mt-1 text-sm text-red-600">{{ 'auth.resendVerification.invalidEmail' | translate }}</p>
+    }
+  </div>
+
+  @if (feedbackKey()) {
+    <p class="text-sm text-green-700">{{ feedbackKey()! | translate }}</p>
+  }
+  @if (errorKey()) {
+    <p class="text-sm text-red-600">{{ errorKey()! | translate }}</p>
+  }
+
+  <button
+    type="button"
+    (click)="resend()"
+    [disabled]="sending() || cooldown() > 0"
+    class="w-full rounded-lg border border-slate-300 py-2 font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+  >
+    @if (cooldown() > 0) {
+      {{ 'auth.resendVerification.cooldown' | translate: { seconds: cooldown() } }}
+    } @else {
+      {{ 'auth.resendVerification.submit' | translate }}
+    }
+  </button>
+</div>

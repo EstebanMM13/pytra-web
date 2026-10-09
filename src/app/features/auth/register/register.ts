@@ -3,10 +3,12 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
+import { usernameValidators } from '../../../core/validators/username';
+import { ResendVerification } from '../../../shared/resend-verification/resend-verification';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ResendVerification],
   templateUrl: './register.html',
 })
 export class Register {
@@ -14,13 +16,14 @@ export class Register {
   private readonly authService = inject(AuthService);
 
   readonly form = this.fb.group({
-    username: this.fb.control('', Validators.required),
+    username: this.fb.control('', usernameValidators),
     email: this.fb.control('', [Validators.required, Validators.email]),
     password: this.fb.control('', [Validators.required, Validators.minLength(8)]),
   });
 
   readonly submitting = signal(false);
-  readonly submitted = signal(false);
+  /** Email the verification link was sent to; set once registration succeeds. */
+  readonly registeredEmail = signal<string | null>(null);
   readonly errorKey = signal<string | null>(null);
 
   submit(): void {
@@ -33,13 +36,17 @@ export class Register {
     this.errorKey.set(null);
 
     this.authService.register(this.form.getRawValue()).subscribe({
-      next: () => {
+      next: (response) => {
         this.submitting.set(false);
-        this.submitted.set(true);
+        this.registeredEmail.set(response.email);
       },
       error: (err) => {
         this.submitting.set(false);
-        this.errorKey.set(err.status === 409 ? 'auth.errors.duplicateUser' : 'auth.errors.generic');
+        this.errorKey.set(
+          err.status === 409 ? 'auth.errors.duplicateUser' :
+          err.status === 429 ? 'auth.errors.tooManyRequests' :
+          'auth.errors.generic'
+        );
       },
     });
   }

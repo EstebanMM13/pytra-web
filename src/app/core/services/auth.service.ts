@@ -9,6 +9,7 @@ import {
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
+  ResendVerificationRequest,
   ResetPasswordRequest,
 } from '../models/auth.model';
 import { TokenStorageService } from './token-storage.service';
@@ -32,6 +33,10 @@ export class AuthService {
 
   verifyEmail(token: string): Observable<void> {
     return this.http.get<void>(`${API_BASE_URL}/auth/verify-email`, { params: { token } });
+  }
+
+  resendVerification(request: ResendVerificationRequest): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${API_BASE_URL}/auth/resend-verification`, request);
   }
 
   forgotPassword(request: ForgotPasswordRequest): Observable<{ message: string }> {

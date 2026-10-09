@@ -71,5 +71,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/steam/steam').then((m) => m.Steam),
   },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/profile/profile').then((m) => m.Profile),
+  },
   { path: '**', redirectTo: 'dashboard' },
 ];

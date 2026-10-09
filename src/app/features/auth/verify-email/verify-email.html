@@ -5,13 +5,28 @@
         <p class="text-slate-600">{{ 'auth.verifyEmail.verifying' | translate }}</p>
       }
       @case ('success') {
-        <p class="mb-4 text-green-700">{{ 'auth.verifyEmail.success' | translate }}</p>
-        <a routerLink="/login" class="font-medium text-slate-900 hover:underline">
-          {{ 'auth.register.login' | translate }}
+        <p class="mb-6 text-green-700">{{ 'auth.verifyEmail.success' | translate }}</p>
+        <a
+          routerLink="/login"
+          class="inline-block w-full rounded-lg bg-brand py-2 font-medium text-white transition hover:bg-brand-dark"
+        >
+          {{ 'auth.verifyEmail.goToLogin' | translate }}
         </a>
       }
-      @case ('error') {
-        <p class="text-red-600">{{ 'auth.verifyEmail.error' | translate }}</p>
+      @case ('expired') {
+        <p class="mb-4 text-red-600">{{ 'auth.verifyEmail.expired' | translate }}</p>
+        <div class="text-left">
+          <app-resend-verification />
+        </div>
+      }
+      @case ('invalid') {
+        <p class="mb-4 text-red-600">{{ 'auth.verifyEmail.invalid' | translate }}</p>
+        <div class="mb-4 text-left">
+          <app-resend-verification />
+        </div>
+        <a routerLink="/login" class="font-medium text-slate-900 hover:underline">
+          {{ 'auth.verifyEmail.goToLogin' | translate }}
+        </a>
       }
     }
   </div>

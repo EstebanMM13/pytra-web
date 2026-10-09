@@ -23,6 +23,10 @@ export class ResetPassword {
   readonly submitting = signal(false);
   readonly success = signal(false);
   readonly errorKey = signal<string | null>(null);
+  /** Link problems (missing, expired, used) cannot be fixed on this page: the user needs a new link. */
+  readonly linkErrorKey = signal<string | null>(
+    this.token ? null : 'auth.resetPassword.invalidLink',
+  );
 
   submit(): void {
     if (this.form.invalid || !this.token) {
@@ -40,9 +44,15 @@ export class ResetPassword {
           this.submitting.set(false);
           this.success.set(true);
         },
-        error: () => {
+        error: (err) => {
           this.submitting.set(false);
-          this.errorKey.set('auth.errors.generic');
+          if (err.status === 410) {
+            this.linkErrorKey.set('auth.resetPassword.expiredLink');
+          } else if (err.status === 400 && !err.error?.fieldErrors?.newPassword) {
+            this.linkErrorKey.set('auth.resetPassword.invalidLink');
+          } else {
+            this.errorKey.set('auth.errors.generic');
+          }
         },
       });
   }

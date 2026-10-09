@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './forgot-password.html',
 })
 export class ForgotPassword {
@@ -34,9 +35,9 @@ export class ForgotPassword {
         this.submitting.set(false);
         this.sent.set(true);
       },
-      error: () => {
+      error: (err) => {
         this.submitting.set(false);
-        this.errorKey.set('auth.errors.generic');
+        this.errorKey.set(err.status === 429 ? 'auth.errors.tooManyRequests' : 'auth.errors.generic');
       },
     });
   }

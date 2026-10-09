@@ -30,6 +30,9 @@
       @if (errorKey()) {
         <p class="text-sm text-red-600">{{ errorKey()! | translate }}</p>
       }
+      @if (unverifiedEmail() !== null) {
+        <app-resend-verification [email]="unverifiedEmail()!" />
+      }
 
       <button
         type="submit"

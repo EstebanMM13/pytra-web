@@ -19,6 +19,10 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface ResendVerificationRequest {
+  email: string;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }

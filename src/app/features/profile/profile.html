@@ -1,0 +1,63 @@
+<app-navbar />
+
+<div class="mx-auto max-w-md px-4 py-10 sm:px-6">
+  <h1 class="mb-6 text-2xl font-semibold text-slate-900">{{ 'profile.title' | translate }}</h1>
+
+  @if (user(); as u) {
+    <div class="space-y-6 rounded-xl border border-slate-200 bg-surface p-6">
+      <dl class="space-y-3 text-sm">
+        <div>
+          <dt class="text-slate-500">{{ 'profile.email' | translate }}</dt>
+          <dd class="break-all text-slate-900">{{ u.email }}</dd>
+        </div>
+        <div>
+          <dt class="text-slate-500">{{ 'profile.current' | translate }}</dt>
+          <dd class="break-all text-slate-900">{{ u.usernameDisplay || u.username }}</dd>
+        </div>
+      </dl>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+        <div>
+          <label for="profile-username" class="mb-1 block text-sm font-medium text-slate-700">
+            {{ 'profile.newUsername' | translate }}
+          </label>
+          <input
+            id="profile-username"
+            type="text"
+            formControlName="username"
+            autocomplete="username"
+            class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
+          />
+          @if (form.controls.username.touched && form.controls.username.hasError('required')) {
+            <p class="mt-1 text-sm text-red-600">{{ 'profile.usernameRequired' | translate }}</p>
+          } @else {
+            <p
+              class="mt-1 text-xs"
+              [class.text-red-600]="form.controls.username.touched && form.controls.username.invalid"
+              [class.text-slate-500]="!(form.controls.username.touched && form.controls.username.invalid)"
+            >
+              {{ 'auth.register.usernameHint' | translate }}
+            </p>
+          }
+        </div>
+
+        @if (errorKey()) {
+          <p class="text-sm text-red-600">{{ errorKey()! | translate }}</p>
+        }
+        @if (saved()) {
+          <p class="text-sm text-green-700">{{ 'profile.saved' | translate }}</p>
+        }
+
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="w-full rounded-lg bg-brand py-2 font-medium text-white transition hover:bg-brand-dark disabled:opacity-50 sm:w-auto sm:px-6"
+        >
+          {{ 'profile.submit' | translate }}
+        </button>
+      </form>
+    </div>
+  } @else {
+    <p class="text-slate-500">{{ 'profile.loading' | translate }}</p>
+  }
+</div>

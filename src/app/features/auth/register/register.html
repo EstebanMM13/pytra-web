@@ -2,8 +2,12 @@
   <div class="w-full max-w-sm rounded-xl bg-surface p-8 shadow-sm">
     <h1 class="mb-6 text-2xl font-semibold text-slate-900">{{ 'auth.register.title' | translate }}</h1>
 
-    @if (submitted()) {
-      <p class="text-sm text-green-700">{{ 'auth.register.success' | translate }}</p>
+    @if (registeredEmail(); as email) {
+      <div class="space-y-4">
+        <p class="text-sm text-green-700">{{ 'auth.register.checkEmail' | translate: { email } }}</p>
+        <p class="text-sm text-slate-500">{{ 'auth.register.checkSpam' | translate }}</p>
+        <app-resend-verification [email]="email" [startCooldown]="true" />
+      </div>
     } @else {
       <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
         <div>
@@ -13,8 +17,16 @@
           <input
             type="text"
             formControlName="username"
+            autocomplete="username"
             class="w-full rounded-lg border border-slate-300 bg-ink text-slate-800 px-3 py-2 focus:border-brand-light focus:outline-none"
           />
+          <p
+            class="mt-1 text-xs"
+            [class.text-red-600]="form.controls.username.touched && form.controls.username.invalid"
+            [class.text-slate-500]="!(form.controls.username.touched && form.controls.username.invalid)"
+          >
+            {{ 'auth.register.usernameHint' | translate }}
+          </p>
         </div>
 
         <div>

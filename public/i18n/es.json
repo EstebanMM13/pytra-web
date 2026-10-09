@@ -18,24 +18,33 @@
       "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes cuenta?",
       "login": "Inicia sesión",
-      "success": "Cuenta creada. Revisa tu email para verificarla."
+      "checkEmail": "Cuenta creada. Hemos enviado un enlace de confirmación a {{email}}. Ábrelo para activar tu cuenta.",
+      "checkSpam": "¿No lo encuentras? Revisa la carpeta de spam.",
+      "usernameHint": "De 3 a 30 caracteres: letras, números, puntos, guiones o guiones bajos. Sin espacios ni @."
     },
     "verifyEmail": {
       "verifying": "Verificando tu email...",
-      "success": "Email verificado. Ya puedes iniciar sesión.",
-      "error": "El enlace de verificación no es válido o ha caducado."
+      "success": "Email confirmado. Ya puedes iniciar sesión.",
+      "expired": "Este enlace de confirmación ha caducado. Solicita uno nuevo abajo.",
+      "invalid": "Este enlace de confirmación no es válido o ya se ha usado.",
+      "goToLogin": "Ir a iniciar sesión"
     },
     "forgotPassword": {
       "title": "Recuperar contraseña",
       "email": "Email",
       "submit": "Enviar enlace",
-      "sent": "Si ese email existe, te hemos enviado un enlace de recuperación."
+      "sent": "Si ese email existe, te hemos enviado un enlace de recuperación.",
+      "backToLogin": "Volver a iniciar sesión"
     },
     "resetPassword": {
       "title": "Nueva contraseña",
       "newPassword": "Nueva contraseña",
       "submit": "Cambiar contraseña",
-      "success": "Contraseña actualizada. Ya puedes iniciar sesión."
+      "success": "Contraseña actualizada. Ya puedes iniciar sesión.",
+      "expiredLink": "Este enlace de restablecimiento ha caducado.",
+      "invalidLink": "Este enlace de restablecimiento no es válido o ya se ha usado.",
+      "requestNew": "Solicitar un enlace nuevo",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres."
     },
     "oauthCallback": {
       "processing": "Completando inicio de sesión...",
@@ -43,12 +52,32 @@
     },
     "errors": {
       "invalidCredentials": "Usuario o contraseña incorrectos.",
-      "emailNotVerified": "Verifica tu email antes de iniciar sesión.",
       "duplicateUser": "Ese usuario o email ya está en uso.",
-      "generic": "Algo salió mal. Inténtalo de nuevo."
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "emailNotVerified": "Confirma tu email antes de iniciar sesión.",
+      "tooManyRequests": "Demasiados intentos. Espera un minuto y vuelve a intentarlo."
+    },
+    "resendVerification": {
+      "prompt": "¿No te ha llegado el email? Podemos enviarte un enlace nuevo.",
+      "submit": "Reenviar email",
+      "cooldown": "Podrás reenviarlo en {{seconds}} s",
+      "sent": "Si ese email pertenece a una cuenta sin confirmar, te hemos enviado un enlace nuevo.",
+      "invalidEmail": "Introduce un email válido."
     }
   },
   "dashboard": {
     "greeting": "Hola, {{name}}"
+  },
+  "profile": {
+    "title": "Perfil",
+    "email": "Email",
+    "username": "Usuario",
+    "current": "Usuario actual",
+    "newUsername": "Nuevo usuario",
+    "submit": "Guardar",
+    "saved": "Usuario actualizado.",
+    "usernameTaken": "Ese usuario ya está en uso.",
+    "usernameRequired": "El usuario es obligatorio.",
+    "loading": "Cargando perfil..."
   }
 }

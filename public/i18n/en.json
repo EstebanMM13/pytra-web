@@ -18,24 +18,33 @@
       "submit": "Create account",
       "hasAccount": "Already have an account?",
       "login": "Sign in",
-      "success": "Account created. Check your email to verify it."
+      "checkEmail": "Account created. We've sent a confirmation link to {{email}}. Open it to activate your account.",
+      "checkSpam": "Can't find it? Check your spam folder.",
+      "usernameHint": "3-30 characters: letters, numbers, dots, hyphens or underscores. No spaces or @."
     },
     "verifyEmail": {
       "verifying": "Verifying your email...",
-      "success": "Email verified. You can sign in now.",
-      "error": "This verification link is invalid or has expired."
+      "success": "Email confirmed. You can sign in now.",
+      "expired": "This confirmation link has expired. Request a new one below.",
+      "invalid": "This confirmation link is invalid or has already been used.",
+      "goToLogin": "Go to sign in"
     },
     "forgotPassword": {
       "title": "Recover password",
       "email": "Email",
       "submit": "Send link",
-      "sent": "If that email exists, we've sent a recovery link."
+      "sent": "If that email exists, we've sent a recovery link.",
+      "backToLogin": "Back to sign in"
     },
     "resetPassword": {
       "title": "New password",
       "newPassword": "New password",
       "submit": "Change password",
-      "success": "Password updated. You can sign in now."
+      "success": "Password updated. You can sign in now.",
+      "expiredLink": "This reset link has expired.",
+      "invalidLink": "This reset link is invalid or has already been used.",
+      "requestNew": "Request a new link",
+      "passwordTooShort": "The password must be at least 8 characters."
     },
     "oauthCallback": {
       "processing": "Completing sign in...",
@@ -43,12 +52,32 @@
     },
     "errors": {
       "invalidCredentials": "Incorrect username or password.",
-      "emailNotVerified": "Verify your email before signing in.",
       "duplicateUser": "That username or email is already in use.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "emailNotVerified": "Confirm your email before signing in.",
+      "tooManyRequests": "Too many attempts. Please wait a minute and try again."
+    },
+    "resendVerification": {
+      "prompt": "Didn't get the email? We can send you a new link.",
+      "submit": "Resend email",
+      "cooldown": "Resend available in {{seconds}}s",
+      "sent": "If that email belongs to an unconfirmed account, we've sent a new link.",
+      "invalidEmail": "Enter a valid email."
     }
   },
   "dashboard": {
     "greeting": "Hi, {{name}}"
+  },
+  "profile": {
+    "title": "Profile",
+    "email": "Email",
+    "username": "Username",
+    "current": "Current username",
+    "newUsername": "New username",
+    "submit": "Save",
+    "saved": "Username updated.",
+    "usernameTaken": "That username is already taken.",
+    "usernameRequired": "Username is required.",
+    "loading": "Loading profile..."
   }
 }
