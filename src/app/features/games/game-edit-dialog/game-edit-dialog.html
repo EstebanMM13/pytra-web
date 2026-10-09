@@ -1,6 +1,6 @@
 <app-modal-sheet
-  [title]="'game.editTitle' | translate"
-  [saveLabel]="'game.saveEdit' | translate"
+  [title]="(game() ? 'game.editTitle' : 'game.createTitle') | translate"
+  [saveLabel]="(game() ? 'game.saveEdit' : 'game.saveCreate') | translate"
   [saving]="saving()"
   (save)="submit()"
   (closed)="closed.emit()"
@@ -93,5 +93,19 @@
         </button>
       </div>
     </div>
+
+    @if (game()) {
+      <div class="border-t border-divider pt-4">
+        <button
+          type="button"
+          (click)="remove()"
+          [disabled]="deleting()"
+          class="flex items-center gap-2 rounded-md text-[13px] font-medium text-danger hover:underline disabled:opacity-50"
+        >
+          <svg lucideTrash2 [size]="15"></svg>
+          {{ 'game.delete' | translate }}
+        </button>
+      </div>
+    }
   </form>
 </app-modal-sheet>

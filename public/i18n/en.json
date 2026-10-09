@@ -155,7 +155,7 @@
       "step1": "In Steam, go to your profile → Edit Profile → Privacy Settings.",
       "step2": "Set \"Game details\" to \"Public\".",
       "step3": "Uncheck \"Always keep my total playtime private\".",
-      "retry": "Then come back and press \"Sync now\" (Steam may take a few minutes to apply the change)."
+      "retry": "Then come back and press \"Sync\" (Steam may take a few minutes to apply the change)."
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",
@@ -175,6 +175,27 @@
       "confirmFailed": "Could not confirm the game.",
       "duplicateName": "You already have a game with that name.",
       "linkSyncInProgress": "Could not switch Steam accounts because a sync is running. Wait for it to finish and try again."
+    },
+    "linkedPill": "Linked",
+    "sync": "Sync",
+    "syncedAgo": "synced {{when}}",
+    "neverSynced": "never synced",
+    "linkTitle": "Link your Steam account",
+    "linkText": "Pytra reads your games and hours to suggest runs. It never posts anything to your profile.",
+    "publicNote": "Your profile and game details must be public.",
+    "pendingHeader": "To review · {{count}}",
+    "pendingHint": "Steam games not in your library yet",
+    "confirmOnly": "Confirm without run",
+    "createRun": "Create run",
+    "confirmed": "\"{{name}}\" added to your library.",
+    "ignoredCount": "{{count}} ignored",
+    "confirmDialog": {
+      "title": "Review Steam game",
+      "save": "Confirm game",
+      "saveAndRun": "Confirm and create run",
+      "intro": "Pick a category to add it to your library. Its Steam hours are imported when you confirm.",
+      "introRun": "It is added to your library first; then the run opens so you can complete it.",
+      "categoryHint": "Singleplayer: hours go to a run. Online/Hybrid: to the game's online hours."
     }
   },
   "nav": {
@@ -303,7 +324,14 @@
       "genres": "Genres",
       "newGenre": "New genre",
       "addGenre": "Add"
-    }
+    },
+    "createTitle": "Add game",
+    "saveCreate": "Add game",
+    "created": "Game added.",
+    "delete": "Delete game",
+    "deleteConfirm": "Delete this game and all its runs?",
+    "deleted": "Game deleted.",
+    "deleteError": "Could not delete the game."
   },
   "run": {
     "platinum": "🏆 Platinum",
@@ -375,5 +403,89 @@
       "hours": "Hours cannot be negative.",
       "dates": "The end cannot be before the start."
     }
+  },
+  "pagination": {
+    "label": "Pagination",
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "library": {
+    "title": "Games",
+    "subtitle": "{{games}} games · {{runs}} runs",
+    "addGame": "Add game",
+    "sortLabel": "Sort by",
+    "sort": {
+      "recent": "Last played",
+      "name": "Name",
+      "rating": "Rating",
+      "hours": "Hours"
+    },
+    "statusLabel": "Filter by status",
+    "status": {
+      "ALL": "All",
+      "EN_CURSO": "Playing",
+      "COMPLETADO": "Completed",
+      "ABANDONADO": "Dropped",
+      "PENDIENTE": "Pending"
+    },
+    "filterPlaceholder": "Filter by name",
+    "steamPending": "{{count}} Steam games to review",
+    "loadError": "Could not load your games.",
+    "empty": {
+      "title": "Your library is empty",
+      "text": "Import your games from Steam or add the first one by hand.",
+      "steam": "Import from Steam"
+    },
+    "noMatches": "No games match the filters.",
+    "clearFilters": "Clear filters",
+    "col": {
+      "game": "Game",
+      "saga": "Saga",
+      "runs": "Runs",
+      "hours": "Hours",
+      "rating": "Rating",
+      "status": "Status",
+      "year": "Year"
+    },
+    "platinum": "Platinum",
+    "noRuns": "No runs",
+    "showing": "Showing {{shown}} of {{total}}",
+    "runsCount": "{{count}} run(s)"
+  },
+  "sagas": {
+    "title": "Sagas",
+    "new": "New saga",
+    "newShort": "New",
+    "loadError": "Could not load your sagas.",
+    "empty": "You have no sagas yet.",
+    "playedOf": "{{played}} of {{total}} played",
+    "back": "Sagas",
+    "edit": "Edit saga",
+    "stats": {
+      "played": "Played",
+      "hours": "Hours",
+      "avgShort": "Average",
+      "avgRating": "Average rating",
+      "platinums": "Platinums"
+    },
+    "releaseOrder": "Release order",
+    "noGames": "This saga has no games yet. Assign it from a game's sheet.",
+    "notFound": "Saga not found.",
+    "createTitle": "New saga",
+    "editTitle": "Edit saga",
+    "saveCreate": "Create saga",
+    "saveEdit": "Save saga",
+    "form": {
+      "name": "Name",
+      "nameRequired": "The name is required."
+    },
+    "deleteHint": "The saga's games are kept, just without a saga.",
+    "delete": "Delete saga",
+    "deleteConfirm": "Delete this saga? Its games are kept, just without a saga.",
+    "created": "Saga created.",
+    "saved": "Saga updated.",
+    "deleted": "Saga deleted.",
+    "saveError": "Could not save the saga (duplicate name?).",
+    "deleteError": "Could not delete the saga."
   }
 }

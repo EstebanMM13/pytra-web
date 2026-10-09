@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { LucideTrash2 } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Game, GameCategory, GameRequest } from '../../../core/models/game.model';
 import { Genre } from '../../../core/models/genre.model';
@@ -11,17 +12,23 @@ import { ToastService } from '../../../shared/toast/toast.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 
-/** Edit a game's sheet (name, studio, release, category, saga, genres) in a modal / mobile sheet. */
+/**
+ * Create or edit a game's sheet (name, studio, release, category, saga, genres) in a modal / mobile sheet.
+ * Without `game` it creates a new one; in edit mode it also offers deleting the game.
+ */
 @Component({
   selector: 'app-game-edit-dialog',
-  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented],
+  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, LucideTrash2],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-edit-dialog.html',
   styleUrl: './game-edit-dialog.css',
 })
 export class GameEditDialog implements OnInit {
-  readonly game = input.required<Game>();
+  /** Game to edit; `null` opens the dialog in create mode. */
+  readonly game = input<Game | null>(null);
   readonly saved = output<Game>();
+  /** Emits the id of the deleted game (edit mode only). */
+  readonly deleted = output<number>();
   readonly closed = output<void>();
 
   private readonly fb = inject(NonNullableFormBuilder);
@@ -40,6 +47,7 @@ export class GameEditDialog implements OnInit {
   protected readonly selectedGenreIds = signal<Set<number>>(new Set());
   protected readonly category = signal<GameCategory>('SINGLEPLAYER');
   protected readonly saving = signal(false);
+  protected readonly deleting = signal(false);
 
   protected readonly newGenreName = this.fb.control('');
   protected readonly form = this.fb.group({
@@ -52,15 +60,17 @@ export class GameEditDialog implements OnInit {
 
   ngOnInit(): void {
     const game = this.game();
-    this.form.setValue({
-      name: game.name,
-      developer: game.developer ?? '',
-      publisher: game.publisher ?? '',
-      releaseDate: game.releaseDate ?? '',
-      sagaId: game.sagaId,
-    });
-    this.category.set(game.category ?? 'SINGLEPLAYER');
-    this.selectedGenreIds.set(new Set(game.genres.map((g) => g.id)));
+    if (game) {
+      this.form.setValue({
+        name: game.name,
+        developer: game.developer ?? '',
+        publisher: game.publisher ?? '',
+        releaseDate: game.releaseDate ?? '',
+        sagaId: game.sagaId,
+      });
+      this.category.set(game.category ?? 'SINGLEPLAYER');
+      this.selectedGenreIds.set(new Set(game.genres.map((g) => g.id)));
+    }
     this.sagaService.findAll().subscribe({
       next: (sagas) => this.sagas.set([...sagas].sort((a, b) => a.name.localeCompare(b.name))),
       error: () => {},
@@ -115,18 +125,37 @@ export class GameEditDialog implements OnInit {
       category: this.category(),
       sagaId: raw.sagaId,
       // Covers are not shown in the redesign, but the API overwrites the field: keep the stored one.
-      coverImageUrl: game.coverImageUrl,
+      coverImageUrl: game?.coverImageUrl ?? null,
       genreIds: [...this.selectedGenreIds()],
     };
     this.saving.set(true);
-    this.gameService.update(game.id, request).subscribe({
+    const request$ = game ? this.gameService.update(game.id, request) : this.gameService.create(request);
+    request$.subscribe({
       next: (updated) => {
-        this.toast.success(this.translate.instant('game.saved'));
+        this.toast.success(this.translate.instant(game ? 'game.saved' : 'game.created'));
         this.saved.emit(updated);
       },
       error: () => {
         this.saving.set(false);
         this.toast.error(this.translate.instant('game.saveError'));
+      },
+    });
+  }
+
+  protected remove(): void {
+    const game = this.game();
+    if (!game || this.deleting() || !confirm(this.translate.instant('game.deleteConfirm'))) {
+      return;
+    }
+    this.deleting.set(true);
+    this.gameService.delete(game.id).subscribe({
+      next: () => {
+        this.toast.success(this.translate.instant('game.deleted'));
+        this.deleted.emit(game.id);
+      },
+      error: () => {
+        this.deleting.set(false);
+        this.toast.error(this.translate.instant('game.deleteError'));
       },
     });
   }

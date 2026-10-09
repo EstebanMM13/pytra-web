@@ -1,5 +1,14 @@
-import { Routes } from '@angular/router';
+import { Routes, UrlMatchResult, UrlSegment } from '@angular/router';
 import { authGuard, guestGuard } from './core/guards/auth.guard';
+
+export function sagasMatcher(segments: UrlSegment[]): UrlMatchResult | null {
+  if (segments[0]?.path !== 'sagas' || segments.length > 2) {
+    return null;
+  }
+  return segments.length === 2
+    ? { consumed: segments, posParams: { id: segments[1] } }
+    : { consumed: segments };
+}
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
@@ -39,15 +48,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
   },
   {
-    path: 'sagas',
+    // `/sagas` and `/sagas/:id` share one route so the master-detail view is reused
+    // (not recreated) when the selection changes.
+    matcher: sagasMatcher,
     canActivate: [authGuard],
     loadComponent: () => import('./features/sagas/sagas').then((m) => m.Sagas),
-  },
-  {
-    path: 'sagas/:id',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/sagas/saga-detail/saga-detail').then((m) => m.SagaDetail),
   },
   {
     path: 'games',

@@ -296,7 +296,12 @@
     </div>
 
     @if (editing()) {
-      <app-game-edit-dialog [game]="g" (saved)="onGameSaved($event)" (closed)="editing.set(false)" />
+      <app-game-edit-dialog
+        [game]="g"
+        (saved)="onGameSaved($event)"
+        (deleted)="onGameDeleted()"
+        (closed)="editing.set(false)"
+      />
     }
   } @else {
     <div class="flex flex-col gap-3">

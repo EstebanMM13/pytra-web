@@ -1,162 +1,160 @@
-import { Component, inject, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { Game, GameCategory } from '../../core/models/game.model';
-import { Genre } from '../../core/models/genre.model';
-import { Saga } from '../../core/models/saga.model';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
+import {
+  LucideArrowDownWideNarrow,
+  LucideArrowRight,
+  LucideDownload,
+  LucidePlus,
+  LucideSearch,
+} from '@lucide/angular';
+import { TranslatePipe } from '@ngx-translate/core';
+import { map } from 'rxjs';
+import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
-import { GenreService } from '../../core/services/genre.service';
-import { SagaService } from '../../core/services/saga.service';
 import { Navbar } from '../../shared/navbar/navbar';
+import { HoursPipe } from '../../shared/pipes/hours.pipe';
+import { RatingPipe } from '../../shared/pipes/rating.pipe';
+import { Pagination } from '../../shared/ui/pagination';
+import { Skeleton } from '../../shared/ui/skeleton';
+import { StatusPill } from '../../shared/ui/status-pill';
+import { GameEditDialog } from './game-edit-dialog/game-edit-dialog';
+import {
+  LIBRARY_SORTS,
+  LIBRARY_STATUS_FILTERS,
+  LibraryQuery,
+  LibrarySort,
+  LibraryStatusFilter,
+  countByStatus,
+  filterGames,
+  isLibraryGame,
+  matchesText,
+  paginate,
+  parsePage,
+  parseSort,
+  parseStatusFilter,
+} from './library.logic';
 
+/**
+ * Library (/games): confirmed games with their run aggregates, filtered, sorted and paged on the
+ * client. Filters live in the URL (`q`, `status`, `sort`, `page`) so back navigation restores them.
+ */
 @Component({
   selector: 'app-games',
-  imports: [ReactiveFormsModule, RouterLink, Navbar],
+  imports: [
+    RouterLink,
+    TranslatePipe,
+    Navbar,
+    HoursPipe,
+    RatingPipe,
+    Pagination,
+    Skeleton,
+    StatusPill,
+    GameEditDialog,
+    LucideArrowDownWideNarrow,
+    LucideArrowRight,
+    LucideDownload,
+    LucidePlus,
+    LucideSearch,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './games.html',
 })
 export class Games {
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly gameService = inject(GameService);
-  private readonly sagaService = inject(SagaService);
-  private readonly genreService = inject(GenreService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
-  readonly categories: GameCategory[] = ['SINGLEPLAYER', 'ONLINE', 'HYBRID'];
+  protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
+  protected readonly sorts = LIBRARY_SORTS;
+  protected readonly skeletonRows = Array.from({ length: 8 }, (_, i) => i);
 
-  readonly games = signal<Game[]>([]);
-  readonly sagas = signal<Saga[]>([]);
-  readonly genres = signal<Genre[]>([]);
-  readonly selectedGenreIds = signal<Set<number>>(new Set());
+  /** `null` while loading. */
+  private readonly allGames = signal<Game[] | null>(null);
+  protected readonly loadError = signal(false);
+  protected readonly creating = signal(false);
 
-  readonly loading = signal(true);
-  readonly error = signal<string | null>(null);
-  readonly editingId = signal<number | null>(null);
-  readonly showForm = signal(false);
+  protected readonly query = toSignal(
+    this.route.queryParamMap.pipe(
+      map(
+        (params) =>
+          ({
+            text: params.get('q') ?? '',
+            status: parseStatusFilter(params.get('status')),
+            sort: parseSort(params.get('sort')),
+            page: parsePage(params.get('page')),
+          }) satisfies LibraryQuery & { page: number },
+      ),
+    ),
+    { requireSync: true },
+  );
 
-  readonly newGenreName = this.fb.control('');
+  protected readonly loading = computed(() => this.allGames() === null);
+  protected readonly libraryGames = computed(() => (this.allGames() ?? []).filter(isLibraryGame));
+  protected readonly pendingReviewCount = computed(
+    () => (this.allGames() ?? []).filter((g) => !isLibraryGame(g)).length,
+  );
+  protected readonly runCount = computed(() =>
+    this.libraryGames().reduce((sum, g) => sum + (g.experienceCount ?? 0), 0),
+  );
 
-  readonly form = this.fb.group({
-    name: this.fb.control('', Validators.required),
-    developer: this.fb.control(''),
-    publisher: this.fb.control(''),
-    releaseDate: this.fb.control(''),
-    category: this.fb.control<GameCategory>('SINGLEPLAYER', Validators.required),
-    sagaId: this.fb.control<number | null>(null),
-    coverImageUrl: this.fb.control(''),
-  });
+  /** Tab counters follow the name filter, so they always add up to what each tab would show. */
+  protected readonly statusCounts = computed(() =>
+    countByStatus(this.libraryGames().filter((g) => matchesText(g, this.query().text))),
+  );
+  protected readonly filtered = computed(() => filterGames(this.libraryGames(), this.query()));
+  protected readonly page = computed(() => paginate(this.filtered(), this.query().page));
+  protected readonly hasFilters = computed(() => !!this.query().text.trim() || this.query().status !== 'ALL');
 
   constructor() {
-    this.loadGames();
-    this.sagaService.findAll().subscribe((sagas) => this.sagas.set(sagas));
-    this.genreService.findAll().subscribe((genres) => this.genres.set(genres));
+    this.load();
   }
 
-  loadGames(): void {
-    this.loading.set(true);
+  private load(): void {
+    this.loadError.set(false);
     this.gameService.findAll().subscribe({
-      next: (games) => {
-        this.games.set(games);
-        this.loading.set(false);
-      },
+      next: (games) => this.allGames.set(games),
       error: () => {
-        this.error.set('No se pudo cargar la lista de juegos.');
-        this.loading.set(false);
+        this.allGames.set([]);
+        this.loadError.set(true);
       },
     });
   }
 
-  openCreateForm(): void {
-    this.editingId.set(null);
-    this.form.reset({ category: 'SINGLEPLAYER', sagaId: null });
-    this.selectedGenreIds.set(new Set());
-    this.showForm.set(true);
+  protected setText(text: string): void {
+    this.updateQuery({ q: text || null, page: null });
   }
 
-  openEditForm(game: Game): void {
-    this.editingId.set(game.id);
-    this.selectedGenreIds.set(new Set(game.genres.map((g) => g.id)));
-
-    this.form.setValue({
-      name: game.name,
-      developer: game.developer ?? '',
-      publisher: game.publisher ?? '',
-      releaseDate: game.releaseDate ?? '',
-      category: (game.category ?? 'SINGLEPLAYER') as GameCategory,
-      sagaId: game.sagaId,
-      coverImageUrl: game.coverImageUrl ?? '',
-    });
-    this.showForm.set(true);
+  protected setStatus(status: LibraryStatusFilter): void {
+    this.updateQuery({ status: status === 'ALL' ? null : status, page: null });
   }
 
-  cancelForm(): void {
-    this.showForm.set(false);
+  protected setSort(sort: string): void {
+    const parsed: LibrarySort = parseSort(sort);
+    this.updateQuery({ sort: parsed === 'recent' ? null : parsed, page: null });
   }
 
-  toggleGenre(genreId: number): void {
-    this.selectedGenreIds.update((current) => {
-      const next = new Set(current);
-      next.has(genreId) ? next.delete(genreId) : next.add(genreId);
-      return next;
+  protected setPage(page: number): void {
+    this.updateQuery({ page: page > 1 ? page : null }, false);
+  }
+
+  protected clearFilters(): void {
+    this.updateQuery({ q: null, status: null, page: null });
+  }
+
+  /** Typing and toggles replace the history entry; page changes push one so "back" pages back. */
+  private updateQuery(params: Params, replaceUrl = true): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: params,
+      queryParamsHandling: 'merge',
+      replaceUrl,
     });
   }
 
-  addGenre(): void {
-    const name = this.newGenreName.value.trim();
-    if (!name) return;
-
-    this.genreService.createIfMissing({ name }).subscribe({
-      next: (genre) => {
-        if (!this.genres().some((g) => g.id === genre.id)) {
-          this.genres.update((list) => [...list, genre]);
-        }
-        this.toggleGenre(genre.id);
-        this.newGenreName.setValue('');
-      },
-      error: () => this.error.set('No se pudo crear el género.'),
-    });
-  }
-
-  submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    const raw = this.form.getRawValue();
-    const request = {
-      name: raw.name,
-      developer: raw.developer || null,
-      publisher: raw.publisher || null,
-      releaseDate: raw.releaseDate || null,
-      category: raw.category,
-      sagaId: raw.sagaId,
-      coverImageUrl: raw.coverImageUrl || null,
-      genreIds: [...this.selectedGenreIds()],
-    };
-
-    const id = this.editingId();
-    const request$ = id ? this.gameService.update(id, request) : this.gameService.create(request);
-
-    request$.subscribe({
-      next: (game) => {
-        this.games.update((list) =>
-          id ? list.map((g) => (g.id === id ? game : g)) : [...list, game]
-        );
-        this.showForm.set(false);
-      },
-      error: () => this.error.set('No se pudo guardar el juego (¿nombre repetido?).'),
-    });
-  }
-
-  remove(game: Game): void {
-    if (!confirm('¿Borrar este juego?')) return;
-
-    this.gameService.delete(game.id).subscribe({
-      next: () => this.games.update((list) => list.filter((g) => g.id !== game.id)),
-      error: () => this.error.set('No se pudo borrar el juego.'),
-    });
-  }
-
-  gameGenreNames(game: Game): string {
-    return game.genres.map((g) => g.name).join(', ');
+  protected onGameCreated(game: Game): void {
+    this.creating.set(false);
+    this.allGames.update((list) => [...(list ?? []), game]);
+    this.router.navigate(['/games', game.id]);
   }
 }

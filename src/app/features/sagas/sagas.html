@@ -1,78 +1,202 @@
 <app-navbar />
 
-<div class="mx-auto max-w-2xl px-6 py-10">
-  <h1 class="mb-6 text-2xl font-semibold text-text">Sagas</h1>
+<main class="mx-auto max-w-7xl md:grid md:min-h-[calc(100dvh-62px)] md:grid-cols-[300px_minmax(0,1fr)] lg:grid-cols-[380px_minmax(0,1fr)]">
+  <!-- Saga list -->
+  <section
+    class="flex-col gap-2.5 px-5 pt-3 pb-8 md:gap-2 md:border-r md:border-border md:px-5 md:py-7"
+    [class]="routeId() !== null ? 'hidden md:flex' : 'flex'"
+  >
+    <div class="mb-1.5 flex items-center justify-between gap-3 md:px-2 md:pb-2.5">
+      <div class="flex items-baseline gap-2.5">
+        <h1 class="text-[26px] font-semibold tracking-[-0.02em] md:text-2xl">{{ 'sagas.title' | translate }}</h1>
+        @if (!loading()) {
+          <span class="text-[13px] text-muted">{{ summaries().length }}</span>
+        }
+      </div>
+      <button
+        type="button"
+        (click)="dialog.set(null)"
+        class="flex items-center gap-1 rounded-lg p-2 text-[13px] font-medium text-brand-light hover:text-brand-lighter md:border md:border-border md:px-2.5 md:py-1.5 md:text-text-2 md:hover:border-border-strong md:hover:text-text"
+        [attr.aria-label]="'sagas.new' | translate"
+      >
+        <svg lucidePlus [size]="18" class="md:size-[15px]"></svg>
+        <span class="hidden md:inline">{{ 'sagas.newShort' | translate }}</span>
+      </button>
+    </div>
 
-  <form [formGroup]="createForm" (ngSubmit)="create()" class="mb-8 flex gap-2">
-    <input
-      type="text"
-      formControlName="name"
-      placeholder="Nombre de la saga"
-      class="flex-1 rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
-    />
-    <button
-      type="submit"
-      class="rounded-lg bg-brand px-4 py-2 font-medium text-white hover:bg-brand-dark"
-    >
-      Añadir
-    </button>
-  </form>
-
-  @if (error()) {
-    <p class="mb-4 text-sm text-danger">{{ error() }}</p>
-  }
-
-  @if (loading()) {
-    <p class="text-muted">Cargando...</p>
-  } @else if (sagas().length === 0) {
-    <p class="text-muted">Todavía no tienes sagas.</p>
-  } @else {
-    <ul class="divide-y divide-divider rounded-xl border border-border bg-surface">
-      @for (saga of sagas(); track saga.id) {
-        <li class="flex items-center justify-between px-4 py-3">
-          @if (editingId() === saga.id) {
-            <form [formGroup]="editForm" (ngSubmit)="saveEdit(saga)" class="flex flex-1 gap-2">
-              <input
-                type="text"
-                formControlName="name"
-                class="flex-1 rounded-lg border border-border bg-bg text-text-2 px-3 py-1.5 focus:border-brand-light focus:outline-none"
-              />
-              <button type="submit" class="text-sm font-medium text-text hover:underline">
-                Guardar
-              </button>
-              <button
-                type="button"
-                (click)="cancelEdit()"
-                class="text-sm text-faint hover:underline"
-              >
-                Cancelar
-              </button>
-            </form>
-          } @else {
-            <div>
-              <a [routerLink]="['/sagas', saga.id]" class="text-text-2 hover:underline">
-                {{ saga.name }}
-              </a>
-            </div>
-            <div class="flex gap-3 text-sm">
-              <button
-                type="button"
-                (click)="startEdit(saga)"
-                class="font-medium text-text-3 hover:underline"
-              >
-                Renombrar
-              </button>
-              <button
-                type="button"
-                (click)="remove(saga)"
-                class="font-medium text-danger hover:underline"
-              >
-                Borrar
-              </button>
-            </div>
-          }
-        </li>
+    @if (loading()) {
+      @for (i of skeletons; track i) {
+        <app-skeleton class="h-[86px] rounded-[10px]" />
       }
-    </ul>
-  }
-</div>
+    } @else if (loadError()) {
+      <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
+        {{ 'sagas.loadError' | translate }}
+      </p>
+    } @else if (summaries().length === 0) {
+      <div class="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface px-5 py-8 text-center">
+        <p class="text-sm text-muted">{{ 'sagas.empty' | translate }}</p>
+        <button
+          type="button"
+          (click)="dialog.set(null)"
+          class="rounded-lg bg-brand px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark"
+        >
+          {{ 'sagas.new' | translate }}
+        </button>
+      </div>
+    } @else {
+      @for (s of summaries(); track s.saga.id) {
+        <a
+          [routerLink]="['/sagas', s.saga.id]"
+          [attr.aria-current]="selected()?.saga?.id === s.saga.id ? 'true' : null"
+          class="block rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
+          [class]="
+            selected()?.saga?.id === s.saga.id
+              ? 'border-border md:border-brand md:bg-brand-tint'
+              : 'border-border md:border-transparent md:bg-transparent md:hover:bg-hover'
+          "
+        >
+          <div class="flex justify-between gap-3 text-[15px] font-semibold">
+            <span class="truncate">{{ s.saga.name }}</span>
+            <span class="shrink-0 font-mono font-medium text-gold">{{ s.avgRating | rating }}</span>
+          </div>
+          <div class="mt-1.5 flex justify-between gap-3 text-xs text-muted">
+            <span>{{ 'sagas.playedOf' | translate: { played: s.played, total: s.total } }}</span>
+            <span class="font-mono">{{ s.hours | hours }}</span>
+          </div>
+          <div class="mt-[9px] h-[3px] rounded-sm bg-border">
+            <div class="h-[3px] rounded-sm bg-brand-light" [style.width.%]="playedPercent(s)"></div>
+          </div>
+        </a>
+      }
+    }
+  </section>
+
+  <!-- Selected saga -->
+  <section
+    class="min-w-0 flex-col gap-4 px-5 pt-3 pb-8 md:gap-6 md:px-8 md:py-8 lg:px-10"
+    [class]="routeId() === null ? 'hidden md:flex' : 'flex'"
+  >
+    @if (loading()) {
+      <app-skeleton class="h-10 w-64 rounded-lg" />
+      <div class="grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-3">
+        @for (i of [0, 1, 2]; track i) {
+          <app-skeleton class="h-20 rounded-xl" />
+        }
+      </div>
+      <app-skeleton class="h-64 rounded-[14px]" />
+    } @else if (selected(); as s) {
+      <!-- Mobile top bar -->
+      <div class="flex items-center justify-between text-text-3 md:hidden">
+        <a routerLink="/sagas" class="-ml-1 rounded-lg p-1 hover:text-text" [attr.aria-label]="'sagas.back' | translate">
+          <svg lucideChevronLeft [size]="24"></svg>
+        </a>
+        <button
+          type="button"
+          (click)="dialog.set(s.saga)"
+          class="rounded-lg p-2 hover:text-text"
+          [attr.aria-label]="'sagas.edit' | translate"
+        >
+          <svg lucidePencil [size]="20"></svg>
+        </button>
+      </div>
+
+      <div class="flex items-end justify-between gap-4">
+        <div class="min-w-0">
+          <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] md:text-4xl md:tracking-[-0.03em]">
+            {{ s.saga.name }}
+          </h2>
+          @if (metaLine(s)) {
+            <p class="mt-1.5 text-[13px] text-muted md:mt-2 md:text-[15px]">{{ metaLine(s) }}</p>
+          }
+        </div>
+        <button
+          type="button"
+          (click)="dialog.set(s.saga)"
+          class="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong md:flex"
+        >
+          <svg lucidePencil [size]="14"></svg>
+          {{ 'sagas.edit' | translate }}
+        </button>
+      </div>
+
+      <!-- Stats: 3 mini on mobile, 4 cards on web -->
+      <div class="grid grid-cols-3 gap-2 md:hidden">
+        <app-stat-card compact [label]="'sagas.stats.played' | translate" [value]="s.played + '/' + s.total" />
+        <app-stat-card compact [label]="'sagas.stats.hours' | translate" [value]="s.hours | hours" />
+        <app-stat-card
+          compact
+          [label]="'sagas.stats.avgShort' | translate"
+          [value]="s.avgRating | rating"
+          valueClass="font-mono text-gold"
+        />
+      </div>
+      <div class="hidden grid-cols-4 gap-3 md:grid">
+        <app-stat-card [label]="'sagas.stats.played' | translate" [value]="s.played + ' / ' + s.total" />
+        <app-stat-card [label]="'sagas.stats.hours' | translate" [value]="s.hours | hours" />
+        <app-stat-card
+          [label]="'sagas.stats.avgRating' | translate"
+          [value]="s.avgRating | rating"
+          valueClass="font-mono text-gold"
+        />
+        <app-stat-card
+          [label]="'sagas.stats.platinums' | translate"
+          [value]="s.platinums ? '🏆 ' + s.platinums : '—'"
+        />
+      </div>
+
+      <section class="flex flex-col md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+        <app-section-header [label]="'sagas.releaseOrder' | translate" class="mb-2" />
+        @if (s.games.length === 0) {
+          <p class="py-6 text-center text-sm text-muted">{{ 'sagas.noGames' | translate }}</p>
+        }
+        @for (g of s.games; track g.id) {
+          <a
+            [routerLink]="['/games', g.id]"
+            class="flex items-center gap-3 border-b border-divider py-3 hover:bg-hover md:grid md:grid-cols-[56px_18px_minmax(0,1fr)_120px_70px_70px] md:gap-4 md:border-t md:border-b-0 md:py-[13px] md:text-sm"
+            [style.opacity]="isPlayed(g) ? 1 : 0.55"
+          >
+            <span class="hidden font-mono text-muted md:block">{{ releaseYear(g) ?? '—' }}</span>
+            <span
+              class="size-3 shrink-0 rounded-full border-2"
+              [class]="isPlayed(g) ? 'border-brand-light bg-brand-light' : 'border-dashed border-faint'"
+              aria-hidden="true"
+            ></span>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-[15px] font-medium md:text-sm">
+                {{ g.name }}
+                @if (g.hasPlatinum) {
+                  <span class="text-xs">🏆</span>
+                }
+              </p>
+              <p class="mt-0.5 truncate text-xs text-muted md:hidden">
+                {{ releaseYear(g) ?? '—' }} ·
+                {{ (g.lastExperienceStatus ? 'status.' + g.lastExperienceStatus : 'game.notPlayed') | translate }}
+              </p>
+            </div>
+            <span class="hidden md:block">
+              @if (g.lastExperienceStatus; as status) {
+                <app-status-pill [status]="status" />
+              } @else {
+                <span class="text-xs text-muted">{{ 'game.notPlayed' | translate }}</span>
+              }
+            </span>
+            <span class="hidden text-right font-mono md:block">{{ g.totalHours ? (g.totalHours | hours) : '—' }}</span>
+            <span class="shrink-0 text-right font-mono text-gold">{{ g.bestRating | rating }}</span>
+          </a>
+        }
+      </section>
+    } @else if (routeId() !== null) {
+      <a routerLink="/sagas" class="flex w-fit items-center gap-1.5 text-[13px] text-muted hover:text-text md:hidden">
+        <svg lucideChevronLeft [size]="16"></svg>
+        {{ 'sagas.back' | translate }}
+      </a>
+      <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
+        {{ 'sagas.notFound' | translate }}
+      </p>
+    }
+  </section>
+</main>
+
+@if (dialog() !== undefined) {
+  <app-saga-dialog [saga]="dialog() ?? null" (saved)="onSaved($event)" (deleted)="onDeleted($event)" (closed)="dialog.set(undefined)" />
+}

@@ -1,59 +1,51 @@
-import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
-import { Game, GameCategory } from '../../core/models/game.model';
-import { Genre } from '../../core/models/genre.model';
-import { Saga } from '../../core/models/saga.model';
+import { LucideEyeOff, LucideLink, LucideRefreshCw } from '@lucide/angular';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Game } from '../../core/models/game.model';
 import { SteamIgnoredApp, SteamStatus, SteamSyncResult } from '../../core/models/steam.model';
-import { GenreService } from '../../core/services/genre.service';
+import { ExperienceService } from '../../core/services/experience.service';
 import { NativeOAuthService } from '../../core/services/native-oauth.service';
-import { SagaService } from '../../core/services/saga.service';
+import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { SteamService } from '../../core/services/steam.service';
 import { Navbar } from '../../shared/navbar/navbar';
-
-/** API error code (ApiError.message) -> translation key. */
-const SYNC_ERROR_KEYS: Record<string, string> = {
-  STEAM_NOT_CONFIGURED: 'steam.errors.notConfigured',
-  STEAM_NOT_LINKED: 'steam.errors.notLinked',
-  SYNC_IN_PROGRESS: 'steam.errors.syncInProgress',
-  STEAM_LINK_CHANGED: 'steam.errors.linkChanged',
-  STEAM_RATE_LIMITED: 'steam.errors.rateLimited',
-  STEAM_UNAVAILABLE: 'steam.errors.unavailable',
-  STEAM_API_KEY_REJECTED: 'steam.errors.apiKeyRejected',
-};
-
-/** `linkError` values set by /oauth-callback from the API's fixed redirect errors. */
-const LINK_ERROR_KEYS: Record<string, string> = {
-  steam_link_failed: 'steam.errors.linkFailed',
-  steam_account_already_linked: 'steam.errors.alreadyLinked',
-  steam_sync_in_progress: 'steam.errors.linkSyncInProgress',
-};
+import { ToastService } from '../../shared/toast/toast.service';
+import { SectionHeader } from '../../shared/ui/section-header';
+import { Skeleton } from '../../shared/ui/skeleton';
+import { formatRelativeTime } from '../../shared/utils/relative-time';
+import { SteamConfirmDialog, SteamConfirmMode } from './steam-confirm-dialog';
+import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, apiCode, findSteamRun, lookup, maskSteamId } from './steam.logic';
 
 @Component({
   selector: 'app-steam',
-  imports: [ReactiveFormsModule, Navbar, TranslatePipe, DatePipe],
+  imports: [
+    TranslatePipe,
+    Navbar,
+    SectionHeader,
+    Skeleton,
+    SteamConfirmDialog,
+    LucideEyeOff,
+    LucideLink,
+    LucideRefreshCw,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './steam.html',
 })
 export class Steam {
-  private readonly fb = inject(NonNullableFormBuilder);
   private readonly steamService = inject(SteamService);
+  private readonly experienceService = inject(ExperienceService);
   private readonly nativeOAuth = inject(NativeOAuthService);
-  private readonly sagaService = inject(SagaService);
-  private readonly genreService = inject(GenreService);
+  private readonly runFormLauncher = inject(RunFormLauncher);
+  private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-
-  readonly categories: GameCategory[] = ['SINGLEPLAYER', 'ONLINE', 'HYBRID'];
 
   readonly status = signal<SteamStatus | null>(null);
   readonly statusLoading = signal(true);
   readonly pending = signal<Game[]>([]);
   readonly ignoredApps = signal<SteamIgnoredApp[]>([]);
-  readonly sagas = signal<Saga[]>([]);
-  readonly genres = signal<Genre[]>([]);
   readonly loading = signal(true);
   readonly connecting = signal(false);
   readonly syncing = signal(false);
@@ -63,14 +55,18 @@ export class Steam {
   readonly syncResult = signal<SteamSyncResult | null>(null);
   readonly errorKey = signal<string | null>(null);
   readonly noticeKey = signal<string | null>(null);
+  readonly showIgnored = signal(false);
+  /** Pending game under review in the confirm dialog, and what happens after confirming. */
+  readonly confirmTarget = signal<{ game: Game; mode: SteamConfirmMode } | null>(null);
 
-  readonly confirmingId = signal<number | null>(null);
-  readonly selectedGenreIds = signal<Set<number>>(new Set());
-
-  readonly confirmForm = this.fb.group({
-    name: this.fb.control('', Validators.required),
-    category: this.fb.control<GameCategory>('SINGLEPLAYER', Validators.required),
-    sagaId: this.fb.control<number | null>(null),
+  protected readonly maskedSteamId = computed(() => maskSteamId(this.status()?.steamId));
+  protected readonly avatarInitial = computed(() => {
+    const s = this.status();
+    return (s?.personaName?.trim() || s?.steamId || '?').charAt(0).toUpperCase();
+  });
+  protected readonly lastSyncRelative = computed(() => {
+    const locale = this.translate.currentLang() === 'en' ? 'en-US' : 'es-ES';
+    return formatRelativeTime(this.status()?.lastSyncAt, locale);
   });
 
   constructor() {
@@ -78,8 +74,6 @@ export class Steam {
     this.loadStatus();
     this.loadPending();
     this.loadIgnored();
-    this.sagaService.findAll().subscribe((sagas) => this.sagas.set(sagas));
-    this.genreService.findAll().subscribe((genres) => this.genres.set(genres));
   }
 
   connect(): void {
@@ -87,12 +81,10 @@ export class Steam {
     this.errorKey.set(null);
     this.steamService.requestConnectToken().subscribe({
       next: ({ token }) => {
-        this.nativeOAuth
-          .openExternalFlow(this.steamService.buildLoginUrl(token))
-          .finally(() => {
-            // On native the app stays alive behind the Custom Tab; let the user retry.
-            if (this.nativeOAuth.isNative) this.connecting.set(false);
-          });
+        this.nativeOAuth.openExternalFlow(this.steamService.buildLoginUrl(token)).finally(() => {
+          // On native the app stays alive behind the Custom Tab; let the user retry.
+          if (this.nativeOAuth.isNative) this.connecting.set(false);
+        });
       },
       error: () => {
         this.connecting.set(false);
@@ -156,13 +148,13 @@ export class Steam {
       next: () => {
         this.busyGameId.set(null);
         this.pending.update((list) => list.filter((g) => g.id !== game.id));
-        if (this.confirmingId() === game.id) this.confirmingId.set(null);
+        if (this.confirmTarget()?.game.id === game.id) this.confirmTarget.set(null);
         this.loadIgnored();
       },
       error: (err: HttpErrorResponse) => {
         this.busyGameId.set(null);
         this.errorKey.set(
-          apiCode(err) === 'SYNC_IN_PROGRESS' ? 'steam.errors.syncInProgress' : 'steam.errors.ignoreFailed'
+          apiCode(err) === 'SYNC_IN_PROGRESS' ? 'steam.errors.syncInProgress' : 'steam.errors.ignoreFailed',
         );
       },
     });
@@ -178,56 +170,41 @@ export class Steam {
     });
   }
 
-  openConfirmForm(game: Game): void {
-    this.confirmingId.set(game.id);
-    this.confirmForm.setValue({
-      name: game.name,
-      category: game.category ?? 'SINGLEPLAYER',
-      sagaId: game.sagaId,
-    });
-    this.selectedGenreIds.set(new Set(game.genres.map((g) => g.id)));
+  openConfirm(game: Game, mode: SteamConfirmMode): void {
+    this.errorKey.set(null);
+    this.confirmTarget.set({ game, mode });
   }
 
-  cancelConfirm(): void {
-    this.confirmingId.set(null);
+  onConfirmed(game: Game): void {
+    const mode = this.confirmTarget()?.mode ?? 'confirm';
+    this.confirmTarget.set(null);
+    this.pending.update((list) => list.filter((g) => g.id !== game.id));
+    this.toast.success(this.translate.instant('steam.confirmed', { name: game.name }));
+    if (mode === 'run') {
+      this.openRunFor(game);
+    }
   }
 
-  toggleGenre(genreId: number): void {
-    this.selectedGenreIds.update((current) => {
-      const next = new Set(current);
-      next.has(genreId) ? next.delete(genreId) : next.add(genreId);
-      return next;
-    });
-  }
-
-  confirm(): void {
-    if (this.confirmForm.invalid) {
-      this.confirmForm.markAllAsTouched();
+  /**
+   * Confirming a SINGLEPLAYER game makes the API create a run with the Steam hours, so we open that
+   * run to complete it (status, rating…) instead of a new one that would count the hours twice.
+   * ONLINE/HYBRID hours go to the game's online playtime: open a fresh PC run without hours.
+   */
+  private openRunFor(game: Game): void {
+    if (game.category !== 'SINGLEPLAYER') {
+      this.runFormLauncher.openNewRun(game.id, { platform: 'PC' });
       return;
     }
-
-    const id = this.confirmingId();
-    if (!id) return;
-
-    const request = {
-      ...this.confirmForm.getRawValue(),
-      genreIds: [...this.selectedGenreIds()],
-    };
-
-    this.steamService.confirmPending(id, request).subscribe({
-      next: () => {
-        this.pending.update((list) => list.filter((g) => g.id !== id));
-        this.confirmingId.set(null);
+    this.experienceService.findAllByGame(game.id).subscribe({
+      next: (runs) => {
+        const steamRun = findSteamRun(runs);
+        if (steamRun) {
+          this.runFormLauncher.openEditRun(steamRun);
+        } else {
+          this.runFormLauncher.openNewRun(game.id, { platform: 'PC' });
+        }
       },
-      // Both a running sync and a duplicate name answer 409: tell them apart by code.
-      error: (err: HttpErrorResponse) =>
-        this.errorKey.set(
-          apiCode(err) === 'SYNC_IN_PROGRESS'
-            ? 'steam.errors.syncInProgress'
-            : err.status === 409
-              ? 'steam.errors.duplicateName'
-              : 'steam.errors.confirmFailed'
-        ),
+      error: () => this.runFormLauncher.openNewRun(game.id, { platform: 'PC' }),
     });
   }
 
@@ -274,14 +251,4 @@ export class Steam {
       error: () => this.ignoredApps.set([]),
     });
   }
-}
-
-function apiCode(err: HttpErrorResponse): string {
-  const message = (err.error as { message?: unknown } | null)?.message;
-  return typeof message === 'string' ? message : '';
-}
-
-/** Own-property lookup, so inputs like "constructor" never resolve to prototype members. */
-function lookup(map: Record<string, string>, key: string): string | null {
-  return Object.hasOwn(map, key) ? map[key] : null;
 }

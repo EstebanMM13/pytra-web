@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   LucideChevronLeft,
   LucideClock,
@@ -73,6 +73,7 @@ function byRelease(a: Game, b: Game): number {
 export class GameDetail {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly gameService = inject(GameService);
   private readonly experienceService = inject(ExperienceService);
   private readonly onlinePlaytimeService = inject(OnlinePlaytimeService);
@@ -272,6 +273,11 @@ export class GameDetail {
       this.sagaGames.update((list) => list.map((g) => (g.id === game.id ? game : g)).sort(byRelease));
     }
     this.loadOnlinePlaytime(game);
+  }
+
+  protected onGameDeleted(): void {
+    this.editing.set(false);
+    this.router.navigate(['/games']);
   }
 
   protected submitOnlinePlaytime(): void {
