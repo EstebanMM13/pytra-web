@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { API_ORIGIN } from '../../../core/api-base-url';
 import { AuthService } from '../../../core/services/auth.service';
+import { NativeOAuthService } from '../../../core/services/native-oauth.service';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ export class Login {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly nativeOAuth = inject(NativeOAuthService);
 
   readonly form = this.fb.group({
     identifier: this.fb.control('', Validators.required),
@@ -46,6 +48,6 @@ export class Login {
   }
 
   loginWithGoogle(): void {
-    window.location.href = `${API_ORIGIN}/oauth2/authorization/google`;
+    void this.nativeOAuth.openExternalFlow(`${API_ORIGIN}/oauth2/authorization/google`);
   }
 }

@@ -7,6 +7,7 @@ import { SteamSyncResult } from '../../core/models/steam.model';
 import { GenreService } from '../../core/services/genre.service';
 import { SagaService } from '../../core/services/saga.service';
 import { SteamService } from '../../core/services/steam.service';
+import { NativeOAuthService } from '../../core/services/native-oauth.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
 @Component({
@@ -17,6 +18,7 @@ import { Navbar } from '../../shared/navbar/navbar';
 export class Steam {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly steamService = inject(SteamService);
+  private readonly nativeOAuth = inject(NativeOAuthService);
   private readonly sagaService = inject(SagaService);
   private readonly genreService = inject(GenreService);
 
@@ -56,7 +58,12 @@ export class Steam {
     this.connecting.set(true);
     this.steamService.requestConnectToken().subscribe({
       next: ({ token }) => {
-        window.location.href = this.steamService.buildLoginUrl(token);
+        this.nativeOAuth
+          .openExternalFlow(this.steamService.buildLoginUrl(token))
+          .finally(() => {
+            // On native the app stays alive behind the Custom Tab; let the user retry.
+            if (this.nativeOAuth.isNative) this.connecting.set(false);
+          });
       },
       error: () => {
         this.connecting.set(false);

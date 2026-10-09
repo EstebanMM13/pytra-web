@@ -21,7 +21,7 @@ export class SteamService {
   }
 
   buildLoginUrl(token: string): string {
-    return `${this.baseUrl}/login?state=${token}`;
+    return `${this.baseUrl}/login?state=${encodeURIComponent(token)}`;
   }
 
   sync(): Observable<SteamSyncResult> {
