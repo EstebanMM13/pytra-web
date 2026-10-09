@@ -6,10 +6,11 @@ import { ExperienceService } from '../../../core/services/experience.service';
 import { GameService } from '../../../core/services/game.service';
 import { Navbar } from '../../../shared/navbar/navbar';
 import { ExperienceForm } from '../experience-form/experience-form';
+import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 
 @Component({
   selector: 'app-experience-detail',
-  imports: [RouterLink, Navbar, ExperienceForm],
+  imports: [RouterLink, Navbar, ExperienceForm, HoursPipe],
   templateUrl: './experience-detail.html',
 })
 export class ExperienceDetail {

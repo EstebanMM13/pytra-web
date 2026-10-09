@@ -4,10 +4,11 @@ import { GenreStat, MostPlayedGame, SagaStat, StatsSummary, TopRatedExperience, 
 import { StatsService } from '../../core/services/stats.service';
 import { UserService } from '../../core/services/user.service';
 import { Navbar } from '../../shared/navbar/navbar';
+import { HoursPipe } from '../../shared/pipes/hours.pipe';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Navbar, TranslatePipe],
+  imports: [Navbar, TranslatePipe, HoursPipe],
   templateUrl: './dashboard.html',
 })
 export class Dashboard {

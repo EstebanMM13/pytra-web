@@ -25,11 +25,11 @@
           <p class="text-xs text-slate-500">Partidas</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
-          <p class="text-2xl font-semibold text-slate-900">{{ s.totalSingleplayerHours }}h</p>
+          <p class="text-2xl font-semibold text-slate-900">{{ s.totalSingleplayerHours | hours }}</p>
           <p class="text-xs text-slate-500">Singleplayer</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
-          <p class="text-2xl font-semibold text-slate-900">{{ s.totalOnlineHours }}h</p>
+          <p class="text-2xl font-semibold text-slate-900">{{ s.totalOnlineHours | hours }}</p>
           <p class="text-xs text-slate-500">Online</p>
         </div>
         <div class="rounded-xl border border-slate-200 bg-surface p-4 text-center">
@@ -65,7 +65,7 @@
             @for (item of mostPlayedSingleplayer(); track item.gameId) {
               <li class="flex justify-between">
                 <span class="text-slate-700">{{ item.gameName }}</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
               </li>
             }
           </ul>
@@ -81,7 +81,7 @@
             @for (item of mostPlayedOnline(); track item.gameId) {
               <li class="flex justify-between">
                 <span class="text-slate-700">{{ item.gameName }}</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
               </li>
             }
           </ul>
@@ -97,7 +97,7 @@
             @for (item of bySaga(); track item.sagaId ?? item.sagaName) {
               <li class="flex justify-between">
                 <span class="text-slate-700">{{ item.sagaName }} ({{ item.gameCount }})</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
               </li>
             }
           </ul>
@@ -113,7 +113,7 @@
             @for (item of byGenre(); track item.genreId) {
               <li class="flex justify-between">
                 <span class="text-slate-700">{{ item.genreName }} ({{ item.gameCount }})</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
               </li>
             }
           </ul>
@@ -129,7 +129,7 @@
             @for (item of byYear(); track item.year) {
               <li class="flex justify-between">
                 <span class="text-slate-700">{{ item.year }} ({{ item.experienceCount }})</span>
-                <span class="font-medium text-slate-900">{{ item.totalHours }}h</span>
+                <span class="font-medium text-slate-900">{{ item.totalHours | hours }}</span>
               </li>
             }
           </ul>

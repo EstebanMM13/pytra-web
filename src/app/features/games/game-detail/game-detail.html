@@ -136,7 +136,7 @@
                 <p class="text-sm text-slate-500">
                   {{ experience.status }} · {{ experience.platform }}
                   @if (experience.hours) {
-                    · {{ experience.hours }}h
+                    · {{ experience.hours | hours }}
                   }
                   @if (experience.rating !== null) {
                     · {{ experience.rating }}/10

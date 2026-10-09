@@ -9,10 +9,11 @@ import { GameService } from '../../../core/services/game.service';
 import { OnlinePlaytimeService } from '../../../core/services/online-playtime.service';
 import { Navbar } from '../../../shared/navbar/navbar';
 import { ExperienceForm } from '../experience-form/experience-form';
+import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 
 @Component({
   selector: 'app-game-detail',
-  imports: [ReactiveFormsModule, RouterLink, Navbar, ExperienceForm],
+  imports: [ReactiveFormsModule, RouterLink, Navbar, ExperienceForm, HoursPipe],
   templateUrl: './game-detail.html',
 })
 export class GameDetail {
