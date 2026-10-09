@@ -44,6 +44,7 @@ export class Register {
         this.submitting.set(false);
         this.errorKey.set(
           err.status === 409 ? 'auth.errors.duplicateUser' :
+          err.status === 403 ? 'auth.errors.registrationClosed' :
           err.status === 429 ? 'auth.errors.tooManyRequests' :
           'auth.errors.generic'
         );

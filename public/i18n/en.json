@@ -55,7 +55,8 @@
       "duplicateUser": "That username or email is already in use.",
       "generic": "Something went wrong. Please try again.",
       "emailNotVerified": "Confirm your email before signing in.",
-      "tooManyRequests": "Too many attempts. Please wait a minute and try again."
+      "tooManyRequests": "Too many attempts. Please wait a minute and try again.",
+      "registrationClosed": "Registration is currently invite-only."
     },
     "resendVerification": {
       "prompt": "Didn't get the email? We can send you a new link.",

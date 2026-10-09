@@ -55,7 +55,8 @@
       "duplicateUser": "Ese usuario o email ya está en uso.",
       "generic": "Algo salió mal. Inténtalo de nuevo.",
       "emailNotVerified": "Confirma tu email antes de iniciar sesión.",
-      "tooManyRequests": "Demasiados intentos. Espera un minuto y vuelve a intentarlo."
+      "tooManyRequests": "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
+      "registrationClosed": "El registro está cerrado de momento: solo por invitación."
     },
     "resendVerification": {
       "prompt": "¿No te ha llegado el email? Podemos enviarte un enlace nuevo.",

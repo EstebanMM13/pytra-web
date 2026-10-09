@@ -1,7 +1,7 @@
 <div class="flex min-h-screen items-center justify-center bg-slate-50 px-4">
   <div class="w-full max-w-sm rounded-xl bg-surface p-8 text-center shadow-sm">
     @if (failed()) {
-      <p class="mb-4 text-red-600">{{ 'auth.oauthCallback.error' | translate }}</p>
+      <p class="mb-4 text-red-600">{{ errorKey() | translate }}</p>
       <a routerLink="/login" class="font-medium text-slate-900 hover:underline">
         {{ 'auth.register.login' | translate }}
       </a>
