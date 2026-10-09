@@ -21,6 +21,14 @@
       <a routerLink="/steam" routerLinkActive="text-brand-light" class="hover:text-brand-light">
         Steam
       </a>
+      @if (displayName(); as name) {
+        <span
+          class="max-w-24 truncate rounded-full border border-slate-200 bg-ink px-3 py-1 text-xs text-slate-700 sm:max-w-48"
+          [title]="name"
+        >
+          {{ name }}
+        </span>
+      }
       <button type="button" (click)="logout()" class="text-slate-400 hover:text-slate-900">
         Cerrar sesión
       </button>

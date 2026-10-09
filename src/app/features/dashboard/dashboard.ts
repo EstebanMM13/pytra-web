@@ -1,15 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { GenreStat, MostPlayedGame, SagaStat, StatsSummary, TopRatedExperience, YearStat } from '../../core/models/stats.model';
 import { StatsService } from '../../core/services/stats.service';
+import { UserService } from '../../core/services/user.service';
 import { Navbar } from '../../shared/navbar/navbar';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [Navbar],
+  imports: [Navbar, TranslatePipe],
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
   private readonly statsService = inject(StatsService);
+  protected readonly displayName = inject(UserService).displayName;
 
   readonly summary = signal<StatsSummary | null>(null);
   readonly byYear = signal<YearStat[]>([]);

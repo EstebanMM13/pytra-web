@@ -1,6 +1,12 @@
 <app-navbar />
 
 <div class="mx-auto max-w-4xl px-6 py-10">
+  @if (displayName(); as name) {
+    <h1 class="mb-6 truncate text-xl font-semibold text-slate-900">
+      {{ 'dashboard.greeting' | translate: { name } }}
+    </h1>
+  }
+
   @if (loading()) {
     <p class="text-slate-500">Cargando estadísticas...</p>
   } @else {

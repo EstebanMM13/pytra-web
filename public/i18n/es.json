@@ -47,5 +47,8 @@
       "duplicateUser": "Ese usuario o email ya está en uso.",
       "generic": "Algo salió mal. Inténtalo de nuevo."
     }
+  },
+  "dashboard": {
+    "greeting": "Hola, {{name}}"
   }
 }

@@ -47,5 +47,8 @@
       "duplicateUser": "That username or email is already in use.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "dashboard": {
+    "greeting": "Hi, {{name}}"
   }
 }
