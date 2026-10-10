@@ -50,7 +50,7 @@
           {{ e.runLabel }}
         </p>
         <h1
-          class="line-clamp-3 text-[28px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-[44px] md:tracking-[-0.035em]"
+          class="font-display line-clamp-3 text-[28px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-[44px] md:tracking-[-0.035em]"
           [attr.title]="game()?.name ?? null"
         >
           @if (game(); as g) {
@@ -125,7 +125,7 @@
       <section
         class="flex flex-col gap-3.5 self-start md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[26px]"
       >
-        <app-section-header [label]="'run.summary' | translate" />
+        <app-section-header collapseKey="run.review" [label]="'run.summary' | translate" />
         @if (e.summary) {
           <p class="text-[15px] leading-[1.55] whitespace-pre-line wrap-break-word text-text-2 md:text-base md:leading-[1.65]">
             {{ e.summary }}
@@ -212,7 +212,7 @@
         </section>
 
         <section class="rounded-[14px] border border-card-border card-glass p-[22px]">
-          <app-section-header class="mb-2.5" [label]="'run.data' | translate" />
+          <app-section-header collapseKey="run.data" class="mb-2.5" [label]="'run.data' | translate" />
           <dl class="text-sm">
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
               <dt class="text-muted">{{ 'run.platform' | translate }}</dt>

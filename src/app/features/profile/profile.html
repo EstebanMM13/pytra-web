@@ -5,7 +5,7 @@
 >
   <!-- Identity + sub-nav (web) / identity header (mobile) -->
   <aside class="flex flex-col gap-1.5 lg:sticky lg:top-8 lg:self-start">
-    <h1 class="mb-2 text-[28px] font-bold tracking-[-0.03em] lg:sr-only">{{ 'profile.title' | translate }}</h1>
+    <h1 class="font-display mb-2 text-[28px] font-bold tracking-[-0.03em] lg:sr-only">{{ 'profile.title' | translate }}</h1>
     <div class="flex items-center gap-3.5 lg:flex-col lg:items-start lg:gap-1.5">
       <span
         class="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand-tint text-[22px] font-semibold text-brand-lighter lg:mb-3.5 lg:size-[72px] lg:text-[28px]"
@@ -82,7 +82,7 @@
     <!-- CUENTA -->
     @if (showAccountSection) {
     <section id="profile-account" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-      <app-section-header class="mb-2" [label]="'profile.sections.account' | translate" />
+      <app-section-header collapseKey="profile.account" class="mb-2" [label]="'profile.sections.account' | translate" />
       @if (user(); as u) {
         <div class="border-t border-divider py-3.5 text-sm">
           @if (editingName()) {
@@ -173,7 +173,7 @@
       id="profile-achievements"
       class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]"
     >
-      <app-section-header class="mb-3.5" [label]="'achievements.title' | translate">
+      <app-section-header collapseKey="profile.achievements" class="mb-3.5" [label]="'achievements.title' | translate">
         @if (achievements()?.length) {
           <span class="shrink-0 font-mono text-xs text-muted">
             {{ 'achievements.count' | translate: { unlocked: unlockedCount(), total: achievements()!.length } }}
@@ -254,7 +254,7 @@
       id="profile-preferences"
       class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]"
     >
-      <app-section-header class="mb-2" [label]="'profile.sections.preferences' | translate" />
+      <app-section-header collapseKey="profile.preferences" class="mb-2" [label]="'profile.sections.preferences' | translate" />
       <div class="flex flex-col gap-2.5 border-t border-divider py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <span id="pref-theme" class="text-muted">{{ 'profile.theme' | translate }}</span>
         <div class="w-full sm:w-auto">
@@ -328,7 +328,7 @@
 
     <!-- DATOS -->
     <section id="profile-data" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-      <app-section-header class="mb-2" [label]="'profile.sections.data' | translate" />
+      <app-section-header collapseKey="profile.data" class="mb-2" [label]="'profile.sections.data' | translate" />
       <div class="flex flex-col gap-2.5 border-t border-divider py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <span class="text-muted">{{ 'profile.export.label' | translate }}</span>
         <div class="flex gap-2">

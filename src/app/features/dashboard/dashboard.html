@@ -4,13 +4,20 @@
   <!-- Greeting + Steam notice -->
   <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
     <div class="min-w-0">
-      <p class="mb-1.5 hidden text-sm text-muted md:block">{{ today() }}</p>
+      <p class="mb-2 hidden items-center gap-2 font-mono text-[11px] tracking-[0.16em] text-muted uppercase md:flex">
+        <span class="size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span>
+        {{ today() }}
+      </p>
       @if (displayName(); as name) {
-        <h1 class="truncate text-[28px] font-bold tracking-[-0.03em] md:text-[34px]">
-          {{ 'dashboard.greeting' | translate: { name } }}
+        <h1 class="truncate pb-0.5 font-display text-[30px] leading-tight font-bold tracking-[-0.035em] md:text-[42px]">
+          {{ 'dashboard.greetingHello' | translate }}
+          <span class="text-figure text-brand-light">{{ name }}</span>
         </h1>
         @if (summary() || summaryFailed()) {
-          <p class="mt-1 truncate text-sm text-text-3 md:text-[15px]" [attr.title]="tagline().key | translate: tagline().params">
+          <p
+            class="mt-0.5 truncate font-serif text-[17px] text-text-3 italic md:mt-1 md:text-xl"
+            [attr.title]="tagline().key | translate: tagline().params"
+          >
             {{ tagline().key | translate: tagline().params }}
           </p>
         }
@@ -160,7 +167,7 @@
     <!-- Top unlocked achievements (hidden when none) -->
     @if (topBadges().length) {
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:px-[22px] md:py-4">
-        <app-section-header class="mb-3" [label]="'dashboard.achievements' | translate">
+        <app-section-header collapseKey="dashboard.achievements" class="mb-3" [label]="'dashboard.achievements' | translate">
           <a routerLink="/profile" fragment="profile-achievements" class="flex shrink-0 items-center gap-1 text-[13px] text-brand-light hover:underline">
             {{ 'dashboard.achievementsAll' | translate }}
             <svg lucideArrowRight [size]="14" aria-hidden="true"></svg>
@@ -177,7 +184,7 @@
     <!-- Playing now + hours per year -->
     <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <section class="md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
-        <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
+        <app-section-header collapseKey="dashboard.playingNow" class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
         @if (playing()?.[0]; as hero) {
           <!-- Web hero for the most recent run: blurred cover backdrop + crisp cover -->
           <a
@@ -249,7 +256,7 @@
       </section>
 
       <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
-        <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
+        <app-section-header collapseKey="dashboard.hoursByYear" class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
         </app-section-header>
         @if (yearBars(); as bars) {
           @if (bars.length) {
@@ -275,7 +282,7 @@
     <!-- Rankings -->
     <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3">
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header class="mb-3.5" [label]="'dashboard.topRated' | translate" />
+        <app-section-header collapseKey="dashboard.topRated" class="mb-3.5" [label]="'dashboard.topRated' | translate" />
         @if (topRated(); as items) {
           @for (item of items; track item.gameId + item.runLabel; let i = $index) {
             <a
@@ -301,7 +308,7 @@
       </section>
 
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header class="mb-3.5" [label]="'dashboard.mostPlayed' | translate">
+        <app-section-header collapseKey="dashboard.mostPlayed" class="mb-3.5" [label]="'dashboard.mostPlayed' | translate">
           <app-segmented size="sm" tone="neutral" [options]="playModeOptions" [(value)]="playMode" />
         </app-section-header>
         @if (mostPlayed(); as items) {
@@ -328,7 +335,7 @@
       </section>
 
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header class="mb-3.5" [label]="'dashboard.bySaga' | translate" />
+        <app-section-header collapseKey="dashboard.bySaga" class="mb-3.5" [label]="'dashboard.bySaga' | translate" />
         @if (topSagas(); as items) {
           @for (item of items; track item.sagaId) {
             <a

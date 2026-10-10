@@ -85,7 +85,7 @@
     }
   },
   "dashboard": {
-    "greeting": "Hola, {{name}}",
+    "greetingHello": "Hola,",
     "steamPending": "{{count}} juegos de Steam por revisar",
     "stats": {
       "games": "Juegos",
@@ -334,6 +334,8 @@
     "PENDIENTE": "Pendiente"
   },
   "common": {
+    "collapseSection": "Contraer {{name}}",
+    "expandSection": "Expandir {{name}}",
     "best": "Mejor",
     "noData": "Sin datos todavía.",
     "games": "{{count}} juegos",

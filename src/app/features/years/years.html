@@ -2,7 +2,7 @@
 
 <main class="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-3 pb-10 md:gap-[26px] md:px-10 md:pt-8 md:pb-12">
   @if (noYears()) {
-    <h1 class="text-[28px] font-bold tracking-[-0.03em] md:text-[34px]">{{ 'years.title' | translate }}</h1>
+    <h1 class="font-display text-[28px] font-bold tracking-[-0.03em] md:text-[34px]">{{ 'years.title' | translate }}</h1>
     <div
       class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-14 text-center"
     >
@@ -47,7 +47,7 @@
 
     @if (year(); as y) {
       <header class="flex flex-col gap-1.5 md:flex-row md:items-end md:justify-between md:gap-6">
-        <h1 class="text-[42px] leading-none font-bold tracking-[-0.045em] md:text-[64px]">
+        <h1 class="font-display text-[42px] leading-none font-bold tracking-[-0.045em] md:text-[64px]">
           {{ 'years.yearTitle' | translate: { year: y } }}
         </h1>
         @if (highlight(); as h) {
@@ -182,7 +182,7 @@
         <!-- Hours per month · runs of the year -->
         <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
-            <app-section-header class="mb-3 md:mb-[18px]" [label]="'years.hoursByMonth' | translate" />
+            <app-section-header collapseKey="years.hoursByMonth" class="mb-3 md:mb-[18px]" [label]="'years.hoursByMonth' | translate" />
             @if (hasMonthHours()) {
               <div class="hidden md:block">
                 <app-mini-bar-chart [bars]="monthBars()" [height]="180" topTone="muted" dense />
@@ -201,7 +201,7 @@
           </section>
 
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-            <app-section-header class="mb-2" [label]="'years.runsOfYear' | translate">
+            <app-section-header collapseKey="years.runsOfYear" class="mb-2" [label]="'years.runsOfYear' | translate">
               <span class="text-xs text-muted">{{ 'years.byRating' | translate }}</span>
             </app-section-header>
             <!-- Web: 10 rows (the preview size) then internal scroll once "show all" expands it. -->
@@ -248,7 +248,7 @@
         <!-- Rankings (Obsidian sections) -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-            <app-section-header class="mb-3.5" [label]="'years.topRated' | translate" />
+            <app-section-header collapseKey="years.topRated" class="mb-3.5" [label]="'years.topRated' | translate" />
             @for (g of s.topRated; track g.gameId; let i = $index) {
               <a
                 [routerLink]="['/games', g.gameId]"
@@ -267,7 +267,7 @@
           </section>
 
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-            <app-section-header class="mb-3.5" [label]="'years.mostPlayed' | translate" />
+            <app-section-header collapseKey="years.mostPlayed" class="mb-3.5" [label]="'years.mostPlayed' | translate" />
             @for (g of s.mostPlayed; track g.gameId) {
               <a [routerLink]="['/games', g.gameId]" class="block border-t border-divider py-[9px] text-sm hover:bg-hover">
                 <span class="flex justify-between gap-3">
@@ -284,7 +284,7 @@
           </section>
 
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-            <app-section-header class="mb-3.5" [label]="'years.topSagas' | translate" />
+            <app-section-header collapseKey="years.topSagas" class="mb-3.5" [label]="'years.topSagas' | translate" />
             @for (saga of s.topSagas; track saga.sagaId) {
               <a
                 [routerLink]="['/sagas', saga.sagaId]"
@@ -303,7 +303,7 @@
           </section>
 
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-            <app-section-header class="mb-3.5" [label]="'years.topGenres' | translate" />
+            <app-section-header collapseKey="years.topGenres" class="mb-3.5" [label]="'years.topGenres' | translate" />
             @for (genre of s.topGenres; track genre.genreId) {
               <div class="flex items-center gap-3 border-t border-divider py-[9px] text-sm">
                 <span class="min-w-0 flex-1 truncate text-text-2" [title]="genre.genreName">{{ genre.genreName }}</span>
@@ -324,7 +324,7 @@
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
           <div class="flex flex-col gap-3">
-            <app-section-header [label]="'years.note.summary' | translate" />
+            <app-section-header collapseKey="years.noteSummary" [label]="'years.note.summary' | translate" />
             <textarea
               id="year-note-summary"
               rows="7"
@@ -342,7 +342,7 @@
             </p>
           </div>
           <div class="flex flex-col gap-3">
-            <app-section-header [label]="'years.note.highlights' | translate" />
+            <app-section-header collapseKey="years.noteHighlights" [label]="'years.note.highlights' | translate" />
             <textarea
               id="year-note-highlights"
               rows="7"

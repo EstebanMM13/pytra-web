@@ -72,7 +72,7 @@
           </a>
         }
         <h1
-          class="line-clamp-3 text-[30px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-[44px] md:tracking-[-0.035em]"
+          class="font-display line-clamp-3 text-[30px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-[44px] md:tracking-[-0.035em]"
           [title]="g.name"
         >
           {{ g.name }}
@@ -173,7 +173,7 @@
       <div class="flex flex-col gap-5 self-start">
       <!-- Runs -->
       <section class="md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
-        <app-section-header class="mb-3 md:mb-4" [label]="'game.runs' | translate" />
+        <app-section-header collapseKey="game.runs" class="mb-3 md:mb-4" [label]="'game.runs' | translate" />
         <div class="flex flex-col gap-2.5 md:scroll-list md:max-h-[494px]">
           @if (experiences() === null) {
             @for (i of [1, 2]; track i) {
@@ -210,7 +210,7 @@
         <!-- Online hours (ONLINE / HYBRID games) -->
         @if (g.category && g.category !== 'SINGLEPLAYER') {
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-            <app-section-header class="mb-3" [label]="'game.online.title' | translate">
+            <app-section-header collapseKey="game.online" class="mb-3" [label]="'game.online.title' | translate">
               <span class="font-mono text-[15px]">{{ onlinePlaytime()?.totalHours | hours }}</span>
             </app-section-header>
             <p class="-mt-1 mb-3 text-xs text-muted">{{ 'game.online.explain' | translate }}</p>
@@ -259,7 +259,7 @@
       <div class="flex flex-col gap-5">
         <!-- Game sheet -->
         <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-          <app-section-header class="mb-3" [label]="'game.sheet' | translate" />
+          <app-section-header collapseKey="game.sheet" class="mb-3" [label]="'game.sheet' | translate" />
           <dl class="text-sm">
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
               <dt class="shrink-0 text-muted">{{ 'game.developer' | translate }}</dt>
@@ -299,7 +299,7 @@
         <!-- Other games of the saga -->
         @if (sagaGames().length > 1) {
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-            <app-section-header class="mb-3" [label]="'game.inSaga' | translate" />
+            <app-section-header collapseKey="game.inSaga" class="mb-3" [label]="'game.inSaga' | translate" />
             <ul class="scroll-list max-h-[312px] text-sm">
               @for (sg of sagaGames(); track sg.id) {
                 <li class="flex items-center justify-between gap-4 border-t border-divider py-[9px]">
