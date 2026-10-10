@@ -14,6 +14,7 @@ import { LucideSearch, LucideX } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
+import { GameCover } from '../ui/game-cover';
 
 const MAX_RESULTS = 8;
 
@@ -27,7 +28,7 @@ function normalize(text: string): string {
 /** Global game search (Ctrl/⌘+K): filters the user's games, Enter opens the highlighted one. */
 @Component({
   selector: 'app-game-search',
-  imports: [TranslatePipe, LucideSearch, LucideX],
+  imports: [TranslatePipe, LucideSearch, LucideX, GameCover],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-search.html',
   host: { '(document:keydown.escape)': 'close()' },

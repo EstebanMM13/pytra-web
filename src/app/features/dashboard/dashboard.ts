@@ -24,6 +24,7 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
+import { GameCover } from '../../shared/ui/game-cover';
 import { RunRow } from '../../shared/ui/run-row';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
@@ -52,6 +53,7 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
     StatCard,
     SectionHeader,
     RunRow,
+    GameCover,
     Segmented,
     MiniBarChart,
     Skeleton,

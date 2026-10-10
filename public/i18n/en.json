@@ -450,7 +450,11 @@
       "noSaga": "No saga",
       "genres": "Genres",
       "newGenre": "New genre",
-      "addGenre": "Add"
+      "addGenre": "Add",
+      "coverUrl": "Cover URL",
+      "coverUrlHint": "Optional. An https link to a landscape image (e.g. the Steam header).",
+      "coverUrlInvalid": "Enter a valid https URL.",
+      "coverPreview": "Cover preview"
     },
     "createTitle": "Add game",
     "saveCreate": "Add game",

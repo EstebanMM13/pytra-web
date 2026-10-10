@@ -46,6 +46,36 @@
     </div>
 
     <div class="flex flex-col gap-2">
+      <label for="game-edit-cover" class="text-[13px] text-text-3">{{ 'game.form.coverUrl' | translate }}</label>
+      <div class="flex items-center gap-3">
+        <input
+          id="game-edit-cover"
+          type="url"
+          inputmode="url"
+          autocomplete="off"
+          spellcheck="false"
+          formControlName="coverImageUrl"
+          placeholder="https://"
+          class="game-edit-input min-w-0 flex-1"
+          aria-describedby="game-edit-cover-hint"
+          [attr.aria-invalid]="form.controls.coverImageUrl.invalid && form.controls.coverImageUrl.touched"
+        />
+        <app-game-cover
+          size="md"
+          class="border border-border"
+          [url]="coverPreview()"
+          [name]="form.controls.name.value || '?'"
+          [attr.title]="'game.form.coverPreview' | translate"
+        />
+      </div>
+      @if (form.controls.coverImageUrl.invalid && form.controls.coverImageUrl.touched) {
+        <p class="text-xs text-danger">{{ 'game.form.coverUrlInvalid' | translate }}</p>
+      } @else {
+        <p id="game-edit-cover-hint" class="text-xs text-muted">{{ 'game.form.coverUrlHint' | translate }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-2">
       <span id="game-edit-category" class="text-[13px] text-text-3">{{ 'game.form.category' | translate }}</span>
       <app-segmented
         stretch

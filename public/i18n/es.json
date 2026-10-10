@@ -450,7 +450,11 @@
       "noSaga": "Sin saga",
       "genres": "Géneros",
       "newGenre": "Nuevo género",
-      "addGenre": "Añadir"
+      "addGenre": "Añadir",
+      "coverUrl": "URL de portada",
+      "coverUrlHint": "Opcional. Enlace https a una imagen horizontal (p. ej. la cabecera de Steam).",
+      "coverUrlInvalid": "Introduce una URL https válida.",
+      "coverPreview": "Vista previa de la portada"
     },
     "createTitle": "Añadir juego",
     "saveCreate": "Añadir juego",

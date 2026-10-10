@@ -12,6 +12,7 @@ import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { ToastService } from '../../shared/toast/toast.service';
+import { GameCover } from '../../shared/ui/game-cover';
 import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
@@ -41,6 +42,7 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
 @Component({
   selector: 'app-years',
   imports: [
+    GameCover,
     Navbar,
     RouterLink,
     TranslatePipe,
@@ -85,6 +87,12 @@ export class Years {
   protected readonly failed = computed(() => {
     const state = this.state();
     return !!state && state.year === this.year() && state.failed;
+  });
+  /** GOTY cover, looked up from the year's runs (the GOTY entry only carries the game id). */
+  protected readonly gotyCover = computed(() => {
+    const summary = this.summary();
+    const gameId = summary?.goty?.gameId;
+    return gameId == null ? null : (summary!.experiences.find((e) => e.gameId === gameId && e.coverImageUrl)?.coverImageUrl ?? null);
   });
   protected readonly noYears = computed(() => this.year() === null && this.years()?.length === 0);
 

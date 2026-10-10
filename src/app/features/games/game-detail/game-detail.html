@@ -36,8 +36,24 @@
       {{ 'game.loadError' | translate }}
     </p>
   } @else if (game(); as g) {
-    <!-- Title block -->
-    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
+    <!-- Title block: cover banner (blurred cover behind, crisp cover beside the title) -->
+    <div
+      class="relative isolate -mx-5 flex flex-col gap-4 overflow-hidden px-5 pt-4 pb-1 md:mx-0 md:flex-row md:items-end md:justify-between md:gap-6 md:rounded-2xl md:border md:border-border md:p-6"
+    >
+      @if (g.coverImageUrl) {
+        <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+          <img
+            [src]="g.coverImageUrl"
+            alt=""
+            decoding="async"
+            referrerpolicy="no-referrer"
+            class="size-full scale-110 object-cover opacity-40 blur-2xl light:opacity-30"
+          />
+          <div class="absolute inset-0 bg-linear-to-b from-bg/40 via-bg/70 to-bg"></div>
+        </div>
+      }
+      <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-end md:gap-6">
+      <app-game-cover [url]="g.coverImageUrl" [name]="g.name" size="lg" class="shadow-lg shadow-black/20" />
       <div class="min-w-0">
         @if (g.sagaId !== null && g.sagaName) {
           <a
@@ -64,6 +80,7 @@
         @if (metaLine()) {
           <p class="mt-1.5 text-[13px] text-muted md:mt-2.5 md:text-[15px] md:text-text-3">{{ metaLine() }}</p>
         }
+      </div>
       </div>
       <div class="hidden shrink-0 gap-2.5 md:flex">
         <button

@@ -3,15 +3,17 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { HoursPipe } from '../pipes/hours.pipe';
 import { RatingPipe } from '../pipes/rating.pipe';
 import { RatingTonePipe } from '../pipes/rating-tone.pipe';
+import { GameCover } from './game-cover';
 
 /**
  * Run (experience) row: brand accent bar, title + meta, mono hours and rating coloured by value.
  * Projects extra content (e.g. a StatusPill) before the figures.
  * `onSurface` is for rows placed directly on the page (mobile) instead of inside a card.
+ * Binding `coverUrl` (even to null, which shows the initials fallback) swaps the accent bar for a cover thumbnail.
  */
 @Component({
   selector: 'app-run-row',
-  imports: [TranslatePipe, HoursPipe, RatingPipe, RatingTonePipe],
+  imports: [TranslatePipe, HoursPipe, RatingPipe, RatingTonePipe, GameCover],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'flex items-center gap-3.5 rounded-[10px] border p-3.5',
@@ -21,7 +23,11 @@ import { RatingTonePipe } from '../pipes/rating-tone.pipe';
     '[class.border-brand]': 'best()',
   },
   template: `
-    <span class="w-1 self-stretch rounded-sm bg-brand-light" aria-hidden="true"></span>
+    @if (coverUrl() !== undefined) {
+      <app-game-cover decorative size="sm" [url]="coverUrl()" [name]="coverName() ?? title()" />
+    } @else {
+      <span class="w-1 self-stretch rounded-sm bg-brand-light" aria-hidden="true"></span>
+    }
     <div class="min-w-0 flex-1">
       <p class="flex items-center gap-2 text-[15px] font-semibold">
         <span class="truncate" [attr.title]="title()">{{ title() }}</span>
@@ -53,6 +59,10 @@ import { RatingTonePipe } from '../pipes/rating-tone.pipe';
 })
 export class RunRow {
   readonly title = input.required<string>();
+  /** Cover thumbnail url; `undefined` (default) keeps the plain accent bar. */
+  readonly coverUrl = input<string | null | undefined>(undefined);
+  /** Name for the cover fallback initials when the title is not the game name. */
+  readonly coverName = input<string | null>(null);
   readonly meta = input<string | null>(null);
   readonly hours = input<number | null>(null);
   readonly rating = input<number | null>(null);

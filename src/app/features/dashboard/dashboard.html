@@ -87,17 +87,51 @@
   <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
     <section class="md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
       <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
+      @if (playing()?.[0]; as hero) {
+        <!-- Web hero for the most recent run: blurred cover backdrop + crisp cover -->
+        <a
+          [routerLink]="['/games', hero.gameId, 'experiences', hero.experienceId]"
+          class="hover-lift relative isolate mb-2.5 hidden overflow-hidden rounded-xl border border-border bg-bg md:block"
+        >
+          @if (hero.coverImageUrl) {
+            <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+              <img
+                [src]="hero.coverImageUrl"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                referrerpolicy="no-referrer"
+                class="size-full scale-110 object-cover opacity-40 blur-2xl light:opacity-30"
+              />
+              <div class="absolute inset-0 bg-linear-to-r from-bg/50 via-bg/75 to-bg/90"></div>
+            </div>
+          }
+          <div class="flex items-center gap-4 p-4">
+            <app-game-cover decorative size="md" class="shadow-md shadow-black/20" [url]="hero.coverImageUrl" [name]="hero.gameName" />
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-base font-semibold" [attr.title]="hero.gameName">{{ hero.gameName }}</p>
+              <p class="mt-1 truncate text-[13px] text-text-3" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
+            </div>
+            @if (daysPlaying(hero); as days) {
+              <span class="shrink-0 rounded-full bg-brand-tint px-2.5 py-1 font-mono text-xs text-brand-lighter">
+                {{ days }}
+              </span>
+            }
+          </div>
+        </a>
+      }
       <div class="scroll-list flex max-h-[326px] flex-col gap-2.5">
         @if (playing() === null) {
           @for (i of [1, 2]; track i) {
             <app-skeleton class="h-[74px] rounded-[10px]" />
           }
         } @else {
-        @for (run of playing(); track run.experienceId) {
-          <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl">
+        @for (run of playing(); track run.experienceId; let first = $first) {
+          <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl" [class]="first ? 'md:hidden' : ''">
             <app-run-row
               class="hover-lift max-md:bg-surface!"
               [title]="run.gameName"
+              [coverUrl]="run.coverImageUrl"
               [meta]="playingMeta(run)"
             >
               @if (daysPlaying(run); as days) {

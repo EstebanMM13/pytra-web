@@ -1,6 +1,14 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output, signal } from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { LucideTrash2 } from '@lucide/angular';
+import { map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Game, GameCategory, GameRequest } from '../../../core/models/game.model';
 import { Genre } from '../../../core/models/genre.model';
@@ -10,7 +18,22 @@ import { GenreService } from '../../../core/services/genre.service';
 import { SagaService } from '../../../core/services/saga.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
+import { GameCover } from '../../../shared/ui/game-cover';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
+
+/** Empty, or an absolute https URL with a host. */
+function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors | null {
+  const value = control.value.trim();
+  if (!value) {
+    return null;
+  }
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.hostname ? null : { httpsUrl: true };
+  } catch {
+    return { httpsUrl: true };
+  }
+}
 
 /**
  * Create or edit a game's sheet (name, studio, release, category, saga, genres) in a modal / mobile sheet.
@@ -18,7 +41,7 @@ import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
  */
 @Component({
   selector: 'app-game-edit-dialog',
-  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, LucideTrash2],
+  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, GameCover, LucideTrash2],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-edit-dialog.html',
   styleUrl: './game-edit-dialog.css',
@@ -56,7 +79,20 @@ export class GameEditDialog implements OnInit {
     publisher: this.fb.control(''),
     releaseDate: this.fb.control(''),
     sagaId: this.fb.control<number | null>(null),
+    coverImageUrl: this.fb.control('', [httpsUrlValidator]),
   });
+
+  /** Valid cover url for the live preview, or null. */
+  protected readonly coverPreview = toSignal(
+    this.form.controls.coverImageUrl.valueChanges.pipe(
+      startWith(''),
+      map(() => {
+        const control = this.form.controls.coverImageUrl;
+        return control.valid ? control.value.trim() || null : null;
+      }),
+    ),
+    { initialValue: null },
+  );
 
   ngOnInit(): void {
     const game = this.game();
@@ -67,6 +103,7 @@ export class GameEditDialog implements OnInit {
         publisher: game.publisher ?? '',
         releaseDate: game.releaseDate ?? '',
         sagaId: game.sagaId,
+        coverImageUrl: game.coverImageUrl ?? '',
       });
       this.category.set(game.category ?? 'SINGLEPLAYER');
       this.selectedGenreIds.set(new Set(game.genres.map((g) => g.id)));
@@ -124,8 +161,7 @@ export class GameEditDialog implements OnInit {
       releaseDate: raw.releaseDate || null,
       category: this.category(),
       sagaId: raw.sagaId,
-      // Covers are not shown in the redesign, but the API overwrites the field: keep the stored one.
-      coverImageUrl: game?.coverImageUrl ?? null,
+      coverImageUrl: raw.coverImageUrl.trim() || null,
       genreIds: [...this.selectedGenreIds()],
     };
     this.saving.set(true);

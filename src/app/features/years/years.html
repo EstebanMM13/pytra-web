@@ -99,12 +99,14 @@
           class="grid grid-cols-2 gap-2 md:gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]"
         >
           <section
-            class="col-span-2 flex min-w-0 flex-col gap-2 rounded-[14px] border border-gold-card-border bg-gold-card p-[18px] md:gap-2.5 md:p-6 lg:col-span-1"
+            class="gold-border col-span-2 flex min-w-0 flex-col gap-2 rounded-[14px] p-[18px] md:gap-2.5 md:p-6 lg:col-span-1"
           >
             <h2 class="text-xs font-semibold tracking-[0.08em] text-gold md:text-[13px]">
               🏆 {{ 'years.goty' | translate: { year: s.year } }}
             </h2>
             @if (s.goty; as g) {
+              <div class="flex items-start gap-4">
+              <div class="flex min-w-0 flex-1 flex-col gap-2 md:gap-2.5">
               <a
                 [routerLink]="['/games', g.gameId]"
                 class="mt-1 line-clamp-2 text-[22px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word hover:underline md:mt-1.5 md:text-[28px]"
@@ -116,6 +118,17 @@
                 {{ g.totalHours | hours }} · <span class="font-mono" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span> ·
                 {{ 'years.runsCount' | translate: { count: g.experienceCount } }}
               </p>
+              </div>
+              <a [routerLink]="['/games', g.gameId]" class="mt-1 shrink-0 rounded-lg md:mt-1.5" tabindex="-1" aria-hidden="true">
+                <app-game-cover
+                  decorative
+                  size="md"
+                  class="ring-1 ring-gold-line shadow-md shadow-black/20"
+                  [url]="gotyCover()"
+                  [name]="g.gameName"
+                />
+              </a>
+              </div>
             } @else {
               <p class="text-sm text-muted">{{ 'years.noGoty' | translate }}</p>
             }

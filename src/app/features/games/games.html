@@ -218,7 +218,8 @@
             [routerLink]="['/games', game.id]"
             class="grid grid-cols-[minmax(0,3fr)_minmax(0,1.6fr)_90px_90px_90px_130px_80px] items-center gap-4 border-t border-divider px-[22px] py-[13px] text-sm first-of-type:border-t-0 hover:bg-hover"
           >
-            <span class="flex min-w-0 items-center gap-2 font-medium">
+            <span class="flex min-w-0 items-center gap-3 font-medium">
+              <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
               <span class="truncate" [title]="game.name">{{ game.name }}</span>
               @if (game.hasPlatinum) {
                 <span class="text-xs" [attr.aria-label]="'library.platinum' | translate">🏆</span>
@@ -254,6 +255,7 @@
               } @else {
                 <span class="size-2 shrink-0 rounded-full border border-faint" aria-hidden="true"></span>
               }
+              <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
               <div class="min-w-0 flex-1">
                 <p class="truncate text-[15px] font-medium" [title]="game.name">
                   {{ game.name }}

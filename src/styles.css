@@ -226,6 +226,16 @@
     color: var(--pt-text);
   }
 
+  /* Dark mode depth: a faint brand glow behind the navbar / top of the page. */
+  :root:not([data-theme='light']) body {
+    background-image: radial-gradient(
+      ellipse 900px 360px at 50% -120px,
+      color-mix(in srgb, var(--pt-brand) 14%, transparent),
+      transparent 70%
+    );
+    background-repeat: no-repeat;
+  }
+
   body {
     font-family: var(--font-sans);
     color-scheme: inherit;
@@ -377,6 +387,21 @@
       transform: none;
     }
   }
+}
+
+/* GOTY card: gold card fill with a gold gradient 1px border. */
+@utility gold-border {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--pt-gold-card), var(--pt-gold-card)) padding-box,
+    linear-gradient(
+        135deg,
+        var(--pt-gold) 0%,
+        var(--pt-gold-card-border) 45%,
+        var(--pt-gold-card-border) 65%,
+        var(--pt-gold) 100%
+      )
+      border-box;
 }
 
 @utility scroll-thin {

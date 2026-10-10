@@ -28,6 +28,7 @@ import { PlatformLabel } from '../../../shared/ui/platform-label';
 import { RatingTonePipe } from '../../../shared/pipes/rating-tone.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { RunRow } from '../../../shared/ui/run-row';
+import { GameCover } from '../../../shared/ui/game-cover';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { decimalValidator, formatDecimalInput, parseDecimal } from '../../../shared/utils/decimal-input';
@@ -61,6 +62,7 @@ function byRelease(a: Game, b: Game): number {
     RatingTonePipe,
     PlatformLabel,
     RunRow,
+    GameCover,
     SectionHeader,
     Skeleton,
     StatCard,
