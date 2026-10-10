@@ -1,8 +1,18 @@
 <app-navbar />
 
 <main class="mx-auto flex max-w-7xl flex-col gap-[18px] px-5 pt-3 pb-8 md:gap-7 md:px-6 md:pt-8 md:pb-12 lg:px-10 lg:pt-10">
-  <!-- Greeting + Steam notice -->
-  <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+  <!-- Greeting + Steam notice, over the login panel's brand glows + watermark mark -->
+  <div
+    class="relative isolate flex flex-col gap-3 overflow-hidden rounded-[18px] border border-card-border px-4 py-4 md:flex-row md:items-end md:justify-between md:px-7 md:py-7"
+  >
+    <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+      <div
+        class="absolute inset-0 bg-[radial-gradient(360px_260px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_30%,transparent),transparent_70%),radial-gradient(320px_240px_at_100%_100%,color-mix(in_srgb,var(--pt-gold)_14%,transparent),transparent_70%)] md:bg-[radial-gradient(620px_340px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_32%,transparent),transparent_70%),radial-gradient(520px_300px_at_100%_100%,color-mix(in_srgb,var(--pt-gold)_14%,transparent),transparent_70%)] light:opacity-70"
+      ></div>
+      <app-pytra-mark
+        class="absolute -top-10 -right-14 size-[180px] rotate-[-12deg] opacity-[0.06] md:-top-24 md:-right-16 md:size-[340px] light:opacity-[0.05]"
+      />
+    </div>
     <div class="min-w-0">
       <p class="mb-2 hidden items-center gap-2 font-mono text-[11px] tracking-[0.16em] text-muted uppercase md:flex">
         <span class="size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span>
@@ -15,10 +25,11 @@
         </h1>
         @if (summary() || summaryFailed()) {
           <p
-            class="mt-0.5 truncate font-serif text-[17px] text-text-3 italic md:mt-1 md:text-xl"
+            class="mt-2 inline-flex max-w-full items-center gap-2 rounded-full border border-brand/30 bg-brand-tint/60 px-3 py-1.5 text-sm font-medium text-text-2 md:mt-3"
             [attr.title]="tagline().key | translate: tagline().params"
           >
-            {{ tagline().key | translate: tagline().params }}
+            <svg lucideSparkles [size]="14" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+            <span class="truncate">{{ tagline().key | translate: tagline().params }}</span>
           </p>
         }
       } @else {
@@ -184,7 +195,7 @@
     <!-- Playing now + hours per year -->
     <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <section class="md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
-        <app-section-header collapseKey="dashboard.playingNow" class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
+        <app-section-header collapseKey="dashboard.playingNow" collapseGroup="dashboard.activity" collapseGroupFrom="lg" class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
         @if (playing()?.[0]; as hero) {
           <!-- Web hero for the most recent run: blurred cover backdrop + crisp cover -->
           <a
@@ -256,7 +267,7 @@
       </section>
 
       <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
-        <app-section-header collapseKey="dashboard.hoursByYear" class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
+        <app-section-header collapseKey="dashboard.hoursByYear" collapseGroup="dashboard.activity" collapseGroupFrom="lg" class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
         </app-section-header>
         @if (yearBars(); as bars) {
           @if (bars.length) {
@@ -282,7 +293,7 @@
     <!-- Rankings -->
     <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3">
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header collapseKey="dashboard.topRated" class="mb-3.5" [label]="'dashboard.topRated' | translate" />
+        <app-section-header collapseKey="dashboard.topRated" collapseGroup="dashboard.lists" collapseGroupFrom="lg" class="mb-3.5" [label]="'dashboard.topRated' | translate" />
         @if (topRated(); as items) {
           @for (item of items; track item.gameId + item.runLabel; let i = $index) {
             <a
@@ -308,7 +319,7 @@
       </section>
 
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header collapseKey="dashboard.mostPlayed" class="mb-3.5" [label]="'dashboard.mostPlayed' | translate">
+        <app-section-header collapseKey="dashboard.mostPlayed" collapseGroup="dashboard.lists" collapseGroupFrom="lg" class="mb-3.5" [label]="'dashboard.mostPlayed' | translate">
           <app-segmented size="sm" tone="neutral" [options]="playModeOptions" [(value)]="playMode" />
         </app-section-header>
         @if (mostPlayed(); as items) {
@@ -335,7 +346,7 @@
       </section>
 
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header collapseKey="dashboard.bySaga" class="mb-3.5" [label]="'dashboard.bySaga' | translate" />
+        <app-section-header collapseKey="dashboard.bySaga" collapseGroup="dashboard.lists" collapseGroupFrom="lg" class="mb-3.5" [label]="'dashboard.bySaga' | translate" />
         @if (topSagas(); as items) {
           @for (item of items; track item.sagaId) {
             <a

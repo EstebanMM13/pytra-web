@@ -7,10 +7,9 @@
 @import '@fontsource/geist/latin-700.css';
 @import '@fontsource/geist-mono/latin-400.css';
 @import '@fontsource/geist-mono/latin-500.css';
-/* Display face for page/entity titles (~44 kB) + italic serif accent for the greeting (~22 kB). */
+/* Display face for page/entity titles (~44 kB). */
 @import '@fontsource/bricolage-grotesque/latin-600.css';
 @import '@fontsource/bricolage-grotesque/latin-700.css';
-@import '@fontsource/instrument-serif/latin-400-italic.css';
 
 @import 'tailwindcss';
 
@@ -218,7 +217,6 @@
   --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-display: 'Bricolage Grotesque', 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
 
   --color-bg: var(--pt-bg);
   --color-nav: var(--pt-nav);

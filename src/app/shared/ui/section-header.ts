@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, signal } from '@angular/core';
 import { LucideChevronDown } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
-import { CollapseStateService } from '../../core/services/collapse-state.service';
+import { CollapseBreakpoint, CollapseStateService } from '../../core/services/collapse-state.service';
 
 let nextRegionId = 0;
 
@@ -11,6 +11,10 @@ let nextRegionId = 0;
  * With `collapseKey` set it also renders a chevron toggle that collapses its parent card:
  * the parent gets `data-collapsed` and global CSS hides every sibling after the header
  * (see `styles.css`), so card templates need no extra wrapper. State persists per key.
+ *
+ * Cards sharing a desktop grid row also set the same `collapseGroup`: from the
+ * `collapseGroupFrom` breakpoint up they share one row state (toggling any collapses the
+ * whole row, so the row height really shrinks); below it each card collapses on its own.
  */
 @Component({
   selector: 'app-section-header',
@@ -47,38 +51,52 @@ export class SectionHeader {
   readonly label = input.required<string>();
   /** Stable "screen.card" key; enables the collapse toggle when set. */
   readonly collapseKey = input<string>();
+  /** Stable "screen.row" key shared by the cards of one multi-column grid row. */
+  readonly collapseGroup = input<string>();
+  /** Breakpoint from which the row lays its cards side by side (and shares state). */
+  readonly collapseGroupFrom = input<CollapseBreakpoint>('md');
 
   private readonly store = inject(CollapseStateService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
+  private readonly rowMode = computed(
+    () => !!this.collapseGroup() && this.store.atLeast(this.collapseGroupFrom())(),
+  );
   protected readonly collapsed = computed(() => {
     const key = this.collapseKey();
-    return key ? this.store.collapsed(key)() : false;
+    if (!key) return false;
+    const group = this.collapseGroup();
+    return this.rowMode() && group ? this.store.rowCollapsed(group)() : this.store.collapsed(key)();
   });
   protected readonly regionId = signal('');
 
   constructor() {
+    let previous: boolean | undefined;
     effect(() => {
       const card = this.host.parentElement;
+      const collapsed = this.collapsed();
       if (!card || !this.collapseKey()) return;
       if (!card.id) card.id = `pt-collapsible-${++nextRegionId}`;
       this.regionId.set(card.id);
       card.setAttribute('data-collapsible', '');
-      card.setAttribute('data-collapsed', String(this.collapsed()));
+      card.setAttribute('data-collapsed', String(collapsed));
+      // Replays the reveal animation on expands after the first render (never on page load),
+      // so every card of a row animates when the row is expanded from any of them.
+      if (previous === true && !collapsed) {
+        card.removeAttribute('data-expanding');
+        void card.offsetWidth;
+        card.setAttribute('data-expanding', '');
+        setTimeout(() => card.removeAttribute('data-expanding'), 300);
+      }
+      previous = collapsed;
     });
   }
 
   protected toggle(): void {
     const key = this.collapseKey();
+    const group = this.collapseGroup();
     if (!key) return;
-    const card = this.host.parentElement;
-    card?.removeAttribute('data-expanding');
-    this.store.toggle(key);
-    if (card && !this.store.collapsed(key)()) {
-      // Replays the reveal animation only on user-triggered expands (not on page load).
-      void card.offsetWidth;
-      card.setAttribute('data-expanding', '');
-      setTimeout(() => card.removeAttribute('data-expanding'), 300);
-    }
+    if (this.rowMode() && group) this.store.toggleRow(group);
+    else this.store.toggle(key);
   }
 }

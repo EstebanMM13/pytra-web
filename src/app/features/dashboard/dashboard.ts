@@ -10,6 +10,7 @@ import {
   LucideLayers,
   LucidePlay,
   LucidePlus,
+  LucideSparkles,
   LucideStar,
   LucideWifi,
   LucideX,
@@ -32,6 +33,7 @@ import { GameCover } from '../../shared/ui/game-cover';
 import { RunRow } from '../../shared/ui/run-row';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
+import { PytraMark } from '../../shared/ui/pytra-mark';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { formatDayMonthYear } from '../../shared/utils/run-dates';
@@ -74,7 +76,9 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
     LucideArrowRight,
     LucideDynamicIcon,
     LucideX,
+    LucideSparkles,
     AchievementBadge,
+    PytraMark,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
