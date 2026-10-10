@@ -61,6 +61,24 @@ export class Login {
     });
   }
 
+  tryDemo(): void {
+    this.submitting.set(true);
+    this.errorKey.set(null);
+    this.unverifiedEmail.set(null);
+
+    this.authService.demoLogin().subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: (err) => {
+        this.submitting.set(false);
+        this.errorKey.set(
+          err.status === 404 ? 'auth.errors.demoUnavailable' :
+          err.status === 429 ? 'auth.errors.tooManyRequests' :
+          'auth.errors.generic'
+        );
+      },
+    });
+  }
+
   loginWithGoogle(): void {
     void this.nativeOAuth.openExternalFlow(`${API_ORIGIN}/oauth2/authorization/google`);
   }

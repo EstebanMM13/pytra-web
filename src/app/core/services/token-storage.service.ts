@@ -1,14 +1,22 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 
 const TOKEN_KEY = 'pytra_token';
 
-function isExpired(token: string): boolean {
+/** JWT payload (unverified: only used for UI decisions, the API is the real guard). */
+function decodePayload(token: string): Record<string, unknown> | null {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    return typeof payload.exp === 'number' && payload.exp * 1000 <= Date.now();
+    return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
   } catch {
+    return null;
+  }
+}
+
+function isExpired(token: string): boolean {
+  const payload = decodePayload(token);
+  if (!payload) {
     return true;
   }
+  return typeof payload['exp'] === 'number' && payload['exp'] * 1000 <= Date.now();
 }
 
 function readStoredToken(): string | null {
@@ -23,6 +31,12 @@ function readStoredToken(): string | null {
 @Injectable({ providedIn: 'root' })
 export class TokenStorageService {
   readonly token = signal<string | null>(readStoredToken());
+
+  /** Read-only demo session (token issued by POST /auth/demo with the `demo` claim). */
+  readonly isDemo = computed(() => {
+    const token = this.token();
+    return token !== null && decodePayload(token)?.['demo'] === true;
+  });
 
   setToken(token: string): void {
     localStorage.setItem(TOKEN_KEY, token);

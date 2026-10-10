@@ -33,6 +33,7 @@
       <kbd class="ml-auto hidden font-mono text-[11px] lg:inline">{{ shortcutLabel }}</kbd>
     </button>
 
+    @if (!isDemo()) {
     <div class="relative" data-add-menu>
       <button
         type="button"
@@ -64,6 +65,7 @@
         </div>
       }
     </div>
+    }
 
     <a
       routerLink="/profile"
@@ -138,6 +140,26 @@
   </div>
 </header>
 
+@if (isDemo()) {
+  <div
+    class="relative z-20 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-gold-card-border bg-gold-tint px-4 py-1.5 text-[13px] text-gold-tint-fg"
+    role="status"
+  >
+    <span class="flex items-center gap-1.5 font-medium">
+      <svg lucideEye [size]="14" aria-hidden="true"></svg>
+      {{ 'demo.banner' | translate }}
+    </span>
+    <span class="flex items-center gap-3">
+      <button type="button" (click)="exitDemo('/register')" class="font-semibold underline-offset-2 hover:underline">
+        {{ 'demo.createAccount' | translate }}
+      </button>
+      <button type="button" (click)="exitDemo('/login')" class="underline-offset-2 opacity-80 hover:underline hover:opacity-100">
+        {{ 'demo.exit' | translate }}
+      </button>
+    </span>
+  </div>
+}
+
 <!-- Mobile tab bar (< md) -->
 <nav
   class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 items-start border-t border-border nav-glass pt-2.5 pb-[max(env(safe-area-inset-bottom),12px)] text-[11px] text-muted md:hidden"
@@ -147,6 +169,7 @@
     <ng-container *ngTemplateOutlet="tabItem; context: { $implicit: tab }" />
   }
   <div class="relative flex justify-center" data-add-menu>
+    @if (!isDemo()) {
     <button
       type="button"
       (click)="addOpen.set(!addOpen())"
@@ -157,6 +180,7 @@
     >
       <svg lucidePlus [size]="26" class="transition-transform" [class.rotate-45]="addOpen()"></svg>
     </button>
+    }
     @if (addOpen()) {
       <div
         role="menu"

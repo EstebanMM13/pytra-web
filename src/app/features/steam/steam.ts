@@ -5,6 +5,7 @@ import { LucideEyeOff, LucideLink, LucideRefreshCw } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Game } from '../../core/models/game.model';
 import { SteamIgnoredApp, SteamPendingGame, SteamStatus, SteamSyncResult } from '../../core/models/steam.model';
+import { AuthService } from '../../core/services/auth.service';
 import { ExperienceService } from '../../core/services/experience.service';
 import { NativeOAuthService } from '../../core/services/native-oauth.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
@@ -49,6 +50,8 @@ export class Steam {
   private readonly experienceService = inject(ExperienceService);
   private readonly nativeOAuth = inject(NativeOAuthService);
   private readonly runFormLauncher = inject(RunFormLauncher);
+  /** Read-only demo: no link, sync or unlink buttons (the API rejects them anyway). */
+  protected readonly isDemo = inject(AuthService).isDemo;
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);

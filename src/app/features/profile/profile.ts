@@ -75,8 +75,10 @@ export class Profile {
   protected readonly showAccountSection = false;
   // Same reason: testers know the shared password, so account deletion is hidden too.
   protected readonly showDeleteAccount = false;
+  // Read-only demo: no avatar change and no export (the API rejects both for demo sessions).
+  protected readonly isDemo = inject(AuthService).isDemo;
   protected readonly sections = (['account', 'achievements', 'preferences', 'data'] as const).filter(
-    (s) => s !== 'account' || this.showAccountSection,
+    (s) => (s !== 'account' || this.showAccountSection) && (s !== 'data' || !this.isDemo()),
   );
 
   private readonly fb = inject(NonNullableFormBuilder);

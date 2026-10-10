@@ -15,6 +15,7 @@ import {
   LucideSearch,
   LucideUser,
   LucideDownload,
+  LucideEye,
 } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
@@ -60,6 +61,7 @@ const WEB_TABS: NavTab[] = [
     LucideUser,
     LucideLogOut,
     LucideDownload,
+    LucideEye,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './navbar.html',
@@ -75,6 +77,8 @@ export class Navbar {
   private readonly userService = inject(UserService);
   protected readonly displayName = this.userService.displayName;
   protected readonly avatar = computed(() => this.userService.currentUser()?.avatar ?? null);
+  /** Read-only demo: no "+" entry points and a banner with a way out. */
+  protected readonly isDemo = this.authService.isDemo;
 
   protected readonly webTabs = WEB_TABS;
   /** Mobile tab bar: two tabs on each side of the central "+" button. */
@@ -133,5 +137,11 @@ export class Navbar {
     this.menuOpen.set(false);
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  /** Leaves the demo session, landing on register ("Crear cuenta") or login ("Salir"). */
+  protected exitDemo(target: '/register' | '/login'): void {
+    this.authService.logout();
+    this.router.navigate([target]);
   }
 }

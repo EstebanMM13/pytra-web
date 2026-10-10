@@ -51,7 +51,7 @@
         <svg lucideChevronRight [size]="18" class="ml-auto text-faint"></svg>
       </button>
       }
-      <a routerLink="/steam" class="flex items-center gap-3 border-b border-border px-3.5 py-[15px] text-[15px]">
+      <a routerLink="/steam" class="flex items-center gap-3 border-border px-3.5 py-[15px] text-[15px]" [class.border-b]="!isDemo()">
         <svg lucideGamepad2 [size]="18" class="text-brand-light"></svg>
         {{ 'nav.steam' | translate }}
         <span class="ml-auto truncate text-[13px] text-muted">
@@ -61,6 +61,7 @@
         </span>
         <svg lucideChevronRight [size]="18" class="shrink-0 text-faint"></svg>
       </a>
+      @if (!isDemo()) {
       <button
         type="button"
         (click)="scrollTo('data')"
@@ -70,6 +71,7 @@
         {{ 'profile.exportData' | translate }}
         <svg lucideChevronRight [size]="18" class="ml-auto text-faint"></svg>
       </button>
+      }
     </div>
   </aside>
 
@@ -164,6 +166,7 @@
     }
 
     <!-- AVATAR -->
+    @if (!isDemo()) {
     <section id="profile-avatar" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
       <app-section-header collapseKey="profile.avatar" class="mb-2" [label]="'profile.avatar.title' | translate" />
       @if (user(); as u) {
@@ -181,6 +184,7 @@
         <app-skeleton class="h-[120px] rounded-[10px]" />
       }
     </section>
+    }
 
     <!-- LOGROS -->
     <section
@@ -341,6 +345,7 @@
     </section>
 
     <!-- DATOS -->
+    @if (!isDemo()) {
     <section id="profile-data" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
       <app-section-header collapseKey="profile.data" class="mb-2" [label]="'profile.sections.data' | translate" />
       <div class="flex flex-col gap-2.5 border-t border-divider py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
@@ -378,6 +383,7 @@
       </div>
       }
     </section>
+    }
 
     <button
       type="button"

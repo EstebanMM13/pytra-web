@@ -72,6 +72,10 @@
     {{ 'auth.login.withGoogle' | translate }}
   </button>
 
+  <button type="button" (click)="tryDemo()" [disabled]="submitting()" class="auth-secondary">
+    {{ 'auth.login.tryDemo' | translate }}
+  </button>
+
   <p class="mt-1.5 text-center text-sm text-muted">
     {{ 'auth.login.noAccount' | translate }}
     <a routerLink="/register" class="auth-link">{{ 'auth.login.register' | translate }}</a>

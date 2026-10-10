@@ -9,6 +9,7 @@
       "register": "Regístrate",
       "forgotPassword": "¿La has olvidado?",
       "withGoogle": "Continuar con Google",
+      "tryDemo": "Probar demo",
       "subtitle": "Bienvenido de nuevo.",
       "showPassword": "Mostrar contraseña",
       "hidePassword": "Ocultar contraseña"
@@ -66,7 +67,8 @@
       "generic": "Algo salió mal. Inténtalo de nuevo.",
       "emailNotVerified": "Confirma tu email antes de iniciar sesión.",
       "tooManyRequests": "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
-      "registrationClosed": "El registro está cerrado de momento: solo por invitación."
+      "registrationClosed": "El registro está cerrado de momento: solo por invitación.",
+      "demoUnavailable": "La demo no está disponible ahora mismo."
     },
     "resendVerification": {
       "prompt": "¿No te ha llegado el email? Podemos enviarte un enlace nuevo.",
@@ -892,5 +894,11 @@
     "showLess": "Ver menos",
     "noneUnlocked": "Aún no has desbloqueado logros. ¡Registra tu primera partida!",
     "emptyFilter": "No hay logros en este filtro."
+  },
+  "demo": {
+    "banner": "Modo demo · solo lectura",
+    "createAccount": "Crear cuenta",
+    "exit": "Salir",
+    "readOnly": "En el modo demo no se pueden hacer cambios"
   }
 }

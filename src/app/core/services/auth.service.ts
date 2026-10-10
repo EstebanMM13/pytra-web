@@ -21,6 +21,8 @@ export class AuthService {
   private readonly tokenStorage = inject(TokenStorageService);
 
   readonly isAuthenticated = computed(() => this.tokenStorage.token() !== null);
+  /** True while browsing the public read-only demo account. */
+  readonly isDemo = this.tokenStorage.isDemo;
 
   register(request: RegisterRequest): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(`${API_BASE_URL}/auth/register`, request);
@@ -51,6 +53,13 @@ export class AuthService {
   exchangeCode(request: ExchangeCodeTokenRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${API_BASE_URL}/auth/exchange-code`, request)
+      .pipe(tap((response) => this.tokenStorage.setToken(response.token)));
+  }
+
+  /** Read-only session on the demo account; 404 when the demo is disabled on the server. */
+  demoLogin(): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${API_BASE_URL}/auth/demo`, {})
       .pipe(tap((response) => this.tokenStorage.setToken(response.token)));
   }
 

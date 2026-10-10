@@ -9,6 +9,7 @@
       "register": "Sign up",
       "forgotPassword": "Forgot it?",
       "withGoogle": "Continue with Google",
+      "tryDemo": "Try the demo",
       "subtitle": "Welcome back.",
       "showPassword": "Show password",
       "hidePassword": "Hide password"
@@ -66,7 +67,8 @@
       "generic": "Something went wrong. Please try again.",
       "emailNotVerified": "Confirm your email before signing in.",
       "tooManyRequests": "Too many attempts. Please wait a minute and try again.",
-      "registrationClosed": "Registration is currently invite-only."
+      "registrationClosed": "Registration is currently invite-only.",
+      "demoUnavailable": "The demo is not available right now."
     },
     "resendVerification": {
       "prompt": "Didn't get the email? We can send you a new link.",
@@ -892,5 +894,11 @@
     "showLess": "Show less",
     "noneUnlocked": "No achievements unlocked yet. Log your first run!",
     "emptyFilter": "No achievements in this filter."
+  },
+  "demo": {
+    "banner": "Demo mode · read-only",
+    "createAccount": "Create account",
+    "exit": "Exit",
+    "readOnly": "Changes are not allowed in demo mode"
   }
 }
