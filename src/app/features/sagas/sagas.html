@@ -3,7 +3,7 @@
 <main class="mx-auto max-w-7xl md:grid md:min-h-[calc(100dvh-62px)] md:grid-cols-[300px_minmax(0,1fr)] lg:grid-cols-[380px_minmax(0,1fr)]">
   <!-- Saga list -->
   <section
-    class="flex-col gap-2.5 px-5 pt-3 pb-8 md:gap-2 md:border-r md:border-border md:px-5 md:py-7"
+    class="flex-col gap-2.5 px-5 pt-3 pb-8 md:sticky md:top-0 md:max-h-[calc(100dvh-62px)] md:gap-2 md:self-start md:px-5 md:py-7"
     [class]="routeId() !== null ? 'hidden md:flex' : 'flex'"
   >
     <div class="mb-1.5 flex items-center justify-between gap-3 md:px-2 md:pb-2.5">
@@ -24,56 +24,59 @@
       </button>
     </div>
 
-    @if (loading()) {
-      @for (i of skeletons; track i) {
-        <app-skeleton class="h-[86px] rounded-[10px]" />
+    <!-- Web: the column is capped to the viewport and the list scrolls inside it; phones keep page scroll. -->
+    <div class="flex flex-col gap-2.5 md:min-h-0 md:scroll-list md:gap-2">
+      @if (loading()) {
+        @for (i of skeletons; track i) {
+          <app-skeleton class="h-[86px] rounded-[10px]" />
+        }
+      } @else if (loadError()) {
+        <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
+          {{ 'sagas.loadError' | translate }}
+        </p>
+      } @else if (summaries().length === 0) {
+        <div class="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface px-5 py-8 text-center">
+          <p class="text-sm text-muted">{{ 'sagas.empty' | translate }}</p>
+          <button
+            type="button"
+            (click)="dialog.set(null)"
+            class="rounded-lg bg-brand px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark"
+          >
+            {{ 'sagas.new' | translate }}
+          </button>
+        </div>
+      } @else {
+        @for (s of summaries(); track s.saga.id) {
+          <a
+            [routerLink]="['/sagas', s.saga.id]"
+            [attr.aria-current]="selected()?.saga?.id === s.saga.id ? 'true' : null"
+            class="block rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
+            [class]="
+              selected()?.saga?.id === s.saga.id
+                ? 'border-border md:border-brand md:bg-brand-tint'
+                : 'border-border md:border-transparent md:bg-transparent md:hover:bg-hover'
+            "
+          >
+            <div class="flex justify-between gap-3 text-[15px] font-semibold">
+              <span class="truncate" [title]="s.saga.name">{{ s.saga.name }}</span>
+              <span class="shrink-0 font-mono font-medium text-gold">{{ s.avgRating | rating }}</span>
+            </div>
+            <div class="mt-1.5 flex justify-between gap-3 text-xs text-muted">
+              <span>{{ 'sagas.playedOf' | translate: { played: s.played, total: s.total } }}</span>
+              <span class="font-mono">{{ s.hours | hours }}</span>
+            </div>
+            <div class="mt-[9px] h-[3px] rounded-sm bg-border">
+              <div class="h-[3px] rounded-sm bg-brand-light" [style.width.%]="playedPercent(s)"></div>
+            </div>
+          </a>
+        }
       }
-    } @else if (loadError()) {
-      <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
-        {{ 'sagas.loadError' | translate }}
-      </p>
-    } @else if (summaries().length === 0) {
-      <div class="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface px-5 py-8 text-center">
-        <p class="text-sm text-muted">{{ 'sagas.empty' | translate }}</p>
-        <button
-          type="button"
-          (click)="dialog.set(null)"
-          class="rounded-lg bg-brand px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark"
-        >
-          {{ 'sagas.new' | translate }}
-        </button>
-      </div>
-    } @else {
-      @for (s of summaries(); track s.saga.id) {
-        <a
-          [routerLink]="['/sagas', s.saga.id]"
-          [attr.aria-current]="selected()?.saga?.id === s.saga.id ? 'true' : null"
-          class="block rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
-          [class]="
-            selected()?.saga?.id === s.saga.id
-              ? 'border-border md:border-brand md:bg-brand-tint'
-              : 'border-border md:border-transparent md:bg-transparent md:hover:bg-hover'
-          "
-        >
-          <div class="flex justify-between gap-3 text-[15px] font-semibold">
-            <span class="truncate">{{ s.saga.name }}</span>
-            <span class="shrink-0 font-mono font-medium text-gold">{{ s.avgRating | rating }}</span>
-          </div>
-          <div class="mt-1.5 flex justify-between gap-3 text-xs text-muted">
-            <span>{{ 'sagas.playedOf' | translate: { played: s.played, total: s.total } }}</span>
-            <span class="font-mono">{{ s.hours | hours }}</span>
-          </div>
-          <div class="mt-[9px] h-[3px] rounded-sm bg-border">
-            <div class="h-[3px] rounded-sm bg-brand-light" [style.width.%]="playedPercent(s)"></div>
-          </div>
-        </a>
-      }
-    }
+    </div>
   </section>
 
   <!-- Selected saga -->
   <section
-    class="min-w-0 flex-col gap-4 px-5 pt-3 pb-8 md:gap-6 md:px-8 md:py-8 lg:px-10"
+    class="min-w-0 flex-col gap-4 px-5 pt-3 pb-8 md:gap-6 md:border-l md:border-border md:px-8 md:py-8 lg:px-10"
     [class]="routeId() === null ? 'hidden md:flex' : 'flex'"
   >
     @if (loading()) {
@@ -102,7 +105,7 @@
 
       <div class="flex items-end justify-between gap-4">
         <div class="min-w-0">
-          <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] md:text-4xl md:tracking-[-0.03em]">
+          <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word md:text-4xl md:tracking-[-0.03em]">
             {{ s.saga.name }}
           </h2>
           @if (metaLine(s)) {
@@ -162,7 +165,7 @@
               aria-hidden="true"
             ></span>
             <div class="min-w-0 flex-1">
-              <p class="truncate text-[15px] font-medium md:text-sm">
+              <p class="truncate text-[15px] font-medium md:text-sm" [title]="g.name">
                 {{ g.name }}
                 @if (g.hasPlatinum) {
                   <span class="text-xs">🏆</span>

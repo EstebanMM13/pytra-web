@@ -107,7 +107,8 @@
             @if (s.goty; as g) {
               <a
                 [routerLink]="['/games', g.gameId]"
-                class="mt-1 text-[22px] leading-tight font-semibold tracking-[-0.02em] hover:underline md:mt-1.5 md:text-[28px]"
+                class="mt-1 line-clamp-2 text-[22px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word hover:underline md:mt-1.5 md:text-[28px]"
+                [title]="g.gameName"
               >
                 {{ g.gameName }}
               </a>
@@ -134,7 +135,7 @@
                 [routerLink]="['/games', g.gameId]"
                 class="flex items-baseline justify-between gap-3 rounded hover:underline"
               >
-                <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg">{{ g.gameName }}</span>
+                <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="shrink-0 font-mono text-xs text-gold md:text-sm">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
@@ -156,7 +157,7 @@
                 [routerLink]="['/games', g.gameId]"
                 class="flex items-baseline justify-between gap-3 rounded hover:underline"
               >
-                <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg">{{ g.gameName }}</span>
+                <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="shrink-0 font-mono text-xs text-gold md:text-sm">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
@@ -190,32 +191,35 @@
             <app-section-header class="mb-2" [label]="'years.runsOfYear' | translate">
               <span class="text-xs text-muted">{{ 'years.byRating' | translate }}</span>
             </app-section-header>
-            @for (run of visibleRuns(); track run.experienceId) {
-              <div
-                class="grid grid-cols-[minmax(0,1fr)_auto_auto_40px] items-center gap-3 border-t border-divider py-2.5 text-sm md:grid-cols-[minmax(0,1fr)_110px_64px_56px] md:gap-3.5"
-              >
-                <span class="min-w-0 truncate">
-                  <a
-                    [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]"
-                    class="text-text-2 hover:underline"
-                    >{{ run.gameName }}</a
-                  >
-                  @if (run.platinum) {
-                    <span class="text-xs" [attr.aria-label]="'run.platinum' | translate"> 🏆</span>
-                  }
-                  <span class="hidden text-xs text-faint md:inline"> · {{ run.runLabel }}</span>
-                </span>
-                <span class="text-xs whitespace-nowrap" [class]="statusText[run.status]">
-                  {{ 'status.' + run.status | translate }}
-                </span>
-                <span class="text-right font-mono text-xs whitespace-nowrap text-text-3 md:text-sm">
-                  {{ run.hours === null ? '—' : (run.hours | hours) }}
-                </span>
-                <span class="text-right font-mono text-gold">{{ run.rating | rating }}</span>
-              </div>
-            } @empty {
-              <p class="border-t border-divider pt-3 text-sm text-muted">{{ 'common.noData' | translate }}</p>
-            }
+            <!-- Web: 10 rows (the preview size) then internal scroll once "show all" expands it. -->
+            <div class="md:scroll-list md:max-h-[410px]">
+              @for (run of visibleRuns(); track run.experienceId) {
+                <div
+                  class="grid grid-cols-[minmax(0,1fr)_auto_auto_40px] items-center gap-3 border-t border-divider py-2.5 text-sm md:grid-cols-[minmax(0,1fr)_110px_64px_56px] md:gap-3.5"
+                >
+                  <span class="min-w-0 truncate" [title]="run.gameName + ' · ' + run.runLabel">
+                    <a
+                      [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]"
+                      class="text-text-2 hover:underline"
+                      >{{ run.gameName }}</a
+                    >
+                    @if (run.platinum) {
+                      <span class="text-xs" [attr.aria-label]="'run.platinum' | translate"> 🏆</span>
+                    }
+                    <span class="hidden text-xs text-faint md:inline"> · {{ run.runLabel }}</span>
+                  </span>
+                  <span class="text-xs whitespace-nowrap" [class]="statusText[run.status]">
+                    {{ 'status.' + run.status | translate }}
+                  </span>
+                  <span class="text-right font-mono text-xs whitespace-nowrap text-text-3 md:text-sm">
+                    {{ run.hours === null ? '—' : (run.hours | hours) }}
+                  </span>
+                  <span class="text-right font-mono text-gold">{{ run.rating | rating }}</span>
+                </div>
+              } @empty {
+                <p class="border-t border-divider pt-3 text-sm text-muted">{{ 'common.noData' | translate }}</p>
+              }
+            </div>
             @if (hiddenRuns() > 0) {
               <button
                 type="button"
@@ -238,7 +242,7 @@
                 class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
               >
                 <span class="w-[18px] shrink-0 font-mono text-xs text-faint">{{ i + 1 }}</span>
-                <span class="min-w-0 flex-1 truncate text-text-2">{{ g.gameName }}</span>
+                <span class="min-w-0 flex-1 truncate text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="hidden shrink-0 text-xs text-faint sm:inline">
                   {{ 'years.runsCount' | translate: { count: g.experienceCount } }} · {{ g.totalHours | hours }}
                 </span>
@@ -254,7 +258,7 @@
             @for (g of s.mostPlayed; track g.gameId) {
               <a [routerLink]="['/games', g.gameId]" class="block border-t border-divider py-[9px] text-sm hover:bg-hover">
                 <span class="flex justify-between gap-3">
-                  <span class="min-w-0 truncate text-text-2">{{ g.gameName }}</span>
+                  <span class="min-w-0 truncate text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
                   <span class="shrink-0 font-mono">{{ g.totalHours | hours }}</span>
                 </span>
                 <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
@@ -273,7 +277,7 @@
                 [routerLink]="['/sagas', saga.sagaId]"
                 class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
               >
-                <span class="min-w-0 flex-1 truncate text-text-2">{{ saga.sagaName }}</span>
+                <span class="min-w-0 flex-1 truncate text-text-2" [title]="saga.sagaName">{{ saga.sagaName }}</span>
                 <span class="shrink-0 text-xs text-faint">
                   {{ 'common.games' | translate: { count: saga.gameCount } }} ·
                   {{ 'years.runsCount' | translate: { count: saga.experienceCount } }}
@@ -289,7 +293,7 @@
             <app-section-header class="mb-3.5" [label]="'years.topGenres' | translate" />
             @for (genre of s.topGenres; track genre.genreId) {
               <div class="flex items-center gap-3 border-t border-divider py-[9px] text-sm">
-                <span class="min-w-0 flex-1 truncate text-text-2">{{ genre.genreName }}</span>
+                <span class="min-w-0 flex-1 truncate text-text-2" [title]="genre.genreName">{{ genre.genreName }}</span>
                 <span class="shrink-0 text-xs text-faint">
                   {{ 'common.games' | translate: { count: genre.gameCount } }} ·
                   {{ 'years.runsCount' | translate: { count: genre.experienceCount } }}

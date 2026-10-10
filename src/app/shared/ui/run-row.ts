@@ -23,7 +23,7 @@ import { RatingPipe } from '../pipes/rating.pipe';
     <span class="w-1 self-stretch rounded-sm bg-brand-light" aria-hidden="true"></span>
     <div class="min-w-0 flex-1">
       <p class="flex items-center gap-2 text-[15px] font-semibold">
-        <span class="truncate">{{ title() }}</span>
+        <span class="truncate" [attr.title]="title()">{{ title() }}</span>
         @if (best()) {
           <span
             class="shrink-0 rounded-full bg-brand-tint px-2 py-0.5 text-[11px] font-medium text-brand-lighter"
@@ -33,7 +33,7 @@ import { RatingPipe } from '../pipes/rating.pipe';
         }
       </p>
       @if (meta()) {
-        <p class="mt-1 truncate text-xs text-muted md:text-[13px]">{{ meta() }}</p>
+        <p class="mt-1 truncate text-xs text-muted md:text-[13px]" [attr.title]="meta()">{{ meta() }}</p>
       }
     </div>
     <ng-content />

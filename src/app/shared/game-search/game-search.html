@@ -32,7 +32,7 @@
       </button>
     </div>
 
-    <ul id="game-search-results" role="listbox" class="max-h-80 overflow-y-auto p-2">
+    <ul id="game-search-results" role="listbox" class="scroll-thin max-h-80 overflow-y-auto p-2">
       @if (games() === null) {
         <li class="px-3 py-6 text-center text-sm text-muted">{{ 'search.loading' | translate }}</li>
       } @else {
@@ -46,11 +46,15 @@
             class="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
             [class.bg-brand-tint]="i === activeIndex()"
           >
-            <span class="min-w-0 flex-1 truncate" [class]="i === activeIndex() ? 'text-brand-lighter' : 'text-text-2'">
+            <span
+              class="min-w-0 flex-1 truncate"
+              [class]="i === activeIndex() ? 'text-brand-lighter' : 'text-text-2'"
+              [title]="game.name"
+            >
               {{ game.name }}
             </span>
             @if (game.sagaName) {
-              <span class="shrink-0 truncate text-xs text-faint">{{ game.sagaName }}</span>
+              <span class="max-w-[40%] shrink-0 truncate text-xs text-faint" [title]="game.sagaName">{{ game.sagaName }}</span>
             }
           </li>
         } @empty {

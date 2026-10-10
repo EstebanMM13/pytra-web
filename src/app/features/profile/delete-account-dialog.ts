@@ -41,7 +41,7 @@ import { REAUTH_REQUIRED_KEY, confirmsUsername, deleteAccountErrorKey } from './
         <p class="text-[13px] leading-relaxed text-muted">{{ 'profile.delete.exportHint' | translate }}</p>
 
         <div class="flex flex-col gap-2">
-          <label for="delete-confirm" class="text-[13px] text-text-3">
+          <label for="delete-confirm" class="text-[13px] wrap-break-word text-text-3">
             {{ 'profile.delete.confirmLabel' | translate: { username: user().username } }}
           </label>
           <input

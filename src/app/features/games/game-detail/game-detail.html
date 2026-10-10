@@ -55,7 +55,10 @@
             }
           </a>
         }
-        <h1 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] md:text-[40px] md:tracking-[-0.03em]">
+        <h1
+          class="line-clamp-3 text-[28px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word md:line-clamp-2 md:text-[40px] md:tracking-[-0.03em]"
+          [title]="g.name"
+        >
           {{ g.name }}
         </h1>
         @if (metaLine()) {
@@ -144,7 +147,7 @@
       <!-- Runs -->
       <section class="self-start md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
         <app-section-header class="mb-3 md:mb-4" [label]="'game.runs' | translate" />
-        <div class="flex flex-col gap-2.5">
+        <div class="flex flex-col gap-2.5 md:scroll-list md:max-h-[494px]">
           @if (experiences() === null) {
             @for (i of [1, 2]; track i) {
               <app-skeleton class="h-[74px] rounded-[10px]" />
@@ -184,12 +187,12 @@
           <dl class="text-sm">
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
               <dt class="shrink-0 text-muted">{{ 'game.developer' | translate }}</dt>
-              <dd class="truncate text-right">{{ g.developer ?? '—' }}</dd>
+              <dd class="truncate text-right" [title]="g.developer ?? ''">{{ g.developer ?? '—' }}</dd>
             </div>
             @if (g.publisher) {
               <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
                 <dt class="shrink-0 text-muted">{{ 'game.publisher' | translate }}</dt>
-                <dd class="truncate text-right">{{ g.publisher }}</dd>
+                <dd class="truncate text-right" [title]="g.publisher">{{ g.publisher }}</dd>
               </div>
             }
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
@@ -198,11 +201,11 @@
             </div>
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
               <dt class="shrink-0 text-muted">{{ 'game.genre' | translate }}</dt>
-              <dd class="truncate text-right">{{ genreNames(g) || '—' }}</dd>
+              <dd class="truncate text-right" [title]="genreNames(g)">{{ genreNames(g) || '—' }}</dd>
             </div>
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
               <dt class="shrink-0 text-muted">{{ 'game.platforms' | translate }}</dt>
-              <dd class="truncate text-right">{{ platformNames() || '—' }}</dd>
+              <dd class="truncate text-right" [title]="platformNames()">{{ platformNames() || '—' }}</dd>
             </div>
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
               <dt class="shrink-0 text-muted">{{ 'game.category' | translate }}</dt>
@@ -262,16 +265,16 @@
         @if (sagaGames().length > 1) {
           <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
             <app-section-header class="mb-3" [label]="'game.inSaga' | translate" />
-            <ul class="text-sm">
+            <ul class="scroll-list max-h-[312px] text-sm">
               @for (sg of sagaGames(); track sg.id) {
                 <li class="flex items-center justify-between gap-4 border-t border-divider py-[9px]">
                   @if (sg.id === g.id) {
-                    <span class="truncate text-brand-lighter" aria-current="page">{{ sg.name }}</span>
+                    <span class="truncate text-brand-lighter" aria-current="page" [title]="sg.name">{{ sg.name }}</span>
                     @if (stats().bestRating !== null) {
                       <span class="shrink-0 font-mono text-gold">{{ stats().bestRating | rating }}</span>
                     }
                   } @else {
-                    <a [routerLink]="['/games', sg.id]" class="truncate hover:underline">{{ sg.name }}</a>
+                    <a [routerLink]="['/games', sg.id]" class="truncate hover:underline" [title]="sg.name">{{ sg.name }}</a>
                     @if (sg.bestRating != null) {
                       <span class="shrink-0 font-mono text-gold">{{ sg.bestRating | rating }}</span>
                     } @else if (sg.lastExperienceStatus) {

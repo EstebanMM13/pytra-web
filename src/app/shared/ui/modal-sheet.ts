@@ -58,12 +58,12 @@ const FOCUSABLE =
         </header>
 
         <!-- Web header -->
-        <header class="hidden shrink-0 items-center justify-between border-b border-border px-[26px] py-5 md:flex">
-          <h2 class="text-[19px] font-semibold">{{ title() }}</h2>
+        <header class="hidden shrink-0 items-center justify-between gap-4 border-b border-border px-[26px] py-5 md:flex">
+          <h2 class="min-w-0 truncate text-[19px] font-semibold" [attr.title]="title()">{{ title() }}</h2>
           <button
             type="button"
             (click)="cancel()" [disabled]="saving()"
-            class="rounded-md p-1 text-muted hover:text-text disabled:opacity-50"
+            class="shrink-0 rounded-md p-1 text-muted hover:text-text disabled:opacity-50"
             [attr.aria-label]="'common.close' | translate"
           >
             <svg lucideX [size]="20"></svg>

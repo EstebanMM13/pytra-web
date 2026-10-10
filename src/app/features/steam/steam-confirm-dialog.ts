@@ -81,7 +81,7 @@ export type SteamConfirmMode = 'confirm' | 'run';
         @if (genres().length > 0) {
           <div class="flex flex-col gap-2">
             <span id="steam-confirm-genres" class="text-[13px] text-text-3">{{ 'steam.form.genres' | translate }}</span>
-            <div class="flex flex-wrap gap-2" role="group" aria-labelledby="steam-confirm-genres">
+            <div class="scroll-list -my-1 -ml-1 flex max-h-[192px] flex-wrap gap-2 py-1 pl-1" role="group" aria-labelledby="steam-confirm-genres">
               @for (genre of genres(); track genre.id) {
                 <button
                   type="button"

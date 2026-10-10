@@ -87,7 +87,7 @@
   <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
     <section class="md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
       <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
-      <div class="flex max-h-[326px] flex-col gap-2.5 overflow-y-auto pr-1 [scrollbar-width:thin]">
+      <div class="scroll-list flex max-h-[326px] flex-col gap-2.5">
         @if (playing() === null) {
           @for (i of [1, 2]; track i) {
             <app-skeleton class="h-[74px] rounded-[10px]" />
@@ -153,7 +153,7 @@
             class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
           >
             <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
-            <span class="min-w-0 flex-1 truncate text-text-2">
+            <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName + ' · ' + item.runLabel">
               {{ item.gameName }} <span class="text-faint">· {{ item.runLabel }}</span>
             </span>
             <span class="font-mono font-medium text-gold">{{ item.rating | rating }}</span>
@@ -178,7 +178,7 @@
         @for (item of items; track item.gameId) {
           <a [routerLink]="['/games', item.gameId]" class="block border-t border-divider py-[9px] text-sm hover:bg-hover">
             <span class="flex justify-between gap-3">
-              <span class="min-w-0 truncate text-text-2">{{ item.gameName }}</span>
+              <span class="min-w-0 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
               <span class="shrink-0 font-mono">{{ item.totalHours | hours }}</span>
             </span>
             <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
@@ -205,7 +205,7 @@
             [routerLink]="['/sagas', item.sagaId]"
             class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
           >
-            <span class="min-w-0 flex-1 truncate text-text-2">{{ item.sagaName }}</span>
+            <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
             <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translate: { count: item.gameCount } }}</span>
             <span class="w-16 shrink-0 text-right font-mono">{{ item.totalHours | hours }}</span>
           </a>

@@ -15,8 +15,8 @@
       </span>
       <div class="flex min-w-0 flex-col gap-0.5 lg:gap-1.5">
         @if (user(); as u) {
-          <span class="truncate text-[19px] font-semibold lg:text-[22px]">{{ displayName() }}</span>
-          <span class="truncate text-[13px] text-muted lg:text-sm">{{ u.email }}</span>
+          <span class="truncate text-[19px] font-semibold lg:text-[22px]" [attr.title]="displayName()">{{ displayName() }}</span>
+          <span class="truncate text-[13px] text-muted lg:text-sm" [title]="u.email">{{ u.email }}</span>
           @if (memberSince(); as since) {
             <span class="mt-1 text-xs text-faint lg:text-[13px]">{{ 'profile.memberSince' | translate: { date: since } }}</span>
           }
@@ -127,7 +127,7 @@
             <div class="flex items-center justify-between gap-4">
               <span class="text-muted">{{ 'profile.username' | translate }}</span>
               <span class="flex min-w-0 items-center gap-4">
-                <span class="truncate">{{ displayName() }}</span>
+                <span class="truncate" [attr.title]="displayName()">{{ displayName() }}</span>
                 <button type="button" (click)="startEditName()" class="shrink-0 text-brand-light hover:underline">
                   {{ 'common.edit' | translate }}
                 </button>
@@ -138,7 +138,7 @@
         <div class="flex items-center justify-between gap-4 border-t border-divider py-3.5 text-sm">
           <span class="text-muted">{{ 'profile.email' | translate }}</span>
           <span class="flex min-w-0 items-center gap-2">
-            <span class="truncate">{{ u.email }}</span>
+            <span class="truncate" [title]="u.email">{{ u.email }}</span>
             @if (u.googleLinked) {
               <span class="shrink-0 rounded-full border border-border px-2 py-0.5 text-[11px] text-text-3">Google</span>
             }

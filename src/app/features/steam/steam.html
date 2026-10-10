@@ -34,7 +34,7 @@
             </span>
             <div class="min-w-0 flex-1">
               <p class="flex flex-wrap items-center gap-2.5 text-[17px] font-semibold">
-                <span class="min-w-0 truncate">{{ s.personaName || s.steamId }}</span>
+                <span class="min-w-0 truncate" [title]="s.personaName || s.steamId">{{ s.personaName || s.steamId }}</span>
                 <span class="rounded-full bg-success-bg px-[9px] py-[3px] text-xs font-medium text-success">
                   {{ 'steam.linkedPill' | translate }}
                 </span>
@@ -179,7 +179,8 @@
       } @else if (pending().length === 0) {
         <p class="border-t border-divider pt-4 pb-1 text-sm text-muted">{{ 'steam.noPending' | translate }}</p>
       } @else {
-        <ul>
+        <!-- Web: ~8 rows then internal scroll; phones keep page scroll (it is the page's main list). -->
+        <ul class="md:scroll-list md:max-h-[560px]">
           @for (game of pending(); track game.id) {
             <li
               class="flex flex-col gap-3 border-t border-divider py-3.5 text-sm md:grid md:grid-cols-[minmax(0,1fr)_110px_72px_auto] md:items-center md:gap-4"
@@ -253,7 +254,8 @@
       @if (showIgnored()) {
         <section class="rounded-[14px] border border-border bg-surface p-4 md:p-[22px]">
           <p class="mb-2 text-[13px] text-muted">{{ 'steam.ignoredHint' | translate }}</p>
-          <ul>
+          <!-- Secondary list: ~6 rows then internal scroll on every size. -->
+          <ul class="scroll-list max-h-[344px]">
             @for (app of ignoredApps(); track app.appId) {
               <li class="flex items-center justify-between gap-3 border-t border-divider py-3">
                 <span class="min-w-0 text-sm break-words text-text-3">{{ app.name }}</span>
