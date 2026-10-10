@@ -101,6 +101,11 @@ const TIER_TONE: Record<AchievementTier, string> = {
       >
         {{ 'achievements.items.' + a().id + '.title' | translate }}
       </span>
+      @if (compact()) {
+        <span class="mt-0.5 line-clamp-2 block text-[11px] leading-snug text-muted">
+          {{ 'achievements.items.' + a().id + '.desc' | translate: { target: a().target } }}
+        </span>
+      }
       @if (compact() && !a().unlocked) {
         <span class="mt-1 block h-0.5 overflow-hidden rounded-full bg-bg" aria-hidden="true">
           <span class="block h-full rounded-full bg-brand-light/60" [style.width.%]="percent()"></span>
