@@ -9,7 +9,13 @@ import { SteamStatus } from '../../core/models/steam.model';
 import { ExportFormat } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
 import { FileExportService, filenameFromContentDisposition } from '../../core/services/file-export.service';
-import { PLATFORMS, PreferencesService, RatingPrecision } from '../../core/services/preferences.service';
+import {
+  Language,
+  PLATFORMS,
+  PreferencesService,
+  RatingPrecision,
+  applyLanguage,
+} from '../../core/services/preferences.service';
 import { SteamService } from '../../core/services/steam.service';
 import { ThemePreference, ThemeService } from '../../core/services/theme.service';
 import { UserService } from '../../core/services/user.service';
@@ -80,6 +86,10 @@ export class Profile {
     { value: 'half', label: '9.5' },
     { value: 'hundredths', label: '9.25' },
   ];
+  protected readonly languageOptions: SegmentedOption<Language>[] = [
+    { value: 'es', label: 'language.es' },
+    { value: 'en', label: 'language.en' },
+  ];
   protected readonly platforms = PLATFORMS;
 
   protected readonly user = this.userService.currentUser;
@@ -93,6 +103,11 @@ export class Profile {
   protected readonly steamStatus = signal<SteamStatus | null>(null);
 
   protected readonly activeSection = signal<ProfileSection>('preferences');
+
+  protected setLanguage(language: Language): void {
+    this.preferences.setLanguage(language);
+    applyLanguage(this.translate, language);
+  }
 
   readonly form = this.fb.group({
     username: this.fb.control('', usernameValidators),

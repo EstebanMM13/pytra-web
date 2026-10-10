@@ -109,7 +109,17 @@
     "retry": "Retry",
     "playingToday": "Today",
     "playingDay": "1 day",
-    "playingDays": "{{count}} days"
+    "playingDays": "{{count}} days",
+    "onboarding": {
+      "title": "Welcome to Pytra",
+      "subtitle": "Your library is empty. Get started in three steps:",
+      "steam": "Import your Steam library",
+      "steamHint": "Bring in your games and hours in a moment.",
+      "addGame": "Add a game",
+      "addGameHint": "Search any game and add it to your collection.",
+      "firstRun": "Log your first run",
+      "firstRunHint": "Track hours, platform and your rating."
+    }
   },
   "profile": {
     "title": "Profile",
@@ -169,7 +179,8 @@
         "syncInProgress": "A Steam sync is running. Wait for it to finish and try again.",
         "reauth": "For security, your Google account needs a recent sign-in. Sign in again with Google and repeat the deletion."
       }
-    }
+    },
+    "language": "Language"
   },
   "steam": {
     "title": "Steam",
@@ -637,5 +648,13 @@
     "deleted": "Saga deleted.",
     "saveError": "Could not save the saga (duplicate name?).",
     "deleteError": "Could not delete the saga."
+  },
+  "language": {
+    "es": "Español",
+    "en": "English"
+  },
+  "update": {
+    "available": "New version available",
+    "reload": "Reload"
   }
 }

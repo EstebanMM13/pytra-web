@@ -18,6 +18,51 @@ server {
     #  - connect-src: the API lives on its own origin.
     set $csp "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://pytra-api-production.up.railway.app; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
 
+    # Service worker files must never be cached by the browser/proxies, otherwise
+    # clients keep running an old worker and never see new versions. These exact
+    # matches win over the hashed-assets regex below. worker-src falls back to
+    # script-src 'self', so the CSP already allows the worker.
+    location = /ngsw-worker.js {
+        try_files $uri =404;
+        add_header Cache-Control "no-cache";
+        add_header Content-Security-Policy $csp always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+    }
+
+    location = /safety-worker.js {
+        try_files $uri =404;
+        add_header Cache-Control "no-cache";
+        add_header Content-Security-Policy $csp always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+    }
+
+    location = /ngsw.json {
+        try_files $uri =404;
+        add_header Cache-Control "no-cache";
+        add_header Content-Security-Policy $csp always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+    }
+
+    location = /manifest.webmanifest {
+        try_files $uri =404;
+        default_type application/manifest+json;
+        add_header Cache-Control "no-cache";
+        add_header Content-Security-Policy $csp always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+    }
+
     # Angular emits content-hashed JS/CSS, so those can be cached aggressively.
     location ~* \.(?:js|css)$ {
         try_files $uri =404;

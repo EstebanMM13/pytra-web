@@ -2,16 +2,21 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   ApplicationConfig,
   inject,
+  isDevMode,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter, withViewTransitions } from '@angular/router';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
-import { provideTranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
+import { provideServiceWorker } from '@angular/service-worker';
+import { Capacitor } from '@capacitor/core';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { routes } from './app.routes';
 import { NativeOAuthService } from './core/services/native-oauth.service';
 import { ThemeService } from './core/services/theme.service';
+import { PreferencesService, applyLanguage } from './core/services/preferences.service';
+import { AppUpdateService } from './core/services/app-update.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,5 +29,12 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     provideTranslateService({ lang: 'es', fallbackLang: 'es' }),
     ...provideTranslateHttpLoader({ prefix: '/i18n/', suffix: '.json' }),
+    provideAppInitializer(() => applyLanguage(inject(TranslateService), inject(PreferencesService).language())),
+    // PWA: production web only. Inside the Capacitor shell assets are already local.
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode() && !Capacitor.isNativePlatform(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
+    provideAppInitializer(() => inject(AppUpdateService).init()),
   ],
 };

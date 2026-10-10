@@ -109,7 +109,17 @@
     "retry": "Reintentar",
     "playingToday": "Hoy",
     "playingDay": "1 día",
-    "playingDays": "{{count}} días"
+    "playingDays": "{{count}} días",
+    "onboarding": {
+      "title": "Bienvenido a Pytra",
+      "subtitle": "Tu biblioteca está vacía. Empieza en tres pasos:",
+      "steam": "Importa tu biblioteca de Steam",
+      "steamHint": "Trae tus juegos y horas en un momento.",
+      "addGame": "Añade un juego",
+      "addGameHint": "Busca cualquier juego y añádelo a tu colección.",
+      "firstRun": "Registra tu primera partida",
+      "firstRunHint": "Anota horas, plataforma y tu nota."
+    }
   },
   "profile": {
     "title": "Perfil",
@@ -169,7 +179,8 @@
         "syncInProgress": "Hay una sincronización de Steam en curso. Espera a que termine y vuelve a intentarlo.",
         "reauth": "Por seguridad, tu cuenta de Google necesita un inicio de sesión reciente. Vuelve a entrar con Google y repite el borrado."
       }
-    }
+    },
+    "language": "Idioma"
   },
   "steam": {
     "title": "Steam",
@@ -637,5 +648,13 @@
     "deleted": "Saga borrada.",
     "saveError": "No se pudo guardar la saga (¿nombre repetido?).",
     "deleteError": "No se pudo borrar la saga."
+  },
+  "language": {
+    "es": "Español",
+    "en": "English"
+  },
+  "update": {
+    "available": "Nueva versión disponible",
+    "reload": "Recargar"
   }
 }

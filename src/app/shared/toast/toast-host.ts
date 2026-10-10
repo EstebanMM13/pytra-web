@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { LucideCheck, LucideCircleAlert, LucideX } from '@lucide/angular';
+import { LucideCheck, LucideCircleAlert, LucideInfo, LucideX } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ToastService } from './toast.service';
 
 /** Renders the toast stack: bottom-centre above the mobile tab bar, bottom-right on web. */
 @Component({
   selector: 'app-toast-host',
-  imports: [TranslatePipe, LucideCheck, LucideCircleAlert, LucideX],
+  imports: [TranslatePipe, LucideCheck, LucideCircleAlert, LucideInfo, LucideX],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
@@ -21,10 +21,21 @@ import { ToastService } from './toast.service';
       >
         @if (toast.tone === 'success') {
           <svg lucideCheck [size]="16" class="shrink-0 text-success"></svg>
+        } @else if (toast.tone === 'info') {
+          <svg lucideInfo [size]="16" class="shrink-0 text-brand-light"></svg>
         } @else {
           <svg lucideCircleAlert [size]="16" class="shrink-0 text-danger"></svg>
         }
         <span class="min-w-0 flex-1">{{ toast.message }}</span>
+        @if (toast.action; as action) {
+          <button
+            type="button"
+            (click)="runAction(toast.id, action.run)"
+            class="shrink-0 rounded-md px-2 py-1 font-medium text-brand-light hover:underline"
+          >
+            {{ action.label | translate }}
+          </button>
+        }
         <button
           type="button"
           (click)="dismiss(toast.id)"
@@ -40,6 +51,11 @@ import { ToastService } from './toast.service';
 export class ToastHost {
   private readonly toastService = inject(ToastService);
   protected readonly toasts = this.toastService.toasts;
+
+  protected runAction(id: number, run: () => void): void {
+    this.toastService.dismiss(id);
+    run();
+  }
 
   protected dismiss(id: number): void {
     this.toastService.dismiss(id);

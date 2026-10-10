@@ -5,9 +5,11 @@ import {
   LucideArrowRight,
   LucideClock,
   LucideDownload,
+  LucideDynamicIcon,
   LucideGamepad2,
   LucideLayers,
   LucidePlay,
+  LucidePlus,
   LucideStar,
   LucideWifi,
 } from '@lucide/angular';
@@ -59,6 +61,7 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
     Skeleton,
     LucideDownload,
     LucideArrowRight,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
@@ -77,6 +80,8 @@ export class Dashboard {
     single: LucideClock,
     online: LucideWifi,
     rating: LucideStar,
+    steam: LucideDownload,
+    addGame: LucidePlus,
   };
 
   readonly summary = signal<StatsSummary | null>(null);
@@ -107,6 +112,9 @@ export class Dashboard {
     }).format(new Date());
     return text.charAt(0).toUpperCase() + text.slice(1);
   });
+
+  /** New account (no games yet): show the onboarding card instead of empty stats. */
+  protected readonly isEmptyLibrary = computed(() => this.summary()?.totalGames === 0);
 
   protected readonly totalHours = computed(() => {
     const s = this.summary();

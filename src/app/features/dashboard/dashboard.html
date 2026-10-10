@@ -25,241 +25,282 @@
     }
   </div>
 
-  <!-- Stats: web (6 cards) -->
-  <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-6">
-    @if (summary(); as s) {
-      <app-stat-card [icon]="icons.games" [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
-      <app-stat-card [icon]="icons.sagas" [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
-      <app-stat-card [icon]="icons.runs" [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" />
-      <app-stat-card
-        [icon]="icons.single"
-        [label]="'dashboard.stats.singleHours' | translate"
-        [value]="s.totalSingleplayerHours | hours"
-      />
-      <app-stat-card
-        [icon]="icons.online"
-        [label]="'dashboard.stats.onlineHours' | translate"
-        [value]="s.totalOnlineHours | hours"
-      />
-      <app-stat-card
-        [icon]="icons.rating"
-        [label]="'dashboard.stats.avgRating' | translate"
-        [value]="s.averageRating | rating"
-        [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
-      />
-    } @else if (!summaryFailed()) {
-      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-        <app-skeleton class="h-[94px] rounded-xl" />
+  @if (isEmptyLibrary()) {
+    <!-- Onboarding: account without games -->
+    <section
+      class="mx-auto w-full max-w-2xl rounded-[14px] border border-border bg-surface p-5 md:p-8"
+      aria-labelledby="onboarding-title"
+    >
+      <h2 id="onboarding-title" class="text-xl font-semibold tracking-[-0.01em] md:text-2xl">
+        {{ 'dashboard.onboarding.title' | translate }}
+      </h2>
+      <p class="mt-1.5 text-sm text-muted">{{ 'dashboard.onboarding.subtitle' | translate }}</p>
+      <ol class="mt-5 flex flex-col gap-2.5">
+        <li>
+          <a routerLink="/steam" class="hover-lift flex items-center gap-3.5 rounded-xl border border-border bg-bg p-3.5 hover:bg-hover">
+            <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: icons.steam }" />
+            <ng-container *ngTemplateOutlet="stepText; context: { title: 'dashboard.onboarding.steam', hint: 'dashboard.onboarding.steamHint' }" />
+          </a>
+        </li>
+        <li>
+          <a
+            routerLink="/games"
+            [queryParams]="{ create: 1 }"
+            class="hover-lift flex items-center gap-3.5 rounded-xl border border-border bg-bg p-3.5 hover:bg-hover"
+          >
+            <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: icons.addGame }" />
+            <ng-container *ngTemplateOutlet="stepText; context: { title: 'dashboard.onboarding.addGame', hint: 'dashboard.onboarding.addGameHint' }" />
+          </a>
+        </li>
+        <li>
+          <button
+            type="button"
+            (click)="newRun()"
+            class="hover-lift flex w-full items-center gap-3.5 rounded-xl border border-border bg-bg p-3.5 text-left hover:bg-hover"
+          >
+            <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: icons.runs }" />
+            <ng-container *ngTemplateOutlet="stepText; context: { title: 'dashboard.onboarding.firstRun', hint: 'dashboard.onboarding.firstRunHint' }" />
+          </button>
+        </li>
+      </ol>
+    </section>
+  } @else {
+    <!-- Stats: web (6 cards) -->
+    <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-6">
+      @if (summary(); as s) {
+        <app-stat-card [icon]="icons.games" [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
+        <app-stat-card [icon]="icons.sagas" [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
+        <app-stat-card [icon]="icons.runs" [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" />
+        <app-stat-card
+          [icon]="icons.single"
+          [label]="'dashboard.stats.singleHours' | translate"
+          [value]="s.totalSingleplayerHours | hours"
+        />
+        <app-stat-card
+          [icon]="icons.online"
+          [label]="'dashboard.stats.onlineHours' | translate"
+          [value]="s.totalOnlineHours | hours"
+        />
+        <app-stat-card
+          [icon]="icons.rating"
+          [label]="'dashboard.stats.avgRating' | translate"
+          [value]="s.averageRating | rating"
+          [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
+        />
+      } @else if (!summaryFailed()) {
+        @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+          <app-skeleton class="h-[94px] rounded-xl" />
+        }
+      } @else {
+        <div class="col-span-full"><ng-container *ngTemplateOutlet="sectionError" /></div>
       }
-    } @else {
-      <div class="col-span-full"><ng-container *ngTemplateOutlet="sectionError" /></div>
-    }
-  </section>
+    </section>
 
-  <!-- Stats: mobile (3 x 2 mini cards) -->
-  <section class="grid grid-cols-3 gap-2 md:hidden">
-    @if (summary(); as s) {
-      <app-stat-card compact [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
-      <app-stat-card compact [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" />
-      <app-stat-card compact [label]="'dashboard.stats.hours' | translate" [value]="totalHours() | hours" />
-      <app-stat-card
-        compact
-        [label]="'dashboard.stats.avg' | translate"
-        [value]="s.averageRating | rating"
-        [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
-      />
-      <app-stat-card compact [label]="'dashboard.stats.replays' | translate" [value]="s.replayCount" />
-      <app-stat-card
-        compact
-        [label]="'🏆 ' + ('dashboard.stats.platinums' | translate)"
-        [value]="s.totalPlatinums"
-      />
-    } @else if (!summaryFailed()) {
-      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-        <app-skeleton class="h-[66px] rounded-xl" />
+    <!-- Stats: mobile (3 x 2 mini cards) -->
+    <section class="grid grid-cols-3 gap-2 md:hidden">
+      @if (summary(); as s) {
+        <app-stat-card compact [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
+        <app-stat-card compact [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" />
+        <app-stat-card compact [label]="'dashboard.stats.hours' | translate" [value]="totalHours() | hours" />
+        <app-stat-card
+          compact
+          [label]="'dashboard.stats.avg' | translate"
+          [value]="s.averageRating | rating"
+          [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
+        />
+        <app-stat-card compact [label]="'dashboard.stats.replays' | translate" [value]="s.replayCount" />
+        <app-stat-card
+          compact
+          [label]="'🏆 ' + ('dashboard.stats.platinums' | translate)"
+          [value]="s.totalPlatinums"
+        />
+      } @else if (!summaryFailed()) {
+        @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+          <app-skeleton class="h-[66px] rounded-xl" />
+        }
+      } @else {
+        <div class="col-span-full"><ng-container *ngTemplateOutlet="sectionError" /></div>
       }
-    } @else {
-      <div class="col-span-full"><ng-container *ngTemplateOutlet="sectionError" /></div>
-    }
-  </section>
+    </section>
 
-  <!-- Playing now + hours per year -->
-  <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-    <section class="md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
-      <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
-      @if (playing()?.[0]; as hero) {
-        <!-- Web hero for the most recent run: blurred cover backdrop + crisp cover -->
-        <a
-          [routerLink]="['/games', hero.gameId, 'experiences', hero.experienceId]"
-          class="hover-lift relative isolate mb-2.5 hidden overflow-hidden rounded-xl border border-border bg-bg md:block"
-        >
-          @if (hero.coverImageUrl) {
-            <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-              <img
-                [src]="hero.coverImageUrl"
-                alt=""
-                loading="lazy"
-                decoding="async"
-                referrerpolicy="no-referrer"
-                class="size-full scale-110 object-cover opacity-40 blur-2xl light:opacity-30"
-              />
-              <div class="absolute inset-0 bg-linear-to-r from-bg/50 via-bg/75 to-bg/90"></div>
-            </div>
-          }
-          <div class="flex items-center gap-4 p-4">
-            <app-game-cover decorative size="md" class="shadow-md shadow-black/20" [url]="hero.coverImageUrl" [name]="hero.gameName" />
-            <div class="min-w-0 flex-1">
-              <p class="truncate text-base font-semibold" [attr.title]="hero.gameName">{{ hero.gameName }}</p>
-              <p class="mt-1 truncate text-[13px] text-text-3" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
-            </div>
-            @if (daysPlaying(hero); as days) {
-              <span class="shrink-0 rounded-full bg-brand-tint px-2.5 py-1 font-mono text-xs text-brand-lighter">
-                {{ days }}
-              </span>
+    <!-- Playing now + hours per year -->
+    <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <section class="md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+        <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
+        @if (playing()?.[0]; as hero) {
+          <!-- Web hero for the most recent run: blurred cover backdrop + crisp cover -->
+          <a
+            [routerLink]="['/games', hero.gameId, 'experiences', hero.experienceId]"
+            class="hover-lift relative isolate mb-2.5 hidden overflow-hidden rounded-xl border border-border bg-bg md:block"
+          >
+            @if (hero.coverImageUrl) {
+              <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+                <img
+                  [src]="hero.coverImageUrl"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                  class="size-full scale-110 object-cover opacity-40 blur-2xl light:opacity-30"
+                />
+                <div class="absolute inset-0 bg-linear-to-r from-bg/50 via-bg/75 to-bg/90"></div>
+              </div>
             }
-          </div>
-        </a>
-      }
-      <div class="scroll-list flex max-h-[326px] flex-col gap-2.5">
-        @if (playing() === null) {
-          @for (i of [1, 2]; track i) {
-            <app-skeleton class="h-[74px] rounded-[10px]" />
-          }
-        } @else {
-        @for (run of playing(); track run.experienceId; let first = $first) {
-          <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl" [class]="first ? 'md:hidden' : ''">
-            <app-run-row
-              class="hover-lift max-md:bg-surface!"
-              [title]="run.gameName"
-              [coverUrl]="run.coverImageUrl"
-              [meta]="playingMeta(run)"
-            >
-              @if (daysPlaying(run); as days) {
+            <div class="flex items-center gap-4 p-4">
+              <app-game-cover decorative size="md" class="shadow-md shadow-black/20" [url]="hero.coverImageUrl" [name]="hero.gameName" />
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-base font-semibold" [attr.title]="hero.gameName">{{ hero.gameName }}</p>
+                <p class="mt-1 truncate text-[13px] text-text-3" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
+              </div>
+              @if (daysPlaying(hero); as days) {
                 <span class="shrink-0 rounded-full bg-brand-tint px-2.5 py-1 font-mono text-xs text-brand-lighter">
                   {{ days }}
                 </span>
               }
-            </app-run-row>
-          </a>
-        } @empty {
-          @if (failed('playing')) {
-            <ng-container *ngTemplateOutlet="sectionError" />
-          } @else {
-            <div class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center">
-              <p class="text-sm font-medium text-text-2">{{ 'dashboard.nothingPlaying' | translate }}</p>
-              <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
-                {{ 'dashboard.startRun' | translate }}
-              </button>
             </div>
+          </a>
+        }
+        <div class="scroll-list flex max-h-[326px] flex-col gap-2.5">
+          @if (playing() === null) {
+            @for (i of [1, 2]; track i) {
+              <app-skeleton class="h-[74px] rounded-[10px]" />
+            }
+          } @else {
+          @for (run of playing(); track run.experienceId; let first = $first) {
+            <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl" [class]="first ? 'md:hidden' : ''">
+              <app-run-row
+                class="hover-lift max-md:bg-surface!"
+                [title]="run.gameName"
+                [coverUrl]="run.coverImageUrl"
+                [meta]="playingMeta(run)"
+              >
+                @if (daysPlaying(run); as days) {
+                  <span class="shrink-0 rounded-full bg-brand-tint px-2.5 py-1 font-mono text-xs text-brand-lighter">
+                    {{ days }}
+                  </span>
+                }
+              </app-run-row>
+            </a>
+          } @empty {
+            @if (failed('playing')) {
+              <ng-container *ngTemplateOutlet="sectionError" />
+            } @else {
+              <div class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center">
+                <p class="text-sm font-medium text-text-2">{{ 'dashboard.nothingPlaying' | translate }}</p>
+                <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
+                  {{ 'dashboard.startRun' | translate }}
+                </button>
+              </div>
+            }
           }
-        }
-        }
-      </div>
-    </section>
+          }
+        </div>
+      </section>
 
-    <section class="flex flex-col md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
-      <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
-      </app-section-header>
-      @if (yearBars(); as bars) {
-        @if (bars.length) {
-          <div class="hidden min-h-[200px] flex-1 md:block">
-            <app-mini-bar-chart [bars]="bars" [height]="null" />
-          </div>
-          <div class="md:hidden">
-            <app-mini-bar-chart [bars]="bars" [height]="96" dense />
-          </div>
+      <section class="flex flex-col md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+        <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
+        </app-section-header>
+        @if (yearBars(); as bars) {
+          @if (bars.length) {
+            <div class="hidden min-h-[200px] flex-1 md:block">
+              <app-mini-bar-chart [bars]="bars" [height]="null" />
+            </div>
+            <div class="md:hidden">
+              <app-mini-bar-chart [bars]="bars" [height]="96" dense />
+            </div>
+          } @else {
+            @if (failed('byYear')) {
+              <ng-container *ngTemplateOutlet="sectionError" />
+            } @else {
+              <p class="py-8 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
+            }
+          }
         } @else {
-          @if (failed('byYear')) {
-            <ng-container *ngTemplateOutlet="sectionError" />
-          } @else {
-            <p class="py-8 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
-          }
+          <app-skeleton class="h-24 rounded-lg md:min-h-[200px] md:flex-1" />
         }
-      } @else {
-        <app-skeleton class="h-24 rounded-lg md:min-h-[200px] md:flex-1" />
-      }
-    </section>
-  </div>
+      </section>
+    </div>
 
-  <!-- Rankings -->
-  <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3">
-    <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
-      <app-section-header class="mb-3.5" [label]="'dashboard.topRated' | translate" />
-      @if (topRated(); as items) {
-        @for (item of items; track item.gameId + item.runLabel; let i = $index) {
-          <a
-            [routerLink]="['/games', item.gameId]"
-            class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
-          >
-            <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
-            <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName + ' · ' + item.runLabel">
-              {{ item.gameName }} <span class="text-faint">· {{ item.runLabel }}</span>
-            </span>
-            <span class="font-mono font-medium" [class]="item.rating | ratingTone">{{ item.rating | rating }}</span>
-          </a>
-        } @empty {
-          @if (failed('topRated')) {
-            <ng-container *ngTemplateOutlet="sectionError" />
-          } @else {
-            <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+    <!-- Rankings -->
+    <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3">
+      <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3.5" [label]="'dashboard.topRated' | translate" />
+        @if (topRated(); as items) {
+          @for (item of items; track item.gameId + item.runLabel; let i = $index) {
+            <a
+              [routerLink]="['/games', item.gameId]"
+              class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
+            >
+              <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
+              <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName + ' · ' + item.runLabel">
+                {{ item.gameName }} <span class="text-faint">· {{ item.runLabel }}</span>
+              </span>
+              <span class="font-mono font-medium" [class]="item.rating | ratingTone">{{ item.rating | rating }}</span>
+            </a>
+          } @empty {
+            @if (failed('topRated')) {
+              <ng-container *ngTemplateOutlet="sectionError" />
+            } @else {
+              <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+            }
           }
+        } @else {
+          <ng-container *ngTemplateOutlet="listSkeleton" />
         }
-      } @else {
-        <ng-container *ngTemplateOutlet="listSkeleton" />
-      }
-    </section>
+      </section>
 
-    <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
-      <app-section-header class="mb-3.5" [label]="'dashboard.mostPlayed' | translate">
-        <app-segmented size="sm" tone="neutral" [options]="playModeOptions" [(value)]="playMode" />
-      </app-section-header>
-      @if (mostPlayed(); as items) {
-        @for (item of items; track item.gameId) {
-          <a [routerLink]="['/games', item.gameId]" class="block hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover">
-            <span class="flex justify-between gap-3">
-              <span class="min-w-0 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
-              <span class="shrink-0 font-mono">{{ item.totalHours | hours }}</span>
-            </span>
-            <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
-              <span class="block h-[3px] rounded-sm bg-brand-light" [style.width.%]="barWidth(item.totalHours)"></span>
-            </span>
-          </a>
-        } @empty {
-          @if (failed('mostPlayed')) {
-            <ng-container *ngTemplateOutlet="sectionError" />
-          } @else {
-            <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+      <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3.5" [label]="'dashboard.mostPlayed' | translate">
+          <app-segmented size="sm" tone="neutral" [options]="playModeOptions" [(value)]="playMode" />
+        </app-section-header>
+        @if (mostPlayed(); as items) {
+          @for (item of items; track item.gameId) {
+            <a [routerLink]="['/games', item.gameId]" class="block hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover">
+              <span class="flex justify-between gap-3">
+                <span class="min-w-0 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
+                <span class="shrink-0 font-mono">{{ item.totalHours | hours }}</span>
+              </span>
+              <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
+                <span class="block h-[3px] rounded-sm bg-brand-light" [style.width.%]="barWidth(item.totalHours)"></span>
+              </span>
+            </a>
+          } @empty {
+            @if (failed('mostPlayed')) {
+              <ng-container *ngTemplateOutlet="sectionError" />
+            } @else {
+              <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+            }
           }
+        } @else {
+          <ng-container *ngTemplateOutlet="listSkeleton" />
         }
-      } @else {
-        <ng-container *ngTemplateOutlet="listSkeleton" />
-      }
-    </section>
+      </section>
 
-    <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
-      <app-section-header class="mb-3.5" [label]="'dashboard.bySaga' | translate" />
-      @if (topSagas(); as items) {
-        @for (item of items; track item.sagaId) {
-          <a
-            [routerLink]="['/sagas', item.sagaId]"
-            class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
-          >
-            <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
-            <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translate: { count: item.gameCount } }}</span>
-            <span class="w-16 shrink-0 text-right font-mono">{{ item.totalHours | hours }}</span>
-          </a>
-        } @empty {
-          @if (failed('bySaga')) {
-            <ng-container *ngTemplateOutlet="sectionError" />
-          } @else {
-            <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+      <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3.5" [label]="'dashboard.bySaga' | translate" />
+        @if (topSagas(); as items) {
+          @for (item of items; track item.sagaId) {
+            <a
+              [routerLink]="['/sagas', item.sagaId]"
+              class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
+            >
+              <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
+              <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translate: { count: item.gameCount } }}</span>
+              <span class="w-16 shrink-0 text-right font-mono">{{ item.totalHours | hours }}</span>
+            </a>
+          } @empty {
+            @if (failed('bySaga')) {
+              <ng-container *ngTemplateOutlet="sectionError" />
+            } @else {
+              <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+            }
           }
+        } @else {
+          <ng-container *ngTemplateOutlet="listSkeleton" />
         }
-      } @else {
-        <ng-container *ngTemplateOutlet="listSkeleton" />
-      }
-    </section>
-  </div>
+      </section>
+    </div>
+  }
 </main>
 
 <ng-template #listSkeleton>
@@ -280,4 +321,18 @@
       {{ 'dashboard.retry' | translate }}
     </button>
   </div>
+</ng-template>
+
+<ng-template #stepIcon let-icon>
+  <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand-tint text-brand-lighter" aria-hidden="true">
+    <svg [lucideIcon]="icon" [size]="18"></svg>
+  </span>
+</ng-template>
+
+<ng-template #stepText let-title="title" let-hint="hint">
+  <span class="min-w-0 flex-1">
+    <span class="block text-sm font-medium text-text">{{ title | translate }}</span>
+    <span class="mt-0.5 block text-[13px] text-muted">{{ hint | translate }}</span>
+  </span>
+  <svg lucideArrowRight [size]="16" class="shrink-0 text-faint" aria-hidden="true"></svg>
 </ng-template>

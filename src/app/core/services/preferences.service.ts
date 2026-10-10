@@ -1,19 +1,29 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Platform } from '../models/experience.model';
 
 /** How finely ratings are typed in the run form: 9 / 9.5 / 9.25. */
 export type RatingPrecision = 'integer' | 'half' | 'hundredths';
 
+/** UI language (ngx-translate). */
+export type Language = 'es' | 'en';
+
 export interface Preferences {
   ratingPrecision: RatingPrecision;
   defaultPlatform: Platform;
+  language: Language;
 }
 
 export const PREFERENCES_KEY = 'pytra_preferences';
 
-export const DEFAULT_PREFERENCES: Preferences = { ratingPrecision: 'hundredths', defaultPlatform: 'PC' };
+export const DEFAULT_PREFERENCES: Preferences = {
+  ratingPrecision: 'hundredths',
+  defaultPlatform: 'PC',
+  language: 'es',
+};
 
 const PRECISIONS: readonly RatingPrecision[] = ['integer', 'half', 'hundredths'];
+export const LANGUAGES: readonly Language[] = ['es', 'en'];
 export const PLATFORMS: readonly Platform[] = ['PC', 'PS5', 'PS4', 'XBOX', 'SWITCH', 'MOBILE'];
 
 /** Number input `step` for a rating precision. */
@@ -39,6 +49,7 @@ export function parsePreferences(raw: string | null): Preferences {
     defaultPlatform: PLATFORMS.includes(value.defaultPlatform as Platform)
       ? (value.defaultPlatform as Platform)
       : DEFAULT_PREFERENCES.defaultPlatform,
+    language: LANGUAGES.includes(value.language as Language) ? (value.language as Language) : DEFAULT_PREFERENCES.language,
   };
 }
 
@@ -50,13 +61,24 @@ function readStored(): Preferences {
   }
 }
 
-/** Device-local UI preferences (rating precision, default platform for new runs). */
+/** Applies the UI language: ngx-translate and `<html lang>`. */
+export function applyLanguage(translate: TranslateService, language: Language): void {
+  translate.use(language);
+  try {
+    document.documentElement.lang = language;
+  } catch {
+    // No DOM (unlikely): translations still switch.
+  }
+}
+
+/** Device-local UI preferences (rating precision, default platform for new runs, language). */
 @Injectable({ providedIn: 'root' })
 export class PreferencesService {
   private readonly state = signal<Preferences>(readStored());
 
   readonly ratingPrecision = computed(() => this.state().ratingPrecision);
   readonly defaultPlatform = computed(() => this.state().defaultPlatform);
+  readonly language = computed(() => this.state().language);
   readonly ratingStep = computed(() => ratingStep(this.ratingPrecision()));
 
   setRatingPrecision(ratingPrecision: RatingPrecision): void {
@@ -65,6 +87,10 @@ export class PreferencesService {
 
   setDefaultPlatform(defaultPlatform: Platform): void {
     this.update({ defaultPlatform });
+  }
+
+  setLanguage(language: Language): void {
+    this.update({ language });
   }
 
   private update(change: Partial<Preferences>): void {

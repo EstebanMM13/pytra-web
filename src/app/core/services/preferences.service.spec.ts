@@ -18,11 +18,15 @@ describe('parsePreferences', () => {
     expect(parsePreferences(JSON.stringify({ ratingPrecision: 'half', defaultPlatform: 'NES' }))).toEqual({
       ratingPrecision: 'half',
       defaultPlatform: 'PC',
+      language: 'es',
     });
     expect(parsePreferences(JSON.stringify({ ratingPrecision: 'x', defaultPlatform: 'SWITCH' }))).toEqual({
       ratingPrecision: 'hundredths',
       defaultPlatform: 'SWITCH',
+      language: 'es',
     });
+    expect(parsePreferences(JSON.stringify({ language: 'en' })).language).toBe('en');
+    expect(parsePreferences(JSON.stringify({ language: 'fr' })).language).toBe('es');
   });
 });
 
@@ -42,17 +46,20 @@ describe('PreferencesService', () => {
     expect(service.ratingPrecision()).toBe('hundredths');
     expect(service.defaultPlatform()).toBe('PC');
     expect(service.ratingStep()).toBe(0.01);
+    expect(service.language()).toBe('es');
   });
 
   it('persists changes in localStorage', () => {
     const service = TestBed.inject(PreferencesService);
     service.setRatingPrecision('half');
     service.setDefaultPlatform('PS5');
+    service.setLanguage('en');
 
     expect(service.ratingStep()).toBe(0.5);
     expect(JSON.parse(localStorage.getItem(PREFERENCES_KEY)!)).toEqual({
       ratingPrecision: 'half',
       defaultPlatform: 'PS5',
+      language: 'en',
     });
   });
 
