@@ -331,7 +331,7 @@
     "years": "Years",
     "steam": "Steam",
     "profile": "Profile",
-    "search": "Search game",
+    "search": "Search",
     "newRun": "Run",
     "newRunAria": "New run",
     "account": "Account",
@@ -344,12 +344,19 @@
     "addSaga": "Saga"
   },
   "search": {
-    "title": "Search game",
-    "placeholder": "Type a game name…",
-    "empty": "No game matches.",
-    "loading": "Loading games…",
+    "title": "Search",
+    "placeholder": "Search games, sagas, years…",
+    "empty": "No results.",
+    "loading": "Loading…",
     "hint": "Enter to open · Esc to close",
-    "close": "Close"
+    "close": "Close",
+    "groups": {
+      "games": "Games",
+      "recent": "Recent",
+      "sagas": "Sagas",
+      "years": "Years",
+      "pages": "Go to"
+    }
   },
   "status": {
     "EN_CURSO": "In progress",
@@ -919,6 +926,7 @@
     "banner": "Demo mode · read-only",
     "createAccount": "Create account",
     "exit": "Exit",
-    "readOnly": "Changes are not allowed in demo mode"
+    "readOnly": "Changes are not allowed in demo mode",
+    "bannerShort": "Demo · read-only"
   }
 }

@@ -331,7 +331,7 @@
     "years": "Años",
     "steam": "Steam",
     "profile": "Perfil",
-    "search": "Buscar juego",
+    "search": "Buscar",
     "newRun": "Partida",
     "newRunAria": "Nueva partida",
     "account": "Cuenta",
@@ -344,12 +344,19 @@
     "addSaga": "Saga"
   },
   "search": {
-    "title": "Buscar juego",
-    "placeholder": "Escribe el nombre de un juego…",
-    "empty": "Ningún juego coincide.",
-    "loading": "Cargando juegos…",
+    "title": "Buscar",
+    "placeholder": "Buscar juegos, sagas, años…",
+    "empty": "Sin resultados.",
+    "loading": "Cargando…",
     "hint": "Enter para abrir · Esc para cerrar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "groups": {
+      "games": "Juegos",
+      "recent": "Recientes",
+      "sagas": "Sagas",
+      "years": "Años",
+      "pages": "Ir a"
+    }
   },
   "status": {
     "EN_CURSO": "En curso",
@@ -919,6 +926,7 @@
     "banner": "Modo demo · solo lectura",
     "createAccount": "Crear cuenta",
     "exit": "Salir",
-    "readOnly": "En el modo demo no se pueden hacer cambios"
+    "readOnly": "En el modo demo no se pueden hacer cambios",
+    "bannerShort": "Demo · solo lectura"
   }
 }

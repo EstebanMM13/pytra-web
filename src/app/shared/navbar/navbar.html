@@ -78,78 +78,90 @@
   </div>
 </nav>
 
-<!-- Mobile header (< md) -->
+<!-- Mobile header (< md): 56px content row below the safe-area inset, items vertically centered -->
 <header
-  class="nav-glass relative z-30 flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top)+14px)] pb-1 md:hidden"
+  class="nav-glass relative z-30 flex h-[calc(env(safe-area-inset-top)+56px)] items-center justify-between gap-3 pt-[env(safe-area-inset-top)] pr-3 pl-4 md:hidden"
 >
-  <a routerLink="/dashboard" class="flex items-center gap-2.5 rounded-md" aria-label="Pytra">
+  <a routerLink="/dashboard" class="flex h-10 items-center gap-2 rounded-md" aria-label="Pytra">
     <app-pytra-mark class="size-[26px]" />
-    <span class="text-[22px] leading-none font-semibold tracking-[-0.035em] text-text" aria-hidden="true">Pytra</span>
+    <span class="text-[21px] leading-none font-semibold tracking-[-0.035em] text-text" aria-hidden="true">Pytra</span>
   </a>
 
-  <div class="relative">
+  <div class="flex items-center gap-1">
     <button
       type="button"
-      (click)="menuOpen.set(!menuOpen())"
-      class="rounded-full"
-      [attr.aria-label]="'nav.menu' | translate"
-      aria-haspopup="menu"
-      [attr.aria-expanded]="menuOpen()"
+      (click)="searchOpen.set(true)"
+      class="flex size-10 items-center justify-center rounded-full text-text-2 hover:bg-hover hover:text-text active:bg-hover"
+      [attr.aria-label]="'nav.search' | translate"
     >
-      <app-avatar [avatar]="avatar()" [name]="displayName()" />
+      <svg lucideSearch [size]="20"></svg>
     </button>
 
-    @if (menuOpen()) {
-      <div class="fixed inset-0 z-40" (click)="menuOpen.set(false)" aria-hidden="true"></div>
-      <div
-        role="menu"
-        class="absolute top-11 right-0 z-50 w-52 animate-modal-in overflow-hidden rounded-xl border border-border bg-surface py-1 text-sm"
+    <div class="relative">
+      <button
+        type="button"
+        (click)="menuOpen.set(!menuOpen())"
+        class="flex size-10 items-center justify-center rounded-full"
+        [attr.aria-label]="'nav.menu' | translate"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="menuOpen()"
       >
-        @if (displayName(); as name) {
-          <p class="truncate border-b border-divider px-4 py-2.5 text-xs text-muted">{{ name }}</p>
-        }
-        <a
-          role="menuitem"
-          routerLink="/steam"
-          (click)="menuOpen.set(false)"
-          class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
+        <app-avatar [avatar]="avatar()" [name]="displayName()" />
+      </button>
+
+      @if (menuOpen()) {
+        <div class="fixed inset-0 z-40" (click)="menuOpen.set(false)" aria-hidden="true"></div>
+        <div
+          role="menu"
+          class="absolute top-12 right-0 z-50 w-52 animate-modal-in overflow-hidden rounded-xl border border-border bg-surface py-1 text-sm"
         >
-          <svg lucideDownload [size]="16" class="text-brand-light"></svg>
-          {{ 'nav.steam' | translate }}
-        </a>
-        <a
-          role="menuitem"
-          routerLink="/profile"
-          (click)="menuOpen.set(false)"
-          class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
-        >
-          <svg lucideUser [size]="16" class="text-brand-light"></svg>
-          {{ 'nav.profile' | translate }}
-        </a>
-        <button
-          role="menuitem"
-          type="button"
-          (click)="logout()"
-          class="flex w-full items-center gap-3 border-t border-divider px-4 py-2.5 text-danger hover:bg-hover"
-        >
-          <svg lucideLogOut [size]="16"></svg>
-          {{ 'nav.logout' | translate }}
-        </button>
-      </div>
-    }
+          @if (displayName(); as name) {
+            <p class="truncate border-b border-divider px-4 py-2.5 text-xs text-muted">{{ name }}</p>
+          }
+          <a
+            role="menuitem"
+            routerLink="/steam"
+            (click)="menuOpen.set(false)"
+            class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
+          >
+            <svg lucideDownload [size]="16" class="text-brand-light"></svg>
+            {{ 'nav.steam' | translate }}
+          </a>
+          <a
+            role="menuitem"
+            routerLink="/profile"
+            (click)="menuOpen.set(false)"
+            class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
+          >
+            <svg lucideUser [size]="16" class="text-brand-light"></svg>
+            {{ 'nav.profile' | translate }}
+          </a>
+          <button
+            role="menuitem"
+            type="button"
+            (click)="logout()"
+            class="flex w-full items-center gap-3 border-t border-divider px-4 py-2.5 text-danger hover:bg-hover"
+          >
+            <svg lucideLogOut [size]="16"></svg>
+            {{ 'nav.logout' | translate }}
+          </button>
+        </div>
+      }
+    </div>
   </div>
 </header>
 
 @if (isDemo()) {
   <div
-    class="relative z-20 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-gold-card-border bg-gold-tint px-4 py-1.5 text-[13px] text-gold-tint-fg"
+    class="relative z-20 flex items-center justify-center gap-x-3 border-b border-gold-card-border bg-gold-tint px-4 py-1.5 text-xs whitespace-nowrap text-gold-tint-fg sm:text-[13px]"
     role="status"
   >
-    <span class="flex items-center gap-1.5 font-medium">
-      <svg lucideEye [size]="14" aria-hidden="true"></svg>
-      {{ 'demo.banner' | translate }}
+    <span class="flex min-w-0 items-center gap-1.5 font-medium">
+      <svg lucideEye [size]="14" class="shrink-0" aria-hidden="true"></svg>
+      <span class="truncate sm:hidden">{{ 'demo.bannerShort' | translate }}</span>
+      <span class="hidden truncate sm:inline">{{ 'demo.banner' | translate }}</span>
     </span>
-    <span class="flex items-center gap-3">
+    <span class="flex shrink-0 items-center gap-3">
       <button type="button" (click)="exitDemo('/register')" class="font-semibold underline-offset-2 hover:underline">
         {{ 'demo.createAccount' | translate }}
       </button>
@@ -218,5 +230,5 @@
 </ng-template>
 
 @if (searchOpen()) {
-  <app-game-search (closed)="searchOpen.set(false)" />
+  <app-global-search (closed)="searchOpen.set(false)" />
 }

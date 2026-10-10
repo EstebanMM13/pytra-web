@@ -21,7 +21,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { UserService } from '../../core/services/user.service';
-import { GameSearch } from '../game-search/game-search';
+import { GlobalSearch } from '../global-search/global-search';
 import { Avatar } from '../ui/avatar';
 import { PytraMark } from '../ui/pytra-mark';
 
@@ -41,8 +41,8 @@ const WEB_TABS: NavTab[] = [
 
 /**
  * App chrome for authenticated pages: top navbar on web (md+), and below md a
- * compact header (logo + avatar menu with Steam/Profile) plus a fixed bottom tab bar.
- * Also owns the global Ctrl/⌘+K game search.
+ * compact header (logo, search button and avatar menu with Steam/Profile) plus a fixed bottom
+ * tab bar. Also owns the global Ctrl/⌘+K search.
  */
 @Component({
   selector: 'app-navbar',
@@ -51,7 +51,7 @@ const WEB_TABS: NavTab[] = [
     RouterLink,
     RouterLinkActive,
     TranslatePipe,
-    GameSearch,
+    GlobalSearch,
     PytraMark,
     Avatar,
     LucideDynamicIcon,

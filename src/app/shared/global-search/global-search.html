@@ -1,0 +1,120 @@
+<div
+  class="fixed inset-0 z-50 flex items-start justify-center bg-overlay px-3 pt-[calc(env(safe-area-inset-top)+12px)] md:px-4 md:pt-[12vh]"
+  (click)="close()"
+>
+  <div
+    class="flex max-h-[calc(100dvh-env(safe-area-inset-top)-24px)] w-full max-w-lg animate-modal-in flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_40px_100px_#000a] md:max-h-[76vh]"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'search.title' | translate"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex shrink-0 items-center gap-3 border-b border-divider px-4">
+      <svg lucideSearch [size]="18" class="shrink-0 text-muted"></svg>
+      <input
+        #searchInput
+        type="search"
+        role="combobox"
+        enterkeyhint="go"
+        autocomplete="off"
+        aria-autocomplete="list"
+        aria-controls="global-search-results"
+        [attr.aria-expanded]="resultCount() > 0"
+        [attr.aria-activedescendant]="resultCount() ? 'global-search-' + activeIndex() : null"
+        [value]="query()"
+        (input)="onQuery($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+        [placeholder]="'search.placeholder' | translate"
+        class="h-14 min-w-0 flex-1 border-0 bg-transparent text-base text-text focus:shadow-none [&::-webkit-search-cancel-button]:hidden"
+      />
+      <button
+        type="button"
+        (click)="close()"
+        class="-mr-1.5 flex size-9 items-center justify-center rounded-md text-muted hover:text-text"
+        [attr.aria-label]="'search.close' | translate"
+      >
+        <svg lucideX [size]="18"></svg>
+      </button>
+    </div>
+
+    <div id="global-search-results" role="listbox" class="scroll-thin min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
+      @for (group of groups(); track group.kind) {
+        <div role="group" [attr.aria-labelledby]="'global-search-group-' + group.kind" class="not-first:mt-1">
+          <p
+            [id]="'global-search-group-' + group.kind"
+            class="px-3 pt-2 pb-1 text-[11px] font-semibold tracking-wider text-faint uppercase"
+          >
+            {{ (query().trim() || group.kind !== 'game' ? groupLabelKeys[group.kind] : 'search.groups.recent') | translate }}
+          </p>
+          @for (entry of group.entries; track entry.key) {
+            @let active = entry.index === activeIndex();
+            <div
+              [id]="'global-search-' + entry.index"
+              role="option"
+              [attr.aria-selected]="active"
+              (click)="open(entry.item)"
+              (mousemove)="activeIndex.set(entry.index)"
+              class="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm"
+              [class.bg-brand-tint]="active"
+            >
+              @switch (entry.item.kind) {
+                @case ('game') {
+                  @let game = entry.item.game;
+                  <app-game-cover decorative size="xs" [url]="game.coverImageUrl" [name]="game.name" />
+                  <span class="min-w-0 flex-1 truncate" [class]="active ? 'text-brand-lighter' : 'text-text-2'" [title]="game.name">
+                    {{ game.name }}
+                  </span>
+                  @let year = releaseYear(game);
+                  @if (year || game.platforms?.length) {
+                    <span class="max-w-[45%] shrink-0 truncate text-xs text-faint">
+                      @if (year) {
+                        <span class="tabular-nums">{{ year }}</span>
+                      }
+                      @if (year && game.platforms?.length) {
+                        <span aria-hidden="true"> · </span>
+                      }
+                      @for (platform of game.platforms ?? []; track platform; let last = $last) {
+                        <span>{{ 'platform.' + platform | translate }}{{ last ? '' : ', ' }}</span>
+                      }
+                    </span>
+                  }
+                }
+                @case ('saga') {
+                  <span class="flex h-5 w-[43px] shrink-0 items-center justify-center text-brand-light">
+                    <svg [lucideIcon]="sagaIcon" [size]="16"></svg>
+                  </span>
+                  <span class="min-w-0 flex-1 truncate" [class]="active ? 'text-brand-lighter' : 'text-text-2'" [title]="entry.item.saga.name">
+                    {{ entry.item.saga.name }}
+                  </span>
+                }
+                @case ('year') {
+                  <span class="flex h-5 w-[43px] shrink-0 items-center justify-center text-brand-light">
+                    <svg [lucideIcon]="yearIcon" [size]="16"></svg>
+                  </span>
+                  <span class="min-w-0 flex-1 truncate tabular-nums" [class]="active ? 'text-brand-lighter' : 'text-text-2'">
+                    {{ entry.item.year }}
+                  </span>
+                }
+                @case ('page') {
+                  <span class="flex h-5 w-[43px] shrink-0 items-center justify-center text-brand-light">
+                    <svg [lucideIcon]="pageIcons.get(entry.item.page.path)!" [size]="16"></svg>
+                  </span>
+                  <span class="min-w-0 flex-1 truncate" [class]="active ? 'text-brand-lighter' : 'text-text-2'">
+                    {{ entry.item.label }}
+                  </span>
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+      @if (resultCount() === 0 || (games() === null && !query().trim())) {
+        <p class="px-3 py-6 text-center text-sm text-muted">
+          {{ (games() === null ? 'search.loading' : 'search.empty') | translate }}
+        </p>
+      }
+    </div>
+
+    <p class="hidden shrink-0 border-t border-divider px-4 py-2.5 text-xs text-faint md:block">{{ 'search.hint' | translate }}</p>
+  </div>
+</div>
