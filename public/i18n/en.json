@@ -78,7 +78,10 @@
     "or": "or",
     "panel": {
       "eyebrow": "Pytra: Play, Track, Remember",
-      "headline": "Every run, with its score and its story."
+      "headline": "Every run, with its score and its story.",
+      "point1": "Every run, rated",
+      "point2": "Your year in numbers",
+      "point3": "Import from Steam"
     }
   },
   "dashboard": {
