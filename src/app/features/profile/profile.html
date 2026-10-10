@@ -40,7 +40,7 @@
 
     <!-- Mobile grouped list -->
     <div class="mt-4 overflow-hidden rounded-xl border border-card-border card-glass md:hidden">
-      @if (showAccountSection) {
+      @if (showAccountSection()) {
       <button
         type="button"
         (click)="scrollTo('account')"
@@ -77,7 +77,7 @@
 
   <div class="flex max-w-[760px] min-w-0 flex-col gap-4 md:gap-5">
     <!-- CUENTA -->
-    @if (showAccountSection) {
+    @if (showAccountSection()) {
     <section id="profile-account" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
       <app-section-header collapseKey="profile.account" class="mb-2" [label]="'profile.sections.account' | translate" />
       @if (user(); as u) {
@@ -369,7 +369,7 @@
           </button>
         </div>
       </div>
-      @if (showDeleteAccount) {
+      @if (showDeleteAccount()) {
       <div class="flex items-center justify-between gap-4 border-t border-divider py-3 text-sm">
         <span class="text-muted">{{ 'profile.delete.label' | translate }}</span>
         <button
@@ -395,6 +395,6 @@
   </div>
 </main>
 
-@if (showDeleteAccount && deleteOpen() && user(); as u) {
+@if (showDeleteAccount() && deleteOpen() && user(); as u) {
   <app-delete-account-dialog [user]="u" (closed)="deleteOpen.set(false)" />
 }

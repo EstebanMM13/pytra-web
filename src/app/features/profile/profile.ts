@@ -70,15 +70,12 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
   templateUrl: './profile.html',
 })
 export class Profile {
-  // The account card (rename / password) is hidden while the app is shared with demo
-  // accounts, so testers can't change the shared credentials. Flip to re-enable it.
-  protected readonly showAccountSection = false;
-  // Same reason: testers know the shared password, so account deletion is hidden too.
-  protected readonly showDeleteAccount = false;
-  // Read-only demo: no avatar change and no export (the API rejects both for demo sessions).
+  // Read-only demo: no account changes, avatar change, export or deletion (the API rejects them all).
   protected readonly isDemo = inject(AuthService).isDemo;
+  protected readonly showAccountSection = computed(() => !this.isDemo());
+  protected readonly showDeleteAccount = computed(() => !this.isDemo());
   protected readonly sections = (['account', 'achievements', 'preferences', 'data'] as const).filter(
-    (s) => (s !== 'account' || this.showAccountSection) && (s !== 'data' || !this.isDemo()),
+    (s) => (s !== 'account' || this.showAccountSection()) && (s !== 'data' || !this.isDemo()),
   );
 
   private readonly fb = inject(NonNullableFormBuilder);
