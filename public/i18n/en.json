@@ -9,7 +9,9 @@
       "register": "Sign up",
       "forgotPassword": "Forgot it?",
       "withGoogle": "Continue with Google",
-      "subtitle": "Welcome back."
+      "subtitle": "Welcome back.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "register": {
       "title": "Create account",
