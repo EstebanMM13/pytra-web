@@ -42,6 +42,8 @@ import { GameCover } from './game-cover';
       @if (meta()) {
         <p class="mt-1 truncate text-xs text-muted md:text-[13px]" [attr.title]="meta()">{{ meta() }}</p>
       }
+      <!-- Optional content under the meta line (e.g. the status pill on narrow screens) -->
+      <ng-content select="[runRowBelow]" />
     </div>
     <ng-content />
     @if (hours() !== null) {

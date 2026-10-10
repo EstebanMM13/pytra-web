@@ -206,7 +206,8 @@
                   [rating]="run.rating"
                   [best]="run.id === bestRunId()"
                 >
-                  <span class="shrink-0"><app-status-pill [status]="run.status" /></span>
+                  <span runRowBelow class="mt-1.5 block sm:hidden"><app-status-pill [status]="run.status" /></span>
+                  <span class="hidden shrink-0 sm:block"><app-status-pill [status]="run.status" /></span>
                 </app-run-row>
               </a>
             } @empty {
