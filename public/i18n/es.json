@@ -300,6 +300,7 @@
       "linkSyncInProgress": "No se pudo cambiar de cuenta de Steam porque hay una sincronización en curso. Espera a que termine e inténtalo de nuevo."
     },
     "linkedPill": "Vinculada",
+    "accountFallback": "Cuenta de Steam",
     "sync": "Sincronizar",
     "syncedAgo": "sincronizado {{when}}",
     "neverSynced": "sin sincronizar",

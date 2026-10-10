@@ -34,7 +34,9 @@
             </span>
             <div class="min-w-0 flex-1">
               <p class="flex flex-wrap items-center gap-2.5 text-[17px] font-semibold">
-                <span class="min-w-0 truncate" [title]="s.personaName || s.steamId">{{ s.personaName || s.steamId }}</span>
+                <span class="min-w-0 truncate" [title]="s.personaName || s.steamId || ('steam.accountFallback' | translate)">{{
+                  s.personaName || s.steamId || ('steam.accountFallback' | translate)
+                }}</span>
                 <span class="rounded-full bg-success-bg px-[9px] py-[3px] text-xs font-medium text-success">
                   {{ 'steam.linkedPill' | translate }}
                 </span>
