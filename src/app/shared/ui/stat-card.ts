@@ -37,6 +37,9 @@ import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
         >
           {{ display() }}
         </p>
+        @if (hint()) {
+          <p class="mt-1 truncate text-xs text-muted" [attr.title]="hint()">{{ hint() }}</p>
+        }
       </div>
     }
   `,
@@ -47,6 +50,8 @@ export class StatCard {
   readonly icon = input<LucideIconInput | null>(null);
   /** Extra classes for the figure, e.g. `font-mono text-gold` for ratings. */
   readonly valueClass = input('');
+  /** Optional small line under the value, e.g. a breakdown. */
+  readonly hint = input<string | null>(null);
   readonly compact = input(false, { transform: booleanAttribute });
 
   /** Text on screen: the exact formatted value, or an intermediate count-up frame. */

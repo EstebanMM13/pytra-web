@@ -172,7 +172,7 @@
           />
         </label>
         <label class="run-form-cell">
-          <span>{{ 'runForm.hours' | translate }}</span>
+          <span>{{ (selectedGame()?.category === 'HYBRID' ? 'runForm.campaignHours' : 'runForm.hours') | translate }}</span>
           <input
             type="text"
             inputmode="decimal"

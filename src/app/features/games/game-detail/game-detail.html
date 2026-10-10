@@ -118,7 +118,16 @@
       @let s = stats();
       <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-5">
         <app-stat-card [icon]="icons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
-        <app-stat-card [icon]="icons.hours" [label]="'game.stats.totalHours' | translate" [value]="s.totalHours | hours" />
+        <app-stat-card
+          [icon]="icons.hours"
+          [label]="'game.stats.totalHours' | translate"
+          [value]="s.totalHours | hours"
+          [hint]="
+            g.category && g.category !== 'SINGLEPLAYER'
+              ? ('game.stats.hoursBreakdown' | translate: { runs: (s.runHours | hours), online: (s.onlineHours | hours) })
+              : null
+          "
+        />
         <app-stat-card
           [icon]="icons.rating"
           [label]="'game.stats.avgRating' | translate"
@@ -204,6 +213,7 @@
             <app-section-header class="mb-3" [label]="'game.online.title' | translate">
               <span class="font-mono text-[15px]">{{ onlinePlaytime()?.totalHours | hours }}</span>
             </app-section-header>
+            <p class="-mt-1 mb-3 text-xs text-muted">{{ 'game.online.explain' | translate }}</p>
             <form
               [formGroup]="onlinePlaytimeForm"
               (ngSubmit)="submitOnlinePlaytime()"

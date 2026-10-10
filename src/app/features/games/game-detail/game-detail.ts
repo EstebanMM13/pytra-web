@@ -121,6 +121,8 @@ export class GameDetail {
     const runHours = runs.reduce((sum, r) => sum + (r.hours ?? 0), 0);
     return {
       runs: runs.length,
+      runHours,
+      onlineHours: this.onlinePlaytime()?.totalHours ?? 0,
       totalHours: runHours + (this.onlinePlaytime()?.totalHours ?? 0),
       avgRating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
       bestRating: ratings.length ? Math.max(...ratings) : null,

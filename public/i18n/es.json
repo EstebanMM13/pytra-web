@@ -411,7 +411,8 @@
       "bestRating": "Mejor nota",
       "platinum": "Platino",
       "avg": "Media",
-      "hours": "Horas"
+      "hours": "Horas",
+      "hoursBreakdown": "{{runs}} campaña + {{online}} online"
     },
     "runs": "Partidas",
     "noRuns": "Todavía no hay partidas.",
@@ -433,7 +434,8 @@
       "update": "Actualizar",
       "saved": "Horas online guardadas.",
       "error": "No se pudieron guardar las horas online.",
-      "invalid": "Horas ≥ 0 (p. ej. 12,5) y valoración entera de 0 a 10."
+      "invalid": "Horas ≥ 0 (p. ej. 12,5) y valoración entera de 0 a 10.",
+      "explain": "Horas jugadas online, aparte de las horas de cada partida: el total del juego suma ambas."
     },
     "loadError": "No se pudo cargar el juego.",
     "editTitle": "Editar juego",
@@ -545,7 +547,8 @@
       "integer": "0–10 · ej. 9",
       "half": "0–10 · ej. 9,5",
       "hundredths": "0–10 · ej. 9,25"
-    }
+    },
+    "campaignHours": "Horas de campaña"
   },
   "pagination": {
     "label": "Paginación",

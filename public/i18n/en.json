@@ -411,7 +411,8 @@
       "bestRating": "Best rating",
       "platinum": "Platinum",
       "avg": "Average",
-      "hours": "Hours"
+      "hours": "Hours",
+      "hoursBreakdown": "{{runs}} campaign + {{online}} online"
     },
     "runs": "Runs",
     "noRuns": "No runs yet.",
@@ -433,7 +434,8 @@
       "update": "Update",
       "saved": "Online hours saved.",
       "error": "Could not save the online hours.",
-      "invalid": "Hours ≥ 0 (e.g. 12.5) and a whole rating from 0 to 10."
+      "invalid": "Hours ≥ 0 (e.g. 12.5) and a whole rating from 0 to 10.",
+      "explain": "Hours played online, separate from each run's hours: the game total adds both."
     },
     "loadError": "Could not load the game.",
     "editTitle": "Edit game",
@@ -545,7 +547,8 @@
       "integer": "0–10 · e.g. 9",
       "half": "0–10 · e.g. 9.5",
       "hundredths": "0–10 · e.g. 9.25"
-    }
+    },
+    "campaignHours": "Campaign hours"
   },
   "pagination": {
     "label": "Pagination",

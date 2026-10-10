@@ -41,13 +41,28 @@
 
       <label class="auth-label">
         {{ 'auth.register.password' | translate }}
-        <input
-          type="password"
-          formControlName="password"
-          autocomplete="new-password"
-          [placeholder]="'auth.register.passwordPlaceholder' | translate"
-          class="auth-input"
-        />
+        <div class="relative">
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="new-password"
+            [placeholder]="'auth.register.passwordPlaceholder' | translate"
+            class="auth-input w-full pr-11"
+          />
+          <button
+            type="button"
+            (click)="showPassword.set(!showPassword())"
+            class="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted hover:text-text"
+            [attr.aria-label]="(showPassword() ? 'auth.login.hidePassword' : 'auth.login.showPassword') | translate"
+            [attr.aria-pressed]="showPassword()"
+          >
+            @if (showPassword()) {
+              <svg lucideEyeOff [size]="18"></svg>
+            } @else {
+              <svg lucideEye [size]="18"></svg>
+            }
+          </button>
+        </div>
         @if (form.controls.password.touched && form.controls.password.invalid) {
           <span class="text-xs text-danger">{{ 'auth.resetPassword.passwordTooShort' | translate }}</span>
         }
