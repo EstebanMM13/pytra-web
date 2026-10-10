@@ -33,15 +33,37 @@
       <kbd class="ml-auto hidden font-mono text-[11px] lg:inline">{{ shortcutLabel }}</kbd>
     </button>
 
-    <button
-      type="button"
-      (click)="newRun()"
-      class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
-      [attr.aria-label]="'nav.newRunAria' | translate"
-    >
-      <svg lucidePlus [size]="15"></svg>
-      {{ 'nav.newRun' | translate }}
-    </button>
+    <div class="relative" data-add-menu>
+      <button
+        type="button"
+        (click)="addOpen.set(!addOpen())"
+        class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="addOpen()"
+      >
+        <svg lucidePlus [size]="15"></svg>
+        {{ 'nav.add' | translate }}
+        <svg lucideChevronDown [size]="14" class="transition-transform" [class.rotate-180]="addOpen()"></svg>
+      </button>
+      @if (addOpen()) {
+        <div
+          role="menu"
+          class="absolute right-0 top-full z-40 mt-1.5 w-52 rounded-[10px] border border-border bg-surface p-1 shadow-[0_12px_32px_#0006]"
+        >
+          @for (item of addItems; track item.kind) {
+            <button
+              type="button"
+              role="menuitem"
+              (click)="add(item.kind)"
+              class="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-[13px] text-text-2 hover:bg-hover hover:text-text"
+            >
+              <svg [lucideIcon]="item.icon" [size]="15" class="shrink-0 text-brand-light"></svg>
+              {{ item.labelKey | translate }}
+            </button>
+          }
+        </div>
+      }
+    </div>
 
     <a
       routerLink="/profile"

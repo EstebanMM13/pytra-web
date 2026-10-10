@@ -276,7 +276,11 @@
     "account": "Account",
     "logout": "Log out",
     "menu": "Account menu",
-    "mainNav": "Main navigation"
+    "mainNav": "Main navigation",
+    "add": "Add",
+    "addRun": "Run",
+    "addGame": "Game",
+    "addSaga": "Saga"
   },
   "search": {
     "title": "Search game",

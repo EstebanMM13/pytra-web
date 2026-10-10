@@ -3,6 +3,8 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import {
   LucideChartColumn,
+  LucideChevronDown,
+  LucidePlay,
   LucideDynamicIcon,
   LucideGamepad2,
   LucideHouse,
@@ -49,6 +51,7 @@ const WEB_TABS: NavTab[] = [
     GameSearch,
     LucideDynamicIcon,
     LucidePlus,
+    LucideChevronDown,
     LucideSearch,
     LucideUser,
     LucideLogOut,
@@ -56,7 +59,10 @@ const WEB_TABS: NavTab[] = [
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './navbar.html',
-  host: { '(document:keydown)': 'onGlobalKeydown($event)' },
+  host: {
+    '(document:keydown)': 'onGlobalKeydown($event)',
+    '(document:click)': 'onDocumentClick($event)',
+  },
 })
 export class Navbar {
   private readonly authService = inject(AuthService);
@@ -76,6 +82,12 @@ export class Navbar {
 
   protected readonly searchOpen = signal(false);
   protected readonly menuOpen = signal(false);
+  protected readonly addOpen = signal(false);
+  protected readonly addItems: { kind: 'run' | 'game' | 'saga'; labelKey: string; icon: LucideIconInput }[] = [
+    { kind: 'run', labelKey: 'nav.addRun', icon: LucidePlay },
+    { kind: 'game', labelKey: 'nav.addGame', icon: LucideGamepad2 },
+    { kind: 'saga', labelKey: 'nav.addSaga', icon: LucideLayers },
+  ];
 
   protected onGlobalKeydown(event: KeyboardEvent): void {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
@@ -83,11 +95,33 @@ export class Navbar {
       this.searchOpen.set(true);
     } else if (event.key === 'Escape') {
       this.menuOpen.set(false);
+      this.addOpen.set(false);
     }
   }
 
   protected newRun(): void {
     this.runFormLauncher.openNewRun();
+  }
+
+  protected add(kind: 'run' | 'game' | 'saga'): void {
+    this.addOpen.set(false);
+    if (kind === 'run') {
+      this.newRun();
+    } else {
+      const target = kind === 'game' ? '/games' : '/sagas';
+      // Keep the current filters only when already on the target page.
+      const samePage = this.router.url.split('?')[0] === target;
+      void this.router.navigate([target], {
+        queryParams: { create: 1 },
+        queryParamsHandling: samePage ? 'merge' : '',
+      });
+    }
+  }
+
+  protected onDocumentClick(event: MouseEvent): void {
+    if (this.addOpen() && !(event.target as HTMLElement).closest('[data-add-menu]')) {
+      this.addOpen.set(false);
+    }
   }
 
   protected logout(): void {

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, effect, untracked } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import {
   LucideArrowDownWideNarrow,
@@ -125,6 +125,13 @@ export class Games {
   );
 
   constructor() {
+    // `?create=1` (from the navbar "Añadir" menu) opens the create dialog once.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      if (params.get('create') === '1') {
+        this.creating.set(true);
+        void this.router.navigate([], { queryParams: { create: null }, queryParamsHandling: 'merge', replaceUrl: true });
+      }
+    });
     this.load();
 
     // `?page=` beyond the last page (or after filtering): rewrite the URL to the page shown.

@@ -276,7 +276,11 @@
     "account": "Cuenta",
     "logout": "Cerrar sesión",
     "menu": "Menú de cuenta",
-    "mainNav": "Navegación principal"
+    "mainNav": "Navegación principal",
+    "add": "Añadir",
+    "addRun": "Partida",
+    "addGame": "Juego",
+    "addSaga": "Saga"
   },
   "search": {
     "title": "Buscar juego",

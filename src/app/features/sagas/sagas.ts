@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideChevronLeft, LucidePencil, LucidePlus } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -82,6 +82,13 @@ export class Sagas {
   });
 
   constructor() {
+    // `?create=1` (from the navbar "Añadir" menu) opens the create dialog once.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      if (params.get('create') === '1') {
+        this.dialog.set(null);
+        void this.router.navigate([], { queryParams: { create: null }, queryParamsHandling: 'merge', replaceUrl: true });
+      }
+    });
     forkJoin([this.sagaService.findAll(), this.gameService.findAll()]).subscribe({
       next: ([sagas, games]) => {
         this.games.set(games);
