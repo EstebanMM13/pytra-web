@@ -21,11 +21,16 @@ import { Sparkline } from './sparkline';
   host: { class: 'block min-w-0 rounded-xl border border-card-border card-glass' },
   template: `
     @if (compact()) {
-      <div class="p-3">
-        <p class="truncate text-xl font-bold tracking-[-0.02em]" [class]="figureClass()">{{ display() }}</p>
-        <p class="mt-0.5 truncate text-xs text-muted">{{ label() }}</p>
+      <!-- Mobile: centred, and long values shrink instead of being cut with "…" -->
+      <div class="flex flex-col items-center p-3 text-center">
+        <p
+          class="text-xl leading-tight font-bold tracking-[-0.02em] break-words"
+          [class]="figureClass()"
+          [style.font-size.px]="display().toString().length > 6 ? 16 : null"
+        >{{ display() }}</p>
+        <p class="mt-0.5 text-xs leading-tight text-muted">{{ label() }}</p>
         @if (hasTrend()) {
-          <app-sparkline class="mt-1.5 block" [values]="trend()!" />
+          <app-sparkline class="mx-auto mt-1.5 block" [values]="trend()!" />
         }
       </div>
     } @else {

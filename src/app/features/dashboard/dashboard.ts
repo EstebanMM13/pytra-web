@@ -194,7 +194,8 @@ export class Dashboard {
         value: y.totalHours,
         label: `'${String(y.year).slice(-2)}`,
         topLabel: y.averageRating == null ? null : ratingPipe.transform(y.averageRating),
-        subLabel: hoursPipe.transform(y.totalHours),
+        // Whole hours keep the per-year label on one line under narrow bars.
+        subLabel: `${Math.round(y.totalHours)}h`,
         title: `${y.year}: ${Math.round(y.totalHours)} h`,
       }));
   });
