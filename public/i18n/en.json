@@ -168,6 +168,27 @@
     "ratingPrecision": "Rating decimals",
     "defaultPlatform": "Default platform",
     "preferencesHint": "Preferences are saved on this device.",
+    "avatar": {
+      "title": "Avatar",
+      "hint": "Choose how you look on Pytra.",
+      "none": "No avatar (initial)",
+      "saved": "Avatar updated.",
+      "error": "Couldn't save the avatar. Try again.",
+      "names": {
+        "gamepad": "Gamepad",
+        "joystick": "Joystick",
+        "swords": "Swords",
+        "shield": "Shield",
+        "crown": "Crown",
+        "ghost": "Ghost",
+        "skull": "Skull",
+        "rocket": "Rocket",
+        "zap": "Lightning",
+        "flame": "Flame",
+        "trophy": "Trophy",
+        "castle": "Castle"
+      }
+    },
     "errors": {
       "network": "Can't reach the server. Try again."
     },

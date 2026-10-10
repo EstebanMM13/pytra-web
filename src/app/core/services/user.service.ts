@@ -3,7 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, catchError, of, switchMap, tap } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
-import { CurrentUser, DeleteAccountRequest, ExportFormat, UpdateUsernameRequest } from '../models/user.model';
+import { CurrentUser, DeleteAccountRequest, ExportFormat, UpdateProfileRequest } from '../models/user.model';
 import { TokenStorageService } from './token-storage.service';
 
 @Injectable({ providedIn: 'root' })
@@ -36,7 +36,7 @@ export class UserService {
     return this.http.get<CurrentUser>(`${this.baseUrl}/me`);
   }
 
-  updateUsername(request: UpdateUsernameRequest): Observable<CurrentUser> {
+  updateProfile(request: UpdateProfileRequest): Observable<CurrentUser> {
     return this.http
       .patch<CurrentUser>(`${this.baseUrl}/me`, request)
       .pipe(tap((user) => this.currentUserState.set(user)));

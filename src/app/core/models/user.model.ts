@@ -6,10 +6,14 @@ export interface CurrentUser {
   googleLinked: boolean;
   /** ISO timestamp of the account creation. */
   createdAt: string | null;
+  /** Preset avatar key (see shared/ui/avatar.ts), null when none is picked. */
+  avatar: string | null;
 }
 
-export interface UpdateUsernameRequest {
-  username: string;
+/** PATCH /users/me body: only the fields present are changed; `avatar: null` clears it. */
+export interface UpdateProfileRequest {
+  username?: string;
+  avatar?: string | null;
 }
 
 export type ExportFormat = 'csv' | 'markdown';

@@ -62,7 +62,7 @@ export function formatMemberSince(iso: string | null | undefined, lang: string):
   );
 }
 
-/** First letter of the display name for the avatar. */
-export function avatarInitial(name: string | null | undefined): string {
-  return (name?.trim().charAt(0) || '?').toUpperCase();
+/** Maps a PATCH /users/me avatar failure to a translation key. */
+export function avatarErrorKey(err: HttpLikeError): string {
+  return err?.status === 0 ? 'profile.errors.network' : 'profile.avatar.error';
 }

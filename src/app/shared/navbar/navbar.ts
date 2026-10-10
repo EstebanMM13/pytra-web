@@ -21,6 +21,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { UserService } from '../../core/services/user.service';
 import { GameSearch } from '../game-search/game-search';
+import { Avatar } from '../ui/avatar';
 import { PytraMark } from '../ui/pytra-mark';
 
 interface NavTab {
@@ -51,6 +52,7 @@ const WEB_TABS: NavTab[] = [
     TranslatePipe,
     GameSearch,
     PytraMark,
+    Avatar,
     LucideDynamicIcon,
     LucidePlus,
     LucideChevronDown,
@@ -70,14 +72,15 @@ export class Navbar {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly runFormLauncher = inject(RunFormLauncher);
-  protected readonly displayName = inject(UserService).displayName;
+  private readonly userService = inject(UserService);
+  protected readonly displayName = this.userService.displayName;
+  protected readonly avatar = computed(() => this.userService.currentUser()?.avatar ?? null);
 
   protected readonly webTabs = WEB_TABS;
   /** Mobile tab bar: two tabs on each side of the central "+" button. */
   protected readonly mobileTabsLeft = WEB_TABS.slice(0, 2);
   protected readonly mobileTabsRight = WEB_TABS.slice(2, 4);
 
-  protected readonly initial = computed(() => (this.displayName() ?? '?').charAt(0).toUpperCase());
   protected readonly shortcutLabel = /Mac|iPhone|iPad/i.test(globalThis.navigator?.userAgent ?? '')
     ? '⌘K'
     : 'Ctrl K';

@@ -1,6 +1,6 @@
 import {
   REAUTH_REQUIRED_KEY,
-  avatarInitial,
+  avatarErrorKey,
   confirmsUsername,
   deleteAccountErrorKey,
   exportErrorKey,
@@ -41,17 +41,19 @@ describe('confirmsUsername', () => {
   });
 });
 
-describe('formatMemberSince / avatarInitial', () => {
+describe('formatMemberSince', () => {
   it('formats month and year', () => {
     expect(formatMemberSince('2026-07-14T10:00:00', 'es')).toBe('julio de 2026');
     expect(formatMemberSince('2026-07-14T10:00:00', 'en')).toBe('July 2026');
     expect(formatMemberSince(null, 'es')).toBeNull();
     expect(formatMemberSince('nope', 'es')).toBeNull();
   });
+});
 
-  it('uses the first letter, uppercased', () => {
-    expect(avatarInitial('esteban')).toBe('E');
-    expect(avatarInitial('  ')).toBe('?');
-    expect(avatarInitial(null)).toBe('?');
+describe('avatarErrorKey', () => {
+  it('separates network failures from the rest', () => {
+    expect(avatarErrorKey({ status: 0 })).toBe('profile.errors.network');
+    expect(avatarErrorKey(apiError(400, 'INVALID_AVATAR'))).toBe('profile.avatar.error');
+    expect(avatarErrorKey(apiError(500))).toBe('profile.avatar.error');
   });
 });

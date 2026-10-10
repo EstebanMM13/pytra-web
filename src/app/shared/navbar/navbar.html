@@ -67,11 +67,11 @@
 
     <a
       routerLink="/profile"
-      class="flex size-[34px] items-center justify-center rounded-full bg-brand-tint text-[13px] font-semibold text-brand-lighter"
+      class="rounded-full"
       [attr.aria-label]="'nav.profile' | translate"
       [title]="displayName() ?? ''"
     >
-      {{ initial() }}
+      <app-avatar [avatar]="avatar()" [name]="displayName()" />
     </a>
   </div>
 </nav>
@@ -89,12 +89,12 @@
     <button
       type="button"
       (click)="menuOpen.set(!menuOpen())"
-      class="flex size-[34px] items-center justify-center rounded-full bg-brand-tint text-[13px] font-semibold text-brand-lighter"
+      class="rounded-full"
       [attr.aria-label]="'nav.menu' | translate"
       aria-haspopup="menu"
       [attr.aria-expanded]="menuOpen()"
     >
-      {{ initial() }}
+      <app-avatar [avatar]="avatar()" [name]="displayName()" />
     </button>
 
     @if (menuOpen()) {

@@ -29,10 +29,12 @@ import { usernameValidators } from '../../core/validators/username';
 import { Navbar } from '../../shared/navbar/navbar';
 import { ToastService } from '../../shared/toast/toast.service';
 import { SectionHeader } from '../../shared/ui/section-header';
+import { Avatar } from '../../shared/ui/avatar';
 import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { Skeleton } from '../../shared/ui/skeleton';
+import { AvatarPicker } from './avatar-picker';
 import { DeleteAccountDialog } from './delete-account-dialog';
-import { avatarInitial, exportErrorKey, formatMemberSince } from './profile.logic';
+import { avatarErrorKey, exportErrorKey, formatMemberSince } from './profile.logic';
 
 type ProfileSection = 'account' | 'achievements' | 'preferences' | 'data';
 type AchievementFilter = 'all' | 'unlocked' | 'locked';
@@ -54,6 +56,8 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
     SectionHeader,
     Segmented,
     Skeleton,
+    Avatar,
+    AvatarPicker,
     DeleteAccountDialog,
     AchievementBadge,
     LucideUser,
@@ -106,7 +110,6 @@ export class Profile {
 
   protected readonly user = this.userService.currentUser;
   protected readonly displayName = this.userService.displayName;
-  protected readonly initial = computed(() => avatarInitial(this.displayName()));
   protected readonly memberSince = computed(() =>
     formatMemberSince(this.user()?.createdAt, this.translate.currentLang() === 'en' ? 'en' : 'es'),
   );
@@ -152,6 +155,8 @@ export class Profile {
   protected readonly editingName = signal(false);
   readonly submitting = signal(false);
   readonly errorKey = signal<string | null>(null);
+
+  protected readonly savingAvatar = signal(false);
 
   protected readonly exporting = signal<ExportFormat | null>(null);
   protected readonly deleteOpen = signal(false);
@@ -227,7 +232,7 @@ export class Profile {
     this.submitting.set(true);
     this.errorKey.set(null);
 
-    this.userService.updateUsername(this.form.getRawValue()).subscribe({
+    this.userService.updateProfile(this.form.getRawValue()).subscribe({
       next: (user) => {
         this.submitting.set(false);
         this.editingName.set(false);
@@ -237,6 +242,24 @@ export class Profile {
       error: (err) => {
         this.submitting.set(false);
         this.errorKey.set(err.status === 409 ? 'profile.usernameTaken' : 'auth.errors.generic');
+      },
+    });
+  }
+
+  /** Saves the picked preset (null = initial); the navbar follows through the shared user state. */
+  protected setAvatar(avatar: string | null): void {
+    if (this.savingAvatar()) {
+      return;
+    }
+    this.savingAvatar.set(true);
+    this.userService.updateProfile({ avatar }).subscribe({
+      next: () => {
+        this.savingAvatar.set(false);
+        this.toast.success(this.translate.instant('profile.avatar.saved'));
+      },
+      error: (err) => {
+        this.savingAvatar.set(false);
+        this.toast.error(this.translate.instant(avatarErrorKey(err)));
       },
     });
   }
