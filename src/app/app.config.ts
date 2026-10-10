@@ -31,7 +31,9 @@ export const appConfig: ApplicationConfig = {
     ...provideTranslateHttpLoader({ prefix: '/i18n/', suffix: '.json' }),
     provideAppInitializer(() => applyLanguage(inject(TranslateService), inject(PreferencesService).language())),
     // PWA: production web only. Inside the Capacitor shell assets are already local.
-    provideServiceWorker('ngsw-worker.js', {
+    // '?v=2' changes the worker URL so browsers that installed the first worker
+    // (with the page CSP, which blocked cross-origin covers) pick up the fixed one.
+    provideServiceWorker('ngsw-worker.js?v=2', {
       enabled: !isDevMode() && !Capacitor.isNativePlatform(),
       registrationStrategy: 'registerWhenStable:30000',
     }),

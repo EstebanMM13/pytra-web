@@ -17,6 +17,10 @@ server {
     #  - img-src https:: game cover URLs are user-provided / external hosts.
     #  - connect-src: the API lives on its own origin.
     set $csp "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://pytra-api-production.up.railway.app; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+    # The service worker re-fetches every request the page makes (game covers from
+    # Steam's CDN included), and a worker is bound by the CSP of its own script.
+    # So its connect-src must allow any https origin, like the page's img-src does.
+    set $csp_worker "default-src 'self'; script-src 'self'; connect-src 'self' https:; object-src 'none'; base-uri 'self'";
 
     # Service worker files must never be cached by the browser/proxies, otherwise
     # clients keep running an old worker and never see new versions. These exact
@@ -25,7 +29,7 @@ server {
     location = /ngsw-worker.js {
         try_files $uri =404;
         add_header Cache-Control "no-cache";
-        add_header Content-Security-Policy $csp always;
+        add_header Content-Security-Policy $csp_worker always;
         add_header X-Content-Type-Options "nosniff" always;
         add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         add_header X-Frame-Options "DENY" always;
@@ -35,7 +39,7 @@ server {
     location = /safety-worker.js {
         try_files $uri =404;
         add_header Cache-Control "no-cache";
-        add_header Content-Security-Policy $csp always;
+        add_header Content-Security-Policy $csp_worker always;
         add_header X-Content-Type-Options "nosniff" always;
         add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         add_header X-Frame-Options "DENY" always;
