@@ -1,3 +1,9 @@
+// Lets Gradle download the JDK version a plugin's toolchain asks for (e.g. Java 21
+// for @capacitor/filesystem) instead of requiring it to be installed locally.
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.10.0'
+}
+
 include ':app'
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
