@@ -238,6 +238,7 @@
           </button>
         </div>
       </div>
+      @if (showDeleteAccount) {
       <div class="flex items-center justify-between gap-4 border-t border-divider py-3 text-sm">
         <span class="text-muted">{{ 'profile.delete.label' | translate }}</span>
         <button
@@ -249,6 +250,7 @@
           {{ 'profile.delete.open' | translate }}
         </button>
       </div>
+      }
     </section>
 
     <button
@@ -261,6 +263,6 @@
   </div>
 </main>
 
-@if (deleteOpen() && user(); as u) {
+@if (showDeleteAccount && deleteOpen() && user(); as u) {
   <app-delete-account-dialog [user]="u" (closed)="deleteOpen.set(false)" />
 }

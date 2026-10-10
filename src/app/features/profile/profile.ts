@@ -52,6 +52,8 @@ export class Profile {
   // The account card (rename / password) is hidden while the app is shared with demo
   // accounts, so testers can't change the shared credentials. Flip to re-enable it.
   protected readonly showAccountSection = false;
+  // Same reason: testers know the shared password, so account deletion is hidden too.
+  protected readonly showDeleteAccount = false;
   protected readonly sections = (['account', 'preferences', 'data'] as const).filter(
     (s) => s !== 'account' || this.showAccountSection,
   );
