@@ -22,7 +22,7 @@ import { Sparkline } from './sparkline';
   template: `
     @if (compact()) {
       <!-- Mobile: centred, and long values shrink instead of being cut with "…" -->
-      <div class="flex flex-col items-center p-3 text-center">
+      <div class="flex h-full flex-col items-center justify-center p-3 text-center">
         <p
           class="text-xl leading-tight font-bold tracking-[-0.02em] break-words"
           [class]="figureClass()"

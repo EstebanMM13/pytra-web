@@ -6,7 +6,7 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideRouter, withViewTransitions } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -22,7 +22,12 @@ import { InstallPromptService } from './core/services/install-prompt.service';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withViewTransitions({ skipInitialTransition: true })),
+    provideRouter(
+      routes,
+      withViewTransitions({ skipInitialTransition: true }),
+      // New pages open at the top; Back restores the previous scroll position.
+      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
+    ),
     provideAppInitializer(() => inject(NativeOAuthService).init()),
     provideAppInitializer(() => {
       inject(ThemeService);

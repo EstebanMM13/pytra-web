@@ -14,7 +14,7 @@
       />
     </div>
     <div class="min-w-0">
-      <p class="mb-2 hidden items-center gap-2 font-mono text-[11px] tracking-[0.16em] text-muted uppercase md:flex">
+      <p class="mb-2 flex items-center gap-2 font-mono text-[10px] tracking-[0.14em] text-muted uppercase md:text-[11px] md:tracking-[0.16em]">
         <span class="size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span>
         {{ today() }}
       </p>
@@ -194,7 +194,7 @@
 
     <!-- Playing now + hours per year -->
     <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      <section class="md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
+      <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
         <app-section-header collapseKey="dashboard.playingNow" collapseGroup="dashboard.activity" collapseGroupFrom="lg" class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
         @if (playing()?.[0]; as hero) {
           <!-- Web hero for the most recent run: blurred cover backdrop + crisp cover -->
@@ -266,7 +266,7 @@
         </div>
       </section>
 
-      <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
+      <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
         <app-section-header collapseKey="dashboard.hoursByYear" collapseGroup="dashboard.activity" collapseGroupFrom="lg" class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
         </app-section-header>
         @if (yearBars(); as bars) {
