@@ -526,7 +526,26 @@
     "delete": "Borrar juego",
     "deleteConfirm": "¿Borrar este juego y todas sus partidas?",
     "deleted": "Juego borrado.",
-    "deleteError": "No se pudo borrar el juego."
+    "deleteError": "No se pudo borrar el juego.",
+    "steamAutofill": {
+      "open": "Autocompletar desde Steam",
+      "searchLabel": "Buscar en la tienda de Steam",
+      "placeholder": "Busca el juego en Steam…",
+      "hint": "Escribe al menos 2 letras. ↑↓ para moverte, Enter para elegir, Esc para cerrar.",
+      "searching": "Buscando en Steam…",
+      "empty": "No hay resultados en Steam.",
+      "results": "Resultados de Steam",
+      "loadingDetails": "Cargando datos del juego…",
+      "close": "Cerrar búsqueda de Steam",
+      "filled": "Datos rellenados desde Steam ({{name}}). Revísalos antes de guardar.",
+      "suggestedGenres": "Géneros de Steam que aún no tienes (pulsa para añadirlos):",
+      "addGenre": "Añadir el género {{name}}",
+      "errors": {
+        "unavailable": "Steam no responde ahora mismo. Inténtalo de nuevo en un rato.",
+        "notFound": "Steam no tiene datos de este juego.",
+        "notAGame": "Eso no es un juego (DLC, banda sonora…). Elige el juego base."
+      }
+    }
   },
   "run": {
     "platinum": "🏆 Platino",

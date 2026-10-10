@@ -526,7 +526,26 @@
     "delete": "Delete game",
     "deleteConfirm": "Delete this game and all its runs?",
     "deleted": "Game deleted.",
-    "deleteError": "Could not delete the game."
+    "deleteError": "Could not delete the game.",
+    "steamAutofill": {
+      "open": "Autofill from Steam",
+      "searchLabel": "Search the Steam store",
+      "placeholder": "Search the game on Steam…",
+      "hint": "Type at least 2 letters. ↑↓ to move, Enter to pick, Esc to close.",
+      "searching": "Searching Steam…",
+      "empty": "No results on Steam.",
+      "results": "Steam results",
+      "loadingDetails": "Loading game details…",
+      "close": "Close Steam search",
+      "filled": "Filled in from Steam ({{name}}). Review it before saving.",
+      "suggestedGenres": "Steam genres you don't have yet (click to add):",
+      "addGenre": "Add the {{name}} genre",
+      "errors": {
+        "unavailable": "Steam isn't responding right now. Try again in a while.",
+        "notFound": "Steam has no data for this game.",
+        "notAGame": "That's not a game (DLC, soundtrack…). Pick the base game."
+      }
+    }
   },
   "run": {
     "platinum": "🏆 Platinum",

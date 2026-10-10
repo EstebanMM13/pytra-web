@@ -1,4 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Injector,
+  OnInit,
+  afterNextRender,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import {
   AbstractControl,
   NonNullableFormBuilder,
@@ -7,7 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { LucideTrash2 } from '@lucide/angular';
+import { LucidePlus, LucideTrash2, LucideWandSparkles } from '@lucide/angular';
 import { map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { GenreNamePipe } from '../../../shared/pipes/genre-name.pipe';
@@ -21,6 +33,9 @@ import { ToastService } from '../../../shared/toast/toast.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { GameCover } from '../../../shared/ui/game-cover';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
+import { SteamGameMetadata } from '../../../core/models/steam-metadata.model';
+import { SteamAutofill } from './steam-autofill';
+import { matchGenres } from './steam-autofill.logic';
 
 /** Empty, or an absolute https URL with a host. */
 function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors | null {
@@ -42,7 +57,18 @@ function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors |
  */
 @Component({
   selector: 'app-game-edit-dialog',
-  imports: [ReactiveFormsModule, TranslatePipe, GenreNamePipe, ModalSheet, Segmented, GameCover, LucideTrash2],
+  imports: [
+    ReactiveFormsModule,
+    TranslatePipe,
+    GenreNamePipe,
+    ModalSheet,
+    Segmented,
+    GameCover,
+    SteamAutofill,
+    LucideTrash2,
+    LucideWandSparkles,
+    LucidePlus,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-edit-dialog.html',
   styleUrl: './game-edit-dialog.css',
@@ -61,6 +87,8 @@ export class GameEditDialog implements OnInit {
   private readonly genreService = inject(GenreService);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
+  private readonly injector = inject(Injector);
+  private readonly steamButton = viewChild<ElementRef<HTMLButtonElement>>('steamButton');
 
   protected readonly categoryOptions: SegmentedOption<GameCategory>[] = (
     ['SINGLEPLAYER', 'ONLINE', 'HYBRID'] as const
@@ -72,6 +100,11 @@ export class GameEditDialog implements OnInit {
   protected readonly category = signal<GameCategory>('SINGLEPLAYER');
   protected readonly saving = signal(false);
   protected readonly deleting = signal(false);
+  protected readonly steamSearchOpen = signal(false);
+  /** Name of the Steam game the form was last filled from (shown as a "review before saving" note). */
+  protected readonly steamFilledFrom = signal<string | null>(null);
+  /** Steam genres the user has no genre for yet; one click creates and selects them. */
+  protected readonly suggestedGenres = signal<string[]>([]);
 
   protected readonly newGenreName = this.fb.control('');
   protected readonly form = this.fb.group({
@@ -133,16 +166,50 @@ export class GameEditDialog implements OnInit {
     if (!name) {
       return;
     }
+    this.createAndSelectGenre(name, () => this.newGenreName.setValue(''));
+  }
+
+  protected addSuggestedGenre(name: string): void {
+    this.createAndSelectGenre(name, () => this.suggestedGenres.update((list) => list.filter((n) => n !== name)));
+  }
+
+  private createAndSelectGenre(name: string, onCreated: () => void): void {
     this.genreService.createIfMissing({ name }).subscribe({
       next: (genre) => {
         if (!this.genres().some((g) => g.id === genre.id)) {
           this.genres.update((list) => [...list, genre]);
         }
         this.selectedGenreIds.update((s) => new Set(s).add(genre.id));
-        this.newGenreName.setValue('');
+        onCreated();
       },
       error: () => this.toast.error(this.translate.instant('game.genreError')),
     });
+  }
+
+  /**
+   * Prefills the form from Steam. Steam values overwrite the fields they have (missing ones keep what
+   * the user typed); matching genres are added to the selection. Nothing is saved until "Save".
+   */
+  protected applySteamMetadata(metadata: SteamGameMetadata): void {
+    const controls = this.form.controls;
+    controls.name.setValue(metadata.name);
+    if (metadata.developer) controls.developer.setValue(metadata.developer);
+    if (metadata.publisher) controls.publisher.setValue(metadata.publisher);
+    if (metadata.releaseDate) controls.releaseDate.setValue(metadata.releaseDate);
+    if (metadata.coverImageUrl) controls.coverImageUrl.setValue(metadata.coverImageUrl);
+    this.form.markAsDirty();
+
+    const { matched, unmatched } = matchGenres(metadata.genres, this.genres());
+    this.selectedGenreIds.update((current) => new Set([...current, ...matched.map((g) => g.id)]));
+    this.suggestedGenres.set(unmatched);
+    this.steamFilledFrom.set(metadata.name);
+    this.closeSteamSearch();
+  }
+
+  /** Hides the Steam search and gives focus back to the button that opened it. */
+  protected closeSteamSearch(): void {
+    this.steamSearchOpen.set(false);
+    afterNextRender(() => this.steamButton()?.nativeElement.focus(), { injector: this.injector });
   }
 
   protected submit(): void {
