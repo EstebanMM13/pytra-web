@@ -38,11 +38,24 @@ import { TranslatePipe } from '@ngx-translate/core';
         class="flex justify-center px-6 pt-[calc(env(safe-area-inset-top)+48px)] pb-[calc(env(safe-area-inset-bottom)+32px)] md:items-center md:px-10 md:py-12"
       >
         <div class="flex w-full max-w-[380px] flex-col gap-4 md:gap-[18px]">
-          <img
-            src="brand/mark-monochrome-purple-512.png"
-            alt="Pytra"
-            class="mb-[18px] size-14 self-start md:hidden"
-          />
+          <!-- Mobile brand header: the side panel is hidden below md -->
+          <div class="mb-4 flex flex-col gap-3 md:hidden">
+            <img src="brand/lockup-horizontal-dark-bg.png" alt="Pytra" class="h-9 w-auto self-start light:hidden" />
+            <img
+              src="brand/lockup-horizontal-light-bg.png"
+              alt="Pytra"
+              class="hidden h-9 w-auto self-start light:block"
+            />
+            <div class="mt-3 flex items-center gap-3">
+              <span class="text-xs font-semibold tracking-[0.04em] text-gold">
+                {{ 'auth.panel.eyebrow' | translate }}
+              </span>
+              <span class="h-px flex-1 bg-linear-to-r from-gold-line to-transparent" aria-hidden="true"></span>
+            </div>
+            <p class="text-[26px] leading-[1.1] font-semibold tracking-[-0.02em]">
+              {{ 'auth.panel.headline' | translate }}
+            </p>
+          </div>
           <ng-content />
         </div>
       </main>
