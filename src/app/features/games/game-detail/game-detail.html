@@ -153,8 +153,24 @@
           [value]="s.avgRating | rating"
           [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
-        <app-stat-card compact [label]="'game.stats.hours' | translate" [value]="s.totalHours | hours" />
+        <app-stat-card
+          compact
+          [label]="'game.stats.hours' | translate"
+          [value]="s.totalHours | hours"
+          [hint]="
+            g.category && g.category !== 'SINGLEPLAYER'
+              ? ('game.stats.hoursBreakdown' | translate: { runs: (s.runHours | hours), online: (s.onlineHours | hours) })
+              : null
+          "
+        />
         <app-stat-card compact [label]="'game.stats.runs' | translate" [value]="s.runs" />
+        <app-stat-card
+          compact
+          [label]="'game.stats.bestRating' | translate"
+          [value]="s.bestRating | rating"
+          [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
+        />
+        <app-stat-card compact [label]="'game.stats.platinum' | translate" [value]="s.platinum ? '🏆' : '—'" />
       </section>
     } @else {
       <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-5">
@@ -190,7 +206,7 @@
                   [rating]="run.rating"
                   [best]="run.id === bestRunId()"
                 >
-                  <span class="hidden sm:block"><app-status-pill [status]="run.status" /></span>
+                  <span class="shrink-0"><app-status-pill [status]="run.status" /></span>
                 </app-run-row>
               </a>
             } @empty {

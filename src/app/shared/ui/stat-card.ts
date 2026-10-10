@@ -29,6 +29,9 @@ import { Sparkline } from './sparkline';
           [style.font-size.px]="display().toString().length > 6 ? 16 : null"
         >{{ display() }}</p>
         <p class="mt-0.5 text-xs leading-tight text-muted">{{ label() }}</p>
+        @if (hint()) {
+          <p class="mt-0.5 text-[10px] leading-tight text-faint">{{ hint() }}</p>
+        }
         @if (hasTrend()) {
           <app-sparkline class="mx-auto mt-1.5 block" [values]="trend()!" />
         }

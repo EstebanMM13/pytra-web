@@ -287,7 +287,8 @@ export class GameDetail {
   }
 
   protected genreNames(game: Game): string {
-    return game.genres.map((g) => g.name).join(', ');
+    // Sorted so the order is stable everywhere (the API returns genres as an unordered set).
+    return game.genres.map((g) => g.name).sort((a, b) => a.localeCompare(b, 'es')).join(', ');
   }
 
   protected newRun(): void {

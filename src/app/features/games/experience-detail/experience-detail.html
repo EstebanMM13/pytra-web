@@ -107,8 +107,11 @@
         [valueClass]="'font-mono ' + (e.rating | ratingTone)"
       />
       <app-stat-card compact [label]="'run.hours' | translate" [value]="e.hours | hours" valueClass="font-mono" />
-      <app-stat-card compact [label]="'run.duration' | translate" [value]="durationLabel(true)" valueClass="font-mono" />
+      <app-stat-card compact [label]="'run.duration' | translate" [value]="durationLabel(false)" valueClass="font-mono" />
     </section>
+    @if (rank(); as r) {
+      <p class="-mt-2 text-center text-xs text-muted md:hidden">{{ 'run.rank' | translate: { rank: r } }}</p>
+    }
     @if (e.startDate || e.endDate) {
       <div
         class="flex items-center gap-2.5 rounded-xl border border-border px-3.5 py-3 font-mono text-[13px] text-text-3 md:hidden"
