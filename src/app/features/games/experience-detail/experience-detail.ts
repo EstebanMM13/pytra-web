@@ -19,6 +19,8 @@ import { StatsService } from '../../../core/services/stats.service';
 import { Navbar } from '../../../shared/navbar/navbar';
 import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../../shared/pipes/rating.pipe';
+import { PlatformLabel } from '../../../shared/ui/platform-label';
+import { RatingTonePipe } from '../../../shared/pipes/rating-tone.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
@@ -47,6 +49,8 @@ export function ratingRank(rating: number, topRatings: readonly number[], window
     Navbar,
     HoursPipe,
     RatingPipe,
+    RatingTonePipe,
+    PlatformLabel,
     SectionHeader,
     Skeleton,
     StatCard,

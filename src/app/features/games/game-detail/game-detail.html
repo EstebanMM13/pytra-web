@@ -106,13 +106,13 @@
           [icon]="icons.rating"
           [label]="'game.stats.avgRating' | translate"
           [value]="s.avgRating | rating"
-          valueClass="font-mono text-gold"
+          [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
         <app-stat-card
           [icon]="icons.rating"
           [label]="'game.stats.bestRating' | translate"
           [value]="s.bestRating | rating"
-          valueClass="font-mono text-gold"
+          [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
         />
         <app-stat-card
           [icon]="icons.platinum"
@@ -125,7 +125,7 @@
           compact
           [label]="'game.stats.avg' | translate"
           [value]="s.avgRating | rating"
-          valueClass="font-mono text-gold"
+          [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
         <app-stat-card compact [label]="'game.stats.hours' | translate" [value]="s.totalHours | hours" />
         <app-stat-card compact [label]="'game.stats.runs' | translate" [value]="s.runs" />
@@ -157,7 +157,7 @@
             @for (run of runs(); track run.id) {
               <a [routerLink]="['/games', g.id, 'experiences', run.id]" class="block rounded-[10px]">
                 <app-run-row
-                  class="hover:border-border-strong max-md:bg-surface!"
+                  class="hover-lift max-md:bg-surface!"
                   [title]="run.runLabel"
                   [meta]="runMeta(run)"
                   [hours]="run.hours"
@@ -254,7 +254,13 @@
             </div>
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
               <dt class="shrink-0 text-muted">{{ 'game.platforms' | translate }}</dt>
-              <dd class="truncate text-right" [title]="platformNames()">{{ platformNames() || '—' }}</dd>
+              <dd class="flex min-w-0 flex-wrap justify-end gap-x-3 gap-y-1 text-right" [title]="platformNames()">
+                @for (p of platforms(); track p) {
+                  <app-platform-label [platform]="p" />
+                } @empty {
+                  —
+                }
+              </dd>
             </div>
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
               <dt class="shrink-0 text-muted">{{ 'game.category' | translate }}</dt>
@@ -273,12 +279,12 @@
                   @if (sg.id === g.id) {
                     <span class="truncate text-brand-lighter" aria-current="page" [title]="sg.name">{{ sg.name }}</span>
                     @if (stats().bestRating !== null) {
-                      <span class="shrink-0 font-mono text-gold">{{ stats().bestRating | rating }}</span>
+                      <span class="shrink-0 font-mono" [class]="stats().bestRating | ratingTone">{{ stats().bestRating | rating }}</span>
                     }
                   } @else {
                     <a [routerLink]="['/games', sg.id]" class="truncate hover:underline" [title]="sg.name">{{ sg.name }}</a>
                     @if (sg.bestRating != null) {
-                      <span class="shrink-0 font-mono text-gold">{{ sg.bestRating | rating }}</span>
+                      <span class="shrink-0 font-mono" [class]="sg.bestRating | ratingTone">{{ sg.bestRating | rating }}</span>
                     } @else if (sg.lastExperienceStatus) {
                       <span class="shrink-0 text-xs text-brand-lighter">
                         {{ 'status.' + sg.lastExperienceStatus | translate }}

@@ -16,6 +16,7 @@ import { GameService } from '../../core/services/game.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
+import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { Pagination } from '../../shared/ui/pagination';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusPill } from '../../shared/ui/status-pill';
@@ -51,6 +52,7 @@ import {
     Navbar,
     HoursPipe,
     RatingPipe,
+    RatingTonePipe,
     Pagination,
     Dropdown,
     Skeleton,

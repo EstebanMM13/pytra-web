@@ -2,15 +2,16 @@ import { ChangeDetectionStrategy, booleanAttribute, Component, input } from '@an
 import { TranslatePipe } from '@ngx-translate/core';
 import { HoursPipe } from '../pipes/hours.pipe';
 import { RatingPipe } from '../pipes/rating.pipe';
+import { RatingTonePipe } from '../pipes/rating-tone.pipe';
 
 /**
- * Run (experience) row: brand accent bar, title + meta, mono hours and gold rating.
+ * Run (experience) row: brand accent bar, title + meta, mono hours and rating coloured by value.
  * Projects extra content (e.g. a StatusPill) before the figures.
  * `onSurface` is for rows placed directly on the page (mobile) instead of inside a card.
  */
 @Component({
   selector: 'app-run-row',
-  imports: [TranslatePipe, HoursPipe, RatingPipe],
+  imports: [TranslatePipe, HoursPipe, RatingPipe, RatingTonePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'flex items-center gap-3.5 rounded-[10px] border p-3.5',
@@ -41,7 +42,10 @@ import { RatingPipe } from '../pipes/rating.pipe';
       <span class="shrink-0 font-mono text-sm md:text-[15px]">{{ hours() | hours }}</span>
     }
     @if (rating() !== null) {
-      <span class="w-10 shrink-0 text-right font-mono text-[15px] font-medium text-gold">
+      <span
+        class="w-10 shrink-0 text-right font-mono text-[15px] font-medium"
+        [class]="rating() | ratingTone"
+      >
         {{ rating() | rating }}
       </span>
     }

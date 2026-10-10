@@ -50,7 +50,7 @@
           <a
             [routerLink]="['/sagas', s.saga.id]"
             [attr.aria-current]="selected()?.saga?.id === s.saga.id ? 'true' : null"
-            class="block rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
+            class="hover-lift block rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
             [class]="
               selected()?.saga?.id === s.saga.id
                 ? 'border-border md:border-brand md:bg-brand-tint'
@@ -59,7 +59,7 @@
           >
             <div class="flex justify-between gap-3 text-[15px] font-semibold">
               <span class="truncate" [title]="s.saga.name">{{ s.saga.name }}</span>
-              <span class="shrink-0 font-mono font-medium text-gold">{{ s.avgRating | rating }}</span>
+              <span class="shrink-0 font-mono font-medium" [class]="s.avgRating | ratingTone">{{ s.avgRating | rating }}</span>
             </div>
             <div class="mt-1.5 flex justify-between gap-3 text-xs text-muted">
               <span>{{ 'sagas.playedOf' | translate: { played: s.played, total: s.total } }}</span>
@@ -130,7 +130,7 @@
           compact
           [label]="'sagas.stats.avgShort' | translate"
           [value]="s.avgRating | rating"
-          valueClass="font-mono text-gold"
+          [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
       </div>
       <div class="hidden grid-cols-4 gap-3 md:grid">
@@ -139,7 +139,7 @@
         <app-stat-card
           [label]="'sagas.stats.avgRating' | translate"
           [value]="s.avgRating | rating"
-          valueClass="font-mono text-gold"
+          [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
         <app-stat-card
           [label]="'sagas.stats.platinums' | translate"
@@ -184,7 +184,7 @@
               }
             </span>
             <span class="hidden text-right font-mono md:block">{{ g.totalHours ? (g.totalHours | hours) : '—' }}</span>
-            <span class="shrink-0 text-right font-mono text-gold">{{ g.bestRating | rating }}</span>
+            <span class="shrink-0 text-right font-mono" [class]="g.bestRating | ratingTone">{{ g.bestRating | rating }}</span>
           </a>
         }
       </section>

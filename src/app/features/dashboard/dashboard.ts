@@ -22,6 +22,7 @@ import { UserService } from '../../core/services/user.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
+import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
 import { RunRow } from '../../shared/ui/run-row';
 import { SectionHeader } from '../../shared/ui/section-header';
@@ -47,6 +48,7 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
     TranslatePipe,
     HoursPipe,
     RatingPipe,
+    RatingTonePipe,
     StatCard,
     SectionHeader,
     RunRow,

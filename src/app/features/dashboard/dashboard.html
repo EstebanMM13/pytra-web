@@ -45,7 +45,7 @@
         [icon]="icons.rating"
         [label]="'dashboard.stats.avgRating' | translate"
         [value]="s.averageRating | rating"
-        valueClass="font-mono text-gold"
+        [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
       />
     } @else if (!summaryFailed()) {
       @for (i of [1, 2, 3, 4, 5, 6]; track i) {
@@ -66,7 +66,7 @@
         compact
         [label]="'dashboard.stats.avg' | translate"
         [value]="s.averageRating | rating"
-        valueClass="font-mono text-gold"
+        [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
       />
       <app-stat-card compact [label]="'dashboard.stats.replays' | translate" [value]="s.replayCount" />
       <app-stat-card
@@ -96,7 +96,7 @@
         @for (run of playing(); track run.experienceId) {
           <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl">
             <app-run-row
-              class="hover:border-border-strong max-md:bg-surface!"
+              class="hover-lift max-md:bg-surface!"
               [title]="run.gameName"
               [meta]="playingMeta(run)"
             >
@@ -155,13 +155,13 @@
         @for (item of items; track item.gameId + item.runLabel; let i = $index) {
           <a
             [routerLink]="['/games', item.gameId]"
-            class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
+            class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
           >
             <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
             <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName + ' · ' + item.runLabel">
               {{ item.gameName }} <span class="text-faint">· {{ item.runLabel }}</span>
             </span>
-            <span class="font-mono font-medium text-gold">{{ item.rating | rating }}</span>
+            <span class="font-mono font-medium" [class]="item.rating | ratingTone">{{ item.rating | rating }}</span>
           </a>
         } @empty {
           @if (failed('topRated')) {
@@ -181,7 +181,7 @@
       </app-section-header>
       @if (mostPlayed(); as items) {
         @for (item of items; track item.gameId) {
-          <a [routerLink]="['/games', item.gameId]" class="block border-t border-divider py-[9px] text-sm hover:bg-hover">
+          <a [routerLink]="['/games', item.gameId]" class="block hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover">
             <span class="flex justify-between gap-3">
               <span class="min-w-0 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
               <span class="shrink-0 font-mono">{{ item.totalHours | hours }}</span>
@@ -208,7 +208,7 @@
         @for (item of items; track item.sagaId) {
           <a
             [routerLink]="['/sagas', item.sagaId]"
-            class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
+            class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
           >
             <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
             <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translate: { count: item.gameCount } }}</span>

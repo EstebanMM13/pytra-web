@@ -227,7 +227,7 @@
             <span class="truncate text-text-3" [title]="game.sagaName ?? ''">{{ game.sagaName ?? '—' }}</span>
             <span class="text-right font-mono text-text-3">{{ game.experienceCount ?? 0 }}</span>
             <span class="text-right font-mono">{{ game.totalHours ? (game.totalHours | hours) : '—' }}</span>
-            <span class="text-right font-mono text-gold">{{ game.bestRating | rating }}</span>
+            <span class="text-right font-mono" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
             <span>
               @if (game.lastExperienceStatus; as status) {
                 <app-status-pill [status]="status" />
@@ -269,7 +269,7 @@
                   }
                 </p>
               </div>
-              <span class="shrink-0 font-mono text-[15px] text-gold">{{ game.bestRating | rating }}</span>
+              <span class="shrink-0 font-mono text-[15px]" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
             </a>
           </li>
         }

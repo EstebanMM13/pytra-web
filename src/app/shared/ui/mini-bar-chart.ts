@@ -26,7 +26,7 @@ export interface MiniBar {
     '[class]': "dense() ? 'gap-[7px]' : 'gap-3.5'",
   },
   template: `
-    @for (bar of normalized(); track bar.key) {
+    @for (bar of normalized(); track bar.key; let i = $index) {
       <div
         class="flex min-w-0 flex-1 flex-col items-center justify-end self-stretch"
         [class]="dense() ? 'gap-[5px]' : 'gap-1.5'"
@@ -40,9 +40,10 @@ export interface MiniBar {
           >{{ bar.topLabel }}</span>
         }
         <div
-          class="w-full bg-brand"
+          class="bar-grow w-full bg-brand"
           [class]="dense() ? 'rounded-t-[3px]' : 'rounded-t'"
           [style.height.%]="bar.percent"
+          [style.animation-delay.ms]="i * 40"
         ></div>
         <span class="text-muted" [class]="dense() ? 'text-[10px]' : 'text-xs'">
           {{ bar.label }}

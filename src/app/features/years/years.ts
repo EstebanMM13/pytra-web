@@ -10,6 +10,7 @@ import { StatsService } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
+import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { ToastService } from '../../shared/toast/toast.service';
 import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
 import { SectionHeader } from '../../shared/ui/section-header';
@@ -45,6 +46,7 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
     TranslatePipe,
     HoursPipe,
     RatingPipe,
+    RatingTonePipe,
     StatCard,
     SectionHeader,
     MiniBarChart,

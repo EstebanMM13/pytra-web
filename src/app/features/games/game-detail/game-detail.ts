@@ -24,6 +24,8 @@ import { RunFormLauncher } from '../../../core/services/run-form-launcher.servic
 import { Navbar } from '../../../shared/navbar/navbar';
 import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../../shared/pipes/rating.pipe';
+import { PlatformLabel } from '../../../shared/ui/platform-label';
+import { RatingTonePipe } from '../../../shared/pipes/rating-tone.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { RunRow } from '../../../shared/ui/run-row';
 import { SectionHeader } from '../../../shared/ui/section-header';
@@ -56,6 +58,8 @@ function byRelease(a: Game, b: Game): number {
     Navbar,
     HoursPipe,
     RatingPipe,
+    RatingTonePipe,
+    PlatformLabel,
     RunRow,
     SectionHeader,
     Skeleton,

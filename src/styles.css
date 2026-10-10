@@ -45,6 +45,14 @@
   --pt-gold-card: #2a2418;
   --pt-gold-card-border: #5a4a2c;
 
+  /* Rating tones (>=9 high, 6-<7 mid, <6 danger, 7-<9 gold) and platform brand dots. */
+  --pt-rating-high: #8fd6a5;
+  --pt-rating-mid: #d9a05b;
+  --pt-platform-playstation: #6b93f5;
+  --pt-platform-xbox: #6cc06c;
+  --pt-platform-switch: #ec6a64;
+  --pt-platform-neutral: #8a857c;
+
   --pt-success: #8fd6a5;
   --pt-success-bg: #1f3326;
   --pt-danger: #f08b8b;
@@ -87,6 +95,13 @@
   --pt-gold-card: #fbf3e4;
   --pt-gold-card-border: #e6d2a8;
 
+  --pt-rating-high: #2d7444;
+  --pt-rating-mid: #9a6a1f;
+  --pt-platform-playstation: #3563d8;
+  --pt-platform-xbox: #3f8f3f;
+  --pt-platform-switch: #cf3f39;
+  --pt-platform-neutral: #8a8478;
+
   --pt-success: #2d7444;
   --pt-success-bg: #e3f2e7;
   --pt-danger: #b23b3b;
@@ -121,7 +136,32 @@
   }
 }
 
+/* MiniBarChart bars grow from the baseline on mount (staggered via animation-delay). */
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.bar-grow {
+  transform-origin: bottom;
+  animation: bar-grow 500ms ease-out both;
+}
+
+/* Route changes (router withViewTransitions): short cross-fade. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 150ms;
+  animation-timing-function: ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .bar-grow,
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+
   .animate-modal-in,
   .max-md\:animate-sheet-in,
   .md\:animate-modal-in {
@@ -160,6 +200,13 @@
   --color-gold-tint-fg: var(--pt-gold-tint-fg);
   --color-gold-card: var(--pt-gold-card);
   --color-gold-card-border: var(--pt-gold-card-border);
+
+  --color-rating-high: var(--pt-rating-high);
+  --color-rating-mid: var(--pt-rating-mid);
+  --color-platform-playstation: var(--pt-platform-playstation);
+  --color-platform-xbox: var(--pt-platform-xbox);
+  --color-platform-switch: var(--pt-platform-switch);
+  --color-platform-neutral: var(--pt-platform-neutral);
 
   --color-success: var(--pt-success);
   --color-success-bg: var(--pt-success-bg);
@@ -314,6 +361,24 @@
  * primary content, so phones keep natural page scroll. `scroll-thin` only styles the scrollbar,
  * for containers that already manage their own overflow and padding (dropdowns, popovers).
  */
+/* Clickable cards/rows: 1px lift + stronger border on hover (no motion with reduced-motion). */
+@utility hover-lift {
+  transition-property: transform, border-color, background-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: var(--pt-border-strong);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
 @utility scroll-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--pt-border-strong) transparent;

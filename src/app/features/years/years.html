@@ -76,7 +76,7 @@
           <app-stat-card
             [label]="'years.stats.avgRating' | translate"
             [value]="s.averageRating | rating"
-            valueClass="font-mono text-gold"
+            [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
           />
           <app-stat-card [label]="'years.stats.platinums' | translate" [value]="s.platinumCount" />
         </section>
@@ -87,7 +87,7 @@
             compact
             [label]="'years.stats.avg' | translate"
             [value]="s.averageRating | rating"
-            valueClass="font-mono text-gold"
+            [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
           />
           <app-stat-card compact [label]="'years.stats.completed' | translate" [value]="s.completedCount" />
           <app-stat-card compact [label]="'years.stats.abandoned' | translate" [value]="s.abandonedCount" />
@@ -113,7 +113,7 @@
                 {{ g.gameName }}
               </a>
               <p class="text-[13px] leading-relaxed text-text-3 md:text-sm">
-                {{ g.totalHours | hours }} · <span class="font-mono text-gold">{{ g.avgRating | rating }}</span> ·
+                {{ g.totalHours | hours }} · <span class="font-mono" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span> ·
                 {{ 'years.runsCount' | translate: { count: g.experienceCount } }}
               </p>
             } @else {
@@ -136,7 +136,7 @@
                 class="flex items-baseline justify-between gap-3 rounded hover:underline"
               >
                 <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
-                <span class="shrink-0 font-mono text-xs text-gold md:text-sm">{{ g.avgRating | rating }}</span>
+                <span class="shrink-0 font-mono text-xs md:text-sm" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
               <p class="text-xs text-muted md:text-[13px]">{{ 'years.noSurprises' | translate }}</p>
@@ -158,7 +158,7 @@
                 class="flex items-baseline justify-between gap-3 rounded hover:underline"
               >
                 <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
-                <span class="shrink-0 font-mono text-xs text-gold md:text-sm">{{ g.avgRating | rating }}</span>
+                <span class="shrink-0 font-mono text-xs md:text-sm" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
               <p class="text-xs text-muted md:text-[13px]">{{ 'years.noDisappointments' | translate }}</p>
@@ -214,7 +214,7 @@
                   <span class="text-right font-mono text-xs whitespace-nowrap text-text-3 md:text-sm">
                     {{ run.hours === null ? '—' : (run.hours | hours) }}
                   </span>
-                  <span class="text-right font-mono text-gold">{{ run.rating | rating }}</span>
+                  <span class="text-right font-mono" [class]="run.rating | ratingTone">{{ run.rating | rating }}</span>
                 </div>
               } @empty {
                 <p class="border-t border-divider pt-3 text-sm text-muted">{{ 'common.noData' | translate }}</p>
@@ -246,7 +246,7 @@
                 <span class="hidden shrink-0 text-xs text-faint sm:inline">
                   {{ 'years.runsCount' | translate: { count: g.experienceCount } }} · {{ g.totalHours | hours }}
                 </span>
-                <span class="w-10 shrink-0 text-right font-mono font-medium text-gold">{{ g.avgRating | rating }}</span>
+                <span class="w-10 shrink-0 text-right font-mono font-medium" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
               <p class="text-sm text-muted">{{ 'years.noCompleted' | translate }}</p>
