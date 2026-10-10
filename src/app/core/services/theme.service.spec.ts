@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ThemeService, applyStoredTheme, readThemePreference } from './theme.service';
+import { THEME_COLORS, ThemeService, applyStoredTheme, readThemePreference } from './theme.service';
 
 describe('ThemeService', () => {
   beforeEach(() => {
@@ -26,6 +26,21 @@ describe('ThemeService', () => {
     expect(service.theme()).toBe('light');
     expect(localStorage.getItem('pytra_theme')).toBe('light');
     expect(document.documentElement.dataset['theme']).toBe('light');
+  });
+
+  it('keeps <meta name="theme-color"> in sync with the theme', () => {
+    const meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+    try {
+      const service = TestBed.inject(ThemeService);
+      service.setPreference('light');
+      expect(meta.content).toBe(THEME_COLORS.light);
+      service.setPreference('dark');
+      expect(meta.content).toBe(THEME_COLORS.dark);
+    } finally {
+      meta.remove();
+    }
   });
 
   it('resolves "system" to a concrete theme', () => {

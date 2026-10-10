@@ -1,11 +1,11 @@
 <!-- Web (md+) -->
 <nav
-  class="hidden h-[62px] items-center justify-between gap-4 border-b border-border bg-nav/80 px-6 light:bg-nav md:flex lg:px-10"
+  class="nav-glass relative z-30 hidden h-[62px] items-center justify-between gap-4 border-b border-border px-6 md:flex lg:px-10"
   [attr.aria-label]="'nav.mainNav' | translate"
 >
-  <a routerLink="/dashboard" class="flex shrink-0 items-center rounded-md">
-    <img src="brand/lockup-horizontal-dark-bg.png" alt="Pytra" class="h-[30px] w-auto light:hidden" />
-    <img src="brand/lockup-horizontal-light-bg.png" alt="Pytra" class="hidden h-[30px] w-auto light:block" />
+  <a routerLink="/dashboard" class="flex shrink-0 items-center gap-2.5 rounded-md" aria-label="Pytra">
+    <app-pytra-mark class="size-[30px]" />
+    <span class="text-[22px] leading-none font-semibold tracking-[-0.035em] text-text" aria-hidden="true">pytra</span>
   </a>
 
   <div class="flex items-center gap-1 text-sm font-medium">
@@ -78,11 +78,11 @@
 
 <!-- Mobile header (< md) -->
 <header
-  class="flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top)+14px)] pb-1 md:hidden"
+  class="nav-glass relative z-30 flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top)+14px)] pb-1 md:hidden"
 >
-  <a routerLink="/dashboard" class="flex items-center rounded-md">
-    <img src="brand/lockup-horizontal-dark-bg.png" alt="Pytra" class="h-[26px] w-auto light:hidden" />
-    <img src="brand/lockup-horizontal-light-bg.png" alt="Pytra" class="hidden h-[26px] w-auto light:block" />
+  <a routerLink="/dashboard" class="flex items-center gap-2.5 rounded-md" aria-label="Pytra">
+    <app-pytra-mark class="size-[26px]" />
+    <span class="text-[22px] leading-none font-semibold tracking-[-0.035em] text-text" aria-hidden="true">pytra</span>
   </a>
 
   <div class="relative">
@@ -140,7 +140,7 @@
 
 <!-- Mobile tab bar (< md) -->
 <nav
-  class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 items-start border-t border-border bg-nav pt-2.5 pb-[max(env(safe-area-inset-bottom),12px)] text-[11px] text-muted md:hidden"
+  class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 items-start border-t border-border nav-glass pt-2.5 pb-[max(env(safe-area-inset-bottom),12px)] text-[11px] text-muted md:hidden"
   [attr.aria-label]="'nav.mainNav' | translate"
 >
   @for (tab of mobileTabsLeft; track tab.path) {

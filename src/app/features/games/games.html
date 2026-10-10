@@ -63,7 +63,7 @@
     </p>
   } @else if (!loading() && libraryGames().length === 0) {
     <!-- Empty library -->
-    <section class="flex flex-col items-center gap-4 rounded-[14px] border border-border bg-surface px-6 py-12 text-center">
+    <section class="flex flex-col items-center gap-4 rounded-[14px] border border-card-border card-glass px-6 py-12 text-center">
       <p class="text-lg font-semibold">{{ 'library.empty.title' | translate }}</p>
       <p class="max-w-md text-sm text-muted">{{ 'library.empty.text' | translate }}</p>
       <div class="flex flex-wrap justify-center gap-2.5">
@@ -190,7 +190,7 @@
         }
       </div>
     } @else if (filtered().length === 0) {
-      <div class="flex flex-col items-center gap-3 rounded-[14px] border border-border bg-surface px-6 py-10 text-center">
+      <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-10 text-center">
         <p class="text-sm text-muted">{{ 'library.noMatches' | translate }}</p>
         @if (hasFilters()) {
           <button type="button" (click)="clearFilters()" class="text-[13px] font-medium text-brand-light hover:underline">
@@ -200,7 +200,7 @@
       </div>
     } @else {
       <!-- Web table (paged) -->
-      <section class="hidden overflow-hidden rounded-[14px] border border-border bg-surface md:block">
+      <section class="hidden overflow-hidden rounded-[14px] border border-card-border card-glass md:block">
         <div
           class="grid grid-cols-[minmax(0,3fr)_minmax(0,1.6fr)_90px_90px_90px_130px_80px] gap-4 border-b border-border px-[22px] py-3 text-xs tracking-[0.04em] text-muted uppercase"
           aria-hidden="true"

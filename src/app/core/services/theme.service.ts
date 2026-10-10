@@ -34,8 +34,12 @@ export function resolveTheme(preference: ThemePreference): ResolvedTheme {
   return preference;
 }
 
+/** Browser/OS chrome colour per theme: matches `--pt-nav` so the status bar blends with the navbar. */
+export const THEME_COLORS: Record<ResolvedTheme, string> = { dark: '#211f1c', light: '#ece6dc' };
+
 function applyTheme(theme: ResolvedTheme): void {
   document.documentElement.dataset['theme'] = theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[theme]);
 }
 
 /**

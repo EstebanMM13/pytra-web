@@ -4,7 +4,7 @@
   @if (noYears()) {
     <h1 class="text-[26px] font-semibold tracking-[-0.02em] md:text-[30px]">{{ 'years.title' | translate }}</h1>
     <div
-      class="flex flex-col items-center gap-3 rounded-[14px] border border-border bg-surface px-6 py-14 text-center"
+      class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-14 text-center"
     >
       <svg lucideChartColumn [size]="28" class="text-brand-light"></svg>
       <p class="text-[15px] font-medium text-text-2">{{ 'years.empty.title' | translate }}</p>
@@ -135,7 +135,7 @@
           </section>
 
           <section
-            class="flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-surface p-3.5 md:gap-2.5 md:rounded-[14px] md:p-6"
+            class="flex min-w-0 flex-col gap-2 rounded-xl border border-card-border card-glass p-3.5 md:gap-2.5 md:rounded-[14px] md:p-6"
           >
             <h2
               class="flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-success uppercase md:text-[13px]"
@@ -157,7 +157,7 @@
           </section>
 
           <section
-            class="flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-surface p-3.5 md:gap-2.5 md:rounded-[14px] md:p-6"
+            class="flex min-w-0 flex-col gap-2 rounded-xl border border-card-border card-glass p-3.5 md:gap-2.5 md:rounded-[14px] md:p-6"
           >
             <h2
               class="flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-danger uppercase md:text-[13px]"
@@ -181,7 +181,7 @@
 
         <!-- Hours per month · runs of the year -->
         <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-          <section class="flex flex-col md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+          <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
             <app-section-header class="mb-3 md:mb-[18px]" [label]="'years.hoursByMonth' | translate" />
             @if (hasMonthHours()) {
               <div class="hidden md:block">
@@ -200,7 +200,7 @@
             }
           </section>
 
-          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header class="mb-2" [label]="'years.runsOfYear' | translate">
               <span class="text-xs text-muted">{{ 'years.byRating' | translate }}</span>
             </app-section-header>
@@ -247,7 +247,7 @@
 
         <!-- Rankings (Obsidian sections) -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
-          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header class="mb-3.5" [label]="'years.topRated' | translate" />
             @for (g of s.topRated; track g.gameId; let i = $index) {
               <a
@@ -266,7 +266,7 @@
             }
           </section>
 
-          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header class="mb-3.5" [label]="'years.mostPlayed' | translate" />
             @for (g of s.mostPlayed; track g.gameId) {
               <a [routerLink]="['/games', g.gameId]" class="block border-t border-divider py-[9px] text-sm hover:bg-hover">
@@ -283,7 +283,7 @@
             }
           </section>
 
-          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header class="mb-3.5" [label]="'years.topSagas' | translate" />
             @for (saga of s.topSagas; track saga.sagaId) {
               <a
@@ -302,7 +302,7 @@
             }
           </section>
 
-          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header class="mb-3.5" [label]="'years.topGenres' | translate" />
             @for (genre of s.topGenres; track genre.genreId) {
               <div class="flex items-center gap-3 border-t border-divider py-[9px] text-sm">
@@ -321,7 +321,7 @@
       }
 
       <!-- Yearly note -->
-      <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
           <div class="flex flex-col gap-3">
             <app-section-header [label]="'years.note.summary' | translate" />
@@ -377,7 +377,7 @@
         </div>
       </section>
     } @else if (failed()) {
-      <div class="flex flex-col items-center gap-3 rounded-[14px] border border-border bg-surface px-6 py-12 text-center">
+      <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-12 text-center">
         <p class="text-sm text-muted">{{ 'years.loadError' | translate }}</p>
         <button
           type="button"

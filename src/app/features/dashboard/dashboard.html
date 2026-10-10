@@ -54,7 +54,7 @@
   @if (isEmptyLibrary()) {
     <!-- Onboarding: account without games -->
     <section
-      class="mx-auto w-full max-w-2xl rounded-[14px] border border-border bg-surface p-5 md:p-8"
+      class="mx-auto w-full max-w-2xl rounded-[14px] border border-card-border card-glass p-5 md:p-8"
       aria-labelledby="onboarding-title"
     >
       <h2 id="onboarding-title" class="text-xl font-semibold tracking-[-0.01em] md:text-2xl">
@@ -151,7 +151,7 @@
 
     <!-- Playing now + hours per year -->
     <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      <section class="md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+      <section class="md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
         <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
         @if (playing()?.[0]; as hero) {
           <!-- Web hero for the most recent run: blurred cover backdrop + crisp cover -->
@@ -223,7 +223,7 @@
         </div>
       </section>
 
-      <section class="flex flex-col md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+      <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
         <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
         </app-section-header>
         @if (yearBars(); as bars) {
@@ -249,7 +249,7 @@
 
     <!-- Rankings -->
     <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3">
-      <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header class="mb-3.5" [label]="'dashboard.topRated' | translate" />
         @if (topRated(); as items) {
           @for (item of items; track item.gameId + item.runLabel; let i = $index) {
@@ -275,7 +275,7 @@
         }
       </section>
 
-      <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header class="mb-3.5" [label]="'dashboard.mostPlayed' | translate">
           <app-segmented size="sm" tone="neutral" [options]="playModeOptions" [(value)]="playMode" />
         </app-section-header>
@@ -302,7 +302,7 @@
         }
       </section>
 
-      <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header class="mb-3.5" [label]="'dashboard.bySaga' | translate" />
         @if (topSagas(); as items) {
           @for (item of items; track item.sagaId) {

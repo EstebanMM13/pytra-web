@@ -44,7 +44,7 @@
     </nav>
 
     <!-- Mobile grouped list -->
-    <div class="mt-4 overflow-hidden rounded-xl border border-border bg-surface md:hidden">
+    <div class="mt-4 overflow-hidden rounded-xl border border-card-border card-glass md:hidden">
       @if (showAccountSection) {
       <button
         type="button"
@@ -81,7 +81,7 @@
   <div class="flex max-w-[760px] min-w-0 flex-col gap-4 md:gap-5">
     <!-- CUENTA -->
     @if (showAccountSection) {
-    <section id="profile-account" class="scroll-mt-6 rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+    <section id="profile-account" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
       <app-section-header class="mb-2" [label]="'profile.sections.account' | translate" />
       @if (user(); as u) {
         <div class="border-t border-divider py-3.5 text-sm">
@@ -171,7 +171,7 @@
     <!-- PREFERENCIAS -->
     <section
       id="profile-preferences"
-      class="scroll-mt-6 rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]"
+      class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]"
     >
       <app-section-header class="mb-2" [label]="'profile.sections.preferences' | translate" />
       <div class="flex flex-col gap-2.5 border-t border-divider py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
@@ -246,7 +246,7 @@
     </section>
 
     <!-- DATOS -->
-    <section id="profile-data" class="scroll-mt-6 rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+    <section id="profile-data" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
       <app-section-header class="mb-2" [label]="'profile.sections.data' | translate" />
       <div class="flex flex-col gap-2.5 border-t border-divider py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <span class="text-muted">{{ 'profile.export.label' | translate }}</span>

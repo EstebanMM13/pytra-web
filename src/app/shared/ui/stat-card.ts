@@ -16,7 +16,7 @@ import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
   selector: 'app-stat-card',
   imports: [LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block min-w-0 rounded-xl border border-border bg-surface' },
+  host: { class: 'block min-w-0 rounded-xl border border-card-border card-glass' },
   template: `
     @if (compact()) {
       <div class="p-3">

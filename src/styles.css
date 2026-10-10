@@ -63,17 +63,23 @@
 
   --pt-overlay: #0d0c0bcc;
 
+  /* Background layers (grid + aura) and the translucent chrome/cards above them. */
+  --pt-aura: 28%;
+  --pt-grid: #ffffff0a;
+  --pt-card: color-mix(in srgb, var(--pt-surface) 85%, transparent);
+  --pt-card-border: #ffffff14;
+
   color-scheme: dark;
 }
 
 :root[data-theme='light'] {
-  --pt-bg: #f7f4ee;
-  --pt-nav: #ffffff;
-  --pt-surface: #ffffff;
-  --pt-border: #e4dfd5;
-  --pt-border-strong: #d2ccc0;
-  --pt-divider: #efebe3;
-  --pt-hover: #fbf9f5;
+  --pt-bg: #e5ded2;
+  --pt-nav: #ece6dc;
+  --pt-surface: #efeae1;
+  --pt-border: #d2c9ba;
+  --pt-border-strong: #bfb5a4;
+  --pt-divider: #dcd4c7;
+  --pt-hover: #e7e1d6;
 
   --pt-text: #1c1a17;
   --pt-text-2: #2e2b27;
@@ -86,13 +92,13 @@
   /* Icons, links and focus use the solid brand in light mode for contrast. */
   --pt-brand-light: #724dce;
   --pt-brand-lighter: #5b3bb0;
-  --pt-brand-tint: #eee8fb;
+  --pt-brand-tint: #dfd6ee;
 
   --pt-gold: #94661f;
   --pt-gold-line: #94661f55;
-  --pt-gold-tint: #f6ebd7;
+  --pt-gold-tint: #e8d8ba;
   --pt-gold-tint-fg: #7e5617;
-  --pt-gold-card: #fbf3e4;
+  --pt-gold-card: #efe3cb;
   --pt-gold-card-border: #e6d2a8;
 
   --pt-rating-high: #2d7444;
@@ -103,14 +109,19 @@
   --pt-platform-neutral: #8a8478;
 
   --pt-success: #2d7444;
-  --pt-success-bg: #e3f2e7;
+  --pt-success-bg: #d5e6d6;
   --pt-danger: #b23b3b;
-  --pt-danger-bg: #f8e5e5;
+  --pt-danger-bg: #eed6d2;
   --pt-danger-solid: #b23b3b;
   --pt-neutral: #5f5a52;
-  --pt-neutral-bg: #efebe3;
+  --pt-neutral-bg: #dcd4c7;
 
   --pt-overlay: #1c1a1799;
+
+  --pt-aura: 14%;
+  --pt-grid: #1c1a170f;
+  --pt-card: color-mix(in srgb, var(--pt-surface) 85%, transparent);
+  --pt-card-border: var(--pt-border);
 
   color-scheme: light;
 }
@@ -217,23 +228,22 @@
   --color-neutral-bg: var(--pt-neutral-bg);
 
   --color-overlay: var(--pt-overlay);
+
+  --color-card-border: var(--pt-card-border);
 }
 
 @layer base {
-  html,
-  body {
+  /*
+   * The page colour lives on <html> only (it paints the canvas). <body> stays transparent so the
+   * fixed `.bg-aura` / `.bg-grid` layers (z-index -1) show between the canvas and the content.
+   */
+  html {
     background-color: var(--pt-bg);
     color: var(--pt-text);
   }
 
-  /* Dark mode depth: a faint brand glow behind the navbar / top of the page. */
-  :root:not([data-theme='light']) body {
-    background-image: radial-gradient(
-      ellipse 900px 360px at 50% -120px,
-      color-mix(in srgb, var(--pt-brand) 14%, transparent),
-      transparent 70%
-    );
-    background-repeat: no-repeat;
+  body {
+    color: var(--pt-text);
   }
 
   body {
@@ -402,6 +412,87 @@
         var(--pt-gold) 100%
       )
       border-box;
+}
+
+/*
+ * Background "grid + aura": two fixed layers behind everything (rendered once in the app root).
+ * Lighter on phones: narrower aura, 32px grid.
+ */
+.bg-aura,
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.bg-aura {
+  background-image:
+    radial-gradient(
+      800px 380px at 50% -60px,
+      color-mix(in srgb, var(--pt-brand) var(--pt-aura), transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      600px 360px at 100% 105%,
+      color-mix(in srgb, var(--pt-gold) 8%, transparent),
+      transparent 70%
+    );
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(var(--pt-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--pt-grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 0%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 0%, #000 30%, transparent 100%);
+}
+
+@media (width < 48rem) {
+  .bg-aura {
+    background-image:
+      radial-gradient(
+        600px 380px at 50% -60px,
+        color-mix(in srgb, var(--pt-brand) var(--pt-aura), transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        600px 360px at 100% 105%,
+        color-mix(in srgb, var(--pt-gold) 8%, transparent),
+        transparent 70%
+      );
+  }
+
+  .bg-grid {
+    background-size: 32px 32px;
+  }
+}
+
+/*
+ * Translucent app chrome (web navbar, mobile header, mobile tab bar). The fill + blur sit on a
+ * ::before layer so the bar itself does not become a containing block for `position: fixed`
+ * descendants (e.g. the mobile menu's click-catcher). The host must be positioned with a
+ * z-index (relative z-30 / fixed z-40) so the layer stays inside its stacking context.
+ */
+@utility nav-glass {
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--pt-nav) 80%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+}
+
+/* Cards (StatCard, page sections): translucent surface + blur. Pair with `border-card-border`. */
+@utility card-glass {
+  background-color: var(--pt-card);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 @utility scroll-thin {

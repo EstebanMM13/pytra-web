@@ -21,6 +21,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { UserService } from '../../core/services/user.service';
 import { GameSearch } from '../game-search/game-search';
+import { PytraMark } from '../ui/pytra-mark';
 
 interface NavTab {
   path: string;
@@ -49,6 +50,7 @@ const WEB_TABS: NavTab[] = [
     RouterLinkActive,
     TranslatePipe,
     GameSearch,
+    PytraMark,
     LucideDynamicIcon,
     LucidePlus,
     LucideChevronDown,

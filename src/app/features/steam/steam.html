@@ -23,7 +23,7 @@
 
     @if (s.linked) {
       <!-- Linked account -->
-      <section class="rounded-[14px] border border-border bg-surface p-4 md:p-[22px]">
+      <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:gap-[18px]">
           <div class="flex min-w-0 flex-1 items-center gap-3.5 md:gap-[18px]">
             <span
@@ -108,7 +108,7 @@
     } @else {
       <!-- Not linked -->
       <section
-        class="flex flex-col gap-3.5 rounded-2xl border border-border bg-surface p-6 md:max-w-[560px] md:rounded-[14px]"
+        class="flex flex-col gap-3.5 rounded-2xl border border-card-border card-glass p-6 md:max-w-[560px] md:rounded-[14px]"
       >
         <span class="flex size-12 items-center justify-center rounded-xl bg-brand-tint text-brand-lighter" aria-hidden="true">
           <svg lucideLink [size]="22"></svg>
@@ -142,7 +142,7 @@
         <p class="mt-2">{{ 'steam.private.retry' | translate }}</p>
       </section>
     } @else {
-      <section class="rounded-[14px] border border-border bg-surface p-4 text-sm text-text-3 md:p-[22px]">
+      <section class="rounded-[14px] border border-card-border card-glass p-4 text-sm text-text-3 md:p-[22px]">
         <app-section-header [label]="'steam.result.title' | translate" class="mb-3" />
         <ul class="grid grid-cols-1 gap-1 sm:grid-cols-2">
           <li>{{ 'steam.result.scanned' | translate: { count: result.gamesScanned } }}</li>
@@ -165,7 +165,7 @@
 
   <!-- Pending review -->
   @if (status()?.linked || pending().length > 0) {
-    <section class="rounded-[14px] border border-border bg-surface p-4 md:p-[22px]">
+    <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
       <app-section-header [label]="('steam.pendingHeader' | translate: { count: pendingTotal() })" class="mb-1.5">
         <span class="hidden text-[13px] text-muted md:inline">{{ 'steam.pendingHint' | translate }}</span>
       </app-section-header>
@@ -252,7 +252,7 @@
       </div>
 
       @if (showIgnored()) {
-        <section class="rounded-[14px] border border-border bg-surface p-4 md:p-[22px]">
+        <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
           <p class="mb-2 text-[13px] text-muted">{{ 'steam.ignoredHint' | translate }}</p>
           <!-- Secondary list: ~6 rows then internal scroll on every size. -->
           <ul class="scroll-list max-h-[344px]">
