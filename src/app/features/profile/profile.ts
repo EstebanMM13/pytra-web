@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LucideChevronRight, LucideDownload, LucideGamepad2, LucideUser } from '@lucide/angular';
+import { LucideChevronDown, LucideChevronRight, LucideDownload, LucideGamepad2, LucideUser } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, forkJoin, of } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { SagaService } from '../../core/services/saga.service';
 import { StatsService } from '../../core/services/stats.service';
 import { AchievementBadge } from '../../shared/achievements/achievement-badge';
-import { Achievement, computeAchievements, sortAchievements } from '../../shared/achievements/achievements';
+import { Achievement, computeAchievements, groupByCategory, topUnlocked } from '../../shared/achievements/achievements';
 import { Platform } from '../../core/models/experience.model';
 import { SteamStatus } from '../../core/models/steam.model';
 import { ExportFormat } from '../../core/models/user.model';
@@ -35,6 +35,9 @@ import { DeleteAccountDialog } from './delete-account-dialog';
 import { avatarInitial, exportErrorKey, formatMemberSince } from './profile.logic';
 
 type ProfileSection = 'account' | 'achievements' | 'preferences' | 'data';
+type AchievementFilter = 'all' | 'unlocked' | 'locked';
+
+const FEATURED_ACHIEVEMENTS = 6;
 
 const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
   csv: 'pytra-export.csv',
@@ -57,6 +60,7 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
     LucideGamepad2,
     LucideDownload,
     LucideChevronRight,
+    LucideChevronDown,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile.html',
@@ -112,9 +116,30 @@ export class Profile {
 
   protected readonly activeSection = signal<ProfileSection>('achievements');
 
-  /** All badges, unlocked first; `null` while loading, `[]` when the data could not load. */
+  /** All badges in definition order (category, easier first); `null` while loading, `[]` when the data could not load. */
   protected readonly achievements = signal<Achievement[] | null>(null);
   protected readonly unlockedCount = computed(() => (this.achievements() ?? []).filter((a) => a.unlocked).length);
+  protected readonly unlockedPercent = computed(() => {
+    const total = this.achievements()?.length ?? 0;
+    return total ? Math.round((this.unlockedCount() / total) * 100) : 0;
+  });
+  /** Collapsed view: the most impressive unlocked badges. */
+  protected readonly featuredAchievements = computed(() => topUnlocked(this.achievements() ?? [], FEATURED_ACHIEVEMENTS));
+  protected readonly showAllAchievements = signal(false);
+  protected readonly achievementFilter = signal<AchievementFilter>('all');
+  protected readonly achievementFilterOptions: SegmentedOption<AchievementFilter>[] = [
+    { value: 'all', label: 'achievements.filter.all' },
+    { value: 'unlocked', label: 'achievements.filter.unlocked' },
+    { value: 'locked', label: 'achievements.filter.locked' },
+  ];
+  /** Expanded view: filtered badges grouped by category with per-group unlocked counts. */
+  protected readonly achievementGroups = computed(() => {
+    const filter = this.achievementFilter();
+    const list = (this.achievements() ?? []).filter((a) => filter === 'all' || a.unlocked === (filter === 'unlocked'));
+    return groupByCategory(list).map((g) => ({ ...g, unlocked: g.items.filter((a) => a.unlocked).length }));
+  });
+  /** Below md the expanded list uses compact two-column badges. */
+  protected readonly isMobile = signal(typeof matchMedia === 'function' && matchMedia('(max-width: 767px)').matches);
 
   protected setLanguage(language: Language): void {
     this.preferences.setLanguage(language);
@@ -132,6 +157,13 @@ export class Profile {
   protected readonly deleteOpen = signal(false);
 
   constructor() {
+    if (typeof matchMedia === 'function') {
+      const mq = matchMedia('(max-width: 767px)');
+      const onChange = (e: MediaQueryListEvent) => this.isMobile.set(e.matches);
+      mq.addEventListener('change', onChange);
+      inject(DestroyRef).onDestroy(() => mq.removeEventListener('change', onChange));
+    }
+
     forkJoin({
       games: inject(GameService).findAll(),
       sagas: inject(SagaService).findAll(),
@@ -140,7 +172,7 @@ export class Profile {
     })
       .pipe(catchError(() => of(null)))
       .subscribe((data) => {
-        this.achievements.set(data ? sortAchievements(computeAchievements(data)) : []);
+        this.achievements.set(data ? computeAchievements(data) : []);
         // "Ver todos" on the dashboard links here with #profile-achievements; the card only
         // exists once this data is loaded, so scroll to it now instead of relying on the router.
         if (this.route.snapshot.fragment === 'profile-achievements') {

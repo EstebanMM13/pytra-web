@@ -5,7 +5,8 @@ import { PytraMark } from '../../shared/ui/pytra-mark';
 /**
  * Layout for the signed-out screens. Web (md+): 50/50 split with the brand panel on the left
  * (nav background, mark + wordmark, gold slogan header and headline) and the projected form
- * centred in a 380px column. Mobile: the same lockup above the form. The page background
+ * centred in a 380px column. Mobile: a bigger lockup above the form over a fixed backdrop
+ * with the panel's glows and watermark mark. The page background
  * stays transparent so the app's grid + aura layers show through.
  */
 @Component({
@@ -14,7 +15,15 @@ import { PytraMark } from '../../shared/ui/pytra-mark';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
-    <div class="grid min-h-dvh grid-cols-1 md:grid-cols-2">
+    <!-- Mobile: the brand panel's glows + watermark become a fixed backdrop behind the form -->
+    <div class="pointer-events-none fixed inset-0 overflow-hidden md:hidden" aria-hidden="true">
+      <div
+        class="absolute inset-0 bg-[radial-gradient(420px_360px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_30%,transparent),transparent_70%),radial-gradient(380px_320px_at_100%_100%,color-mix(in_srgb,var(--pt-gold)_14%,transparent),transparent_70%)] light:opacity-70"
+      ></div>
+      <app-pytra-mark class="absolute -right-28 -bottom-20 size-[360px] rotate-[-12deg] opacity-[0.06] light:opacity-[0.05]" />
+    </div>
+
+    <div class="relative grid min-h-dvh grid-cols-1 md:grid-cols-2">
       <aside
         class="relative hidden flex-col justify-between overflow-hidden border-r border-card-border bg-nav p-10 md:flex lg:p-14"
       >
@@ -55,22 +64,22 @@ import { PytraMark } from '../../shared/ui/pytra-mark';
       </aside>
 
       <main
-        class="flex justify-center px-6 pt-[calc(env(safe-area-inset-top)+48px)] pb-[calc(env(safe-area-inset-bottom)+32px)] md:items-center md:px-10 md:py-12"
+        class="relative flex justify-center px-6 pt-[calc(env(safe-area-inset-top)+48px)] pb-[calc(env(safe-area-inset-bottom)+32px)] md:items-center md:px-10 md:py-12"
       >
         <div class="flex w-full max-w-[380px] flex-col gap-4 md:gap-[18px]">
           <!-- Mobile brand header: the side panel is hidden below md -->
-          <div class="mb-4 flex flex-col gap-3 md:hidden">
-            <div class="flex items-center gap-2.5 self-start" role="img" aria-label="Pytra">
-              <app-pytra-mark class="size-9" />
-              <span class="text-[26px] leading-none font-semibold tracking-[-0.035em] text-text" aria-hidden="true">Pytra</span>
+          <div class="mb-5 flex flex-col gap-3 md:hidden">
+            <div class="flex items-center gap-3 self-start" role="img" aria-label="Pytra">
+              <app-pytra-mark class="size-12 drop-shadow-[0_6px_18px_rgba(114,77,206,0.4)]" />
+              <span class="text-[36px] leading-none font-bold tracking-[-0.04em] text-text" aria-hidden="true">Pytra</span>
             </div>
-            <div class="mt-3 flex items-center gap-3">
-              <span class="text-xs font-semibold tracking-[0.04em] text-gold">
+            <div class="mt-4 flex items-center gap-3">
+              <span class="text-[13px] font-semibold tracking-[0.04em] text-gold">
                 {{ 'auth.panel.eyebrow' | translate }}
               </span>
               <span class="h-px flex-1 bg-linear-to-r from-gold-line to-transparent" aria-hidden="true"></span>
             </div>
-            <p class="text-[26px] leading-[1.1] font-semibold tracking-[-0.02em]">
+            <p class="text-[28px] leading-[1.08] font-semibold tracking-[-0.025em]">
               {{ 'auth.panel.headline' | translate }}
             </p>
           </div>

@@ -182,11 +182,65 @@
       </app-section-header>
       @if (achievements(); as list) {
         @if (list.length) {
-          <ul class="grid grid-cols-1 gap-x-6 gap-y-4 border-t border-divider pt-4 sm:grid-cols-2">
-            @for (badge of list; track badge.id) {
-              <li><app-achievement-badge [achievement]="badge" /></li>
+          <div class="border-t border-divider pt-4">
+            <div
+              class="h-1.5 overflow-hidden rounded-full bg-bg"
+              role="progressbar"
+              [attr.aria-valuenow]="unlockedPercent()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-label]="'achievements.progress' | translate"
+            >
+              <span class="block h-full rounded-full bg-linear-to-r from-brand to-gold" [style.width.%]="unlockedPercent()"></span>
+            </div>
+
+            @if (!showAllAchievements()) {
+              @if (featuredAchievements().length) {
+                <ul class="mt-4 grid grid-cols-2 gap-x-3 gap-y-3.5 sm:grid-cols-3 sm:gap-x-5">
+                  @for (badge of featuredAchievements(); track badge.id) {
+                    <li class="min-w-0"><app-achievement-badge compact [achievement]="badge" /></li>
+                  }
+                </ul>
+              } @else {
+                <p class="mt-4 text-sm text-muted">{{ 'achievements.noneUnlocked' | translate }}</p>
+              }
+            } @else {
+              <div class="mt-4">
+                <app-segmented
+                  stretch
+                  size="sm"
+                  [attr.aria-label]="'achievements.filter.label' | translate"
+                  [options]="achievementFilterOptions"
+                  [value]="achievementFilter()"
+                  (valueChange)="achievementFilter.set($event)"
+                />
+              </div>
+              @for (group of achievementGroups(); track group.category) {
+                <h3 class="mt-5 mb-2.5 flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-faint uppercase">
+                  {{ 'achievements.categories.' + group.category | translate }}
+                  <span class="h-px flex-1 bg-divider" aria-hidden="true"></span>
+                  <span class="font-mono tracking-normal normal-case">{{ group.unlocked }}/{{ group.items.length }}</span>
+                </h3>
+                <ul class="grid grid-cols-2 gap-x-3 gap-y-3.5 md:gap-x-6 md:gap-y-4">
+                  @for (badge of group.items; track badge.id) {
+                    <li class="min-w-0"><app-achievement-badge [compact]="isMobile()" [achievement]="badge" /></li>
+                  }
+                </ul>
+              } @empty {
+                <p class="mt-4 text-sm text-muted">{{ 'achievements.emptyFilter' | translate }}</p>
+              }
             }
-          </ul>
+
+            <button
+              type="button"
+              (click)="showAllAchievements.set(!showAllAchievements())"
+              [attr.aria-expanded]="showAllAchievements()"
+              class="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border py-2.5 text-[13px] text-text-2 hover:border-border-strong"
+            >
+              {{ (showAllAchievements() ? 'achievements.showLess' : 'achievements.showAll') | translate: { total: list.length } }}
+              <svg lucideChevronDown [size]="16" class="transition-transform" [class.rotate-180]="showAllAchievements()"></svg>
+            </button>
+          </div>
         } @else {
           <p class="border-t border-divider pt-3 text-sm text-muted">{{ 'common.noData' | translate }}</p>
         }

@@ -686,17 +686,17 @@
     "count": "{{unlocked}} de {{total}}",
     "progress": "Progreso",
     "items": {
-      "firstPlatinum": {
-        "title": "Primer platino 🏆",
-        "desc": "Consigue tu primer platino"
+      "collector25": {
+        "title": "Coleccionista",
+        "desc": "Ten {{target}} juegos en tu biblioteca"
       },
-      "platinumHunter": {
-        "title": "Cazador de platinos",
-        "desc": "Consigue {{target}} platinos"
+      "collector50": {
+        "title": "Gran coleccionista",
+        "desc": "Ten {{target}} juegos en tu biblioteca"
       },
-      "marathon": {
-        "title": "Maratón",
-        "desc": "Juega {{target}} h a un mismo juego"
+      "collector100": {
+        "title": "Archivero",
+        "desc": "Ten {{target}} juegos en tu biblioteca"
       },
       "runs10": {
         "title": "Jugador habitual",
@@ -710,34 +710,164 @@
         "title": "Centenario",
         "desc": "Registra {{target}} partidas"
       },
-      "collector25": {
-        "title": "Coleccionista",
-        "desc": "Ten {{target}} juegos en tu biblioteca"
+      "completed10": {
+        "title": "Finalizador",
+        "desc": "Completa {{target}} partidas"
       },
-      "collector50": {
-        "title": "Gran coleccionista",
-        "desc": "Ten {{target}} juegos en tu biblioteca"
+      "completed25": {
+        "title": "Sin cabos sueltos",
+        "desc": "Completa {{target}} partidas"
       },
-      "collector100": {
-        "title": "Archivero",
-        "desc": "Ten {{target}} juegos en tu biblioteca"
+      "completed100": {
+        "title": "Leyenda de los créditos",
+        "desc": "Completa {{target}} partidas"
       },
-      "sagaComplete": {
-        "title": "Saga completada",
-        "desc": "Juega todos los juegos de una saga (mín. 2)"
+      "firstReplay": {
+        "title": "Otra vez",
+        "desc": "Rejuega un juego por primera vez"
+      },
+      "replays5": {
+        "title": "Nostálgico",
+        "desc": "Registra {{target}} rejugadas"
+      },
+      "hours100": {
+        "title": "Calentando",
+        "desc": "Acumula {{target}} h de juego"
+      },
+      "hours500": {
+        "title": "Dedicado",
+        "desc": "Acumula {{target}} h de juego"
+      },
+      "hours1000": {
+        "title": "Mil horas",
+        "desc": "Acumula {{target}} h de juego"
+      },
+      "hours2500": {
+        "title": "Vida entera",
+        "desc": "Acumula {{target}} h de juego"
+      },
+      "marathon50": {
+        "title": "Sesión larga",
+        "desc": "Juega {{target}} h a un mismo juego"
+      },
+      "marathon": {
+        "title": "Maratón",
+        "desc": "Juega {{target}} h a un mismo juego"
+      },
+      "marathon250": {
+        "title": "Ultramaratón",
+        "desc": "Juega {{target}} h a un mismo juego"
       },
       "critic": {
         "title": "Crítico",
         "desc": "Puntúa {{target}} juegos"
       },
+      "perfectTen": {
+        "title": "Obra maestra",
+        "desc": "Ponle un 10 a un juego"
+      },
+      "masterpieces": {
+        "title": "Buen gusto",
+        "desc": "Puntúa {{target}} juegos con 9 o más"
+      },
+      "harshCritic": {
+        "title": "Crítico duro",
+        "desc": "Puntúa un juego con 4 o menos"
+      },
+      "firstPlatinum": {
+        "title": "Primer platino 🏆",
+        "desc": "Consigue tu primer platino"
+      },
+      "platinum5": {
+        "title": "Brillo propio",
+        "desc": "Consigue {{target}} platinos"
+      },
+      "platinumHunter": {
+        "title": "Cazador de platinos",
+        "desc": "Consigue {{target}} platinos"
+      },
+      "platinum25": {
+        "title": "Vitrina llena",
+        "desc": "Consigue {{target}} platinos"
+      },
+      "sagaComplete": {
+        "title": "Saga completada",
+        "desc": "Juega todos los juegos de una saga (mín. 2)"
+      },
+      "sagaTrilogy": {
+        "title": "Trilogía",
+        "desc": "Completa {{target}} juegos de una misma saga"
+      },
       "platforms": {
         "title": "Políglota de plataformas",
         "desc": "Juega en {{target}} plataformas distintas"
       },
+      "allPlatforms": {
+        "title": "Omnijugador",
+        "desc": "Juega en las {{target}} plataformas"
+      },
+      "years3": {
+        "title": "Constante",
+        "desc": "Registra partidas en {{target}} años distintos"
+      },
       "veteran": {
         "title": "Veterano",
         "desc": "Registra partidas en {{target}} años distintos"
+      },
+      "years10": {
+        "title": "Una década",
+        "desc": "Registra partidas en {{target}} años distintos"
+      },
+      "streak3": {
+        "title": "En racha",
+        "desc": "Juega {{target}} años seguidos"
+      },
+      "onlineDebut": {
+        "title": "Conectado",
+        "desc": "Juega un juego online o híbrido"
+      },
+      "variety": {
+        "title": "Todoterreno",
+        "desc": "Juega juegos individuales, online e híbridos"
+      },
+      "online100": {
+        "title": "Habitual del servidor",
+        "desc": "Acumula {{target}} h online"
+      },
+      "online500": {
+        "title": "Veterano online",
+        "desc": "Acumula {{target}} h online"
+      },
+      "multitasker": {
+        "title": "Multitarea",
+        "desc": "Ten {{target}} partidas en curso a la vez"
+      },
+      "completionist": {
+        "title": "Nada a medias",
+        "desc": "Completa {{target}} partidas sin abandonar ninguna"
       }
-    }
+    },
+    "categories": {
+      "collection": "Colección",
+      "runs": "Partidas",
+      "hours": "Horas",
+      "ratings": "Notas",
+      "platinums": "Platinos",
+      "sagas": "Sagas",
+      "platforms": "Plataformas",
+      "years": "Constancia",
+      "online": "Online",
+      "special": "Especiales"
+    },
+    "filter": {
+      "label": "Filtrar logros",
+      "all": "Todos",
+      "unlocked": "Desbloqueados",
+      "locked": "Pendientes"
+    },
+    "showAll": "Ver todos ({{total}})",
+    "showLess": "Ver menos",
+    "noneUnlocked": "Aún no has desbloqueado logros. ¡Registra tu primera partida!",
+    "emptyFilter": "No hay logros en este filtro."
   }
 }

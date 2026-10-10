@@ -686,17 +686,17 @@
     "count": "{{unlocked}} of {{total}}",
     "progress": "Progress",
     "items": {
-      "firstPlatinum": {
-        "title": "First platinum 🏆",
-        "desc": "Earn your first platinum"
+      "collector25": {
+        "title": "Collector",
+        "desc": "Have {{target}} games in your library"
       },
-      "platinumHunter": {
-        "title": "Platinum hunter",
-        "desc": "Earn {{target}} platinums"
+      "collector50": {
+        "title": "Big collector",
+        "desc": "Have {{target}} games in your library"
       },
-      "marathon": {
-        "title": "Marathon",
-        "desc": "Play a single game for {{target}} h"
+      "collector100": {
+        "title": "Archivist",
+        "desc": "Have {{target}} games in your library"
       },
       "runs10": {
         "title": "Regular player",
@@ -710,34 +710,164 @@
         "title": "Centurion",
         "desc": "Log {{target}} runs"
       },
-      "collector25": {
-        "title": "Collector",
-        "desc": "Have {{target}} games in your library"
+      "completed10": {
+        "title": "Finisher",
+        "desc": "Complete {{target}} runs"
       },
-      "collector50": {
-        "title": "Big collector",
-        "desc": "Have {{target}} games in your library"
+      "completed25": {
+        "title": "No loose ends",
+        "desc": "Complete {{target}} runs"
       },
-      "collector100": {
-        "title": "Archivist",
-        "desc": "Have {{target}} games in your library"
+      "completed100": {
+        "title": "Credits legend",
+        "desc": "Complete {{target}} runs"
       },
-      "sagaComplete": {
-        "title": "Saga complete",
-        "desc": "Play every game in a saga (2+ games)"
+      "firstReplay": {
+        "title": "One more time",
+        "desc": "Replay a game for the first time"
+      },
+      "replays5": {
+        "title": "Nostalgic",
+        "desc": "Log {{target}} replays"
+      },
+      "hours100": {
+        "title": "Warming up",
+        "desc": "Play {{target}} h in total"
+      },
+      "hours500": {
+        "title": "Dedicated",
+        "desc": "Play {{target}} h in total"
+      },
+      "hours1000": {
+        "title": "Thousand hours",
+        "desc": "Play {{target}} h in total"
+      },
+      "hours2500": {
+        "title": "A lifetime",
+        "desc": "Play {{target}} h in total"
+      },
+      "marathon50": {
+        "title": "Long session",
+        "desc": "Play a single game for {{target}} h"
+      },
+      "marathon": {
+        "title": "Marathon",
+        "desc": "Play a single game for {{target}} h"
+      },
+      "marathon250": {
+        "title": "Ultramarathon",
+        "desc": "Play a single game for {{target}} h"
       },
       "critic": {
         "title": "Critic",
         "desc": "Rate {{target}} games"
       },
+      "perfectTen": {
+        "title": "Masterpiece",
+        "desc": "Give a game a 10"
+      },
+      "masterpieces": {
+        "title": "Good taste",
+        "desc": "Rate {{target}} games 9 or higher"
+      },
+      "harshCritic": {
+        "title": "Harsh critic",
+        "desc": "Rate a game 4 or lower"
+      },
+      "firstPlatinum": {
+        "title": "First platinum 🏆",
+        "desc": "Earn your first platinum"
+      },
+      "platinum5": {
+        "title": "Shining",
+        "desc": "Earn {{target}} platinums"
+      },
+      "platinumHunter": {
+        "title": "Platinum hunter",
+        "desc": "Earn {{target}} platinums"
+      },
+      "platinum25": {
+        "title": "Full trophy case",
+        "desc": "Earn {{target}} platinums"
+      },
+      "sagaComplete": {
+        "title": "Saga complete",
+        "desc": "Play every game in a saga (2+ games)"
+      },
+      "sagaTrilogy": {
+        "title": "Trilogy",
+        "desc": "Complete {{target}} games of the same saga"
+      },
       "platforms": {
         "title": "Platform polyglot",
         "desc": "Play on {{target}} different platforms"
       },
+      "allPlatforms": {
+        "title": "Omniplayer",
+        "desc": "Play on all {{target}} platforms"
+      },
+      "years3": {
+        "title": "Consistent",
+        "desc": "Log runs in {{target}} different years"
+      },
       "veteran": {
         "title": "Veteran",
         "desc": "Log runs in {{target}} different years"
+      },
+      "years10": {
+        "title": "A decade",
+        "desc": "Log runs in {{target}} different years"
+      },
+      "streak3": {
+        "title": "On a roll",
+        "desc": "Play {{target}} years in a row"
+      },
+      "onlineDebut": {
+        "title": "Connected",
+        "desc": "Play an online or hybrid game"
+      },
+      "variety": {
+        "title": "All-rounder",
+        "desc": "Play single-player, online and hybrid games"
+      },
+      "online100": {
+        "title": "Server regular",
+        "desc": "Play {{target}} h online"
+      },
+      "online500": {
+        "title": "Online veteran",
+        "desc": "Play {{target}} h online"
+      },
+      "multitasker": {
+        "title": "Multitasker",
+        "desc": "Have {{target}} runs in progress at once"
+      },
+      "completionist": {
+        "title": "No half measures",
+        "desc": "Complete {{target}} runs without abandoning any"
       }
-    }
+    },
+    "categories": {
+      "collection": "Collection",
+      "runs": "Runs",
+      "hours": "Hours",
+      "ratings": "Ratings",
+      "platinums": "Platinums",
+      "sagas": "Sagas",
+      "platforms": "Platforms",
+      "years": "Consistency",
+      "online": "Online",
+      "special": "Special"
+    },
+    "filter": {
+      "label": "Filter achievements",
+      "all": "All",
+      "unlocked": "Unlocked",
+      "locked": "Locked"
+    },
+    "showAll": "See all ({{total}})",
+    "showLess": "Show less",
+    "noneUnlocked": "No achievements unlocked yet. Log your first run!",
+    "emptyFilter": "No achievements in this filter."
   }
 }

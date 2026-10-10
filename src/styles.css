@@ -343,6 +343,30 @@
     border-color: var(--pt-border-strong);
   }
 
+  /* Google sign-in button per Google's branding: neutral fill, unaltered "G" logo. */
+  .auth-google {
+    border: 1px solid #8e918f;
+    background-color: #131314;
+    color: #e3e3e3;
+    font-weight: 500;
+  }
+
+  .auth-google:hover {
+    border-color: #8e918f;
+    background-color: #1f1f20;
+  }
+
+  :where([data-theme='light']) .auth-google {
+    border-color: #747775;
+    background-color: #ffffff;
+    color: #1f1f1f;
+  }
+
+  :where([data-theme='light']) .auth-google:hover {
+    border-color: #747775;
+    background-color: #f2f2f2;
+  }
+
   .auth-primary:disabled,
   .auth-secondary:disabled {
     opacity: 0.55;
