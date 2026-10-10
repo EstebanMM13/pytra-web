@@ -28,7 +28,7 @@
     </div>
 
     <nav class="mt-6 hidden flex-col gap-0.5 text-sm lg:flex" [attr.aria-label]="'profile.sectionsLabel' | translate">
-      @for (section of ['account', 'preferences', 'data']; track section) {
+      @for (section of sections; track section) {
         <button
           type="button"
           (click)="scrollTo($any(section))"
@@ -45,6 +45,7 @@
 
     <!-- Mobile grouped list -->
     <div class="mt-4 overflow-hidden rounded-xl border border-border bg-surface md:hidden">
+      @if (showAccountSection) {
       <button
         type="button"
         (click)="scrollTo('account')"
@@ -54,6 +55,7 @@
         {{ 'profile.sections.account' | translate }}
         <svg lucideChevronRight [size]="18" class="ml-auto text-faint"></svg>
       </button>
+      }
       <a routerLink="/steam" class="flex items-center gap-3 border-b border-border px-3.5 py-[15px] text-[15px]">
         <svg lucideGamepad2 [size]="18" class="text-brand-light"></svg>
         {{ 'nav.steam' | translate }}
@@ -78,6 +80,7 @@
 
   <div class="flex max-w-[760px] min-w-0 flex-col gap-4 md:gap-5">
     <!-- CUENTA -->
+    @if (showAccountSection) {
     <section id="profile-account" class="scroll-mt-6 rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
       <app-section-header class="mb-2" [label]="'profile.sections.account' | translate" />
       @if (user(); as u) {
@@ -163,6 +166,7 @@
         <app-skeleton class="h-[150px] rounded-[10px]" />
       }
     </section>
+    }
 
     <!-- PREFERENCIAS -->
     <section

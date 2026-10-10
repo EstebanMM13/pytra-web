@@ -3,7 +3,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 /**
  * Layout for the signed-out screens. Web (md+): 50/50 split with the brand panel on the left
- * (nav background, lockup, gold "TU HISTORIAL" header and headline) and the projected form
+ * (nav background, lockup, gold slogan header and headline) and the projected form
  * centred in a 380px column. Mobile: purple mark (56px) above the form.
  */
 @Component({
@@ -22,7 +22,7 @@ import { TranslatePipe } from '@ngx-translate/core';
         />
         <div>
           <div class="mb-[22px] flex items-center gap-3">
-            <span class="text-[13px] font-semibold tracking-[0.08em] text-gold uppercase">
+            <span class="text-[13px] font-semibold tracking-[0.04em] text-gold">
               {{ 'auth.panel.eyebrow' | translate }}
             </span>
             <span class="h-px w-[120px] bg-linear-to-r from-gold-line to-transparent" aria-hidden="true"></span>

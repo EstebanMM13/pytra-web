@@ -75,8 +75,8 @@
     },
     "or": "or",
     "panel": {
-      "eyebrow": "Your history",
-      "headline": "Every run, with its rating and its story."
+      "eyebrow": "Pytra: Play, Track, Remember",
+      "headline": "Every run, with its score and its story."
     }
   },
   "dashboard": {

@@ -49,6 +49,13 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
   templateUrl: './profile.html',
 })
 export class Profile {
+  // The account card (rename / password) is hidden while the app is shared with demo
+  // accounts, so testers can't change the shared credentials. Flip to re-enable it.
+  protected readonly showAccountSection = false;
+  protected readonly sections = (['account', 'preferences', 'data'] as const).filter(
+    (s) => s !== 'account' || this.showAccountSection,
+  );
+
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
@@ -83,7 +90,7 @@ export class Profile {
   /** Steam link state for the mobile list; null while loading or unavailable. */
   protected readonly steamStatus = signal<SteamStatus | null>(null);
 
-  protected readonly activeSection = signal<ProfileSection>('account');
+  protected readonly activeSection = signal<ProfileSection>('preferences');
 
   readonly form = this.fb.group({
     username: this.fb.control('', usernameValidators),
