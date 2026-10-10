@@ -586,7 +586,8 @@
     "runsCount": "{{count}} partida(s)",
     "platformLabel": "Filtrar por plataforma",
     "platformAll": "Plataforma: todas",
-    "platformOption": "Plataforma: {{platform}}"
+    "platformPrefix": "Plataforma:",
+    "platformAllShort": "Todas"
   },
   "sagas": {
     "title": "Sagas",

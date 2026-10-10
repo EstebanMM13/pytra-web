@@ -586,7 +586,8 @@
     "runsCount": "{{count}} run(s)",
     "platformLabel": "Filter by platform",
     "platformAll": "Platform: all",
-    "platformOption": "Platform: {{platform}}"
+    "platformPrefix": "Platform:",
+    "platformAllShort": "All"
   },
   "sagas": {
     "title": "Sagas",

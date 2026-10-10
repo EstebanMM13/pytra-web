@@ -9,6 +9,7 @@ import {
   LucideSearch,
 } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Dropdown, DropdownOption } from '../../shared/ui/dropdown';
 import { map } from 'rxjs';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
@@ -51,6 +52,7 @@ import {
     HoursPipe,
     RatingPipe,
     Pagination,
+    Dropdown,
     Skeleton,
     StatusPill,
     GameEditDialog,
@@ -71,6 +73,11 @@ export class Games {
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
   protected readonly sorts = LIBRARY_SORTS;
   protected readonly platforms = LIBRARY_PLATFORMS;
+  protected readonly platformOptions: DropdownOption[] = [
+    { value: 'ALL', label: 'library.platformAllShort' },
+    ...LIBRARY_PLATFORMS.map((p) => ({ value: p, label: `platform.${p}` })),
+  ];
+  protected readonly sortOptions: DropdownOption[] = LIBRARY_SORTS.map((s) => ({ value: s, label: `library.sort.${s}` }));
   protected readonly skeletonRows = Array.from({ length: 8 }, (_, i) => i);
 
   /** `null` while loading. */

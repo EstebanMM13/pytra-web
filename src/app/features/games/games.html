@@ -161,40 +161,26 @@
         </label>
       </div>
 
-      <label
-        class="ml-auto hidden items-center rounded-lg border px-3 py-[9px] text-[13px] hover:border-border-strong md:flex"
-        [class]="query().platform !== 'ALL' ? 'border-brand text-brand-lighter' : 'border-border text-text-3'"
-      >
-        <span class="sr-only">{{ 'library.platformLabel' | translate }}</span>
-        <select
-          class="cursor-pointer appearance-none bg-transparent pr-1 focus:shadow-none"
+      <div class="ml-auto hidden items-center gap-2.5 md:flex">
+        <app-dropdown
+          [options]="platformOptions"
           [value]="query().platform"
-          (change)="setPlatform($any($event.target).value)"
-        >
-          <option value="ALL">{{ 'library.platformAll' | translate }}</option>
-          @for (p of platforms; track p) {
-            <option [value]="p" [selected]="p === query().platform">
-              {{ 'library.platformOption' | translate: { platform: ('platform.' + p | translate) } }}
-            </option>
-          }
-        </select>
-      </label>
-
-      <label
-        class="relative hidden items-center gap-2 rounded-lg border border-border px-3 py-[9px] text-[13px] text-text-3 hover:border-border-strong md:flex"
-      >
-        <svg lucideArrowDownWideNarrow [size]="15" class="shrink-0"></svg>
-        <span class="sr-only">{{ 'library.sortLabel' | translate }}</span>
-        <select
-          class="cursor-pointer appearance-none bg-transparent pr-1 text-text-3 focus:shadow-none"
+          (valueChange)="setPlatform($event)"
+          [prefix]="'library.platformPrefix' | translate"
+          [ariaLabel]="'library.platformLabel' | translate"
+          [highlighted]="query().platform !== 'ALL'"
+          align="end"
+        />
+        <app-dropdown
+          [options]="sortOptions"
           [value]="query().sort"
-          (change)="setSort($any($event.target).value)"
+          (valueChange)="setSort($event)"
+          [ariaLabel]="'library.sortLabel' | translate"
+          align="end"
         >
-          @for (sort of sorts; track sort) {
-            <option [value]="sort">{{ 'library.sort.' + sort | translate }}</option>
-          }
-        </select>
-      </label>
+          <svg lucideArrowDownWideNarrow [size]="15" class="shrink-0"></svg>
+        </app-dropdown>
+      </div>
     </div>
 
     @if (loading()) {
