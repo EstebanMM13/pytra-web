@@ -87,7 +87,7 @@
   <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
     <section class="md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
       <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
-      <div class="flex flex-col gap-2.5">
+      <div class="flex max-h-[326px] flex-col gap-2.5 overflow-y-auto pr-1 [scrollbar-width:thin]">
         @if (playing() === null) {
           @for (i of [1, 2]; track i) {
             <app-skeleton class="h-[74px] rounded-[10px]" />
@@ -120,9 +120,6 @@
 
     <section class="flex flex-col md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
       <app-section-header class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
-        @if (yearBars()?.length && summary()?.averageRating != null) {
-          <span class="hidden text-xs text-muted md:inline">{{ 'dashboard.avgRatingHint' | translate }}</span>
-        }
       </app-section-header>
       @if (yearBars(); as bars) {
         @if (bars.length) {
