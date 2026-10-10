@@ -1,21 +1,19 @@
 import { ChangeDetectionStrategy, Component, booleanAttribute, input, output } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AVATARS, Avatar, findAvatar } from '../../shared/ui/avatar';
+import { Avatar } from '../../shared/ui/avatar';
+import { AVATAR_CATEGORIES, findAvatar } from '../../shared/ui/avatar-catalog';
 
 /**
- * Grid of preset avatars plus a "no avatar" (initial) option. Presentational: it only emits the
- * picked key (null = initial); the profile page saves it.
+ * Preset avatars grouped by category, after a "no avatar" (initial) option. Presentational: it only
+ * emits the picked key (null = initial); the profile page saves it.
  */
 @Component({
   selector: 'app-avatar-picker',
   imports: [Avatar, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block' },
+  host: { class: 'block space-y-4' },
   template: `
-    <ul
-      class="grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2"
-      [attr.aria-label]="'profile.avatar.title' | translate"
-    >
+    <ul class="grid grid-cols-4 gap-2 sm:grid-cols-8">
       <li class="flex justify-center">
         <button
           type="button"
@@ -29,22 +27,34 @@ import { AVATARS, Avatar, findAvatar } from '../../shared/ui/avatar';
           <app-avatar size="md" [name]="name()" />
         </button>
       </li>
-      @for (option of avatars; track option.key) {
-        <li class="flex justify-center">
-          <button
-            type="button"
-            (click)="pick(option.key)"
-            [disabled]="disabled()"
-            [attr.aria-pressed]="current() === option.key"
-            [attr.aria-label]="'profile.avatar.names.' + option.key | translate"
-            [title]="'profile.avatar.names.' + option.key | translate"
-            [class]="optionClass(current() === option.key)"
-          >
-            <app-avatar size="md" [avatar]="option.key" />
-          </button>
-        </li>
-      }
     </ul>
+    @for (category of categories; track category.id) {
+      <section [attr.aria-labelledby]="'avatar-cat-' + category.id">
+        <h3
+          [id]="'avatar-cat-' + category.id"
+          class="mb-2 text-[11px] font-semibold tracking-[0.08em] text-faint uppercase"
+        >
+          {{ 'profile.avatar.categories.' + category.id | translate }}
+        </h3>
+        <ul class="grid grid-cols-4 gap-2 sm:grid-cols-8">
+          @for (key of category.keys; track key) {
+            <li class="flex justify-center">
+              <button
+                type="button"
+                (click)="pick(key)"
+                [disabled]="disabled()"
+                [attr.aria-pressed]="current() === key"
+                [attr.aria-label]="'profile.avatar.names.' + key | translate"
+                [title]="'profile.avatar.names.' + key | translate"
+                [class]="optionClass(current() === key)"
+              >
+                <app-avatar size="md" lazy [avatar]="key" />
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
   `,
 })
 export class AvatarPicker {
@@ -55,11 +65,11 @@ export class AvatarPicker {
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly picked = output<string | null>();
 
-  protected readonly avatars = AVATARS;
+  protected readonly categories = AVATAR_CATEGORIES;
 
   /** The saved key when it is a known preset, otherwise null (the initial option is highlighted). */
   protected current(): string | null {
-    return findAvatar(this.selected())?.key ?? null;
+    return findAvatar(this.selected());
   }
 
   protected pick(key: string | null): void {

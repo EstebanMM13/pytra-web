@@ -15,7 +15,7 @@
       "installMode": "lazy",
       "updateMode": "prefetch",
       "resources": {
-        "files": ["/brand/**", "/icons/**", "/i18n/**", "/media/**", "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"]
+        "files": ["/brand/**", "/icons/**", "/avatars/**", "/i18n/**", "/media/**", "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"]
       }
     }
   ]
