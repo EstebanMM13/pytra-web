@@ -41,17 +41,19 @@
                   {{ 'steam.linkedPill' | translate }}
                 </span>
               </p>
-              <p class="mt-[5px] font-mono text-xs text-muted md:text-[13px]">
+              <!-- Separators come from CSS so none is left dangling when the Steam id is hidden (demo). -->
+              <p
+                class="mt-[5px] font-mono text-xs text-muted md:text-[13px] [&>span+span]:before:content-['_·_']"
+              >
                 @if (maskedSteamId()) {
                   <span>{{ maskedSteamId() }}</span>
                 }
                 @if (linkedGamesCount(); as linked) {
-                  <span> · {{ 'common.games' | translate: { count: linked } }}</span>
+                  <span>{{ 'common.games' | translate: { count: linked } }}</span>
                 } @else if (syncResult(); as r) {
-                  <span> · {{ 'common.games' | translate: { count: r.gamesScanned } }}</span>
+                  <span>{{ 'common.games' | translate: { count: r.gamesScanned } }}</span>
                 }
                 <span>
-                  ·
                   @if (lastSyncRelative(); as rel) {
                     {{ 'steam.syncedAgo' | translate: { when: rel } }}
                   } @else {
