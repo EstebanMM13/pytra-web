@@ -10,6 +10,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { LucideTrash2 } from '@lucide/angular';
 import { map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { GenreNamePipe } from '../../../shared/pipes/genre-name.pipe';
 import { Game, GameCategory, GameRequest } from '../../../core/models/game.model';
 import { Genre } from '../../../core/models/genre.model';
 import { Saga } from '../../../core/models/saga.model';
@@ -41,7 +42,7 @@ function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors |
  */
 @Component({
   selector: 'app-game-edit-dialog',
-  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, GameCover, LucideTrash2],
+  imports: [ReactiveFormsModule, TranslatePipe, GenreNamePipe, ModalSheet, Segmented, GameCover, LucideTrash2],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-edit-dialog.html',
   styleUrl: './game-edit-dialog.css',

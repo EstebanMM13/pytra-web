@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { GenreNamePipe } from '../../shared/pipes/genre-name.pipe';
 import { Game, GameCategory } from '../../core/models/game.model';
 import { Genre } from '../../core/models/genre.model';
 import { Saga } from '../../core/models/saga.model';
@@ -22,7 +23,7 @@ export type SteamConfirmMode = 'confirm' | 'run';
  */
 @Component({
   selector: 'app-steam-confirm-dialog',
-  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented],
+  imports: [ReactiveFormsModule, TranslatePipe, GenreNamePipe, ModalSheet, Segmented],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-modal-sheet
@@ -94,7 +95,7 @@ export type SteamConfirmMode = 'confirm' | 'run';
                       : 'border-border text-text-2 hover:border-border-strong'
                   "
                 >
-                  {{ genre.name }}
+                  {{ genre.name | genreName }}
                 </button>
               }
             </div>

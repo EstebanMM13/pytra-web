@@ -8,6 +8,7 @@ import { YearStat, YearSummary } from '../../core/models/stats.model';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
+import { GenreNamePipe } from '../../shared/pipes/genre-name.pipe';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
@@ -47,6 +48,7 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
     RouterLink,
     TranslatePipe,
     HoursPipe,
+    GenreNamePipe,
     RatingPipe,
     RatingTonePipe,
     StatCard,

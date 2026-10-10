@@ -3,9 +3,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
+  LucideBuilding,
+  LucideCalendar,
   LucideChevronLeft,
   LucideClock,
   LucideDownload,
+  LucideGamepad2,
   LucideLayers,
   LucidePencil,
   LucidePlay,
@@ -22,6 +25,7 @@ import { GameService } from '../../../core/services/game.service';
 import { OnlinePlaytimeService } from '../../../core/services/online-playtime.service';
 import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
 import { Navbar } from '../../../shared/navbar/navbar';
+import { formatGenreName } from '../../../shared/pipes/genre-name.pipe';
 import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../../shared/pipes/rating.pipe';
 import { PlatformLabel } from '../../../shared/ui/platform-label';
@@ -68,7 +72,10 @@ function byRelease(a: Game, b: Game): number {
     StatCard,
     StatusPill,
     GameEditDialog,
+    LucideBuilding,
+    LucideCalendar,
     LucideChevronLeft,
+    LucideGamepad2,
     LucideLayers,
     LucidePencil,
     LucidePlus,
@@ -152,20 +159,10 @@ export class GameDetail {
       .join(', '),
   );
 
-  protected readonly metaLine = computed(() => {
-    const g = this.game();
-    if (!g) {
-      return '';
-    }
-    return [
-      g.developer,
-      g.releaseDate?.slice(0, 4),
-      g.genres.map((genre) => genre.name).join(', '),
-      this.platformNames(),
-    ]
-      .filter((part) => !!part)
-      .join(' · ');
-  });
+  /** Display names, sorted so the order is stable everywhere (the API returns genres as an unordered set). */
+  protected readonly genres = computed(() =>
+    (this.game()?.genres ?? []).map((g) => formatGenreName(g.name)).sort((a, b) => a.localeCompare(b, 'es')),
+  );
 
   protected readonly sagaPosition = computed(() => {
     const games = this.sagaGames();
@@ -284,11 +281,6 @@ export class GameDetail {
 
   protected releaseDate(game: Game): string {
     return formatDayMonthYear(game.releaseDate);
-  }
-
-  protected genreNames(game: Game): string {
-    // Sorted so the order is stable everywhere (the API returns genres as an unordered set).
-    return game.genres.map((g) => g.name).sort((a, b) => a.localeCompare(b, 'es')).join(', ');
   }
 
   protected newRun(): void {

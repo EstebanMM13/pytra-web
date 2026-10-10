@@ -306,7 +306,7 @@
             <app-section-header collapseKey="years.topGenres" collapseGroup="years.breakdown" class="mb-3.5" [label]="'years.topGenres' | translate" />
             @for (genre of s.topGenres; track genre.genreId) {
               <div class="flex items-center gap-3 border-t border-divider py-[9px] text-sm">
-                <span class="min-w-0 flex-1 truncate text-text-2" [title]="genre.genreName">{{ genre.genreName }}</span>
+                <span class="min-w-0 flex-1 truncate text-text-2" [title]="genre.genreName | genreName">{{ genre.genreName | genreName }}</span>
                 <span class="shrink-0 text-xs text-faint">
                   {{ 'common.games' | translate: { count: genre.gameCount } }} ·
                   {{ 'years.runsCount' | translate: { count: genre.experienceCount } }}
