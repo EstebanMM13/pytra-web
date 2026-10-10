@@ -1,6 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Experience } from '../../core/models/experience.model';
-import { STEAM_RUN_LABEL, confirmErrorKey, findSteamRun, lookup, maskSteamId } from './steam.logic';
+import { SteamStatus } from '../../core/models/steam.model';
+import {
+  STEAM_RUN_LABEL,
+  applyPendingChange,
+  confirmErrorKey,
+  findSteamRun,
+  lookup,
+  maskSteamId,
+  steamHours,
+} from './steam.logic';
 
 const run = (id: number, runLabel: string) => ({ id, runLabel }) as Experience;
 
@@ -27,5 +36,34 @@ describe('steam logic', () => {
   it('only looks up own keys', () => {
     expect(lookup({ A: 'a' }, 'constructor')).toBeNull();
     expect(lookup({ A: 'a' }, 'A')).toBe('a');
+  });
+
+  describe('status counters', () => {
+    const status: SteamStatus = {
+      linked: true,
+      steamId: '1',
+      personaName: 'p',
+      lastSyncAt: null,
+      configured: true,
+      linkedGamesCount: 10,
+      pendingCount: 2,
+      ignoredCount: 0,
+    };
+
+    it('moves a pending game to ignored or linked', () => {
+      expect(applyPendingChange(status, 'ignored')).toMatchObject({ pendingCount: 1, ignoredCount: 1, linkedGamesCount: 10 });
+      expect(applyPendingChange(status, 'confirmed')).toMatchObject({ pendingCount: 1, ignoredCount: 0, linkedGamesCount: 11 });
+    });
+
+    it('never goes below zero', () => {
+      expect(applyPendingChange(status, 'unignored').ignoredCount).toBe(0);
+      expect(applyPendingChange({ ...status, pendingCount: 0 }, 'ignored').pendingCount).toBe(0);
+    });
+  });
+
+  it('converts Steam minutes to hours', () => {
+    expect(steamHours(90)).toBe(1.5);
+    expect(steamHours(null)).toBe(0);
+    expect(steamHours(-5)).toBe(0);
   });
 });

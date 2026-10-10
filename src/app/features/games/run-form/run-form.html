@@ -191,9 +191,9 @@
             inputmode="decimal"
             min="0"
             max="10"
-            step="0.01"
+            [step]="preferences.ratingStep()"
             formControlName="rating"
-            [placeholder]="(status() === 'EN_CURSO' ? 'runForm.ratingPlaceholder' : 'runForm.ratingRange') | translate"
+            [placeholder]="(status() === 'EN_CURSO' ? 'runForm.ratingPlaceholder' : 'runForm.ratingExample.' + preferences.ratingPrecision()) | translate"
             class="run-form-cell-input text-gold!"
             [attr.aria-invalid]="showError('rating')"
           />

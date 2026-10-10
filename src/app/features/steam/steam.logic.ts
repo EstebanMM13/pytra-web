@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Experience } from '../../core/models/experience.model';
+import { SteamStatus } from '../../core/models/steam.model';
 
 /** Run label the API gives the run it creates when a SINGLEPLAYER Steam game is confirmed. */
 export const STEAM_RUN_LABEL = 'Importado de Steam';
@@ -54,4 +55,29 @@ export function maskSteamId(steamId: string | null | undefined): string {
  */
 export function findSteamRun(runs: readonly Experience[]): Experience | null {
   return runs.find((r) => r.runLabel === STEAM_RUN_LABEL) ?? (runs.length === 1 ? runs[0] : null);
+}
+
+/** Local change to a pending game, mirrored in the status counters without refetching. */
+export type PendingChange = 'ignored' | 'confirmed' | 'unignored';
+
+/** Status counters after a pending game is ignored, confirmed or un-ignored (never below 0). */
+export function applyPendingChange(status: SteamStatus, change: PendingChange): SteamStatus {
+  const dec = (n: number) => Math.max(0, (n ?? 0) - 1);
+  switch (change) {
+    case 'ignored':
+      return { ...status, pendingCount: dec(status.pendingCount), ignoredCount: (status.ignoredCount ?? 0) + 1 };
+    case 'confirmed':
+      return {
+        ...status,
+        pendingCount: dec(status.pendingCount),
+        linkedGamesCount: (status.linkedGamesCount ?? 0) + 1,
+      };
+    case 'unignored':
+      return { ...status, ignoredCount: dec(status.ignoredCount) };
+  }
+}
+
+/** Steam playtime in hours (the API sends minutes). */
+export function steamHours(minutes: number | null | undefined): number {
+  return Math.max(0, minutes ?? 0) / 60;
 }

@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, catchError, of, switchMap, tap } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
-import { CurrentUser, UpdateUsernameRequest } from '../models/user.model';
+import { CurrentUser, DeleteAccountRequest, ExportFormat, UpdateUsernameRequest } from '../models/user.model';
 import { TokenStorageService } from './token-storage.service';
 
 @Injectable({ providedIn: 'root' })
@@ -40,5 +40,19 @@ export class UserService {
     return this.http
       .patch<CurrentUser>(`${this.baseUrl}/me`, request)
       .pipe(tap((user) => this.currentUserState.set(user)));
+  }
+
+  /** Full data export as a file; the filename comes in `Content-Disposition`. */
+  exportData(format: ExportFormat): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.baseUrl}/me/export`, {
+      params: { format },
+      observe: 'response',
+      responseType: 'blob',
+    });
+  }
+
+  /** Permanently deletes the account and all its data (204). The caller clears the session. */
+  deleteAccount(request: DeleteAccountRequest): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/me`, { body: request });
   }
 }

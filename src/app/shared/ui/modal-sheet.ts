@@ -49,10 +49,11 @@ const FOCUSABLE =
           <button
             type="button"
             (click)="save.emit()"
-            [disabled]="saving()"
-            class="text-[15px] font-semibold text-brand-lighter disabled:opacity-50"
+            [disabled]="saving() || saveDisabled()"
+            class="text-[15px] font-semibold disabled:opacity-50"
+            [class]="danger() ? 'text-danger' : 'text-brand-lighter'"
           >
-            {{ 'common.save' | translate }}
+            {{ danger() ? saveLabel() : ('common.save' | translate) }}
           </button>
         </header>
 
@@ -85,8 +86,9 @@ const FOCUSABLE =
           <button
             type="button"
             (click)="save.emit()"
-            [disabled]="saving()"
-            class="rounded-lg bg-brand px-[18px] py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
+            [disabled]="saving() || saveDisabled()"
+            class="rounded-lg px-[18px] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+            [class]="danger() ? 'bg-danger-solid hover:opacity-90' : 'bg-brand hover:bg-brand-dark'"
           >
             {{ saveLabel() }}
           </button>
@@ -100,6 +102,10 @@ export class ModalSheet {
   /** Primary button text on web (mobile always shows "Guardar"). */
   readonly saveLabel = input.required<string>();
   readonly saving = input(false, { transform: booleanAttribute });
+  /** Destructive action: red primary button, and its label (not "Guardar") in the mobile header. */
+  readonly danger = input(false, { transform: booleanAttribute });
+  /** Disables the primary action (e.g. until a confirmation is typed). */
+  readonly saveDisabled = input(false, { transform: booleanAttribute });
 
   readonly save = output<void>();
   readonly closed = output<void>();

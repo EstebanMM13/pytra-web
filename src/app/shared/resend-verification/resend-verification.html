@@ -1,35 +1,22 @@
-<div class="space-y-3 rounded-lg border border-border p-4">
+<div class="flex flex-col gap-3 rounded-[10px] border border-border bg-surface p-4">
   <p class="text-sm text-text-3">{{ 'auth.resendVerification.prompt' | translate }}</p>
 
-  <div>
-    <label for="resend-email" class="mb-1 block text-sm font-medium text-text-2">
-      {{ 'auth.register.email' | translate }}
-    </label>
-    <input
-      id="resend-email"
-      type="email"
-      autocomplete="email"
-      [formControl]="emailControl"
-      class="w-full rounded-lg border border-border bg-bg text-text-2 px-3 py-2 focus:border-brand-light focus:outline-none"
-    />
+  <label for="resend-email" class="auth-label">
+    {{ 'auth.register.email' | translate }}
+    <input id="resend-email" type="email" autocomplete="email" [formControl]="emailControl" class="auth-input bg-bg!" />
     @if (emailControl.touched && emailControl.invalid) {
-      <p class="mt-1 text-sm text-danger">{{ 'auth.resendVerification.invalidEmail' | translate }}</p>
+      <span class="text-xs text-danger">{{ 'auth.resendVerification.invalidEmail' | translate }}</span>
     }
-  </div>
+  </label>
 
   @if (feedbackKey()) {
     <p class="text-sm text-success">{{ feedbackKey()! | translate }}</p>
   }
   @if (errorKey()) {
-    <p class="text-sm text-danger">{{ errorKey()! | translate }}</p>
+    <p class="text-sm text-danger" role="alert">{{ errorKey()! | translate }}</p>
   }
 
-  <button
-    type="button"
-    (click)="resend()"
-    [disabled]="sending() || cooldown() > 0"
-    class="w-full rounded-lg border border-border py-2 font-medium text-text-2 transition hover:bg-hover disabled:opacity-50"
-  >
+  <button type="button" (click)="resend()" [disabled]="sending() || cooldown() > 0" class="auth-secondary">
     @if (cooldown() > 0) {
       {{ 'auth.resendVerification.cooldown' | translate: { seconds: cooldown() } }}
     } @else {

@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, Validators, NonNullableFormBuilder } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthShell } from '../auth-shell';
 import { TranslatePipe } from '@ngx-translate/core';
 import { API_ORIGIN } from '../../../core/api-base-url';
 import { AuthService } from '../../../core/services/auth.service';
@@ -9,7 +10,7 @@ import { ResendVerification } from '../../../shared/resend-verification/resend-v
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ResendVerification],
+  imports: [AuthShell, ReactiveFormsModule, RouterLink, TranslatePipe, ResendVerification],
   templateUrl: './login.html',
 })
 export class Login {

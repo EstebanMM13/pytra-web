@@ -1,12 +1,12 @@
-<div class="flex min-h-screen items-center justify-center bg-hover px-4">
-  <div class="w-full max-w-sm rounded-xl bg-surface p-8 text-center shadow-sm">
-    @if (failed()) {
-      <p class="mb-4 text-danger">{{ errorKey() | translate }}</p>
-      <a routerLink="/login" class="font-medium text-text hover:underline">
-        {{ 'auth.register.login' | translate }}
-      </a>
-    } @else {
-      <p class="text-text-3">{{ 'auth.oauthCallback.processing' | translate }}</p>
-    }
-  </div>
-</div>
+<app-auth-shell>
+  @if (failed()) {
+    <h1 class="text-[30px] font-semibold tracking-[-0.02em] md:text-[28px]">
+      {{ 'auth.oauthCallback.errorTitle' | translate }}
+    </h1>
+    <p class="text-sm leading-relaxed text-danger" role="alert">{{ errorKey() | translate }}</p>
+    <a routerLink="/login" class="auth-primary">{{ 'auth.verifyEmail.goToLogin' | translate }}</a>
+  } @else {
+    <h1 class="text-[30px] font-semibold tracking-[-0.02em] md:text-[28px]">{{ 'auth.login.title' | translate }}</h1>
+    <p class="text-[15px] text-muted" role="status">{{ 'auth.oauthCallback.processing' | translate }}</p>
+  }
+</app-auth-shell>

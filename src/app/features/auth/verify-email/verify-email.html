@@ -1,33 +1,25 @@
-<div class="flex min-h-screen items-center justify-center bg-hover px-4">
-  <div class="w-full max-w-sm rounded-xl bg-surface p-8 text-center shadow-sm">
-    @switch (status()) {
-      @case ('verifying') {
-        <p class="text-text-3">{{ 'auth.verifyEmail.verifying' | translate }}</p>
-      }
-      @case ('success') {
-        <p class="mb-6 text-success">{{ 'auth.verifyEmail.success' | translate }}</p>
-        <a
-          routerLink="/login"
-          class="inline-block w-full rounded-lg bg-brand py-2 font-medium text-white transition hover:bg-brand-dark"
-        >
-          {{ 'auth.verifyEmail.goToLogin' | translate }}
-        </a>
-      }
-      @case ('expired') {
-        <p class="mb-4 text-danger">{{ 'auth.verifyEmail.expired' | translate }}</p>
-        <div class="text-left">
-          <app-resend-verification />
-        </div>
-      }
-      @case ('invalid') {
-        <p class="mb-4 text-danger">{{ 'auth.verifyEmail.invalid' | translate }}</p>
-        <div class="mb-4 text-left">
-          <app-resend-verification />
-        </div>
-        <a routerLink="/login" class="font-medium text-text hover:underline">
-          {{ 'auth.verifyEmail.goToLogin' | translate }}
-        </a>
-      }
+<app-auth-shell>
+  <h1 class="text-[30px] font-semibold tracking-[-0.02em] md:text-[28px]">{{ 'auth.verifyEmail.title' | translate }}</h1>
+  @switch (status()) {
+    @case ('verifying') {
+      <p class="text-[15px] text-muted" role="status">{{ 'auth.verifyEmail.verifying' | translate }}</p>
     }
-  </div>
-</div>
+    @case ('success') {
+      <p class="rounded-[10px] border border-border bg-surface px-4 py-3 text-sm leading-relaxed text-success">
+        {{ 'auth.verifyEmail.success' | translate }}
+      </p>
+      <a routerLink="/login" class="auth-primary">{{ 'auth.verifyEmail.goToLogin' | translate }}</a>
+    }
+    @case ('expired') {
+      <p class="text-sm leading-relaxed text-danger" role="alert">{{ 'auth.verifyEmail.expired' | translate }}</p>
+      <app-resend-verification />
+    }
+    @case ('invalid') {
+      <p class="text-sm leading-relaxed text-danger" role="alert">{{ 'auth.verifyEmail.invalid' | translate }}</p>
+      <app-resend-verification />
+      <p class="text-center text-sm">
+        <a routerLink="/login" class="auth-link">{{ 'auth.verifyEmail.goToLogin' | translate }}</a>
+      </p>
+    }
+  }
+</app-auth-shell>

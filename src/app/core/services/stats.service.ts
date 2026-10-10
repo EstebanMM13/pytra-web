@@ -9,7 +9,10 @@ import {
   SagaStat,
   StatsSummary,
   TopRatedExperience,
+  YearNote,
+  YearNoteRequest,
   YearStat,
+  YearSummary,
 } from '../models/stats.model';
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +26,19 @@ export class StatsService {
 
   getByYear(): Observable<YearStat[]> {
     return this.http.get<YearStat[]>(`${this.baseUrl}/by-year`);
+  }
+
+  /** Years with data, most recent first. */
+  getYears(): Observable<number[]> {
+    return this.http.get<number[]>(`${this.baseUrl}/years`);
+  }
+
+  getYearSummary(year: number): Observable<YearSummary> {
+    return this.http.get<YearSummary>(`${this.baseUrl}/years/${year}`);
+  }
+
+  saveYearNote(year: number, request: YearNoteRequest): Observable<YearNote> {
+    return this.http.put<YearNote>(`${this.baseUrl}/years/${year}/note`, request);
   }
 
   /** EN_CURSO runs across all games, most recently started first. */

@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthShell } from '../auth-shell';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [AuthShell, ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './reset-password.html',
 })
 export class ResetPassword {

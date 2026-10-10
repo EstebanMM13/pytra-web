@@ -1,7 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthShell } from '../auth-shell';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
+import { consumePostLoginRedirect } from '../../../shared/utils/post-login-redirect';
 
 /** Error value the API sends when a Google sign-up is blocked by the invite allowlist. */
 const REGISTRATION_CLOSED_ERROR = 'registration_closed';
@@ -14,7 +16,7 @@ const NEXT_ROUTES = new Map<string, string>([['steam', '/steam']]);
 
 @Component({
   selector: 'app-oauth-callback',
-  imports: [RouterLink, TranslatePipe],
+  imports: [AuthShell, RouterLink, TranslatePipe],
   templateUrl: './oauth-callback.html',
 })
 export class OauthCallback {
@@ -39,6 +41,9 @@ export class OauthCallback {
       return;
     }
 
+    // Pending "resume after re-login" destination (e.g. account deletion); read once either way.
+    const resume = nextRoute ? null : consumePostLoginRedirect();
+
     if (!code || error) {
       if (error === REGISTRATION_CLOSED_ERROR) {
         this.errorKey.set('auth.errors.registrationClosed');
@@ -48,11 +53,16 @@ export class OauthCallback {
     }
 
     this.authService.exchangeCode({ code }).subscribe({
-      next: () =>
+      next: () => {
+        if (resume) {
+          this.router.navigateByUrl(resume, { replaceUrl: true });
+          return;
+        }
         this.router.navigate([nextRoute ?? '/dashboard'], {
           queryParams: nextRoute === '/steam' ? { linked: '1' } : {},
           replaceUrl: true,
-        }),
+        });
+      },
       error: () => this.failed.set(true),
     });
   }

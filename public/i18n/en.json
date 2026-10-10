@@ -7,8 +7,9 @@
       "submit": "Sign in",
       "noAccount": "Don't have an account?",
       "register": "Sign up",
-      "forgotPassword": "Forgot your password?",
-      "withGoogle": "Continue with Google"
+      "forgotPassword": "Forgot it?",
+      "withGoogle": "Continue with Google",
+      "subtitle": "Welcome back."
     },
     "register": {
       "title": "Create account",
@@ -20,21 +21,26 @@
       "login": "Sign in",
       "checkEmail": "Account created. We've sent a confirmation link to {{email}}. Open it to activate your account.",
       "checkSpam": "Can't find it? Check your spam folder.",
-      "usernameHint": "3-30 characters: letters, numbers, dots, hyphens or underscores. No spaces or @."
+      "usernameHint": "3-30 characters: letters, numbers, dots, hyphens or underscores. No spaces or @.",
+      "subtitle": "Start logging your runs.",
+      "passwordPlaceholder": "At least 8 characters"
     },
     "verifyEmail": {
       "verifying": "Verifying your email...",
       "success": "Email confirmed. You can sign in now.",
       "expired": "This confirmation link has expired. Request a new one below.",
       "invalid": "This confirmation link is invalid or has already been used.",
-      "goToLogin": "Go to sign in"
+      "goToLogin": "Go to sign in",
+      "title": "Confirm email"
     },
     "forgotPassword": {
       "title": "Recover password",
       "email": "Email",
       "submit": "Send link",
       "sent": "If that email exists, we've sent a recovery link.",
-      "backToLogin": "Back to sign in"
+      "backToLogin": "Back to sign in",
+      "subtitle": "We'll send you a link to create a new password.",
+      "backToProfile": "Back to profile"
     },
     "resetPassword": {
       "title": "New password",
@@ -44,11 +50,13 @@
       "expiredLink": "This reset link has expired.",
       "invalidLink": "This reset link is invalid or has already been used.",
       "requestNew": "Request a new link",
-      "passwordTooShort": "The password must be at least 8 characters."
+      "passwordTooShort": "The password must be at least 8 characters.",
+      "subtitle": "Choose a new password for your account."
     },
     "oauthCallback": {
       "processing": "Completing sign in...",
-      "error": "Could not complete sign in."
+      "error": "Could not complete sign in.",
+      "errorTitle": "Couldn't sign in"
     },
     "errors": {
       "invalidCredentials": "Incorrect username or password.",
@@ -64,6 +72,11 @@
       "cooldown": "Resend available in {{seconds}}s",
       "sent": "If that email belongs to an unconfirmed account, we've sent a new link.",
       "invalidEmail": "Enter a valid email."
+    },
+    "or": "or",
+    "panel": {
+      "eyebrow": "Your history",
+      "headline": "Every run, with its rating and its story."
     }
   },
   "dashboard": {
@@ -95,16 +108,62 @@
   "profile": {
     "title": "Profile",
     "email": "Email",
-    "username": "Username",
-    "current": "Current username",
-    "newUsername": "New username",
+    "username": "Name",
     "submit": "Save",
     "saved": "Username updated.",
     "usernameTaken": "That username is already taken.",
     "usernameRequired": "Username is required.",
-    "loading": "Loading profile...",
     "preferences": "Preferences",
-    "theme": "Theme"
+    "theme": "Theme",
+    "memberSince": "On Pytra since {{date}}",
+    "sectionsLabel": "Profile sections",
+    "sections": {
+      "account": "Account",
+      "preferences": "Preferences",
+      "data": "Data"
+    },
+    "steamLinked": "Linked",
+    "steamNotLinked": "Not linked",
+    "exportData": "Export data",
+    "password": "Password",
+    "changePassword": "Change",
+    "noPassword": "You sign in with Google: no password set.",
+    "createPassword": "Create password",
+    "ratingPrecision": "Rating decimals",
+    "defaultPlatform": "Default platform",
+    "preferencesHint": "Preferences are saved on this device.",
+    "errors": {
+      "network": "Can't reach the server. Try again."
+    },
+    "export": {
+      "label": "Export everything",
+      "csv": "CSV",
+      "markdown": "Markdown (Obsidian)",
+      "exporting": "Exporting…",
+      "done": "Export ready.",
+      "error": "Couldn't export. Try again.",
+      "rateLimited": "You exported very recently. Wait a few minutes and try again.",
+      "shareTitle": "Pytra export"
+    },
+    "delete": {
+      "label": "Delete account",
+      "open": "Delete…",
+      "title": "Delete account",
+      "submit": "Delete my account",
+      "deleting": "Deleting…",
+      "warning": "Your games, runs, sagas, yearly notes and Steam link will be deleted forever. This can't be undone.",
+      "exportHint": "To keep your data, export it first with “Export everything”.",
+      "confirmLabel": "Type {{username}} to confirm",
+      "password": "Current password",
+      "done": "Your account has been deleted.",
+      "reauthButton": "Sign in again with Google",
+      "errors": {
+        "password": "The password is incorrect.",
+        "confirmation": "The username doesn't match.",
+        "syncInProgress": "A Steam sync is running. Wait for it to finish and try again.",
+        "reauth": "For security, your Google account needs a recent sign-in. Sign in again with Google and repeat the deletion."
+      }
+    }
   },
   "steam": {
     "title": "Steam",
@@ -196,7 +255,9 @@
       "intro": "Pick a category to add it to your library. Its Steam hours are imported when you confirm.",
       "introRun": "It is added to your library first; then the run opens so you can complete it.",
       "categoryHint": "Singleplayer: hours go to a run. Online/Hybrid: to the game's online hours."
-    }
+    },
+    "lastSession": "Last session {{when}}",
+    "linkedCount": "{{count}} already linked to a Pytra game"
   },
   "nav": {
     "home": "Home",
@@ -242,8 +303,66 @@
     "no": "No"
   },
   "years": {
-    "title": "Yearly summary",
-    "comingSoon": "The yearly summary is coming soon."
+    "title": "Years",
+    "tabsLabel": "Years with runs",
+    "yearTitle": "Year {{year}}",
+    "statsLabel": "Year figures",
+    "empty": {
+      "title": "No years with runs yet",
+      "text": "Once you log runs with dates, each year's summary shows up here."
+    },
+    "emptyYear": "No runs logged in {{year}}.",
+    "highlight": {
+      "mostHours": "Your year with the most hours",
+      "mostRuns": "Your year with the most runs",
+      "bestRated": "Your best-rated year",
+      "firstYear": "Your first logged year",
+      "platinums": "{{count}} platinums this year",
+      "completed": "{{count}} runs completed",
+      "runs": "{{count}} runs this year"
+    },
+    "stats": {
+      "hours": "Hours",
+      "runs": "Runs",
+      "completed": "Completed",
+      "abandoned": "Abandoned",
+      "avgRating": "Average rating",
+      "avg": "Average",
+      "platinums": "Platinums"
+    },
+    "goty": "GOTY {{year}}",
+    "noGoty": "No GOTY: no rated runs completed this year.",
+    "runsCount": "{{count}} runs",
+    "surprises": "Surprises",
+    "disappointments": "Disappointments",
+    "noSurprises": "No notable surprises this year",
+    "noDisappointments": "No disappointments this year 🎉",
+    "hoursByMonth": "Hours per month",
+    "noMonthHours": "No dated hours this year.",
+    "hoursWithoutMonth": "{{hours}} without a month (runs without dates inside the year).",
+    "runsOfYear": "Runs of the year",
+    "byRating": "by rating",
+    "showAll": "Show all {{count}} runs",
+    "showLess": "Show less",
+    "topRated": "Top 5 best rated",
+    "mostPlayed": "Most played",
+    "topSagas": "Most played sagas",
+    "topGenres": "Most played genres",
+    "noCompleted": "No rated runs completed this year.",
+    "loadError": "Couldn't load the year summary.",
+    "retry": "Retry",
+    "note": {
+      "summary": "Year in review",
+      "highlights": "Games that left a mark",
+      "summaryPlaceholder": "How was your gaming year?",
+      "highlightsPlaceholder": "The games that stuck with you, and why.",
+      "save": "Save notes",
+      "saving": "Saving…",
+      "saved": "Year notes saved.",
+      "saveError": "Couldn't save the notes.",
+      "savedAgo": "Saved {{ago}}",
+      "tooLong": "Each text allows at most {{max}} characters."
+    }
   },
   "theme": {
     "dark": "Dark",
@@ -402,6 +521,11 @@
       "rating": "The rating goes from 0 to 10, with up to 2 decimals.",
       "hours": "Hours cannot be negative.",
       "dates": "The end cannot be before the start."
+    },
+    "ratingExample": {
+      "integer": "0–10 · e.g. 9",
+      "half": "0–10 · e.g. 9.5",
+      "hundredths": "0–10 · e.g. 9.25"
     }
   },
   "pagination": {
@@ -450,7 +574,10 @@
     "platinum": "Platinum",
     "noRuns": "No runs",
     "showing": "Showing {{shown}} of {{total}}",
-    "runsCount": "{{count}} run(s)"
+    "runsCount": "{{count}} run(s)",
+    "platformLabel": "Filter by platform",
+    "platformAll": "Platform: all",
+    "platformOption": "Platform: {{platform}}"
   },
   "sagas": {
     "title": "Sagas",

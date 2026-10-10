@@ -1,4 +1,4 @@
-import { ExperienceStatus } from '../../core/models/experience.model';
+import { ExperienceStatus, Platform } from '../../core/models/experience.model';
 import { Game } from '../../core/models/game.model';
 
 /** Status tab of the library toolbar. `PENDIENTE` also covers games with no runs yet. */
@@ -15,10 +15,17 @@ export const LIBRARY_STATUS_FILTERS: readonly LibraryStatusFilter[] = [
 export const LIBRARY_SORTS: readonly LibrarySort[] = ['recent', 'name', 'rating', 'hours'];
 export const LIBRARY_PAGE_SIZE = 10;
 
+/** Platform dropdown of the toolbar: a platform the game has runs on, or all. */
+export type LibraryPlatformFilter = Platform | 'ALL';
+
+export const LIBRARY_PLATFORMS: readonly Platform[] = ['PC', 'PS5', 'PS4', 'XBOX', 'SWITCH', 'MOBILE'];
+
 export interface LibraryQuery {
   text: string;
   status: LibraryStatusFilter;
   sort: LibrarySort;
+  /** Defaults to 'ALL' when omitted. */
+  platform?: LibraryPlatformFilter;
 }
 
 /** Steam imports waiting for review live on /steam until confirmed; the library only lists confirmed games. */
@@ -41,6 +48,10 @@ export function matchesStatus(game: Game, status: LibraryStatusFilter): boolean 
   }
   const last = game.lastExperienceStatus ?? null;
   return status === 'PENDIENTE' ? last === 'PENDIENTE' || last === null : last === status;
+}
+
+export function matchesPlatform(game: Game, platform: LibraryPlatformFilter | undefined): boolean {
+  return !platform || platform === 'ALL' || (game.platforms ?? []).includes(platform);
 }
 
 export function matchesText(game: Game, text: string): boolean {
@@ -84,13 +95,22 @@ function byNumberDesc(pick: (g: Game) => number | null | undefined) {
   };
 }
 
+/** Sortable `yyyy-MM-dd` for "last played": the exact date, else the end of `lastPlayedYear`. */
+export function lastPlayedKey(game: Game): string | null {
+  if (game.lastPlayedAt) {
+    return game.lastPlayedAt.slice(0, 10);
+  }
+  return game.lastPlayedYear != null ? `${String(game.lastPlayedYear).padStart(4, '0')}-12-31` : null;
+}
+
 const COMPARATORS: Record<LibrarySort, (a: Game, b: Game) => number> = {
-  // The API only exposes the year of the last run: newest year first, then most recently updated.
+  // Most recent `lastPlayedAt` first; games without it fall back to `lastPlayedYear`
+  // (compared as the year's last day), then most recently updated, then name.
   recent: (a, b) => {
-    const ya = a.lastPlayedYear ?? null;
-    const yb = b.lastPlayedYear ?? null;
-    if (ya !== yb) {
-      return ya === null ? 1 : yb === null ? -1 : yb - ya;
+    const ka = lastPlayedKey(a);
+    const kb = lastPlayedKey(b);
+    if (ka !== kb) {
+      return ka === null ? 1 : kb === null ? -1 : kb.localeCompare(ka);
     }
     return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '') || byName(a, b);
   },
@@ -105,7 +125,9 @@ export function sortGames(games: readonly Game[], sort: LibrarySort): Game[] {
 
 export function filterGames(games: readonly Game[], query: LibraryQuery): Game[] {
   return sortGames(
-    games.filter((g) => matchesText(g, query.text) && matchesStatus(g, query.status)),
+    games.filter(
+      (g) => matchesText(g, query.text) && matchesStatus(g, query.status) && matchesPlatform(g, query.platform),
+    ),
     query.sort,
   );
 }
@@ -133,6 +155,10 @@ export function parseStatusFilter(value: string | null): LibraryStatusFilter {
 
 export function parseSort(value: string | null): LibrarySort {
   return (LIBRARY_SORTS as readonly string[]).includes(value ?? '') ? (value as LibrarySort) : 'recent';
+}
+
+export function parsePlatformFilter(value: string | null): LibraryPlatformFilter {
+  return (LIBRARY_PLATFORMS as readonly string[]).includes(value ?? '') ? (value as Platform) : 'ALL';
 }
 
 export function parsePage(value: string | null): number {

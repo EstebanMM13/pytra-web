@@ -31,7 +31,10 @@ export interface MiniBar {
         [attr.aria-label]="bar.title ?? bar.label"
       >
         @if (bar.topLabel) {
-          <span class="font-mono text-[10px] text-gold md:text-[11px]">{{ bar.topLabel }}</span>
+          <span
+            class="font-mono text-[10px] md:text-[11px]"
+            [class]="topTone() === 'gold' ? 'text-gold' : 'text-muted'"
+          >{{ bar.topLabel }}</span>
         }
         <div
           class="w-full bg-brand"
@@ -50,6 +53,8 @@ export class MiniBarChart {
   /** Chart height in px (labels included). */
   readonly height = input(170);
   readonly dense = input(false, { transform: booleanAttribute });
+  /** Colour of the labels above the bars: gold (ratings) or muted (plain values). */
+  readonly topTone = input<'gold' | 'muted'>('gold');
 
   protected readonly normalized = computed(() => {
     const bars = this.bars();

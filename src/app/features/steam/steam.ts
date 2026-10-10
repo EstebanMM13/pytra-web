@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LucideEyeOff, LucideLink, LucideRefreshCw } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Game } from '../../core/models/game.model';
-import { SteamIgnoredApp, SteamStatus, SteamSyncResult } from '../../core/models/steam.model';
+import { SteamIgnoredApp, SteamPendingGame, SteamStatus, SteamSyncResult } from '../../core/models/steam.model';
 import { ExperienceService } from '../../core/services/experience.service';
 import { NativeOAuthService } from '../../core/services/native-oauth.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
@@ -12,14 +12,26 @@ import { SteamService } from '../../core/services/steam.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { ToastService } from '../../shared/toast/toast.service';
 import { SectionHeader } from '../../shared/ui/section-header';
+import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { formatRelativeTime } from '../../shared/utils/relative-time';
 import { SteamConfirmDialog, SteamConfirmMode } from './steam-confirm-dialog';
-import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, apiCode, findSteamRun, lookup, maskSteamId } from './steam.logic';
+import {
+  LINK_ERROR_KEYS,
+  PendingChange,
+  SYNC_ERROR_KEYS,
+  apiCode,
+  applyPendingChange,
+  findSteamRun,
+  lookup,
+  maskSteamId,
+  steamHours,
+} from './steam.logic';
 
 @Component({
   selector: 'app-steam',
   imports: [
+    HoursPipe,
     TranslatePipe,
     Navbar,
     SectionHeader,
@@ -44,7 +56,7 @@ export class Steam {
 
   readonly status = signal<SteamStatus | null>(null);
   readonly statusLoading = signal(true);
-  readonly pending = signal<Game[]>([]);
+  readonly pending = signal<SteamPendingGame[]>([]);
   readonly ignoredApps = signal<SteamIgnoredApp[]>([]);
   readonly loading = signal(true);
   readonly connecting = signal(false);
@@ -64,10 +76,24 @@ export class Steam {
     const s = this.status();
     return (s?.personaName?.trim() || s?.steamId || '?').charAt(0).toUpperCase();
   });
-  protected readonly lastSyncRelative = computed(() => {
-    const locale = this.translate.currentLang() === 'en' ? 'en-US' : 'es-ES';
-    return formatRelativeTime(this.status()?.lastSyncAt, locale);
-  });
+  private readonly locale = computed(() => (this.translate.currentLang() === 'en' ? 'en-US' : 'es-ES'));
+  protected readonly lastSyncRelative = computed(() => formatRelativeTime(this.status()?.lastSyncAt, this.locale()));
+
+  /** Server counters (GET /status), falling back to the loaded lists if the API omits them. */
+  protected readonly pendingTotal = computed(() => this.status()?.pendingCount ?? this.pending().length);
+  protected readonly ignoredTotal = computed(() => this.status()?.ignoredCount ?? this.ignoredApps().length);
+  protected readonly linkedGamesCount = computed(() => this.status()?.linkedGamesCount ?? null);
+
+  protected readonly steamHours = steamHours;
+
+  protected lastSession(game: SteamPendingGame): string | null {
+    return formatRelativeTime(game.lastPlayedAt, this.locale());
+  }
+
+  /** Keeps the status counters in step with local list changes (no refetch needed). */
+  private applyChange(change: PendingChange): void {
+    this.status.update((status) => (status ? applyPendingChange(status, change) : status));
+  }
 
   constructor() {
     this.readCallbackParams();
@@ -149,6 +175,7 @@ export class Steam {
         this.busyGameId.set(null);
         this.pending.update((list) => list.filter((g) => g.id !== game.id));
         if (this.confirmTarget()?.game.id === game.id) this.confirmTarget.set(null);
+        this.applyChange('ignored');
         this.loadIgnored();
       },
       error: (err: HttpErrorResponse) => {
@@ -164,6 +191,7 @@ export class Steam {
     this.steamService.unignore(app.appId).subscribe({
       next: () => {
         this.ignoredApps.update((list) => list.filter((a) => a.appId !== app.appId));
+        this.applyChange('unignored');
         this.noticeKey.set('steam.unignored');
       },
       error: () => this.errorKey.set('steam.errors.generic'),
@@ -178,6 +206,9 @@ export class Steam {
   onConfirmed(game: Game): void {
     const mode = this.confirmTarget()?.mode ?? 'confirm';
     this.confirmTarget.set(null);
+    if (this.pending().some((g) => g.id === game.id)) {
+      this.applyChange('confirmed');
+    }
     this.pending.update((list) => list.filter((g) => g.id !== game.id));
     this.toast.success(this.translate.instant('steam.confirmed', { name: game.name }));
     if (mode === 'run') {

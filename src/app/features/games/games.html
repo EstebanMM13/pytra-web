@@ -143,10 +143,45 @@
             <span class="ml-0.5 font-mono text-[11px] opacity-70">{{ statusCounts()[status] }}</span>
           </button>
         }
+        <label
+          class="relative shrink-0 rounded-full border px-3 py-[7px] whitespace-nowrap"
+          [class]="query().platform !== 'ALL' ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-3'"
+        >
+          <span class="sr-only">{{ 'library.platformLabel' | translate }}</span>
+          <select
+            class="cursor-pointer appearance-none bg-transparent focus:shadow-none"
+            [value]="query().platform"
+            (change)="setPlatform($any($event.target).value)"
+          >
+            <option value="ALL">{{ 'library.platformAll' | translate }}</option>
+            @for (p of platforms; track p) {
+              <option [value]="p" [selected]="p === query().platform">{{ 'platform.' + p | translate }}</option>
+            }
+          </select>
+        </label>
       </div>
 
       <label
-        class="relative ml-auto hidden items-center gap-2 rounded-lg border border-border px-3 py-[9px] text-[13px] text-text-3 hover:border-border-strong md:flex"
+        class="ml-auto hidden items-center rounded-lg border px-3 py-[9px] text-[13px] hover:border-border-strong md:flex"
+        [class]="query().platform !== 'ALL' ? 'border-brand text-brand-lighter' : 'border-border text-text-3'"
+      >
+        <span class="sr-only">{{ 'library.platformLabel' | translate }}</span>
+        <select
+          class="cursor-pointer appearance-none bg-transparent pr-1 focus:shadow-none"
+          [value]="query().platform"
+          (change)="setPlatform($any($event.target).value)"
+        >
+          <option value="ALL">{{ 'library.platformAll' | translate }}</option>
+          @for (p of platforms; track p) {
+            <option [value]="p" [selected]="p === query().platform">
+              {{ 'library.platformOption' | translate: { platform: ('platform.' + p | translate) } }}
+            </option>
+          }
+        </select>
+      </label>
+
+      <label
+        class="relative hidden items-center gap-2 rounded-lg border border-border px-3 py-[9px] text-[13px] text-text-3 hover:border-border-strong md:flex"
       >
         <svg lucideArrowDownWideNarrow [size]="15" class="shrink-0"></svg>
         <span class="sr-only">{{ 'library.sortLabel' | translate }}</span>

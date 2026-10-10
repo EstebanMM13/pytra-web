@@ -1,40 +1,46 @@
 {
   "auth": {
     "login": {
-      "title": "Iniciar sesión",
+      "title": "Entrar",
       "identifier": "Usuario o email",
       "password": "Contraseña",
       "submit": "Entrar",
       "noAccount": "¿No tienes cuenta?",
       "register": "Regístrate",
-      "forgotPassword": "¿Olvidaste tu contraseña?",
-      "withGoogle": "Continuar con Google"
+      "forgotPassword": "¿La has olvidado?",
+      "withGoogle": "Continuar con Google",
+      "subtitle": "Bienvenido de nuevo."
     },
     "register": {
       "title": "Crear cuenta",
-      "username": "Usuario",
+      "username": "Nombre de usuario",
       "email": "Email",
       "password": "Contraseña",
       "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes cuenta?",
-      "login": "Inicia sesión",
+      "login": "Entra",
       "checkEmail": "Cuenta creada. Hemos enviado un enlace de confirmación a {{email}}. Ábrelo para activar tu cuenta.",
       "checkSpam": "¿No lo encuentras? Revisa la carpeta de spam.",
-      "usernameHint": "De 3 a 30 caracteres: letras, números, puntos, guiones o guiones bajos. Sin espacios ni @."
+      "usernameHint": "De 3 a 30 caracteres: letras, números, puntos, guiones o guiones bajos. Sin espacios ni @.",
+      "subtitle": "Empieza a registrar tus partidas.",
+      "passwordPlaceholder": "Mínimo 8 caracteres"
     },
     "verifyEmail": {
       "verifying": "Verificando tu email...",
       "success": "Email confirmado. Ya puedes iniciar sesión.",
       "expired": "Este enlace de confirmación ha caducado. Solicita uno nuevo abajo.",
       "invalid": "Este enlace de confirmación no es válido o ya se ha usado.",
-      "goToLogin": "Ir a iniciar sesión"
+      "goToLogin": "Ir a iniciar sesión",
+      "title": "Confirmar email"
     },
     "forgotPassword": {
       "title": "Recuperar contraseña",
       "email": "Email",
       "submit": "Enviar enlace",
       "sent": "Si ese email existe, te hemos enviado un enlace de recuperación.",
-      "backToLogin": "Volver a iniciar sesión"
+      "backToLogin": "Volver a iniciar sesión",
+      "subtitle": "Te enviaremos un enlace para crear una contraseña nueva.",
+      "backToProfile": "Volver al perfil"
     },
     "resetPassword": {
       "title": "Nueva contraseña",
@@ -44,11 +50,13 @@
       "expiredLink": "Este enlace de restablecimiento ha caducado.",
       "invalidLink": "Este enlace de restablecimiento no es válido o ya se ha usado.",
       "requestNew": "Solicitar un enlace nuevo",
-      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres."
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "subtitle": "Elige una contraseña nueva para tu cuenta."
     },
     "oauthCallback": {
       "processing": "Completando inicio de sesión...",
-      "error": "No se pudo completar el inicio de sesión."
+      "error": "No se pudo completar el inicio de sesión.",
+      "errorTitle": "No se pudo entrar"
     },
     "errors": {
       "invalidCredentials": "Usuario o contraseña incorrectos.",
@@ -64,6 +72,11 @@
       "cooldown": "Podrás reenviarlo en {{seconds}} s",
       "sent": "Si ese email pertenece a una cuenta sin confirmar, te hemos enviado un enlace nuevo.",
       "invalidEmail": "Introduce un email válido."
+    },
+    "or": "o",
+    "panel": {
+      "eyebrow": "Tu historial",
+      "headline": "Cada partida, con su nota y su historia."
     }
   },
   "dashboard": {
@@ -95,16 +108,62 @@
   "profile": {
     "title": "Perfil",
     "email": "Email",
-    "username": "Usuario",
-    "current": "Usuario actual",
-    "newUsername": "Nuevo usuario",
+    "username": "Nombre",
     "submit": "Guardar",
-    "saved": "Usuario actualizado.",
+    "saved": "Nombre de usuario actualizado.",
     "usernameTaken": "Ese usuario ya está en uso.",
     "usernameRequired": "El usuario es obligatorio.",
-    "loading": "Cargando perfil...",
     "preferences": "Preferencias",
-    "theme": "Tema"
+    "theme": "Tema",
+    "memberSince": "En Pytra desde {{date}}",
+    "sectionsLabel": "Secciones del perfil",
+    "sections": {
+      "account": "Cuenta",
+      "preferences": "Preferencias",
+      "data": "Datos"
+    },
+    "steamLinked": "Vinculada",
+    "steamNotLinked": "Sin vincular",
+    "exportData": "Exportar datos",
+    "password": "Contraseña",
+    "changePassword": "Cambiar",
+    "noPassword": "Entras con Google: no tienes contraseña.",
+    "createPassword": "Crear contraseña",
+    "ratingPrecision": "Notas con decimales",
+    "defaultPlatform": "Plataforma por defecto",
+    "preferencesHint": "Las preferencias se guardan en este dispositivo.",
+    "errors": {
+      "network": "No hay conexión con el servidor. Inténtalo de nuevo."
+    },
+    "export": {
+      "label": "Exportar todo",
+      "csv": "CSV",
+      "markdown": "Markdown (Obsidian)",
+      "exporting": "Exportando…",
+      "done": "Exportación lista.",
+      "error": "No se pudo exportar. Inténtalo de nuevo.",
+      "rateLimited": "Has exportado hace muy poco. Espera unos minutos y vuelve a intentarlo.",
+      "shareTitle": "Exportación de Pytra"
+    },
+    "delete": {
+      "label": "Borrar cuenta",
+      "open": "Borrar…",
+      "title": "Borrar cuenta",
+      "submit": "Borrar mi cuenta",
+      "deleting": "Borrando…",
+      "warning": "Se borrarán para siempre tus juegos, partidas, sagas, notas anuales y la vinculación con Steam. No se puede deshacer.",
+      "exportHint": "Si quieres conservar tus datos, expórtalos antes desde «Exportar todo».",
+      "confirmLabel": "Escribe {{username}} para confirmar",
+      "password": "Contraseña actual",
+      "done": "Tu cuenta se ha borrado.",
+      "reauthButton": "Entrar de nuevo con Google",
+      "errors": {
+        "password": "La contraseña no es correcta.",
+        "confirmation": "El nombre de usuario no coincide.",
+        "syncInProgress": "Hay una sincronización de Steam en curso. Espera a que termine y vuelve a intentarlo.",
+        "reauth": "Por seguridad, tu cuenta de Google necesita un inicio de sesión reciente. Vuelve a entrar con Google y repite el borrado."
+      }
+    }
   },
   "steam": {
     "title": "Steam",
@@ -196,7 +255,9 @@
       "intro": "Elige la categoría para añadirlo a tu biblioteca. Sus horas de Steam se importan al confirmar.",
       "introRun": "Primero se añade a tu biblioteca; después se abre la partida para completarla.",
       "categoryHint": "Singleplayer: las horas van a una partida. Online/Híbrido: a las horas online del juego."
-    }
+    },
+    "lastSession": "Última sesión {{when}}",
+    "linkedCount": "{{count}} ya vinculados a un juego de Pytra"
   },
   "nav": {
     "home": "Inicio",
@@ -242,8 +303,66 @@
     "no": "No"
   },
   "years": {
-    "title": "Resumen anual",
-    "comingSoon": "El resumen por años llegará pronto."
+    "title": "Años",
+    "tabsLabel": "Años con partidas",
+    "yearTitle": "Año {{year}}",
+    "statsLabel": "Cifras del año",
+    "empty": {
+      "title": "Aún no hay años con partidas",
+      "text": "Cuando registres partidas con fechas, aquí verás el resumen de cada año."
+    },
+    "emptyYear": "No hay partidas registradas en {{year}}.",
+    "highlight": {
+      "mostHours": "Tu año con más horas",
+      "mostRuns": "Tu año con más partidas",
+      "bestRated": "Tu año con mejor nota media",
+      "firstYear": "Tu primer año registrado",
+      "platinums": "{{count}} platinos este año",
+      "completed": "{{count}} partidas completadas",
+      "runs": "{{count}} partidas este año"
+    },
+    "stats": {
+      "hours": "Horas",
+      "runs": "Partidas",
+      "completed": "Completadas",
+      "abandoned": "Abandonadas",
+      "avgRating": "Nota media",
+      "avg": "Media",
+      "platinums": "Platinos"
+    },
+    "goty": "GOTY {{year}}",
+    "noGoty": "Sin GOTY: no hay partidas completadas con nota este año.",
+    "runsCount": "{{count}} partidas",
+    "surprises": "Sorpresas",
+    "disappointments": "Decepciones",
+    "noSurprises": "No hay sorpresas destacables este año",
+    "noDisappointments": "No hay decepciones este año 🎉",
+    "hoursByMonth": "Horas por mes",
+    "noMonthHours": "Sin horas con fecha este año.",
+    "hoursWithoutMonth": "{{hours}} sin mes asignado (partidas sin fechas dentro del año).",
+    "runsOfYear": "Partidas del año",
+    "byRating": "por nota",
+    "showAll": "Ver las {{count}} partidas",
+    "showLess": "Ver menos",
+    "topRated": "Top 5 mejor valorados",
+    "mostPlayed": "Más jugados",
+    "topSagas": "Sagas más jugadas",
+    "topGenres": "Géneros más jugados",
+    "noCompleted": "Sin partidas completadas con nota este año.",
+    "loadError": "No se pudo cargar el resumen del año.",
+    "retry": "Reintentar",
+    "note": {
+      "summary": "Resumen del año",
+      "highlights": "Juegos que más te han marcado",
+      "summaryPlaceholder": "¿Cómo ha sido tu año jugando?",
+      "highlightsPlaceholder": "Los juegos que se te han quedado dentro y por qué.",
+      "save": "Guardar notas",
+      "saving": "Guardando…",
+      "saved": "Notas del año guardadas.",
+      "saveError": "No se pudieron guardar las notas.",
+      "savedAgo": "Guardado {{ago}}",
+      "tooLong": "Cada texto admite como máximo {{max}} caracteres."
+    }
   },
   "theme": {
     "dark": "Oscuro",
@@ -402,6 +521,11 @@
       "rating": "La nota va de 0 a 10, con hasta 2 decimales.",
       "hours": "Las horas no pueden ser negativas.",
       "dates": "El fin no puede ser anterior al inicio."
+    },
+    "ratingExample": {
+      "integer": "0–10 · ej. 9",
+      "half": "0–10 · ej. 9.5",
+      "hundredths": "0–10 · ej. 9.25"
     }
   },
   "pagination": {
@@ -450,7 +574,10 @@
     "platinum": "Platino",
     "noRuns": "Sin partidas",
     "showing": "Mostrando {{shown}} de {{total}}",
-    "runsCount": "{{count}} partida(s)"
+    "runsCount": "{{count}} partida(s)",
+    "platformLabel": "Filtrar por plataforma",
+    "platformAll": "Plataforma: todas",
+    "platformOption": "Plataforma: {{platform}}"
   },
   "sagas": {
     "title": "Sagas",

@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AuthShell } from '../auth-shell';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { usernameValidators } from '../../../core/validators/username';
@@ -8,7 +9,7 @@ import { ResendVerification } from '../../../shared/resend-verification/resend-v
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ResendVerification],
+  imports: [AuthShell, ReactiveFormsModule, RouterLink, TranslatePipe, ResendVerification],
   templateUrl: './register.html',
 })
 export class Register {

@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
 import { Game, GameRequest } from '../models/game.model';
-import { SteamIgnoredApp, SteamStatus, SteamSyncResult } from '../models/steam.model';
+import { SteamIgnoredApp, SteamPendingGame, SteamStatus, SteamSyncResult } from '../models/steam.model';
 
 @Injectable({ providedIn: 'root' })
 export class SteamService {
@@ -36,8 +36,8 @@ export class SteamService {
     return this.http.post<SteamSyncResult>(`${this.baseUrl}/sync`, {});
   }
 
-  getPending(): Observable<Game[]> {
-    return this.http.get<Game[]>(`${this.baseUrl}/pending`);
+  getPending(): Observable<SteamPendingGame[]> {
+    return this.http.get<SteamPendingGame[]>(`${this.baseUrl}/pending`);
   }
 
   confirmPending(gameId: number, request: GameRequest): Observable<Game> {

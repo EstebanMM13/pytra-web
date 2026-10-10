@@ -1,0 +1,395 @@
+<app-navbar />
+
+<main class="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-3 pb-10 md:gap-[26px] md:px-10 md:pt-8 md:pb-12">
+  @if (noYears()) {
+    <h1 class="text-[26px] font-semibold tracking-[-0.02em] md:text-[30px]">{{ 'years.title' | translate }}</h1>
+    <div
+      class="flex flex-col items-center gap-3 rounded-[14px] border border-border bg-surface px-6 py-14 text-center"
+    >
+      <svg lucideChartColumn [size]="28" class="text-brand-light"></svg>
+      <p class="text-[15px] font-medium text-text-2">{{ 'years.empty.title' | translate }}</p>
+      <p class="max-w-sm text-sm text-muted">{{ 'years.empty.text' | translate }}</p>
+      <button
+        type="button"
+        (click)="newRun()"
+        class="mt-2 flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+      >
+        <svg lucidePlus [size]="15"></svg>
+        {{ 'nav.newRun' | translate }}
+      </button>
+    </div>
+  } @else {
+    <!-- Year tabs -->
+    <nav
+      class="-mx-5 flex gap-0.5 overflow-x-auto border-b border-border px-5 font-mono text-[13px] [scrollbar-width:none] md:mx-0 md:gap-1 md:px-0"
+      [attr.aria-label]="'years.tabsLabel' | translate"
+    >
+      @if (years() === null) {
+        @for (i of [1, 2, 3, 4]; track i) {
+          <span class="my-2 mr-2 h-5 w-12 shrink-0 animate-pulse rounded bg-surface"></span>
+        }
+      }
+      @for (y of tabs(); track y) {
+        <a
+          [routerLink]="['/years', y]"
+          [attr.aria-current]="y === year() ? 'page' : null"
+          class="shrink-0 px-3 py-2.5 md:px-3.5"
+          [class]="
+            y === year()
+              ? 'text-brand-lighter shadow-[inset_0_-2px_0_var(--pt-brand-light)]'
+              : 'text-muted hover:text-text-2'
+          "
+        >
+          {{ y }}
+        </a>
+      }
+    </nav>
+
+    @if (year(); as y) {
+      <header class="flex flex-col gap-1.5 md:flex-row md:items-end md:justify-between md:gap-6">
+        <h1 class="text-[38px] leading-none font-semibold tracking-[-0.04em] md:text-[56px]">
+          {{ 'years.yearTitle' | translate: { year: y } }}
+        </h1>
+        @if (highlight(); as h) {
+          <p class="text-sm text-muted md:pb-1.5">{{ 'years.highlight.' + h.key | translate: h.params }}</p>
+        }
+      </header>
+    }
+
+    @if (summary(); as s) {
+      @if (s.experienceCount === 0 && !noteSummary() && !noteHighlights()) {
+        <div
+          class="flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border px-6 py-12 text-center"
+        >
+          <p class="text-[15px] font-medium text-text-2">{{ 'years.emptyYear' | translate: { year: s.year } }}</p>
+          <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
+            {{ 'dashboard.startRun' | translate }}
+          </button>
+        </div>
+      } @else {
+        <!-- Stats: 6 cards on web, 3x2 mini stats on mobile -->
+        <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-6" [attr.aria-label]="'years.statsLabel' | translate">
+          <app-stat-card [label]="'years.stats.hours' | translate" [value]="s.totalHours | hours" />
+          <app-stat-card [label]="'years.stats.runs' | translate" [value]="s.experienceCount" />
+          <app-stat-card [label]="'years.stats.completed' | translate" [value]="s.completedCount" />
+          <app-stat-card [label]="'years.stats.abandoned' | translate" [value]="s.abandonedCount" />
+          <app-stat-card
+            [label]="'years.stats.avgRating' | translate"
+            [value]="s.averageRating | rating"
+            valueClass="font-mono text-gold"
+          />
+          <app-stat-card [label]="'years.stats.platinums' | translate" [value]="s.platinumCount" />
+        </section>
+        <section class="grid grid-cols-3 gap-2 md:hidden" [attr.aria-label]="'years.statsLabel' | translate">
+          <app-stat-card compact [label]="'years.stats.hours' | translate" [value]="s.totalHours | hours" />
+          <app-stat-card compact [label]="'years.stats.runs' | translate" [value]="s.experienceCount" />
+          <app-stat-card
+            compact
+            [label]="'years.stats.avg' | translate"
+            [value]="s.averageRating | rating"
+            valueClass="font-mono text-gold"
+          />
+          <app-stat-card compact [label]="'years.stats.completed' | translate" [value]="s.completedCount" />
+          <app-stat-card compact [label]="'years.stats.abandoned' | translate" [value]="s.abandonedCount" />
+          <app-stat-card compact [label]="'🏆 ' + ('years.stats.platinums' | translate)" [value]="s.platinumCount" />
+        </section>
+
+        <!-- GOTY · surprises · disappointments -->
+        <div
+          class="grid grid-cols-2 gap-2 md:gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]"
+        >
+          <section
+            class="col-span-2 flex min-w-0 flex-col gap-2 rounded-[14px] border border-gold-card-border bg-gold-card p-[18px] md:gap-2.5 md:p-6 lg:col-span-1"
+          >
+            <h2 class="text-xs font-semibold tracking-[0.08em] text-gold md:text-[13px]">
+              🏆 {{ 'years.goty' | translate: { year: s.year } }}
+            </h2>
+            @if (s.goty; as g) {
+              <a
+                [routerLink]="['/games', g.gameId]"
+                class="mt-1 text-[22px] leading-tight font-semibold tracking-[-0.02em] hover:underline md:mt-1.5 md:text-[28px]"
+              >
+                {{ g.gameName }}
+              </a>
+              <p class="text-[13px] leading-relaxed text-text-3 md:text-sm">
+                {{ g.totalHours | hours }} · <span class="font-mono text-gold">{{ g.avgRating | rating }}</span> ·
+                {{ 'years.runsCount' | translate: { count: g.experienceCount } }}
+              </p>
+            } @else {
+              <p class="text-sm text-muted">{{ 'years.noGoty' | translate }}</p>
+            }
+          </section>
+
+          <section
+            class="flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-surface p-3.5 md:gap-2.5 md:rounded-[14px] md:p-6"
+          >
+            <h2
+              class="flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-success uppercase md:text-[13px]"
+            >
+              <svg lucideSparkles [size]="15" class="hidden md:block"></svg>
+              {{ 'years.surprises' | translate }}
+            </h2>
+            @for (g of s.surprises.slice(0, highlightLimit); track g.gameId) {
+              <a
+                [routerLink]="['/games', g.gameId]"
+                class="flex items-baseline justify-between gap-3 rounded hover:underline"
+              >
+                <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg">{{ g.gameName }}</span>
+                <span class="shrink-0 font-mono text-xs text-gold md:text-sm">{{ g.avgRating | rating }}</span>
+              </a>
+            } @empty {
+              <p class="text-xs text-muted md:text-[13px]">{{ 'years.noSurprises' | translate }}</p>
+            }
+          </section>
+
+          <section
+            class="flex min-w-0 flex-col gap-2 rounded-xl border border-border bg-surface p-3.5 md:gap-2.5 md:rounded-[14px] md:p-6"
+          >
+            <h2
+              class="flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-danger uppercase md:text-[13px]"
+            >
+              <svg lucideTrendingDown [size]="15" class="hidden md:block"></svg>
+              {{ 'years.disappointments' | translate }}
+            </h2>
+            @for (g of s.disappointments.slice(0, highlightLimit); track g.gameId) {
+              <a
+                [routerLink]="['/games', g.gameId]"
+                class="flex items-baseline justify-between gap-3 rounded hover:underline"
+              >
+                <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg">{{ g.gameName }}</span>
+                <span class="shrink-0 font-mono text-xs text-gold md:text-sm">{{ g.avgRating | rating }}</span>
+              </a>
+            } @empty {
+              <p class="text-xs text-muted md:text-[13px]">{{ 'years.noDisappointments' | translate }}</p>
+            }
+          </section>
+        </div>
+
+        <!-- Hours per month · runs of the year -->
+        <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+          <section class="flex flex-col md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+            <app-section-header class="mb-3 md:mb-[18px]" [label]="'years.hoursByMonth' | translate" />
+            @if (hasMonthHours()) {
+              <div class="hidden md:block">
+                <app-mini-bar-chart [bars]="monthBars()" [height]="180" topTone="muted" dense />
+              </div>
+              <div class="md:hidden">
+                <app-mini-bar-chart [bars]="monthBarsMobile()" [height]="90" dense />
+              </div>
+            } @else {
+              <p class="py-8 text-center text-sm text-muted">{{ 'years.noMonthHours' | translate }}</p>
+            }
+            @if (s.hoursWithoutMonth > 0) {
+              <p class="mt-3 text-xs text-faint">
+                {{ 'years.hoursWithoutMonth' | translate: { hours: (s.hoursWithoutMonth | hours) } }}
+              </p>
+            }
+          </section>
+
+          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+            <app-section-header class="mb-2" [label]="'years.runsOfYear' | translate">
+              <span class="text-xs text-muted">{{ 'years.byRating' | translate }}</span>
+            </app-section-header>
+            @for (run of visibleRuns(); track run.experienceId) {
+              <div
+                class="grid grid-cols-[minmax(0,1fr)_auto_auto_40px] items-center gap-3 border-t border-divider py-2.5 text-sm md:grid-cols-[minmax(0,1fr)_110px_64px_56px] md:gap-3.5"
+              >
+                <span class="min-w-0 truncate">
+                  <a
+                    [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]"
+                    class="text-text-2 hover:underline"
+                    >{{ run.gameName }}</a
+                  >
+                  @if (run.platinum) {
+                    <span class="text-xs" [attr.aria-label]="'run.platinum' | translate"> 🏆</span>
+                  }
+                  <span class="hidden text-xs text-faint md:inline"> · {{ run.runLabel }}</span>
+                </span>
+                <span class="text-xs whitespace-nowrap" [class]="statusText[run.status]">
+                  {{ 'status.' + run.status | translate }}
+                </span>
+                <span class="text-right font-mono text-xs whitespace-nowrap text-text-3 md:text-sm">
+                  {{ run.hours === null ? '—' : (run.hours | hours) }}
+                </span>
+                <span class="text-right font-mono text-gold">{{ run.rating | rating }}</span>
+              </div>
+            } @empty {
+              <p class="border-t border-divider pt-3 text-sm text-muted">{{ 'common.noData' | translate }}</p>
+            }
+            @if (hiddenRuns() > 0) {
+              <button
+                type="button"
+                (click)="showAllRuns.set(!showAllRuns())"
+                class="mt-2 text-[13px] text-brand-light hover:underline"
+              >
+                {{ (showAllRuns() ? 'years.showLess' : 'years.showAll') | translate: { count: s.experiences.length } }}
+              </button>
+            }
+          </section>
+        </div>
+
+        <!-- Rankings (Obsidian sections) -->
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+            <app-section-header class="mb-3.5" [label]="'years.topRated' | translate" />
+            @for (g of s.topRated; track g.gameId; let i = $index) {
+              <a
+                [routerLink]="['/games', g.gameId]"
+                class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
+              >
+                <span class="w-[18px] shrink-0 font-mono text-xs text-faint">{{ i + 1 }}</span>
+                <span class="min-w-0 flex-1 truncate text-text-2">{{ g.gameName }}</span>
+                <span class="hidden shrink-0 text-xs text-faint sm:inline">
+                  {{ 'years.runsCount' | translate: { count: g.experienceCount } }} · {{ g.totalHours | hours }}
+                </span>
+                <span class="w-10 shrink-0 text-right font-mono font-medium text-gold">{{ g.avgRating | rating }}</span>
+              </a>
+            } @empty {
+              <p class="text-sm text-muted">{{ 'years.noCompleted' | translate }}</p>
+            }
+          </section>
+
+          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+            <app-section-header class="mb-3.5" [label]="'years.mostPlayed' | translate" />
+            @for (g of s.mostPlayed; track g.gameId) {
+              <a [routerLink]="['/games', g.gameId]" class="block border-t border-divider py-[9px] text-sm hover:bg-hover">
+                <span class="flex justify-between gap-3">
+                  <span class="min-w-0 truncate text-text-2">{{ g.gameName }}</span>
+                  <span class="shrink-0 font-mono">{{ g.totalHours | hours }}</span>
+                </span>
+                <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
+                  <span class="block h-[3px] rounded-sm bg-brand-light" [style.width.%]="barWidth(g.totalHours)"></span>
+                </span>
+              </a>
+            } @empty {
+              <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+            }
+          </section>
+
+          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+            <app-section-header class="mb-3.5" [label]="'years.topSagas' | translate" />
+            @for (saga of s.topSagas; track saga.sagaId) {
+              <a
+                [routerLink]="['/sagas', saga.sagaId]"
+                class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
+              >
+                <span class="min-w-0 flex-1 truncate text-text-2">{{ saga.sagaName }}</span>
+                <span class="shrink-0 text-xs text-faint">
+                  {{ 'common.games' | translate: { count: saga.gameCount } }} ·
+                  {{ 'years.runsCount' | translate: { count: saga.experienceCount } }}
+                </span>
+                <span class="w-16 shrink-0 text-right font-mono">{{ saga.totalHours | hours }}</span>
+              </a>
+            } @empty {
+              <p class="text-sm text-muted">{{ 'years.noCompleted' | translate }}</p>
+            }
+          </section>
+
+          <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+            <app-section-header class="mb-3.5" [label]="'years.topGenres' | translate" />
+            @for (genre of s.topGenres; track genre.genreId) {
+              <div class="flex items-center gap-3 border-t border-divider py-[9px] text-sm">
+                <span class="min-w-0 flex-1 truncate text-text-2">{{ genre.genreName }}</span>
+                <span class="shrink-0 text-xs text-faint">
+                  {{ 'common.games' | translate: { count: genre.gameCount } }} ·
+                  {{ 'years.runsCount' | translate: { count: genre.experienceCount } }}
+                </span>
+                <span class="w-16 shrink-0 text-right font-mono">{{ genre.totalHours | hours }}</span>
+              </div>
+            } @empty {
+              <p class="text-sm text-muted">{{ 'years.noCompleted' | translate }}</p>
+            }
+          </section>
+        </div>
+      }
+
+      <!-- Yearly note -->
+      <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div class="flex flex-col gap-3">
+            <app-section-header [label]="'years.note.summary' | translate" />
+            <textarea
+              id="year-note-summary"
+              rows="7"
+              [value]="noteSummary()"
+              (input)="noteSummary.set($any($event.target).value)"
+              [placeholder]="'years.note.summaryPlaceholder' | translate"
+              [attr.aria-label]="'years.note.summary' | translate"
+              class="min-h-[160px] w-full resize-y rounded-[10px] border border-border bg-bg px-3.5 py-3 text-[16px] leading-relaxed text-text-2 md:text-[15px]"
+            ></textarea>
+            <p
+              class="text-right font-mono text-[11px]"
+              [class]="noteSummary().length > noteMax ? 'text-danger' : 'text-faint'"
+            >
+              {{ formatCount(noteSummary().length) }} / {{ formatCount(noteMax) }}
+            </p>
+          </div>
+          <div class="flex flex-col gap-3">
+            <app-section-header [label]="'years.note.highlights' | translate" />
+            <textarea
+              id="year-note-highlights"
+              rows="7"
+              [value]="noteHighlights()"
+              (input)="noteHighlights.set($any($event.target).value)"
+              [placeholder]="'years.note.highlightsPlaceholder' | translate"
+              [attr.aria-label]="'years.note.highlights' | translate"
+              class="min-h-[160px] w-full resize-y rounded-[10px] border border-border bg-bg px-3.5 py-3 text-[16px] leading-relaxed text-text-2 md:text-[15px]"
+            ></textarea>
+            <p
+              class="text-right font-mono text-[11px]"
+              [class]="noteHighlights().length > noteMax ? 'text-danger' : 'text-faint'"
+            >
+              {{ formatCount(noteHighlights().length) }} / {{ formatCount(noteMax) }}
+            </p>
+          </div>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center justify-end gap-3">
+          @if (noteTooLong()) {
+            <p class="mr-auto text-xs text-danger">{{ 'years.note.tooLong' | translate: { max: formatCount(noteMax) } }}</p>
+          } @else if (noteSavedAgo(); as ago) {
+            <p class="mr-auto text-xs text-faint">{{ 'years.note.savedAgo' | translate: { ago } }}</p>
+          }
+          <button
+            type="button"
+            (click)="saveNote()"
+            [disabled]="!noteDirty() || savingNote() || noteTooLong()"
+            class="rounded-lg bg-brand px-[18px] py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
+          >
+            {{ (savingNote() ? 'years.note.saving' : 'years.note.save') | translate }}
+          </button>
+        </div>
+      </section>
+    } @else if (failed()) {
+      <div class="flex flex-col items-center gap-3 rounded-[14px] border border-border bg-surface px-6 py-12 text-center">
+        <p class="text-sm text-muted">{{ 'years.loadError' | translate }}</p>
+        <button
+          type="button"
+          (click)="reload()"
+          class="rounded-lg border border-border px-4 py-2 text-sm text-text-2 hover:border-border-strong"
+        >
+          {{ 'years.retry' | translate }}
+        </button>
+      </div>
+    } @else {
+      <div class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-6">
+        @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+          <app-skeleton class="h-[94px] rounded-xl" />
+        }
+      </div>
+      <div class="grid grid-cols-3 gap-2 md:hidden">
+        @for (i of [1, 2, 3]; track i) {
+          <app-skeleton class="h-[66px] rounded-xl" />
+        }
+      </div>
+      <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]">
+        <app-skeleton class="h-[150px] rounded-[14px]" />
+        <app-skeleton class="hidden h-[150px] rounded-[14px] lg:block" />
+        <app-skeleton class="hidden h-[150px] rounded-[14px] lg:block" />
+      </div>
+      <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <app-skeleton class="h-[240px] rounded-[14px]" />
+        <app-skeleton class="h-[240px] rounded-[14px]" />
+      </div>
+    }
+  }
+</main>

@@ -9,6 +9,7 @@ import { Experience, ExperienceStatus, Platform } from '../../../core/models/exp
 import { Game } from '../../../core/models/game.model';
 import { ExperienceService } from '../../../core/services/experience.service';
 import { GameService } from '../../../core/services/game.service';
+import { PreferencesService } from '../../../core/services/preferences.service';
 import { RunFormLauncher, RunFormRequest } from '../../../core/services/run-form-launcher.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
@@ -55,6 +56,7 @@ export class RunForm implements OnInit {
   private readonly launcher = inject(RunFormLauncher);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
+  protected readonly preferences = inject(PreferencesService);
 
   protected readonly platforms = RUN_PLATFORMS;
   protected readonly statusOptions: SegmentedOption<ExperienceStatus>[] = RUN_STATUSES.map((s) => ({
@@ -133,7 +135,7 @@ export class RunForm implements OnInit {
       this.initEdit(request.experience);
     } else {
       this.form.patchValue({
-        platform: request.prefill?.platform ?? 'PC',
+        platform: request.prefill?.platform ?? this.preferences.defaultPlatform(),
         hours: request.prefill?.hours ?? null,
       });
       if (request.gameId !== undefined) {

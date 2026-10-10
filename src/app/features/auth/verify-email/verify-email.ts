@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthShell } from '../auth-shell';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { ResendVerification } from '../../../shared/resend-verification/resend-verification';
 
 @Component({
   selector: 'app-verify-email',
-  imports: [RouterLink, TranslatePipe, ResendVerification],
+  imports: [AuthShell, RouterLink, TranslatePipe, ResendVerification],
   templateUrl: './verify-email.html',
 })
 export class VerifyEmail {

@@ -1,3 +1,5 @@
+import { Game } from './game.model';
+
 export interface SteamSyncResult {
   gamesScanned: number;
   newGamesPending: number;
@@ -17,6 +19,22 @@ export interface SteamStatus {
   lastSyncAt: string | null;
   /** False when the server has no Steam API key: linking works, syncing does not. */
   configured: boolean;
+  /** Steam games already linked to a Pytra game. */
+  linkedGamesCount: number;
+  /** Steam games waiting for review (same list as GET /pending). */
+  pendingCount: number;
+  ignoredCount: number;
+}
+
+/**
+ * Item of GET /integrations/steam/pending: a game pending review plus its Steam data.
+ * Note `lastPlayedAt` here is an ISO instant (last Steam session), unlike the `yyyy-MM-dd`
+ * date of the same name on library games.
+ */
+export interface SteamPendingGame extends Game {
+  appId: string;
+  steamPlaytimeMinutes: number;
+  lastPlayedAt: string | null;
 }
 
 export interface SteamIgnoredApp {

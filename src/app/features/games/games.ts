@@ -20,6 +20,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { GameEditDialog } from './game-edit-dialog/game-edit-dialog';
 import {
+  LIBRARY_PLATFORMS,
   LIBRARY_SORTS,
   LIBRARY_STATUS_FILTERS,
   LibraryQuery,
@@ -28,16 +29,18 @@ import {
   countByStatus,
   filterGames,
   isLibraryGame,
+  matchesPlatform,
   matchesText,
   paginate,
   parsePage,
+  parsePlatformFilter,
   parseSort,
   parseStatusFilter,
 } from './library.logic';
 
 /**
  * Library (/games): confirmed games with their run aggregates, filtered, sorted and paged on the
- * client. Filters live in the URL (`q`, `status`, `sort`, `page`) so back navigation restores them.
+ * client. Filters live in the URL (`q`, `status`, `platform`, `sort`, `page`) so back navigation restores them.
  */
 @Component({
   selector: 'app-games',
@@ -67,6 +70,7 @@ export class Games {
 
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
   protected readonly sorts = LIBRARY_SORTS;
+  protected readonly platforms = LIBRARY_PLATFORMS;
   protected readonly skeletonRows = Array.from({ length: 8 }, (_, i) => i);
 
   /** `null` while loading. */
@@ -82,6 +86,7 @@ export class Games {
             text: params.get('q') ?? '',
             status: parseStatusFilter(params.get('status')),
             sort: parseSort(params.get('sort')),
+            platform: parsePlatformFilter(params.get('platform')),
             page: parsePage(params.get('page')),
           }) satisfies LibraryQuery & { page: number },
       ),
@@ -98,13 +103,19 @@ export class Games {
     this.libraryGames().reduce((sum, g) => sum + (g.experienceCount ?? 0), 0),
   );
 
-  /** Tab counters follow the name filter, so they always add up to what each tab would show. */
+  /** Tab counters follow the name and platform filters, so they add up to what each tab would show. */
   protected readonly statusCounts = computed(() =>
-    countByStatus(this.libraryGames().filter((g) => matchesText(g, this.query().text))),
+    countByStatus(
+      this.libraryGames().filter(
+        (g) => matchesText(g, this.query().text) && matchesPlatform(g, this.query().platform),
+      ),
+    ),
   );
   protected readonly filtered = computed(() => filterGames(this.libraryGames(), this.query()));
   protected readonly page = computed(() => paginate(this.filtered(), this.query().page));
-  protected readonly hasFilters = computed(() => !!this.query().text.trim() || this.query().status !== 'ALL');
+  protected readonly hasFilters = computed(
+    () => !!this.query().text.trim() || this.query().status !== 'ALL' || this.query().platform !== 'ALL',
+  );
 
   constructor() {
     this.load();
@@ -134,12 +145,17 @@ export class Games {
     this.updateQuery({ sort: parsed === 'recent' ? null : parsed, page: null });
   }
 
+  protected setPlatform(platform: string): void {
+    const parsed = parsePlatformFilter(platform);
+    this.updateQuery({ platform: parsed === 'ALL' ? null : parsed, page: null });
+  }
+
   protected setPage(page: number): void {
     this.updateQuery({ page: page > 1 ? page : null }, false);
   }
 
   protected clearFilters(): void {
-    this.updateQuery({ q: null, status: null, page: null });
+    this.updateQuery({ q: null, status: null, platform: null, page: null });
   }
 
   /** Typing and toggles replace the history entry; page changes push one so "back" pages back. */

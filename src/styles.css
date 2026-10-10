@@ -222,3 +222,87 @@
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
   }
 }
+
+/* Auth screens (login, register, password flows): shared form pieces. Mobile-first: 16px inputs avoid iOS zoom. */
+@layer components {
+  .auth-label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--pt-text-3);
+  }
+
+  .auth-input {
+    width: 100%;
+    border: 1px solid var(--pt-border);
+    background-color: var(--pt-surface);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    color: var(--pt-text);
+  }
+
+  .auth-primary,
+  .auth-secondary {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .auth-primary {
+    background-color: var(--pt-brand);
+    color: #fff;
+  }
+
+  .auth-primary:hover {
+    background-color: var(--pt-brand-dark);
+  }
+
+  .auth-secondary {
+    border: 1px solid var(--pt-border);
+    color: var(--pt-text-2);
+    font-weight: 500;
+  }
+
+  .auth-secondary:hover {
+    border-color: var(--pt-border-strong);
+  }
+
+  .auth-primary:disabled,
+  .auth-secondary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .auth-link {
+    color: var(--pt-brand-lighter);
+    font-weight: 500;
+  }
+
+  .auth-link:hover {
+    text-decoration: underline;
+  }
+
+  @media (width >= 48rem) {
+    .auth-input {
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 15px;
+    }
+
+    .auth-primary,
+    .auth-secondary {
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+    }
+  }
+}

@@ -134,7 +134,11 @@ export class GameDetail {
     return runs.find((r) => r.rating === best)?.id ?? null;
   });
 
-  protected readonly platforms = computed(() => [...new Set(this.runs().map((r) => r.platform))]);
+  /** API aggregate (enum order) when present; otherwise derived from the loaded runs. */
+  protected readonly platforms = computed(() => {
+    const fromApi = this.game()?.platforms;
+    return fromApi?.length ? fromApi : [...new Set(this.runs().map((r) => r.platform))];
+  });
 
   protected readonly platformNames = computed(() =>
     this.platforms()

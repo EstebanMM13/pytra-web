@@ -1,20 +1,29 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthShell } from '../auth-shell';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [AuthShell, ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './forgot-password.html',
 })
 export class ForgotPassword {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+
+  /** Opened from the profile ("Cambiar contraseña"): link back there instead of to /login. */
+  readonly signedIn = this.authService.isAuthenticated;
 
   readonly form = this.fb.group({
-    email: this.fb.control('', [Validators.required, Validators.email]),
+    // Prefilled when coming from the profile (?email=...).
+    email: this.fb.control(this.route.snapshot.queryParamMap.get('email') ?? '', [
+      Validators.required,
+      Validators.email,
+    ]),
   });
 
   readonly submitting = signal(false);

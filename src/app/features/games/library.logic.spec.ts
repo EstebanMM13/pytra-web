@@ -3,9 +3,12 @@ import {
   countByStatus,
   filterGames,
   isLibraryGame,
+  lastPlayedKey,
+  matchesPlatform,
   matchesStatus,
   paginate,
   parsePage,
+  parsePlatformFilter,
   parseSort,
   parseStatusFilter,
   sortGames,
@@ -29,6 +32,8 @@ function game(overrides: Partial<Game> & { id: number; name: string }): Game {
     lastExperienceStatus: null,
     lastPlayedYear: null,
     hasPlatinum: false,
+    platforms: [],
+    lastPlayedAt: null,
     ...overrides,
   };
 }
@@ -69,6 +74,16 @@ describe('library logic', () => {
     it('combines the text and status filters', () => {
       expect(filterGames(all, { text: 'e', status: 'PENDIENTE', sort: 'name' }).map((g) => g.id)).toEqual([4, 5]);
     });
+
+    it('filters by platform (games with a run on it)', () => {
+      const pc = game({ id: 10, name: 'Hades', platforms: ['PC', 'SWITCH'] });
+      const ps = game({ id: 11, name: 'Astro Bot', platforms: ['PS5'] });
+      const list = [pc, ps, unplayed];
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platform: 'SWITCH' }).map((g) => g.id)).toEqual([10]);
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platform: 'ALL' })).toHaveLength(3);
+      expect(matchesPlatform(unplayed, 'PC')).toBe(false);
+      expect(matchesPlatform(game({ id: 12, name: 'X', platforms: null }), 'PC')).toBe(false);
+    });
   });
 
   describe('sortGames', () => {
@@ -92,6 +107,17 @@ describe('library logic', () => {
 
     it('sorts by last played year, then most recently updated; never played last', () => {
       expect(sortGames(all, 'recent').map((g) => g.id)).toEqual([2, 3, 1, 4, 5]);
+    });
+
+    it('sorts by lastPlayedAt, falling back to the year of the last run', () => {
+      const march = game({ id: 20, name: 'March', lastPlayedAt: '2024-03-10', lastPlayedYear: 2024 });
+      const june = game({ id: 21, name: 'June', lastPlayedAt: '2024-06-01', lastPlayedYear: 2024 });
+      const yearOnly = game({ id: 22, name: 'Year only', lastPlayedYear: 2024 });
+      const older = game({ id: 23, name: 'Older', lastPlayedAt: '2023-12-31', lastPlayedYear: 2023 });
+      expect(sortGames([older, march, yearOnly, june, unplayed], 'recent').map((g) => g.id)).toEqual([22, 21, 20, 23, 4]);
+      expect(lastPlayedKey(march)).toBe('2024-03-10');
+      expect(lastPlayedKey(yearOnly)).toBe('2024-12-31');
+      expect(lastPlayedKey(unplayed)).toBeNull();
     });
 
     it('does not mutate the input', () => {
@@ -127,6 +153,9 @@ describe('library logic', () => {
       expect(parsePage('-1')).toBe(1);
       expect(parsePage('abc')).toBe(1);
       expect(parsePage('2.5')).toBe(1);
+      expect(parsePlatformFilter('PS5')).toBe('PS5');
+      expect(parsePlatformFilter('NES')).toBe('ALL');
+      expect(parsePlatformFilter(null)).toBe('ALL');
     });
   });
 });
