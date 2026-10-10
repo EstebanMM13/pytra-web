@@ -35,11 +35,20 @@ import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { formatDayMonthYear } from '../../shared/utils/run-dates';
+import { Game } from '../../core/models/game.model';
+import { Saga } from '../../core/models/saga.model';
+import { GameService } from '../../core/services/game.service';
+import { SagaService } from '../../core/services/saga.service';
+import { AchievementBadge } from '../../shared/achievements/achievement-badge';
+import { computeAchievements, topUnlocked } from '../../shared/achievements/achievements';
+import { pickTagline } from './dashboard.logic';
 
 type PlayMode = 'single' | 'online';
 
 const RANKING_SIZE = 5;
 const MAX_YEARS = 10;
+/** Years shown in the stat-card sparklines. */
+const TREND_YEARS = 8;
 
 /** Sections that show an inline error (with retry) when their request fails. */
 type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated' | 'mostPlayed';
@@ -65,6 +74,7 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
     LucideArrowRight,
     LucideDynamicIcon,
     LucideX,
+    AchievementBadge,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
@@ -75,6 +85,8 @@ export class Dashboard {
   private readonly steamService = inject(SteamService);
   private readonly translate = inject(TranslateService);
   private readonly runFormLauncher = inject(RunFormLauncher);
+  private readonly gameService = inject(GameService);
+  private readonly sagaService = inject(SagaService);
   protected readonly displayName = inject(UserService).displayName;
 
   protected readonly icons = {
@@ -97,6 +109,9 @@ export class Dashboard {
   readonly mostPlayedSingleplayer = signal<MostPlayedGame[] | null>(null);
   readonly mostPlayedOnline = signal<MostPlayedGame[] | null>(null);
   readonly steamPendingCount = signal(0);
+  /** Library and sagas, only for achievements; `null` while loading (badges stay hidden). */
+  readonly games = signal<Game[] | null>(null);
+  readonly sagas = signal<Saga[] | null>(null);
 
   /** Runs with status EN_CURSO (`/stats/in-progress`); `null` while loading. */
   readonly playing = signal<InProgressExperience[] | null>(null);
@@ -115,6 +130,41 @@ export class Dashboard {
       month: 'long',
     }).format(new Date());
     return text.charAt(0).toUpperCase() + text.slice(1);
+  });
+
+  /** Contextual line under the greeting, rotating daily among the ones the data supports. */
+  protected readonly tagline = computed(() => {
+    this.translate.currentLang();
+    const t = pickTagline({
+      playing: this.playing(),
+      byYear: this.byYear(),
+      summary: this.summary(),
+      topRated: this.topRated(),
+      today: new Date(),
+    });
+    const params: Record<string, string | number> = { ...t.params };
+    if (typeof params['rating'] === 'number') params['rating'] = new RatingPipe().transform(params['rating']);
+    if (typeof params['hours'] === 'number') params['hours'] = new HoursPipe().transform(params['hours']);
+    return { key: `dashboard.tagline.${t.key}`, params };
+  });
+
+  /** Per-year series (oldest first, last TREND_YEARS) for the stat-card sparklines. */
+  protected readonly trends = computed(() => {
+    const years = [...(this.byYear() ?? [])].sort((a, b) => a.year - b.year).slice(-TREND_YEARS);
+    return {
+      hours: years.map((y) => y.totalHours),
+      runs: years.map((y) => y.experienceCount),
+      rating: years.flatMap((y) => (y.averageRating == null ? [] : [y.averageRating])),
+    };
+  });
+
+  /** Most impressive unlocked badges (max 4); empty until games, sagas and summary load. */
+  protected readonly topBadges = computed(() => {
+    const games = this.games();
+    const sagas = this.sagas();
+    const summary = this.summary();
+    if (!games || !sagas || !summary) return [];
+    return topUnlocked(computeAchievements({ games, sagas, summary, years: this.byYear() }), 4);
   });
 
   /** New account (no games yet): show the onboarding card instead of empty stats. */
@@ -189,6 +239,15 @@ export class Dashboard {
     this.orEmpty('mostPlayed', this.statsService.getMostPlayedOnline(RANKING_SIZE)).subscribe((s) =>
       this.mostPlayedOnline.set(s),
     );
+    // Achievements are a bonus: on failure simply hide them.
+    this.gameService
+      .findAll()
+      .pipe(catchError(() => of(null)))
+      .subscribe((games) => this.games.set(games));
+    this.sagaService
+      .findAll()
+      .pipe(catchError(() => of(null)))
+      .subscribe((sagas) => this.sagas.set(sagas));
     // Not linked / not configured answers with an error: simply hide the notice (no inline error).
     this.steamService
       .getPending()

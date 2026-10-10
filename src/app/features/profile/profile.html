@@ -5,7 +5,7 @@
 >
   <!-- Identity + sub-nav (web) / identity header (mobile) -->
   <aside class="flex flex-col gap-1.5 lg:sticky lg:top-8 lg:self-start">
-    <h1 class="mb-2 text-[26px] font-semibold tracking-[-0.02em] lg:sr-only">{{ 'profile.title' | translate }}</h1>
+    <h1 class="mb-2 text-[28px] font-bold tracking-[-0.03em] lg:sr-only">{{ 'profile.title' | translate }}</h1>
     <div class="flex items-center gap-3.5 lg:flex-col lg:items-start lg:gap-1.5">
       <span
         class="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand-tint text-[22px] font-semibold text-brand-lighter lg:mb-3.5 lg:size-[72px] lg:text-[28px]"
@@ -15,7 +15,7 @@
       </span>
       <div class="flex min-w-0 flex-col gap-0.5 lg:gap-1.5">
         @if (user(); as u) {
-          <span class="truncate text-[19px] font-semibold lg:text-[22px]" [attr.title]="displayName()">{{ displayName() }}</span>
+          <span class="truncate text-[21px] font-bold tracking-[-0.02em] lg:text-[26px]" [attr.title]="displayName()">{{ displayName() }}</span>
           <span class="truncate text-[13px] text-muted lg:text-sm" [title]="u.email">{{ u.email }}</span>
           @if (memberSince(); as since) {
             <span class="mt-1 text-xs text-faint lg:text-[13px]">{{ 'profile.memberSince' | translate: { date: since } }}</span>
@@ -167,6 +167,33 @@
       }
     </section>
     }
+
+    <!-- LOGROS -->
+    <section
+      id="profile-achievements"
+      class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]"
+    >
+      <app-section-header class="mb-3.5" [label]="'achievements.title' | translate">
+        @if (achievements()?.length) {
+          <span class="shrink-0 font-mono text-xs text-muted">
+            {{ 'achievements.count' | translate: { unlocked: unlockedCount(), total: achievements()!.length } }}
+          </span>
+        }
+      </app-section-header>
+      @if (achievements(); as list) {
+        @if (list.length) {
+          <ul class="grid grid-cols-1 gap-x-6 gap-y-4 border-t border-divider pt-4 sm:grid-cols-2">
+            @for (badge of list; track badge.id) {
+              <li><app-achievement-badge [achievement]="badge" /></li>
+            }
+          </ul>
+        } @else {
+          <p class="border-t border-divider pt-3 text-sm text-muted">{{ 'common.noData' | translate }}</p>
+        }
+      } @else {
+        <app-skeleton class="h-[180px] rounded-[10px]" />
+      }
+    </section>
 
     <!-- PREFERENCIAS -->
     <section

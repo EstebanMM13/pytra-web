@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   booleanAttribute,
   Component,
+  computed,
   DestroyRef,
   effect,
   inject,
@@ -10,18 +11,22 @@ import {
   untracked,
 } from '@angular/core';
 import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
+import { Sparkline } from './sparkline';
 
 /** Label + big figure tile. `compact` is the mobile mini-stat variant (value first, no icon). */
 @Component({
   selector: 'app-stat-card',
-  imports: [LucideDynamicIcon],
+  imports: [LucideDynamicIcon, Sparkline],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0 rounded-xl border border-card-border card-glass' },
   template: `
     @if (compact()) {
       <div class="p-3">
-        <p class="truncate text-xl font-semibold" [class]="valueClass()">{{ display() }}</p>
+        <p class="truncate text-xl font-bold tracking-[-0.02em]" [class]="figureClass()">{{ display() }}</p>
         <p class="mt-0.5 truncate text-xs text-muted">{{ label() }}</p>
+        @if (hasTrend()) {
+          <app-sparkline class="mt-1.5 block" [values]="trend()!" />
+        }
       </div>
     } @else {
       <div class="px-[18px] py-4">
@@ -31,12 +36,17 @@ import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
           }
           <span class="truncate">{{ label() }}</span>
         </p>
-        <p
-          class="mt-3 truncate text-[26px] font-semibold tracking-[-0.02em] lg:text-[28px]"
-          [class]="valueClass()"
-        >
-          {{ display() }}
-        </p>
+        <div class="mt-3 flex items-end justify-between gap-2">
+          <p
+            class="min-w-0 truncate text-[26px] font-bold tracking-[-0.03em] lg:text-[28px]"
+            [class]="figureClass()"
+          >
+            {{ display() }}
+          </p>
+          @if (hasTrend()) {
+            <app-sparkline class="mb-2 shrink-0" [values]="trend()!" />
+          }
+        </div>
         @if (hint()) {
           <p class="mt-1 truncate text-xs text-muted" [attr.title]="hint()">{{ hint() }}</p>
         }
@@ -53,6 +63,15 @@ export class StatCard {
   /** Optional small line under the value, e.g. a breakdown. */
   readonly hint = input<string | null>(null);
   readonly compact = input(false, { transform: booleanAttribute });
+  /** Optional series (oldest first) drawn as a tiny sparkline next to the value; hidden with < 2 points. */
+  readonly trend = input<readonly number[] | null>(null);
+
+  protected readonly hasTrend = computed(() => (this.trend()?.length ?? 0) >= 2);
+  /** Toned figures (ratings) keep their color with a brand hint; plain ones get the brand gradient. */
+  protected readonly figureClass = computed(() => {
+    const extra = this.valueClass();
+    return extra ? `${extra} text-figure-tone` : 'text-figure';
+  });
 
   /** Text on screen: the exact formatted value, or an intermediate count-up frame. */
   protected readonly display = signal('');

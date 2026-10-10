@@ -128,7 +128,17 @@
       "text": "Instala Pytra para abrirla como una app, a pantalla completa.",
       "action": "Instalar",
       "dismiss": "Descartar"
-    }
+    },
+    "tagline": {
+      "longRun": "Llevas {{days}} días con {{game}}",
+      "bestYear": "{{year}}: tu año con más horas",
+      "platinums": "{{count}} platinos y contando 🏆",
+      "bestRating": "Tu mejor nota: {{rating}} en {{game}}",
+      "thisYear": "Has jugado {{hours}} este año",
+      "fallback": "¿A qué jugamos hoy?"
+    },
+    "achievements": "Logros",
+    "achievementsAll": "Ver todos"
   },
   "profile": {
     "title": "Perfil",
@@ -144,6 +154,7 @@
     "sectionsLabel": "Secciones del perfil",
     "sections": {
       "account": "Cuenta",
+      "achievements": "Logros",
       "preferences": "Preferencias",
       "data": "Datos"
     },
@@ -669,5 +680,64 @@
   "update": {
     "available": "Nueva versión disponible",
     "reload": "Recargar"
+  },
+  "achievements": {
+    "title": "Logros",
+    "count": "{{unlocked}} de {{total}}",
+    "progress": "Progreso",
+    "items": {
+      "firstPlatinum": {
+        "title": "Primer platino 🏆",
+        "desc": "Consigue tu primer platino"
+      },
+      "platinumHunter": {
+        "title": "Cazador de platinos",
+        "desc": "Consigue {{target}} platinos"
+      },
+      "marathon": {
+        "title": "Maratón",
+        "desc": "Juega {{target}} h a un mismo juego"
+      },
+      "runs10": {
+        "title": "Jugador habitual",
+        "desc": "Registra {{target}} partidas"
+      },
+      "runs50": {
+        "title": "Medio centenar",
+        "desc": "Registra {{target}} partidas"
+      },
+      "runs100": {
+        "title": "Centenario",
+        "desc": "Registra {{target}} partidas"
+      },
+      "collector25": {
+        "title": "Coleccionista",
+        "desc": "Ten {{target}} juegos en tu biblioteca"
+      },
+      "collector50": {
+        "title": "Gran coleccionista",
+        "desc": "Ten {{target}} juegos en tu biblioteca"
+      },
+      "collector100": {
+        "title": "Archivero",
+        "desc": "Ten {{target}} juegos en tu biblioteca"
+      },
+      "sagaComplete": {
+        "title": "Saga completada",
+        "desc": "Juega todos los juegos de una saga (mín. 2)"
+      },
+      "critic": {
+        "title": "Crítico",
+        "desc": "Puntúa {{target}} juegos"
+      },
+      "platforms": {
+        "title": "Políglota de plataformas",
+        "desc": "Juega en {{target}} plataformas distintas"
+      },
+      "veteran": {
+        "title": "Veterano",
+        "desc": "Registra partidas en {{target}} años distintos"
+      }
+    }
   }
 }

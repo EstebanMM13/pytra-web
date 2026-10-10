@@ -3,7 +3,12 @@ import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideChevronRight, LucideDownload, LucideGamepad2, LucideUser } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { catchError, of } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
+import { GameService } from '../../core/services/game.service';
+import { SagaService } from '../../core/services/saga.service';
+import { StatsService } from '../../core/services/stats.service';
+import { AchievementBadge } from '../../shared/achievements/achievement-badge';
+import { Achievement, computeAchievements, sortAchievements } from '../../shared/achievements/achievements';
 import { Platform } from '../../core/models/experience.model';
 import { SteamStatus } from '../../core/models/steam.model';
 import { ExportFormat } from '../../core/models/user.model';
@@ -29,7 +34,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { DeleteAccountDialog } from './delete-account-dialog';
 import { avatarInitial, exportErrorKey, formatMemberSince } from './profile.logic';
 
-type ProfileSection = 'account' | 'preferences' | 'data';
+type ProfileSection = 'account' | 'achievements' | 'preferences' | 'data';
 
 const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
   csv: 'pytra-export.csv',
@@ -47,6 +52,7 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
     Segmented,
     Skeleton,
     DeleteAccountDialog,
+    AchievementBadge,
     LucideUser,
     LucideGamepad2,
     LucideDownload,
@@ -61,7 +67,7 @@ export class Profile {
   protected readonly showAccountSection = false;
   // Same reason: testers know the shared password, so account deletion is hidden too.
   protected readonly showDeleteAccount = false;
-  protected readonly sections = (['account', 'preferences', 'data'] as const).filter(
+  protected readonly sections = (['account', 'achievements', 'preferences', 'data'] as const).filter(
     (s) => s !== 'account' || this.showAccountSection,
   );
 
@@ -104,7 +110,11 @@ export class Profile {
   /** Steam link state for the mobile list; null while loading or unavailable. */
   protected readonly steamStatus = signal<SteamStatus | null>(null);
 
-  protected readonly activeSection = signal<ProfileSection>('preferences');
+  protected readonly activeSection = signal<ProfileSection>('achievements');
+
+  /** All badges, unlocked first; `null` while loading, `[]` when the data could not load. */
+  protected readonly achievements = signal<Achievement[] | null>(null);
+  protected readonly unlockedCount = computed(() => (this.achievements() ?? []).filter((a) => a.unlocked).length);
 
   protected setLanguage(language: Language): void {
     this.preferences.setLanguage(language);
@@ -122,6 +132,22 @@ export class Profile {
   protected readonly deleteOpen = signal(false);
 
   constructor() {
+    forkJoin({
+      games: inject(GameService).findAll(),
+      sagas: inject(SagaService).findAll(),
+      summary: inject(StatsService).getSummary(),
+      years: inject(StatsService).getByYear().pipe(catchError(() => of([]))),
+    })
+      .pipe(catchError(() => of(null)))
+      .subscribe((data) => {
+        this.achievements.set(data ? sortAchievements(computeAchievements(data)) : []);
+        // "Ver todos" on the dashboard links here with #profile-achievements; the card only
+        // exists once this data is loaded, so scroll to it now instead of relying on the router.
+        if (this.route.snapshot.fragment === 'profile-achievements') {
+          setTimeout(() => this.scrollTo('achievements'));
+        }
+      });
+
     this.steamService
       .getStatus()
       .pipe(catchError(() => of(null)))

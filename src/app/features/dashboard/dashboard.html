@@ -6,9 +6,14 @@
     <div class="min-w-0">
       <p class="mb-1.5 hidden text-sm text-muted md:block">{{ today() }}</p>
       @if (displayName(); as name) {
-        <h1 class="truncate text-[26px] font-semibold tracking-[-0.02em] md:text-[30px]">
+        <h1 class="truncate text-[28px] font-bold tracking-[-0.03em] md:text-[34px]">
           {{ 'dashboard.greeting' | translate: { name } }}
         </h1>
+        @if (summary() || summaryFailed()) {
+          <p class="mt-1 truncate text-sm text-text-3 md:text-[15px]" [attr.title]="tagline().key | translate: tagline().params">
+            {{ tagline().key | translate: tagline().params }}
+          </p>
+        }
       } @else {
         <app-skeleton class="h-9 w-56 rounded-lg" />
       }
@@ -96,11 +101,12 @@
       @if (summary(); as s) {
         <app-stat-card [icon]="icons.games" [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
         <app-stat-card [icon]="icons.sagas" [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
-        <app-stat-card [icon]="icons.runs" [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" />
+        <app-stat-card [icon]="icons.runs" [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" [trend]="trends().runs" />
         <app-stat-card
           [icon]="icons.single"
           [label]="'dashboard.stats.singleHours' | translate"
           [value]="s.totalSingleplayerHours | hours"
+          [trend]="trends().hours"
         />
         <app-stat-card
           [icon]="icons.online"
@@ -112,6 +118,7 @@
           [label]="'dashboard.stats.avgRating' | translate"
           [value]="s.averageRating | rating"
           [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
+          [trend]="trends().rating"
         />
       } @else if (!summaryFailed()) {
         @for (i of [1, 2, 3, 4, 5, 6]; track i) {
@@ -126,13 +133,14 @@
     <section class="grid grid-cols-3 gap-2 md:hidden">
       @if (summary(); as s) {
         <app-stat-card compact [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
-        <app-stat-card compact [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" />
-        <app-stat-card compact [label]="'dashboard.stats.hours' | translate" [value]="totalHours() | hours" />
+        <app-stat-card compact [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" [trend]="trends().runs" />
+        <app-stat-card compact [label]="'dashboard.stats.hours' | translate" [value]="totalHours() | hours" [trend]="trends().hours" />
         <app-stat-card
           compact
           [label]="'dashboard.stats.avg' | translate"
           [value]="s.averageRating | rating"
           [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
+          [trend]="trends().rating"
         />
         <app-stat-card compact [label]="'dashboard.stats.replays' | translate" [value]="s.replayCount" />
         <app-stat-card
@@ -148,6 +156,23 @@
         <div class="col-span-full"><ng-container *ngTemplateOutlet="sectionError" /></div>
       }
     </section>
+
+    <!-- Top unlocked achievements (hidden when none) -->
+    @if (topBadges().length) {
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:px-[22px] md:py-4">
+        <app-section-header class="mb-3" [label]="'dashboard.achievements' | translate">
+          <a routerLink="/profile" fragment="profile-achievements" class="flex shrink-0 items-center gap-1 text-[13px] text-brand-light hover:underline">
+            {{ 'dashboard.achievementsAll' | translate }}
+            <svg lucideArrowRight [size]="14" aria-hidden="true"></svg>
+          </a>
+        </app-section-header>
+        <ul class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          @for (badge of topBadges(); track badge.id) {
+            <li><app-achievement-badge compact [achievement]="badge" /></li>
+          }
+        </ul>
+      </section>
+    }
 
     <!-- Playing now + hours per year -->
     <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">

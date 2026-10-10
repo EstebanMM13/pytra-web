@@ -128,7 +128,17 @@
       "text": "Install Pytra to open it like an app, full screen.",
       "action": "Install",
       "dismiss": "Dismiss"
-    }
+    },
+    "tagline": {
+      "longRun": "You've been playing {{game}} for {{days}} days",
+      "bestYear": "{{year}}: your year with the most hours",
+      "platinums": "{{count}} platinums and counting 🏆",
+      "bestRating": "Your top rating: {{rating}} for {{game}}",
+      "thisYear": "You've played {{hours}} this year",
+      "fallback": "What are we playing today?"
+    },
+    "achievements": "Achievements",
+    "achievementsAll": "See all"
   },
   "profile": {
     "title": "Profile",
@@ -144,6 +154,7 @@
     "sectionsLabel": "Profile sections",
     "sections": {
       "account": "Account",
+      "achievements": "Achievements",
       "preferences": "Preferences",
       "data": "Data"
     },
@@ -669,5 +680,64 @@
   "update": {
     "available": "New version available",
     "reload": "Reload"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "count": "{{unlocked}} of {{total}}",
+    "progress": "Progress",
+    "items": {
+      "firstPlatinum": {
+        "title": "First platinum 🏆",
+        "desc": "Earn your first platinum"
+      },
+      "platinumHunter": {
+        "title": "Platinum hunter",
+        "desc": "Earn {{target}} platinums"
+      },
+      "marathon": {
+        "title": "Marathon",
+        "desc": "Play a single game for {{target}} h"
+      },
+      "runs10": {
+        "title": "Regular player",
+        "desc": "Log {{target}} runs"
+      },
+      "runs50": {
+        "title": "Half a hundred",
+        "desc": "Log {{target}} runs"
+      },
+      "runs100": {
+        "title": "Centurion",
+        "desc": "Log {{target}} runs"
+      },
+      "collector25": {
+        "title": "Collector",
+        "desc": "Have {{target}} games in your library"
+      },
+      "collector50": {
+        "title": "Big collector",
+        "desc": "Have {{target}} games in your library"
+      },
+      "collector100": {
+        "title": "Archivist",
+        "desc": "Have {{target}} games in your library"
+      },
+      "sagaComplete": {
+        "title": "Saga complete",
+        "desc": "Play every game in a saga (2+ games)"
+      },
+      "critic": {
+        "title": "Critic",
+        "desc": "Rate {{target}} games"
+      },
+      "platforms": {
+        "title": "Platform polyglot",
+        "desc": "Play on {{target}} different platforms"
+      },
+      "veteran": {
+        "title": "Veteran",
+        "desc": "Log runs in {{target}} different years"
+      }
+    }
   }
 }

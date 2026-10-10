@@ -513,3 +513,34 @@ select optgroup {
   background-color: var(--pt-surface);
   color: var(--pt-text);
 }
+
+/*
+ * Key figures (stat values, big ratings): subtle brand gradient text in dark mode, solid in light
+ * mode for contrast. Uses text-fill so `currentColor` (e.g. a rating tone) stays usable.
+ */
+@utility text-figure {
+  background-image: linear-gradient(120deg, var(--pt-brand-lighter) 10%, var(--pt-brand-light) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  &:where([data-theme='light'] *, [data-theme='light']) {
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+/* Same treatment for toned figures (ratings): keeps the tone, blends a hint of brand-light. */
+@utility text-figure-tone {
+  background-image: linear-gradient(
+    120deg,
+    currentColor 35%,
+    color-mix(in srgb, currentColor 60%, var(--pt-brand-light)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  &:where([data-theme='light'] *, [data-theme='light']) {
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}

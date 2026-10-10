@@ -50,7 +50,7 @@
           {{ e.runLabel }}
         </p>
         <h1
-          class="line-clamp-3 text-[26px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word md:line-clamp-2 md:text-[40px] md:tracking-[-0.03em]"
+          class="line-clamp-3 text-[28px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-[44px] md:tracking-[-0.035em]"
           [attr.title]="game()?.name ?? null"
         >
           @if (game(); as g) {
@@ -195,7 +195,7 @@
           <p class="text-[13px] text-muted">{{ 'run.rating' | translate }}</p>
           @if (e.rating !== null) {
             <p class="mt-1.5 flex items-baseline gap-2">
-              <span class="font-mono text-[52px] leading-none font-semibold tracking-[-0.03em]" [class]="e.rating | ratingTone">
+              <span class="text-figure-tone font-mono text-[52px] leading-none font-bold tracking-[-0.03em]" [class]="e.rating | ratingTone">
                 {{ e.rating | rating }}
               </span>
               <span class="text-base text-faint">{{ 'run.outOf' | translate }}</span>
