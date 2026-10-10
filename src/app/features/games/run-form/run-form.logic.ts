@@ -1,5 +1,7 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Experience, ExperienceRequest, ExperienceStatus, Platform } from '../../../core/models/experience.model';
+import { RatingPrecision } from '../../../core/services/preferences.service';
+import { decimalValidator, parseDecimal } from '../../../shared/utils/decimal-input';
 
 /** Pure helpers behind the run form: validation, defaults and request building. */
 
@@ -11,27 +13,38 @@ export function nextRunLabel(existingRuns: number): string {
   return `Run ${Math.max(0, existingRuns) + 1}`;
 }
 
-/** 0–10 with at most two decimals. Empty is valid (a run in progress has no rating yet). */
-export function isValidRating(value: number | null | undefined): boolean {
+/**
+ * 0–10 following the rating precision: `integer` (9), `half` (9 or 9.5) or `hundredths` (up to two
+ * decimals, the API limit). Empty is valid (a run in progress has no rating yet).
+ */
+export function isValidRating(value: number | null | undefined, precision: RatingPrecision = 'hundredths'): boolean {
   if (value === null || value === undefined) {
     return true;
   }
   if (!Number.isFinite(value) || value < 0 || value > 10) {
     return false;
   }
-  return Math.abs(value * 100 - Math.round(value * 100)) < 1e-6;
+  const factor = precision === 'integer' ? 1 : precision === 'half' ? 2 : 100;
+  return Math.abs(value * factor - Math.round(value * factor)) < 1e-6;
 }
 
-export const ratingValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null =>
-  isValidRating(control.value) ? null : { rating: true };
+/**
+ * Rating validator for the text input ("9,25" or "9.25"). Unparsable text is an error.
+ * `keep` is a value accepted regardless of the precision (the stored rating of a run being
+ * edited, so changing the preference never blocks saving an untouched rating).
+ */
+export function ratingValidatorFor(
+  precision: () => RatingPrecision,
+  keep: () => number | null = () => null,
+): ValidatorFn {
+  return decimalValidator('rating', (value) => value === keep() ? isValidRating(value) : isValidRating(value, precision()));
+}
 
-/** Hours are optional; when present they must be a finite number ≥ 0. */
-export const hoursValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-  const value = control.value as number | null;
-  return value === null || value === undefined || (Number.isFinite(value) && value >= 0)
-    ? null
-    : { hours: true };
-};
+/** Default rating validator (two decimals). */
+export const ratingValidator: ValidatorFn = ratingValidatorFor(() => 'hundredths');
+
+/** Hours are optional; when present they must be a number ≥ 0 ("12,5" accepted). */
+export const hoursValidator: ValidatorFn = decimalValidator('hours', (value) => value >= 0);
 
 /** ISO `yyyy-mm-dd` strings compare correctly as text. */
 export function isValidDateRange(start: string | null | undefined, end: string | null | undefined): boolean {
@@ -78,8 +91,9 @@ export interface RunFormValue {
   platform: Platform;
   startDate: string;
   endDate: string;
-  hours: number | null;
-  rating: number | null;
+  /** Raw text of the decimal inputs ("12,5"); parsed when building the request. */
+  hours: string;
+  rating: string;
   summary: string;
   platinum: boolean;
   replay: boolean;
@@ -93,6 +107,12 @@ function textOrNull(value: string): string | null {
   return trimmed ? trimmed : null;
 }
 
+/** Parsed decimal, or null when empty or invalid (validators block invalid text before submit). */
+function numberOrNull(text: string | number | null | undefined): number | null {
+  const value = parseDecimal(text);
+  return value === null || Number.isNaN(value) ? null : value;
+}
+
 /** Maps the form value to the API request (empty strings become null, year is derived). */
 export function buildExperienceRequest(
   value: RunFormValue,
@@ -104,8 +124,8 @@ export function buildExperienceRequest(
     runLabel: value.runLabel.trim(),
     year: deriveRunYear({ startDate, endDate }, original),
     status: value.status,
-    rating: value.rating ?? null,
-    hours: value.hours ?? null,
+    rating: numberOrNull(value.rating),
+    hours: numberOrNull(value.hours),
     startDate,
     endDate,
     platform: value.platform,

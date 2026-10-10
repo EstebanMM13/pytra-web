@@ -35,10 +35,8 @@ type PlayMode = 'single' | 'online';
 const RANKING_SIZE = 5;
 const MAX_YEARS = 10;
 
-/** `null` while loading; failed requests degrade to an empty list so the page still renders. */
-function orEmpty<T>(source: Observable<T[]>): Observable<T[]> {
-  return source.pipe(catchError(() => of([] as T[])));
-}
+/** Sections that show an inline error (with retry) when their request fails. */
+type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated' | 'mostPlayed';
 
 @Component({
   selector: 'app-dashboard',
@@ -79,6 +77,7 @@ export class Dashboard {
 
   readonly summary = signal<StatsSummary | null>(null);
   readonly summaryFailed = signal(false);
+  protected readonly failedSections = signal<ReadonlySet<DashboardSection>>(new Set());
   readonly byYear = signal<YearStat[] | null>(null);
   readonly bySaga = signal<SagaStat[] | null>(null);
   readonly topRated = signal<TopRatedExperience[] | null>(null);
@@ -153,23 +152,59 @@ export class Dashboard {
   }
 
   private load(): void {
-    orEmpty(this.statsService.getInProgress()).subscribe((runs) => this.playing.set(runs));
+    this.summaryFailed.set(false);
+    this.failedSections.set(new Set());
+    this.orEmpty('playing', this.statsService.getInProgress()).subscribe((runs) => this.playing.set(runs));
     this.statsService.getSummary().subscribe({
       next: (s) => this.summary.set(s),
-      error: () => this.summaryFailed.set(true),
+      error: () => {
+        this.summaryFailed.set(true);
+        this.markFailed('summary');
+      },
     });
-    orEmpty(this.statsService.getByYear()).subscribe((s) => this.byYear.set(s));
-    orEmpty(this.statsService.getBySaga()).subscribe((s) => this.bySaga.set(s));
-    orEmpty(this.statsService.getTopRated(RANKING_SIZE)).subscribe((s) => this.topRated.set(s));
-    orEmpty(this.statsService.getMostPlayedSingleplayer(RANKING_SIZE)).subscribe((s) =>
+    this.orEmpty('byYear', this.statsService.getByYear()).subscribe((s) => this.byYear.set(s));
+    this.orEmpty('bySaga', this.statsService.getBySaga()).subscribe((s) => this.bySaga.set(s));
+    this.orEmpty('topRated', this.statsService.getTopRated(RANKING_SIZE)).subscribe((s) => this.topRated.set(s));
+    this.orEmpty('mostPlayed', this.statsService.getMostPlayedSingleplayer(RANKING_SIZE)).subscribe((s) =>
       this.mostPlayedSingleplayer.set(s),
     );
-    orEmpty(this.statsService.getMostPlayedOnline(RANKING_SIZE)).subscribe((s) =>
+    this.orEmpty('mostPlayed', this.statsService.getMostPlayedOnline(RANKING_SIZE)).subscribe((s) =>
       this.mostPlayedOnline.set(s),
     );
-    // Not linked / not configured answers with an error: simply hide the notice.
-    orEmpty(this.steamService.getPending()).subscribe((games) =>
-      this.steamPendingCount.set(games.length),
+    // Not linked / not configured answers with an error: simply hide the notice (no inline error).
+    this.steamService
+      .getPending()
+      .pipe(catchError(() => of([])))
+      .subscribe((games) => this.steamPendingCount.set(games.length));
+  }
+
+  /** Retry after a failure: back to skeletons, then reload everything. */
+  protected retry(): void {
+    this.summary.set(null);
+    this.playing.set(null);
+    this.byYear.set(null);
+    this.bySaga.set(null);
+    this.topRated.set(null);
+    this.mostPlayedSingleplayer.set(null);
+    this.mostPlayedOnline.set(null);
+    this.load();
+  }
+
+  protected failed(section: DashboardSection): boolean {
+    return this.failedSections().has(section);
+  }
+
+  private markFailed(section: DashboardSection): void {
+    this.failedSections.update((set) => new Set(set).add(section));
+  }
+
+  /** A failed list degrades to empty (the page still renders) and flags its section. */
+  private orEmpty<T>(section: DashboardSection, source: Observable<T[]>): Observable<T[]> {
+    return source.pipe(
+      catchError(() => {
+        this.markFailed(section);
+        return of([] as T[]);
+      }),
     );
   }
 

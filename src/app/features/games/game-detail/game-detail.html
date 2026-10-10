@@ -226,10 +226,9 @@
               <label class="flex min-w-0 flex-col gap-1.5 text-xs text-muted">
                 {{ 'game.online.hours' | translate }}
                 <input
-                  type="number"
+                  type="text"
                   inputmode="decimal"
-                  min="0"
-                  step="any"
+                  autocomplete="off"
                   formControlName="totalHours"
                   class="h-10 w-full rounded-lg border border-border bg-bg px-3 font-mono text-sm text-text"
                 />
@@ -237,11 +236,9 @@
               <label class="flex min-w-0 flex-col gap-1.5 text-xs text-muted">
                 {{ 'game.online.rating' | translate }}
                 <input
-                  type="number"
+                  type="text"
                   inputmode="numeric"
-                  min="0"
-                  max="10"
-                  step="1"
+                  autocomplete="off"
                   formControlName="generalRating"
                   placeholder="—"
                   class="h-10 w-full rounded-lg border border-border bg-bg px-3 font-mono text-sm text-gold"

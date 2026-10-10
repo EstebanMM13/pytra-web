@@ -15,6 +15,7 @@ import { ToastService } from '../../../shared/toast/toast.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { todayIso } from '../../../shared/utils/run-dates';
+import { formatDecimalInput } from '../../../shared/utils/decimal-input';
 import {
   RUN_PLATFORMS,
   RUN_STATUSES,
@@ -23,7 +24,7 @@ import {
   dateRangeValidator,
   hoursValidator,
   nextRunLabel,
-  ratingValidator,
+  ratingValidatorFor,
 } from './run-form.logic';
 
 const MAX_RESULTS = 8;
@@ -58,6 +59,10 @@ export class RunForm implements OnInit {
   private readonly translate = inject(TranslateService);
   protected readonly preferences = inject(PreferencesService);
 
+  private lang(): string {
+    return this.translate.currentLang() === 'en' ? 'en' : 'es';
+  }
+
   protected readonly platforms = RUN_PLATFORMS;
   protected readonly statusOptions: SegmentedOption<ExperienceStatus>[] = RUN_STATUSES.map((s) => ({
     value: s,
@@ -72,8 +77,15 @@ export class RunForm implements OnInit {
       platform: this.fb.control<Platform>('PC'),
       startDate: this.fb.control(''),
       endDate: this.fb.control(''),
-      hours: this.fb.control<number | null>(null, hoursValidator),
-      rating: this.fb.control<number | null>(null, ratingValidator),
+      // Text inputs so "9,25" works on every keyboard/locale (number inputs drop it as empty).
+      hours: this.fb.control('', hoursValidator),
+      rating: this.fb.control(
+        '',
+        ratingValidatorFor(
+          () => this.preferences.ratingPrecision(),
+          () => this.original?.rating ?? null,
+        ),
+      ),
       summary: this.fb.control(''),
       platinum: this.fb.control(false),
       replay: this.fb.control(false),
@@ -136,7 +148,7 @@ export class RunForm implements OnInit {
     } else {
       this.form.patchValue({
         platform: request.prefill?.platform ?? this.preferences.defaultPlatform(),
-        hours: request.prefill?.hours ?? null,
+        hours: formatDecimalInput(request.prefill?.hours ?? null, this.lang()),
       });
       if (request.gameId !== undefined) {
         this.lockToGame(request.gameId, true);
@@ -158,8 +170,8 @@ export class RunForm implements OnInit {
       platform: experience.platform,
       startDate: experience.startDate ?? '',
       endDate: experience.endDate ?? '',
-      hours: experience.hours,
-      rating: experience.rating,
+      hours: formatDecimalInput(experience.hours, this.lang()),
+      rating: formatDecimalInput(experience.rating, this.lang()),
       summary: experience.summary ?? '',
       platinum: experience.platinum,
       replay: experience.replay,

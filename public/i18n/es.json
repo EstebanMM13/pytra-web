@@ -103,7 +103,9 @@
     "mostPlayed": "Más jugados",
     "bySaga": "Por saga",
     "single": "Single",
-    "online": "Online"
+    "online": "Online",
+    "sectionError": "No se pudo cargar esta sección.",
+    "retry": "Reintentar"
   },
   "profile": {
     "title": "Perfil",
@@ -423,7 +425,7 @@
       "update": "Actualizar",
       "saved": "Horas online guardadas.",
       "error": "No se pudieron guardar las horas online.",
-      "invalid": "Horas ≥ 0 y valoración de 0 a 10."
+      "invalid": "Horas ≥ 0 (p. ej. 12,5) y valoración entera de 0 a 10."
     },
     "loadError": "No se pudo cargar el juego.",
     "editTitle": "Editar juego",
@@ -519,13 +521,18 @@
       "game": "Elige un juego de tu biblioteca.",
       "runLabel": "Ponle nombre a la partida.",
       "rating": "La nota va de 0 a 10, con hasta 2 decimales.",
-      "hours": "Las horas no pueden ser negativas.",
-      "dates": "El fin no puede ser anterior al inicio."
+      "hours": "Introduce unas horas válidas: 0 o más (p. ej. 12,5).",
+      "dates": "El fin no puede ser anterior al inicio.",
+      "ratingPrecision": {
+        "integer": "La nota va de 0 a 10, sin decimales (según tus preferencias).",
+        "half": "La nota va de 0 a 10, en medios puntos: 9 o 9,5 (según tus preferencias).",
+        "hundredths": "La nota va de 0 a 10, con hasta 2 decimales (p. ej. 9,25)."
+      }
     },
     "ratingExample": {
       "integer": "0–10 · ej. 9",
-      "half": "0–10 · ej. 9.5",
-      "hundredths": "0–10 · ej. 9.25"
+      "half": "0–10 · ej. 9,5",
+      "hundredths": "0–10 · ej. 9,25"
     }
   },
   "pagination": {

@@ -12,6 +12,7 @@ import {
   ResendVerificationRequest,
   ResetPasswordRequest,
 } from '../models/auth.model';
+import { clearPostLoginRedirect } from '../../shared/utils/post-login-redirect';
 import { TokenStorageService } from './token-storage.service';
 
 @Injectable({ providedIn: 'root' })
@@ -54,6 +55,7 @@ export class AuthService {
   }
 
   logout(): void {
+    clearPostLoginRedirect();
     this.tokenStorage.clearToken();
   }
 }

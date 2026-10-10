@@ -174,10 +174,9 @@
         <label class="run-form-cell">
           <span>{{ 'runForm.hours' | translate }}</span>
           <input
-            type="number"
+            type="text"
             inputmode="decimal"
-            min="0"
-            step="any"
+            autocomplete="off"
             formControlName="hours"
             placeholder="0"
             class="run-form-cell-input"
@@ -187,11 +186,9 @@
         <label class="run-form-cell">
           <span>{{ 'runForm.rating' | translate }}</span>
           <input
-            type="number"
+            type="text"
             inputmode="decimal"
-            min="0"
-            max="10"
-            [step]="preferences.ratingStep()"
+            autocomplete="off"
             formControlName="rating"
             [placeholder]="(status() === 'EN_CURSO' ? 'runForm.ratingPlaceholder' : 'runForm.ratingExample.' + preferences.ratingPrecision()) | translate"
             class="run-form-cell-input text-gold!"
@@ -209,7 +206,7 @@
         <p class="text-xs text-danger">{{ 'runForm.errors.hours' | translate }}</p>
       }
       @if (showError('rating')) {
-        <p class="text-xs text-danger">{{ 'runForm.errors.rating' | translate }}</p>
+        <p class="text-xs text-danger">{{ 'runForm.errors.ratingPrecision.' + preferences.ratingPrecision() | translate }}</p>
       }
     </div>
 

@@ -123,13 +123,23 @@ export class ExperienceDetail {
     this.experience.set(null);
     this.loadError.set(false);
 
+    // Ignore late answers for a run/game the user already navigated away from.
     this.experienceService.findById(experienceId).subscribe({
-      next: (experience) => this.experience.set(experience),
-      error: () => this.loadError.set(true),
+      next: (experience) => {
+        if (experienceId === this.experienceId()) this.experience.set(experience);
+      },
+      error: () => {
+        if (experienceId === this.experienceId()) this.loadError.set(true);
+      },
     });
     if (this.game()?.id !== gameId) {
       this.game.set(null);
-      this.gameService.findById(gameId).subscribe({ next: (game) => this.game.set(game), error: () => {} });
+      this.gameService.findById(gameId).subscribe({
+        next: (game) => {
+          if (gameId === this.gameId()) this.game.set(game);
+        },
+        error: () => {},
+      });
     }
   }
 

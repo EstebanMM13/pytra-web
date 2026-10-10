@@ -24,9 +24,36 @@ export function filenameFromContentDisposition(header: string | null | undefined
     const plain = /filename\s*=\s*("([^"]*)"|[^;]+)/i.exec(header);
     name = plain ? (plain[2] ?? plain[1]).trim() : null;
   }
-  const safe = name?.replace(/[\\/]/g, '_').trim();
-  return safe ? safe : fallback;
+  return sanitizeFilename(name) ?? fallback;
 }
+
+/** Longest filename kept; longer ones are cut, keeping a short extension when there is one. */
+export const MAX_FILENAME_LENGTH = 100;
+
+/**
+ * A filename safe to hand to the browser or the native filesystem: path separators become "_",
+ * control characters are removed, "." / ".." and names without a letter or digit are rejected
+ * (null), and the result is cut to {@link MAX_FILENAME_LENGTH} characters.
+ */
+export function sanitizeFilename(name: string | null | undefined): string | null {
+  if (!name) {
+    return null;
+  }
+  // eslint-disable-next-line no-control-regex
+  let safe = name.replace(/[\\/]/g, '_').replace(/[\x00-\x1f\x7f]/g, '').trim();
+  if (!safe || /^\.+$/.test(safe) || !/[A-Za-z0-9]/.test(safe)) {
+    return null;
+  }
+  if (safe.length > MAX_FILENAME_LENGTH) {
+    const dot = safe.lastIndexOf('.');
+    const ext = dot > 0 && safe.length - dot <= 10 ? safe.slice(dot) : '';
+    safe = safe.slice(0, MAX_FILENAME_LENGTH - ext.length) + ext;
+  }
+  return safe;
+}
+
+/** Cache subfolder for exported files shared from the Android app. */
+const EXPORT_DIR = 'exports';
 
 /** Base64 payload of a blob (without the `data:` prefix), for Capacitor Filesystem. */
 function blobToBase64(blob: Blob): Promise<string> {
@@ -78,10 +105,12 @@ export class FileExportService {
   }
 
   private async shareNative(blob: Blob, filename: string, shareTitle: string): Promise<void> {
+    const path = `${EXPORT_DIR}/${sanitizeFilename(filename) ?? 'pytra-export'}`;
     const { uri } = await Filesystem.writeFile({
-      path: filename,
+      path,
       data: await blobToBase64(blob),
       directory: Directory.Cache,
+      recursive: true,
     });
     try {
       await Share.share({ title: shareTitle, url: uri, dialogTitle: shareTitle });
@@ -89,6 +118,9 @@ export class FileExportService {
       if (!isShareCancel(error)) {
         throw error;
       }
+    } finally {
+      // The share sheet already handed the file over (or was dismissed): don't keep copies around.
+      await Filesystem.deleteFile({ path, directory: Directory.Cache }).catch(() => undefined);
     }
   }
 }

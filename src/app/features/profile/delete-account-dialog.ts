@@ -8,7 +8,11 @@ import { NativeOAuthService } from '../../core/services/native-oauth.service';
 import { UserService } from '../../core/services/user.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { ModalSheet } from '../../shared/ui/modal-sheet';
-import { RESUME_DELETE_ACCOUNT, rememberPostLoginRedirect } from '../../shared/utils/post-login-redirect';
+import {
+  RESUME_DELETE_ACCOUNT,
+  clearPostLoginRedirect,
+  rememberPostLoginRedirect,
+} from '../../shared/utils/post-login-redirect';
 import { REAUTH_REQUIRED_KEY, confirmsUsername, deleteAccountErrorKey } from './profile.logic';
 
 /**
@@ -28,7 +32,7 @@ import { REAUTH_REQUIRED_KEY, confirmsUsername, deleteAccountErrorKey } from './
       [saving]="deleting()"
       [saveDisabled]="!canSubmit()"
       (save)="submit()"
-      (closed)="closed.emit()"
+      (closed)="close()"
     >
       <form (submit)="$event.preventDefault(); submit()" novalidate class="flex flex-col gap-4 md:gap-[18px]">
         <div class="rounded-[10px] border border-danger/40 bg-danger-bg px-4 py-3 text-sm leading-relaxed text-danger">
@@ -130,6 +134,12 @@ export class DeleteAccountDialog {
         this.errorKey.set(deleteAccountErrorKey(err));
       },
     });
+  }
+
+  /** Closing the dialog also abandons a pending "resume after Google re-login". */
+  protected close(): void {
+    clearPostLoginRedirect();
+    this.closed.emit();
   }
 
   /** Fresh Google login, then back to `/profile?delete=1` (see OauthCallback). */

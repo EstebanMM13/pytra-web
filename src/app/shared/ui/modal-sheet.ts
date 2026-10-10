@@ -42,7 +42,7 @@ const FOCUSABLE =
         <header
           class="flex shrink-0 items-center justify-between gap-3 border-b border-border px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-4 md:hidden"
         >
-          <button type="button" (click)="closed.emit()" class="text-[15px] text-text-3">
+          <button type="button" (click)="cancel()" [disabled]="saving()" class="text-[15px] text-text-3 disabled:opacity-50">
             {{ 'common.cancel' | translate }}
           </button>
           <h2 class="truncate text-base font-semibold">{{ title() }}</h2>
@@ -62,8 +62,8 @@ const FOCUSABLE =
           <h2 class="text-[19px] font-semibold">{{ title() }}</h2>
           <button
             type="button"
-            (click)="closed.emit()"
-            class="rounded-md p-1 text-muted hover:text-text"
+            (click)="cancel()" [disabled]="saving()"
+            class="rounded-md p-1 text-muted hover:text-text disabled:opacity-50"
             [attr.aria-label]="'common.close' | translate"
           >
             <svg lucideX [size]="20"></svg>
@@ -78,8 +78,8 @@ const FOCUSABLE =
         <footer class="hidden shrink-0 justify-end gap-2.5 border-t border-border px-[26px] py-[18px] md:flex">
           <button
             type="button"
-            (click)="closed.emit()"
-            class="rounded-lg border border-border px-4 py-2.5 text-sm text-text-2 hover:border-border-strong"
+            (click)="cancel()" [disabled]="saving()"
+            class="rounded-lg border border-border px-4 py-2.5 text-sm text-text-2 hover:border-border-strong disabled:opacity-50"
           >
             {{ 'common.cancel' | translate }}
           </button>
@@ -134,6 +134,13 @@ export class ModalSheet {
   protected onEscape(event: Event): void {
     if (!event.defaultPrevented) {
       event.preventDefault();
+      this.cancel();
+    }
+  }
+
+  /** Closing mid-save would drop the request's outcome (and its error), so it waits. */
+  protected cancel(): void {
+    if (!this.saving()) {
       this.closed.emit();
     }
   }

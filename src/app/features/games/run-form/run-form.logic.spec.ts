@@ -9,6 +9,7 @@ import {
   isValidRating,
   nextRunLabel,
   ratingValidator,
+  ratingValidatorFor,
 } from './run-form.logic';
 
 describe('run form logic', () => {
@@ -32,18 +33,41 @@ describe('run form logic', () => {
       }
     });
 
-    it('is exposed as a control validator', () => {
-      expect(ratingValidator(new FormControl(8.75))).toBeNull();
-      expect(ratingValidator(new FormControl(12))).toEqual({ rating: true });
+    it('is exposed as a control validator over the typed text', () => {
+      expect(ratingValidator(new FormControl('8,75'))).toBeNull();
+      expect(ratingValidator(new FormControl('9.5'))).toBeNull();
+      expect(ratingValidator(new FormControl(''))).toBeNull();
+      expect(ratingValidator(new FormControl('12'))).toEqual({ rating: true });
+      expect(ratingValidator(new FormControl('abc'))).toEqual({ rating: true });
+      expect(ratingValidator(new FormControl('9,125'))).toEqual({ rating: true });
+    });
+
+    it('enforces the rating precision preference', () => {
+      expect(isValidRating(9, 'integer')).toBe(true);
+      expect(isValidRating(9.5, 'integer')).toBe(false);
+      expect(isValidRating(9.5, 'half')).toBe(true);
+      expect(isValidRating(9.25, 'half')).toBe(false);
+      expect(isValidRating(9.25, 'hundredths')).toBe(true);
+
+      const half = ratingValidatorFor(() => 'half');
+      expect(half(new FormControl('9,5'))).toBeNull();
+      expect(half(new FormControl('9,25'))).toEqual({ rating: true });
+    });
+
+    it('keeps accepting the stored rating of the run being edited', () => {
+      const integer = ratingValidatorFor(() => 'integer', () => 9.25);
+      expect(integer(new FormControl('9,25'))).toBeNull();
+      expect(integer(new FormControl('9,5'))).toEqual({ rating: true });
     });
   });
 
   describe('hours', () => {
     it('allows empty and non-negative values only', () => {
-      expect(hoursValidator(new FormControl(null))).toBeNull();
-      expect(hoursValidator(new FormControl(0))).toBeNull();
-      expect(hoursValidator(new FormControl(12.5))).toBeNull();
-      expect(hoursValidator(new FormControl(-1))).toEqual({ hours: true });
+      expect(hoursValidator(new FormControl(''))).toBeNull();
+      expect(hoursValidator(new FormControl('0'))).toBeNull();
+      expect(hoursValidator(new FormControl('12,5'))).toBeNull();
+      expect(hoursValidator(new FormControl('-1'))).toEqual({ hours: true });
+      expect(hoursValidator(new FormControl('doce'))).toEqual({ hours: true });
     });
   });
 
@@ -93,8 +117,8 @@ describe('run form logic', () => {
       platform: 'SWITCH',
       startDate: '2025-01-10',
       endDate: '2025-04-02',
-      hours: 27,
-      rating: 9.5,
+      hours: '27',
+      rating: '9,5',
       summary: '  ',
       platinum: true,
       replay: true,
@@ -120,6 +144,15 @@ describe('run form logic', () => {
         cons: null,
         notes: null,
       });
+    });
+
+    it('parses comma decimals and sends null for empty numbers', () => {
+      const request = buildExperienceRequest({ ...value, rating: '9,25', hours: '12.5' });
+      expect(request.rating).toBe(9.25);
+      expect(request.hours).toBe(12.5);
+      const empty = buildExperienceRequest({ ...value, rating: '', hours: ' ' });
+      expect(empty.rating).toBeNull();
+      expect(empty.hours).toBeNull();
     });
 
     it('sends null dates when they are empty', () => {

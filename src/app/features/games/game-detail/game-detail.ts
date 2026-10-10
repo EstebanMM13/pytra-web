@@ -28,6 +28,7 @@ import { ToastService } from '../../../shared/toast/toast.service';
 import { RunRow } from '../../../shared/ui/run-row';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
+import { decimalValidator, formatDecimalInput, parseDecimal } from '../../../shared/utils/decimal-input';
 import { StatCard } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { formatDayMonthYear, formatRunPeriod } from '../../../shared/utils/run-dates';
@@ -93,14 +94,11 @@ export class GameDetail {
   readonly editing = signal(false);
   readonly savingOnline = signal(false);
 
+  // Text inputs so "12,5" works on every keyboard/locale (number inputs drop it as empty).
   readonly onlinePlaytimeForm = this.fb.group({
-    totalHours: this.fb.control<number | null>(0, [Validators.required, Validators.min(0)]),
+    totalHours: this.fb.control('0', [Validators.required, decimalValidator('hours', (h) => h >= 0)]),
     // The API stores the online rating as an integer 0–10.
-    generalRating: this.fb.control<number | null>(null, [
-      Validators.min(0),
-      Validators.max(10),
-      Validators.pattern(/^\d+$/),
-    ]),
+    generalRating: this.fb.control('', decimalValidator('rating', (r) => Number.isInteger(r) && r >= 0 && r <= 10)),
   });
 
   protected readonly runs = computed(() => [...(this.experiences() ?? [])].sort(byRecencyDesc));
@@ -188,13 +186,17 @@ export class GameDetail {
     this.loadError.set(false);
     this.editing.set(false);
 
+    // Every handler checks the id: a late answer for the previous game must not overwrite this one.
     this.gameService.findById(id).subscribe({
       next: (game) => {
+        if (id !== this.gameId()) return;
         this.game.set(game);
         this.loadOnlinePlaytime(game);
         this.loadSaga(game);
       },
-      error: () => this.loadError.set(true),
+      error: () => {
+        if (id === this.gameId()) this.loadError.set(true);
+      },
     });
     this.loadRuns();
   }
@@ -207,22 +209,31 @@ export class GameDetail {
           this.experiences.set(runs);
         }
       },
-      error: () => this.experiences.set([]),
+      error: () => {
+        if (id === this.gameId()) {
+          this.experiences.set([]);
+        }
+      },
     });
   }
 
   private loadOnlinePlaytime(game: Game): void {
     // Online hours only exist for ONLINE/HYBRID games; a SINGLEPLAYER game never has them.
+    // Also drop hours loaded earlier, e.g. when an edit turns the game into SINGLEPLAYER.
+    this.onlinePlaytime.set(null);
     if (game.category === 'SINGLEPLAYER') {
       return;
     }
-    this.onlinePlaytimeForm.reset({ totalHours: 0, generalRating: null });
-    this.onlinePlaytimeService.findByGame(game.id).subscribe({
+    this.onlinePlaytimeForm.reset({ totalHours: '0', generalRating: '' });
+    const id = game.id;
+    this.onlinePlaytimeService.findByGame(id).subscribe({
       next: (playtime) => {
+        if (id !== this.gameId()) return;
+        const lang = this.lang();
         this.onlinePlaytime.set(playtime);
         this.onlinePlaytimeForm.setValue({
-          totalHours: playtime.totalHours,
-          generalRating: playtime.generalRating,
+          totalHours: formatDecimalInput(playtime.totalHours, lang),
+          generalRating: formatDecimalInput(playtime.generalRating, lang),
         });
       },
       error: () => {
@@ -236,10 +247,19 @@ export class GameDetail {
     if (game.sagaId === null) {
       return;
     }
+    const id = game.id;
     this.gameService.findAll().subscribe({
-      next: (games) => this.sagaGames.set(games.filter((g) => g.sagaId === game.sagaId).sort(byRelease)),
+      next: (games) => {
+        if (id === this.gameId() && this.game()?.sagaId === game.sagaId) {
+          this.sagaGames.set(games.filter((g) => g.sagaId === game.sagaId).sort(byRelease));
+        }
+      },
       error: () => {},
     });
+  }
+
+  private lang(): string {
+    return this.translate.currentLang() === 'en' ? 'en' : 'es';
   }
 
   protected runMeta(run: Experience): string {
@@ -290,19 +310,21 @@ export class GameDetail {
       return;
     }
     const raw = this.onlinePlaytimeForm.getRawValue();
+    const id = this.gameId();
     this.savingOnline.set(true);
     this.onlinePlaytimeService
-      .upsert(this.gameId(), {
-        totalHours: raw.totalHours ?? 0,
-        generalRating: raw.generalRating,
+      .upsert(id, {
+        totalHours: parseDecimal(raw.totalHours) ?? 0,
+        generalRating: parseDecimal(raw.generalRating),
         // Keep fields this card does not edit.
         lastSessionAt: this.onlinePlaytime()?.lastSessionAt ?? null,
         notes: this.onlinePlaytime()?.notes ?? null,
       })
       .subscribe({
         next: (playtime) => {
-          this.onlinePlaytime.set(playtime);
           this.savingOnline.set(false);
+          if (id !== this.gameId()) return;
+          this.onlinePlaytime.set(playtime);
           this.toast.success(this.translate.instant('game.online.saved'));
         },
         error: () => {

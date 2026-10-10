@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, effect, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import {
@@ -119,6 +119,17 @@ export class Games {
 
   constructor() {
     this.load();
+
+    // `?page=` beyond the last page (or after filtering): rewrite the URL to the page shown.
+    effect(() => {
+      if (this.loading()) {
+        return;
+      }
+      const shown = this.page().page;
+      if (this.query().page !== shown) {
+        untracked(() => this.updateQuery({ page: shown > 1 ? shown : null }));
+      }
+    });
   }
 
   private load(): void {

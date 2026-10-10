@@ -239,12 +239,16 @@ export class Years {
     this.statsService.saveYearNote(year, request).subscribe({
       next: (note) => {
         this.savingNote.set(false);
+        this.toast.success(this.translate.instant('years.note.saved'));
+        // The user may have switched years meanwhile: never put this note in another year's editor.
+        if (year !== this.year()) {
+          return;
+        }
         const saved = { summary: note.summary ?? '', highlights: note.highlights ?? '' };
         this.savedNote.set(saved);
         this.noteSummary.set(saved.summary);
         this.noteHighlights.set(saved.highlights);
         this.noteUpdatedAt.set(note.updatedAt);
-        this.toast.success(this.translate.instant('years.note.saved'));
       },
       error: () => {
         this.savingNote.set(false);

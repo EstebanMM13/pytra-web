@@ -51,6 +51,8 @@
       @for (i of [1, 2, 3, 4, 5, 6]; track i) {
         <app-skeleton class="h-[94px] rounded-xl" />
       }
+    } @else {
+      <div class="col-span-full"><ng-container *ngTemplateOutlet="sectionError" /></div>
     }
   </section>
 
@@ -76,6 +78,8 @@
       @for (i of [1, 2, 3, 4, 5, 6]; track i) {
         <app-skeleton class="h-[66px] rounded-xl" />
       }
+    } @else {
+      <div class="col-span-full"><ng-container *ngTemplateOutlet="sectionError" /></div>
     }
   </section>
 
@@ -99,12 +103,16 @@
             />
           </a>
         } @empty {
-          <div class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center">
-            <p class="text-sm font-medium text-text-2">{{ 'dashboard.nothingPlaying' | translate }}</p>
-            <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
-              {{ 'dashboard.startRun' | translate }}
-            </button>
-          </div>
+          @if (failed('playing')) {
+            <ng-container *ngTemplateOutlet="sectionError" />
+          } @else {
+            <div class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center">
+              <p class="text-sm font-medium text-text-2">{{ 'dashboard.nothingPlaying' | translate }}</p>
+              <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
+                {{ 'dashboard.startRun' | translate }}
+              </button>
+            </div>
+          }
         }
         }
       </div>
@@ -125,7 +133,11 @@
             <app-mini-bar-chart [bars]="bars" [height]="96" dense />
           </div>
         } @else {
-          <p class="py-8 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
+          @if (failed('byYear')) {
+            <ng-container *ngTemplateOutlet="sectionError" />
+          } @else {
+            <p class="py-8 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
+          }
         }
       } @else {
         <app-skeleton class="h-24 rounded-lg md:h-[190px]" />
@@ -150,7 +162,11 @@
             <span class="font-mono font-medium text-gold">{{ item.rating | rating }}</span>
           </a>
         } @empty {
-          <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+          @if (failed('topRated')) {
+            <ng-container *ngTemplateOutlet="sectionError" />
+          } @else {
+            <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+          }
         }
       } @else {
         <ng-container *ngTemplateOutlet="listSkeleton" />
@@ -173,7 +189,11 @@
             </span>
           </a>
         } @empty {
-          <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+          @if (failed('mostPlayed')) {
+            <ng-container *ngTemplateOutlet="sectionError" />
+          } @else {
+            <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+          }
         }
       } @else {
         <ng-container *ngTemplateOutlet="listSkeleton" />
@@ -193,7 +213,11 @@
             <span class="w-16 shrink-0 text-right font-mono">{{ item.totalHours | hours }}</span>
           </a>
         } @empty {
-          <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+          @if (failed('bySaga')) {
+            <ng-container *ngTemplateOutlet="sectionError" />
+          } @else {
+            <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
+          }
         }
       } @else {
         <ng-container *ngTemplateOutlet="listSkeleton" />
@@ -207,5 +231,17 @@
     @for (i of [1, 2, 3, 4, 5]; track i) {
       <app-skeleton class="h-6 rounded-md" />
     }
+  </div>
+</ng-template>
+
+<ng-template #sectionError>
+  <div
+    class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-dashed border-border px-3.5 py-3 text-[13px] text-muted"
+    role="alert"
+  >
+    {{ 'dashboard.sectionError' | translate }}
+    <button type="button" (click)="retry()" class="font-medium text-brand-light hover:underline">
+      {{ 'dashboard.retry' | translate }}
+    </button>
   </div>
 </ng-template>
