@@ -123,8 +123,8 @@
       </app-section-header>
       @if (yearBars(); as bars) {
         @if (bars.length) {
-          <div class="hidden md:block">
-            <app-mini-bar-chart [bars]="bars" [height]="190" />
+          <div class="hidden min-h-[200px] flex-1 md:block">
+            <app-mini-bar-chart [bars]="bars" [height]="null" />
           </div>
           <div class="md:hidden">
             <app-mini-bar-chart [bars]="bars" [height]="96" dense />
@@ -137,7 +137,7 @@
           }
         }
       } @else {
-        <app-skeleton class="h-24 rounded-lg md:h-[190px]" />
+        <app-skeleton class="h-24 rounded-lg md:min-h-[200px] md:flex-1" />
       }
     </section>
   </div>

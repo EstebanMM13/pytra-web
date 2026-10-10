@@ -8,6 +8,8 @@ export interface MiniBar {
   label: string;
   /** Optional text above the bar, e.g. the year's average rating (gold mono). */
   topLabel?: string | null;
+  /** Optional second line under the label, e.g. the bar's hours. */
+  subLabel?: string | null;
   /** Accessible description of the bar. */
   title?: string;
 }
@@ -20,6 +22,7 @@ export interface MiniBar {
     class: 'flex items-end',
     role: 'list',
     '[style.height.px]': 'height()',
+    '[class.h-full]': 'height() === null',
     '[class]': "dense() ? 'gap-[7px]' : 'gap-3.5'",
   },
   template: `
@@ -44,14 +47,17 @@ export interface MiniBar {
         <span class="text-muted" [class]="dense() ? 'text-[10px]' : 'text-xs'">
           {{ bar.label }}
         </span>
+        @if (bar.subLabel) {
+          <span class="-mt-1 font-mono text-[10px] text-faint md:text-[11px]">{{ bar.subLabel }}</span>
+        }
       </div>
     }
   `,
 })
 export class MiniBarChart {
   readonly bars = input.required<readonly MiniBar[]>();
-  /** Chart height in px (labels included). */
-  readonly height = input(170);
+  /** Chart height in px (labels included); null fills the parent's height. */
+  readonly height = input<number | null>(170);
   readonly dense = input(false, { transform: booleanAttribute });
   /** Colour of the labels above the bars: gold (ratings) or muted (plain values). */
   readonly topTone = input<'gold' | 'muted'>('gold');

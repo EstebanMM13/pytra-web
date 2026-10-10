@@ -115,6 +115,7 @@ export class Dashboard {
       return null;
     }
     const ratingPipe = new RatingPipe();
+    const hoursPipe = new HoursPipe();
     return [...years]
       .sort((a, b) => a.year - b.year)
       .slice(-MAX_YEARS)
@@ -123,6 +124,7 @@ export class Dashboard {
         value: y.totalHours,
         label: `'${String(y.year).slice(-2)}`,
         topLabel: y.averageRating == null ? null : ratingPipe.transform(y.averageRating),
+        subLabel: hoursPipe.transform(y.totalHours),
         title: `${y.year}: ${Math.round(y.totalHours)} h`,
       }));
   });
