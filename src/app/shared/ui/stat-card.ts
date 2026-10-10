@@ -44,15 +44,16 @@ import { Sparkline } from './sparkline';
           }
           <span class="truncate">{{ label() }}</span>
         </p>
-        <div class="mt-3 flex items-end justify-between gap-2">
+        <!-- The figure never truncates: when it doesn't fit beside the sparkline, the sparkline wraps below. -->
+        <div class="mt-3 flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
           <p
-            class="min-w-0 truncate text-[26px] font-bold tracking-[-0.03em] lg:text-[28px]"
+            class="whitespace-nowrap text-[26px] font-bold tracking-[-0.03em] lg:text-[28px]"
             [class]="figureClass()"
           >
             {{ display() }}
           </p>
           @if (hasTrend()) {
-            <app-sparkline class="mb-2 shrink-0" [values]="trend()!" />
+            <app-sparkline class="mb-2 ml-auto shrink-0" [values]="trend()!" />
           }
         </div>
         @if (hint()) {
