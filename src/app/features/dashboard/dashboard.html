@@ -99,8 +99,13 @@
               class="hover:border-border-strong max-md:bg-surface!"
               [title]="run.gameName"
               [meta]="playingMeta(run)"
-              [hours]="run.hours"
-            />
+            >
+              @if (daysPlaying(run); as days) {
+                <span class="shrink-0 rounded-full bg-brand-tint px-2.5 py-1 font-mono text-xs text-brand-lighter">
+                  {{ days }}
+                </span>
+              }
+            </app-run-row>
           </a>
         } @empty {
           @if (failed('playing')) {

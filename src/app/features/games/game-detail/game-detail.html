@@ -144,8 +144,9 @@
     }
 
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div class="flex flex-col gap-5 self-start">
       <!-- Runs -->
-      <section class="self-start md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
+      <section class="md:rounded-[14px] md:border md:border-border md:bg-surface md:p-[22px]">
         <app-section-header class="mb-3 md:mb-4" [label]="'game.runs' | translate" />
         <div class="flex flex-col gap-2.5 md:scroll-list md:max-h-[494px]">
           @if (experiences() === null) {
@@ -179,40 +180,6 @@
           }
         </div>
       </section>
-
-      <div class="flex flex-col gap-5">
-        <!-- Game sheet -->
-        <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
-          <app-section-header class="mb-3" [label]="'game.sheet' | translate" />
-          <dl class="text-sm">
-            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
-              <dt class="shrink-0 text-muted">{{ 'game.developer' | translate }}</dt>
-              <dd class="truncate text-right" [title]="g.developer ?? ''">{{ g.developer ?? '—' }}</dd>
-            </div>
-            @if (g.publisher) {
-              <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
-                <dt class="shrink-0 text-muted">{{ 'game.publisher' | translate }}</dt>
-                <dd class="truncate text-right" [title]="g.publisher">{{ g.publisher }}</dd>
-              </div>
-            }
-            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
-              <dt class="shrink-0 text-muted">{{ 'game.release' | translate }}</dt>
-              <dd class="truncate text-right font-mono">{{ releaseDate(g) }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
-              <dt class="shrink-0 text-muted">{{ 'game.genre' | translate }}</dt>
-              <dd class="truncate text-right" [title]="genreNames(g)">{{ genreNames(g) || '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
-              <dt class="shrink-0 text-muted">{{ 'game.platforms' | translate }}</dt>
-              <dd class="truncate text-right" [title]="platformNames()">{{ platformNames() || '—' }}</dd>
-            </div>
-            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
-              <dt class="shrink-0 text-muted">{{ 'game.category' | translate }}</dt>
-              <dd class="truncate text-right">{{ g.category ? ('category.' + g.category | translate) : '—' }}</dd>
-            </div>
-          </dl>
-        </section>
 
         <!-- Online hours (ONLINE / HYBRID games) -->
         @if (g.category && g.category !== 'SINGLEPLAYER') {
@@ -260,6 +227,41 @@
             }
           </section>
         }
+      </div>
+
+      <div class="flex flex-col gap-5">
+        <!-- Game sheet -->
+        <section class="rounded-[14px] border border-border bg-surface p-[18px] md:p-[22px]">
+          <app-section-header class="mb-3" [label]="'game.sheet' | translate" />
+          <dl class="text-sm">
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.developer' | translate }}</dt>
+              <dd class="truncate text-right" [title]="g.developer ?? ''">{{ g.developer ?? '—' }}</dd>
+            </div>
+            @if (g.publisher) {
+              <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+                <dt class="shrink-0 text-muted">{{ 'game.publisher' | translate }}</dt>
+                <dd class="truncate text-right" [title]="g.publisher">{{ g.publisher }}</dd>
+              </div>
+            }
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.release' | translate }}</dt>
+              <dd class="truncate text-right font-mono">{{ releaseDate(g) }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.genre' | translate }}</dt>
+              <dd class="truncate text-right" [title]="genreNames(g)">{{ genreNames(g) || '—' }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.platforms' | translate }}</dt>
+              <dd class="truncate text-right" [title]="platformNames()">{{ platformNames() || '—' }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
+              <dt class="shrink-0 text-muted">{{ 'game.category' | translate }}</dt>
+              <dd class="truncate text-right">{{ g.category ? ('category.' + g.category | translate) : '—' }}</dd>
+            </div>
+          </dl>
+        </section>
 
         <!-- Other games of the saga -->
         @if (sagaGames().length > 1) {

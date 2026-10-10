@@ -104,7 +104,10 @@
     "single": "Single",
     "online": "Online",
     "sectionError": "No se pudo cargar esta sección.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "playingToday": "Hoy",
+    "playingDay": "1 día",
+    "playingDays": "{{count}} días"
   },
   "profile": {
     "title": "Perfil",

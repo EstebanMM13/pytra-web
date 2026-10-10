@@ -325,3 +325,10 @@
   scrollbar-width: thin;
   scrollbar-color: var(--pt-border-strong) transparent;
 }
+
+/* Native <select> popups ignore most page styles; give their options the theme colours. */
+select option,
+select optgroup {
+  background-color: var(--pt-surface);
+  color: var(--pt-text);
+}

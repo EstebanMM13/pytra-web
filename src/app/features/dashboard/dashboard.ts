@@ -218,6 +218,23 @@ export class Dashboard {
     return parts.join(' · ');
   }
 
+  /** Days since the run started ("Hoy", "1 día", "N días"); null without a start date. */
+  protected daysPlaying(run: InProgressExperience): string | null {
+    if (!run.startDate) {
+      return null;
+    }
+    const [y, m, d] = run.startDate.split('-').map(Number);
+    const today = new Date();
+    const days = Math.max(
+      0,
+      Math.round((Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) - Date.UTC(y, m - 1, d)) / 86_400_000),
+    );
+    if (days === 0) {
+      return this.translate.instant('dashboard.playingToday') as string;
+    }
+    return this.translate.instant(days === 1 ? 'dashboard.playingDay' : 'dashboard.playingDays', { count: days }) as string;
+  }
+
   protected newRun(): void {
     this.runFormLauncher.openNewRun();
   }
