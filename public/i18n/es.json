@@ -119,6 +119,12 @@
       "addGameHint": "Busca cualquier juego y añádelo a tu colección.",
       "firstRun": "Registra tu primera partida",
       "firstRunHint": "Anota horas, plataforma y tu nota."
+    },
+    "install": {
+      "title": "Instalar Pytra",
+      "text": "Instala Pytra para abrirla como una app, a pantalla completa.",
+      "action": "Instalar",
+      "dismiss": "Descartar"
     }
   },
   "profile": {
@@ -180,7 +186,11 @@
         "reauth": "Por seguridad, tu cuenta de Google necesita un inicio de sesión reciente. Vuelve a entrar con Google y repite el borrado."
       }
     },
-    "language": "Idioma"
+    "language": "Idioma",
+    "app": "Aplicación",
+    "installApp": "Instalar app",
+    "installIosHint": "En Safari: Compartir → Añadir a pantalla de inicio",
+    "appInstalled": "Instalada"
   },
   "steam": {
     "title": "Steam",

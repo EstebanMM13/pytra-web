@@ -12,6 +12,7 @@ import {
   LucidePlus,
   LucideStar,
   LucideWifi,
+  LucideX,
 } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -21,6 +22,7 @@ import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { SteamService } from '../../core/services/steam.service';
 import { UserService } from '../../core/services/user.service';
+import { InstallPromptService } from '../../core/services/install-prompt.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
@@ -62,11 +64,13 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
     LucideDownload,
     LucideArrowRight,
     LucideDynamicIcon,
+    LucideX,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
+  protected readonly installPrompt = inject(InstallPromptService);
   private readonly statsService = inject(StatsService);
   private readonly steamService = inject(SteamService);
   private readonly translate = inject(TranslateService);

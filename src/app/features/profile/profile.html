@@ -223,6 +223,25 @@
           }
         </select>
       </div>
+      @if (installPrompt.canInstall() || installPrompt.showIosHint() || installPrompt.installed()) {
+        <div class="flex items-center justify-between gap-4 border-t border-divider py-3 text-sm">
+          <span class="text-muted">{{ 'profile.app' | translate }}</span>
+          @if (installPrompt.canInstall()) {
+            <button
+              type="button"
+              (click)="installPrompt.install()"
+              class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+            >
+              <svg lucideDownload [size]="14"></svg>
+              {{ 'profile.installApp' | translate }}
+            </button>
+          } @else if (installPrompt.showIosHint()) {
+            <span class="text-right text-xs text-text-3">{{ 'profile.installIosHint' | translate }}</span>
+          } @else {
+            <span class="text-[13px] text-faint">{{ 'profile.appInstalled' | translate }}</span>
+          }
+        </div>
+      }
       <p class="border-t border-divider pt-3 text-xs text-faint">{{ 'profile.preferencesHint' | translate }}</p>
     </section>
 

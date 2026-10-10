@@ -25,6 +25,32 @@
     }
   </div>
 
+  @if (installPrompt.showBanner()) {
+    <div
+      class="flex items-center gap-3 rounded-xl border border-border bg-surface px-3.5 py-2.5 text-[13px]"
+      role="region"
+      [attr.aria-label]="'dashboard.install.title' | translate"
+    >
+      <svg lucideDownload [size]="16" class="shrink-0 text-brand-light"></svg>
+      <p class="min-w-0 flex-1 text-text-3">{{ 'dashboard.install.text' | translate }}</p>
+      <button
+        type="button"
+        (click)="installPrompt.install()"
+        class="shrink-0 rounded-lg bg-brand px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-brand-dark"
+      >
+        {{ 'dashboard.install.action' | translate }}
+      </button>
+      <button
+        type="button"
+        (click)="installPrompt.dismissBanner()"
+        class="shrink-0 rounded-md p-1 text-faint hover:bg-hover hover:text-text"
+        [attr.aria-label]="'dashboard.install.dismiss' | translate"
+      >
+        <svg lucideX [size]="16"></svg>
+      </button>
+    </div>
+  }
+
   @if (isEmptyLibrary()) {
     <!-- Onboarding: account without games -->
     <section
@@ -141,9 +167,9 @@
                   loading="lazy"
                   decoding="async"
                   referrerpolicy="no-referrer"
-                  class="size-full scale-110 object-cover opacity-40 blur-2xl light:opacity-30"
+                  class="size-full scale-110 object-cover opacity-40 blur-2xl light:opacity-25"
                 />
-                <div class="absolute inset-0 bg-linear-to-r from-bg/50 via-bg/75 to-bg/90"></div>
+                <div class="absolute inset-0 bg-linear-to-r from-bg/50 via-bg/75 to-bg/90 light:from-bg/65 light:via-bg/85"></div>
               </div>
             }
             <div class="flex items-center gap-4 p-4">

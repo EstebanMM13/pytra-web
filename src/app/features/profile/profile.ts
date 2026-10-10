@@ -8,6 +8,7 @@ import { Platform } from '../../core/models/experience.model';
 import { SteamStatus } from '../../core/models/steam.model';
 import { ExportFormat } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
+import { InstallPromptService } from '../../core/services/install-prompt.service';
 import { FileExportService, filenameFromContentDisposition } from '../../core/services/file-export.service';
 import {
   Language,
@@ -75,6 +76,7 @@ export class Profile {
   private readonly route = inject(ActivatedRoute);
   protected readonly theme = inject(ThemeService);
   protected readonly preferences = inject(PreferencesService);
+  protected readonly installPrompt = inject(InstallPromptService);
 
   protected readonly themeOptions: SegmentedOption<ThemePreference>[] = [
     { value: 'dark', label: 'theme.dark' },

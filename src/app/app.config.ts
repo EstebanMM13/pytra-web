@@ -17,6 +17,7 @@ import { NativeOAuthService } from './core/services/native-oauth.service';
 import { ThemeService } from './core/services/theme.service';
 import { PreferencesService, applyLanguage } from './core/services/preferences.service';
 import { AppUpdateService } from './core/services/app-update.service';
+import { InstallPromptService } from './core/services/install-prompt.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,6 +26,8 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => inject(NativeOAuthService).init()),
     provideAppInitializer(() => {
       inject(ThemeService);
+      // Attach the beforeinstallprompt listener before the browser fires it.
+      inject(InstallPromptService);
     }),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideTranslateService({ lang: 'es', fallbackLang: 'es' }),

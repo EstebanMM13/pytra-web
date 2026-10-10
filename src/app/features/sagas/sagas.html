@@ -50,11 +50,11 @@
           <a
             [routerLink]="['/sagas', s.saga.id]"
             [attr.aria-current]="selected()?.saga?.id === s.saga.id ? 'true' : null"
-            class="hover-lift block rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
+            class="block rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
             [class]="
               selected()?.saga?.id === s.saga.id
                 ? 'border-border md:border-brand md:bg-brand-tint'
-                : 'border-border md:border-transparent md:bg-transparent md:hover:bg-hover'
+                : 'hover-lift border-border md:border-transparent md:bg-transparent md:hover:bg-hover'
             "
           >
             <div class="flex justify-between gap-3 text-[15px] font-semibold">
