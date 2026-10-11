@@ -1,8 +1,11 @@
 import { ExperienceStatus, Platform } from '../../core/models/experience.model';
 import { Game } from '../../core/models/game.model';
 
-/** Status tab of the library toolbar. `PENDIENTE` also covers games with no runs yet. */
-export type LibraryStatusFilter = 'ALL' | 'EN_CURSO' | 'COMPLETADO' | 'ABANDONADO' | 'PENDIENTE';
+/**
+ * Status tab of the library toolbar. `PENDIENTE` also covers games with no runs yet, except online
+ * games: those are tracked through online playtime, not runs, so they get their own `ONLINE` tab.
+ */
+export type LibraryStatusFilter = 'ALL' | 'EN_CURSO' | 'COMPLETADO' | 'ABANDONADO' | 'PENDIENTE' | 'ONLINE';
 export type LibrarySort = 'recent' | 'name' | 'rating' | 'hours';
 
 export const LIBRARY_STATUS_FILTERS: readonly LibraryStatusFilter[] = [
@@ -11,6 +14,7 @@ export const LIBRARY_STATUS_FILTERS: readonly LibraryStatusFilter[] = [
   'COMPLETADO',
   'ABANDONADO',
   'PENDIENTE',
+  'ONLINE',
 ];
 export const LIBRARY_SORTS: readonly LibrarySort[] = ['recent', 'name', 'rating', 'hours'];
 export const LIBRARY_PAGE_SIZE = 10;
@@ -42,12 +46,20 @@ export function normalizeText(value: string): string {
     .trim();
 }
 
+/** Online (or hybrid) game with no runs: played through online playtime, so never "pending". */
+export function isOnlineOnly(game: Game): boolean {
+  return !game.lastExperienceStatus && (game.category === 'ONLINE' || game.category === 'HYBRID');
+}
+
 export function matchesStatus(game: Game, status: LibraryStatusFilter): boolean {
   if (status === 'ALL') {
     return true;
   }
+  if (status === 'ONLINE') {
+    return isOnlineOnly(game);
+  }
   const last = game.lastExperienceStatus ?? null;
-  return status === 'PENDIENTE' ? last === 'PENDIENTE' || last === null : last === status;
+  return status === 'PENDIENTE' ? last === 'PENDIENTE' || (last === null && !isOnlineOnly(game)) : last === status;
 }
 
 export function matchesPlatform(game: Game, platform: LibraryPlatformFilter | undefined): boolean {

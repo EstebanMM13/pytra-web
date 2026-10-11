@@ -232,6 +232,8 @@
             <span>
               @if (game.lastExperienceStatus; as status) {
                 <app-status-pill [status]="status" />
+              } @else if (isOnlineOnly(game)) {
+                <span class="rounded-full bg-brand-tint px-2 py-0.5 text-xs text-brand-lighter">{{ 'library.online' | translate }}</span>
               } @else {
                 <span class="text-xs text-faint">{{ 'library.noRuns' | translate }}</span>
               }
@@ -252,6 +254,8 @@
             <a [routerLink]="['/games', game.id]" class="flex items-center gap-3 border-b border-divider py-[13px]">
               @if (game.lastExperienceStatus; as status) {
                 <app-status-pill dot [status]="status" class="shrink-0" />
+              } @else if (isOnlineOnly(game)) {
+                <span class="size-2 shrink-0 rounded-full bg-brand-light" aria-hidden="true"></span>
               } @else {
                 <span class="size-2 shrink-0 rounded-full border border-faint" aria-hidden="true"></span>
               }
@@ -264,7 +268,7 @@
                   }
                 </p>
                 <p class="mt-[3px] truncate text-xs text-muted">
-                  {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : 'library.noRuns') | translate }}
+                  {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
                   · {{ 'library.runsCount' | translate: { count: game.experienceCount ?? 0 } }}
                   @if (game.totalHours) {
                     · {{ game.totalHours | hours }}

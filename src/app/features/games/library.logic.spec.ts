@@ -3,6 +3,7 @@ import {
   countByStatus,
   filterGames,
   isLibraryGame,
+  isOnlineOnly,
   lastPlayedKey,
   matchesPlatform,
   matchesStatus,
@@ -61,7 +62,7 @@ describe('library logic', () => {
     });
 
     it('counts every tab', () => {
-      expect(countByStatus(all)).toEqual({ ALL: 5, EN_CURSO: 1, COMPLETADO: 1, ABANDONADO: 1, PENDIENTE: 2 });
+      expect(countByStatus(all)).toEqual({ ALL: 5, EN_CURSO: 1, COMPLETADO: 1, ABANDONADO: 1, PENDIENTE: 2, ONLINE: 0 });
     });
   });
 
@@ -157,5 +158,23 @@ describe('library logic', () => {
       expect(parsePlatformFilter('NES')).toBe('ALL');
       expect(parsePlatformFilter(null)).toBe('ALL');
     });
+  });
+});
+
+describe('online-only games', () => {
+  const fortnite = game({ id: 1, name: 'Fortnite', category: 'ONLINE', lastExperienceStatus: null });
+  const codNoRuns = game({ id: 2, name: 'COD', category: 'HYBRID', lastExperienceStatus: null });
+  const codWithRun = game({ id: 3, name: 'COD 2', category: 'HYBRID', lastExperienceStatus: 'COMPLETADO' });
+  const backlog = game({ id: 4, name: 'GTA 6', category: 'SINGLEPLAYER', lastExperienceStatus: null });
+
+  it('are online-only when online or hybrid without runs', () => {
+    expect([fortnite, codNoRuns, codWithRun, backlog].map(isOnlineOnly)).toEqual([true, true, false, false]);
+  });
+
+  it('go to the ONLINE tab instead of PENDIENTE', () => {
+    expect(matchesStatus(fortnite, 'ONLINE')).toBe(true);
+    expect(matchesStatus(fortnite, 'PENDIENTE')).toBe(false);
+    expect(matchesStatus(backlog, 'PENDIENTE')).toBe(true);
+    expect(matchesStatus(codWithRun, 'ONLINE')).toBe(false);
   });
 });

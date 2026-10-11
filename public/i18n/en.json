@@ -99,7 +99,10 @@
       "hours": "Hours",
       "avg": "Average",
       "platinums": "Platinums",
-      "replays": "Replays"
+      "replays": "Replays",
+      "singleHoursShort": "Single",
+      "onlineHoursShort": "Online",
+      "avgRatingShort": "Avg"
     },
     "playingNow": "Playing now",
     "nothingPlaying": "Nothing in progress",
@@ -703,7 +706,8 @@
       "EN_CURSO": "Playing",
       "COMPLETADO": "Completed",
       "ABANDONADO": "Dropped",
-      "PENDIENTE": "Pending"
+      "PENDIENTE": "Pending",
+      "ONLINE": "Online"
     },
     "filterPlaceholder": "Filter by name",
     "steamPending": "{{count}} Steam games to review",
@@ -725,6 +729,7 @@
       "year": "Year"
     },
     "platinum": "Platinum",
+    "online": "Online",
     "noRuns": "No runs",
     "showing": "Showing {{shown}} of {{total}}",
     "runsCount": "{{count}} run(s)",

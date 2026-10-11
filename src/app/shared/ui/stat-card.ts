@@ -31,7 +31,12 @@ import { Sparkline } from './sparkline';
         @if (icon(); as i) {
           <svg [lucideIcon]="i" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
         }
-        <span class="truncate" [attr.title]="label()">{{ label() }}</span>
+        @if (shortLabel(); as short) {
+          <span class="truncate sm:hidden" [attr.title]="label()">{{ short }}</span>
+          <span class="hidden truncate sm:inline">{{ label() }}</span>
+        } @else {
+          <span class="truncate" [attr.title]="label()">{{ label() }}</span>
+        }
       </p>
       <p
         class="mt-1.5 text-[22px] leading-[28px] font-bold tracking-[-0.03em] whitespace-nowrap md:mt-2 md:leading-[34px]"
@@ -50,6 +55,8 @@ import { Sparkline } from './sparkline';
 })
 export class StatCard {
   readonly label = input.required<string>();
+  /** Shown instead of `label` on narrow screens (< sm), where three cards share a row. */
+  readonly shortLabel = input<string | null>(null);
   readonly value = input.required<string | number>();
   readonly icon = input<LucideIconInput | null>(null);
   /** Extra classes for the figure, e.g. `font-mono text-gold` for ratings. */

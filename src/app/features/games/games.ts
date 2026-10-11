@@ -26,6 +26,7 @@ import {
   LIBRARY_PLATFORMS,
   LIBRARY_SORTS,
   LIBRARY_STATUS_FILTERS,
+  isOnlineOnly,
   LibraryQuery,
   LibrarySort,
   LibraryStatusFilter,
@@ -75,6 +76,7 @@ export class Games {
   private readonly router = inject(Router);
 
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
+  protected readonly isOnlineOnly = isOnlineOnly;
   protected readonly sorts = LIBRARY_SORTS;
   protected readonly platforms = LIBRARY_PLATFORMS;
   protected readonly platformOptions: DropdownOption[] = [

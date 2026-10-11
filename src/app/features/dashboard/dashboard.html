@@ -123,17 +123,20 @@
         <app-stat-card
           [icon]="icons.single"
           [label]="'dashboard.stats.singleHours' | translate"
+          [shortLabel]="'dashboard.stats.singleHoursShort' | translate"
           [value]="s.totalSingleplayerHours | hours"
           [trend]="trends().hours"
         />
         <app-stat-card
           [icon]="icons.online"
           [label]="'dashboard.stats.onlineHours' | translate"
+          [shortLabel]="'dashboard.stats.onlineHoursShort' | translate"
           [value]="s.totalOnlineHours | hours"
         />
         <app-stat-card
           [icon]="icons.rating"
           [label]="'dashboard.stats.avgRating' | translate"
+          [shortLabel]="'dashboard.stats.avgRatingShort' | translate"
           [value]="s.averageRating | rating"
           [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
           [trend]="trends().rating"

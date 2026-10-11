@@ -99,7 +99,10 @@
       "hours": "Horas",
       "avg": "Media",
       "platinums": "Platinos",
-      "replays": "Replays"
+      "replays": "Replays",
+      "singleHoursShort": "Single",
+      "onlineHoursShort": "Online",
+      "avgRatingShort": "Media"
     },
     "playingNow": "Jugando ahora",
     "nothingPlaying": "Nada en curso",
@@ -703,7 +706,8 @@
       "EN_CURSO": "En curso",
       "COMPLETADO": "Completados",
       "ABANDONADO": "Abandonados",
-      "PENDIENTE": "Pendientes"
+      "PENDIENTE": "Pendientes",
+      "ONLINE": "Online"
     },
     "filterPlaceholder": "Filtrar por nombre",
     "steamPending": "{{count}} juegos de Steam por revisar",
@@ -725,6 +729,7 @@
       "year": "Año"
     },
     "platinum": "Platino",
+    "online": "Online",
     "noRuns": "Sin partidas",
     "showing": "Mostrando {{shown}} de {{total}}",
     "runsCount": "{{count}} partida(s)",
