@@ -114,8 +114,8 @@
       </ol>
     </section>
   } @else {
-    <!-- Stats: web (6 cards) -->
-    <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-6">
+    <!-- Stats: same 6 cards everywhere (3 x 2 on mobile and tablet, one row on desktop) -->
+    <section class="grid grid-cols-3 gap-2 md:gap-3 lg:grid-cols-6">
       @if (summary(); as s) {
         <app-stat-card [icon]="icons.games" [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
         <app-stat-card [icon]="icons.sagas" [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
@@ -140,35 +140,7 @@
         />
       } @else if (!summaryFailed()) {
         @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-          <app-skeleton class="h-[94px] rounded-xl" />
-        }
-      } @else {
-        <div class="col-span-full"><ng-container *ngTemplateOutlet="sectionError" /></div>
-      }
-    </section>
-
-    <!-- Stats: mobile (3 x 2 mini cards) -->
-    <section class="grid grid-cols-3 gap-2 md:hidden">
-      @if (summary(); as s) {
-        <app-stat-card compact [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
-        <app-stat-card compact [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" [trend]="trends().runs" />
-        <app-stat-card compact [label]="'dashboard.stats.hours' | translate" [value]="totalHours() | hours" [trend]="trends().hours" />
-        <app-stat-card
-          compact
-          [label]="'dashboard.stats.avg' | translate"
-          [value]="s.averageRating | rating"
-          [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
-          [trend]="trends().rating"
-        />
-        <app-stat-card compact [label]="'dashboard.stats.replays' | translate" [value]="s.replayCount" />
-        <app-stat-card
-          compact
-          [label]="'🏆 ' + ('dashboard.stats.platinums' | translate)"
-          [value]="s.totalPlatinums"
-        />
-      } @else if (!summaryFailed()) {
-        @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-          <app-skeleton class="h-[66px] rounded-xl" />
+          <app-skeleton class="h-[84px] rounded-xl md:h-[118px]" />
         }
       } @else {
         <div class="col-span-full"><ng-container *ngTemplateOutlet="sectionError" /></div>
@@ -271,8 +243,8 @@
         </app-section-header>
         @if (yearBars(); as bars) {
           @if (bars.length) {
-            <div class="hidden min-h-[200px] flex-1 md:block">
-              <app-mini-bar-chart [bars]="bars" [height]="null" />
+            <div class="hidden min-h-[200px] flex-1 flex-col md:flex">
+              <app-mini-bar-chart class="flex-1" [bars]="bars" [height]="null" />
             </div>
             <div class="md:hidden">
               <app-mini-bar-chart [bars]="bars" [height]="96" dense />
@@ -290,15 +262,16 @@
       </section>
     </div>
 
-    <!-- Rankings -->
-    <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3">
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+    <!-- Rankings: same-length lists share the row height so the cards end flush; lists of
+         different lengths keep their own height rather than stretching a few rows. -->
+    <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3" [class.items-start]="listsUneven()">
+      <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header collapseKey="dashboard.topRated" collapseGroup="dashboard.lists" collapseGroupFrom="lg" class="mb-3.5" [label]="'dashboard.topRated' | translate" />
         @if (topRated(); as items) {
           @for (item of items; track item.gameId + item.runLabel; let i = $index) {
             <a
               [routerLink]="['/games', item.gameId]"
-              class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
+              class="flex flex-1 items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
             >
               <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
               <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName + ' · ' + item.runLabel">
@@ -318,13 +291,13 @@
         }
       </section>
 
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+      <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header collapseKey="dashboard.mostPlayed" collapseGroup="dashboard.lists" collapseGroupFrom="lg" class="mb-3.5" [label]="'dashboard.mostPlayed' | translate">
           <app-segmented size="sm" tone="neutral" [options]="playModeOptions" [(value)]="playMode" />
         </app-section-header>
         @if (mostPlayed(); as items) {
           @for (item of items; track item.gameId) {
-            <a [routerLink]="['/games', item.gameId]" class="block hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover">
+            <a [routerLink]="['/games', item.gameId]" class="flex flex-1 flex-col justify-center hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover">
               <span class="flex justify-between gap-3">
                 <span class="min-w-0 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
                 <span class="shrink-0 font-mono">{{ item.totalHours | hours }}</span>
@@ -345,13 +318,13 @@
         }
       </section>
 
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+      <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header collapseKey="dashboard.bySaga" collapseGroup="dashboard.lists" collapseGroupFrom="lg" class="mb-3.5" [label]="'dashboard.bySaga' | translate" />
         @if (topSagas(); as items) {
           @for (item of items; track item.sagaId) {
             <a
               [routerLink]="['/sagas', item.sagaId]"
-              class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
+              class="flex flex-1 items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
             >
               <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
               <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translate: { count: item.gameCount } }}</span>

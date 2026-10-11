@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  booleanAttribute,
   Component,
   computed,
   DestroyRef,
@@ -13,54 +12,40 @@ import {
 import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
 import { Sparkline } from './sparkline';
 
-/** Label + big figure tile. `compact` is the mobile mini-stat variant (value first, no icon). */
+/**
+ * Label + big figure tile, one design for every screen size: label row on top, the figure on
+ * its own line (never truncated: it shrinks with the card width instead) and, when there is a
+ * trend, a full-width sparkline strip pinned to the bottom. Cards stretched to a grid row keep
+ * their label, figure and bottom edge aligned.
+ */
 @Component({
   selector: 'app-stat-card',
   imports: [LucideDynamicIcon, Sparkline],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0 rounded-xl border border-card-border card-glass' },
   template: `
-    @if (compact()) {
-      <!-- Mobile: centred, and long values shrink instead of being cut with "…" -->
-      <div class="flex h-full flex-col items-center justify-center p-3 text-center">
-        <p
-          class="text-xl leading-tight font-bold tracking-[-0.02em] break-words"
-          [class]="figureClass()"
-          [style.font-size.px]="display().toString().length > 6 ? 16 : null"
-        >{{ display() }}</p>
-        <p class="mt-0.5 text-xs leading-tight text-muted">{{ label() }}</p>
-        @if (hint()) {
-          <p class="mt-0.5 text-[10px] leading-tight text-faint">{{ hint() }}</p>
+    <div
+      class="@container flex h-full flex-col p-3 [--fig-max:22px] md:px-[18px] md:py-4 md:[--fig-max:26px] lg:[--fig-max:28px]"
+    >
+      <p class="flex min-w-0 items-center gap-1.5 text-[11px] leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
+        @if (icon(); as i) {
+          <svg [lucideIcon]="i" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
         }
-        @if (hasTrend()) {
-          <app-sparkline class="mx-auto mt-1.5 block" [values]="trend()!" />
-        }
-      </div>
-    } @else {
-      <div class="px-[18px] py-4">
-        <p class="flex items-center gap-2 text-[13px] text-muted">
-          @if (icon(); as i) {
-            <svg [lucideIcon]="i" [size]="15" class="shrink-0 text-brand-light"></svg>
-          }
-          <span class="truncate">{{ label() }}</span>
-        </p>
-        <!-- The figure never truncates: when it doesn't fit beside the sparkline, the sparkline wraps below. -->
-        <div class="mt-3 flex flex-wrap items-end justify-between gap-x-2 gap-y-1">
-          <p
-            class="whitespace-nowrap text-[26px] font-bold tracking-[-0.03em] lg:text-[28px]"
-            [class]="figureClass()"
-          >
-            {{ display() }}
-          </p>
-          @if (hasTrend()) {
-            <app-sparkline class="mb-2 ml-auto shrink-0" [values]="trend()!" />
-          }
-        </div>
-        @if (hint()) {
-          <p class="mt-1 truncate text-xs text-muted" [attr.title]="hint()">{{ hint() }}</p>
-        }
-      </div>
-    }
+        <span class="truncate" [attr.title]="label()">{{ label() }}</span>
+      </p>
+      <p
+        class="mt-1.5 text-[22px] leading-[28px] font-bold tracking-[-0.03em] whitespace-nowrap md:mt-2 md:leading-[34px]"
+        [style.font-size]="figureSize()"
+      >
+        <span [class]="figureClass()">{{ display() }}</span>
+      </p>
+      @if (hint()) {
+        <p class="mt-1.5 line-clamp-2 text-[11px] leading-snug text-muted md:text-xs" [attr.title]="hint()">{{ hint() }}</p>
+      }
+      @if (hasTrend()) {
+        <app-sparkline class="mt-auto h-5 w-full pt-2.5 md:h-7 md:pt-3" [values]="trend()!" />
+      }
+    </div>
   `,
 })
 export class StatCard {
@@ -71,8 +56,7 @@ export class StatCard {
   readonly valueClass = input('');
   /** Optional small line under the value, e.g. a breakdown. */
   readonly hint = input<string | null>(null);
-  readonly compact = input(false, { transform: booleanAttribute });
-  /** Optional series (oldest first) drawn as a tiny sparkline next to the value; hidden with < 2 points. */
+  /** Optional series (oldest first) drawn as a sparkline strip at the bottom; hidden with < 2 points. */
   readonly trend = input<readonly number[] | null>(null);
 
   protected readonly hasTrend = computed(() => (this.trend()?.length ?? 0) >= 2);
@@ -81,6 +65,8 @@ export class StatCard {
     const extra = this.valueClass();
     return extra ? `${extra} text-figure-tone` : 'text-figure';
   });
+  /** Sized from the final value (not the count-up frame) so the figure never jumps while animating. */
+  protected readonly figureSize = computed(() => figureFontSize(String(this.value())));
 
   /** Text on screen: the exact formatted value, or an intermediate count-up frame. */
   protected readonly display = signal('');
@@ -121,6 +107,19 @@ export class StatCard {
 }
 
 const COUNT_UP_MS = 600;
+
+/** Average advance of a bold figure glyph, in em (digits ~0.6, separators narrower, "h" wider). */
+const FIGURE_EM_PER_CHAR = 0.62;
+
+/**
+ * CSS font-size for a figure: the card's `--fig-max`, shrunk so the whole text fits the
+ * card's content width (`cqi` of the `@container` wrapper) instead of being cut with "…".
+ */
+export function figureFontSize(text: string): string {
+  const chars = Math.max(1, Array.from(text).length);
+  const ems = Math.round(chars * FIGURE_EM_PER_CHAR * 100) / 100;
+  return `min(var(--fig-max), calc(100cqi / ${ems}))`;
+}
 
 /**
  * Numeric figures the count-up understands: plain integers/decimals with an optional

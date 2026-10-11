@@ -101,13 +101,12 @@
     <!-- Mobile: mini stats + date strip -->
     <section class="grid grid-cols-3 gap-2 md:hidden">
       <app-stat-card
-        compact
         [label]="'run.rating' | translate"
         [value]="e.rating | rating"
         [valueClass]="'font-mono ' + (e.rating | ratingTone)"
       />
-      <app-stat-card compact [label]="'run.hours' | translate" [value]="e.hours | hours" valueClass="font-mono" />
-      <app-stat-card compact [label]="'run.duration' | translate" [value]="durationLabel(false)" valueClass="font-mono" />
+      <app-stat-card [label]="'run.hours' | translate" [value]="e.hours | hours" valueClass="font-mono" />
+      <app-stat-card [label]="'run.duration' | translate" [value]="durationLabel(false)" valueClass="font-mono" />
     </section>
     @if (rank(); as r) {
       <p class="-mt-2 text-center text-xs text-muted md:hidden">{{ 'run.rank' | translate: { rank: r } }}</p>

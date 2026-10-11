@@ -149,9 +149,11 @@
     <!-- Stats -->
     @if (experiences() !== null) {
       @let s = stats();
-      <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-5">
-        <app-stat-card [icon]="icons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
+      <!-- Mobile/tablet: 2 wide cards (runs, hours + breakdown) over 3 narrow ones; one row on desktop -->
+      <section class="grid grid-cols-6 gap-2 md:gap-3 lg:grid-cols-5">
+        <app-stat-card class="col-span-3 lg:col-span-1" [icon]="icons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
         <app-stat-card
+          class="col-span-3 lg:col-span-1"
           [icon]="icons.hours"
           [label]="'game.stats.totalHours' | translate"
           [value]="s.totalHours | hours"
@@ -162,58 +164,30 @@
           "
         />
         <app-stat-card
+          class="col-span-2 lg:col-span-1"
           [icon]="icons.rating"
           [label]="'game.stats.avgRating' | translate"
           [value]="s.avgRating | rating"
           [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
         <app-stat-card
+          class="col-span-2 lg:col-span-1"
           [icon]="icons.rating"
           [label]="'game.stats.bestRating' | translate"
           [value]="s.bestRating | rating"
           [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
         />
         <app-stat-card
+          class="col-span-2 lg:col-span-1"
           [icon]="icons.platinum"
           [label]="'game.stats.platinum' | translate"
           [value]="s.platinum ? '🏆' : '—'"
         />
       </section>
-      <section class="grid grid-cols-3 gap-2 md:hidden">
-        <app-stat-card
-          compact
-          [label]="'game.stats.avg' | translate"
-          [value]="s.avgRating | rating"
-          [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
-        />
-        <app-stat-card
-          compact
-          [label]="'game.stats.hours' | translate"
-          [value]="s.totalHours | hours"
-          [hint]="
-            g.category && g.category !== 'SINGLEPLAYER'
-              ? ('game.stats.hoursBreakdown' | translate: { runs: (s.runHours | hours), online: (s.onlineHours | hours) })
-              : null
-          "
-        />
-        <app-stat-card compact [label]="'game.stats.runs' | translate" [value]="s.runs" />
-        <app-stat-card
-          compact
-          [label]="'game.stats.bestRating' | translate"
-          [value]="s.bestRating | rating"
-          [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
-        />
-        <app-stat-card compact [label]="'game.stats.platinum' | translate" [value]="s.platinum ? '🏆' : '—'" />
-      </section>
     } @else {
-      <section class="hidden grid-cols-3 gap-3 md:grid lg:grid-cols-5">
+      <section class="grid grid-cols-3 gap-2 md:gap-3 lg:grid-cols-5">
         @for (i of [1, 2, 3, 4, 5]; track i) {
-          <app-skeleton class="h-[94px] rounded-xl" />
-        }
-      </section>
-      <section class="grid grid-cols-3 gap-2 md:hidden">
-        @for (i of [1, 2, 3]; track i) {
-          <app-skeleton class="h-[66px] rounded-xl" />
+          <app-skeleton class="h-[72px] rounded-xl md:h-[90px]" />
         }
       </section>
     }

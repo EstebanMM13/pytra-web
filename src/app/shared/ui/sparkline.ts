@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-const WIDTH = 60;
-const HEIGHT = 18;
+/** Drawing box; the SVG stretches it to whatever size the host gets. */
+const WIDTH = 120;
+const HEIGHT = 24;
 const PAD = 1.5;
 
 /**
@@ -24,20 +25,28 @@ function round(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-/** Tiny decorative trend line (no axes). Renders nothing with fewer than 2 points. */
+/**
+ * Decorative trend line (no axes) that fills its host box: size the host (e.g. `h-6 w-full`)
+ * and the line stretches to it with a constant stroke width. Renders nothing with < 2 points.
+ */
 @Component({
   selector: 'app-sparkline',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'inline-block', 'aria-hidden': 'true' },
+  host: { class: 'block', 'aria-hidden': 'true' },
   template: `
     @if (line(); as l) {
-      <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" [attr.width]="width" [attr.height]="height" class="block overflow-visible">
+      <svg
+        [attr.viewBox]="'0 0 ' + width + ' ' + height"
+        preserveAspectRatio="none"
+        class="block size-full overflow-visible"
+      >
         <path [attr.d]="l.area" class="fill-brand-light/15 stroke-none" />
         <path
           [attr.d]="l.stroke"
           fill="none"
           class="stroke-brand-light"
           stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
           stroke-linecap="round"
           stroke-linejoin="round"
         />

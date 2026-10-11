@@ -122,18 +122,8 @@
         </button>
       </div>
 
-      <!-- Stats: 3 mini on mobile, 4 cards on web -->
-      <div class="grid grid-cols-3 gap-2 md:hidden">
-        <app-stat-card compact [label]="'sagas.stats.played' | translate" [value]="s.played + '/' + s.total" />
-        <app-stat-card compact [label]="'sagas.stats.hours' | translate" [value]="s.hours | hours" />
-        <app-stat-card
-          compact
-          [label]="'sagas.stats.avgShort' | translate"
-          [value]="s.avgRating | rating"
-          [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
-        />
-      </div>
-      <div class="hidden grid-cols-4 gap-3 md:grid">
+      <!-- Stats: 2 x 2 on mobile, one row on web -->
+      <div class="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
         <app-stat-card [label]="'sagas.stats.played' | translate" [value]="s.played + ' / ' + s.total" />
         <app-stat-card [label]="'sagas.stats.hours' | translate" [value]="s.hours | hours" />
         <app-stat-card

@@ -174,9 +174,10 @@ export class Dashboard {
   /** New account (no games yet): show the onboarding card instead of empty stats. */
   protected readonly isEmptyLibrary = computed(() => this.summary()?.totalGames === 0);
 
-  protected readonly totalHours = computed(() => {
-    const s = this.summary();
-    return s ? s.totalSingleplayerHours + s.totalOnlineHours : 0;
+  /** True when the three ranking lists have different lengths (loading lists count as full). */
+  protected readonly listsUneven = computed(() => {
+    const lengths = [this.topRated(), this.mostPlayed(), this.topSagas()].map((l) => l?.length ?? 5);
+    return lengths.some((n) => n !== lengths[0]);
   });
 
   protected readonly yearBars = computed<MiniBar[] | null>(() => {
