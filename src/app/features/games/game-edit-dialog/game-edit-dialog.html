@@ -6,21 +6,21 @@
   (closed)="closed.emit()"
 >
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4 md:gap-[18px]">
-    @if (steamSearchOpen()) {
-      <app-steam-autofill (picked)="applySteamMetadata($event)" (cancelled)="closeSteamSearch()" />
+    @if (autofillOpen()) {
+      <app-metadata-autofill [igdbEnabled]="igdbEnabled()" (picked)="applyAutofill($event)" (cancelled)="closeAutofill()" />
     } @else {
       <div class="flex flex-col gap-2">
         <button
-          #steamButton
+          #autofillButton
           type="button"
-          (click)="steamSearchOpen.set(true)"
+          (click)="autofillOpen.set(true)"
           class="flex items-center gap-2 self-start rounded-lg border border-border px-3.5 py-2 text-[13px] font-medium text-text-2 hover:border-border-strong"
         >
           <svg lucideWandSparkles [size]="15" class="text-brand-light"></svg>
-          {{ 'game.steamAutofill.open' | translate }}
+          {{ 'game.autofill.open' | translate }}
         </button>
-        @if (steamFilledFrom(); as source) {
-          <p class="text-xs text-muted" role="status">{{ 'game.steamAutofill.filled' | translate: { name: source } }}</p>
+        @if (filledFrom(); as filled) {
+          <p class="text-xs text-muted" role="status">{{ 'game.autofill.filled' | translate: filled }}</p>
         }
       </div>
     }
@@ -126,13 +126,13 @@
       </div>
       @if (suggestedGenres().length) {
         <div class="flex flex-col gap-2">
-          <span id="game-edit-suggested-genres" class="text-xs text-muted">{{ 'game.steamAutofill.suggestedGenres' | translate }}</span>
+          <span id="game-edit-suggested-genres" class="text-xs text-muted">{{ 'game.autofill.suggestedGenres' | translate }}</span>
           <div class="flex flex-wrap gap-2" role="group" aria-labelledby="game-edit-suggested-genres">
             @for (name of suggestedGenres(); track name) {
               <button
                 type="button"
                 (click)="addSuggestedGenre(name)"
-                [attr.aria-label]="'game.steamAutofill.addGenre' | translate: { name }"
+                [attr.aria-label]="'game.autofill.addGenre' | translate: { name }"
                 class="flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-[6px] text-[13px] text-text-2 hover:border-border-strong"
               >
                 <svg lucidePlus [size]="13"></svg>

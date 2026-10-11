@@ -33,9 +33,9 @@ import { ToastService } from '../../../shared/toast/toast.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { GameCover } from '../../../shared/ui/game-cover';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
-import { SteamGameMetadata } from '../../../core/models/steam-metadata.model';
-import { SteamAutofill } from './steam-autofill';
-import { matchGenres } from './steam-autofill.logic';
+import { IgdbMetadataService } from '../../../core/services/igdb-metadata.service';
+import { MetadataAutofill } from './metadata-autofill';
+import { AUTOFILL_SOURCE_LABELS, AutofillPick, matchGenres } from './metadata-autofill.logic';
 
 /** Empty, or an absolute https URL with a host. */
 function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors | null {
@@ -64,7 +64,7 @@ function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors |
     ModalSheet,
     Segmented,
     GameCover,
-    SteamAutofill,
+    MetadataAutofill,
     LucideTrash2,
     LucideWandSparkles,
     LucidePlus,
@@ -88,7 +88,8 @@ export class GameEditDialog implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
   private readonly injector = inject(Injector);
-  private readonly steamButton = viewChild<ElementRef<HTMLButtonElement>>('steamButton');
+  private readonly igdbService = inject(IgdbMetadataService);
+  private readonly autofillButton = viewChild<ElementRef<HTMLButtonElement>>('autofillButton');
 
   protected readonly categoryOptions: SegmentedOption<GameCategory>[] = (
     ['SINGLEPLAYER', 'ONLINE', 'HYBRID'] as const
@@ -100,10 +101,12 @@ export class GameEditDialog implements OnInit {
   protected readonly category = signal<GameCategory>('SINGLEPLAYER');
   protected readonly saving = signal(false);
   protected readonly deleting = signal(false);
-  protected readonly steamSearchOpen = signal(false);
-  /** Name of the Steam game the form was last filled from (shown as a "review before saving" note). */
-  protected readonly steamFilledFrom = signal<string | null>(null);
-  /** Steam genres the user has no genre for yet; one click creates and selects them. */
+  protected readonly autofillOpen = signal(false);
+  /** Whether the API offers IGDB as an autofill source (asked once, on open). */
+  protected readonly igdbEnabled = signal(false);
+  /** Game and source the form was last filled from (shown as a "review before saving" note). */
+  protected readonly filledFrom = signal<{ name: string; source: string } | null>(null);
+  /** Source genres the user has no genre for yet; one click creates and selects them. */
   protected readonly suggestedGenres = signal<string[]>([]);
 
   protected readonly newGenreName = this.fb.control('');
@@ -147,6 +150,7 @@ export class GameEditDialog implements OnInit {
       error: () => {},
     });
     this.genreService.findAll().subscribe({ next: (genres) => this.genres.set(genres), error: () => {} });
+    this.igdbService.providers().subscribe((providers) => this.igdbEnabled.set(providers.igdb));
   }
 
   protected toggleGenre(id: number): void {
@@ -187,10 +191,10 @@ export class GameEditDialog implements OnInit {
   }
 
   /**
-   * Prefills the form from Steam. Steam values overwrite the fields they have (missing ones keep what
-   * the user typed); matching genres are added to the selection. Nothing is saved until "Save".
+   * Prefills the form from IGDB or Steam. Source values overwrite the fields they have (missing ones
+   * keep what the user typed); matching genres are added to the selection. Nothing is saved until "Save".
    */
-  protected applySteamMetadata(metadata: SteamGameMetadata): void {
+  protected applyAutofill({ source, metadata }: AutofillPick): void {
     const controls = this.form.controls;
     controls.name.setValue(metadata.name);
     if (metadata.developer) controls.developer.setValue(metadata.developer);
@@ -202,14 +206,14 @@ export class GameEditDialog implements OnInit {
     const { matched, unmatched } = matchGenres(metadata.genres, this.genres());
     this.selectedGenreIds.update((current) => new Set([...current, ...matched.map((g) => g.id)]));
     this.suggestedGenres.set(unmatched);
-    this.steamFilledFrom.set(metadata.name);
-    this.closeSteamSearch();
+    this.filledFrom.set({ name: metadata.name, source: AUTOFILL_SOURCE_LABELS[source] });
+    this.closeAutofill();
   }
 
-  /** Hides the Steam search and gives focus back to the button that opened it. */
-  protected closeSteamSearch(): void {
-    this.steamSearchOpen.set(false);
-    afterNextRender(() => this.steamButton()?.nativeElement.focus(), { injector: this.injector });
+  /** Hides the autofill search and gives focus back to the button that opened it. */
+  protected closeAutofill(): void {
+    this.autofillOpen.set(false);
+    afterNextRender(() => this.autofillButton()?.nativeElement.focus(), { injector: this.injector });
   }
 
   protected submit(): void {
