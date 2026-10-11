@@ -28,7 +28,9 @@ import { Navbar } from '../../../shared/navbar/navbar';
 import { formatGenreName } from '../../../shared/pipes/genre-name.pipe';
 import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../../shared/pipes/rating.pipe';
-import { PlatformLabel } from '../../../shared/ui/platform-label';
+import { PlatformLabel, platformDisplayName } from '../../../shared/ui/platform-label';
+import { PlatformRef } from '../../../core/models/platform.model';
+import { distinctPlatformRefs } from '../../../core/services/platform.logic';
 import { RatingTonePipe } from '../../../shared/pipes/rating-tone.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { RunRow } from '../../../shared/ui/run-row';
@@ -147,15 +149,17 @@ export class GameDetail {
     return runs.find((r) => r.rating === best)?.id ?? null;
   });
 
-  /** API aggregate (enum order) when present; otherwise derived from the loaded runs. */
-  protected readonly platforms = computed(() => {
-    const fromApi = this.game()?.platforms;
-    return fromApi?.length ? fromApi : [...new Set(this.runs().map((r) => r.platform))];
+  /** API aggregate (catalog order) when present; otherwise derived from the loaded runs. */
+  protected readonly platforms = computed<PlatformRef[]>(() => {
+    const fromApi = this.game()?.platformRefs;
+    return fromApi?.length
+      ? fromApi
+      : distinctPlatformRefs(this.runs().map((r) => ({ id: r.platformId, name: r.platformName, color: r.platformColor })));
   });
 
   protected readonly platformNames = computed(() =>
     this.platforms()
-      .map((p) => this.translate.instant(`platform.${p}`) as string)
+      .map((p) => platformDisplayName(p.name, this.translate))
       .join(', '),
   );
 
@@ -270,7 +274,7 @@ export class GameDetail {
   protected runMeta(run: Experience): string {
     const locale = this.translate.currentLang() === 'en' ? 'en-US' : 'es-ES';
     return [
-      this.translate.instant(`platform.${run.platform}`) as string,
+      platformDisplayName(run.platformName, this.translate),
       formatRunPeriod(run.startDate, run.endDate, locale) ?? (run.year ? String(run.year) : null),
       run.platinum ? '🏆' : null,
       run.replay ? (this.translate.instant('run.replay') as string) : null,

@@ -131,25 +131,86 @@
 
     <!-- Platform -->
     <div class="flex flex-col gap-2">
-      <span id="run-form-platform" class="text-[13px] text-text-3">{{ 'runForm.platform' | translate }}</span>
-      <div role="radiogroup" aria-labelledby="run-form-platform" class="flex flex-wrap gap-2">
-        @for (p of platforms; track p) {
+      <label for="run-form-platform" class="text-[13px] text-text-3">{{ 'runForm.platform' | translate }}</label>
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="relative min-w-0 flex-1">
+          <span
+            class="pointer-events-none absolute top-1/2 left-3.5 size-2 -translate-y-1/2 rounded-full"
+            [class.bg-platform-neutral]="!selectedPlatformColor()"
+            [style.background-color]="selectedPlatformColor()"
+            aria-hidden="true"
+          ></span>
+          <select
+            id="run-form-platform"
+            formControlName="platformId"
+            [attr.aria-invalid]="showError('platformId')"
+            [attr.aria-busy]="platformGroups() === null"
+            class="h-[50px] w-full rounded-xl border bg-surface pr-3.5 pl-8 text-base text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+            [class]="showError('platformId') ? 'border-danger' : 'border-border'"
+          >
+            @if (platformGroups() === null) {
+              <option [ngValue]="null" disabled>{{ 'runForm.platformLoading' | translate }}</option>
+            } @else if (platformId() === null) {
+              <option [ngValue]="null" disabled>{{ 'runForm.platformPlaceholder' | translate }}</option>
+            }
+            @for (group of platformGroups() ?? []; track group.family) {
+              <optgroup [label]="'platformFamily.' + group.family | translate">
+                @for (p of group.platforms; track p.id) {
+                  <option [ngValue]="p.id">{{ platformLabel(p.name) | translate }}</option>
+                }
+              </optgroup>
+            }
+          </select>
+        </div>
+        @if (!addingPlatform()) {
           <button
             type="button"
-            role="radio"
-            [attr.aria-checked]="platform() === p"
-            (click)="setPlatform(p)"
-            class="rounded-full border px-3.5 py-[9px] text-sm md:py-[7px] md:text-[13px]"
-            [class]="
-              platform() === p
-                ? 'border-brand bg-brand-tint text-brand-lighter'
-                : 'border-border text-text-2 hover:border-border-strong'
-            "
+            class="shrink-0 rounded-full border border-dashed border-border px-3.5 py-[9px] text-sm text-text-2 hover:border-border-strong md:py-[7px] md:text-[13px]"
+            (click)="startAddPlatform()"
           >
-            {{ 'platform.' + p | translate }}
+            {{ 'runForm.addPlatform' | translate }}
           </button>
         }
       </div>
+      @if (addingPlatform()) {
+        <div class="flex flex-wrap items-center gap-2">
+          <input
+            id="run-form-new-platform"
+            type="text"
+            [attr.aria-label]="'runForm.newPlatformLabel' | translate"
+            [placeholder]="'runForm.newPlatformPlaceholder' | translate"
+            [maxLength]="platformNameMaxLength"
+            [value]="newPlatformName()"
+            (input)="newPlatformName.set($any($event.target).value)"
+            (keydown.enter)="$event.preventDefault(); createPlatform()"
+            (keydown.escape)="$event.preventDefault(); $event.stopPropagation(); cancelAddPlatform()"
+            [attr.aria-invalid]="newPlatformInvalid()"
+            class="h-[46px] min-w-0 flex-1 rounded-[10px] border bg-surface px-3.5 text-base text-text md:h-[42px] md:bg-bg md:text-[15px]"
+            [class]="newPlatformInvalid() ? 'border-danger' : 'border-border'"
+          />
+          <button
+            type="button"
+            class="rounded-full border border-brand bg-brand-tint px-3.5 py-[9px] text-sm text-brand-lighter disabled:opacity-60 md:py-[7px] md:text-[13px]"
+            [disabled]="creatingPlatform()"
+            (click)="createPlatform()"
+          >
+            {{ (creatingPlatform() ? 'runForm.addingPlatform' : 'runForm.addPlatformConfirm') | translate }}
+          </button>
+          <button
+            type="button"
+            class="rounded-full border border-border px-3.5 py-[9px] text-sm text-text-2 hover:border-border-strong md:py-[7px] md:text-[13px]"
+            (click)="cancelAddPlatform()"
+          >
+            {{ 'runForm.cancelAddPlatform' | translate }}
+          </button>
+        </div>
+        @if (newPlatformInvalid()) {
+          <p class="text-xs text-danger">{{ 'runForm.errors.platformName' | translate }}</p>
+        }
+      }
+      @if (showError('platformId')) {
+        <p class="text-xs text-danger">{{ 'runForm.errors.platform' | translate }}</p>
+      }
     </div>
 
     <!-- Dates, hours, rating: grouped list on mobile, 4 columns on web -->

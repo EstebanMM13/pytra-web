@@ -13,6 +13,7 @@ import { Dropdown, DropdownOption } from '../../shared/ui/dropdown';
 import { map } from 'rxjs';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
+import { platformNameKey } from '../../core/services/platform.logic';
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
@@ -23,7 +24,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { GameEditDialog } from './game-edit-dialog/game-edit-dialog';
 import {
-  LIBRARY_PLATFORMS,
+  libraryPlatforms,
   LIBRARY_SORTS,
   LIBRARY_STATUS_FILTERS,
   isOnlineOnly,
@@ -78,11 +79,6 @@ export class Games {
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
   protected readonly isOnlineOnly = isOnlineOnly;
   protected readonly sorts = LIBRARY_SORTS;
-  protected readonly platforms = LIBRARY_PLATFORMS;
-  protected readonly platformOptions: DropdownOption[] = [
-    { value: 'ALL', label: 'library.platformAllShort' },
-    ...LIBRARY_PLATFORMS.map((p) => ({ value: p, label: `platform.${p}` })),
-  ];
   protected readonly sortOptions: DropdownOption[] = LIBRARY_SORTS.map((s) => ({ value: s, label: `library.sort.${s}` }));
   protected readonly skeletonRows = Array.from({ length: 8 }, (_, i) => i);
 
@@ -112,6 +108,13 @@ export class Games {
   protected readonly pendingReviewCount = computed(
     () => (this.allGames() ?? []).filter((g) => !isLibraryGame(g)).length,
   );
+  /** Only the platforms the user's games have runs on. */
+  protected readonly platforms = computed(() => libraryPlatforms(this.libraryGames()));
+  protected readonly platformOptions = computed<DropdownOption[]>(() => [
+    { value: 'ALL', label: 'library.platformAllShort' },
+    ...this.platforms().map((p) => ({ value: String(p.id), label: platformNameKey(p.name) ?? p.name })),
+  ]);
+  protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
   protected readonly runCount = computed(() =>
     this.libraryGames().reduce((sum, g) => sum + (g.experienceCount ?? 0), 0),
   );

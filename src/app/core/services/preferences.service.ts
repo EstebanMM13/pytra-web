@@ -1,6 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Platform } from '../models/experience.model';
 
 /** How finely ratings are typed in the run form: 9 / 9.5 / 9.25. */
 export type RatingPrecision = 'integer' | 'half' | 'hundredths';
@@ -10,7 +9,11 @@ export type Language = 'es' | 'en';
 
 export interface Preferences {
   ratingPrecision: RatingPrecision;
-  defaultPlatform: Platform;
+  /**
+   * Platform preselected for new runs: a catalog id ("14"), or an old enum value ("PC") saved before
+   * the catalog existed. Resolved against the catalog with `findPlatformByKey`.
+   */
+  defaultPlatform: string;
   language: Language;
 }
 
@@ -24,7 +27,11 @@ export const DEFAULT_PREFERENCES: Preferences = {
 
 const PRECISIONS: readonly RatingPrecision[] = ['integer', 'half', 'hundredths'];
 export const LANGUAGES: readonly Language[] = ['es', 'en'];
-export const PLATFORMS: readonly Platform[] = ['PC', 'PS5', 'PS4', 'XBOX', 'SWITCH', 'MOBILE'];
+const MAX_PLATFORM_KEY_LENGTH = 40;
+
+function isPlatformKey(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && value.length <= MAX_PLATFORM_KEY_LENGTH;
+}
 
 /** Number input `step` for a rating precision. */
 export function ratingStep(precision: RatingPrecision): number {
@@ -46,9 +53,7 @@ export function parsePreferences(raw: string | null): Preferences {
     ratingPrecision: PRECISIONS.includes(value.ratingPrecision as RatingPrecision)
       ? (value.ratingPrecision as RatingPrecision)
       : DEFAULT_PREFERENCES.ratingPrecision,
-    defaultPlatform: PLATFORMS.includes(value.defaultPlatform as Platform)
-      ? (value.defaultPlatform as Platform)
-      : DEFAULT_PREFERENCES.defaultPlatform,
+    defaultPlatform: isPlatformKey(value.defaultPlatform) ? value.defaultPlatform : DEFAULT_PREFERENCES.defaultPlatform,
     language: LANGUAGES.includes(value.language as Language) ? (value.language as Language) : DEFAULT_PREFERENCES.language,
   };
 }
@@ -85,7 +90,7 @@ export class PreferencesService {
     this.update({ ratingPrecision });
   }
 
-  setDefaultPlatform(defaultPlatform: Platform): void {
+  setDefaultPlatform(defaultPlatform: string): void {
     this.update({ defaultPlatform });
   }
 

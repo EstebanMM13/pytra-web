@@ -70,11 +70,11 @@
                       @if (year) {
                         <span class="tabular-nums">{{ year }}</span>
                       }
-                      @if (year && game.platforms?.length) {
+                      @if (year && game.platformRefs?.length) {
                         <span aria-hidden="true"> · </span>
                       }
-                      @for (platform of game.platforms ?? []; track platform; let last = $last) {
-                        <span>{{ 'platform.' + platform | translate }}{{ last ? '' : ', ' }}</span>
+                      @for (platform of game.platformRefs ?? []; track platform.id; let last = $last) {
+                        <span>{{ platformLabel(platform.name) | translate }}{{ last ? '' : ', ' }}</span>
                       }
                     </span>
                   }

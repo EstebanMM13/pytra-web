@@ -503,7 +503,8 @@
     "PS4": "PS4",
     "XBOX": "Xbox",
     "SWITCH": "Switch",
-    "MOBILE": "Móvil"
+    "MOBILE": "Móvil",
+    "RETRO": "Retro / Emulador"
   },
   "category": {
     "SINGLEPLAYER": "Singleplayer",
@@ -675,14 +676,26 @@
         "integer": "La nota va de 0 a 10, sin decimales (según tus preferencias).",
         "half": "La nota va de 0 a 10, en medios puntos: 9 o 9,5 (según tus preferencias).",
         "hundredths": "La nota va de 0 a 10, con hasta 2 decimales (p. ej. 9,25)."
-      }
+      },
+      "platform": "Elige una plataforma.",
+      "platformName": "El nombre debe tener entre 1 y 40 caracteres."
     },
     "ratingExample": {
       "integer": "0–10 · ej. 9",
       "half": "0–10 · ej. 9,5",
       "hundredths": "0–10 · ej. 9,25"
     },
-    "campaignHours": "Horas de campaña"
+    "campaignHours": "Horas de campaña",
+    "platformLoading": "Cargando plataformas…",
+    "platformPlaceholder": "Elige una plataforma",
+    "addPlatform": "+ Añadir plataforma",
+    "newPlatformLabel": "Nueva plataforma",
+    "newPlatformPlaceholder": "Nombre (p. ej. Anbernic)",
+    "addPlatformConfirm": "Añadir",
+    "addingPlatform": "Añadiendo…",
+    "cancelAddPlatform": "Cancelar",
+    "platformCreateError": "No se pudo añadir la plataforma.",
+    "platformLoadError": "No se pudieron cargar las plataformas."
   },
   "pagination": {
     "label": "Paginación",
@@ -905,7 +918,7 @@
       },
       "allPlatforms": {
         "title": "Omnijugador",
-        "desc": "Juega en las {{target}} plataformas"
+        "desc": "Juega en {{target}} plataformas distintas"
       },
       "years3": {
         "title": "Constante",
@@ -977,5 +990,13 @@
     "exit": "Salir",
     "readOnly": "En el modo demo no se pueden hacer cambios",
     "bannerShort": "Demo · solo lectura"
+  },
+  "platformFamily": {
+    "PC": "PC",
+    "PLAYSTATION": "PlayStation",
+    "XBOX": "Xbox",
+    "NINTENDO": "Nintendo",
+    "MOBILE": "Móvil",
+    "OTHER": "Otras"
   }
 }

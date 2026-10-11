@@ -114,7 +114,7 @@ describe('run form logic', () => {
     const value: RunFormValue = {
       runLabel: '  Run 2 ',
       status: 'COMPLETADO',
-      platform: 'SWITCH',
+      platformId: 14,
       startDate: '2025-01-10',
       endDate: '2025-04-02',
       hours: '27',
@@ -136,7 +136,7 @@ describe('run form logic', () => {
         hours: 27,
         startDate: '2025-01-10',
         endDate: '2025-04-02',
-        platform: 'SWITCH',
+        platformId: 14,
         platinum: true,
         replay: true,
         summary: null,

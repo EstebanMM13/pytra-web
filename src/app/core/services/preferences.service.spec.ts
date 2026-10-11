@@ -15,7 +15,7 @@ describe('parsePreferences', () => {
   });
 
   it('keeps valid fields and replaces unknown ones', () => {
-    expect(parsePreferences(JSON.stringify({ ratingPrecision: 'half', defaultPlatform: 'NES' }))).toEqual({
+    expect(parsePreferences(JSON.stringify({ ratingPrecision: 'half', defaultPlatform: 42 }))).toEqual({
       ratingPrecision: 'half',
       defaultPlatform: 'PC',
       language: 'es',

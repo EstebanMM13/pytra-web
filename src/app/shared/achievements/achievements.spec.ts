@@ -2,6 +2,10 @@ import { Game } from '../../core/models/game.model';
 import { StatsSummary, YearStat } from '../../core/models/stats.model';
 import { ACHIEVEMENT_CATEGORIES, computeAchievements, groupByCategory, sortAchievements, topUnlocked } from './achievements';
 
+const PC = { id: 1, name: 'PC', color: '#8A857C' };
+const PS5 = { id: 2, name: 'PS5', color: '#4F7BE8' };
+const SWITCH = { id: 14, name: 'Switch', color: '#E0524C' };
+
 const game = (id: number, partial: Partial<Game> = {}): Game => ({
   id,
   name: `Game ${id}`,
@@ -107,8 +111,8 @@ describe('computeAchievements', () => {
 
   it('derives game-based badges (marathon, platforms, critic)', () => {
     const games = [
-      game(1, { totalHours: 120, platforms: ['PC', 'PS5'], bestRating: 9 }),
-      game(2, { totalHours: 10, platforms: ['PC', 'SWITCH'], bestRating: null }),
+      game(1, { totalHours: 120, platformRefs: [PC, PS5], bestRating: 9 }),
+      game(2, { totalHours: 10, platformRefs: [PC, SWITCH], bestRating: null }),
     ];
     const a = byId(computeAchievements({ games, summary: null, sagas: [] }));
     expect(a['marathon'].unlocked).toBe(true);

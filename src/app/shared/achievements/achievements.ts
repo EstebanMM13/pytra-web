@@ -85,7 +85,8 @@ export interface AchievementInput {
 }
 
 const TIER_WEIGHT: Record<AchievementTier, number> = { bronze: 0, silver: 1, gold: 2 };
-const ALL_PLATFORMS = 6;
+/** Distinct platforms for the gold platform badge (the old fixed list had 6). */
+const MANY_PLATFORMS = 6;
 
 type Def = [id: string, category: AchievementCategory, tier: AchievementTier, icon: AchievementIcon, current: number, target: number];
 
@@ -110,7 +111,7 @@ export function computeAchievements({ games, summary, sagas, years }: Achievemen
     : games.filter((g) => g.category === 'ONLINE').reduce((n, g) => n + (g.totalHours ?? 0), 0);
   const maxGameHours = Math.max(0, ...games.map((g) => g.totalHours ?? 0));
   const ratings = games.map((g) => g.bestRating).filter((r): r is number => r != null);
-  const platforms = new Set(games.flatMap((g) => g.platforms ?? [])).size;
+  const platforms = new Set(games.flatMap((g) => (g.platformRefs ?? []).map((p) => p.id))).size;
   const activeYears = (years ?? []).filter((y) => y.experienceCount > 0).map((y) => y.year);
   const playedCategories = new Set(played.map((g) => g.category).filter((c) => c != null));
   const playedOnline = played.some((g) => g.category === 'ONLINE' || g.category === 'HYBRID') ? 1 : 0;
@@ -151,7 +152,7 @@ export function computeAchievements({ games, summary, sagas, years }: Achievemen
     ['sagaTrilogy', 'sagas', 'silver', 'bookOpen', bestSagaCompleted(games, sagas), 3],
 
     ['platforms', 'platforms', 'bronze', 'monitor', platforms, 3],
-    ['allPlatforms', 'platforms', 'gold', 'globe', platforms, ALL_PLATFORMS],
+    ['allPlatforms', 'platforms', 'gold', 'globe', platforms, MANY_PLATFORMS],
 
     ['years3', 'years', 'bronze', 'calendar', activeYears.length, 3],
     ['veteran', 'years', 'silver', 'calendar', activeYears.length, 5],

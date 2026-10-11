@@ -5,10 +5,19 @@ import { NavigationStart, Router } from '@angular/router';
 import { LucideSearch } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, filter, map, startWith } from 'rxjs';
-import { Experience, ExperienceStatus, Platform } from '../../../core/models/experience.model';
+import { Experience, ExperienceStatus } from '../../../core/models/experience.model';
 import { Game } from '../../../core/models/game.model';
+import { PLATFORM_NAME_MAX_LENGTH, Platform } from '../../../core/models/platform.model';
 import { ExperienceService } from '../../../core/services/experience.service';
 import { GameService } from '../../../core/services/game.service';
+import {
+  findPlatformByKey,
+  groupPlatformsByFamily,
+  isValidPlatformName,
+  normalizePlatformName,
+  platformNameKey,
+} from '../../../core/services/platform.logic';
+import { PlatformService } from '../../../core/services/platform.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { RunFormLauncher, RunFormRequest } from '../../../core/services/run-form-launcher.service';
 import { ToastService } from '../../../shared/toast/toast.service';
@@ -17,7 +26,6 @@ import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { todayIso } from '../../../shared/utils/run-dates';
 import { formatDecimalInput } from '../../../shared/utils/decimal-input';
 import {
-  RUN_PLATFORMS,
   RUN_STATUSES,
   RunFormValue,
   buildExperienceRequest,
@@ -54,6 +62,7 @@ export class RunForm implements OnInit {
   private readonly router = inject(Router);
   private readonly gameService = inject(GameService);
   private readonly experienceService = inject(ExperienceService);
+  private readonly platformService = inject(PlatformService);
   private readonly launcher = inject(RunFormLauncher);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
@@ -63,7 +72,23 @@ export class RunForm implements OnInit {
     return this.translate.currentLang() === 'en' ? 'en' : 'es';
   }
 
-  protected readonly platforms = RUN_PLATFORMS;
+  /** Catalog grouped by family; null while loading. */
+  protected readonly platformGroups = computed(() => {
+    const platforms = this.platformService.platforms();
+    return platforms ? groupPlatformsByFamily(platforms) : null;
+  });
+  protected readonly platformNameMaxLength = PLATFORM_NAME_MAX_LENGTH;
+  /** Translation key for seeded names that have one, else the name itself (renders as-is). */
+  protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
+
+  // Inline "+ Add platform".
+  protected readonly addingPlatform = signal(false);
+  protected readonly newPlatformName = signal('');
+  protected readonly creatingPlatform = signal(false);
+  private readonly newPlatformTouched = signal(false);
+  protected readonly newPlatformInvalid = computed(
+    () => this.newPlatformTouched() && !isValidPlatformName(this.newPlatformName()),
+  );
   protected readonly statusOptions: SegmentedOption<ExperienceStatus>[] = RUN_STATUSES.map((s) => ({
     value: s,
     label: `status.${s}`,
@@ -74,7 +99,7 @@ export class RunForm implements OnInit {
       gameId: this.fb.control<number | null>(null, Validators.required),
       runLabel: this.fb.control('', [Validators.required, Validators.pattern(/\S/)]),
       status: this.fb.control<ExperienceStatus>('EN_CURSO'),
-      platform: this.fb.control<Platform>('PC'),
+      platformId: this.fb.control<number | null>(null, Validators.required),
       startDate: this.fb.control(''),
       endDate: this.fb.control(''),
       // Text inputs so "9,25" works on every keyboard/locale (number inputs drop it as empty).
@@ -101,7 +126,14 @@ export class RunForm implements OnInit {
   }
 
   protected readonly status = this.controlSignal(this.form.controls.status.valueChanges, () => this.form.controls.status.value);
-  protected readonly platform = this.controlSignal(this.form.controls.platform.valueChanges, () => this.form.controls.platform.value);
+  protected readonly platformId = this.controlSignal(
+    this.form.controls.platformId.valueChanges,
+    () => this.form.controls.platformId.value,
+  );
+  protected readonly selectedPlatformColor = computed(() => {
+    const id = this.platformId();
+    return this.platformService.platforms()?.find((p) => p.id === id)?.color ?? null;
+  });
   protected readonly platinum = this.controlSignal(this.form.controls.platinum.valueChanges, () => this.form.controls.platinum.value);
   protected readonly replay = this.controlSignal(this.form.controls.replay.valueChanges, () => this.form.controls.replay.value);
 
@@ -143,11 +175,25 @@ export class RunForm implements OnInit {
 
   ngOnInit(): void {
     const request = this.request();
+    const preferredPlatform = request.mode === 'create' ? (request.prefill?.platform ?? this.preferences.defaultPlatform()) : null;
+    const editedPlatformId = request.mode === 'edit' ? request.experience.platformId : null;
+    const cached = this.platformService.platforms();
+    const stale = editedPlatformId !== null && !!cached && !cached.some((p) => p.id === editedPlatformId);
+    this.platformService.load(stale).subscribe({
+      next: (platforms) => {
+        const control = this.form.controls.platformId;
+        if (control.value === null && preferredPlatform !== null) {
+          // Unknown preference (e.g. a removed id): fall back to PC rather than leaving it empty.
+          const platform = findPlatformByKey(platforms, preferredPlatform) ?? findPlatformByKey(platforms, 'PC');
+          control.setValue(platform?.id ?? null);
+        }
+      },
+      error: () => this.toast.error(this.translate.instant('runForm.platformLoadError')),
+    });
     if (request.mode === 'edit') {
       this.initEdit(request.experience);
     } else {
       this.form.patchValue({
-        platform: request.prefill?.platform ?? this.preferences.defaultPlatform(),
         hours: formatDecimalInput(request.prefill?.hours ?? null, this.lang()),
       });
       if (request.gameId !== undefined) {
@@ -167,7 +213,7 @@ export class RunForm implements OnInit {
       gameId: experience.gameId,
       runLabel: experience.runLabel,
       status: experience.status,
-      platform: experience.platform,
+      platformId: experience.platformId,
       startDate: experience.startDate ?? '',
       endDate: experience.endDate ?? '',
       hours: formatDecimalInput(experience.hours, this.lang()),
@@ -266,8 +312,39 @@ export class RunForm implements OnInit {
     }
   }
 
-  protected setPlatform(platform: Platform): void {
-    this.form.controls.platform.setValue(platform);
+  protected startAddPlatform(): void {
+    this.addingPlatform.set(true);
+    this.newPlatformName.set('');
+    this.newPlatformTouched.set(false);
+    queueMicrotask(() => document.getElementById('run-form-new-platform')?.focus());
+  }
+
+  protected cancelAddPlatform(): void {
+    this.addingPlatform.set(false);
+    this.newPlatformName.set('');
+    this.newPlatformTouched.set(false);
+  }
+
+  /** Creates (or finds, case-insensitively) the typed platform and selects it. */
+  protected createPlatform(): void {
+    this.newPlatformTouched.set(true);
+    const name = normalizePlatformName(this.newPlatformName());
+    if (this.creatingPlatform() || !isValidPlatformName(name)) {
+      return;
+    }
+    this.creatingPlatform.set(true);
+    this.platformService.create({ name }).subscribe({
+      next: (platform: Platform) => {
+        this.creatingPlatform.set(false);
+        this.form.controls.platformId.setValue(platform.id);
+        this.cancelAddPlatform();
+        queueMicrotask(() => document.getElementById('run-form-platform')?.focus());
+      },
+      error: () => {
+        this.creatingPlatform.set(false);
+        this.toast.error(this.translate.instant('runForm.platformCreateError'));
+      },
+    });
   }
 
   protected toggle(control: 'platinum' | 'replay'): void {
@@ -275,7 +352,7 @@ export class RunForm implements OnInit {
     c.setValue(!c.value);
   }
 
-  protected showError(name: 'gameId' | 'runLabel' | 'hours' | 'rating'): boolean {
+  protected showError(name: 'gameId' | 'runLabel' | 'platformId' | 'hours' | 'rating'): boolean {
     const control = this.form.controls[name];
     return control.invalid && (control.touched || this.submitted());
   }

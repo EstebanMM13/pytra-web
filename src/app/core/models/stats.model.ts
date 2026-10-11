@@ -1,4 +1,5 @@
-import { ExperienceStatus, Platform } from './experience.model';
+import { ExperienceStatus } from './experience.model';
+import { LegacyPlatformCode } from './platform.model';
 
 export interface StatsSummary {
   totalGames: number;
@@ -57,7 +58,11 @@ export interface InProgressExperience {
   gameName: string;
   coverImageUrl: string | null;
   runLabel: string;
-  platform: Platform;
+  /** Legacy enum code (old clients); use platformName/platformColor. */
+  platform: LegacyPlatformCode;
+  platformId: number;
+  platformName: string;
+  platformColor: string | null;
   startDate: string | null;
   hours: number | null;
   updatedAt: string;
@@ -80,7 +85,11 @@ export interface YearExperience {
   hours: number | null;
   rating: number | null;
   platinum: boolean;
-  platform: Platform;
+  /** Legacy enum code (old clients); use platformName/platformColor. */
+  platform: LegacyPlatformCode;
+  platformId: number;
+  platformName: string;
+  platformColor: string | null;
   month: number | null;
   startDate: string | null;
   endDate: string | null;

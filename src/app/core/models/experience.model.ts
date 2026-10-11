@@ -1,5 +1,6 @@
+import { LegacyPlatformCode } from './platform.model';
+
 export type ExperienceStatus = 'EN_CURSO' | 'COMPLETADO' | 'ABANDONADO' | 'PENDIENTE';
-export type Platform = 'PC' | 'PS5' | 'PS4' | 'XBOX' | 'SWITCH' | 'MOBILE';
 
 export interface Experience {
   id: number;
@@ -11,7 +12,11 @@ export interface Experience {
   hours: number | null;
   startDate: string | null;
   endDate: string | null;
-  platform: Platform;
+  /** Legacy enum code, kept by the API for old clients; use the platformId/Name/Color fields. */
+  platform: LegacyPlatformCode;
+  platformId: number;
+  platformName: string;
+  platformColor: string | null;
   platinum: boolean;
   replay: boolean;
   summary: string | null;
@@ -29,7 +34,8 @@ export interface ExperienceRequest {
   hours?: number | null;
   startDate?: string | null;
   endDate?: string | null;
-  platform: Platform;
+  /** Catalog platform id. */
+  platformId: number;
   platinum?: boolean;
   replay?: boolean;
   summary?: string | null;

@@ -9,7 +9,8 @@ import { SagaService } from '../../core/services/saga.service';
 import { StatsService } from '../../core/services/stats.service';
 import { AchievementBadge } from '../../shared/achievements/achievement-badge';
 import { Achievement, computeAchievements, groupByCategory, topUnlocked } from '../../shared/achievements/achievements';
-import { Platform } from '../../core/models/experience.model';
+import { findPlatformByKey, groupPlatformsByFamily, platformNameKey } from '../../core/services/platform.logic';
+import { PlatformService } from '../../core/services/platform.service';
 import { SteamStatus } from '../../core/models/steam.model';
 import { ExportFormat } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
@@ -17,7 +18,6 @@ import { InstallPromptService } from '../../core/services/install-prompt.service
 import { FileExportService, filenameFromContentDisposition } from '../../core/services/file-export.service';
 import {
   Language,
-  PLATFORMS,
   PreferencesService,
   RatingPrecision,
   applyLanguage,
@@ -105,7 +105,14 @@ export class Profile {
     { value: 'es', label: 'language.es' },
     { value: 'en', label: 'language.en' },
   ];
-  protected readonly platforms = PLATFORMS;
+  private readonly platformService = inject(PlatformService);
+  protected readonly platformGroups = computed(() => groupPlatformsByFamily(this.platformService.platforms() ?? []));
+  /** Translation key for seeded names that have one, else the name itself (renders as-is). */
+  protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
+  /** Catalog id of the default platform preference (stored as id or old enum value). */
+  protected readonly defaultPlatformId = computed(
+    () => findPlatformByKey(this.platformService.platforms() ?? [], this.preferences.defaultPlatform())?.id ?? null,
+  );
 
   protected readonly user = this.userService.currentUser;
   protected readonly displayName = this.userService.displayName;
@@ -167,6 +174,8 @@ export class Profile {
       mq.addEventListener('change', onChange);
       inject(DestroyRef).onDestroy(() => mq.removeEventListener('change', onChange));
     }
+
+    this.platformService.load().subscribe({ error: () => {} });
 
     forkJoin({
       games: inject(GameService).findAll(),
@@ -264,8 +273,8 @@ export class Profile {
   }
 
   protected setPlatform(value: string): void {
-    if ((PLATFORMS as readonly string[]).includes(value)) {
-      this.preferences.setDefaultPlatform(value as Platform);
+    if (findPlatformByKey(this.platformService.platforms() ?? [], value)) {
+      this.preferences.setDefaultPlatform(value);
     }
   }
 

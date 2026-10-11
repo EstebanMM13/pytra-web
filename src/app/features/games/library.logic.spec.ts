@@ -5,6 +5,7 @@ import {
   isLibraryGame,
   isOnlineOnly,
   lastPlayedKey,
+  libraryPlatforms,
   matchesPlatform,
   matchesStatus,
   paginate,
@@ -14,6 +15,11 @@ import {
   parseStatusFilter,
   sortGames,
 } from './library.logic';
+
+const PC = { id: 1, name: 'PC', color: '#8A857C' };
+const PS5 = { id: 2, name: 'PS5', color: '#4F7BE8' };
+const SWITCH = { id: 14, name: 'Switch', color: '#E0524C' };
+const DS = { id: 20, name: 'DS', color: '#E0524C' };
 
 function game(overrides: Partial<Game> & { id: number; name: string }): Game {
   return {
@@ -34,6 +40,7 @@ function game(overrides: Partial<Game> & { id: number; name: string }): Game {
     lastPlayedYear: null,
     hasPlatinum: false,
     platforms: [],
+    platformRefs: [],
     lastPlayedAt: null,
     ...overrides,
   };
@@ -77,13 +84,24 @@ describe('library logic', () => {
     });
 
     it('filters by platform (games with a run on it)', () => {
-      const pc = game({ id: 10, name: 'Hades', platforms: ['PC', 'SWITCH'] });
-      const ps = game({ id: 11, name: 'Astro Bot', platforms: ['PS5'] });
+      const pc = game({ id: 10, name: 'Hades', platformRefs: [PC, SWITCH] });
+      const ps = game({ id: 11, name: 'Astro Bot', platformRefs: [PS5] });
       const list = [pc, ps, unplayed];
-      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platform: 'SWITCH' }).map((g) => g.id)).toEqual([10]);
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platform: '14' }).map((g) => g.id)).toEqual([10]);
       expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platform: 'ALL' })).toHaveLength(3);
-      expect(matchesPlatform(unplayed, 'PC')).toBe(false);
-      expect(matchesPlatform(game({ id: 12, name: 'X', platforms: null }), 'PC')).toBe(false);
+      expect(matchesPlatform(unplayed, '1')).toBe(false);
+      expect(matchesPlatform(game({ id: 12, name: 'X', platformRefs: null }), '1')).toBe(false);
+    });
+
+    it('lists the platforms present in the games, distinct and by name', () => {
+      const list = [
+        game({ id: 10, name: 'Hades', platformRefs: [PC, SWITCH] }),
+        game({ id: 11, name: 'Astro Bot', platformRefs: [PS5, PC] }),
+        game({ id: 12, name: 'Pokémon Platino', platformRefs: [DS] }),
+        unplayed,
+      ];
+      expect(libraryPlatforms(list).map((p) => p.name)).toEqual(['DS', 'PC', 'PS5', 'Switch']);
+      expect(libraryPlatforms([unplayed])).toEqual([]);
     });
   });
 
@@ -154,8 +172,10 @@ describe('library logic', () => {
       expect(parsePage('-1')).toBe(1);
       expect(parsePage('abc')).toBe(1);
       expect(parsePage('2.5')).toBe(1);
-      expect(parsePlatformFilter('PS5')).toBe('PS5');
-      expect(parsePlatformFilter('NES')).toBe('ALL');
+      expect(parsePlatformFilter('14')).toBe('14');
+      expect(parsePlatformFilter('014')).toBe('14');
+      expect(parsePlatformFilter('PS5')).toBe('ALL');
+      expect(parsePlatformFilter('1.5')).toBe('ALL');
       expect(parsePlatformFilter(null)).toBe('ALL');
     });
   });

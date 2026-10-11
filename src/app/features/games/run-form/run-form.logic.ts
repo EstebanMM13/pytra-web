@@ -1,12 +1,11 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { Experience, ExperienceRequest, ExperienceStatus, Platform } from '../../../core/models/experience.model';
+import { Experience, ExperienceRequest, ExperienceStatus } from '../../../core/models/experience.model';
 import { RatingPrecision } from '../../../core/services/preferences.service';
 import { decimalValidator, parseDecimal } from '../../../shared/utils/decimal-input';
 
 /** Pure helpers behind the run form: validation, defaults and request building. */
 
 export const RUN_STATUSES: readonly ExperienceStatus[] = ['EN_CURSO', 'COMPLETADO', 'ABANDONADO', 'PENDIENTE'];
-export const RUN_PLATFORMS: readonly Platform[] = ['PC', 'PS5', 'PS4', 'XBOX', 'SWITCH', 'MOBILE'];
 
 /** Default label for a new run of a game that already has `existingRuns` runs. */
 export function nextRunLabel(existingRuns: number): string {
@@ -88,7 +87,8 @@ export function deriveRunYear(
 export interface RunFormValue {
   runLabel: string;
   status: ExperienceStatus;
-  platform: Platform;
+  /** Catalog platform id; required by the form validators before a request is built. */
+  platformId: number | null;
   startDate: string;
   endDate: string;
   /** Raw text of the decimal inputs ("12,5"); parsed when building the request. */
@@ -128,7 +128,7 @@ export function buildExperienceRequest(
     hours: numberOrNull(value.hours),
     startDate,
     endDate,
-    platform: value.platform,
+    platformId: value.platformId as number,
     platinum: value.platinum,
     replay: value.replay,
     summary: textOrNull(value.summary),

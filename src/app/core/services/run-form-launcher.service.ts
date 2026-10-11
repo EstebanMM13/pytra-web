@@ -1,12 +1,13 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { Experience, Platform } from '../models/experience.model';
+import { Experience } from '../models/experience.model';
 import { DemoModeService } from './demo-mode.service';
 
 /** Optional values to prefill a new run with (e.g. hours and platform from a Steam import). */
 export interface RunPrefill {
   hours?: number | null;
-  platform?: Platform;
+  /** Platform key: catalog id, old enum value ("PC") or name; see `findPlatformByKey`. */
+  platform?: string;
 }
 
 /** What the run form is currently open for. Rendered by `RunFormHost` (app root). */

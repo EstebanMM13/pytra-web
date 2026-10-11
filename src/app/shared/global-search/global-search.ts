@@ -24,6 +24,7 @@ import {
 } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Game } from '../../core/models/game.model';
+import { platformNameKey } from '../../core/services/platform.logic';
 import { Saga } from '../../core/models/saga.model';
 import { GameService } from '../../core/services/game.service';
 import { SagaService } from '../../core/services/saga.service';
@@ -83,6 +84,8 @@ export class GlobalSearch {
   protected readonly activeIndex = signal(0);
 
   protected readonly groupLabelKeys = GROUP_LABEL_KEYS;
+  /** Translation key for seeded platform names that have one, else the name (renders as-is). */
+  protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
   protected readonly pageIcons = new Map(PAGES.map((p) => [p.path, p.icon]));
   protected readonly sagaIcon = LucideLayers;
   protected readonly yearIcon = LucideChartColumn;

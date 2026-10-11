@@ -1,5 +1,6 @@
 import { Genre } from './genre.model';
-import { ExperienceStatus, Platform } from './experience.model';
+import { ExperienceStatus } from './experience.model';
+import { LegacyPlatformCode, PlatformRef } from './platform.model';
 
 export type GameCategory = 'SINGLEPLAYER' | 'ONLINE' | 'HYBRID';
 export type ReviewStatus = 'PENDING_REVIEW' | 'CONFIRMED';
@@ -26,8 +27,10 @@ export interface Game {
   lastExperienceStatus?: ExperienceStatus | null;
   lastPlayedYear?: number | null;
   hasPlatinum?: boolean | null;
-  /** Platforms of the game's runs, in enum order; empty when it has no runs. */
-  platforms?: Platform[] | null;
+  /** Legacy enum codes of the game's platforms (kept by the API for old clients); use platformRefs. */
+  platforms?: LegacyPlatformCode[] | null;
+  /** Catalog platforms of the game's runs, in catalog order; empty when it has no runs. */
+  platformRefs?: PlatformRef[] | null;
   /** Date (`yyyy-MM-dd`) of the most recent run activity; null when unknown. */
   lastPlayedAt?: string | null;
 }

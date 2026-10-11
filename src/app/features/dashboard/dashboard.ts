@@ -38,6 +38,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { formatDayMonthYear } from '../../shared/utils/run-dates';
 import { Game } from '../../core/models/game.model';
+import { platformDisplayName } from '../../shared/ui/platform-label';
 import { Saga } from '../../core/models/saga.model';
 import { GameService } from '../../core/services/game.service';
 import { SagaService } from '../../core/services/saga.service';
@@ -292,7 +293,7 @@ export class Dashboard {
   }
 
   protected playingMeta(run: InProgressExperience): string {
-    const parts = [run.runLabel, this.translate.instant(`platform.${run.platform}`) as string];
+    const parts = [run.runLabel, platformDisplayName(run.platformName, this.translate)];
     if (run.startDate) {
       parts.push(this.translate.instant('common.since', { date: formatDayMonthYear(run.startDate) }) as string);
     }

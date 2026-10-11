@@ -1,5 +1,7 @@
-import { ExperienceStatus, Platform } from '../../core/models/experience.model';
+import { ExperienceStatus } from '../../core/models/experience.model';
 import { Game } from '../../core/models/game.model';
+import { PlatformRef } from '../../core/models/platform.model';
+import { distinctPlatformRefs } from '../../core/services/platform.logic';
 
 /**
  * Status tab of the library toolbar. `PENDIENTE` also covers games with no runs yet, except online
@@ -19,10 +21,15 @@ export const LIBRARY_STATUS_FILTERS: readonly LibraryStatusFilter[] = [
 export const LIBRARY_SORTS: readonly LibrarySort[] = ['recent', 'name', 'rating', 'hours'];
 export const LIBRARY_PAGE_SIZE = 10;
 
-/** Platform dropdown of the toolbar: a platform the game has runs on, or all. */
-export type LibraryPlatformFilter = Platform | 'ALL';
+/** Platform dropdown of the toolbar: a catalog platform id (as text, it lives in the URL) or all. */
+export type LibraryPlatformFilter = string;
 
-export const LIBRARY_PLATFORMS: readonly Platform[] = ['PC', 'PS5', 'PS4', 'XBOX', 'SWITCH', 'MOBILE'];
+/** Platforms the user's games have runs on, distinct, by name (the options of the platform filter). */
+export function libraryPlatforms(games: readonly Game[]): PlatformRef[] {
+  return distinctPlatformRefs(games.flatMap((g) => g.platformRefs ?? [])).sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true }),
+  );
+}
 
 export interface LibraryQuery {
   text: string;
@@ -63,7 +70,7 @@ export function matchesStatus(game: Game, status: LibraryStatusFilter): boolean 
 }
 
 export function matchesPlatform(game: Game, platform: LibraryPlatformFilter | undefined): boolean {
-  return !platform || platform === 'ALL' || (game.platforms ?? []).includes(platform);
+  return !platform || platform === 'ALL' || (game.platformRefs ?? []).some((ref) => String(ref.id) === platform);
 }
 
 export function matchesText(game: Game, text: string): boolean {
@@ -170,7 +177,7 @@ export function parseSort(value: string | null): LibrarySort {
 }
 
 export function parsePlatformFilter(value: string | null): LibraryPlatformFilter {
-  return (LIBRARY_PLATFORMS as readonly string[]).includes(value ?? '') ? (value as Platform) : 'ALL';
+  return value && /^\d+$/.test(value) ? String(Number(value)) : 'ALL';
 }
 
 export function parsePage(value: string | null): number {

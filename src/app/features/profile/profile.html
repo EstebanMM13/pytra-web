@@ -313,12 +313,15 @@
         <label for="pref-platform" class="text-muted">{{ 'profile.defaultPlatform' | translate }}</label>
         <select
           id="pref-platform"
-          [value]="preferences.defaultPlatform()"
           (change)="setPlatform($any($event.target).value)"
-          class="rounded-lg border border-border bg-bg px-3 py-[7px] text-[13px] text-text"
+          class="max-w-[55%] rounded-lg border border-border bg-bg px-3 py-[7px] text-[13px] text-text"
         >
-          @for (p of platforms; track p) {
-            <option [value]="p" [selected]="p === preferences.defaultPlatform()">{{ 'platform.' + p | translate }}</option>
+          @for (group of platformGroups(); track group.family) {
+            <optgroup [label]="'platformFamily.' + group.family | translate">
+              @for (p of group.platforms; track p.id) {
+                <option [value]="p.id" [selected]="p.id === defaultPlatformId()">{{ platformLabel(p.name) | translate }}</option>
+              }
+            </optgroup>
           }
         </select>
       </div>
