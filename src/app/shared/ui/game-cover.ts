@@ -57,13 +57,26 @@ export function coverHue(name: string): number {
   },
   template: `
     @if (showImage()) {
+      @if (portrait()) {
+        <!-- Portrait box art (e.g. IGDB covers): blurred copy fills the banner, the full cover sits on top. -->
+        <img
+          [src]="url()"
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          referrerpolicy="no-referrer"
+          class="absolute inset-0 size-full scale-125 object-cover opacity-70 blur-md"
+        />
+      }
       <img
         [src]="url()"
         [alt]="decorative() ? '' : name()"
         loading="lazy"
         decoding="async"
         referrerpolicy="no-referrer"
-        class="size-full object-cover"
+        class="relative size-full"
+        [class]="portrait() ? 'object-contain' : 'object-cover'"
+        (load)="onLoad($event)"
         (error)="failed.set(true)"
       />
     } @else {
@@ -93,6 +106,9 @@ export class GameCover {
   /** Load error of the current url; resets whenever the url changes. */
   protected readonly failed = linkedSignal({ source: this.url, computation: () => false });
 
+  /** The loaded image is taller than wide; resets whenever the url changes. */
+  protected readonly portrait = linkedSignal({ source: this.url, computation: () => false });
+
   protected readonly showImage = computed(() => !!this.url() && !this.failed());
   protected readonly initials = computed(() => coverInitials(this.name()));
   protected readonly sizeClass = computed(() => SIZE_CLASS[this.size()]);
@@ -104,4 +120,9 @@ export class GameCover {
       `var(--pt-surface) 100%)`
     );
   });
+
+  protected onLoad(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    this.portrait.set(img.naturalHeight > img.naturalWidth);
+  }
 }

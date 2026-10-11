@@ -587,7 +587,7 @@
       "newGenre": "New genre",
       "addGenre": "Add",
       "coverUrl": "Cover URL",
-      "coverUrlHint": "Optional. An https link to a landscape image (e.g. the Steam header).",
+      "coverUrlHint": "Optional. https link to an image: portrait box art or a landscape header (e.g. Steam’s).",
       "coverUrlInvalid": "Enter a valid https URL.",
       "coverPreview": "Cover preview"
     },

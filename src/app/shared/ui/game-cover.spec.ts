@@ -32,6 +32,30 @@ describe('GameCover', () => {
     expect(host.classList).toContain('w-16');
   });
 
+  it('shows portrait art whole over a blurred backdrop', () => {
+    const { fixture, el } = setup('https://images.example.com/cover.jpg');
+    const img = el.querySelector('img')!;
+    Object.defineProperty(img, 'naturalWidth', { value: 264 });
+    Object.defineProperty(img, 'naturalHeight', { value: 374 });
+    img.dispatchEvent(new Event('load'));
+    fixture.detectChanges();
+    const imgs = el.querySelectorAll('img');
+    expect(imgs.length).toBe(2);
+    expect(imgs[0].getAttribute('aria-hidden')).toBe('true');
+    expect(imgs[1].classList).toContain('object-contain');
+  });
+
+  it('keeps landscape art cropped to fill', () => {
+    const { fixture, el } = setup('https://images.example.com/header.jpg');
+    const img = el.querySelector('img')!;
+    Object.defineProperty(img, 'naturalWidth', { value: 460 });
+    Object.defineProperty(img, 'naturalHeight', { value: 215 });
+    img.dispatchEvent(new Event('load'));
+    fixture.detectChanges();
+    expect(el.querySelectorAll('img').length).toBe(1);
+    expect(el.querySelector('img')!.classList).toContain('object-cover');
+  });
+
   it('shows the initials fallback without a url', () => {
     const { el } = setup(null);
     expect(el.querySelector('img')).toBeNull();
