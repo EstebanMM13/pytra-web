@@ -29,6 +29,7 @@ import {
 } from 'rxjs';
 import { IgdbMetadataService } from '../../../core/services/igdb-metadata.service';
 import { SteamMetadataService } from '../../../core/services/steam-metadata.service';
+import { GameCover } from '../../../shared/ui/game-cover';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import {
   AUTOFILL_SEARCH_MIN_LENGTH,
@@ -55,7 +56,7 @@ type SearchState = 'idle' | 'loading' | 'ready' | 'error';
  */
 @Component({
   selector: 'app-metadata-autofill',
-  imports: [TranslatePipe, LucideSearch, LucideX, LucideLoaderCircle, Segmented],
+  imports: [TranslatePipe, LucideSearch, LucideX, LucideLoaderCircle, Segmented, GameCover],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-col gap-2 rounded-xl border border-border bg-bg p-3">
@@ -135,21 +136,8 @@ type SearchState = 'idle' | 'loading' | 'ready' | 'error';
               class="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm"
               [class.bg-brand-tint]="i === activeIndex()"
             >
-              <!-- IGDB thumbnails are portrait box art, Steam's are wide capsules. -->
-              @if (result.imageUrl) {
-                <img
-                  [src]="result.imageUrl"
-                  alt=""
-                  [attr.width]="portraitThumbs() ? 30 : 64"
-                  [attr.height]="portraitThumbs() ? 40 : 24"
-                  loading="lazy"
-                  referrerpolicy="no-referrer"
-                  class="shrink-0 rounded object-cover"
-                  [class]="portraitThumbs() ? 'h-10 w-[30px]' : 'h-6 w-16'"
-                />
-              } @else {
-                <span class="shrink-0 rounded bg-border" [class]="portraitThumbs() ? 'h-10 w-[30px]' : 'h-6 w-16'"></span>
-              }
+              <!-- Box art: IGDB's small cover, or the Steam library capsule the game would be saved with. -->
+              <app-game-cover decorative size="sm" [url]="result.imageUrl" [name]="result.name" />
               <span class="flex min-w-0 flex-1 flex-col">
                 <span class="truncate" [class]="i === activeIndex() ? 'text-brand-lighter' : 'text-text-2'">
                   {{ result.name }}
@@ -192,7 +180,6 @@ export class MetadataAutofill implements OnInit {
     this.igdbEnabled() ? (this.chosenSource() ?? 'igdb') : 'steam',
   );
   protected readonly sourceParams = computed(() => ({ source: AUTOFILL_SOURCE_LABELS[this.source()] }));
-  protected readonly portraitThumbs = computed(() => this.source() === 'igdb');
 
   protected readonly query = signal('');
   protected readonly results = signal<AutofillResult[]>([]);

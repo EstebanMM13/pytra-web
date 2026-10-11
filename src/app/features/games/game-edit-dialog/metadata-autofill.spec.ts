@@ -96,7 +96,9 @@ describe('MetadataAutofill', () => {
     expect(search).toHaveBeenCalledWith('elden');
     const options = el.querySelectorAll('[role="option"]');
     expect(options.length).toBe(2);
-    expect(options[0].querySelector('img')?.getAttribute('src')).toBe(STEAM_RESULTS[0].imageUrl);
+    expect(options[0].querySelector('img')?.getAttribute('src')).toBe(
+      'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/library_600x900.jpg',
+    );
     expect(input.getAttribute('aria-expanded')).toBe('true');
   });
 

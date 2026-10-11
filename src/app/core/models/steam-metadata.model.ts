@@ -16,5 +16,6 @@ export interface SteamGameMetadata {
   releaseDate: string | null;
   /** Steam genre names as the Spanish store shows them (e.g. "Acción"). */
   genres: string[];
+  /** Portrait library capsule (library_600x900.jpg) built from the appid. */
   coverImageUrl: string | null;
 }

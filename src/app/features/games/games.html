@@ -12,8 +12,17 @@
       }
     </div>
 
-    <!-- Mobile actions: sort (native picker under the icon) + add -->
+    <!-- Mobile actions: list/grid view, sort (native picker under the icon) + add -->
     <div class="flex items-center gap-1 text-text-3 md:hidden">
+      @if (view() === 'list') {
+        <button type="button" (click)="setView('grid')" class="rounded-lg p-2 hover:text-text" [attr.aria-label]="'library.view.grid' | translate">
+          <svg lucideLayoutGrid [size]="20"></svg>
+        </button>
+      } @else {
+        <button type="button" (click)="setView('list')" class="rounded-lg p-2 hover:text-text" [attr.aria-label]="'library.view.list' | translate">
+          <svg lucideList [size]="20"></svg>
+        </button>
+      }
       <label class="relative rounded-lg p-2 hover:text-text" [attr.aria-label]="'library.sortLabel' | translate">
         <svg lucideArrowDownWideNarrow [size]="20"></svg>
         <select
@@ -162,6 +171,29 @@
       </div>
 
       <div class="ml-auto hidden items-center gap-2.5 md:flex">
+        <div
+          class="inline-flex rounded-lg border border-border bg-surface p-[3px] text-[13px]"
+          role="radiogroup"
+          [attr.aria-label]="'library.view.label' | translate"
+        >
+          @for (v of views; track v) {
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="view() === v"
+              (click)="setView(v)"
+              class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5"
+              [class]="view() === v ? 'bg-border text-text' : 'text-muted hover:text-text-2'"
+            >
+              @if (v === 'list') {
+                <svg lucideList [size]="15"></svg>
+              } @else {
+                <svg lucideLayoutGrid [size]="15"></svg>
+              }
+              {{ 'library.view.' + v | translate }}
+            </button>
+          }
+        </div>
         <app-dropdown
           [options]="platformOptions()"
           [value]="query().platform"
@@ -198,6 +230,59 @@
           </button>
         }
       </div>
+    } @else if (view() === 'grid') {
+      <!-- Poster grid (all results) -->
+      <ul class="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 md:grid-cols-5 md:gap-x-5 md:gap-y-7 lg:grid-cols-6">
+        @for (game of filtered(); track game.id) {
+          <li class="min-w-0">
+            <a [routerLink]="['/games', game.id]" class="group flex flex-col gap-2 rounded-lg">
+              <div class="relative">
+                <app-game-cover
+                  decorative
+                  size="fill"
+                  class="shadow-md ring-1 shadow-black/25 ring-border transition duration-200 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:ring-brand-light"
+                  [url]="game.coverImageUrl"
+                  [name]="game.name"
+                />
+                @if (game.bestRating !== null && game.bestRating !== undefined) {
+                  <span
+                    class="absolute right-1.5 bottom-1.5 rounded-md border border-border bg-bg/85 px-1.5 py-0.5 font-mono text-xs font-medium backdrop-blur-sm transition duration-200 group-hover:-translate-y-1"
+                    [class]="game.bestRating | ratingTone"
+                    >{{ game.bestRating | rating }}</span
+                  >
+                }
+                @if (game.hasPlatinum) {
+                  <span
+                    class="absolute top-1.5 left-1.5 rounded-md bg-bg/85 px-1 py-0.5 text-xs backdrop-blur-sm transition duration-200 group-hover:-translate-y-1"
+                    [attr.aria-label]="'library.platinum' | translate"
+                    >🏆</span
+                  >
+                }
+              </div>
+              <div class="min-w-0 px-0.5">
+                <p class="line-clamp-2 text-[13px] leading-snug font-medium group-hover:text-brand-lighter md:text-sm" [title]="game.name">
+                  {{ game.name }}
+                </p>
+                <p class="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] text-muted md:text-xs">
+                  @if (game.lastExperienceStatus; as status) {
+                    <app-status-pill dot [status]="status" class="shrink-0" />
+                  } @else if (isOnlineOnly(game)) {
+                    <span class="size-2 shrink-0 rounded-full bg-brand-light" aria-hidden="true"></span>
+                  } @else {
+                    <span class="size-2 shrink-0 rounded-full border border-faint" aria-hidden="true"></span>
+                  }
+                  <span class="truncate">
+                    {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
+                    @if (game.totalHours) {
+                      · {{ game.totalHours | hours }}
+                    }
+                  </span>
+                </p>
+              </div>
+            </a>
+          </li>
+        }
+      </ul>
     } @else {
       <!-- Web table (paged) -->
       <section class="hidden overflow-hidden rounded-[14px] border border-card-border card-glass md:block">
@@ -216,7 +301,7 @@
         @for (game of page().items; track game.id) {
           <a
             [routerLink]="['/games', game.id]"
-            class="grid grid-cols-[minmax(0,3fr)_minmax(0,1.6fr)_90px_90px_90px_130px_80px] items-center gap-4 border-t border-divider px-[22px] py-[13px] text-sm first-of-type:border-t-0 hover:bg-hover"
+            class="grid grid-cols-[minmax(0,3fr)_minmax(0,1.6fr)_90px_90px_90px_130px_80px] items-center gap-4 border-t border-divider px-[22px] py-2 text-sm first-of-type:border-t-0 hover:bg-hover"
           >
             <span class="flex min-w-0 items-center gap-3 font-medium">
               <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
@@ -251,7 +336,7 @@
       <ul class="flex flex-col md:hidden">
         @for (game of filtered(); track game.id) {
           <li>
-            <a [routerLink]="['/games', game.id]" class="flex items-center gap-3 border-b border-divider py-[13px]">
+            <a [routerLink]="['/games', game.id]" class="flex items-center gap-3 border-b border-divider py-2.5">
               @if (game.lastExperienceStatus; as status) {
                 <app-status-pill dot [status]="status" class="shrink-0" />
               } @else if (isOnlineOnly(game)) {

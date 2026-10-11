@@ -50,13 +50,30 @@
           <a
             [routerLink]="['/sagas', s.saga.id]"
             [attr.aria-current]="selected()?.saga?.id === s.saga.id ? 'true' : null"
-            class="block rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
+            class="flex items-center gap-3.5 rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
             [class]="
               selected()?.saga?.id === s.saga.id
                 ? 'border-border md:border-brand md:bg-brand-tint'
                 : 'hover-lift border-border md:border-transparent md:bg-transparent md:hover:bg-hover'
             "
           >
+            <!-- First games of the saga as a fanned stack of box art -->
+            <span class="flex w-14 shrink-0 items-center" aria-hidden="true">
+              @for (g of s.games.slice(0, 3); track g.id; let i = $index) {
+                <app-game-cover
+                  decorative
+                  size="sm"
+                  class="shadow-md ring-2 shadow-black/30 ring-bg"
+                  [class.-ml-5]="i > 0"
+                  [style.z-index]="3 - i"
+                  [url]="g.coverImageUrl"
+                  [name]="g.name"
+                />
+              } @empty {
+                <app-game-cover decorative size="sm" [name]="s.saga.name" />
+              }
+            </span>
+            <div class="min-w-0 flex-1">
             <div class="flex justify-between gap-3 text-[15px] font-semibold">
               <span class="truncate" [title]="s.saga.name">{{ s.saga.name }}</span>
               <span class="shrink-0 font-mono font-medium" [class]="s.avgRating | ratingTone">{{ s.avgRating | rating }}</span>
@@ -67,6 +84,7 @@
             </div>
             <div class="mt-[9px] h-[3px] rounded-sm bg-border">
               <div class="h-[3px] rounded-sm bg-brand-light" [style.width.%]="playedPercent(s)"></div>
+            </div>
             </div>
           </a>
         }
@@ -145,7 +163,7 @@
         @for (g of s.games; track g.id) {
           <a
             [routerLink]="['/games', g.id]"
-            class="flex items-center gap-3 border-b border-divider py-3 hover:bg-hover md:grid md:grid-cols-[56px_18px_minmax(0,1fr)_120px_70px_70px] md:gap-4 md:border-t md:border-b-0 md:py-[13px] md:text-sm"
+            class="flex items-center gap-3 border-b border-divider py-2.5 hover:bg-hover md:grid md:grid-cols-[56px_18px_32px_minmax(0,1fr)_120px_70px_70px] md:gap-4 md:border-t md:border-b-0 md:py-2 md:text-sm"
             [style.opacity]="isPlayed(g) ? 1 : 0.55"
           >
             <span class="hidden font-mono text-muted md:block">{{ releaseYear(g) ?? '—' }}</span>
@@ -154,6 +172,7 @@
               [class]="isPlayed(g) ? 'border-brand-light bg-brand-light' : 'border-dashed border-faint'"
               aria-hidden="true"
             ></span>
+            <app-game-cover decorative size="sm" [url]="g.coverImageUrl" [name]="g.name" />
             <div class="min-w-0 flex-1">
               <p class="truncate text-[15px] font-medium md:text-sm" [title]="g.name">
                 {{ g.name }}

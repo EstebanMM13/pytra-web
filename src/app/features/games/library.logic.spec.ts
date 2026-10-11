@@ -9,6 +9,7 @@ import {
   matchesPlatform,
   matchesStatus,
   paginate,
+  parseLibraryView,
   parsePage,
   parsePlatformFilter,
   parseSort,
@@ -196,5 +197,12 @@ describe('online-only games', () => {
     expect(matchesStatus(fortnite, 'PENDIENTE')).toBe(false);
     expect(matchesStatus(backlog, 'PENDIENTE')).toBe(true);
     expect(matchesStatus(codWithRun, 'ONLINE')).toBe(false);
+  });
+
+  it('parses the library view, defaulting to the list', () => {
+    expect(parseLibraryView('grid')).toBe('grid');
+    expect(parseLibraryView('list')).toBe('list');
+    expect(parseLibraryView(null)).toBe('list');
+    expect(parseLibraryView('poster')).toBe('list');
   });
 });

@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Genre } from '../../../core/models/genre.model';
 import { IgdbSearchResult } from '../../../core/models/igdb-metadata.model';
 import { SteamStoreSearchResult } from '../../../core/models/steam-metadata.model';
+import { steamPortraitCoverUrl } from '../../../shared/ui/game-cover';
 
 /** Where the game form can be prefilled from. */
 export type AutofillSource = 'igdb' | 'steam';
@@ -37,8 +38,9 @@ export interface AutofillPick {
   metadata: AutofillMetadata;
 }
 
+/** Steam rows show the portrait library capsule (the cover the game is saved with), not the wide search capsule. */
 export function fromSteamResult(result: SteamStoreSearchResult): AutofillResult {
-  return { id: result.appId, name: result.name, imageUrl: result.imageUrl, year: null, platforms: [] };
+  return { id: result.appId, name: result.name, imageUrl: steamPortraitCoverUrl(result.appId), year: null, platforms: [] };
 }
 
 export function fromIgdbResult(result: IgdbSearchResult): AutofillResult {

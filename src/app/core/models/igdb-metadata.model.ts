@@ -20,7 +20,7 @@ export interface IgdbGameMetadata {
   releaseDate: string | null;
   /** IGDB genre names, in English (e.g. "Role-playing (RPG)"). */
   genres: string[];
-  /** Landscape artwork when IGDB has one, the portrait cover otherwise. */
+  /** Official portrait cover (box art); a landscape artwork only when IGDB has no cover. */
   coverImageUrl: string | null;
   platforms: string[];
 }

@@ -16,6 +16,7 @@ import { SectionHeader } from '../../shared/ui/section-header';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
 import { Skeleton } from '../../shared/ui/skeleton';
+import { GameCover } from '../../shared/ui/game-cover';
 import { formatRelativeTime } from '../../shared/utils/relative-time';
 import { SteamConfirmDialog, SteamConfirmMode } from './steam-confirm-dialog';
 import {
@@ -40,6 +41,7 @@ import {
     SectionHeader,
     Skeleton,
     SteamConfirmDialog,
+    GameCover,
     LucideEyeOff,
     LucideLink,
     LucideRefreshCw,

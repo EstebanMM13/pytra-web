@@ -204,10 +204,10 @@
             </div>
           </a>
         }
-        <div class="scroll-list flex max-h-[326px] flex-col gap-2.5">
+        <div class="scroll-list flex max-h-[356px] flex-col gap-2.5">
           @if (playing() === null) {
             @for (i of [1, 2]; track i) {
-              <app-skeleton class="h-[74px] rounded-[10px]" />
+              <app-skeleton class="h-[78px] rounded-[10px]" />
             }
           } @else {
           @for (run of playing(); track run.experienceId; let first = $first) {

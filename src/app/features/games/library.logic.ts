@@ -176,6 +176,16 @@ export function parseSort(value: string | null): LibrarySort {
   return (LIBRARY_SORTS as readonly string[]).includes(value ?? '') ? (value as LibrarySort) : 'recent';
 }
 
+/** How the library lays out its games: rows, or a grid of box-art posters. */
+export type LibraryView = 'list' | 'grid';
+
+/** localStorage key of the library view (per device). */
+export const LIBRARY_VIEW_KEY = 'pytra_library_view';
+
+export function parseLibraryView(value: string | null): LibraryView {
+  return value === 'grid' ? 'grid' : 'list';
+}
+
 export function parsePlatformFilter(value: string | null): LibraryPlatformFilter {
   return value && /^\d+$/.test(value) ? String(Number(value)) : 'ALL';
 }

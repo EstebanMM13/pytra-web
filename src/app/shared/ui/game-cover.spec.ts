@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { GameCover, coverHue, coverInitials } from './game-cover';
+import { GameCover, coverHue, coverInitials, steamHeaderFallback, steamPortraitCoverUrl } from './game-cover';
 
 @Component({
   imports: [GameCover],
@@ -21,23 +21,35 @@ describe('GameCover', () => {
     return { fixture, el, host: el.querySelector('app-game-cover') as HTMLElement };
   }
 
-  it('renders a lazy, no-referrer image with the name as alt', () => {
-    const { el, host } = setup('https://cdn.example.com/header.jpg');
+  function load(img: HTMLImageElement, width: number, height: number) {
+    Object.defineProperty(img, 'naturalWidth', { value: width });
+    Object.defineProperty(img, 'naturalHeight', { value: height });
+    img.dispatchEvent(new Event('load'));
+  }
+
+  it('renders a lazy, no-referrer image with the name as alt in a portrait box', () => {
+    const { el, host } = setup('https://cdn.example.com/cover.jpg');
     const img = el.querySelector('img')!;
-    expect(img.getAttribute('src')).toBe('https://cdn.example.com/header.jpg');
+    expect(img.getAttribute('src')).toBe('https://cdn.example.com/cover.jpg');
     expect(img.getAttribute('alt')).toBe('Hollow Knight');
     expect(img.getAttribute('loading')).toBe('lazy');
     expect(img.getAttribute('referrerpolicy')).toBe('no-referrer');
     expect(host.classList).toContain('extra');
-    expect(host.classList).toContain('w-16');
+    expect(host.classList).toContain('w-8');
+    expect(host.classList).toContain('h-12');
   });
 
-  it('shows portrait art whole over a blurred backdrop', () => {
+  it('crops portrait art to fill the box', () => {
     const { fixture, el } = setup('https://images.example.com/cover.jpg');
-    const img = el.querySelector('img')!;
-    Object.defineProperty(img, 'naturalWidth', { value: 264 });
-    Object.defineProperty(img, 'naturalHeight', { value: 374 });
-    img.dispatchEvent(new Event('load'));
+    load(el.querySelector('img')!, 264, 374);
+    fixture.detectChanges();
+    expect(el.querySelectorAll('img').length).toBe(1);
+    expect(el.querySelector('img')!.classList).toContain('object-cover');
+  });
+
+  it('shows landscape art whole over a blurred backdrop', () => {
+    const { fixture, el } = setup('https://images.example.com/header.jpg');
+    load(el.querySelector('img')!, 460, 215);
     fixture.detectChanges();
     const imgs = el.querySelectorAll('img');
     expect(imgs.length).toBe(2);
@@ -45,15 +57,19 @@ describe('GameCover', () => {
     expect(imgs[1].classList).toContain('object-contain');
   });
 
-  it('keeps landscape art cropped to fill', () => {
-    const { fixture, el } = setup('https://images.example.com/header.jpg');
-    const img = el.querySelector('img')!;
-    Object.defineProperty(img, 'naturalWidth', { value: 460 });
-    Object.defineProperty(img, 'naturalHeight', { value: 215 });
-    img.dispatchEvent(new Event('load'));
+  it('retries a failed Steam library capsule with the header, then shows the initials', () => {
+    const capsule = steamPortraitCoverUrl(70);
+    const { fixture, el } = setup(capsule);
+    el.querySelector('img')!.dispatchEvent(new Event('error'));
     fixture.detectChanges();
-    expect(el.querySelectorAll('img').length).toBe(1);
-    expect(el.querySelector('img')!.classList).toContain('object-cover');
+    expect(el.querySelector('img')!.getAttribute('src')).toBe(
+      'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/70/header.jpg',
+    );
+
+    el.querySelector('img')!.dispatchEvent(new Event('error'));
+    fixture.detectChanges();
+    expect(el.querySelector('img')).toBeNull();
+    expect(el.textContent?.trim()).toBe('HK');
   });
 
   it('shows the initials fallback without a url', () => {
@@ -74,6 +90,29 @@ describe('GameCover', () => {
     fixture.componentInstance.url.set('https://cdn.example.com/other.jpg');
     fixture.detectChanges();
     expect(el.querySelector('img')).not.toBeNull();
+  });
+});
+
+describe('steam cover urls', () => {
+  it('builds the portrait library capsule from an appid', () => {
+    expect(steamPortraitCoverUrl(1245620)).toBe(
+      'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/library_600x900.jpg',
+    );
+  });
+
+  it('falls back from a library capsule to the header of the same app and host', () => {
+    expect(steamHeaderFallback(steamPortraitCoverUrl(620))).toBe(
+      'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/620/header.jpg',
+    );
+    expect(steamHeaderFallback('https://cdn.cloudflare.steamstatic.com/steam/apps/620/library_600x900_2x.jpg?t=1')).toBe(
+      'https://cdn.cloudflare.steamstatic.com/steam/apps/620/header.jpg',
+    );
+  });
+
+  it('has no fallback for other urls', () => {
+    expect(steamHeaderFallback('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/620/header.jpg')).toBeNull();
+    expect(steamHeaderFallback('https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg')).toBeNull();
+    expect(steamHeaderFallback('https://evil.example.com/steam/apps/620/library_600x900.jpg')).toBeNull();
   });
 });
 

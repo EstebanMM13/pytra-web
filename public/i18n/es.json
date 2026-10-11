@@ -587,7 +587,7 @@
       "newGenre": "Nuevo género",
       "addGenre": "Añadir",
       "coverUrl": "URL de portada",
-      "coverUrlHint": "Opcional. Enlace https a una imagen: carátula vertical o cabecera horizontal (p. ej. la de Steam).",
+      "coverUrlHint": "Opcional. Enlace https a una imagen; se recomienda carátula vertical (2:3).",
       "coverUrlInvalid": "Introduce una URL https válida.",
       "coverPreview": "Vista previa de la portada"
     },
@@ -766,7 +766,12 @@
     "platformLabel": "Filtrar por plataforma",
     "platformAll": "Plataforma: todas",
     "platformPrefix": "Plataforma:",
-    "platformAllShort": "Todas"
+    "platformAllShort": "Todas",
+    "view": {
+      "label": "Vista",
+      "list": "Lista",
+      "grid": "Cuadrícula"
+    }
   },
   "sagas": {
     "title": "Sagas",

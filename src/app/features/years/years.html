@@ -92,29 +92,29 @@
               🏆 {{ 'years.goty' | translate: { year: s.year } }}
             </h2>
             @if (s.goty; as g) {
-              <div class="flex flex-1 items-center gap-4">
-              <div class="flex min-w-0 flex-1 flex-col gap-2 md:gap-2.5">
-              <a
-                [routerLink]="['/games', g.gameId]"
-                class="mt-1 line-clamp-2 text-[22px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word hover:underline md:mt-1.5 md:text-[28px]"
-                [title]="g.gameName"
-              >
-                {{ g.gameName }}
-              </a>
-              <p class="text-[13px] leading-relaxed text-text-3 md:text-sm">
-                {{ g.totalHours | hours }} · <span class="font-mono" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span> ·
-                {{ 'years.runsCount' | translatePlural: g.experienceCount }}
-              </p>
-              </div>
-              <a [routerLink]="['/games', g.gameId]" class="mt-1 shrink-0 rounded-lg md:mt-1.5" tabindex="-1" aria-hidden="true">
-                <app-game-cover
-                  decorative
-                  size="md"
-                  class="ring-1 ring-gold-line shadow-md shadow-black/20"
-                  [url]="gotyCover()"
-                  [name]="g.gameName"
-                />
-              </a>
+              <div class="flex flex-1 items-center gap-4 md:gap-5">
+                <a [routerLink]="['/games', g.gameId]" class="mt-1 shrink-0 rounded-md md:mt-1.5" tabindex="-1" aria-hidden="true">
+                  <app-game-cover
+                    decorative
+                    size="md"
+                    class="shadow-lg ring-1 shadow-black/30 ring-gold-line md:h-[120px]! md:w-20!"
+                    [url]="gotyCover()"
+                    [name]="g.gameName"
+                  />
+                </a>
+                <div class="flex min-w-0 flex-1 flex-col gap-2 md:gap-2.5">
+                  <a
+                    [routerLink]="['/games', g.gameId]"
+                    class="mt-1 line-clamp-2 text-[22px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word hover:underline md:mt-1.5 md:text-[28px]"
+                    [title]="g.gameName"
+                  >
+                    {{ g.gameName }}
+                  </a>
+                  <p class="text-[13px] leading-relaxed text-text-3 md:text-sm">
+                    {{ g.totalHours | hours }} · <span class="font-mono" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span> ·
+                    {{ 'years.runsCount' | translatePlural: g.experienceCount }}
+                  </p>
+                </div>
               </div>
             } @else {
               <p class="text-sm text-muted">{{ 'years.noGoty' | translate }}</p>
@@ -203,8 +203,10 @@
             <div class="flex flex-1 flex-col md:scroll-list md:max-h-[410px]">
               @for (run of visibleRuns(); track run.experienceId) {
                 <div
-                  class="grid flex-1 grid-cols-[minmax(0,1fr)_auto_auto_40px] items-center gap-3 border-t border-divider py-2.5 text-sm md:grid-cols-[minmax(0,1fr)_110px_64px_56px] md:gap-3.5"
+                  class="grid flex-1 grid-cols-[minmax(0,1fr)_auto_auto_40px] items-center gap-3 border-t border-divider py-1.5 text-sm md:grid-cols-[minmax(0,1fr)_110px_64px_56px] md:gap-3.5"
                 >
+                  <span class="flex min-w-0 items-center gap-2.5">
+                  <app-game-cover decorative size="xs" [url]="run.coverImageUrl" [name]="run.gameName" />
                   <span class="min-w-0 truncate" [title]="run.gameName + ' · ' + run.runLabel">
                     <a
                       [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]"
@@ -215,6 +217,7 @@
                       <span class="text-xs" [attr.aria-label]="'run.platinum' | translate"> 🏆</span>
                     }
                     <span class="hidden text-xs text-faint md:inline"> · {{ run.runLabel }}</span>
+                  </span>
                   </span>
                   <span class="text-xs whitespace-nowrap" [class]="statusText[run.status]">
                     {{ 'status.' + run.status | translate }}

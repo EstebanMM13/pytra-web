@@ -587,7 +587,7 @@
       "newGenre": "New genre",
       "addGenre": "Add",
       "coverUrl": "Cover URL",
-      "coverUrlHint": "Optional. https link to an image: portrait box art or a landscape header (e.g. Steam’s).",
+      "coverUrlHint": "Optional. https link to an image; portrait box art (2:3) recommended.",
       "coverUrlInvalid": "Enter a valid https URL.",
       "coverPreview": "Cover preview"
     },
@@ -766,7 +766,12 @@
     "platformLabel": "Filter by platform",
     "platformAll": "Platform: all",
     "platformPrefix": "Platform:",
-    "platformAllShort": "All"
+    "platformAllShort": "All",
+    "view": {
+      "label": "View",
+      "list": "List",
+      "grid": "Grid"
+    }
   },
   "sagas": {
     "title": "Sagas",

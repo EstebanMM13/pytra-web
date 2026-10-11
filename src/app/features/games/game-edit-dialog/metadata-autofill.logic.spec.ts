@@ -116,7 +116,7 @@ describe('metadata autofill logic', () => {
     expect(fromSteamResult({ appId: 620, name: 'Portal 2', imageUrl: null })).toEqual({
       id: 620,
       name: 'Portal 2',
-      imageUrl: null,
+      imageUrl: 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/620/library_600x900.jpg',
       year: null,
       platforms: [],
     });

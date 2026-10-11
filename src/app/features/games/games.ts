@@ -5,6 +5,8 @@ import {
   LucideArrowDownWideNarrow,
   LucideArrowRight,
   LucideDownload,
+  LucideLayoutGrid,
+  LucideList,
   LucidePlus,
   LucideSearch,
 } from '@lucide/angular';
@@ -35,9 +37,12 @@ import {
   countByStatus,
   filterGames,
   isLibraryGame,
+  LIBRARY_VIEW_KEY,
+  LibraryView,
   matchesPlatform,
   matchesText,
   paginate,
+  parseLibraryView,
   parsePage,
   parsePlatformFilter,
   parseSort,
@@ -47,6 +52,7 @@ import {
 /**
  * Library (/games): confirmed games with their run aggregates, filtered, sorted and paged on the
  * client. Filters live in the URL (`q`, `status`, `platform`, `sort`, `page`) so back navigation restores them.
+ * The list / grid view is a per-device preference (localStorage); the grid shows every result, unpaged.
  */
 @Component({
   selector: 'app-games',
@@ -67,6 +73,8 @@ import {
     LucideArrowDownWideNarrow,
     LucideArrowRight,
     LucideDownload,
+    LucideLayoutGrid,
+    LucideList,
     LucidePlus,
     LucideSearch,
   ],
@@ -88,6 +96,8 @@ export class Games {
   private readonly allGames = signal<Game[] | null>(null);
   protected readonly loadError = signal(false);
   protected readonly creating = signal(false);
+  protected readonly views: readonly LibraryView[] = ['list', 'grid'];
+  protected readonly view = signal<LibraryView>(readLibraryView());
 
   protected readonly query = toSignal(
     this.route.queryParamMap.pipe(
@@ -190,6 +200,15 @@ export class Games {
     this.updateQuery({ page: page > 1 ? page : null }, false);
   }
 
+  protected setView(view: LibraryView): void {
+    this.view.set(view);
+    try {
+      localStorage.setItem(LIBRARY_VIEW_KEY, view);
+    } catch {
+      // Storage unavailable (private mode, quota): keep the in-memory choice only.
+    }
+  }
+
   protected clearFilters(): void {
     this.updateQuery({ q: null, status: null, platform: null, page: null });
   }
@@ -208,5 +227,13 @@ export class Games {
     this.creating.set(false);
     this.allGames.update((list) => [...(list ?? []), game]);
     this.router.navigate(['/games', game.id]);
+  }
+}
+
+function readLibraryView(): LibraryView {
+  try {
+    return parseLibraryView(localStorage.getItem(LIBRARY_VIEW_KEY));
+  } catch {
+    return 'list';
   }
 }
