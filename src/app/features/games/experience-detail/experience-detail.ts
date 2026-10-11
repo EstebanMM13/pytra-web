@@ -26,6 +26,7 @@ import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { StatCard } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
+import { translatePlural } from '../../../shared/utils/plural';
 import { formatDayMonthYear, runDuration, splitLines } from '../../../shared/utils/run-dates';
 
 /** `/stats/top-rated` caps `limit` at 50 server-side. */
@@ -159,10 +160,7 @@ export class ExperienceDetail {
     if (short) {
       return this.translate.instant(d.unit === 'months' ? 'run.monthsShort' : 'run.daysShort', { count: d.count });
     }
-    if (d.count === 1) {
-      return this.translate.instant(d.unit === 'months' ? 'run.oneMonth' : 'run.oneDay');
-    }
-    return this.translate.instant(d.unit === 'months' ? 'run.months' : 'run.days', { count: d.count });
+    return translatePlural(this.translate, d.unit === 'months' ? 'run.months' : 'run.days', d.count);
   }
 
   protected edit(): void {

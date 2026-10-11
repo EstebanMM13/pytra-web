@@ -51,7 +51,7 @@
           {{ 'years.yearTitle' | translate: { year: y } }}
         </h1>
         @if (highlight(); as h) {
-          <p class="text-sm text-muted md:pb-1.5">{{ 'years.highlight.' + h.key | translate: h.params }}</p>
+          <p class="text-sm text-muted md:pb-1.5">{{ 'years.highlight.' + h.key | translatePlural: h.params?.['count'] : h.params }}</p>
         }
       </header>
     }
@@ -103,7 +103,7 @@
               </a>
               <p class="text-[13px] leading-relaxed text-text-3 md:text-sm">
                 {{ g.totalHours | hours }} · <span class="font-mono" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span> ·
-                {{ 'years.runsCount' | translate: { count: g.experienceCount } }}
+                {{ 'years.runsCount' | translatePlural: g.experienceCount }}
               </p>
               </div>
               <a [routerLink]="['/games', g.gameId]" class="mt-1 shrink-0 rounded-lg md:mt-1.5" tabindex="-1" aria-hidden="true">
@@ -257,7 +257,7 @@
                 <span class="w-[18px] shrink-0 font-mono text-xs text-faint">{{ i + 1 }}</span>
                 <span class="min-w-0 flex-1 truncate text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="hidden shrink-0 text-xs text-faint sm:inline">
-                  {{ 'years.runsCount' | translate: { count: g.experienceCount } }} · {{ g.totalHours | hours }}
+                  {{ 'years.runsCount' | translatePlural: g.experienceCount }} · {{ g.totalHours | hours }}
                 </span>
                 <span class="w-10 shrink-0 text-right font-mono font-medium" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
@@ -295,8 +295,8 @@
               >
                 <span class="min-w-0 flex-1 truncate text-text-2" [title]="saga.sagaName">{{ saga.sagaName }}</span>
                 <span class="shrink-0 text-xs text-faint">
-                  {{ 'common.games' | translate: { count: saga.gameCount } }} ·
-                  {{ 'years.runsCount' | translate: { count: saga.experienceCount } }}
+                  {{ 'common.games' | translatePlural: saga.gameCount }} ·
+                  {{ 'years.runsCount' | translatePlural: saga.experienceCount }}
                 </span>
                 <span class="w-16 shrink-0 text-right font-mono">{{ saga.totalHours | hours }}</span>
               </a>
@@ -311,8 +311,8 @@
               <div class="flex items-center gap-3 border-t border-divider py-[9px] text-sm">
                 <span class="min-w-0 flex-1 truncate text-text-2" [title]="genre.genreName | genreName">{{ genre.genreName | genreName }}</span>
                 <span class="shrink-0 text-xs text-faint">
-                  {{ 'common.games' | translate: { count: genre.gameCount } }} ·
-                  {{ 'years.runsCount' | translate: { count: genre.experienceCount } }}
+                  {{ 'common.games' | translatePlural: genre.gameCount }} ·
+                  {{ 'years.runsCount' | translatePlural: genre.experienceCount }}
                 </span>
                 <span class="w-16 shrink-0 text-right font-mono">{{ genre.totalHours | hours }}</span>
               </div>

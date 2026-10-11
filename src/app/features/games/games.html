@@ -7,7 +7,7 @@
       <h1 class="font-display text-[28px] font-bold tracking-[-0.03em] md:text-[34px]">{{ 'library.title' | translate }}</h1>
       @if (!loading()) {
         <p class="mt-1.5 hidden text-sm text-muted md:block">
-          {{ 'library.subtitle' | translate: { games: libraryGames().length, runs: runCount() } }}
+          {{ 'common.games' | translatePlural: libraryGames().length }} · {{ 'library.runsCount' | translatePlural: runCount() }}
         </p>
       }
     </div>
@@ -52,7 +52,7 @@
       routerLink="/steam"
       class="flex w-fit items-center gap-2 rounded-lg bg-gold-tint px-3 py-2 text-[13px] font-medium text-gold-tint-fg hover:opacity-90"
     >
-      {{ 'library.steamPending' | translate: { count: pendingReviewCount() } }}
+      {{ 'library.steamPending' | translatePlural: pendingReviewCount() }}
       <svg lucideArrowRight [size]="14"></svg>
     </a>
   }
@@ -269,7 +269,7 @@
                 </p>
                 <p class="mt-[3px] truncate text-xs text-muted">
                   {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
-                  · {{ 'library.runsCount' | translate: { count: game.experienceCount ?? 0 } }}
+                  · {{ 'library.runsCount' | translatePlural: game.experienceCount ?? 0 }}
                   @if (game.totalHours) {
                     · {{ game.totalHours | hours }}
                   }

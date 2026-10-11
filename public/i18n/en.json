@@ -89,6 +89,7 @@
   "dashboard": {
     "greetingHello": "Hi,",
     "steamPending": "{{count}} Steam games to review",
+    "steamPending_one": "{{count}} Steam game to review",
     "stats": {
       "games": "Games",
       "sagas": "Sagas",
@@ -116,8 +117,8 @@
     "sectionError": "Couldn't load this section.",
     "retry": "Retry",
     "playingToday": "Today",
-    "playingDay": "1 day",
     "playingDays": "{{count}} days",
+    "playingDays_one": "{{count}} day",
     "onboarding": {
       "title": "Welcome to Pytra",
       "subtitle": "Your library is empty. Get started in three steps:",
@@ -138,6 +139,7 @@
       "longRun": "You've been playing {{game}} for {{days}} days",
       "bestYear": "{{year}}: your year with the most hours",
       "platinums": "{{count}} platinums and counting 🏆",
+      "platinums_one": "{{count}} platinum and counting 🏆",
       "bestRating": "Your top rating: {{rating}} for {{game}}",
       "thisYear": "You've played {{hours}} this year",
       "fallback": "What are we playing today?"
@@ -312,12 +314,18 @@
     "result": {
       "title": "Sync result",
       "scanned": "{{count}} games checked",
+      "scanned_one": "{{count}} game checked",
       "newPending": "{{count}} new pending review",
+      "newPending_one": "{{count}} new pending review",
       "linkedExisting": "{{count}} linked to games you already had",
+      "linkedExisting_one": "{{count}} linked to a game you already had",
       "updated": "{{count}} with updated hours",
       "ignored": "{{count}} ignored",
+      "ignored_one": "{{count}} ignored",
       "skipped": "{{count}} skipped (another Steam game already has that name)",
-      "errored": "{{count}} could not be imported; they will be retried on the next sync"
+      "skipped_one": "{{count}} skipped (another Steam game already has that name)",
+      "errored": "{{count}} could not be imported; they will be retried on the next sync",
+      "errored_one": "{{count}} could not be imported; it will be retried on the next sync"
     },
     "private": {
       "title": "Your Steam profile is private",
@@ -360,6 +368,7 @@
     "createRun": "Create run",
     "confirmed": "\"{{name}}\" added to your library.",
     "ignoredCount": "{{count}} ignored",
+    "ignoredCount_one": "{{count}} ignored",
     "confirmDialog": {
       "title": "Review Steam game",
       "save": "Confirm game",
@@ -369,7 +378,8 @@
       "categoryHint": "Singleplayer: hours go to a run. Online/Hybrid: to the game's online hours."
     },
     "lastSession": "Last session {{when}}",
-    "linkedCount": "{{count}} already linked to a Pytra game"
+    "linkedCount": "{{count}} already linked to a Pytra game",
+    "linkedCount_one": "{{count}} already linked to a Pytra game"
   },
   "nav": {
     "home": "Home",
@@ -417,6 +427,7 @@
     "best": "Best",
     "noData": "No data yet.",
     "games": "{{count}} games",
+    "games_one": "{{count}} game",
     "since": "since {{date}}",
     "cancel": "Cancel",
     "save": "Save",
@@ -443,8 +454,11 @@
       "bestRated": "Your best-rated year",
       "firstYear": "Your first logged year",
       "platinums": "{{count}} platinums this year",
+      "platinums_one": "{{count}} platinum this year",
       "completed": "{{count}} runs completed",
-      "runs": "{{count}} runs this year"
+      "completed_one": "{{count}} run completed",
+      "runs": "{{count}} runs this year",
+      "runs_one": "{{count}} run this year"
     },
     "stats": {
       "hours": "Hours",
@@ -458,6 +472,7 @@
     "goty": "GOTY {{year}}",
     "noGoty": "No GOTY: no rated runs completed this year.",
     "runsCount": "{{count}} runs",
+    "runsCount_one": "{{count}} run",
     "surprises": "Surprises",
     "disappointments": "Disappointments",
     "noSurprises": "No notable surprises this year",
@@ -627,9 +642,9 @@
     "duration": "Duration",
     "hours": "Hours",
     "months": "{{count}} months",
-    "oneMonth": "1 month",
+    "months_one": "{{count}} month",
     "days": "{{count}} days",
-    "oneDay": "1 day",
+    "days_one": "{{count}} day",
     "monthsShort": "{{count}} mo",
     "daysShort": "{{count}} d",
     "loadError": "Could not load the run.",
@@ -705,7 +720,6 @@
   },
   "library": {
     "title": "Games",
-    "subtitle": "{{games}} games · {{runs}} runs",
     "addGame": "Add game",
     "sortLabel": "Sort by",
     "sort": {
@@ -725,6 +739,7 @@
     },
     "filterPlaceholder": "Filter by name",
     "steamPending": "{{count}} Steam games to review",
+    "steamPending_one": "{{count}} Steam game to review",
     "loadError": "Could not load your games.",
     "empty": {
       "title": "Your library is empty",
@@ -746,7 +761,8 @@
     "online": "Online",
     "noRuns": "No runs",
     "showing": "Showing {{shown}} of {{total}}",
-    "runsCount": "{{count}} run(s)",
+    "runsCount": "{{count}} runs",
+    "runsCount_one": "{{count}} run",
     "platformLabel": "Filter by platform",
     "platformAll": "Platform: all",
     "platformPrefix": "Platform:",
@@ -759,6 +775,7 @@
     "loadError": "Could not load your sagas.",
     "empty": "You have no sagas yet.",
     "playedOf": "{{played}} of {{total}} played",
+    "playedOf_one": "{{played}} of {{total}} played",
     "back": "Sagas",
     "edit": "Edit saga",
     "stats": {

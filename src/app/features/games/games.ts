@@ -18,6 +18,7 @@ import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
+import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
 import { GameCover } from '../../shared/ui/game-cover';
 import { Pagination } from '../../shared/ui/pagination';
 import { Skeleton } from '../../shared/ui/skeleton';
@@ -53,6 +54,7 @@ import {
     GameCover,
     RouterLink,
     TranslatePipe,
+    TranslatePluralPipe,
     Navbar,
     HoursPipe,
     RatingPipe,

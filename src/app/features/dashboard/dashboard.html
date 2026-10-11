@@ -26,10 +26,10 @@
         @if (summary() || summaryFailed()) {
           <p
             class="mt-2 inline-flex max-w-full items-center gap-2 rounded-full border border-brand/30 bg-brand-tint/60 px-3 py-1.5 text-sm font-medium text-text-2 md:mt-3"
-            [attr.title]="tagline().key | translate: tagline().params"
+            [attr.title]="tagline().key | translatePlural: tagline().count : tagline().params"
           >
             <svg lucideSparkles [size]="14" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
-            <span class="truncate">{{ tagline().key | translate: tagline().params }}</span>
+            <span class="truncate">{{ tagline().key | translatePlural: tagline().count : tagline().params }}</span>
           </p>
         }
       } @else {
@@ -42,7 +42,7 @@
         class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-[13px] text-gold-tint-fg hover:opacity-90 md:self-auto"
       >
         <svg lucideDownload [size]="14"></svg>
-        {{ 'dashboard.steamPending' | translate: { count: steamPendingCount() } }}
+        {{ 'dashboard.steamPending' | translatePlural: steamPendingCount() }}
         <svg lucideArrowRight [size]="14"></svg>
       </a>
     }
@@ -330,7 +330,7 @@
               class="flex flex-1 items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
             >
               <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
-              <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translate: { count: item.gameCount } }}</span>
+              <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translatePlural: item.gameCount }}</span>
               <span class="w-16 shrink-0 text-right font-mono">{{ item.totalHours | hours }}</span>
             </a>
           } @empty {

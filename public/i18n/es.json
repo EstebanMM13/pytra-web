@@ -89,6 +89,7 @@
   "dashboard": {
     "greetingHello": "Hola,",
     "steamPending": "{{count}} juegos de Steam por revisar",
+    "steamPending_one": "{{count}} juego de Steam por revisar",
     "stats": {
       "games": "Juegos",
       "sagas": "Sagas",
@@ -116,8 +117,8 @@
     "sectionError": "No se pudo cargar esta sección.",
     "retry": "Reintentar",
     "playingToday": "Hoy",
-    "playingDay": "1 día",
     "playingDays": "{{count}} días",
+    "playingDays_one": "{{count}} día",
     "onboarding": {
       "title": "Bienvenido a Pytra",
       "subtitle": "Tu biblioteca está vacía. Empieza en tres pasos:",
@@ -138,6 +139,7 @@
       "longRun": "Llevas {{days}} días con {{game}}",
       "bestYear": "{{year}}: tu año con más horas",
       "platinums": "{{count}} platinos y contando 🏆",
+      "platinums_one": "{{count}} platino y contando 🏆",
       "bestRating": "Tu mejor nota: {{rating}} en {{game}}",
       "thisYear": "Has jugado {{hours}} este año",
       "fallback": "¿A qué jugamos hoy?"
@@ -312,12 +314,18 @@
     "result": {
       "title": "Resultado de la sincronización",
       "scanned": "{{count}} juegos revisados",
+      "scanned_one": "{{count}} juego revisado",
       "newPending": "{{count}} nuevos pendientes de revisar",
+      "newPending_one": "{{count}} nuevo pendiente de revisar",
       "linkedExisting": "{{count}} vinculados a juegos que ya tenías",
+      "linkedExisting_one": "{{count}} vinculado a un juego que ya tenías",
       "updated": "{{count}} con horas actualizadas",
       "ignored": "{{count}} ignorados",
+      "ignored_one": "{{count}} ignorado",
       "skipped": "{{count}} omitidos (ya hay otro juego de Steam con ese nombre)",
-      "errored": "{{count}} no se pudieron importar; se reintentarán en la próxima sincronización"
+      "skipped_one": "{{count}} omitido (ya hay otro juego de Steam con ese nombre)",
+      "errored": "{{count}} no se pudieron importar; se reintentarán en la próxima sincronización",
+      "errored_one": "{{count}} no se pudo importar; se reintentará en la próxima sincronización"
     },
     "private": {
       "title": "Tu perfil de Steam es privado",
@@ -360,6 +368,7 @@
     "createRun": "Crear partida",
     "confirmed": "«{{name}}» añadido a tu biblioteca.",
     "ignoredCount": "{{count}} ignorados",
+    "ignoredCount_one": "{{count}} ignorado",
     "confirmDialog": {
       "title": "Revisar juego de Steam",
       "save": "Confirmar juego",
@@ -369,7 +378,8 @@
       "categoryHint": "Singleplayer: las horas van a una partida. Online/Híbrido: a las horas online del juego."
     },
     "lastSession": "Última sesión {{when}}",
-    "linkedCount": "{{count}} ya vinculados a un juego de Pytra"
+    "linkedCount": "{{count}} ya vinculados a un juego de Pytra",
+    "linkedCount_one": "{{count}} ya vinculado a un juego de Pytra"
   },
   "nav": {
     "home": "Inicio",
@@ -417,6 +427,7 @@
     "best": "Mejor",
     "noData": "Sin datos todavía.",
     "games": "{{count}} juegos",
+    "games_one": "{{count}} juego",
     "since": "desde {{date}}",
     "cancel": "Cancelar",
     "save": "Guardar",
@@ -443,8 +454,11 @@
       "bestRated": "Tu año con mejor nota media",
       "firstYear": "Tu primer año registrado",
       "platinums": "{{count}} platinos este año",
+      "platinums_one": "{{count}} platino este año",
       "completed": "{{count}} partidas completadas",
-      "runs": "{{count}} partidas este año"
+      "completed_one": "{{count}} partida completada",
+      "runs": "{{count}} partidas este año",
+      "runs_one": "{{count}} partida este año"
     },
     "stats": {
       "hours": "Horas",
@@ -458,6 +472,7 @@
     "goty": "GOTY {{year}}",
     "noGoty": "Sin GOTY: no hay partidas completadas con nota este año.",
     "runsCount": "{{count}} partidas",
+    "runsCount_one": "{{count}} partida",
     "surprises": "Sorpresas",
     "disappointments": "Decepciones",
     "noSurprises": "No hay sorpresas destacables este año",
@@ -627,9 +642,9 @@
     "duration": "Duración",
     "hours": "Horas",
     "months": "{{count}} meses",
-    "oneMonth": "1 mes",
+    "months_one": "{{count}} mes",
     "days": "{{count}} días",
-    "oneDay": "1 día",
+    "days_one": "{{count}} día",
     "monthsShort": "{{count}} m",
     "daysShort": "{{count}} d",
     "loadError": "No se pudo cargar la partida.",
@@ -705,7 +720,6 @@
   },
   "library": {
     "title": "Juegos",
-    "subtitle": "{{games}} juegos · {{runs}} partidas",
     "addGame": "Añadir juego",
     "sortLabel": "Ordenar por",
     "sort": {
@@ -725,6 +739,7 @@
     },
     "filterPlaceholder": "Filtrar por nombre",
     "steamPending": "{{count}} juegos de Steam por revisar",
+    "steamPending_one": "{{count}} juego de Steam por revisar",
     "loadError": "No se pudo cargar la lista de juegos.",
     "empty": {
       "title": "Tu biblioteca está vacía",
@@ -746,7 +761,8 @@
     "online": "Online",
     "noRuns": "Sin partidas",
     "showing": "Mostrando {{shown}} de {{total}}",
-    "runsCount": "{{count}} partida(s)",
+    "runsCount": "{{count}} partidas",
+    "runsCount_one": "{{count}} partida",
     "platformLabel": "Filtrar por plataforma",
     "platformAll": "Plataforma: todas",
     "platformPrefix": "Plataforma:",
@@ -759,6 +775,7 @@
     "loadError": "No se pudieron cargar las sagas.",
     "empty": "Todavía no tienes sagas.",
     "playedOf": "{{played}} de {{total}} jugados",
+    "playedOf_one": "{{played}} de {{total}} jugado",
     "back": "Sagas",
     "edit": "Editar saga",
     "stats": {

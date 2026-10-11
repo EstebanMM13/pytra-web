@@ -12,6 +12,7 @@ import { GenreNamePipe } from '../../shared/pipes/genre-name.pipe';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
+import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
 import { ToastService } from '../../shared/toast/toast.service';
 import { GameCover } from '../../shared/ui/game-cover';
 import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
@@ -47,6 +48,7 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
     Navbar,
     RouterLink,
     TranslatePipe,
+    TranslatePluralPipe,
     HoursPipe,
     GenreNamePipe,
     RatingPipe,

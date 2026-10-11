@@ -28,6 +28,8 @@ import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
+import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
+import { translatePlural } from '../../shared/utils/plural';
 import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
 import { GameCover } from '../../shared/ui/game-cover';
 import { RunRow } from '../../shared/ui/run-row';
@@ -63,6 +65,7 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
     NgTemplateOutlet,
     RouterLink,
     TranslatePipe,
+    TranslatePluralPipe,
     HoursPipe,
     RatingPipe,
     RatingTonePipe,
@@ -150,7 +153,8 @@ export class Dashboard {
     const params: Record<string, string | number> = { ...t.params };
     if (typeof params['rating'] === 'number') params['rating'] = new RatingPipe().transform(params['rating']);
     if (typeof params['hours'] === 'number') params['hours'] = new HoursPipe().transform(params['hours']);
-    return { key: `dashboard.tagline.${t.key}`, params };
+    const count = typeof params['count'] === 'number' ? params['count'] : null;
+    return { key: `dashboard.tagline.${t.key}`, params, count };
   });
 
   /** Per-year series (oldest first, last TREND_YEARS) for the stat-card sparklines. */
@@ -314,7 +318,7 @@ export class Dashboard {
     if (days === 0) {
       return this.translate.instant('dashboard.playingToday') as string;
     }
-    return this.translate.instant(days === 1 ? 'dashboard.playingDay' : 'dashboard.playingDays', { count: days }) as string;
+    return translatePlural(this.translate, 'dashboard.playingDays', days);
   }
 
   protected newRun(): void {

@@ -49,9 +49,9 @@
                   <span>{{ maskedSteamId() }}</span>
                 }
                 @if (linkedGamesCount(); as linked) {
-                  <span>{{ 'common.games' | translate: { count: linked } }}</span>
+                  <span>{{ 'common.games' | translatePlural: linked }}</span>
                 } @else if (syncResult(); as r) {
-                  <span>{{ 'common.games' | translate: { count: r.gamesScanned } }}</span>
+                  <span>{{ 'common.games' | translatePlural: r.gamesScanned }}</span>
                 }
                 <span>
                   @if (lastSyncRelative(); as rel) {
@@ -151,18 +151,18 @@
       <section class="rounded-[14px] border border-card-border card-glass p-4 text-sm text-text-3 md:p-[22px]">
         <app-section-header collapseKey="steam.result" [label]="'steam.result.title' | translate" class="mb-3" />
         <ul class="grid grid-cols-1 gap-1 sm:grid-cols-2">
-          <li>{{ 'steam.result.scanned' | translate: { count: result.gamesScanned } }}</li>
-          <li>{{ 'steam.result.newPending' | translate: { count: result.newGamesPending } }}</li>
-          <li>{{ 'steam.result.linkedExisting' | translate: { count: result.linkedExisting } }}</li>
-          <li>{{ 'steam.result.updated' | translate: { count: result.gamesUpdated } }}</li>
+          <li>{{ 'steam.result.scanned' | translatePlural: result.gamesScanned }}</li>
+          <li>{{ 'steam.result.newPending' | translatePlural: result.newGamesPending }}</li>
+          <li>{{ 'steam.result.linkedExisting' | translatePlural: result.linkedExisting }}</li>
+          <li>{{ 'steam.result.updated' | translatePlural: result.gamesUpdated }}</li>
           @if (result.ignored > 0) {
-            <li>{{ 'steam.result.ignored' | translate: { count: result.ignored } }}</li>
+            <li>{{ 'steam.result.ignored' | translatePlural: result.ignored }}</li>
           }
           @if (result.skipped > 0) {
-            <li class="text-gold">{{ 'steam.result.skipped' | translate: { count: result.skipped } }}</li>
+            <li class="text-gold">{{ 'steam.result.skipped' | translatePlural: result.skipped }}</li>
           }
           @if (result.errored > 0) {
-            <li class="text-danger">{{ 'steam.result.errored' | translate: { count: result.errored } }}</li>
+            <li class="text-danger">{{ 'steam.result.errored' | translatePlural: result.errored }}</li>
           }
         </ul>
       </section>
@@ -249,11 +249,11 @@
         class="flex w-fit items-center gap-2 rounded-md text-[13px] text-muted hover:text-text-2"
       >
         <svg lucideEyeOff [size]="15"></svg>
-        {{ 'steam.ignoredCount' | translate: { count: ignoredTotal() } }}
+        {{ 'steam.ignoredCount' | translatePlural: ignoredTotal() }}
       </button>
       @if (linkedGamesCount(); as linked) {
         <span aria-hidden="true">·</span>
-        <span>{{ 'steam.linkedCount' | translate: { count: linked } }}</span>
+        <span>{{ 'steam.linkedCount' | translatePlural: linked }}</span>
       }
       </div>
 

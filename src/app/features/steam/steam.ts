@@ -14,6 +14,7 @@ import { Navbar } from '../../shared/navbar/navbar';
 import { ToastService } from '../../shared/toast/toast.service';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
+import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { formatRelativeTime } from '../../shared/utils/relative-time';
 import { SteamConfirmDialog, SteamConfirmMode } from './steam-confirm-dialog';
@@ -34,6 +35,7 @@ import {
   imports: [
     HoursPipe,
     TranslatePipe,
+    TranslatePluralPipe,
     Navbar,
     SectionHeader,
     Skeleton,
