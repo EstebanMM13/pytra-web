@@ -105,13 +105,13 @@ let nextId = 0;
       @if (multiple()) {
         @for (option of selectedOptions(); track option.id) {
           <span
-            class="inline-flex max-w-full items-center gap-1 rounded-full border border-brand/30 bg-brand-tint py-1 pr-1 pl-2.5 text-[13px] text-brand-lighter"
+            class="inline-flex max-w-full items-center gap-1 rounded-full border border-brand/25 bg-brand-tint py-1 pr-1 pl-2.5 text-[13px] text-brand-lighter"
           >
             <span class="truncate">{{ option.label }}</span>
             <button
               type="button"
               (click)="$event.stopPropagation(); remove(option.id)"
-              class="grid size-5 shrink-0 place-items-center rounded-full text-brand-light hover:bg-brand/20 hover:text-text"
+              class="grid size-5 shrink-0 place-items-center rounded-full text-brand-light hover:bg-hover hover:text-text"
               [attr.aria-label]="removeLabel() | translate: { name: option.label }"
             >
               <svg [lucideIcon]="icons.x" [size]="12"></svg>
@@ -135,12 +135,12 @@ let nextId = 0;
         [attr.aria-controls]="listId"
         [attr.aria-activedescendant]="open() && activeIndex() >= 0 ? listId + '-' + activeIndex() : null"
         [value]="inputText()"
-        [placeholder]="inputPlaceholder()"
+        [placeholder]="inputPlaceholder() | translate"
         (input)="onInput($event)"
         (focus)="openList()"
         (click)="openList()"
         (keydown)="onKeydown($event)"
-        class="h-9 min-w-[9ch] flex-1 border-0 bg-transparent px-1.5 text-[16px] text-text shadow-none outline-none focus:border-0 focus:shadow-none md:text-[15px]"
+        class="h-9 min-w-24 flex-1 border-0 bg-transparent px-1.5 text-[16px] text-text shadow-none outline-none focus:border-0 focus:shadow-none md:text-[15px]"
         [class]="!multiple() && selectedOptions().length ? 'placeholder:text-text-2' : ''"
       />
       @if (!multiple() && selectedOptions().length) {
@@ -161,14 +161,14 @@ let nextId = 0;
         [id]="listId"
         [attr.aria-labelledby]="labelledBy() || null"
         [attr.aria-multiselectable]="multiple() || null"
-        class="scroll-thin mt-1.5 max-h-60 overflow-y-auto rounded-[10px] border border-border bg-surface p-1 shadow-[0_12px_32px_#0004]"
+        class="scroll-thin mt-1.5 max-h-60 overflow-y-auto rounded-[10px] border border-border bg-surface p-1 shadow-[0_12px_32px_#0006]"
       >
         @for (entry of entries(); track $index; let i = $index) {
           <li
             role="option"
             [id]="listId + '-' + i"
             [attr.aria-selected]="isSelected(entry)"
-            class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-[14px] md:text-[13px]"
+            class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm md:text-[13px]"
             [class]="i === activeIndex() ? 'bg-hover text-text' : isSelected(entry) ? 'text-brand-lighter' : 'text-text-2'"
             (mouseenter)="activeIndex.set(i)"
             (mousedown)="$event.preventDefault()"
