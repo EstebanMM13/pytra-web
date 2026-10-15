@@ -444,7 +444,8 @@
       "empty": "No results",
       "remove": "Remove {{name}}",
       "clear": "Clear selection"
-    }
+    },
+    "showAll": "Show all"
   },
   "years": {
     "title": "Years",

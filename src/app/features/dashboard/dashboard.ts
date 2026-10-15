@@ -18,7 +18,8 @@ import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
 import { translatePlural } from '../../shared/utils/plural';
-import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
+import { MiniBar } from '../../shared/ui/mini-bar-chart';
+import { RecentBarChart } from '../../shared/ui/recent-bar-chart';
 import { GameCover } from '../../shared/ui/game-cover';
 import { RunRow } from '../../shared/ui/run-row';
 import { SectionHeader } from '../../shared/ui/section-header';
@@ -39,7 +40,6 @@ import { pickTagline, topRatedKey, topRatedLink } from './dashboard.logic';
 type PlayMode = 'single' | 'online';
 
 const RANKING_SIZE = 5;
-const MAX_YEARS = 10;
 /** Years shown in the stat-card sparklines. */
 const TREND_YEARS = 8;
 
@@ -62,7 +62,7 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
     RunRow,
     GameCover,
     Segmented,
-    MiniBarChart,
+    RecentBarChart,
     Skeleton,
     LucideDynamicIcon,
     AchievementBadge,
@@ -173,6 +173,7 @@ export class Dashboard {
     return lengths.some((n) => n !== lengths[0]);
   });
 
+  /** Every year, oldest first; the chart shows the last few and the rest behind "Ver todos". */
   protected readonly yearBars = computed<MiniBar[] | null>(() => {
     const years = this.byYear();
     if (years === null) {
@@ -182,7 +183,6 @@ export class Dashboard {
     const hoursPipe = new HoursPipe();
     return [...years]
       .sort((a, b) => a.year - b.year)
-      .slice(-MAX_YEARS)
       .map((y) => ({
         key: y.year,
         value: y.totalHours,

@@ -247,10 +247,10 @@
         @if (yearBars(); as bars) {
           @if (bars.length) {
             <div class="hidden min-h-[200px] flex-1 flex-col md:flex">
-              <app-mini-bar-chart class="flex-1" [bars]="bars" [height]="null" />
+              <app-recent-bar-chart class="flex-1" [bars]="bars" [height]="null" [title]="'dashboard.hoursByYear' | translate" />
             </div>
             <div class="md:hidden">
-              <app-mini-bar-chart [bars]="bars" [height]="96" dense />
+              <app-recent-bar-chart [bars]="bars" [height]="96" dense [title]="'dashboard.hoursByYear' | translate" />
             </div>
           } @else {
             @if (failed('byYear')) {

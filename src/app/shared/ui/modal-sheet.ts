@@ -22,7 +22,7 @@ const FOCUSABLE =
  * Dialog shell. Web (md+): centred modal (max 720px) over the overlay, fade + 8px rise.
  * Mobile: full-screen sheet sliding up, header "Cancelar · title · Guardar".
  * Handles Escape, a Tab focus trap, body scroll lock and focus restore. The body is projected;
- * the save buttons emit `save` (the content owns validation and submission).
+ * the save buttons emit `save` (the content owns validation and submission). `viewOnly` drops them.
  */
 @Component({
   selector: 'app-modal-sheet',
@@ -44,18 +44,23 @@ const FOCUSABLE =
           class="flex shrink-0 items-center justify-between gap-3 border-b border-border px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-4 md:hidden"
         >
           <button type="button" (click)="cancel()" [disabled]="saving()" class="text-[15px] text-text-3 disabled:opacity-50">
-            {{ 'common.cancel' | translate }}
+            {{ (viewOnly() ? 'common.close' : 'common.cancel') | translate }}
           </button>
           <h2 class="truncate text-base font-semibold">{{ title() }}</h2>
-          <button
-            type="button"
-            (click)="save.emit()"
-            [disabled]="saving() || saveDisabled()"
-            class="text-[15px] font-semibold disabled:opacity-50"
-            [class]="danger() ? 'text-danger' : 'text-brand-lighter'"
-          >
-            {{ danger() ? saveLabel() : ('common.save' | translate) }}
-          </button>
+          @if (viewOnly()) {
+            <!-- Keeps the title centred -->
+            <span class="invisible text-[15px]" aria-hidden="true">{{ 'common.close' | translate }}</span>
+          } @else {
+            <button
+              type="button"
+              (click)="save.emit()"
+              [disabled]="saving() || saveDisabled()"
+              class="text-[15px] font-semibold disabled:opacity-50"
+              [class]="danger() ? 'text-danger' : 'text-brand-lighter'"
+            >
+              {{ danger() ? saveLabel() : ('common.save' | translate) }}
+            </button>
+          }
         </header>
 
         <!-- Web header -->
@@ -75,25 +80,27 @@ const FOCUSABLE =
           <ng-content />
         </div>
 
-        <!-- Web footer -->
-        <footer class="hidden shrink-0 justify-end gap-2.5 border-t border-border px-[26px] py-[18px] md:flex">
-          <button
-            type="button"
-            (click)="cancel()" [disabled]="saving()"
-            class="rounded-lg border border-border px-4 py-2.5 text-sm text-text-2 hover:border-border-strong disabled:opacity-50"
-          >
-            {{ 'common.cancel' | translate }}
-          </button>
-          <button
-            type="button"
-            (click)="save.emit()"
-            [disabled]="saving() || saveDisabled()"
-            class="rounded-lg px-[18px] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-            [class]="danger() ? 'bg-danger-solid hover:opacity-90' : 'bg-brand hover:bg-brand-dark'"
-          >
-            {{ saveLabel() }}
-          </button>
-        </footer>
+        <!-- Web footer (view-only sheets close from the header) -->
+        @if (!viewOnly()) {
+          <footer class="hidden shrink-0 justify-end gap-2.5 border-t border-border px-[26px] py-[18px] md:flex">
+            <button
+              type="button"
+              (click)="cancel()" [disabled]="saving()"
+              class="rounded-lg border border-border px-4 py-2.5 text-sm text-text-2 hover:border-border-strong disabled:opacity-50"
+            >
+              {{ 'common.cancel' | translate }}
+            </button>
+            <button
+              type="button"
+              (click)="save.emit()"
+              [disabled]="saving() || saveDisabled()"
+              class="rounded-lg px-[18px] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              [class]="danger() ? 'bg-danger-solid hover:opacity-90' : 'bg-brand hover:bg-brand-dark'"
+            >
+              {{ saveLabel() }}
+            </button>
+          </footer>
+        }
       </div>
     </div>
   `,
@@ -102,8 +109,10 @@ export class ModalSheet {
   protected readonly icons = ICONS;
 
   readonly title = input.required<string>();
-  /** Primary button text on web (mobile always shows "Guardar"). */
-  readonly saveLabel = input.required<string>();
+  /** Primary button text on web (mobile always shows "Guardar"). Unused when `viewOnly`. */
+  readonly saveLabel = input<string>('');
+  /** Nothing to save (e.g. an enlarged chart): no save buttons, "Cerrar" instead of "Cancelar". */
+  readonly viewOnly = input(false, { transform: booleanAttribute });
   readonly saving = input(false, { transform: booleanAttribute });
   /** Destructive action: red primary button, and its label (not "Guardar") in the mobile header. */
   readonly danger = input(false, { transform: booleanAttribute });
