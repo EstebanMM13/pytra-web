@@ -8,7 +8,7 @@ export interface StatsSummary {
   totalSingleplayerHours: number;
   totalOnlineHours: number;
   totalPlatinums: number;
-  /** Mean rating of rated runs (null when nothing is rated). */
+  /** Mean of the run ratings and online ratings (null when nothing is rated). */
   averageRating: number | null;
   replayCount: number;
   completedCount: number;
@@ -38,11 +38,15 @@ export interface GenreStat {
   totalHours: number;
 }
 
+/** A rated run, or a game's online playtime (`online: true`, no run label nor experience id). */
 export interface TopRatedExperience {
   gameId: number;
   gameName: string;
-  runLabel: string;
+  runLabel: string | null;
   rating: number;
+  /** The run's id; null for online entries (absent from older API versions). */
+  experienceId?: number | null;
+  online?: boolean;
 }
 
 export interface MostPlayedGame {

@@ -271,15 +271,22 @@
       <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header collapseKey="dashboard.topRated" collapseGroup="dashboard.lists" collapseGroupFrom="lg" class="mb-3.5" [label]="'dashboard.topRated' | translate" />
         @if (topRated(); as items) {
-          @for (item of items; track item.gameId + item.runLabel; let i = $index) {
+          @for (item of items; track topRatedKey(item); let i = $index) {
             <a
-              [routerLink]="['/games', item.gameId]"
+              [routerLink]="topRatedLink(item)"
               class="flex flex-1 items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
             >
               <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
-              <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName + ' · ' + item.runLabel">
-                {{ item.gameName }} <span class="text-faint">· {{ item.runLabel }}</span>
-              </span>
+              @if (item.online) {
+                <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
+                <span class="shrink-0 rounded-full bg-brand-tint px-2 py-0.5 text-[11px] text-brand-lighter">
+                  {{ 'dashboard.topRatedOnline' | translate }}
+                </span>
+              } @else {
+                <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName + ' · ' + item.runLabel">
+                  {{ item.gameName }} <span class="text-faint">· {{ item.runLabel }}</span>
+                </span>
+              }
               <span class="font-mono font-medium" [class]="item.rating | ratingTone">{{ item.rating | rating }}</span>
             </a>
           } @empty {

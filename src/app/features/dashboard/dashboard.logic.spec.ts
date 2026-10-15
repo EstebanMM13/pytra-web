@@ -1,5 +1,5 @@
 import { InProgressExperience, StatsSummary, YearStat } from '../../core/models/stats.model';
-import { dayOfYear, daysSince, pickTagline, taglineCandidates, TaglineInput } from './dashboard.logic';
+import { dayOfYear, daysSince, pickTagline, taglineCandidates, TaglineInput, topRatedKey, topRatedLink } from './dashboard.logic';
 
 const summary = (partial: Partial<StatsSummary> = {}): StatsSummary => ({
   totalGames: 0,
@@ -83,5 +83,30 @@ describe('dashboard tagline', () => {
     expect(day1.key).toBe('platinums');
     expect(day2.key).toBe('thisYear');
     expect(pickTagline({ ...input, today: new Date(2026, 0, 1) })).toEqual(day1);
+  });
+});
+
+describe('top rated links', () => {
+  it('lead to the run page for runs and to the game page for online entries', () => {
+    expect(topRatedLink({ gameId: 3, gameName: 'Hades', runLabel: 'Run 1', rating: 9, experienceId: 42, online: false })).toEqual([
+      '/games',
+      3,
+      'experiences',
+      42,
+    ]);
+    expect(topRatedLink({ gameId: 7, gameName: 'Fortnite', runLabel: null, rating: 8, experienceId: null, online: true })).toEqual([
+      '/games',
+      7,
+    ]);
+  });
+
+  it('fall back to the game page when the API sends no experience id', () => {
+    expect(topRatedLink({ gameId: 3, gameName: 'Hades', runLabel: 'Run 1', rating: 9 })).toEqual(['/games', 3]);
+  });
+
+  it('give runs and online entries of the same game distinct keys', () => {
+    const run = topRatedKey({ gameId: 3, gameName: 'G', runLabel: 'Run 1', rating: 9, experienceId: 42, online: false });
+    const online = topRatedKey({ gameId: 3, gameName: 'G', runLabel: null, rating: 9, experienceId: null, online: true });
+    expect(run).not.toEqual(online);
   });
 });

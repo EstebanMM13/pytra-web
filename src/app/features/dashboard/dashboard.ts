@@ -34,7 +34,7 @@ import { GameService } from '../../core/services/game.service';
 import { SagaService } from '../../core/services/saga.service';
 import { AchievementBadge } from '../../shared/achievements/achievement-badge';
 import { computeAchievements, topUnlocked } from '../../shared/achievements/achievements';
-import { pickTagline } from './dashboard.logic';
+import { pickTagline, topRatedKey, topRatedLink } from './dashboard.logic';
 
 type PlayMode = 'single' | 'online';
 
@@ -73,6 +73,8 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
 })
 export class Dashboard {
   protected readonly icons = ICONS;
+  protected readonly topRatedLink = topRatedLink;
+  protected readonly topRatedKey = topRatedKey;
 
   protected readonly installPrompt = inject(InstallPromptService);
   private readonly statsService = inject(StatsService);

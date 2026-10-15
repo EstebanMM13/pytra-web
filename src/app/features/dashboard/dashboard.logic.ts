@@ -68,3 +68,18 @@ export function pickTagline(input: TaglineInput): Tagline {
   if (!candidates.length) return { key: 'fallback', params: {} };
   return candidates[dayOfYear(input.today) % candidates.length];
 }
+
+/**
+ * Where a top-rated entry leads: the run's own page, or the game page for online entries (and for
+ * runs from an API that does not send `experienceId` yet).
+ */
+export function topRatedLink(item: TopRatedExperience): (string | number)[] {
+  return !item.online && item.experienceId != null
+    ? ['/games', item.gameId, 'experiences', item.experienceId]
+    : ['/games', item.gameId];
+}
+
+/** Stable `@for` key: the run id, else the game (a game has at most one online entry). */
+export function topRatedKey(item: TopRatedExperience): string {
+  return item.online ? `online-${item.gameId}` : `run-${item.experienceId ?? `${item.gameId}-${item.runLabel}`}`;
+}

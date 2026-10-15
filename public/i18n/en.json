@@ -145,7 +145,8 @@
       "fallback": "What are we playing today?"
     },
     "achievements": "Achievements",
-    "achievementsAll": "See all"
+    "achievementsAll": "See all",
+    "topRatedOnline": "Online"
   },
   "profile": {
     "title": "Profile",
