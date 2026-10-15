@@ -10,4 +10,8 @@
   }
 }
 
-<app-toast-host />
+<!-- Deferred: keeps the toast host and the icon set out of the initial bundle; the toast
+     queue lives in ToastService, so toasts raised before it loads still show. -->
+@defer (on idle) {
+  <app-toast-host />
+}
