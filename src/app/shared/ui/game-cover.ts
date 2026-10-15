@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, booleanAttribute, Component, computed, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, booleanAttribute, Component, computed, input, linkedSignal, output } from '@angular/core';
 
 export type GameCoverSize = 'xs' | 'sm' | 'md' | 'lg' | 'hero' | 'fill';
 
@@ -40,22 +40,20 @@ export function steamHeaderFallback(url: string): string | null {
   return match ? `${match[1]}header.jpg` : null;
 }
 
-/** Box art aspect (width / height) the cover boxes are drawn at. */
-const PORTRAIT_RATIO = 2 / 3;
-
 /**
- * How far (relative) an image's aspect may be from 2:3 and still be cropped to fill the box.
- * IGDB's 264x374 covers are about 6% off and crop fine; wider gaps (squarish art, landscape headers,
- * very tall images) would lose a visible part of the art, so those are shown whole instead.
+ * Widest aspect (width / height) still cropped to fill the 2:3 box. Any reasonably portrait image
+ * (Steam's 600x900, IGDB's 264x374, slightly-off custom covers, tall art) is cropped, anchored to
+ * the top so a title there survives; only clearly non-portrait art (square, landscape) is
+ * letterboxed over a blurred copy of itself.
  */
-export const PORTRAIT_TOLERANCE = 0.08;
+export const MAX_PORTRAIT_RATIO = 0.8;
 
-/** Whether an image of `width` x `height` is close enough to 2:3 to be cropped (object-cover). */
-export function fitsPortraitBox(width: number, height: number, tolerance = PORTRAIT_TOLERANCE): boolean {
+/** Whether an image of the given size is portrait enough to be cropped (object-cover). */
+export function fitsPortraitBox(width: number, height: number): boolean {
   if (!(width > 0) || !(height > 0)) {
     return true;
   }
-  return Math.abs(width / height / PORTRAIT_RATIO - 1) <= tolerance;
+  return width / height <= MAX_PORTRAIT_RATIO;
 }
 
 /** Up to two initials from the first words of a name (ignores punctuation-only tokens). */
@@ -84,7 +82,7 @@ export function coverHue(name: string): number {
 
 /**
  * Game cover as portrait box art (2:3). Lazy-loaded, no referrer. A Steam library capsule that fails
- * to load retries once with the app's store header; art far from 2:3 (that header, a square or a custom url) is
+ * to load retries once with the app's store header; clearly non-portrait art (that header, a square or a custom url) is
  * shown whole over a blurred copy of itself instead of being cropped to a sliver. With no url, or
  * when loading fails, it renders a gradient (brand tint -> surface, faintly hued from the name) with initials.
  */
@@ -116,7 +114,7 @@ export function coverHue(name: string): number {
         decoding="async"
         referrerpolicy="no-referrer"
         class="relative size-full"
-        [class]="letterbox() ? 'object-contain' : 'object-cover'"
+        [class]="letterbox() ? 'object-contain' : 'object-cover object-top'"
         (load)="onLoad($event)"
         (error)="onError(current)"
       />
@@ -143,11 +141,13 @@ export class GameCover {
   readonly size = input<GameCoverSize>('sm');
   /** Next to a visible game name: hide from assistive tech instead of repeating the name. */
   readonly decorative = input(false, { transform: booleanAttribute });
+  /** Emits on each image load whether it is portrait enough to be cropped (see `fitsPortraitBox`). */
+  readonly portraitChange = output<boolean>();
 
   /** Image being shown: the url, then its Steam header fallback, then null (initials). Resets with the url. */
   protected readonly src = linkedSignal<string | null>(() => this.url() || null);
 
-  /** The loaded image is too far from 2:3 to crop (see `fitsPortraitBox`); resets whenever the url changes. */
+  /** The loaded image is not portrait enough to crop (see `fitsPortraitBox`); resets whenever the url changes. */
   protected readonly letterbox = linkedSignal({ source: this.url, computation: () => false });
 
   protected readonly initials = computed(() => coverInitials(this.name()));
@@ -163,7 +163,9 @@ export class GameCover {
 
   protected onLoad(event: Event): void {
     const img = event.target as HTMLImageElement;
-    this.letterbox.set(!fitsPortraitBox(img.naturalWidth, img.naturalHeight));
+    const portrait = fitsPortraitBox(img.naturalWidth, img.naturalHeight);
+    this.letterbox.set(!portrait);
+    this.portraitChange.emit(portrait);
   }
 
   protected onError(failed: string): void {

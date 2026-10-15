@@ -52,6 +52,7 @@ describe('GameCover', () => {
     fixture.detectChanges();
     expect(el.querySelectorAll('img').length).toBe(1);
     expect(el.querySelector('img')!.classList).toContain('object-cover');
+    expect(el.querySelector('img')!.classList).toContain('object-top');
   });
 
   it('shows landscape art whole over a blurred backdrop', () => {
@@ -140,17 +141,18 @@ describe('coverInitials / coverHue', () => {
 });
 
 describe('fitsPortraitBox', () => {
-  it('crops art within 8% of 2:3 (Steam 600x900, IGDB 264x374)', () => {
+  it('crops any reasonably portrait art (width / height up to 0.80)', () => {
     expect(fitsPortraitBox(600, 900)).toBe(true);
     expect(fitsPortraitBox(264, 374)).toBe(true);
-    expect(fitsPortraitBox(640, 920)).toBe(true);
+    expect(fitsPortraitBox(3, 4)).toBe(true);
+    expect(fitsPortraitBox(800, 1000)).toBe(true);
+    expect(fitsPortraitBox(300, 600)).toBe(true);
   });
 
-  it('shows squarish, landscape or very tall art whole', () => {
+  it('letterboxes only clearly non-portrait art (square or landscape)', () => {
+    expect(fitsPortraitBox(810, 1000)).toBe(false);
     expect(fitsPortraitBox(512, 512)).toBe(false);
     expect(fitsPortraitBox(460, 215)).toBe(false);
-    expect(fitsPortraitBox(300, 600)).toBe(false);
-    expect(fitsPortraitBox(3, 4)).toBe(false);
   });
 
   it('treats a missing size as portrait (nothing to decide yet)', () => {
