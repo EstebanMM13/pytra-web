@@ -40,6 +40,24 @@ export function steamHeaderFallback(url: string): string | null {
   return match ? `${match[1]}header.jpg` : null;
 }
 
+/** Box art aspect (width / height) the cover boxes are drawn at. */
+const PORTRAIT_RATIO = 2 / 3;
+
+/**
+ * How far (relative) an image's aspect may be from 2:3 and still be cropped to fill the box.
+ * IGDB's 264x374 covers are about 6% off and crop fine; wider gaps (squarish art, landscape headers,
+ * very tall images) would lose a visible part of the art, so those are shown whole instead.
+ */
+export const PORTRAIT_TOLERANCE = 0.08;
+
+/** Whether an image of `width` x `height` is close enough to 2:3 to be cropped (object-cover). */
+export function fitsPortraitBox(width: number, height: number, tolerance = PORTRAIT_TOLERANCE): boolean {
+  if (!(width > 0) || !(height > 0)) {
+    return true;
+  }
+  return Math.abs(width / height / PORTRAIT_RATIO - 1) <= tolerance;
+}
+
 /** Up to two initials from the first words of a name (ignores punctuation-only tokens). */
 export function coverInitials(name: string): string {
   const words = name
@@ -66,7 +84,7 @@ export function coverHue(name: string): number {
 
 /**
  * Game cover as portrait box art (2:3). Lazy-loaded, no referrer. A Steam library capsule that fails
- * to load retries once with the app's store header; landscape art (that header, or a custom url) is
+ * to load retries once with the app's store header; art far from 2:3 (that header, a square or a custom url) is
  * shown whole over a blurred copy of itself instead of being cropped to a sliver. With no url, or
  * when loading fails, it renders a gradient (brand tint -> surface, faintly hued from the name) with initials.
  */
@@ -80,8 +98,8 @@ export function coverHue(name: string): number {
   },
   template: `
     @if (src(); as current) {
-      @if (landscape()) {
-        <!-- Landscape art: a blurred copy fills the poster, the whole image sits on top. -->
+      @if (letterbox()) {
+        <!-- Art far from 2:3: a blurred copy fills the poster, the whole image sits on top. -->
         <img
           [src]="current"
           alt=""
@@ -98,7 +116,7 @@ export function coverHue(name: string): number {
         decoding="async"
         referrerpolicy="no-referrer"
         class="relative size-full"
-        [class]="landscape() ? 'object-contain' : 'object-cover'"
+        [class]="letterbox() ? 'object-contain' : 'object-cover'"
         (load)="onLoad($event)"
         (error)="onError(current)"
       />
@@ -129,8 +147,8 @@ export class GameCover {
   /** Image being shown: the url, then its Steam header fallback, then null (initials). Resets with the url. */
   protected readonly src = linkedSignal<string | null>(() => this.url() || null);
 
-  /** The loaded image is wider than tall; resets whenever the url changes. */
-  protected readonly landscape = linkedSignal({ source: this.url, computation: () => false });
+  /** The loaded image is too far from 2:3 to crop (see `fitsPortraitBox`); resets whenever the url changes. */
+  protected readonly letterbox = linkedSignal({ source: this.url, computation: () => false });
 
   protected readonly initials = computed(() => coverInitials(this.name()));
   protected readonly sizeClass = computed(() => SIZE_CLASS[this.size()]);
@@ -145,11 +163,11 @@ export class GameCover {
 
   protected onLoad(event: Event): void {
     const img = event.target as HTMLImageElement;
-    this.landscape.set(img.naturalWidth > img.naturalHeight);
+    this.letterbox.set(!fitsPortraitBox(img.naturalWidth, img.naturalHeight));
   }
 
   protected onError(failed: string): void {
-    this.landscape.set(false);
+    this.letterbox.set(false);
     this.src.set(failed === this.url() ? steamHeaderFallback(failed) : null);
   }
 }

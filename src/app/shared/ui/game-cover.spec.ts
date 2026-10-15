@@ -1,6 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { GameCover, coverHue, coverInitials, steamHeaderFallback, steamPortraitCoverUrl } from './game-cover';
+import {
+  GameCover,
+  coverHue,
+  coverInitials,
+  fitsPortraitBox,
+  steamHeaderFallback,
+  steamPortraitCoverUrl,
+} from './game-cover';
 
 @Component({
   imports: [GameCover],
@@ -129,5 +136,25 @@ describe('coverInitials / coverHue', () => {
     const hue = coverHue('Elden Ring');
     expect(hue).toBeGreaterThanOrEqual(0);
     expect(hue).toBeLessThan(360);
+  });
+});
+
+describe('fitsPortraitBox', () => {
+  it('crops art within 8% of 2:3 (Steam 600x900, IGDB 264x374)', () => {
+    expect(fitsPortraitBox(600, 900)).toBe(true);
+    expect(fitsPortraitBox(264, 374)).toBe(true);
+    expect(fitsPortraitBox(640, 920)).toBe(true);
+  });
+
+  it('shows squarish, landscape or very tall art whole', () => {
+    expect(fitsPortraitBox(512, 512)).toBe(false);
+    expect(fitsPortraitBox(460, 215)).toBe(false);
+    expect(fitsPortraitBox(300, 600)).toBe(false);
+    expect(fitsPortraitBox(3, 4)).toBe(false);
+  });
+
+  it('treats a missing size as portrait (nothing to decide yet)', () => {
+    expect(fitsPortraitBox(0, 0)).toBe(true);
+    expect(fitsPortraitBox(Number.NaN, 900)).toBe(true);
   });
 });
