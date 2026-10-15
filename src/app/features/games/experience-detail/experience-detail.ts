@@ -22,6 +22,7 @@ import { StatCard } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { translatePlural } from '../../../shared/utils/plural';
 import { formatDayMonthYear, runDuration, splitLines } from '../../../shared/utils/run-dates';
+import { toastApiError } from '../../../shared/utils/api-error';
 
 /** `/stats/top-rated` caps `limit` at 50 server-side. */
 const RANK_WINDOW = 50;
@@ -172,9 +173,9 @@ export class ExperienceDetail {
         this.toast.success(this.translate.instant('run.deleted'));
         this.router.navigate(['/games', this.gameId()]);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.deleting.set(false);
-        this.toast.error(this.translate.instant('run.deleteError'));
+        toastApiError(this.toast, this.translate, err, 'run.deleteError');
       },
     });
   }

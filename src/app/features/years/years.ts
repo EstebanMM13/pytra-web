@@ -21,6 +21,7 @@ import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { formatRelativeTime } from '../../shared/utils/relative-time';
+import { toastApiError } from '../../shared/utils/api-error';
 import {
   STATUS_TEXT,
   latestYear,
@@ -264,9 +265,9 @@ export class Years {
         this.noteHighlights.set(saved.highlights);
         this.noteUpdatedAt.set(note.updatedAt);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.savingNote.set(false);
-        this.toast.error(this.translate.instant('years.note.saveError'));
+        toastApiError(this.toast, this.translate, err, 'years.note.saveError');
       },
     });
   }

@@ -26,6 +26,7 @@ import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { todayIso } from '../../../shared/utils/run-dates';
 import { formatDecimalInput } from '../../../shared/utils/decimal-input';
+import { toastApiError } from '../../../shared/utils/api-error';
 import {
   RUN_STATUSES,
   RunFormValue,
@@ -193,7 +194,7 @@ export class RunForm implements OnInit {
           control.setValue(platform?.id ?? null);
         }
       },
-      error: () => this.toast.error(this.translate.instant('runForm.platformLoadError')),
+      error: (err: unknown) => toastApiError(this.toast, this.translate, err, 'runForm.platformLoadError'),
     });
     if (request.mode === 'edit') {
       this.initEdit(request.experience);
@@ -374,9 +375,9 @@ export class RunForm implements OnInit {
         this.cancelAddPlatform();
         queueMicrotask(() => document.getElementById('run-form-platform')?.focus());
       },
-      error: () => {
+      error: (err: unknown) => {
         this.creatingPlatform.set(false);
-        this.toast.error(this.translate.instant('runForm.platformCreateError'));
+        toastApiError(this.toast, this.translate, err, 'runForm.platformCreateError');
       },
     });
   }
@@ -429,9 +430,9 @@ export class RunForm implements OnInit {
           this.router.navigate(['/games', experience.gameId, 'experiences', experience.id]);
         }
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.toast.error(this.translate.instant('runForm.saveError'));
+        toastApiError(this.toast, this.translate, err, 'runForm.saveError');
       },
     });
   }

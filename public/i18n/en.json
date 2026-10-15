@@ -587,7 +587,7 @@
     "editTitle": "Edit game",
     "saveEdit": "Save game",
     "saved": "Game updated.",
-    "saveError": "Could not save the game (duplicate name?).",
+    "saveError": "Couldn't save the game.",
     "genreError": "Could not create the genre.",
     "form": {
       "name": "Name",
@@ -828,7 +828,7 @@
     "created": "Saga created.",
     "saved": "Saga updated.",
     "deleted": "Saga deleted.",
-    "saveError": "Could not save the saga (duplicate name?).",
+    "saveError": "Couldn't save the saga.",
     "deleteError": "Could not delete the saga."
   },
   "language": {
@@ -1042,5 +1042,29 @@
     "NINTENDO": "Nintendo",
     "MOBILE": "Mobile",
     "OTHER": "Other"
+  },
+  "errors": {
+    "network": "You're offline. Check your connection and try again.",
+    "server": "The server is having trouble right now. Try again in a moment.",
+    "notFound": "It no longer exists (maybe it was deleted). Reload the page.",
+    "conflict": "It conflicts with existing data. Reload and try again.",
+    "tooManyRequests": "Too many attempts in a row. Wait a moment.",
+    "duplicateGame": "A game with that name already exists.",
+    "duplicateSaga": "A saga with that name already exists.",
+    "concurrentEdit": "It was saved from somewhere else at the same time. Try again.",
+    "platformCatalogFull": "The custom platform limit has been reached.",
+    "platformRateLimited": "You created several platforms in a row. Wait a bit before adding another.",
+    "invalidPlatform": "That platform doesn't exist. Reload and pick another.",
+    "invalidYear": "That year isn't valid.",
+    "field": "{{field}}: {{message}}",
+    "fields": {
+      "name": "The name is required.",
+      "releaseDate": "The release date can't be more than 10 years ahead.",
+      "category": "Pick a category.",
+      "runLabel": "The run needs a name.",
+      "status": "Pick a status.",
+      "rating": "The rating must be 0 to 10, with at most 2 decimals.",
+      "hours": "Hours can't be negative."
+    }
   }
 }

@@ -7,6 +7,7 @@ import { Saga } from '../../core/models/saga.model';
 import { SagaService } from '../../core/services/saga.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { ModalSheet } from '../../shared/ui/modal-sheet';
+import { toastApiError } from '../../shared/utils/api-error';
 
 /** Create (no `saga`) or rename/delete a saga in a modal / mobile sheet. */
 @Component({
@@ -93,9 +94,9 @@ export class SagaDialog implements OnInit {
         this.toast.success(this.translate.instant(saga ? 'sagas.saved' : 'sagas.created'));
         this.saved.emit(result);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.toast.error(this.translate.instant('sagas.saveError'));
+        toastApiError(this.toast, this.translate, err, 'sagas.saveError');
       },
     });
   }
@@ -111,9 +112,9 @@ export class SagaDialog implements OnInit {
         this.toast.success(this.translate.instant('sagas.deleted'));
         this.deleted.emit(saga.id);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.deleting.set(false);
-        this.toast.error(this.translate.instant('sagas.deleteError'));
+        toastApiError(this.toast, this.translate, err, 'sagas.deleteError');
       },
     });
   }

@@ -43,6 +43,7 @@ import {
 } from './online-playtime.logic';
 import { UpcomingBadge } from '../../../shared/ui/game-badges';
 import { isUpcoming } from '../library.logic';
+import { toastApiError } from '../../../shared/utils/api-error';
 
 /** Newest run first: end date, else start date, else stored year; ties by id. */
 function byRecencyDesc(a: Experience, b: Experience): number {
@@ -400,10 +401,10 @@ export class GameDetail {
           this.onlinePlatforms.set(playtime.platforms ?? []);
           this.toast.success(this.translate.instant('game.online.saved'));
         },
-        error: () => {
+        error: (err: unknown) => {
           this.savingOnlinePlatforms.set(false);
           if (id === this.gameId()) this.onlinePlatforms.set(previous);
-          this.toast.error(this.translate.instant('game.online.error'));
+          toastApiError(this.toast, this.translate, err, 'game.online.error');
         },
       });
   }
@@ -454,9 +455,9 @@ export class GameDetail {
           this.onlineLoadState.set('loaded');
           this.toast.success(this.translate.instant('game.online.saved'));
         },
-        error: () => {
+        error: (err: unknown) => {
           this.savingOnline.set(false);
-          this.toast.error(this.translate.instant('game.online.error'));
+          toastApiError(this.toast, this.translate, err, 'game.online.error');
         },
       });
   }

@@ -587,7 +587,7 @@
     "editTitle": "Editar juego",
     "saveEdit": "Guardar juego",
     "saved": "Juego actualizado.",
-    "saveError": "No se pudo guardar el juego (¿nombre repetido?).",
+    "saveError": "No se pudo guardar el juego.",
     "genreError": "No se pudo crear el género.",
     "form": {
       "name": "Nombre",
@@ -828,7 +828,7 @@
     "created": "Saga creada.",
     "saved": "Saga actualizada.",
     "deleted": "Saga borrada.",
-    "saveError": "No se pudo guardar la saga (¿nombre repetido?).",
+    "saveError": "No se pudo guardar la saga.",
     "deleteError": "No se pudo borrar la saga."
   },
   "language": {
@@ -1042,5 +1042,29 @@
     "NINTENDO": "Nintendo",
     "MOBILE": "Móvil",
     "OTHER": "Otras"
+  },
+  "errors": {
+    "network": "Sin conexión. Revisa tu red e inténtalo de nuevo.",
+    "server": "El servidor no responde bien ahora mismo. Inténtalo en un momento.",
+    "notFound": "Ya no existe (quizá se borró). Recarga la página.",
+    "conflict": "Choca con datos que ya existen. Recarga e inténtalo de nuevo.",
+    "tooManyRequests": "Demasiados intentos seguidos. Espera un momento.",
+    "duplicateGame": "Ya existe un juego con ese nombre.",
+    "duplicateSaga": "Ya existe una saga con ese nombre.",
+    "concurrentEdit": "Se guardó a la vez desde otro sitio. Inténtalo de nuevo.",
+    "platformCatalogFull": "Se ha alcanzado el máximo de plataformas personalizadas.",
+    "platformRateLimited": "Has creado varias plataformas seguidas. Espera un poco antes de añadir otra.",
+    "invalidPlatform": "Esa plataforma no existe. Recarga y elige otra.",
+    "invalidYear": "Ese año no es válido.",
+    "field": "{{field}}: {{message}}",
+    "fields": {
+      "name": "El nombre es obligatorio.",
+      "releaseDate": "La fecha de salida no puede estar a más de 10 años vista.",
+      "category": "Elige una categoría.",
+      "runLabel": "La partida necesita un nombre.",
+      "status": "Elige un estado.",
+      "rating": "La nota debe ir de 0 a 10, con 2 decimales como mucho.",
+      "hours": "Las horas no pueden ser negativas."
+    }
   }
 }

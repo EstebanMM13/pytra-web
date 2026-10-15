@@ -37,6 +37,7 @@ import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { IgdbMetadataService } from '../../../core/services/igdb-metadata.service';
 import { MetadataAutofill } from './metadata-autofill';
 import { AUTOFILL_SOURCE_LABELS, AutofillPick, matchGenres } from './metadata-autofill.logic';
+import { toastApiError } from '../../../shared/utils/api-error';
 
 /** Empty, or an absolute https URL with a host. */
 function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors | null {
@@ -187,7 +188,7 @@ export class GameEditDialog implements OnInit {
         this.selectedGenreIds.update((s) => new Set(s).add(genre.id));
         onCreated();
       },
-      error: () => this.toast.error(this.translate.instant('game.genreError')),
+      error: (err: unknown) => toastApiError(this.toast, this.translate, err, 'game.genreError'),
     });
   }
 
@@ -244,9 +245,9 @@ export class GameEditDialog implements OnInit {
         this.toast.success(this.translate.instant(game ? 'game.saved' : 'game.created'));
         this.saved.emit(updated);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.toast.error(this.translate.instant('game.saveError'));
+        toastApiError(this.toast, this.translate, err, 'game.saveError');
       },
     });
   }
@@ -262,9 +263,9 @@ export class GameEditDialog implements OnInit {
         this.toast.success(this.translate.instant('game.deleted'));
         this.deleted.emit(game.id);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.deleting.set(false);
-        this.toast.error(this.translate.instant('game.deleteError'));
+        toastApiError(this.toast, this.translate, err, 'game.deleteError');
       },
     });
   }
