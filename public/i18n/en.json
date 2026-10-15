@@ -438,7 +438,13 @@
     "delete": "Delete",
     "back": "Back",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "combobox": {
+      "create": "Create “{{name}}”",
+      "empty": "No results",
+      "remove": "Remove {{name}}",
+      "clear": "Clear selection"
+    }
   },
   "years": {
     "title": "Years",
@@ -599,12 +605,14 @@
       "saga": "Saga",
       "noSaga": "No saga",
       "genres": "Genres",
-      "newGenre": "New genre",
-      "addGenre": "Add",
       "coverUrl": "Cover URL",
       "coverUrlHint": "Optional. https link to an image; portrait box art (2:3) recommended.",
       "coverUrlInvalid": "Enter a valid https URL.",
-      "coverPreview": "Cover preview"
+      "coverPreview": "Cover preview",
+      "sagaPlaceholder": "Search sagas…",
+      "createSaga": "Create saga “{{name}}”",
+      "genrePlaceholder": "Search or create genres…",
+      "createGenre": "Create genre “{{name}}”"
     },
     "createTitle": "Add game",
     "saveCreate": "Add game",

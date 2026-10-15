@@ -54,13 +54,21 @@
         <input id="game-edit-release" type="date" formControlName="releaseDate" class="game-edit-input font-mono" />
       </div>
       <div class="flex flex-col gap-2">
-        <label for="game-edit-saga" class="text-[13px] text-text-3">{{ 'game.form.saga' | translate }}</label>
-        <select id="game-edit-saga" formControlName="sagaId" class="game-edit-input">
-          <option [ngValue]="null">{{ 'game.form.noSaga' | translate }}</option>
-          @for (saga of sagas(); track saga.id) {
-            <option [ngValue]="saga.id">{{ saga.name }}</option>
-          }
-        </select>
+        <label id="game-edit-saga-label" for="game-edit-saga" class="text-[13px] text-text-3">{{
+          'game.form.saga' | translate
+        }}</label>
+        <app-combobox
+          inputId="game-edit-saga"
+          labelledBy="game-edit-saga-label"
+          creatable
+          [options]="sagaOptions()"
+          [selected]="sagaSelection()"
+          (selectedChange)="selectSaga($event)"
+          (create)="createSaga($event)"
+          noneLabel="game.form.noSaga"
+          placeholder="game.form.sagaPlaceholder"
+          createLabel="game.form.createSaga"
+        />
       </div>
     </div>
 
@@ -107,23 +115,17 @@
 
     <div class="flex flex-col gap-2">
       <span id="game-edit-genres" class="text-[13px] text-text-3">{{ 'game.form.genres' | translate }}</span>
-      <div class="scroll-list -my-1 -ml-1 flex max-h-[192px] flex-wrap gap-2 py-1 pl-1" role="group" aria-labelledby="game-edit-genres">
-        @for (genre of genres(); track genre.id) {
-          <button
-            type="button"
-            [attr.aria-pressed]="selectedGenreIds().has(genre.id)"
-            (click)="toggleGenre(genre.id)"
-            class="rounded-full border px-3.5 py-[7px] text-[13px]"
-            [class]="
-              selectedGenreIds().has(genre.id)
-                ? 'border-brand bg-brand-tint text-brand-lighter'
-                : 'border-border text-text-2 hover:border-border-strong'
-            "
-          >
-            {{ genre.name | genreName }}
-          </button>
-        }
-      </div>
+      <app-combobox
+        multiple
+        creatable
+        labelledBy="game-edit-genres"
+        [options]="genreOptions()"
+        [selected]="genreSelection()"
+        (selectedChange)="selectedGenreIds.set(toSet($event))"
+        (create)="createAndSelectGenre($event)"
+        placeholder="game.form.genrePlaceholder"
+        createLabel="game.form.createGenre"
+      />
       @if (suggestedGenres().length) {
         <div class="flex flex-col gap-2">
           <span id="game-edit-suggested-genres" class="text-xs text-muted">{{ 'game.autofill.suggestedGenres' | translate }}</span>
@@ -142,23 +144,6 @@
           </div>
         </div>
       }
-      <div class="flex gap-2">
-        <input
-          type="text"
-          [formControl]="newGenreName"
-          (keydown.enter)="$event.preventDefault(); addGenre()"
-          [placeholder]="'game.form.newGenre' | translate"
-          [attr.aria-label]="'game.form.newGenre' | translate"
-          class="game-edit-input min-w-0 flex-1"
-        />
-        <button
-          type="button"
-          (click)="addGenre()"
-          class="shrink-0 rounded-lg border border-border px-4 text-sm text-text-2 hover:border-border-strong"
-        >
-          {{ 'game.form.addGenre' | translate }}
-        </button>
-      </div>
     </div>
 
     @if (game()) {

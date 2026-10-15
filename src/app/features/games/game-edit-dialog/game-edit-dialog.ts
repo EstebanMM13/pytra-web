@@ -5,6 +5,7 @@ import {
   Injector,
   OnInit,
   afterNextRender,
+  computed,
   inject,
   input,
   output,
@@ -23,7 +24,8 @@ import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../../../shared/ui/icons';
 import { map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { GenreNamePipe } from '../../../shared/pipes/genre-name.pipe';
+import { formatGenreName } from '../../../shared/pipes/genre-name.pipe';
+import { Combobox, ComboboxOption } from '../../../shared/ui/combobox';
 import { Game, GameCategory, GameRequest } from '../../../core/models/game.model';
 import { Genre } from '../../../core/models/genre.model';
 import { Saga } from '../../../core/models/saga.model';
@@ -38,6 +40,10 @@ import { IgdbMetadataService } from '../../../core/services/igdb-metadata.servic
 import { MetadataAutofill } from './metadata-autofill';
 import { AUTOFILL_SOURCE_LABELS, AutofillPick, matchGenres } from './metadata-autofill.logic';
 import { toastApiError } from '../../../shared/utils/api-error';
+
+function sortByName(sagas: readonly Saga[]): Saga[] {
+  return [...sagas].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+}
 
 /** Empty, or an absolute https URL with a host. */
 function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors | null {
@@ -62,7 +68,7 @@ function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors |
   imports: [
     ReactiveFormsModule,
     TranslatePipe,
-    GenreNamePipe,
+    Combobox,
     ModalSheet,
     Segmented,
     GameCover,
@@ -111,7 +117,6 @@ export class GameEditDialog implements OnInit {
   /** Source genres the user has no genre for yet; one click creates and selects them. */
   protected readonly suggestedGenres = signal<string[]>([]);
 
-  protected readonly newGenreName = this.fb.control('');
   protected readonly form = this.fb.group({
     name: this.fb.control('', [Validators.required, Validators.pattern(/\S/)]),
     developer: this.fb.control(''),
@@ -120,6 +125,22 @@ export class GameEditDialog implements OnInit {
     sagaId: this.fb.control<number | null>(null),
     coverImageUrl: this.fb.control('', [httpsUrlValidator]),
   });
+
+  /** Genre combobox rows: display names, alphabetical. */
+  protected readonly genreOptions = computed<ComboboxOption[]>(() =>
+    this.genres()
+      .map((g) => ({ id: g.id, label: formatGenreName(g.name) }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'es')),
+  );
+  protected readonly genreSelection = computed(() => [...this.selectedGenreIds()]);
+
+  protected readonly sagaOptions = computed<ComboboxOption[]>(() =>
+    this.sagas().map((s) => ({ id: s.id, label: s.name })),
+  );
+  protected readonly sagaSelection = toSignal(
+    this.form.controls.sagaId.valueChanges.pipe(map((id) => (id === null ? [] : [id]))),
+    { initialValue: [] as number[] },
+  );
 
   /** Valid cover url for the live preview, or null. */
   protected readonly coverPreview = toSignal(
@@ -148,38 +169,39 @@ export class GameEditDialog implements OnInit {
       this.selectedGenreIds.set(new Set(game.genres.map((g) => g.id)));
     }
     this.sagaService.findAll().subscribe({
-      next: (sagas) => this.sagas.set([...sagas].sort((a, b) => a.name.localeCompare(b.name))),
+      next: (sagas) => this.sagas.set(sortByName(sagas)),
       error: () => {},
     });
     this.genreService.findAll().subscribe({ next: (genres) => this.genres.set(genres), error: () => {} });
     this.igdbService.providers().subscribe((providers) => this.igdbEnabled.set(providers.igdb));
   }
 
-  protected toggleGenre(id: number): void {
-    this.selectedGenreIds.update((current) => {
-      const next = new Set(current);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+  /** Picks from the genre combobox (chips keep their pick order). */
+  protected toSet(ids: readonly number[]): Set<number> {
+    return new Set(ids);
   }
 
-  protected addGenre(): void {
-    const name = this.newGenreName.value.trim();
-    if (!name) {
-      return;
-    }
-    this.createAndSelectGenre(name, () => this.newGenreName.setValue(''));
+  protected selectSaga(ids: readonly number[]): void {
+    this.form.controls.sagaId.setValue(ids[0] ?? null);
+    this.form.controls.sagaId.markAsDirty();
+  }
+
+  /** Creates a saga from the combobox search and selects it. */
+  protected createSaga(name: string): void {
+    this.sagaService.create({ name }).subscribe({
+      next: (saga) => {
+        this.sagas.update((list) => sortByName([...list.filter((s) => s.id !== saga.id), saga]));
+        this.selectSaga([saga.id]);
+      },
+      error: (err: unknown) => toastApiError(this.toast, this.translate, err, 'sagas.saveError'),
+    });
   }
 
   protected addSuggestedGenre(name: string): void {
     this.createAndSelectGenre(name, () => this.suggestedGenres.update((list) => list.filter((n) => n !== name)));
   }
 
-  private createAndSelectGenre(name: string, onCreated: () => void): void {
+  protected createAndSelectGenre(name: string, onCreated: () => void = () => {}): void {
     this.genreService.createIfMissing({ name }).subscribe({
       next: (genre) => {
         if (!this.genres().some((g) => g.id === genre.id)) {

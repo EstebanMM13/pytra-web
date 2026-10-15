@@ -438,7 +438,13 @@
     "delete": "Borrar",
     "back": "Volver",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "combobox": {
+      "create": "Crear «{{name}}»",
+      "empty": "Sin resultados",
+      "remove": "Quitar {{name}}",
+      "clear": "Quitar selección"
+    }
   },
   "years": {
     "title": "Años",
@@ -599,12 +605,14 @@
       "saga": "Saga",
       "noSaga": "Sin saga",
       "genres": "Géneros",
-      "newGenre": "Nuevo género",
-      "addGenre": "Añadir",
       "coverUrl": "URL de portada",
       "coverUrlHint": "Opcional. Enlace https a una imagen; se recomienda carátula vertical (2:3).",
       "coverUrlInvalid": "Introduce una URL https válida.",
-      "coverPreview": "Vista previa de la portada"
+      "coverPreview": "Vista previa de la portada",
+      "sagaPlaceholder": "Buscar saga…",
+      "createSaga": "Crear saga «{{name}}»",
+      "genrePlaceholder": "Buscar o crear géneros…",
+      "createGenre": "Crear género «{{name}}»"
     },
     "createTitle": "Añadir juego",
     "saveCreate": "Añadir juego",
