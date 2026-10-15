@@ -10,6 +10,7 @@ import { UserService } from '../../core/services/user.service';
 import { GlobalSearch } from '../global-search/global-search';
 import { Avatar } from '../ui/avatar';
 import { PytraMark } from '../ui/pytra-mark';
+import { PytraWordmark } from '../ui/pytra-wordmark';
 
 interface NavTab {
   path: string;
@@ -39,6 +40,7 @@ const WEB_TABS: NavTab[] = [
     TranslatePipe,
     GlobalSearch,
     PytraMark,
+    PytraWordmark,
     Avatar,
     LucideDynamicIcon,
   ],

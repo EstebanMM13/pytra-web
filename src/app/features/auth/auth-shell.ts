@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { PytraMark } from '../../shared/ui/pytra-mark';
+import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
 
 /**
  * Layout for the signed-out screens. Web (md+): 50/50 split with the brand panel on the left
@@ -11,7 +12,7 @@ import { PytraMark } from '../../shared/ui/pytra-mark';
  */
 @Component({
   selector: 'app-auth-shell',
-  imports: [TranslatePipe, PytraMark],
+  imports: [TranslatePipe, PytraMark, PytraWordmark],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
@@ -39,7 +40,7 @@ import { PytraMark } from '../../shared/ui/pytra-mark';
 
         <div class="relative flex items-center gap-4 self-start" role="img" aria-label="Pytra">
           <app-pytra-mark class="size-16 drop-shadow-[0_8px_24px_rgba(114,77,206,0.45)]" />
-          <span class="text-[52px] leading-none font-bold tracking-[-0.04em] text-text" aria-hidden="true">Pytra</span>
+          <app-pytra-wordmark class="text-[52px] font-bold tracking-[-0.04em]" />
         </div>
 
         <div class="relative">
@@ -71,7 +72,7 @@ import { PytraMark } from '../../shared/ui/pytra-mark';
           <div class="mb-5 flex flex-col gap-3 md:hidden">
             <div class="flex items-center gap-3 self-start" role="img" aria-label="Pytra">
               <app-pytra-mark class="size-12 drop-shadow-[0_6px_18px_rgba(114,77,206,0.4)]" />
-              <span class="text-[36px] leading-none font-bold tracking-[-0.04em] text-text" aria-hidden="true">Pytra</span>
+              <app-pytra-wordmark class="text-[36px] font-bold tracking-[-0.04em]" />
             </div>
             <div class="mt-4 flex items-center gap-3">
               <span class="text-[13px] font-semibold tracking-[0.04em] text-gold">
