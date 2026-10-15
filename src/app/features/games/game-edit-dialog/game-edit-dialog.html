@@ -61,6 +61,8 @@
           inputId="game-edit-saga"
           labelledBy="game-edit-saga-label"
           creatable
+          ariaLabel="game.form.saga"
+          [busy]="creatingSaga()"
           [options]="sagaOptions()"
           [selected]="sagaSelection()"
           (selectedChange)="selectSaga($event)"
@@ -119,6 +121,8 @@
         multiple
         creatable
         labelledBy="game-edit-genres"
+        ariaLabel="game.form.genres"
+        [busy]="creatingGenre()"
         [options]="genreOptions()"
         [selected]="genreSelection()"
         (selectedChange)="selectedGenreIds.set(toSet($event))"
@@ -134,8 +138,9 @@
               <button
                 type="button"
                 (click)="addSuggestedGenre(name)"
+                [disabled]="creatingGenre()"
                 [attr.aria-label]="'game.autofill.addGenre' | translate: { name }"
-                class="flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-[6px] text-[13px] text-text-2 hover:border-border-strong"
+                class="flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-[6px] text-[13px] text-text-2 hover:border-border-strong disabled:opacity-50"
               >
                 <svg [lucideIcon]="icons.plus" [size]="13"></svg>
                 {{ name }}

@@ -116,6 +116,9 @@ export class GameEditDialog implements OnInit {
   protected readonly filledFrom = signal<{ name: string; source: string } | null>(null);
   /** Source genres the user has no genre for yet; one click creates and selects them. */
   protected readonly suggestedGenres = signal<string[]>([]);
+  /** A genre / saga create request is in flight (one at a time, so a retry cannot double-post). */
+  protected readonly creatingGenre = signal(false);
+  protected readonly creatingSaga = signal(false);
 
   protected readonly form = this.fb.group({
     name: this.fb.control('', [Validators.required, Validators.pattern(/\S/)]),
@@ -188,12 +191,18 @@ export class GameEditDialog implements OnInit {
 
   /** Creates a saga from the combobox search and selects it. */
   protected createSaga(name: string): void {
+    if (this.creatingSaga()) return;
+    this.creatingSaga.set(true);
     this.sagaService.create({ name }).subscribe({
       next: (saga) => {
+        this.creatingSaga.set(false);
         this.sagas.update((list) => sortByName([...list.filter((s) => s.id !== saga.id), saga]));
         this.selectSaga([saga.id]);
       },
-      error: (err: unknown) => toastApiError(this.toast, this.translate, err, 'sagas.saveError'),
+      error: (err: unknown) => {
+        this.creatingSaga.set(false);
+        toastApiError(this.toast, this.translate, err, 'sagas.saveError');
+      },
     });
   }
 
@@ -202,15 +211,21 @@ export class GameEditDialog implements OnInit {
   }
 
   protected createAndSelectGenre(name: string, onCreated: () => void = () => {}): void {
+    if (this.creatingGenre()) return;
+    this.creatingGenre.set(true);
     this.genreService.createIfMissing({ name }).subscribe({
       next: (genre) => {
+        this.creatingGenre.set(false);
         if (!this.genres().some((g) => g.id === genre.id)) {
           this.genres.update((list) => [...list, genre]);
         }
         this.selectedGenreIds.update((s) => new Set(s).add(genre.id));
         onCreated();
       },
-      error: (err: unknown) => toastApiError(this.toast, this.translate, err, 'game.genreError'),
+      error: (err: unknown) => {
+        this.creatingGenre.set(false);
+        toastApiError(this.toast, this.translate, err, 'game.genreError');
+      },
     });
   }
 

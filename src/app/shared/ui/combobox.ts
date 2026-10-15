@@ -4,12 +4,14 @@ import {
   ElementRef,
   booleanAttribute,
   computed,
+  effect,
   inject,
   input,
   model,
   numberAttribute,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -129,8 +131,10 @@ let nextId = 0;
         autocapitalize="off"
         spellcheck="false"
         aria-autocomplete="list"
+        aria-haspopup="listbox"
         [id]="inputId()"
         [attr.aria-labelledby]="labelledBy() || null"
+        [attr.aria-label]="labelledBy() || !ariaLabel() ? null : (ariaLabel() | translate)"
         [attr.aria-expanded]="open()"
         [attr.aria-controls]="listId"
         [attr.aria-activedescendant]="open() && activeIndex() >= 0 ? listId + '-' + activeIndex() : null"
@@ -160,6 +164,8 @@ let nextId = 0;
         role="listbox"
         [id]="listId"
         [attr.aria-labelledby]="labelledBy() || null"
+        [attr.aria-label]="labelledBy() || !ariaLabel() ? null : (ariaLabel() | translate)"
+        [attr.aria-busy]="busy() || null"
         [attr.aria-multiselectable]="multiple() || null"
         class="scroll-thin mt-1.5 max-h-60 overflow-y-auto rounded-[10px] border border-border bg-surface p-1 shadow-[0_12px_32px_#0006]"
       >
@@ -168,6 +174,8 @@ let nextId = 0;
             role="option"
             [id]="listId + '-' + i"
             [attr.aria-selected]="isSelected(entry)"
+            [attr.aria-disabled]="(entry.kind === 'create' && busy()) || null"
+            [class.opacity-50]="entry.kind === 'create' && busy()"
             class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm md:text-[13px]"
             [class]="i === activeIndex() ? 'bg-hover text-text' : isSelected(entry) ? 'text-brand-lighter' : 'text-text-2'"
             (mouseenter)="activeIndex.set(i)"
@@ -214,6 +222,10 @@ export class Combobox {
   readonly limit = input(8, { transform: numberAttribute });
   /** id of the visible label element. */
   readonly labelledBy = input('');
+  /** Accessible name (translation key) when there is no visible label to point at. */
+  readonly ariaLabel = input('');
+  /** A create is in flight: the create row is disabled so the same name is not sent twice. */
+  readonly busy = input(false, { transform: booleanAttribute });
   /** id for the input, so a `<label for>` can point at it. */
   readonly inputId = input(`pt-combobox-${nextId++}`);
   // Translation keys (plain text also renders as-is).
@@ -226,6 +238,24 @@ export class Combobox {
   readonly clearLabel = input('common.combobox.clear');
   /** Emits the trimmed query when the user picks the "create" row. */
   readonly create = output<string>();
+
+  /** Normalized name of the last create request, until it appears among the picks. */
+  private pendingCreate: string | null = null;
+
+  constructor() {
+    effect(() => {
+      const picked = this.selectedOptions();
+      untracked(() => {
+        const pending = this.pendingCreate;
+        if (pending && picked.some((o) => normalizeSearch(o.label) === pending)) {
+          this.pendingCreate = null;
+          this.query.set('');
+          if (this.multiple()) this.activeIndex.set(this.firstActiveIndex());
+          else this.close();
+        }
+      });
+    });
+  }
 
   protected readonly listId = `pt-combobox-list-${nextId++}`;
   protected readonly open = signal(false);
@@ -299,6 +329,8 @@ export class Combobox {
         return;
       }
       case 'Enter': {
+        // IME composition (e.g. accents on some keyboards) confirms with Enter: not a pick.
+        if (event.isComposing) return;
         // Never submits the surrounding form from the search box.
         event.preventDefault();
         const entry = this.entries()[this.activeIndex()];
@@ -344,10 +376,11 @@ export class Combobox {
         this.close();
         break;
       case 'create':
+        // The query stays until the created item shows up as picked (see the constructor), so a
+        // failed create keeps what the user typed.
+        if (this.busy()) return;
+        this.pendingCreate = normalizeSearch(entry.name);
         this.create.emit(entry.name);
-        this.query.set('');
-        if (this.multiple()) this.activeIndex.set(this.firstActiveIndex());
-        else this.close();
         break;
     }
   }
