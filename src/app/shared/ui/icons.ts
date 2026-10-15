@@ -1,7 +1,6 @@
 import { LucideIconData } from '@lucide/angular';
 import {
   Archive,
-  ArrowDownWideNarrow,
   ArrowRight,
   Award,
   BookOpen,
@@ -76,7 +75,6 @@ const icon = (name: string, node: IconNode): LucideIconData => ({ name, node });
  */
 export const ICONS = {
   archive: icon('archive', Archive),
-  arrowDownWideNarrow: icon('arrow-down-wide-narrow', ArrowDownWideNarrow),
   arrowRight: icon('arrow-right', ArrowRight),
   award: icon('award', Award),
   bookOpen: icon('book-open', BookOpen),
