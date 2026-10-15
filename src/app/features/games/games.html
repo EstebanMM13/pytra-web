@@ -153,12 +153,12 @@
           </button>
         }
         <label
-          class="relative shrink-0 rounded-full border px-3 py-[7px] whitespace-nowrap"
+          class="relative flex shrink-0 items-center rounded-full border px-3 py-[7px] whitespace-nowrap"
           [class]="query().platform !== 'ALL' ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-3'"
         >
           <span class="sr-only">{{ 'library.platformLabel' | translate }}</span>
           <select
-            class="cursor-pointer appearance-none bg-transparent focus:shadow-none"
+            class="cursor-pointer appearance-none bg-transparent pr-4 focus:shadow-none"
             [value]="query().platform"
             (change)="setPlatform($any($event.target).value)"
           >
@@ -167,14 +167,15 @@
               <option [value]="p.id" [selected]="'' + p.id === query().platform">{{ platformLabel(p.name) | translate }}</option>
             }
           </select>
+          <svg [lucideIcon]="icons.chevronDown" [size]="12" class="pointer-events-none absolute right-2.5 opacity-70" aria-hidden="true"></svg>
         </label>
         <label
-          class="relative shrink-0 rounded-full border px-3 py-[7px] whitespace-nowrap"
+          class="relative flex shrink-0 items-center rounded-full border px-3 py-[7px] whitespace-nowrap"
           [class]="query().category !== 'ALL' ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-3'"
         >
           <span class="sr-only">{{ 'library.categoryLabel' | translate }}</span>
           <select
-            class="cursor-pointer appearance-none bg-transparent focus:shadow-none"
+            class="cursor-pointer appearance-none bg-transparent pr-4 focus:shadow-none"
             [value]="query().category"
             (change)="setCategory($any($event.target).value)"
           >
@@ -183,6 +184,7 @@
               <option [value]="c" [selected]="c === query().category">{{ 'category.' + c | translate }}</option>
             }
           </select>
+          <svg [lucideIcon]="icons.chevronDown" [size]="12" class="pointer-events-none absolute right-2.5 opacity-70" aria-hidden="true"></svg>
         </label>
       </div>
 
@@ -395,7 +397,7 @@
                 </p>
                 <p class="mt-[3px] flex min-w-0 items-center gap-1.5 text-xs text-muted">
                   @if (game.category; as category) {
-                    <app-category-badge [category]="category" />
+                    <app-category-badge compact [category]="category" />
                   }
                   @if (isUpcoming(game)) {
                     <app-upcoming-badge />
