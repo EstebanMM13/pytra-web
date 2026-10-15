@@ -38,7 +38,7 @@ import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
           aria-hidden="true"
         />
 
-        <div class="relative flex items-center gap-4 self-start" role="img" aria-label="Pytra">
+        <div class="relative flex items-center gap-4 self-start">
           <app-pytra-mark class="size-16 drop-shadow-[0_8px_24px_rgba(114,77,206,0.45)]" />
           <app-pytra-wordmark class="text-[52px] font-bold tracking-[-0.04em]" />
         </div>
@@ -70,7 +70,7 @@ import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
         <div class="flex w-full max-w-[380px] flex-col gap-4 md:gap-[18px]">
           <!-- Mobile brand header: the side panel is hidden below md -->
           <div class="mb-5 flex flex-col gap-3 md:hidden">
-            <div class="flex items-center gap-3 self-start" role="img" aria-label="Pytra">
+            <div class="flex items-center gap-3 self-start">
               <app-pytra-mark class="size-12 drop-shadow-[0_6px_18px_rgba(114,77,206,0.4)]" />
               <app-pytra-wordmark class="text-[36px] font-bold tracking-[-0.04em]" />
             </div>
