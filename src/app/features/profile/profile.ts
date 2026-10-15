@@ -37,7 +37,7 @@ import { AvatarPicker } from './avatar-picker';
 import { DeleteAccountDialog } from './delete-account-dialog';
 import { avatarErrorKey, exportErrorKey, formatMemberSince } from './profile.logic';
 
-type ProfileSection = 'account' | 'achievements' | 'preferences' | 'data';
+type ProfileSection = 'account' | 'avatar' | 'achievements' | 'preferences' | 'data';
 type AchievementFilter = 'all' | 'unlocked' | 'locked';
 
 const FEATURED_ACHIEVEMENTS = 6;
@@ -73,8 +73,8 @@ export class Profile {
   protected readonly isDemo = inject(AuthService).isDemo;
   protected readonly showAccountSection = computed(() => !this.isDemo());
   protected readonly showDeleteAccount = computed(() => !this.isDemo());
-  protected readonly sections = (['account', 'achievements', 'preferences', 'data'] as const).filter(
-    (s) => (s !== 'account' || this.showAccountSection()) && (s !== 'data' || !this.isDemo()),
+  protected readonly sections = (['account', 'avatar', 'achievements', 'preferences', 'data'] as const).filter(
+    (s) => (s !== 'account' || this.showAccountSection()) && ((s !== 'data' && s !== 'avatar') || !this.isDemo()),
   );
 
   private readonly fb = inject(NonNullableFormBuilder);

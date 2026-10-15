@@ -164,7 +164,8 @@
       "account": "Cuenta",
       "achievements": "Logros",
       "preferences": "Preferencias",
-      "data": "Datos"
+      "data": "Datos",
+      "avatar": "Avatar"
     },
     "steamLinked": "Vinculada",
     "steamNotLinked": "Sin vincular",
