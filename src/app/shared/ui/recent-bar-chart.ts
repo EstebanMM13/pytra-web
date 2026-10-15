@@ -6,8 +6,8 @@ import { ModalSheet } from './modal-sheet';
 /** Bars a per-year chart shows before "Ver todos". */
 export const RECENT_BARS_LIMIT = 5;
 
-/** Width each bar gets in the full chart, so long series scroll sideways instead of squeezing. */
-const FULL_BAR_WIDTH_PX = 44;
+/** Above this many bars, labels switch to their compact form ("'20" instead of "2020"). */
+export const FULL_LABELS_MAX = 8;
 
 /** A bar with something to show: hours or a label above it (e.g. a rating with no hours logged). */
 function hasData(bar: MiniBar): boolean {
@@ -27,10 +27,16 @@ export function hasHiddenBars(bars: readonly MiniBar[], limit = RECENT_BARS_LIMI
   return bars.length > recentBars(bars, limit).length;
 }
 
+/** Bars labelled with their full form (`fullLabel`) when few enough fit, else the compact `label`. */
+export function fitLabels(bars: readonly MiniBar[], maxFull = FULL_LABELS_MAX): MiniBar[] {
+  return bars.length > maxFull ? [...bars] : bars.map((bar) => ({ ...bar, label: bar.fullLabel ?? bar.label }));
+}
+
 /**
  * Per-year bar chart that shows only the most recent `limit` bars, with a "Ver todos" button
  * (when more exist) opening the whole series in a modal sheet; there it scrolls sideways on narrow
- * screens. `bars` is the full chronological series (oldest first).
+ * screens. `bars` is the full chronological series (oldest first). Few bars get full labels
+ * ("2020"), many get compact ones ("'20").
  */
 @Component({
   selector: 'app-recent-bar-chart',
@@ -38,11 +44,13 @@ export function hasHiddenBars(bars: readonly MiniBar[], limit = RECENT_BARS_LIMI
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'flex flex-col' },
   template: `
+    <!-- flex-1 only when filling the parent: a flex basis would override a fixed px height. -->
     <app-mini-bar-chart
-      class="flex-1"
+      [class.flex-1]="height() === null"
       [bars]="visible()"
       [height]="height()"
       [dense]="dense()"
+      [large]="large()"
       [topTone]="topTone()"
     />
     @if (hasMore()) {
@@ -59,13 +67,14 @@ export function hasHiddenBars(bars: readonly MiniBar[], limit = RECENT_BARS_LIMI
     @if (expanded()) {
       <app-modal-sheet viewOnly [title]="title()" (closed)="expanded.set(false)">
         <div class="-mx-5 overflow-x-auto px-5 pb-2 md:mx-0 md:px-0">
-          <app-mini-bar-chart
-            class="min-w-full"
-            [style.min-width.px]="bars().length * fullBarWidth"
-            [bars]="bars()"
-            [height]="240"
-            [topTone]="topTone()"
-          />
+          <!-- Definite plot height; at least 44px per bar on phones (scrolls sideways), 28px on wider screens; the sheet's width when that is enough. -->
+          <div
+            class="h-[220px] min-w-[calc(var(--bars)*44px)] md:h-[260px] md:min-w-[calc(var(--bars)*28px)]"
+            [style.--bars]="all().length"
+            data-full-plot
+          >
+            <app-mini-bar-chart [bars]="all()" [height]="null" [dense]="all().length > fullLabelsMax" [topTone]="topTone()" />
+          </div>
         </div>
       </app-modal-sheet>
     }
@@ -77,13 +86,16 @@ export class RecentBarChart {
   /** Title of the "Ver todos" sheet (already translated). */
   readonly title = input.required<string>();
   readonly limit = input(RECENT_BARS_LIMIT, { transform: numberAttribute });
-  /** Height of the recent chart in px; null fills the parent's height. */
+  /** Height of the recent chart in px; null fills the parent's height (which must be definite). */
   readonly height = input<number | null>(170);
   readonly dense = input(false, { transform: booleanAttribute });
+  /** Bigger labels in the recent chart (wide layouts with room to spare). */
+  readonly large = input(false, { transform: booleanAttribute });
   readonly topTone = input<'gold' | 'muted'>('gold');
 
-  protected readonly fullBarWidth = FULL_BAR_WIDTH_PX;
+  protected readonly fullLabelsMax = FULL_LABELS_MAX;
   protected readonly expanded = signal(false);
-  protected readonly visible = computed(() => recentBars(this.bars(), this.limit()));
+  protected readonly visible = computed(() => fitLabels(recentBars(this.bars(), this.limit())));
+  protected readonly all = computed(() => fitLabels(this.bars()));
   protected readonly hasMore = computed(() => hasHiddenBars(this.bars(), this.limit()));
 }

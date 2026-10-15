@@ -247,7 +247,7 @@
         @if (yearBars(); as bars) {
           @if (bars.length) {
             <div class="hidden min-h-[200px] flex-1 flex-col md:flex">
-              <app-recent-bar-chart class="flex-1" [bars]="bars" [height]="null" [title]="'dashboard.hoursByYear' | translate" />
+              <app-recent-bar-chart class="flex-1" [bars]="bars" [height]="null" large [title]="'dashboard.hoursByYear' | translate" />
             </div>
             <div class="md:hidden">
               <app-recent-bar-chart [bars]="bars" [height]="96" dense [title]="'dashboard.hoursByYear' | translate" />
