@@ -34,6 +34,7 @@ import {
   hoursValidator,
   nextRunLabel,
   ratingValidatorFor,
+  statusForEndDate,
 } from './run-form.logic';
 
 const MAX_RESULTS = 8;
@@ -312,6 +313,15 @@ export class RunForm implements OnInit {
     if (status === 'COMPLETADO' && !endDate.value && (!startDate.value || startDate.value <= today)) {
       endDate.setValue(today);
       this.endSuggested.set(true);
+    }
+  }
+
+  /** The user picked or cleared the end date: keep the status consistent with it (see statusForEndDate). */
+  protected onEndDateChange(endDate: string): void {
+    const status = this.form.controls.status;
+    const next = statusForEndDate(status.value, endDate);
+    if (next !== status.value) {
+      status.setValue(next);
     }
   }
 

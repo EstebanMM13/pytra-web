@@ -57,6 +57,18 @@ export const dateRangeValidator: ValidatorFn = (group: AbstractControl): Validat
   return isValidDateRange(start, end) ? null : { dateRange: true };
 };
 
+/**
+ * Status after the user edits the end date: a date on a run in progress or pending finishes it
+ * (COMPLETADO); clearing the date of a completed run reopens it (EN_CURSO). ABANDONADO is never
+ * changed, and any other combination keeps the current status.
+ */
+export function statusForEndDate(status: ExperienceStatus, endDate: string | null | undefined): ExperienceStatus {
+  if (endDate) {
+    return status === 'EN_CURSO' || status === 'PENDIENTE' ? 'COMPLETADO' : status;
+  }
+  return status === 'COMPLETADO' ? 'EN_CURSO' : status;
+}
+
 function yearOf(date: string | null | undefined): number | null {
   const match = /^(\d{4})-/.exec(date ?? '');
   return match ? Number(match[1]) : null;

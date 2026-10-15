@@ -10,9 +10,36 @@ import {
   nextRunLabel,
   ratingValidator,
   ratingValidatorFor,
+  statusForEndDate,
 } from './run-form.logic';
 
 describe('run form logic', () => {
+  describe('statusForEndDate', () => {
+    it('completes a run in progress or pending when an end date is set', () => {
+      expect(statusForEndDate('EN_CURSO', '2026-10-01')).toBe('COMPLETADO');
+      expect(statusForEndDate('PENDIENTE', '2026-10-01')).toBe('COMPLETADO');
+    });
+
+    it('reopens a completed run when its end date is cleared', () => {
+      expect(statusForEndDate('COMPLETADO', '')).toBe('EN_CURSO');
+      expect(statusForEndDate('COMPLETADO', null)).toBe('EN_CURSO');
+    });
+
+    it('keeps a completed run completed when its end date moves', () => {
+      expect(statusForEndDate('COMPLETADO', '2026-09-30')).toBe('COMPLETADO');
+    });
+
+    it('never changes an abandoned run', () => {
+      expect(statusForEndDate('ABANDONADO', '2026-10-01')).toBe('ABANDONADO');
+      expect(statusForEndDate('ABANDONADO', '')).toBe('ABANDONADO');
+    });
+
+    it('leaves runs without an end date in progress or pending', () => {
+      expect(statusForEndDate('EN_CURSO', '')).toBe('EN_CURSO');
+      expect(statusForEndDate('PENDIENTE', null)).toBe('PENDIENTE');
+    });
+  });
+
   describe('nextRunLabel', () => {
     it('numbers the next run after the existing ones', () => {
       expect(nextRunLabel(0)).toBe('Run 1');
