@@ -4,7 +4,6 @@ import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Dropdown, DropdownOption } from '../../shared/ui/dropdown';
 import { map } from 'rxjs';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
@@ -25,7 +24,6 @@ import {
   isUpcoming,
   libraryPlatforms,
   LibraryCategoryFilter,
-  LIBRARY_SORTS,
   LIBRARY_STATUS_FILTERS,
   isOnlineOnly,
   LibraryQuery,
@@ -71,7 +69,6 @@ import { formatGenreName } from '../../shared/pipes/genre-name.pipe';
     RatingPipe,
     RatingTonePipe,
     Pagination,
-    Dropdown,
     Skeleton,
     StatusPill,
     CategoryBadge,
@@ -96,8 +93,6 @@ export class Games {
   /** Fixed when the page loads: good enough for a "coming soon" badge. */
   private readonly today = todayIso();
   protected readonly isUpcoming = (game: Game): boolean => isUpcoming(game, this.today);
-  protected readonly sorts = LIBRARY_SORTS;
-  protected readonly sortOptions: DropdownOption[] = LIBRARY_SORTS.map((s) => ({ value: s, label: `library.sort.${s}` }));
   protected readonly skeletonRows = Array.from({ length: 8 }, (_, i) => i);
 
   /** `null` while loading. */

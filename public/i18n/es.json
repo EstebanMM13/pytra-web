@@ -800,9 +800,9 @@
     "hoursPlayed": "{{hours}} jugadas",
     "noHours": "Sin horas",
     "filters": {
-      "button": "Filtrar",
-      "buttonActive": "Filtrar ({{count}} activos)",
-      "title": "Filtros",
+      "button": "Filtrar y ordenar",
+      "buttonActive": "Filtrar y ordenar ({{count}} filtros activos)",
+      "title": "Filtrar y ordenar",
       "type": "Tipo",
       "platforms": "Plataforma",
       "genres": "Géneros",
@@ -810,7 +810,8 @@
       "anyHint": "Se muestran los juegos con cualquiera de los elegidos.",
       "clear": "Limpiar filtros",
       "done": "Listo",
-      "active": "Filtros activos"
+      "active": "Filtros activos",
+      "sortChanged": "Orden personalizado"
     }
   },
   "sagas": {

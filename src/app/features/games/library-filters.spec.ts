@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
-import { LibraryCategoryFilter } from './library.logic';
+import { LibraryCategoryFilter, LibrarySort } from './library.logic';
 import { LibraryFilters } from './library-filters';
 
 @Component({
@@ -10,6 +10,8 @@ import { LibraryFilters } from './library-filters';
     [category]="category()"
     [platformIds]="platforms()"
     [genreIds]="genres()"
+    [sort]="sort()"
+    (sortChange)="sort.set($event)"
     [platforms]="platformRefs"
     [genreOptions]="genreOptions"
     (categoryChange)="category.set($event)"
@@ -22,6 +24,7 @@ class Host {
   readonly category = signal<LibraryCategoryFilter>('ALL');
   readonly platforms = signal<readonly string[]>([]);
   readonly genres = signal<readonly number[]>([]);
+  readonly sort = signal<LibrarySort>('recent');
   readonly platformRefs = [
     { id: 1, name: 'PC', color: '#888' },
     { id: 2, name: 'PS5', color: '#44f' },
@@ -113,5 +116,18 @@ describe('LibraryFilters', () => {
     fixture.destroy();
     expect(document.body.style.overflow).toBe('');
     el.remove();
+  });
+
+  it('sorts from the same panel; a custom sort shows a dot, not a filter count', () => {
+    const { fixture, el, trigger, button } = setup();
+    trigger.click();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-sort-dot]')).toBeNull();
+    button('library.sort.rating').click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.sort()).toBe('rating');
+    expect(el.querySelector('[data-sort-dot]')).not.toBeNull();
+    expect(trigger.querySelector('.font-mono')).toBeNull();
+    expect(button('library.sort.rating').getAttribute('aria-checked')).toBe('true');
   });
 });

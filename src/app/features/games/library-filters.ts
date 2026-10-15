@@ -20,10 +20,10 @@ import { PlatformRef } from '../../core/models/platform.model';
 import { platformNameKey } from '../../core/services/platform.logic';
 import { Combobox, ComboboxOption } from '../../shared/ui/combobox';
 import { ICONS } from '../../shared/ui/icons';
-import { GAME_CATEGORIES, LibraryCategoryFilter } from './library.logic';
+import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } from './library.logic';
 
 /**
- * "Filtrar" button of the library toolbar with its panel: type (category), platforms and genres.
+ * "Filtrar y ordenar" button of the library toolbar with its panel: sort, type (category), platforms and genres.
  * A bottom sheet on phones, a popover under the button from md. Changes apply right away; the
  * parent keeps them in the URL.
  */
@@ -41,11 +41,13 @@ import { GAME_CATEGORIES, LibraryCategoryFilter } from './library.logic';
       #trigger
       type="button"
       (click)="toggle()"
-      class="flex h-full items-center gap-2 rounded-xl border px-3.5 py-3 text-[13px] font-medium md:rounded-lg md:px-3 md:py-[9px]"
+      class="relative flex h-11 items-center gap-2 rounded-full border px-4 text-[13px] font-medium whitespace-nowrap md:h-9 md:px-3.5"
       [class]="count() ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border bg-surface text-text-2 hover:border-border-strong'"
       aria-haspopup="dialog"
       [attr.aria-expanded]="open()"
-      [attr.aria-label]="count() ? ('library.filters.buttonActive' | translate: { count: count() }) : null"
+      [attr.aria-label]="
+        (count() ? 'library.filters.buttonActive' : 'library.filters.button') | translate: { count: count() }
+      "
     >
       <svg [lucideIcon]="icons.slidersHorizontal" [size]="15" class="shrink-0"></svg>
       <span>{{ 'library.filters.button' | translate }}</span>
@@ -53,6 +55,13 @@ import { GAME_CATEGORIES, LibraryCategoryFilter } from './library.logic';
         <span class="grid min-w-5 place-items-center rounded-full bg-brand px-1.5 font-mono text-[11px] leading-5 text-white">
           {{ count() }}
         </span>
+      }
+      @if (customSort()) {
+        <span
+          class="absolute top-1.5 right-2 size-2 rounded-full bg-gold ring-2 ring-surface md:top-1 md:right-1.5"
+          data-sort-dot
+          [attr.title]="'library.filters.sortChanged' | translate"
+        ></span>
       }
     </button>
 
@@ -78,6 +87,26 @@ import { GAME_CATEGORIES, LibraryCategoryFilter } from './library.logic';
             <svg [lucideIcon]="icons.x" [size]="16"></svg>
           </button>
         </div>
+
+        <section class="flex flex-col gap-2 border-t border-divider py-3.5">
+          <h3 id="library-filter-sort" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+            {{ 'library.sortLabel' | translate }}
+          </h3>
+          <div class="flex flex-wrap gap-1.5" role="radiogroup" aria-labelledby="library-filter-sort">
+            @for (option of sortChoices; track option) {
+              <button
+                type="button"
+                role="radio"
+                [attr.aria-checked]="sort() === option"
+                (click)="sortChange.emit(option)"
+                class="rounded-full border px-3 py-1.5 text-[13px]"
+                [class]="sort() === option ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-2 hover:border-border-strong'"
+              >
+                {{ 'library.sort.' + option | translate }}
+              </button>
+            }
+          </div>
+        </section>
 
         <section class="flex flex-col gap-2 border-t border-divider py-3.5">
           <h3 id="library-filter-type" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
@@ -179,6 +208,7 @@ export class LibraryFilters {
   }
 
   readonly category = input.required<LibraryCategoryFilter>();
+  readonly sort = input<LibrarySort>('recent');
   readonly platformIds = input.required<readonly string[]>();
   readonly genreIds = input.required<readonly number[]>();
   /** Platforms the library's games were played on. */
@@ -189,9 +219,14 @@ export class LibraryFilters {
   readonly categoryChange = output<LibraryCategoryFilter>();
   readonly platformsChange = output<string[]>();
   readonly genresChange = output<readonly number[]>();
+  readonly sortChange = output<LibrarySort>();
+  /** Clears the filters (type, platforms, genres); the sort stays. */
   readonly cleared = output<void>();
 
   protected readonly categoryChoices: readonly LibraryCategoryFilter[] = ['ALL', ...GAME_CATEGORIES];
+  protected readonly sortChoices = LIBRARY_SORTS;
+  /** A sort other than the default: a dot on the button (the count is for filters only). */
+  protected readonly customSort = computed(() => this.sort() !== 'recent');
   protected readonly open = signal(false);
   protected readonly count = computed(
     () => (this.category() !== 'ALL' ? 1 : 0) + this.platformIds().length + this.genreIds().length,
