@@ -44,7 +44,6 @@ import {
 import { CategoryBadge, UpcomingBadge } from '../../../shared/ui/game-badges';
 import { figureFontSize } from '../../../shared/ui/stat-card';
 import { DemoModeService } from '../../../core/services/demo-mode.service';
-import { NgTemplateOutlet } from '@angular/common';
 import { isUpcoming } from '../library.logic';
 import { toastApiError } from '../../../shared/utils/api-error';
 
@@ -81,7 +80,6 @@ function byRelease(a: Game, b: Game): number {
     GameEditDialog,
     UpcomingBadge,
     CategoryBadge,
-    NgTemplateOutlet,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -203,6 +201,12 @@ export class GameDetail {
   protected readonly showHoursBreakdown = computed(() => {
     const category = this.game()?.category;
     return !!category && category !== 'SINGLEPLAYER';
+  });
+
+  /** Campaign (runs) share of the total hours, for the breakdown bar; 100 without hours. */
+  protected readonly campaignShare = computed(() => {
+    const { runHours, totalHours } = this.stats();
+    return totalHours > 0 ? Math.round((runHours / totalHours) * 1000) / 10 : 100;
   });
 
   protected readonly upcoming = computed(() => {

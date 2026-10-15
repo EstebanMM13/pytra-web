@@ -557,10 +557,9 @@
       "platinum": "Platinum",
       "avg": "Average",
       "hours": "Hours",
-      "hoursBreakdown": "{{runs}} campaign + {{online}} online",
-      "avgRatingShort": "Avg",
-      "bestRatingShort": "Best",
-      "label": "Game figures"
+      "label": "Game figures",
+      "campaign": "Campaign",
+      "online": "Online"
     },
     "runs": "Runs",
     "noRuns": "No runs yet.",

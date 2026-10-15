@@ -557,10 +557,9 @@
       "platinum": "Platino",
       "avg": "Media",
       "hours": "Horas",
-      "hoursBreakdown": "{{runs}} campaña + {{online}} online",
-      "avgRatingShort": "Media",
-      "bestRatingShort": "Mejor",
-      "label": "Cifras del juego"
+      "label": "Cifras del juego",
+      "campaign": "Campaña",
+      "online": "Online"
     },
     "runs": "Partidas",
     "noRuns": "Todavía no hay partidas.",

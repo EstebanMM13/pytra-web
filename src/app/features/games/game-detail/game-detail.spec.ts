@@ -74,7 +74,7 @@ describe('GameDetail', () => {
   it('offers edit, new run and the first-run link to a signed-in user', () => {
     const { buttons } = setup(game('SINGLEPLAYER'));
     expect(buttons('game.editAria').length).toBe(1);
-    expect(buttons('game.edit').length).toBe(2); // tablet and desktop placements
+    expect(buttons('game.edit').length).toBe(1);
     expect(buttons('game.newRun').length).toBeGreaterThan(0);
     expect(buttons('game.firstRun').length).toBe(1);
     buttons('game.firstRun')[0].click();
@@ -101,7 +101,7 @@ describe('GameDetail', () => {
     const { buttons, el } = setup(game('ONLINE'));
     expect(buttons('game.newRun')).toEqual([]);
     expect(buttons('game.firstRun')).toEqual([]);
-    expect(buttons('game.edit').length).toBe(2);
+    expect(buttons('game.edit').length).toBe(1);
     expect(el.textContent).toContain('game.onlineNoRuns');
   });
 
@@ -109,5 +109,45 @@ describe('GameDetail', () => {
     expect(setup(game('SINGLEPLAYER', '2999-01-01')).el.querySelector('app-upcoming-badge')).not.toBeNull();
     TestBed.resetTestingModule();
     expect(setup(game('SINGLEPLAYER', '2020-01-01')).el.querySelector('app-upcoming-badge')).toBeNull();
+  });
+});
+
+describe('GameDetail stats', () => {
+  function render(category: GameCategory) {
+    TestBed.configureTestingModule({
+      imports: [GameDetail],
+      providers: [
+        provideRouter([]),
+        provideTranslateService(),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '7' })) } },
+        { provide: GameService, useValue: { findById: () => of(game(category)), findAll: () => of([]) } },
+        { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        {
+          provide: OnlinePlaytimeService,
+          useValue: { findByGame: () => of({ gameId: 7, totalHours: 20, generalRating: null, platforms: [] }) },
+        },
+        { provide: PlatformService, useValue: { platforms: signal([]), load: () => of([]) } },
+        { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },
+        { provide: DemoModeService, useValue: { isDemo: signal(false), blockWrite: () => false } },
+        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
+      ],
+    });
+    TestBed.overrideComponent(GameDetail, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const fixture = TestBed.createComponent(GameDetail);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  it('features total hours with the campaign / online split for games with online hours', () => {
+    const hours = render('HYBRID').querySelector('[data-stat="hours"]')!;
+    expect(hours.textContent).toContain('20 h');
+    expect(hours.textContent).toContain('game.stats.campaign');
+    expect(hours.textContent).toContain('game.stats.online');
+  });
+
+  it('shows the four equal cards and no split for single-player games', () => {
+    const el = render('SINGLEPLAYER');
+    expect(el.querySelector('[data-stat="hours"]')!.textContent).not.toContain('game.stats.online');
+    expect(el.querySelectorAll('app-stat-card').length).toBe(4);
   });
 });

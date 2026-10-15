@@ -38,7 +38,7 @@
       {{ 'game.loadError' | translate }}
     </p>
   } @else if (game(); as g) {
-    <!-- Hero: cover + identity; from md the key figures sit inside it (beside the identity from lg) -->
+    <!-- Hero: cover + identity. From md the sheet facts spread in labelled columns across the hero. -->
     <section
       class="relative isolate -mx-5 overflow-hidden px-5 pt-2 pb-3 md:mx-0 md:rounded-2xl md:border md:border-card-border md:p-6"
     >
@@ -55,27 +55,22 @@
         </div>
       }
 
-      <div class="flex flex-col gap-5 lg:flex-row lg:items-stretch lg:gap-8">
-        <!-- Identity -->
-        <div class="flex min-w-0 flex-1 items-start gap-4 sm:gap-5 md:items-end md:gap-6">
-          <app-game-cover
-            decorative
-            size="hero"
-            class="shadow-lg ring-1 shadow-black/25 ring-border"
-            [url]="g.coverImageUrl"
-            [name]="g.name"
-          />
-          <div class="flex min-w-0 flex-1 flex-col self-stretch">
-            @if (canEdit()) {
-              <div class="mb-4 hidden justify-end gap-2.5 md:flex lg:hidden">
-                <ng-container *ngTemplateOutlet="heroActions" />
-              </div>
-            }
-            <div class="flex min-w-0 flex-1 flex-col justify-center md:justify-end">
+      <div class="flex items-start gap-4 sm:gap-5 md:items-stretch md:gap-7">
+        <app-game-cover
+          decorative
+          size="hero"
+          class="shadow-lg ring-1 shadow-black/25 ring-border"
+          [url]="g.coverImageUrl"
+          [name]="g.name"
+        />
+
+        <div class="flex min-w-0 flex-1 flex-col">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
               @if (g.sagaId !== null && g.sagaName) {
                 <a
                   [routerLink]="['/sagas', g.sagaId]"
-                  class="mb-1 flex w-fit max-w-full items-center gap-1.5 rounded-md text-xs font-medium text-brand-light hover:underline md:mb-2 md:text-sm"
+                  class="mb-1 flex w-fit max-w-full items-center gap-1.5 rounded-md text-[13px] font-medium text-brand-light hover:underline md:mb-2 md:text-sm"
                 >
                   <svg [lucideIcon]="icons.layers" [size]="14" class="shrink-0" aria-hidden="true"></svg>
                   <span class="truncate">
@@ -91,156 +86,142 @@
                 </a>
               }
               <h1
-                class="font-display line-clamp-3 text-[22px] leading-tight font-bold tracking-[-0.025em] wrap-break-word sm:text-[26px] md:line-clamp-2 md:text-[36px] md:leading-tight md:tracking-[-0.035em] lg:line-clamp-3 lg:text-[40px]"
+                class="font-display line-clamp-3 text-[22px] leading-tight font-bold tracking-[-0.025em] wrap-break-word sm:text-[26px] md:line-clamp-2 md:text-[40px] md:tracking-[-0.035em] lg:text-[48px]"
                 [title]="g.name"
               >
                 {{ g.name }}
               </h1>
-
-              <!-- Meta: stacked compact lines on phones, one wrapping row from md -->
-              <div
-                class="mt-2 flex flex-col gap-1 text-xs text-text-2 md:mt-3 md:flex-row md:flex-wrap md:items-center md:gap-x-4 md:gap-y-1.5 md:text-sm"
-              >
-                @if (g.developer) {
-                  <span class="inline-flex min-w-0 items-center gap-1.5">
-                    <svg [lucideIcon]="icons.building" [size]="13" class="shrink-0 text-muted" aria-hidden="true"></svg>
-                    <span class="truncate" [title]="g.developer">{{ g.developer }}</span>
-                  </span>
-                }
-                @if (g.releaseDate || g.category || upcoming()) {
-                  <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1 md:contents">
-                    @if (g.releaseDate) {
-                      <span class="inline-flex items-center gap-1.5">
-                        <svg [lucideIcon]="icons.calendar" [size]="13" class="shrink-0 text-muted" aria-hidden="true"></svg>
-                        <span class="font-mono">{{ g.releaseDate.slice(0, 4) }}</span>
-                      </span>
-                    }
-                    @if (g.category; as category) {
-                      <app-category-badge [category]="category" />
-                    }
-                    @if (upcoming()) {
-                      <app-upcoming-badge />
-                    }
-                  </span>
-                }
-                @if (platforms().length) {
-                  <span class="flex flex-wrap items-center gap-x-3 gap-y-1 md:contents">
-                    @for (p of platforms(); track p.id) {
-                      <app-platform-label [platform]="p" />
-                    }
-                  </span>
+            </div>
+            @if (canEdit()) {
+              <div class="hidden shrink-0 gap-2.5 md:flex">
+                <button
+                  type="button"
+                  (click)="editing.set(true)"
+                  class="flex items-center gap-1.5 rounded-lg border border-border bg-bg/40 px-3.5 py-[9px] text-[13px] font-medium text-text-2 backdrop-blur-sm hover:border-border-strong hover:text-text light:bg-surface/70"
+                >
+                  <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
+                  {{ 'game.edit' | translate }}
+                </button>
+                @if (canAddRun()) {
+                  <button
+                    type="button"
+                    (click)="newRun()"
+                    class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+                  >
+                    <svg [lucideIcon]="icons.plus" [size]="15"></svg>
+                    {{ 'game.newRun' | translate }}
+                  </button>
                 }
               </div>
-
-              @if (genres().length) {
-                <ul class="mt-2.5 flex flex-wrap gap-1.5 md:mt-3" [attr.aria-label]="'game.genre' | translate">
-                  @for (genre of genres(); track genre) {
-                    <li
-                      class="rounded-full border border-brand/25 bg-brand-tint px-2 py-px text-[11px] leading-4 font-medium text-brand-lighter md:px-2.5 md:py-0.5 md:text-xs"
-                    >
-                      {{ genre }}
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
+            }
           </div>
-        </div>
 
-        <!-- Key figures (md+): a strip under the identity on tablets, a side panel from lg -->
-        <div class="hidden min-w-0 flex-col gap-4 md:flex lg:w-[380px] lg:shrink-0">
-          @if (canEdit()) {
-            <div class="hidden justify-end gap-2.5 lg:flex">
-              <ng-container *ngTemplateOutlet="heroActions" />
-            </div>
-          }
-          @if (experiences() !== null) {
-            @let s = stats();
-            <dl
-              class="grid grid-cols-[minmax(0,1.5fr)_repeat(4,minmax(0,1fr))] overflow-hidden rounded-xl border border-card-border bg-bg/40 backdrop-blur-md lg:mt-auto lg:grid-cols-2 light:bg-surface/70"
-            >
-              <div class="@container flex min-w-0 flex-col px-4 py-3.5 [--fig-max:26px] lg:col-span-2 lg:px-5 lg:py-4 lg:[--fig-max:38px]">
-                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                  <svg [lucideIcon]="statIcons.hours" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
-                  {{ 'game.stats.totalHours' | translate }}
-                </dt>
-                <dd class="mt-1 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.totalHours | hours)">
-                  <span class="text-figure">{{ s.totalHours | hours }}</span>
-                </dd>
-                @if (showHoursBreakdown()) {
-                  <dd class="mt-1 text-xs leading-snug text-muted">
-                    {{ 'game.stats.hoursBreakdown' | translate: { runs: (s.runHours | hours), online: (s.onlineHours | hours) } }}
-                  </dd>
+          <!-- Phones: compact meta lines beside the cover -->
+          <div class="mt-2 flex flex-col gap-1.5 text-[13px] text-text-2 md:hidden">
+            @if (g.developer) {
+              <span class="inline-flex min-w-0 items-center gap-1.5">
+                <svg [lucideIcon]="icons.building" [size]="14" class="shrink-0 text-muted" aria-hidden="true"></svg>
+                <span class="truncate" [title]="g.developer">{{ g.developer }}</span>
+              </span>
+            }
+            @if (g.releaseDate || g.category || upcoming()) {
+              <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                @if (g.releaseDate) {
+                  <span class="inline-flex items-center gap-1.5">
+                    <svg [lucideIcon]="icons.calendar" [size]="14" class="shrink-0 text-muted" aria-hidden="true"></svg>
+                    <span class="font-mono">{{ g.releaseDate.slice(0, 4) }}</span>
+                  </span>
                 }
-              </div>
-              <div class="@container flex min-w-0 flex-col border-divider px-4 py-3.5 [--fig-max:26px] md:border-l lg:border-t lg:border-l-0 lg:px-5 lg:[--fig-max:28px]">
-                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                  <svg [lucideIcon]="statIcons.rating" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
-                  {{ 'game.stats.avgRating' | translate }}
-                </dt>
-                <dd class="mt-1 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.avgRating | rating)">
-                  <span class="text-figure-tone font-mono" [class]="s.avgRating | ratingTone">{{ s.avgRating | rating }}</span>
-                </dd>
-              </div>
-              <div class="@container flex min-w-0 flex-col border-divider px-4 py-3.5 [--fig-max:26px] md:border-l lg:border-t lg:px-5 lg:[--fig-max:28px]">
-                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                  <svg [lucideIcon]="statIcons.best" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
-                  {{ 'game.stats.bestRating' | translate }}
-                </dt>
-                <dd class="mt-1 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.bestRating | rating)">
-                  <span class="text-figure-tone font-mono" [class]="s.bestRating | ratingTone">{{ s.bestRating | rating }}</span>
-                </dd>
-              </div>
-              <div class="@container flex min-w-0 flex-col border-divider px-4 py-3.5 [--fig-max:26px] md:border-l lg:border-t lg:border-l-0 lg:px-5 lg:[--fig-max:28px]">
-                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                  <svg [lucideIcon]="statIcons.runs" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
-                  {{ 'game.stats.runs' | translate }}
-                </dt>
-                <dd class="mt-1 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.runs)">
-                  <span class="text-figure">{{ s.runs }}</span>
-                </dd>
-              </div>
-              <div class="@container flex min-w-0 flex-col border-divider px-4 py-3.5 [--fig-max:26px] md:border-l lg:border-t lg:px-5 lg:[--fig-max:28px]">
-                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                  <svg [lucideIcon]="statIcons.platinum" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
-                  {{ 'game.stats.platinum' | translate }}
-                </dt>
-                <dd class="mt-1 leading-tight font-bold whitespace-nowrap" [style.font-size]="figureSize('—')">
-                  @if (s.platinum) {
-                    <span [attr.aria-label]="'common.yes' | translate">🏆</span>
-                  } @else {
-                    <span class="text-faint">—</span>
-                  }
-                </dd>
-              </div>
-            </dl>
-          } @else {
-            <app-skeleton class="h-[90px] rounded-xl lg:mt-auto lg:h-[216px]" />
-          }
+                @if (g.category; as category) {
+                  <app-category-badge [category]="category" />
+                }
+                @if (upcoming()) {
+                  <app-upcoming-badge />
+                }
+              </span>
+            }
+            @if (platforms().length) {
+              <span class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                @for (p of platforms(); track p.id) {
+                  <app-platform-label [platform]="p" />
+                }
+              </span>
+            }
+            @if (genres().length) {
+              <ul class="mt-1 flex flex-wrap gap-1.5" [attr.aria-label]="'game.genre' | translate">
+                @for (genre of genres(); track genre) {
+                  <li class="rounded-full border border-brand/25 bg-brand-tint px-2.5 py-0.5 text-xs font-medium text-brand-lighter">
+                    {{ genre }}
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
+          <!-- md+: the sheet facts as labelled columns across the whole hero -->
+          <dl class="mt-auto hidden grid-cols-2 gap-x-8 gap-y-5 border-t border-divider pt-5 md:grid lg:grid-cols-4">
+            <div class="min-w-0">
+              <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                <svg [lucideIcon]="icons.building" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                {{ 'game.developer' | translate }}
+              </dt>
+              <dd class="mt-1.5 truncate text-[17px] font-semibold text-text" [title]="g.developer ?? ''">
+                {{ g.developer ?? '—' }}
+              </dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                <svg [lucideIcon]="icons.calendar" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                {{ 'game.release' | translate }}
+              </dt>
+              <dd class="mt-1.5 flex flex-wrap items-center gap-2 text-[17px] font-semibold text-text">
+                <span class="font-mono">{{ g.releaseDate ? releaseDate(g) : '—' }}</span>
+                @if (upcoming()) {
+                  <app-upcoming-badge />
+                }
+              </dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                <svg [lucideIcon]="icons.gamepad2" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                {{ 'game.category' | translate }}
+              </dt>
+              <dd class="mt-1.5 truncate text-[17px] font-semibold text-text">
+                {{ g.category ? ('category.' + g.category | translate) : '—' }}
+              </dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                <svg [lucideIcon]="icons.monitor" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                {{ 'game.platforms' | translate }}
+              </dt>
+              <dd class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[17px] font-semibold text-text" [title]="platformNames()">
+                @for (p of platforms(); track p.id) {
+                  <app-platform-label [platform]="p" />
+                } @empty {
+                  —
+                }
+              </dd>
+            </div>
+            <div class="col-span-2 min-w-0 lg:col-span-4">
+              <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                <svg [lucideIcon]="icons.sparkles" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                {{ 'game.genre' | translate }}
+              </dt>
+              <dd class="mt-2 flex flex-wrap gap-2">
+                @for (genre of genres(); track genre) {
+                  <span class="rounded-full border border-brand/25 bg-brand-tint px-3 py-1 text-[13px] font-medium text-brand-lighter">
+                    {{ genre }}
+                  </span>
+                } @empty {
+                  <span class="text-[17px] font-semibold">—</span>
+                }
+              </dd>
+            </div>
+          </dl>
         </div>
       </div>
     </section>
-
-    <ng-template #heroActions>
-      <button
-        type="button"
-        (click)="editing.set(true)"
-        class="flex items-center gap-1.5 rounded-lg border border-border bg-bg/40 px-3.5 py-[9px] text-[13px] font-medium text-text-2 backdrop-blur-sm hover:border-border-strong hover:text-text light:bg-surface/70"
-      >
-        <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
-        {{ 'game.edit' | translate }}
-      </button>
-      @if (canAddRun()) {
-        <button
-          type="button"
-          (click)="newRun()"
-          class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
-        >
-          <svg [lucideIcon]="icons.plus" [size]="15"></svg>
-          {{ 'game.newRun' | translate }}
-        </button>
-      }
-    </ng-template>
 
     @if (g.reviewStatus === 'PENDING_REVIEW') {
       <a
@@ -253,49 +234,78 @@
       </a>
     }
 
-    <!-- Stats on phones: 2 wide cards (runs, hours + breakdown) over 3 narrow ones -->
+    <!-- Stats: featured total hours (full row on phones/tablets, double width on desktop) + 4 equal cards -->
     @if (experiences() !== null) {
       @let s = stats();
-      <section class="grid grid-cols-6 gap-2 md:hidden" [attr.aria-label]="'game.stats.label' | translate">
-        <app-stat-card class="col-span-3" [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
+      <section
+        class="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3 lg:grid-cols-6"
+        [attr.aria-label]="'game.stats.label' | translate"
+      >
+        <div
+          class="relative col-span-2 min-w-0 overflow-hidden rounded-xl border border-card-border card-glass md:col-span-4 lg:col-span-2"
+          data-stat="hours"
+        >
+          <div
+            class="pointer-events-none absolute -top-16 -right-10 size-48 rounded-full bg-brand/25 blur-3xl light:bg-brand/15"
+            aria-hidden="true"
+          ></div>
+          <div class="@container relative flex h-full flex-col p-4 [--fig-max:36px] md:px-5 md:[--fig-max:40px]">
+            <p class="flex items-center gap-1.5 text-[11px] leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
+              <svg [lucideIcon]="statIcons.hours" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
+              {{ 'game.stats.totalHours' | translate }}
+            </p>
+            <p
+              class="mt-1.5 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap"
+              [style.font-size]="figureSize(s.totalHours | hours)"
+            >
+              <span class="text-figure">{{ s.totalHours | hours }}</span>
+            </p>
+            @if (showHoursBreakdown()) {
+              <div class="mt-auto pt-3">
+                <div class="flex h-1.5 overflow-hidden rounded-full bg-border" aria-hidden="true">
+                  <span class="bg-brand-light" [style.width.%]="campaignShare()"></span>
+                  <span class="flex-1 bg-gold" [class.opacity-0]="!s.onlineHours"></span>
+                </div>
+                <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                  <span class="inline-flex items-center gap-1.5">
+                    <span class="size-2 rounded-full bg-brand-light" aria-hidden="true"></span>
+                    {{ 'game.stats.campaign' | translate }}
+                    <span class="font-mono text-text-2">{{ s.runHours | hours }}</span>
+                  </span>
+                  <span class="inline-flex items-center gap-1.5">
+                    <span class="size-2 rounded-full bg-gold" aria-hidden="true"></span>
+                    {{ 'game.stats.online' | translate }}
+                    <span class="font-mono text-text-2">{{ s.onlineHours | hours }}</span>
+                  </span>
+                </p>
+              </div>
+            }
+          </div>
+        </div>
+        <app-stat-card [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
         <app-stat-card
-          class="col-span-3"
-          [icon]="statIcons.hours"
-          [label]="'game.stats.totalHours' | translate"
-          [value]="s.totalHours | hours"
-          [hint]="
-            showHoursBreakdown()
-              ? ('game.stats.hoursBreakdown' | translate: { runs: (s.runHours | hours), online: (s.onlineHours | hours) })
-              : null
-          "
-        />
-        <app-stat-card
-          class="col-span-2"
           [icon]="statIcons.rating"
           [label]="'game.stats.avgRating' | translate"
-          [shortLabel]="'game.stats.avgRatingShort' | translate"
           [value]="s.avgRating | rating"
           [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
         <app-stat-card
-          class="col-span-2"
           [icon]="statIcons.best"
           [label]="'game.stats.bestRating' | translate"
-          [shortLabel]="'game.stats.bestRatingShort' | translate"
           [value]="s.bestRating | rating"
           [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
         />
         <app-stat-card
-          class="col-span-2"
           [icon]="statIcons.platinum"
           [label]="'game.stats.platinum' | translate"
           [value]="s.platinum ? '🏆' : '—'"
         />
       </section>
     } @else {
-      <section class="grid grid-cols-6 gap-2 md:hidden">
-        @for (i of [1, 2, 3, 4, 5]; track i) {
-          <app-skeleton class="h-[72px] rounded-xl" [class]="i < 3 ? 'col-span-3' : 'col-span-2'" />
+      <section class="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3 lg:grid-cols-6">
+        <app-skeleton class="col-span-2 h-[112px] rounded-xl md:col-span-4 lg:col-span-2" />
+        @for (i of [1, 2, 3, 4]; track i) {
+          <app-skeleton class="h-[86px] rounded-xl md:h-[112px]" />
         }
       </section>
     }
