@@ -80,3 +80,13 @@ export function distinctPlatformRefs(refs: readonly PlatformRef[]): PlatformRef[
   const seen = new Set<number>();
   return refs.filter((ref) => (seen.has(ref.id) ? false : (seen.add(ref.id), true)));
 }
+
+/**
+ * The refs ordered like `reference` (the catalog, or a list already in catalog order); refs missing
+ * from it keep their relative order at the end.
+ */
+export function orderPlatformRefsLike(refs: readonly PlatformRef[], reference: readonly { id: number }[]): PlatformRef[] {
+  const index = new Map(reference.map((p, i) => [p.id, i]));
+  const rank = (ref: PlatformRef) => index.get(ref.id) ?? Number.MAX_SAFE_INTEGER;
+  return [...refs].sort((a, b) => rank(a) - rank(b));
+}

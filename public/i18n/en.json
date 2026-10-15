@@ -571,7 +571,10 @@
       "saved": "Online hours saved.",
       "error": "Could not save the online hours.",
       "invalid": "Hours ≥ 0 (e.g. 12.5) and a whole rating from 0 to 10.",
-      "explain": "Hours played online, separate from each run's hours: the game total adds both."
+      "explain": "Hours played online, separate from each run's hours: the game total adds both.",
+      "platforms": "Platforms",
+      "addPlatform": "Add platform…",
+      "removePlatform": "Remove {{name}}"
     },
     "loadError": "Could not load the game.",
     "editTitle": "Edit game",
@@ -623,7 +626,8 @@
         "notAGame": "That's not a game (DLC, soundtrack…). Pick the base game."
       }
     },
-    "upcoming": "Coming soon"
+    "upcoming": "Coming soon",
+    "onlineNoRuns": "Online games are tracked with online hours, not runs."
   },
   "run": {
     "platinum": "🏆 Platinum",

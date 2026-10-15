@@ -19,14 +19,16 @@
         >
           <svg [lucideIcon]="icons.pencil" [size]="20"></svg>
         </button>
-        <button
-          type="button"
-          (click)="newRun()"
-          class="rounded-lg p-2 text-brand-light hover:text-brand-lighter"
-          [attr.aria-label]="'game.newRun' | translate"
-        >
-          <svg [lucideIcon]="icons.plus" [size]="22"></svg>
-        </button>
+        @if (canAddRun()) {
+          <button
+            type="button"
+            (click)="newRun()"
+            class="rounded-lg p-2 text-brand-light hover:text-brand-lighter"
+            [attr.aria-label]="'game.newRun' | translate"
+          >
+            <svg [lucideIcon]="icons.plus" [size]="22"></svg>
+          </button>
+        }
       </div>
     }
   </div>
@@ -92,6 +94,9 @@
               <span class="font-mono">{{ g.releaseDate.slice(0, 4) }}</span>
             </span>
           }
+          @if (upcoming()) {
+            <app-upcoming-badge />
+          }
           @if (g.category) {
             <span class="inline-flex items-center gap-1.5">
               <svg [lucideIcon]="icons.gamepad2" [size]="14" class="shrink-0 text-muted" aria-hidden="true"></svg>
@@ -124,14 +129,16 @@
           <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
           {{ 'game.edit' | translate }}
         </button>
-        <button
-          type="button"
-          (click)="newRun()"
-          class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
-        >
-          <svg [lucideIcon]="icons.plus" [size]="15"></svg>
-          {{ 'game.newRun' | translate }}
-        </button>
+        @if (canAddRun()) {
+          <button
+            type="button"
+            (click)="newRun()"
+            class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+          >
+            <svg [lucideIcon]="icons.plus" [size]="15"></svg>
+            {{ 'game.newRun' | translate }}
+          </button>
+        }
       </div>
     </div>
 
@@ -222,9 +229,13 @@
                 class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center"
               >
                 <p class="text-sm font-medium text-text-2">{{ 'game.noRuns' | translate }}</p>
-                <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
-                  {{ 'game.firstRun' | translate }}
-                </button>
+                @if (canAddRun()) {
+                  <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
+                    {{ 'game.firstRun' | translate }}
+                  </button>
+                } @else {
+                  <p class="text-[13px] text-muted">{{ 'game.onlineNoRuns' | translate }}</p>
+                }
               </div>
             }
           }
@@ -238,6 +249,47 @@
               <span class="font-mono text-[15px]">{{ onlinePlaytime()?.totalHours | hours }}</span>
             </app-section-header>
             <p class="-mt-1 mb-3 text-xs text-muted">{{ 'game.online.explain' | translate }}</p>
+            <div class="mb-3 flex flex-col gap-1.5 text-xs text-muted">
+              <span id="game-online-platforms">{{ 'game.online.platforms' | translate }}</span>
+              <div class="flex flex-wrap items-center gap-1.5" role="group" aria-labelledby="game-online-platforms">
+                @for (p of onlinePlatforms(); track p.id) {
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full border border-border bg-bg py-0.5 pr-1 pl-2 text-xs text-text-2"
+                  >
+                    <app-platform-label [platform]="p" />
+                    <button
+                      type="button"
+                      (click)="removeOnlinePlatform(p.id)"
+                      class="rounded-full p-0.5 text-faint hover:text-text"
+                      [attr.aria-label]="'game.online.removePlatform' | translate: { name: p.name }"
+                    >
+                      <svg [lucideIcon]="icons.x" [size]="12"></svg>
+                    </button>
+                  </span>
+                }
+                @if (onlinePlatformGroups(); as groups) {
+                  @if (groups.length) {
+                    <select
+                      #platformSelect
+                      class="h-8 max-w-full rounded-lg border border-border bg-bg px-2 text-xs text-text-2"
+                      [attr.aria-label]="'game.online.addPlatform' | translate"
+                      (change)="addOnlinePlatform(platformSelect)"
+                    >
+                      <option value="" selected>{{ 'game.online.addPlatform' | translate }}</option>
+                      @for (group of groups; track group.family) {
+                        <optgroup [label]="'platformFamily.' + group.family | translate">
+                          @for (p of group.platforms; track p.id) {
+                            <option [value]="p.id">{{ platformLabel(p.name) | translate }}</option>
+                          }
+                        </optgroup>
+                      }
+                    </select>
+                  }
+                } @else if (!onlinePlatforms().length) {
+                  <span class="text-faint">—</span>
+                }
+              </div>
+            </div>
             <form
               [formGroup]="onlinePlaytimeForm"
               (ngSubmit)="submitOnlinePlaytime()"

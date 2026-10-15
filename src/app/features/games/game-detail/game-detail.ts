@@ -18,7 +18,13 @@ import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../../shared/pipes/rating.pipe';
 import { PlatformLabel, platformDisplayName } from '../../../shared/ui/platform-label';
 import { PlatformRef } from '../../../core/models/platform.model';
-import { distinctPlatformRefs } from '../../../core/services/platform.logic';
+import {
+  distinctPlatformRefs,
+  groupPlatformsByFamily,
+  orderPlatformRefsLike,
+  platformNameKey,
+} from '../../../core/services/platform.logic';
+import { PlatformService } from '../../../core/services/platform.service';
 import { RatingTonePipe } from '../../../shared/pipes/rating-tone.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { RunRow } from '../../../shared/ui/run-row';
@@ -30,6 +36,8 @@ import { StatCard } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { formatDayMonthYear, formatRunPeriod } from '../../../shared/utils/run-dates';
 import { GameEditDialog } from '../game-edit-dialog/game-edit-dialog';
+import { UpcomingBadge } from '../../../shared/ui/game-badges';
+import { isUpcoming } from '../library.logic';
 
 /** Newest run first: end date, else start date, else stored year; ties by id. */
 function byRecencyDesc(a: Experience, b: Experience): number {
@@ -62,6 +70,7 @@ function byRelease(a: Game, b: Game): number {
     StatCard,
     StatusPill,
     GameEditDialog,
+    UpcomingBadge,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,6 +85,7 @@ export class GameDetail {
   private readonly gameService = inject(GameService);
   private readonly experienceService = inject(ExperienceService);
   private readonly onlinePlaytimeService = inject(OnlinePlaytimeService);
+  private readonly platformService = inject(PlatformService);
   private readonly runFormLauncher = inject(RunFormLauncher);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
@@ -91,6 +101,8 @@ export class GameDetail {
   readonly loadError = signal(false);
   readonly editing = signal(false);
   readonly savingOnline = signal(false);
+  /** Platforms picked in the online card (saved with the hours), in catalog order. */
+  readonly onlinePlatforms = signal<PlatformRef[]>([]);
 
   // Text inputs so "12,5" works on every keyboard/locale (number inputs drop it as empty).
   readonly onlinePlaytimeForm = this.fb.group({
@@ -101,21 +113,28 @@ export class GameDetail {
 
   protected readonly runs = computed(() => [...(this.experiences() ?? [])].sort(byRecencyDesc));
 
+  /** Run ratings plus the online general rating: the same set the library's bestRating uses. */
   protected readonly ratings = computed(() =>
-    this.runs()
-      .map((r) => r.rating)
-      .filter((r): r is number => r !== null),
+    [...this.runs().map((r) => r.rating), this.onlinePlaytime()?.generalRating ?? null].filter(
+      (r): r is number => r !== null,
+    ),
   );
 
+  /**
+   * Hours are summed here from the loaded runs and online playtime (not read from the game's
+   * totalHours aggregate, which already includes both) so the card stays current after a run or the
+   * online card is saved.
+   */
   protected readonly stats = computed(() => {
     const runs = this.runs();
     const ratings = this.ratings();
     const runHours = runs.reduce((sum, r) => sum + (r.hours ?? 0), 0);
+    const onlineHours = this.onlinePlaytime()?.totalHours ?? 0;
     return {
       runs: runs.length,
       runHours,
-      onlineHours: this.onlinePlaytime()?.totalHours ?? 0,
-      totalHours: runHours + (this.onlinePlaytime()?.totalHours ?? 0),
+      onlineHours,
+      totalHours: runHours + onlineHours,
       avgRating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
       bestRating: ratings.length ? Math.max(...ratings) : null,
       platinum: runs.some((r) => r.platinum),
@@ -132,13 +151,41 @@ export class GameDetail {
     return runs.find((r) => r.rating === best)?.id ?? null;
   });
 
-  /** API aggregate (catalog order) when present; otherwise derived from the loaded runs. */
+  /**
+   * Union of the loaded runs' platforms and the online platforms, in catalog order (the API aggregate
+   * until the runs load, so the header does not flicker).
+   */
   protected readonly platforms = computed<PlatformRef[]>(() => {
-    const fromApi = this.game()?.platformRefs;
-    return fromApi?.length
-      ? fromApi
-      : distinctPlatformRefs(this.runs().map((r) => ({ id: r.platformId, name: r.platformName, color: r.platformColor })));
+    const fromApi = this.game()?.platformRefs ?? [];
+    const local = distinctPlatformRefs([
+      ...this.runs().map((r) => ({ id: r.platformId, name: r.platformName, color: r.platformColor })),
+      ...(this.onlinePlaytime()?.platforms ?? []),
+    ]);
+    if (this.experiences() === null || !local.length) {
+      return fromApi;
+    }
+    return orderPlatformRefsLike(local, this.platformService.platforms() ?? fromApi);
   });
+
+  /** ONLINE games are tracked through online playtime only: no "new run" entry points. */
+  protected readonly canAddRun = computed(() => this.game()?.category !== 'ONLINE');
+
+  protected readonly upcoming = computed(() => {
+    const game = this.game();
+    return !!game && isUpcoming(game);
+  });
+
+  /** Catalog entries not yet picked for the online card, grouped by family; null while loading. */
+  protected readonly onlinePlatformGroups = computed(() => {
+    const catalog = this.platformService.platforms();
+    if (!catalog) {
+      return null;
+    }
+    const picked = new Set(this.onlinePlatforms().map((p) => p.id));
+    return groupPlatformsByFamily(catalog.filter((p) => !picked.has(p.id)));
+  });
+
+  protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
 
   protected readonly platformNames = computed(() =>
     this.platforms()
@@ -213,16 +260,20 @@ export class GameDetail {
     // Online hours only exist for ONLINE/HYBRID games; a SINGLEPLAYER game never has them.
     // Also drop hours loaded earlier, e.g. when an edit turns the game into SINGLEPLAYER.
     this.onlinePlaytime.set(null);
+    this.onlinePlatforms.set([]);
     if (game.category === 'SINGLEPLAYER') {
       return;
     }
     this.onlinePlaytimeForm.reset({ totalHours: '0', generalRating: '' });
+    // Catalog for the online platform picker (cached after the first load).
+    this.platformService.load().subscribe({ error: () => {} });
     const id = game.id;
     this.onlinePlaytimeService.findByGame(id).subscribe({
       next: (playtime) => {
         if (id !== this.gameId()) return;
         const lang = this.lang();
         this.onlinePlaytime.set(playtime);
+        this.onlinePlatforms.set(playtime.platforms ?? []);
         this.onlinePlaytimeForm.setValue({
           totalHours: formatDecimalInput(playtime.totalHours, lang),
           generalRating: formatDecimalInput(playtime.generalRating, lang),
@@ -271,7 +322,28 @@ export class GameDetail {
   }
 
   protected newRun(): void {
+    if (!this.canAddRun()) {
+      return;
+    }
     this.runFormLauncher.openNewRun(this.gameId());
+  }
+
+  /** Picks a catalog platform from the online card's select, then resets the select to its prompt. */
+  protected addOnlinePlatform(select: HTMLSelectElement): void {
+    const id = Number(select.value);
+    select.value = '';
+    const catalog = this.platformService.platforms() ?? [];
+    const platform = catalog.find((p) => p.id === id);
+    if (!platform || this.onlinePlatforms().some((p) => p.id === id)) {
+      return;
+    }
+    this.onlinePlatforms.update((list) =>
+      orderPlatformRefsLike([...list, { id: platform.id, name: platform.name, color: platform.color }], catalog),
+    );
+  }
+
+  protected removeOnlinePlatform(id: number): void {
+    this.onlinePlatforms.update((list) => list.filter((p) => p.id !== id));
   }
 
   protected onGameSaved(game: Game): void {
@@ -307,12 +379,14 @@ export class GameDetail {
         // Keep fields this card does not edit.
         lastSessionAt: this.onlinePlaytime()?.lastSessionAt ?? null,
         notes: this.onlinePlaytime()?.notes ?? null,
+        platformIds: this.onlinePlatforms().map((p) => p.id),
       })
       .subscribe({
         next: (playtime) => {
           this.savingOnline.set(false);
           if (id !== this.gameId()) return;
           this.onlinePlaytime.set(playtime);
+          this.onlinePlatforms.set(playtime.platforms ?? []);
           this.toast.success(this.translate.instant('game.online.saved'));
         },
         error: () => {

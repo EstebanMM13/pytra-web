@@ -571,7 +571,10 @@
       "saved": "Horas online guardadas.",
       "error": "No se pudieron guardar las horas online.",
       "invalid": "Horas ≥ 0 (p. ej. 12,5) y valoración entera de 0 a 10.",
-      "explain": "Horas jugadas online, aparte de las horas de cada partida: el total del juego suma ambas."
+      "explain": "Horas jugadas online, aparte de las horas de cada partida: el total del juego suma ambas.",
+      "platforms": "Plataformas",
+      "addPlatform": "Añadir plataforma…",
+      "removePlatform": "Quitar {{name}}"
     },
     "loadError": "No se pudo cargar el juego.",
     "editTitle": "Editar juego",
@@ -623,7 +626,8 @@
         "notAGame": "Eso no es un juego (DLC, banda sonora…). Elige el juego base."
       }
     },
-    "upcoming": "Próximamente"
+    "upcoming": "Próximamente",
+    "onlineNoRuns": "Los juegos online se registran con horas online, no con partidas."
   },
   "run": {
     "platinum": "🏆 Platino",

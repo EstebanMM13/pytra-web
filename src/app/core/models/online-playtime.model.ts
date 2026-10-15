@@ -1,3 +1,5 @@
+import { PlatformRef } from './platform.model';
+
 export interface OnlinePlaytime {
   id: number;
   gameId: number;
@@ -5,6 +7,8 @@ export interface OnlinePlaytime {
   lastSessionAt: string | null;
   generalRating: number | null;
   notes: string | null;
+  /** Catalog platforms played online on, in catalog order (absent from older API versions). */
+  platforms?: PlatformRef[] | null;
 }
 
 export interface OnlinePlaytimeRequest {
@@ -12,4 +16,6 @@ export interface OnlinePlaytimeRequest {
   lastSessionAt?: string | null;
   generalRating?: number | null;
   notes?: string | null;
+  /** Omitted keeps the stored platforms; an empty list clears them. */
+  platformIds?: number[];
 }

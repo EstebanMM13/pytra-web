@@ -19,17 +19,20 @@ export interface Game {
   genres: Genre[];
   updatedAt: string;
 
-  // Aggregates over the game's runs, sent by GET /games and /games/{id};
+  // Aggregates over the game's runs and online playtime, sent by GET /games and /games/{id};
   // null (or absent) on other responses such as Steam pending games.
+  /** Number of runs (online playtime is not a run). */
   experienceCount?: number | null;
+  /** Run hours plus online hours. */
   totalHours?: number | null;
+  /** Best of the run ratings and the online general rating. */
   bestRating?: number | null;
   lastExperienceStatus?: ExperienceStatus | null;
   lastPlayedYear?: number | null;
   hasPlatinum?: boolean | null;
   /** Legacy enum codes of the game's platforms (kept by the API for old clients); use platformRefs. */
   platforms?: LegacyPlatformCode[] | null;
-  /** Catalog platforms of the game's runs, in catalog order; empty when it has no runs. */
+  /** Catalog platforms of the game's runs and online playtime, distinct, in catalog order. */
   platformRefs?: PlatformRef[] | null;
   /** Date (`yyyy-MM-dd`) of the most recent run activity; null when unknown. */
   lastPlayedAt?: string | null;

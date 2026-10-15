@@ -7,6 +7,7 @@ import {
   normalizePlatformName,
   platformNameKey,
   sortPlatforms,
+  orderPlatformRefsLike,
 } from './platform.logic';
 
 const platform = (id: number, name: string, partial: Partial<Platform> = {}): Platform => ({
@@ -73,5 +74,13 @@ describe('platform.logic', () => {
       { id: 1, name: 'PC', color: null },
     ];
     expect(distinctPlatformRefs(refs).map((r) => r.id)).toEqual([1, 2]);
+  });
+});
+
+describe('orderPlatformRefsLike', () => {
+  it('orders refs like the reference list and keeps unknown ones last in their order', () => {
+    const ref = (id: number) => ({ id, name: `P${id}`, color: null });
+    const ordered = orderPlatformRefsLike([ref(9), ref(3), ref(1), ref(8)], [{ id: 1 }, { id: 2 }, { id: 3 }]);
+    expect(ordered.map((p) => p.id)).toEqual([1, 3, 9, 8]);
   });
 });
