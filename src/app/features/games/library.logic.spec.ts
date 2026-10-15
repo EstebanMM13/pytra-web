@@ -9,12 +9,17 @@ import {
   parseCategoryFilter,
   lastPlayedKey,
   libraryPlatforms,
-  matchesPlatform,
+  matchesPlatforms,
+  matchesGenres,
+  libraryGenres,
+  libraryStatusLine,
+  panelFilterCount,
+  parseIdList,
+  serializeIdList,
   matchesStatus,
   paginate,
   parseLibraryView,
   parsePage,
-  parsePlatformFilter,
   parseSort,
   parseStatusFilter,
   sortGames,
@@ -91,10 +96,37 @@ describe('library logic', () => {
       const pc = game({ id: 10, name: 'Hades', platformRefs: [PC, SWITCH] });
       const ps = game({ id: 11, name: 'Astro Bot', platformRefs: [PS5] });
       const list = [pc, ps, unplayed];
-      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platform: '14' }).map((g) => g.id)).toEqual([10]);
-      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platform: 'ALL' })).toHaveLength(3);
-      expect(matchesPlatform(unplayed, '1')).toBe(false);
-      expect(matchesPlatform(game({ id: 12, name: 'X', platformRefs: null }), '1')).toBe(false);
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platforms: ['14'] }).map((g) => g.id)).toEqual([10]);
+      // ANY of the picked platforms.
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platforms: ['14', '2'] }).map((g) => g.id)).toEqual([11, 10]);
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', platforms: [] })).toHaveLength(3);
+      expect(matchesPlatforms(unplayed, ['1'])).toBe(false);
+      expect(matchesPlatforms(game({ id: 12, name: 'X', platformRefs: null }), ['1'])).toBe(false);
+    });
+
+    it('filters by genre: a game matches with ANY picked genre', () => {
+      const rpg = { id: 1, name: 'RPG' };
+      const acc = { id: 2, name: 'ACCIÓN' };
+      const both = game({ id: 10, name: 'Elden Ring', genres: [rpg, acc] });
+      const action = game({ id: 11, name: 'DOOM', genres: [acc] });
+      const list = [both, action, unplayed];
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', genres: [1] }).map((g) => g.id)).toEqual([10]);
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', genres: [1, 2] }).map((g) => g.id)).toEqual([11, 10]);
+      expect(matchesGenres(unplayed, [])).toBe(true);
+      expect(matchesGenres(game({ id: 12, name: 'X', genres: undefined as never }), [1])).toBe(false);
+      expect(libraryGenres(list, (n) => n.toLowerCase())).toEqual([
+        { id: 2, label: 'acción' },
+        { id: 1, label: 'rpg' },
+      ]);
+    });
+
+    it('combines panel filters with AND across kinds and counts them', () => {
+      const a = game({ id: 10, name: 'A', category: 'ONLINE', platformRefs: [PC], genres: [{ id: 1, name: 'RPG' }] });
+      const b = game({ id: 11, name: 'B', category: 'SINGLEPLAYER', platformRefs: [PC], genres: [{ id: 1, name: 'RPG' }] });
+      const query = { text: '', status: 'ALL' as const, sort: 'name' as const, category: 'ONLINE' as const, platforms: ['1'], genres: [1] };
+      expect(filterGames([a, b], query).map((g) => g.id)).toEqual([10]);
+      expect(panelFilterCount(query)).toBe(3);
+      expect(panelFilterCount({ category: 'ALL', platforms: [], genres: [] })).toBe(0);
     });
 
     it('lists the platforms present in the games, distinct and by name', () => {
@@ -176,12 +208,28 @@ describe('library logic', () => {
       expect(parsePage('-1')).toBe(1);
       expect(parsePage('abc')).toBe(1);
       expect(parsePage('2.5')).toBe(1);
-      expect(parsePlatformFilter('14')).toBe('14');
-      expect(parsePlatformFilter('014')).toBe('14');
-      expect(parsePlatformFilter('PS5')).toBe('ALL');
-      expect(parsePlatformFilter('1.5')).toBe('ALL');
-      expect(parsePlatformFilter(null)).toBe('ALL');
+      expect(parseIdList('14')).toEqual([14]);
+      expect(parseIdList('014,3, 3 ,7')).toEqual([14, 3, 7]);
+      expect(parseIdList('PS5,1.5,-2,0,,99999999999')).toEqual([]);
+      expect(parseIdList(null)).toEqual([]);
+      expect(parseIdList(Array.from({ length: 50 }, (_, i) => i + 1).join(','))).toHaveLength(30);
     });
+
+    it('round-trips id lists through the URL', () => {
+      expect(serializeIdList([3, 14])).toBe('3,14');
+      expect(parseIdList(serializeIdList([3, 14]))).toEqual([3, 14]);
+      expect(serializeIdList([])).toBeNull();
+      expect(parseIdList(serializeIdList([]))).toEqual([]);
+    });
+  });
+});
+
+describe('library status line', () => {
+  it('shows only the hours for ONLINE games, "Online" for HYBRID ones without runs', () => {
+    expect(libraryStatusLine(game({ id: 1, name: 'Fortnite', category: 'ONLINE' }))).toBe('played');
+    expect(libraryStatusLine(game({ id: 2, name: 'COD', category: 'HYBRID' }))).toBe('online');
+    expect(libraryStatusLine(game({ id: 3, name: 'COD 2', category: 'HYBRID', lastExperienceStatus: 'COMPLETADO' }))).toBe('status');
+    expect(libraryStatusLine(game({ id: 4, name: 'Zelda' }))).toBe('noRuns');
   });
 });
 
@@ -231,10 +279,10 @@ describe('category filter', () => {
   it('combines with the platform filter', () => {
     const ps5Online = { ...fortnite, platformRefs: [PS5] };
     expect(
-      filterGames([zelda, ps5Online, cod], { text: '', status: 'ALL', sort: 'name', category: 'ONLINE', platform: '2' }),
+      filterGames([zelda, ps5Online, cod], { text: '', status: 'ALL', sort: 'name', category: 'ONLINE', platforms: ['2'] }),
     ).toEqual([ps5Online]);
     expect(
-      filterGames([zelda, ps5Online, cod], { text: '', status: 'ALL', sort: 'name', category: 'HYBRID', platform: '2' }),
+      filterGames([zelda, ps5Online, cod], { text: '', status: 'ALL', sort: 'name', category: 'HYBRID', platforms: ['2'] }),
     ).toEqual([]);
   });
 
@@ -257,8 +305,8 @@ describe('online platforms in the library', () => {
   });
 
   it('lets online-only games match a platform', () => {
-    expect(matchesPlatform(fortnite, '2')).toBe(true);
-    expect(matchesPlatform(fortnite, '14')).toBe(false);
+    expect(matchesPlatforms(fortnite, ['2'])).toBe(true);
+    expect(matchesPlatforms(fortnite, ['14'])).toBe(false);
   });
 });
 

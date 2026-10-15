@@ -22,7 +22,6 @@ import { CategoryBadge, UpcomingBadge } from '../../shared/ui/game-badges';
 import { todayIso } from '../../shared/utils/run-dates';
 import { GameEditDialog } from './game-edit-dialog/game-edit-dialog';
 import {
-  GAME_CATEGORIES,
   isUpcoming,
   libraryPlatforms,
   LibraryCategoryFilter,
@@ -37,21 +36,26 @@ import {
   isLibraryGame,
   LIBRARY_VIEW_KEY,
   LibraryView,
-  matchesCategory,
-  matchesPlatform,
-  matchesText,
+  libraryGenres,
+  libraryStatusLine,
+  matchesPanelFilters,
   paginate,
+  panelFilterCount,
   parseCategoryFilter,
+  parseIdList,
   parseLibraryView,
   parsePage,
-  parsePlatformFilter,
   parseSort,
   parseStatusFilter,
+  serializeIdList,
 } from './library.logic';
+import { LibraryFilters } from './library-filters';
+import { formatGenreName } from '../../shared/pipes/genre-name.pipe';
 
 /**
  * Library (/games): confirmed games with their run aggregates, filtered, sorted and paged on the
- * client. Filters live in the URL (`q`, `status`, `platform`, `category`, `sort`, `page`) so back navigation restores them.
+ * client. Filters live in the URL (`q`, `status`, `platform` and `genre` as comma-separated ids, `category`,
+ * `sort`, `page`) so back navigation restores them.
  * The list / grid view is a per-device preference (localStorage); the grid shows every result, unpaged.
  */
 @Component({
@@ -72,6 +76,7 @@ import {
     CategoryBadge,
     UpcomingBadge,
     GameEditDialog,
+    LibraryFilters,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -86,11 +91,7 @@ export class Games {
 
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
   protected readonly isOnlineOnly = isOnlineOnly;
-  protected readonly categories = GAME_CATEGORIES;
-  protected readonly categoryOptions: DropdownOption[] = [
-    { value: 'ALL', label: 'library.categoryAllShort' },
-    ...GAME_CATEGORIES.map((c) => ({ value: c, label: `category.${c}` })),
-  ];
+  protected readonly statusLine = libraryStatusLine;
   /** Fixed when the page loads: good enough for a "coming soon" badge. */
   private readonly today = todayIso();
   protected readonly isUpcoming = (game: Game): boolean => isUpcoming(game, this.today);
@@ -113,7 +114,8 @@ export class Games {
             text: params.get('q') ?? '',
             status: parseStatusFilter(params.get('status')),
             sort: parseSort(params.get('sort')),
-            platform: parsePlatformFilter(params.get('platform')),
+            platforms: parseIdList(params.get('platform')).map(String),
+            genres: parseIdList(params.get('genre')),
             category: parseCategoryFilter(params.get('category')),
             page: parsePage(params.get('page')),
           }) satisfies LibraryQuery & { page: number },
@@ -129,25 +131,36 @@ export class Games {
   );
   /** Only the platforms the user's games were played on (runs or online). */
   protected readonly platforms = computed(() => libraryPlatforms(this.libraryGames()));
-  protected readonly platformOptions = computed<DropdownOption[]>(() => [
-    { value: 'ALL', label: 'library.platformAllShort' },
-    ...this.platforms().map((p) => ({ value: String(p.id), label: platformNameKey(p.name) ?? p.name })),
-  ]);
+  /** Only the genres present in the library. */
+  protected readonly genreOptions = computed(() => libraryGenres(this.libraryGames(), formatGenreName));
+  protected readonly filterCount = computed(() => panelFilterCount(this.query()));
+  /** Removable chips for the active panel filters. */
+  protected readonly filterChips = computed(() => {
+    const query = this.query();
+    const chips: { kind: 'category' | 'platform' | 'genre'; id: string; label: string }[] = [];
+    if (query.category !== 'ALL') {
+      chips.push({ kind: 'category', id: query.category, label: `category.${query.category}` });
+    }
+    const platforms = new Map(this.platforms().map((p) => [String(p.id), p.name]));
+    for (const id of query.platforms) {
+      const name = platforms.get(id);
+      if (name) chips.push({ kind: 'platform', id, label: this.platformLabel(name) });
+    }
+    const genres = new Map(this.genreOptions().map((g) => [g.id, g.label]));
+    for (const id of query.genres) {
+      const label = genres.get(id);
+      if (label) chips.push({ kind: 'genre', id: String(id), label });
+    }
+    return chips;
+  });
   protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
   protected readonly runCount = computed(() =>
     this.libraryGames().reduce((sum, g) => sum + (g.experienceCount ?? 0), 0),
   );
 
-  /** Tab counters follow the name, platform and category filters, so they add up to what each tab would show. */
+  /** Tab counters follow the name and panel filters, so they add up to what each tab would show. */
   protected readonly statusCounts = computed(() =>
-    countByStatus(
-      this.libraryGames().filter(
-        (g) =>
-          matchesText(g, this.query().text) &&
-          matchesPlatform(g, this.query().platform) &&
-          matchesCategory(g, this.query().category),
-      ),
-    ),
+    countByStatus(this.libraryGames().filter((g) => matchesPanelFilters(g, this.query()))),
   );
   protected readonly filtered = computed(() => filterGames(this.libraryGames(), this.query()));
   protected readonly page = computed(() => paginate(this.filtered(), this.query().page));
@@ -155,8 +168,7 @@ export class Games {
     () =>
       !!this.query().text.trim() ||
       this.query().status !== 'ALL' ||
-      this.query().platform !== 'ALL' ||
-      this.query().category !== 'ALL',
+      this.filterCount() > 0,
   );
 
   constructor() {
@@ -205,9 +217,24 @@ export class Games {
     this.updateQuery({ sort: parsed === 'recent' ? null : parsed, page: null });
   }
 
-  protected setPlatform(platform: string): void {
-    const parsed = parsePlatformFilter(platform);
-    this.updateQuery({ platform: parsed === 'ALL' ? null : parsed, page: null });
+  protected setPlatforms(platforms: readonly string[]): void {
+    this.updateQuery({ platform: serializeIdList(parseIdList(platforms.join(','))), page: null });
+  }
+
+  protected setGenres(genres: readonly number[]): void {
+    this.updateQuery({ genre: serializeIdList(parseIdList(genres.join(','))), page: null });
+  }
+
+  protected removeChip(chip: { kind: 'category' | 'platform' | 'genre'; id: string }): void {
+    const query = this.query();
+    if (chip.kind === 'category') this.setCategory('ALL');
+    else if (chip.kind === 'platform') this.setPlatforms(query.platforms.filter((p) => p !== chip.id));
+    else this.setGenres(query.genres.filter((g) => String(g) !== chip.id));
+  }
+
+  /** Clears the filter panel only (type, platforms, genres); search and status tab stay. */
+  protected clearPanelFilters(): void {
+    this.updateQuery({ platform: null, genre: null, category: null, page: null });
   }
 
   protected setCategory(category: string): void {
@@ -229,7 +256,7 @@ export class Games {
   }
 
   protected clearFilters(): void {
-    this.updateQuery({ q: null, status: null, platform: null, category: null, page: null });
+    this.updateQuery({ q: null, status: null, platform: null, genre: null, category: null, page: null });
   }
 
   /** Typing and toggles replace the history entry; page changes push one so "back" pages back. */

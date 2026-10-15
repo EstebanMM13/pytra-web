@@ -22,9 +22,6 @@ export const LIBRARY_STATUS_FILTERS: readonly LibraryStatusFilter[] = [
 export const LIBRARY_SORTS: readonly LibrarySort[] = ['recent', 'name', 'rating', 'hours'];
 export const LIBRARY_PAGE_SIZE = 10;
 
-/** Platform dropdown of the toolbar: a catalog platform id (as text, it lives in the URL) or all. */
-export type LibraryPlatformFilter = string;
-
 /** Category dropdown of the toolbar: a game category or all. */
 export type LibraryCategoryFilter = 'ALL' | GameCategory;
 
@@ -45,8 +42,10 @@ export interface LibraryQuery {
   text: string;
   status: LibraryStatusFilter;
   sort: LibrarySort;
-  /** Defaults to 'ALL' when omitted. */
-  platform?: LibraryPlatformFilter;
+  /** Catalog platform ids (as text, they live in the URL); a game matches with ANY of them. Empty: all. */
+  platforms?: readonly string[];
+  /** Genre ids; a game matches when it has ANY of them. Empty: all. */
+  genres?: readonly number[];
   /** Defaults to 'ALL' when omitted. */
   category?: LibraryCategoryFilter;
 }
@@ -81,8 +80,43 @@ export function matchesStatus(game: Game, status: LibraryStatusFilter): boolean 
   return status === 'PENDIENTE' ? last === 'PENDIENTE' || (last === null && !isOnlineOnly(game)) : last === status;
 }
 
-export function matchesPlatform(game: Game, platform: LibraryPlatformFilter | undefined): boolean {
-  return !platform || platform === 'ALL' || (game.platformRefs ?? []).some((ref) => String(ref.id) === platform);
+/** ANY of the platforms (none picked: every game). */
+export function matchesPlatforms(game: Game, platforms: readonly string[] | undefined): boolean {
+  return !platforms?.length || (game.platformRefs ?? []).some((ref) => platforms.includes(String(ref.id)));
+}
+
+/** ANY of the genres (none picked: every game). */
+export function matchesGenres(game: Game, genres: readonly number[] | undefined): boolean {
+  return !genres?.length || (game.genres ?? []).some((g) => genres.includes(g.id));
+}
+
+/** Text, platform, genre and category filters: everything except the status tab. */
+export function matchesPanelFilters(game: Game, query: LibraryQuery): boolean {
+  return (
+    matchesText(game, query.text) &&
+    matchesPlatforms(game, query.platforms) &&
+    matchesGenres(game, query.genres) &&
+    matchesCategory(game, query.category)
+  );
+}
+
+/** Number of filters set in the filter panel (category, each platform, each genre). */
+export function panelFilterCount(query: Pick<LibraryQuery, 'category' | 'platforms' | 'genres'>): number {
+  return (
+    (query.category && query.category !== 'ALL' ? 1 : 0) + (query.platforms?.length ?? 0) + (query.genres?.length ?? 0)
+  );
+}
+
+/** Genres present in the games, distinct, by display name (the options of the genre filter). */
+export function libraryGenres(
+  games: readonly Game[],
+  format: (name: string) => string,
+): { id: number; label: string }[] {
+  const byId = new Map<number, string>();
+  for (const genre of games.flatMap((g) => g.genres ?? [])) {
+    byId.set(genre.id, format(genre.name));
+  }
+  return [...byId].map(([id, label]) => ({ id, label })).sort((a, b) => a.label.localeCompare(b.label, 'es'));
 }
 
 export function matchesCategory(game: Game, category: LibraryCategoryFilter | undefined): boolean {
@@ -166,11 +200,7 @@ export function sortGames(games: readonly Game[], sort: LibrarySort): Game[] {
 export function filterGames(games: readonly Game[], query: LibraryQuery): Game[] {
   return sortGames(
     games.filter(
-      (g) =>
-        matchesText(g, query.text) &&
-        matchesStatus(g, query.status) &&
-        matchesPlatform(g, query.platform) &&
-        matchesCategory(g, query.category),
+      (g) => matchesPanelFilters(g, query) && matchesStatus(g, query.status),
     ),
     query.sort,
   );
@@ -211,8 +241,26 @@ export function parseLibraryView(value: string | null): LibraryView {
   return value === 'grid' ? 'grid' : 'list';
 }
 
-export function parsePlatformFilter(value: string | null): LibraryPlatformFilter {
-  return value && /^\d+$/.test(value) ? String(Number(value)) : 'ALL';
+/** Most ids a list filter keeps from the URL (anything longer is not a hand-made link). */
+const MAX_FILTER_IDS = 30;
+
+/**
+ * Comma-separated catalog ids from the URL (`platform=3,14`; a single id from older links works too):
+ * positive integers only, normalized, distinct, in order. Anything else is dropped.
+ */
+export function parseIdList(value: string | null): number[] {
+  const ids = (value ?? '')
+    .split(',')
+    .map((part) => part.trim())
+    .filter((part) => /^\d{1,9}$/.test(part))
+    .map(Number)
+    .filter((n) => n > 0);
+  return [...new Set(ids)].slice(0, MAX_FILTER_IDS);
+}
+
+/** URL form of an id list; null (param removed) when empty. */
+export function serializeIdList(ids: readonly (number | string)[]): string | null {
+  return ids.length ? ids.join(',') : null;
 }
 
 export function parseCategoryFilter(value: string | null): LibraryCategoryFilter {
@@ -222,6 +270,18 @@ export function parseCategoryFilter(value: string | null): LibraryCategoryFilter
 export function parsePage(value: string | null): number {
   const n = Number(value);
   return Number.isInteger(n) && n >= 1 ? n : 1;
+}
+
+/**
+ * What a library row says next to its status dot: the last run's status; for ONLINE games just the
+ * hours played (their badge already says "Online"); "Online" for HYBRID games without runs; else "no runs".
+ */
+export type LibraryStatusLine = 'status' | 'played' | 'online' | 'noRuns';
+
+export function libraryStatusLine(game: Game): LibraryStatusLine {
+  if (game.lastExperienceStatus) return 'status';
+  if (game.category === 'ONLINE') return 'played';
+  return isOnlineOnly(game) ? 'online' : 'noRuns';
 }
 
 /** The status a library row shows: the game's last run, or null when it has none. */

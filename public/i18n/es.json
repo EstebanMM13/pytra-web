@@ -788,19 +788,27 @@
     "showing": "Mostrando {{shown}} de {{total}}",
     "runsCount": "{{count}} partidas",
     "runsCount_one": "{{count}} partida",
-    "platformLabel": "Filtrar por plataforma",
-    "platformAll": "Plataforma: todas",
-    "platformPrefix": "Plataforma:",
-    "platformAllShort": "Todas",
     "view": {
       "label": "Vista",
       "list": "Lista",
       "grid": "Cuadrícula"
     },
-    "categoryLabel": "Filtrar por categoría",
-    "categoryAll": "Categoría: todas",
-    "categoryPrefix": "Categoría:",
-    "categoryAllShort": "Todas"
+    "categoryAllShort": "Todas",
+    "hoursPlayed": "{{hours}} jugadas",
+    "noHours": "Sin horas",
+    "filters": {
+      "button": "Filtrar",
+      "buttonActive": "Filtrar ({{count}} activos)",
+      "title": "Filtros",
+      "type": "Tipo",
+      "platforms": "Plataforma",
+      "genres": "Géneros",
+      "genresPlaceholder": "Buscar géneros…",
+      "anyHint": "Se muestran los juegos con cualquiera de los elegidos.",
+      "clear": "Limpiar filtros",
+      "done": "Listo",
+      "active": "Filtros activos"
+    }
   },
   "sagas": {
     "title": "Sagas",

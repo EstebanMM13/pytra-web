@@ -788,19 +788,27 @@
     "showing": "Showing {{shown}} of {{total}}",
     "runsCount": "{{count}} runs",
     "runsCount_one": "{{count}} run",
-    "platformLabel": "Filter by platform",
-    "platformAll": "Platform: all",
-    "platformPrefix": "Platform:",
-    "platformAllShort": "All",
     "view": {
       "label": "View",
       "list": "List",
       "grid": "Grid"
     },
-    "categoryLabel": "Filter by category",
-    "categoryAll": "Category: all",
-    "categoryPrefix": "Category:",
-    "categoryAllShort": "All"
+    "categoryAllShort": "All",
+    "hoursPlayed": "{{hours}} played",
+    "noHours": "No hours yet",
+    "filters": {
+      "button": "Filter",
+      "buttonActive": "Filter ({{count}} active)",
+      "title": "Filters",
+      "type": "Type",
+      "platforms": "Platform",
+      "genres": "Genres",
+      "genresPlaceholder": "Search genres…",
+      "anyHint": "Shows games with any of the picked ones.",
+      "clear": "Clear filters",
+      "done": "Done",
+      "active": "Active filters"
+    }
   },
   "sagas": {
     "title": "Sagas",

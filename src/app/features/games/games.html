@@ -96,8 +96,9 @@
   } @else {
     <!-- Toolbar -->
     <div class="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:gap-2.5">
+      <div class="flex gap-2">
       <label
-        class="flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-3 text-faint focus-within:border-brand-light md:w-[280px] md:rounded-lg md:px-3 md:py-[9px]"
+        class="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-3 text-faint focus-within:border-brand-light md:w-[280px] md:flex-none md:rounded-lg md:px-3 md:py-[9px]"
       >
         <svg [lucideIcon]="icons.search" [size]="15" class="shrink-0"></svg>
         <input
@@ -109,6 +110,19 @@
           [attr.aria-label]="'library.filterPlaceholder' | translate"
         />
       </label>
+      <app-library-filters
+        class="shrink-0"
+        [category]="query().category"
+        [platformIds]="query().platforms"
+        [genreIds]="query().genres"
+        [platforms]="platforms()"
+        [genreOptions]="genreOptions()"
+        (categoryChange)="setCategory($event)"
+        (platformsChange)="setPlatforms($event)"
+        (genresChange)="setGenres($event)"
+        (cleared)="clearPanelFilters()"
+      />
+      </div>
 
       <!-- Status: segmented with counters (web) / scrollable chips (mobile) -->
       <div
@@ -152,40 +166,6 @@
             <span class="ml-0.5 font-mono text-[11px] opacity-70">{{ statusCounts()[status] }}</span>
           </button>
         }
-        <label
-          class="relative flex shrink-0 items-center rounded-full border px-3 py-[7px] whitespace-nowrap"
-          [class]="query().platform !== 'ALL' ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-3'"
-        >
-          <span class="sr-only">{{ 'library.platformLabel' | translate }}</span>
-          <select
-            class="cursor-pointer appearance-none bg-transparent pr-4 focus:shadow-none"
-            [value]="query().platform"
-            (change)="setPlatform($any($event.target).value)"
-          >
-            <option value="ALL">{{ 'library.platformAll' | translate }}</option>
-            @for (p of platforms(); track p.id) {
-              <option [value]="p.id" [selected]="'' + p.id === query().platform">{{ platformLabel(p.name) | translate }}</option>
-            }
-          </select>
-          <svg [lucideIcon]="icons.chevronDown" [size]="12" class="pointer-events-none absolute right-2.5 opacity-70" aria-hidden="true"></svg>
-        </label>
-        <label
-          class="relative flex shrink-0 items-center rounded-full border px-3 py-[7px] whitespace-nowrap"
-          [class]="query().category !== 'ALL' ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-3'"
-        >
-          <span class="sr-only">{{ 'library.categoryLabel' | translate }}</span>
-          <select
-            class="cursor-pointer appearance-none bg-transparent pr-4 focus:shadow-none"
-            [value]="query().category"
-            (change)="setCategory($any($event.target).value)"
-          >
-            <option value="ALL">{{ 'library.categoryAll' | translate }}</option>
-            @for (c of categories; track c) {
-              <option [value]="c" [selected]="c === query().category">{{ 'category.' + c | translate }}</option>
-            }
-          </select>
-          <svg [lucideIcon]="icons.chevronDown" [size]="12" class="pointer-events-none absolute right-2.5 opacity-70" aria-hidden="true"></svg>
-        </label>
       </div>
 
       <div class="ml-auto hidden items-center gap-2.5 md:flex">
@@ -213,24 +193,6 @@
           }
         </div>
         <app-dropdown
-          [options]="categoryOptions"
-          [value]="query().category"
-          (valueChange)="setCategory($event)"
-          [prefix]="'library.categoryPrefix' | translate"
-          [ariaLabel]="'library.categoryLabel' | translate"
-          [highlighted]="query().category !== 'ALL'"
-          align="end"
-        />
-        <app-dropdown
-          [options]="platformOptions()"
-          [value]="query().platform"
-          (valueChange)="setPlatform($event)"
-          [prefix]="'library.platformPrefix' | translate"
-          [ariaLabel]="'library.platformLabel' | translate"
-          [highlighted]="query().platform !== 'ALL'"
-          align="end"
-        />
-        <app-dropdown
           [options]="sortOptions"
           [value]="query().sort"
           (valueChange)="setSort($event)"
@@ -241,6 +203,27 @@
         </app-dropdown>
       </div>
     </div>
+
+    @if (filterChips().length) {
+      <div class="-mt-1 flex flex-wrap items-center gap-1.5 md:-mt-2" [attr.aria-label]="'library.filters.active' | translate" role="group">
+        @for (chip of filterChips(); track chip.kind + chip.id) {
+          <span class="inline-flex items-center gap-1 rounded-full border border-brand/25 bg-brand-tint py-1 pr-1 pl-2.5 text-xs text-brand-lighter">
+            {{ chip.label | translate }}
+            <button
+              type="button"
+              (click)="removeChip(chip)"
+              class="grid size-5 place-items-center rounded-full text-brand-light hover:bg-hover hover:text-text"
+              [attr.aria-label]="'common.combobox.remove' | translate: { name: (chip.label | translate) }"
+            >
+              <svg [lucideIcon]="icons.x" [size]="12"></svg>
+            </button>
+          </span>
+        }
+        <button type="button" (click)="clearPanelFilters()" class="ml-1 text-xs font-medium text-brand-light hover:underline">
+          {{ 'library.filters.clear' | translate }}
+        </button>
+      </div>
+    }
 
     @if (loading()) {
       <div class="flex flex-col gap-2">
@@ -309,9 +292,13 @@
                     <span class="size-2 shrink-0 rounded-full border border-faint" aria-hidden="true"></span>
                   }
                   <span class="truncate">
-                    {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
-                    @if (game.totalHours) {
-                      · {{ game.totalHours | hours }}
+                    @if (statusLine(game) === 'played') {
+                      {{ game.totalHours ? ('library.hoursPlayed' | translate: { hours: (game.totalHours | hours) }) : ('library.noHours' | translate) }}
+                    } @else {
+                      {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
+                      @if (game.totalHours) {
+                        · {{ game.totalHours | hours }}
+                      }
                     }
                   </span>
                 </p>
@@ -360,6 +347,8 @@
             <span>
               @if (game.lastExperienceStatus; as status) {
                 <app-status-pill [status]="status" />
+              } @else if (statusLine(game) === 'played') {
+                <span class="text-xs text-faint">—</span>
               } @else if (isOnlineOnly(game)) {
                 <span class="rounded-full bg-brand-tint px-2 py-0.5 text-xs text-brand-lighter">{{ 'library.online' | translate }}</span>
               } @else {
@@ -403,10 +392,14 @@
                     <app-upcoming-badge />
                   }
                   <span class="truncate">
-                    {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
-                    · {{ 'library.runsCount' | translatePlural: game.experienceCount ?? 0 }}
-                    @if (game.totalHours) {
-                      · {{ game.totalHours | hours }}
+                    @if (statusLine(game) === 'played') {
+                      {{ game.totalHours ? ('library.hoursPlayed' | translate: { hours: (game.totalHours | hours) }) : ('library.noHours' | translate) }}
+                    } @else {
+                      {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
+                      · {{ 'library.runsCount' | translatePlural: game.experienceCount ?? 0 }}
+                      @if (game.totalHours) {
+                        · {{ game.totalHours | hours }}
+                      }
                     }
                   </span>
                 </p>
