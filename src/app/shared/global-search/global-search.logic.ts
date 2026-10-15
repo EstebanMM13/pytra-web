@@ -10,9 +10,15 @@ export interface SearchPage {
 
 export type SearchItem =
   | { kind: 'page'; page: SearchPage; label: string }
-  | { kind: 'game'; game: Game }
+  | { kind: 'game'; game: Game; match?: GameFieldMatch }
   | { kind: 'saga'; saga: Saga }
   | { kind: 'year'; year: number };
+
+/** The developer / publisher a game result matched on, when its name did not match. */
+export interface GameFieldMatch {
+  field: 'developer' | 'publisher';
+  value: string;
+}
 
 export type SearchGroupKind = SearchItem['kind'];
 
@@ -75,6 +81,39 @@ function rankByName<T>(items: readonly T[], name: (item: T) => string, query: st
     .map((r) => r.item);
 }
 
+/**
+ * Games matching the query by name (first, ranked as in rankByName), then by developer or publisher
+ * (after every name match, ranked the same way); the latter carry the field that matched.
+ */
+function rankGames(games: readonly Game[], query: string): { game: Game; match?: GameFieldMatch }[] {
+  const ranked: { game: Game; match?: GameFieldMatch; order: number; rank: number }[] = [];
+  games.forEach((game, order) => {
+    const nameRank = matchRank(normalizeText(game.name), query);
+    if (nameRank !== null) {
+      ranked.push({ game, order, rank: nameRank });
+      return;
+    }
+    const fields = [
+      { field: 'developer', value: game.developer },
+      { field: 'publisher', value: game.publisher },
+    ] as const;
+    let best: { match: GameFieldMatch; rank: number } | null = null;
+    for (const { field, value } of fields) {
+      const rank = value ? matchRank(normalizeText(value), query) : null;
+      if (value && rank !== null && (!best || rank < best.rank)) {
+        best = { match: { field, value: value.trim() }, rank };
+      }
+    }
+    if (best) {
+      // Field matches always rank below name matches (name ranks are 0..2).
+      ranked.push({ game, order, match: best.match, rank: 3 + best.rank });
+    }
+  });
+  return ranked
+    .sort((a, b) => a.rank - b.rank || a.order - b.order)
+    .map(({ game, match }) => (match ? { game, match } : { game }));
+}
+
 function byName(a: { name: string }, b: { name: string }): number {
   return a.name.localeCompare(b.name);
 }
@@ -115,9 +154,9 @@ function collectItems(sources: SearchSources, query: string): Record<SearchGroup
     };
   }
   return {
-    game: rankByName([...sources.games].sort(byName), (g) => g.name, query)
+    game: rankGames([...sources.games].sort(byName), query)
       .slice(0, GROUP_LIMITS.game)
-      .map((game) => ({ kind: 'game', game })),
+      .map((result) => ({ kind: 'game', ...result })),
     saga: rankByName([...sources.sagas].sort(byName), (s) => s.name, query)
       .slice(0, GROUP_LIMITS.saga)
       .map((saga) => ({ kind: 'saga', saga })),
@@ -134,7 +173,8 @@ function collectItems(sources: SearchSources, query: string): Record<SearchGroup
 
 /**
  * Grouped search results. With an empty query: recent games plus every shortcut; otherwise
- * accent/case-insensitive matches per group (prefix matches first), capped by GROUP_LIMITS.
+ * accent/case-insensitive matches per group (prefix matches first; games
+ * also match on developer / publisher, after the name matches), capped by GROUP_LIMITS.
  * Empty groups are dropped and each entry gets its index in the flat keyboard-navigation list.
  */
 export function buildSearchGroups(sources: SearchSources, rawQuery: string): SearchGroup[] {

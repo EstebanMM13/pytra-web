@@ -65,7 +65,11 @@
                     {{ game.name }}
                   </span>
                   @let year = releaseYear(game);
-                  @if (year || game.platforms?.length) {
+                  @if (entry.item.match; as match) {
+                    <span class="max-w-[45%] shrink-0 truncate text-xs text-faint" [title]="match.value">
+                      {{ (match.field === 'developer' ? 'search.matchedDeveloper' : 'search.matchedPublisher') | translate: { name: match.value } }}
+                    </span>
+                  } @else if (year || game.platforms?.length) {
                     <span class="max-w-[45%] shrink-0 truncate text-xs text-faint">
                       @if (year) {
                         <span class="tabular-nums">{{ year }}</span>

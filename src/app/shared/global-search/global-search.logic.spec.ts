@@ -135,3 +135,31 @@ describe('releaseYear', () => {
     expect(releaseYear(game(1, 'A'))).toBeNull();
   });
 });
+
+describe('buildSearchGroups developer / publisher matches', () => {
+  const games = [
+    game(1, 'Elden Ring', { developer: 'FromSoftware', publisher: 'Bandai Namco' }),
+    game(2, 'Fromage Quest'),
+    game(3, 'Tekken 8', { developer: 'Bandai Namco Studios', publisher: 'Bandai Namco' }),
+    game(4, 'Halo', { developer: 'Bungie', publisher: 'Microsoft' }),
+  ];
+  const results = (query: string) =>
+    flattenGroups(buildSearchGroups(sources({ games }), query)).flatMap((i) =>
+      i.kind === 'game' ? [{ id: i.game.id, match: i.match }] : [],
+    );
+
+  it('finds games by developer or publisher after the name matches, with the matched field', () => {
+    expect(results('from')).toEqual([
+      { id: 2, match: undefined },
+      { id: 1, match: { field: 'developer', value: 'FromSoftware' } },
+    ]);
+    expect(results('microsóft')).toEqual([{ id: 4, match: { field: 'publisher', value: 'Microsoft' } }]);
+  });
+
+  it('prefers the better-ranked field', () => {
+    expect(results('namco')).toEqual([
+      { id: 1, match: { field: 'publisher', value: 'Bandai Namco' } },
+      { id: 3, match: { field: 'developer', value: 'Bandai Namco Studios' } },
+    ]);
+  });
+});

@@ -404,7 +404,7 @@
   },
   "search": {
     "title": "Buscar",
-    "placeholder": "Buscar juegos, sagas, años…",
+    "placeholder": "Buscar juegos, estudios, sagas, años…",
     "empty": "Sin resultados.",
     "loading": "Cargando…",
     "hint": "Enter para abrir · Esc para cerrar",
@@ -415,7 +415,9 @@
       "sagas": "Sagas",
       "years": "Años",
       "pages": "Ir a"
-    }
+    },
+    "matchedDeveloper": "Desarrolladora: {{name}}",
+    "matchedPublisher": "Distribuidora: {{name}}"
   },
   "status": {
     "EN_CURSO": "En curso",
