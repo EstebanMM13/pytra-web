@@ -37,13 +37,16 @@ let nextRegionId = 0;
         [attr.aria-controls]="regionId()"
         [attr.aria-label]="(collapsed() ? 'common.expandSection' : 'common.collapseSection') | translate: { name: label() }"
       >
-        <svg
-          [lucideIcon]="icons.chevronDown"
-          [size]="18"
-          class="transition-transform duration-200 motion-reduce:transition-none"
+        <!-- Rotated on a wrapper: the lucide directive owns the svg's class attribute and would
+             drop a class bound on it at first render (a persisted collapse showed an open chevron). -->
+        <span
+          data-chevron
+          class="grid place-items-center transition-transform duration-200 motion-reduce:transition-none"
           [class.-rotate-90]="collapsed()"
           aria-hidden="true"
-        ></svg>
+        >
+          <svg [lucideIcon]="icons.chevronDown" [size]="18"></svg>
+        </span>
       </button>
     }
   `,
