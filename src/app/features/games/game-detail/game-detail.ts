@@ -41,7 +41,10 @@ import {
   buildOnlinePlaytimeRequest,
   onlinePlaytimeErrorState,
 } from './online-playtime.logic';
-import { UpcomingBadge } from '../../../shared/ui/game-badges';
+import { CategoryBadge, UpcomingBadge } from '../../../shared/ui/game-badges';
+import { figureFontSize } from '../../../shared/ui/stat-card';
+import { AuthService } from '../../../core/services/auth.service';
+import { NgTemplateOutlet } from '@angular/common';
 import { isUpcoming } from '../library.logic';
 import { toastApiError } from '../../../shared/utils/api-error';
 
@@ -77,6 +80,8 @@ function byRelease(a: Game, b: Game): number {
     StatusPill,
     GameEditDialog,
     UpcomingBadge,
+    CategoryBadge,
+    NgTemplateOutlet,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,7 +101,20 @@ export class GameDetail {
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
 
-  protected readonly statIcons = { runs: ICONS.play, hours: ICONS.clock, rating: ICONS.star, platinum: ICONS.trophy };
+  protected readonly statIcons = {
+    runs: ICONS.play,
+    hours: ICONS.clock,
+    rating: ICONS.star,
+    best: ICONS.award,
+    platinum: ICONS.trophy,
+  };
+
+  /** Read-only demo: no edit / new run entry points (the API would reject them anyway). */
+  protected readonly canEdit = computed(() => !this.isDemo());
+  private readonly isDemo = inject(AuthService).isDemo;
+
+  /** Hero figure size: shrinks long values to the cell width instead of cutting them. */
+  protected readonly figureSize = (value: string | number): string => figureFontSize(String(value));
 
   readonly gameId = signal(0);
   readonly game = signal<Game | null>(null);
@@ -179,6 +197,12 @@ export class GameDetail {
 
   /** ONLINE games are tracked through online playtime only: no "new run" entry points. */
   protected readonly canAddRun = computed(() => this.game()?.category !== 'ONLINE');
+
+  /** ONLINE / HYBRID games break the total down into campaign + online hours. */
+  protected readonly showHoursBreakdown = computed(() => {
+    const category = this.game()?.category;
+    return !!category && category !== 'SINGLEPLAYER';
+  });
 
   protected readonly upcoming = computed(() => {
     const game = this.game();

@@ -9,7 +9,7 @@
       <svg [lucideIcon]="icons.chevronLeft" [size]="16"></svg>
       {{ 'game.breadcrumb' | translate }}
     </a>
-    @if (game()) {
+    @if (game() && canEdit()) {
       <div class="flex items-center gap-1 text-text-3 md:hidden">
         <button
           type="button"
@@ -38,9 +38,9 @@
       {{ 'game.loadError' | translate }}
     </p>
   } @else if (game(); as g) {
-    <!-- Title block: cover banner (blurred cover behind, crisp cover beside the title) -->
-    <div
-      class="relative isolate -mx-5 flex flex-col gap-4 overflow-hidden px-5 pt-4 pb-1 md:mx-0 md:flex-row md:items-end md:justify-between md:gap-6 md:rounded-2xl md:border md:border-border md:p-6"
+    <!-- Hero: cover + identity; from md the key figures sit inside it (beside the identity from lg) -->
+    <section
+      class="relative isolate -mx-5 overflow-hidden px-5 pt-2 pb-1 md:mx-0 md:rounded-2xl md:border md:border-card-border md:p-6"
     >
       @if (g.coverImageUrl) {
         <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
@@ -54,93 +54,193 @@
           <div class="absolute inset-0 bg-linear-to-b from-bg/40 via-bg/70 to-bg light:from-bg/55 light:via-bg/80"></div>
         </div>
       }
-      <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-end md:gap-6">
-      <app-game-cover [url]="g.coverImageUrl" [name]="g.name" size="lg" class="shadow-lg shadow-black/20" />
-      <div class="min-w-0">
-        @if (g.sagaId !== null && g.sagaName) {
-          <a
-            [routerLink]="['/sagas', g.sagaId]"
-            class="mb-1 flex w-fit items-center gap-1.5 rounded-md text-[13px] font-medium text-brand-light hover:underline md:mb-2 md:text-sm"
-          >
-            <svg [lucideIcon]="icons.layers" [size]="15" class="hidden md:block"></svg>
-            @if (sagaPosition(); as pos) {
-              <span class="hidden md:inline">
-                {{ 'game.sagaPosition' | translate: { saga: g.sagaName, index: pos.index, total: pos.total } }}
-              </span>
-              <span class="md:hidden">{{ 'game.saga' | translate: { saga: g.sagaName } }}</span>
-            } @else {
-              {{ 'game.saga' | translate: { saga: g.sagaName } }}
+
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-stretch lg:gap-8">
+        <!-- Identity -->
+        <div class="flex min-w-0 flex-1 items-start gap-4 sm:gap-5 md:items-end md:gap-6">
+          <app-game-cover
+            decorative
+            size="hero"
+            class="shadow-lg ring-1 shadow-black/25 ring-border"
+            [url]="g.coverImageUrl"
+            [name]="g.name"
+          />
+          <div class="flex min-w-0 flex-1 flex-col self-stretch">
+            @if (canEdit()) {
+              <div class="mb-4 hidden justify-end gap-2.5 md:flex lg:hidden">
+                <ng-container *ngTemplateOutlet="heroActions" />
+              </div>
             }
-          </a>
-        }
-        <h1
-          class="font-display line-clamp-3 text-[30px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-[44px] md:tracking-[-0.035em]"
-          [title]="g.name"
-        >
-          {{ g.name }}
-        </h1>
-        <div
-          class="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[13px] text-text-2 md:mt-3 md:gap-x-4 md:text-sm"
-        >
-          @if (g.developer) {
-            <span class="inline-flex min-w-0 items-center gap-1.5">
-              <svg [lucideIcon]="icons.building" [size]="14" class="shrink-0 text-muted" aria-hidden="true"></svg>
-              <span class="truncate" [title]="g.developer">{{ g.developer }}</span>
-            </span>
+            <div class="flex min-w-0 flex-1 flex-col justify-center md:justify-end">
+              @if (g.sagaId !== null && g.sagaName) {
+                <a
+                  [routerLink]="['/sagas', g.sagaId]"
+                  class="mb-1 flex w-fit max-w-full items-center gap-1.5 rounded-md text-xs font-medium text-brand-light hover:underline md:mb-2 md:text-sm"
+                >
+                  <svg [lucideIcon]="icons.layers" [size]="14" class="shrink-0" aria-hidden="true"></svg>
+                  <span class="truncate">
+                    @if (sagaPosition(); as pos) {
+                      <span class="hidden md:inline">
+                        {{ 'game.sagaPosition' | translate: { saga: g.sagaName, index: pos.index, total: pos.total } }}
+                      </span>
+                      <span class="md:hidden">{{ 'game.saga' | translate: { saga: g.sagaName } }}</span>
+                    } @else {
+                      {{ 'game.saga' | translate: { saga: g.sagaName } }}
+                    }
+                  </span>
+                </a>
+              }
+              <h1
+                class="font-display line-clamp-3 text-[22px] leading-tight font-bold tracking-[-0.025em] wrap-break-word sm:text-[26px] md:line-clamp-2 md:text-[36px] md:leading-tight md:tracking-[-0.035em] lg:line-clamp-3 lg:text-[40px]"
+                [title]="g.name"
+              >
+                {{ g.name }}
+              </h1>
+
+              <!-- Meta: stacked compact lines on phones, one wrapping row from md -->
+              <div
+                class="mt-2 flex flex-col gap-1 text-xs text-text-2 md:mt-3 md:flex-row md:flex-wrap md:items-center md:gap-x-4 md:gap-y-1.5 md:text-sm"
+              >
+                @if (g.developer) {
+                  <span class="inline-flex min-w-0 items-center gap-1.5">
+                    <svg [lucideIcon]="icons.building" [size]="13" class="shrink-0 text-muted" aria-hidden="true"></svg>
+                    <span class="truncate" [title]="g.developer">{{ g.developer }}</span>
+                  </span>
+                }
+                @if (g.releaseDate || g.category || upcoming()) {
+                  <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1 md:contents">
+                    @if (g.releaseDate) {
+                      <span class="inline-flex items-center gap-1.5">
+                        <svg [lucideIcon]="icons.calendar" [size]="13" class="shrink-0 text-muted" aria-hidden="true"></svg>
+                        <span class="font-mono">{{ g.releaseDate.slice(0, 4) }}</span>
+                      </span>
+                    }
+                    @if (g.category; as category) {
+                      <app-category-badge [category]="category" />
+                    }
+                    @if (upcoming()) {
+                      <app-upcoming-badge />
+                    }
+                  </span>
+                }
+                @if (platforms().length) {
+                  <span class="flex flex-wrap items-center gap-x-3 gap-y-1 md:contents">
+                    @for (p of platforms(); track p.id) {
+                      <app-platform-label [platform]="p" />
+                    }
+                  </span>
+                }
+              </div>
+
+              @if (genres().length) {
+                <ul class="mt-2.5 flex flex-wrap gap-1.5 md:mt-3" [attr.aria-label]="'game.genre' | translate">
+                  @for (genre of genres(); track genre) {
+                    <li
+                      class="rounded-full border border-brand/25 bg-brand-tint px-2 py-px text-[11px] leading-4 font-medium text-brand-lighter md:px-2.5 md:py-0.5 md:text-xs"
+                    >
+                      {{ genre }}
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Key figures (md+): a strip under the identity on tablets, a side panel from lg -->
+        <div class="hidden min-w-0 flex-col gap-4 md:flex lg:w-[380px] lg:shrink-0">
+          @if (canEdit()) {
+            <div class="hidden justify-end gap-2.5 lg:flex">
+              <ng-container *ngTemplateOutlet="heroActions" />
+            </div>
           }
-          @if (g.releaseDate) {
-            <span class="inline-flex items-center gap-1.5">
-              <svg [lucideIcon]="icons.calendar" [size]="14" class="shrink-0 text-muted" aria-hidden="true"></svg>
-              <span class="font-mono">{{ g.releaseDate.slice(0, 4) }}</span>
-            </span>
-          }
-          @if (upcoming()) {
-            <app-upcoming-badge />
-          }
-          @if (g.category) {
-            <span class="inline-flex items-center gap-1.5">
-              <svg [lucideIcon]="icons.gamepad2" [size]="14" class="shrink-0 text-muted" aria-hidden="true"></svg>
-              {{ 'category.' + g.category | translate }}
-            </span>
-          }
-          @for (p of platforms(); track p.id) {
-            <app-platform-label [platform]="p" />
+          @if (experiences() !== null) {
+            @let s = stats();
+            <dl
+              class="grid grid-cols-[minmax(0,1.5fr)_repeat(4,minmax(0,1fr))] overflow-hidden rounded-xl border border-card-border bg-bg/40 backdrop-blur-md lg:mt-auto lg:grid-cols-2 light:bg-surface/70"
+            >
+              <div class="@container flex min-w-0 flex-col px-4 py-3.5 [--fig-max:26px] lg:col-span-2 lg:px-5 lg:py-4 lg:[--fig-max:38px]">
+                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                  <svg [lucideIcon]="statIcons.hours" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                  {{ 'game.stats.totalHours' | translate }}
+                </dt>
+                <dd class="mt-1 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.totalHours | hours)">
+                  <span class="text-figure">{{ s.totalHours | hours }}</span>
+                </dd>
+                @if (showHoursBreakdown()) {
+                  <dd class="mt-1 text-xs leading-snug text-muted">
+                    {{ 'game.stats.hoursBreakdown' | translate: { runs: (s.runHours | hours), online: (s.onlineHours | hours) } }}
+                  </dd>
+                }
+              </div>
+              <div class="@container flex min-w-0 flex-col border-divider px-4 py-3.5 [--fig-max:26px] md:border-l lg:border-t lg:border-l-0 lg:px-5 lg:[--fig-max:28px]">
+                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                  <svg [lucideIcon]="statIcons.rating" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                  {{ 'game.stats.avgRating' | translate }}
+                </dt>
+                <dd class="mt-1 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.avgRating | rating)">
+                  <span class="text-figure-tone font-mono" [class]="s.avgRating | ratingTone">{{ s.avgRating | rating }}</span>
+                </dd>
+              </div>
+              <div class="@container flex min-w-0 flex-col border-divider px-4 py-3.5 [--fig-max:26px] md:border-l lg:border-t lg:px-5 lg:[--fig-max:28px]">
+                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                  <svg [lucideIcon]="statIcons.best" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                  {{ 'game.stats.bestRating' | translate }}
+                </dt>
+                <dd class="mt-1 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.bestRating | rating)">
+                  <span class="text-figure-tone font-mono" [class]="s.bestRating | ratingTone">{{ s.bestRating | rating }}</span>
+                </dd>
+              </div>
+              <div class="@container flex min-w-0 flex-col border-divider px-4 py-3.5 [--fig-max:26px] md:border-l lg:border-t lg:border-l-0 lg:px-5 lg:[--fig-max:28px]">
+                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                  <svg [lucideIcon]="statIcons.runs" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                  {{ 'game.stats.runs' | translate }}
+                </dt>
+                <dd class="mt-1 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.runs)">
+                  <span class="text-figure">{{ s.runs }}</span>
+                </dd>
+              </div>
+              <div class="@container flex min-w-0 flex-col border-divider px-4 py-3.5 [--fig-max:26px] md:border-l lg:border-t lg:px-5 lg:[--fig-max:28px]">
+                <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+                  <svg [lucideIcon]="statIcons.platinum" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                  {{ 'game.stats.platinum' | translate }}
+                </dt>
+                <dd class="mt-1 leading-tight font-bold whitespace-nowrap" [style.font-size]="figureSize('—')">
+                  @if (s.platinum) {
+                    <span [attr.aria-label]="'common.yes' | translate">🏆</span>
+                  } @else {
+                    <span class="text-faint">—</span>
+                  }
+                </dd>
+              </div>
+            </dl>
+          } @else {
+            <app-skeleton class="h-[90px] rounded-xl lg:mt-auto lg:h-[216px]" />
           }
         </div>
-        @if (genres().length) {
-          <ul class="mt-2.5 flex flex-wrap gap-1.5 md:mt-3" [attr.aria-label]="'game.genre' | translate">
-            @for (genre of genres(); track genre) {
-              <li
-                class="rounded-full border border-brand/25 bg-brand-tint px-2.5 py-0.5 text-xs font-medium text-brand-lighter"
-              >
-                {{ genre }}
-              </li>
-            }
-          </ul>
-        }
       </div>
-      </div>
-      <div class="hidden shrink-0 gap-2.5 md:flex">
+    </section>
+
+    <ng-template #heroActions>
+      <button
+        type="button"
+        (click)="editing.set(true)"
+        class="flex items-center gap-1.5 rounded-lg border border-border bg-bg/40 px-3.5 py-[9px] text-[13px] font-medium text-text-2 backdrop-blur-sm hover:border-border-strong hover:text-text light:bg-surface/70"
+      >
+        <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
+        {{ 'game.edit' | translate }}
+      </button>
+      @if (canAddRun()) {
         <button
           type="button"
-          (click)="editing.set(true)"
-          class="flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong"
+          (click)="newRun()"
+          class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
         >
-          <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
-          {{ 'game.edit' | translate }}
+          <svg [lucideIcon]="icons.plus" [size]="15"></svg>
+          {{ 'game.newRun' | translate }}
         </button>
-        @if (canAddRun()) {
-          <button
-            type="button"
-            (click)="newRun()"
-            class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
-          >
-            <svg [lucideIcon]="icons.plus" [size]="15"></svg>
-            {{ 'game.newRun' | translate }}
-          </button>
-        }
-      </div>
-    </div>
+      }
+    </ng-template>
 
     @if (g.reviewStatus === 'PENDING_REVIEW') {
       <a
@@ -153,25 +253,24 @@
       </a>
     }
 
-    <!-- Stats -->
+    <!-- Stats on phones: 2 wide cards (runs, hours + breakdown) over 3 narrow ones -->
     @if (experiences() !== null) {
       @let s = stats();
-      <!-- Mobile/tablet: 2 wide cards (runs, hours + breakdown) over 3 narrow ones; one row on desktop -->
-      <section class="grid grid-cols-6 gap-2 md:gap-3 lg:grid-cols-5">
-        <app-stat-card class="col-span-3 lg:col-span-1" [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
+      <section class="grid grid-cols-6 gap-2 md:hidden" [attr.aria-label]="'game.stats.label' | translate">
+        <app-stat-card class="col-span-3" [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
         <app-stat-card
-          class="col-span-3 lg:col-span-1"
+          class="col-span-3"
           [icon]="statIcons.hours"
           [label]="'game.stats.totalHours' | translate"
           [value]="s.totalHours | hours"
           [hint]="
-            g.category && g.category !== 'SINGLEPLAYER'
+            showHoursBreakdown()
               ? ('game.stats.hoursBreakdown' | translate: { runs: (s.runHours | hours), online: (s.onlineHours | hours) })
               : null
           "
         />
         <app-stat-card
-          class="col-span-2 lg:col-span-1"
+          class="col-span-2"
           [icon]="statIcons.rating"
           [label]="'game.stats.avgRating' | translate"
           [shortLabel]="'game.stats.avgRatingShort' | translate"
@@ -179,24 +278,24 @@
           [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
         <app-stat-card
-          class="col-span-2 lg:col-span-1"
-          [icon]="statIcons.rating"
+          class="col-span-2"
+          [icon]="statIcons.best"
           [label]="'game.stats.bestRating' | translate"
           [shortLabel]="'game.stats.bestRatingShort' | translate"
           [value]="s.bestRating | rating"
           [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
         />
         <app-stat-card
-          class="col-span-2 lg:col-span-1"
+          class="col-span-2"
           [icon]="statIcons.platinum"
           [label]="'game.stats.platinum' | translate"
           [value]="s.platinum ? '🏆' : '—'"
         />
       </section>
     } @else {
-      <section class="grid grid-cols-3 gap-2 md:gap-3 lg:grid-cols-5">
+      <section class="grid grid-cols-6 gap-2 md:hidden">
         @for (i of [1, 2, 3, 4, 5]; track i) {
-          <app-skeleton class="h-[72px] rounded-xl md:h-[90px]" />
+          <app-skeleton class="h-[72px] rounded-xl" [class]="i < 3 ? 'col-span-3' : 'col-span-2'" />
         }
       </section>
     }

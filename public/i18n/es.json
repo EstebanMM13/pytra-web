@@ -559,7 +559,8 @@
       "hours": "Horas",
       "hoursBreakdown": "{{runs}} campaña + {{online}} online",
       "avgRatingShort": "Media",
-      "bestRatingShort": "Mejor"
+      "bestRatingShort": "Mejor",
+      "label": "Cifras del juego"
     },
     "runs": "Partidas",
     "noRuns": "Todavía no hay partidas.",

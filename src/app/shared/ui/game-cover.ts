@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, booleanAttribute, Component, computed, input, linkedSignal } from '@angular/core';
 
-export type GameCoverSize = 'xs' | 'sm' | 'md' | 'lg' | 'fill';
+export type GameCoverSize = 'xs' | 'sm' | 'md' | 'lg' | 'hero' | 'fill';
 
 /** Box size per variant: portrait box art (2:3). `fill` takes the parent's width. */
 const SIZE_CLASS: Record<GameCoverSize, string> = {
@@ -8,6 +8,7 @@ const SIZE_CLASS: Record<GameCoverSize, string> = {
   sm: 'h-12 w-8 rounded',
   md: 'h-[84px] w-14 rounded-md',
   lg: 'h-[150px] w-[100px] rounded-lg md:h-[216px] md:w-36 md:rounded-xl',
+  hero: 'aspect-[2/3] w-28 rounded-lg sm:w-32 md:w-40 md:rounded-xl lg:w-44',
   fill: 'aspect-[2/3] w-full rounded-lg',
 };
 
@@ -16,6 +17,7 @@ const INITIALS_TEXT: Record<GameCoverSize, string> = {
   sm: 'text-[10px]',
   md: 'text-sm',
   lg: 'text-3xl md:text-4xl',
+  hero: 'text-3xl md:text-4xl',
   fill: 'text-3xl',
 };
 

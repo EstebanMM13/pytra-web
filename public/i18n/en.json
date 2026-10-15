@@ -559,7 +559,8 @@
       "hours": "Hours",
       "hoursBreakdown": "{{runs}} campaign + {{online}} online",
       "avgRatingShort": "Avg",
-      "bestRatingShort": "Best"
+      "bestRatingShort": "Best",
+      "label": "Game figures"
     },
     "runs": "Runs",
     "noRuns": "No runs yet.",
