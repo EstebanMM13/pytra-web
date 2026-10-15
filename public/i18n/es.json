@@ -469,7 +469,8 @@
       "abandoned": "Abandonadas",
       "avgRating": "Nota media",
       "avg": "Media",
-      "platinums": "Platinos"
+      "platinums": "Platinos",
+      "avgRatingShort": "Media"
     },
     "goty": "GOTY {{year}}",
     "noGoty": "Sin GOTY: no hay partidas completadas con nota este año.",
@@ -550,7 +551,9 @@
       "platinum": "Platino",
       "avg": "Media",
       "hours": "Horas",
-      "hoursBreakdown": "{{runs}} campaña + {{online}} online"
+      "hoursBreakdown": "{{runs}} campaña + {{online}} online",
+      "avgRatingShort": "Media",
+      "bestRatingShort": "Mejor"
     },
     "runs": "Partidas",
     "noRuns": "Todavía no hay partidas.",

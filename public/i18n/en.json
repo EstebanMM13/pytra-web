@@ -469,7 +469,8 @@
       "abandoned": "Abandoned",
       "avgRating": "Average rating",
       "avg": "Average",
-      "platinums": "Platinums"
+      "platinums": "Platinums",
+      "avgRatingShort": "Avg"
     },
     "goty": "GOTY {{year}}",
     "noGoty": "No GOTY: no rated runs completed this year.",
@@ -550,7 +551,9 @@
       "platinum": "Platinum",
       "avg": "Average",
       "hours": "Hours",
-      "hoursBreakdown": "{{runs}} campaign + {{online}} online"
+      "hoursBreakdown": "{{runs}} campaign + {{online}} online",
+      "avgRatingShort": "Avg",
+      "bestRatingShort": "Best"
     },
     "runs": "Runs",
     "noRuns": "No runs yet.",
