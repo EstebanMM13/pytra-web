@@ -575,7 +575,9 @@
       "explain": "Hours played online, separate from each run's hours: the game total adds both.",
       "platforms": "Platforms",
       "addPlatform": "Add platform…",
-      "removePlatform": "Remove {{name}}"
+      "removePlatform": "Remove {{name}}",
+      "loadError": "Could not load the online hours. Reload the page before saving.",
+      "platformsPending": "They will be saved with the hours."
     },
     "loadError": "Could not load the game.",
     "editTitle": "Edit game",

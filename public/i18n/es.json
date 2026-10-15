@@ -575,7 +575,9 @@
       "explain": "Horas jugadas online, aparte de las horas de cada partida: el total del juego suma ambas.",
       "platforms": "Plataformas",
       "addPlatform": "Añadir plataforma…",
-      "removePlatform": "Quitar {{name}}"
+      "removePlatform": "Quitar {{name}}",
+      "loadError": "No se pudieron cargar las horas online. Recarga la página antes de guardar.",
+      "platformsPending": "Se guardarán junto con las horas."
     },
     "loadError": "No se pudo cargar el juego.",
     "editTitle": "Editar juego",

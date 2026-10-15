@@ -36,6 +36,11 @@ import { StatCard } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { formatDayMonthYear, formatRunPeriod } from '../../../shared/utils/run-dates';
 import { GameEditDialog } from '../game-edit-dialog/game-edit-dialog';
+import {
+  OnlinePlaytimeLoadState,
+  buildOnlinePlaytimeRequest,
+  onlinePlaytimeErrorState,
+} from './online-playtime.logic';
 import { UpcomingBadge } from '../../../shared/ui/game-badges';
 import { isUpcoming } from '../library.logic';
 
@@ -101,8 +106,12 @@ export class GameDetail {
   readonly loadError = signal(false);
   readonly editing = signal(false);
   readonly savingOnline = signal(false);
-  /** Platforms picked in the online card (saved with the hours), in catalog order. */
+  /** Platforms picked in the online card, in catalog order. */
   readonly onlinePlatforms = signal<PlatformRef[]>([]);
+  /** Whether the picker changed since the card loaded (decides if the PUT sends platformIds). */
+  private readonly onlinePlatformsTouched = signal(false);
+  readonly savingOnlinePlatforms = signal(false);
+  readonly onlineLoadState = signal<OnlinePlaytimeLoadState>('loading');
 
   // Text inputs so "12,5" works on every keyboard/locale (number inputs drop it as empty).
   readonly onlinePlaytimeForm = this.fb.group({
@@ -261,6 +270,8 @@ export class GameDetail {
     // Also drop hours loaded earlier, e.g. when an edit turns the game into SINGLEPLAYER.
     this.onlinePlaytime.set(null);
     this.onlinePlatforms.set([]);
+    this.onlinePlatformsTouched.set(false);
+    this.onlineLoadState.set('loading');
     if (game.category === 'SINGLEPLAYER') {
       return;
     }
@@ -274,13 +285,16 @@ export class GameDetail {
         const lang = this.lang();
         this.onlinePlaytime.set(playtime);
         this.onlinePlatforms.set(playtime.platforms ?? []);
+        this.onlineLoadState.set('loaded');
         this.onlinePlaytimeForm.setValue({
           totalHours: formatDecimalInput(playtime.totalHours, lang),
           generalRating: formatDecimalInput(playtime.generalRating, lang),
         });
       },
-      error: () => {
-        // 404: no online hours recorded for this game yet.
+      error: (error: unknown) => {
+        // 404: no online hours recorded for this game yet. Anything else: saving could overwrite
+        // a record we failed to read, so the card is disabled.
+        if (id === this.gameId()) this.onlineLoadState.set(onlinePlaytimeErrorState(error));
       },
     });
   }
@@ -337,13 +351,61 @@ export class GameDetail {
     if (!platform || this.onlinePlatforms().some((p) => p.id === id)) {
       return;
     }
-    this.onlinePlatforms.update((list) =>
-      orderPlatformRefsLike([...list, { id: platform.id, name: platform.name, color: platform.color }], catalog),
+    this.changeOnlinePlatforms(
+      orderPlatformRefsLike(
+        [...this.onlinePlatforms(), { id: platform.id, name: platform.name, color: platform.color }],
+        catalog,
+      ),
     );
   }
 
   protected removeOnlinePlatform(id: number): void {
-    this.onlinePlatforms.update((list) => list.filter((p) => p.id !== id));
+    this.changeOnlinePlatforms(this.onlinePlatforms().filter((p) => p.id !== id));
+  }
+
+  /**
+   * With a stored record the change is saved right away (reverted if that fails); without one the
+   * platforms stay pending and are sent with the first save of the hours.
+   */
+  private changeOnlinePlatforms(next: PlatformRef[]): void {
+    if (this.savingOnlinePlatforms() || this.onlineLoadState() === 'error') {
+      return;
+    }
+    const previous = this.onlinePlatforms();
+    this.onlinePlatforms.set(next);
+    this.onlinePlatformsTouched.set(true);
+    const existing = this.onlinePlaytime();
+    if (!existing) {
+      return;
+    }
+    const id = this.gameId();
+    this.savingOnlinePlatforms.set(true);
+    this.onlinePlaytimeService
+      .upsert(
+        id,
+        // The stored hours and rating, not the form's possibly unsaved edits.
+        buildOnlinePlaytimeRequest({
+          totalHours: existing.totalHours,
+          generalRating: existing.generalRating,
+          existing,
+          platformIds: next.map((p) => p.id),
+          platformsTouched: true,
+        }),
+      )
+      .subscribe({
+        next: (playtime) => {
+          this.savingOnlinePlatforms.set(false);
+          if (id !== this.gameId()) return;
+          this.onlinePlaytime.set(playtime);
+          this.onlinePlatforms.set(playtime.platforms ?? []);
+          this.toast.success(this.translate.instant('game.online.saved'));
+        },
+        error: () => {
+          this.savingOnlinePlatforms.set(false);
+          if (id === this.gameId()) this.onlinePlatforms.set(previous);
+          this.toast.error(this.translate.instant('game.online.error'));
+        },
+      });
   }
 
   protected onGameSaved(game: Game): void {
@@ -365,7 +427,7 @@ export class GameDetail {
   }
 
   protected submitOnlinePlaytime(): void {
-    if (this.onlinePlaytimeForm.invalid || this.savingOnline()) {
+    if (this.onlinePlaytimeForm.invalid || this.savingOnline() || this.onlineLoadState() === 'error') {
       this.onlinePlaytimeForm.markAllAsTouched();
       return;
     }
@@ -373,20 +435,23 @@ export class GameDetail {
     const id = this.gameId();
     this.savingOnline.set(true);
     this.onlinePlaytimeService
-      .upsert(id, {
-        totalHours: parseDecimal(raw.totalHours) ?? 0,
-        generalRating: parseDecimal(raw.generalRating),
-        // Keep fields this card does not edit.
-        lastSessionAt: this.onlinePlaytime()?.lastSessionAt ?? null,
-        notes: this.onlinePlaytime()?.notes ?? null,
-        platformIds: this.onlinePlatforms().map((p) => p.id),
-      })
+      .upsert(
+        id,
+        buildOnlinePlaytimeRequest({
+          totalHours: parseDecimal(raw.totalHours) ?? 0,
+          generalRating: parseDecimal(raw.generalRating),
+          existing: this.onlinePlaytime(),
+          platformIds: this.onlinePlatforms().map((p) => p.id),
+          platformsTouched: this.onlinePlatformsTouched(),
+        }),
+      )
       .subscribe({
         next: (playtime) => {
           this.savingOnline.set(false);
           if (id !== this.gameId()) return;
           this.onlinePlaytime.set(playtime);
           this.onlinePlatforms.set(playtime.platforms ?? []);
+          this.onlineLoadState.set('loaded');
           this.toast.success(this.translate.instant('game.online.saved'));
         },
         error: () => {

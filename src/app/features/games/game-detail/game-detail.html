@@ -249,6 +249,11 @@
               <span class="font-mono text-[15px]">{{ onlinePlaytime()?.totalHours | hours }}</span>
             </app-section-header>
             <p class="-mt-1 mb-3 text-xs text-muted">{{ 'game.online.explain' | translate }}</p>
+            @if (onlineLoadState() === 'error') {
+              <p class="mb-3 rounded-lg bg-danger-bg px-3 py-2 text-xs text-danger" role="alert">
+                {{ 'game.online.loadError' | translate }}
+              </p>
+            }
             <div class="mb-3 flex flex-col gap-1.5 text-xs text-muted">
               <span id="game-online-platforms">{{ 'game.online.platforms' | translate }}</span>
               <div class="flex flex-wrap items-center gap-1.5" role="group" aria-labelledby="game-online-platforms">
@@ -260,7 +265,8 @@
                     <button
                       type="button"
                       (click)="removeOnlinePlatform(p.id)"
-                      class="rounded-full p-0.5 text-faint hover:text-text"
+                      [disabled]="savingOnlinePlatforms() || onlineLoadState() === 'error'"
+                      class="rounded-full p-0.5 text-faint hover:text-text disabled:opacity-50"
                       [attr.aria-label]="'game.online.removePlatform' | translate: { name: p.name }"
                     >
                       <svg [lucideIcon]="icons.x" [size]="12"></svg>
@@ -271,7 +277,8 @@
                   @if (groups.length) {
                     <select
                       #platformSelect
-                      class="h-8 max-w-full rounded-lg border border-border bg-bg px-2 text-xs text-text-2"
+                      class="h-8 max-w-full rounded-lg border border-border bg-bg px-2 text-xs text-text-2 disabled:opacity-50"
+                      [disabled]="savingOnlinePlatforms() || onlineLoadState() === 'error'"
                       [attr.aria-label]="'game.online.addPlatform' | translate"
                       (change)="addOnlinePlatform(platformSelect)"
                     >
@@ -289,6 +296,9 @@
                   <span class="text-faint">—</span>
                 }
               </div>
+              @if (onlineLoadState() === 'missing' && onlinePlatforms().length) {
+                <p class="text-faint">{{ 'game.online.platformsPending' | translate }}</p>
+              }
             </div>
             <form
               [formGroup]="onlinePlaytimeForm"
@@ -319,7 +329,7 @@
               </label>
               <button
                 type="submit"
-                [disabled]="savingOnline()"
+                [disabled]="savingOnline() || onlineLoadState() === 'error' || onlineLoadState() === 'loading'"
                 class="h-10 rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
               >
                 {{ (onlinePlaytime() ? 'game.online.update' : 'game.online.save') | translate }}
