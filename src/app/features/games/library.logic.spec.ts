@@ -4,6 +4,9 @@ import {
   filterGames,
   isLibraryGame,
   isOnlineOnly,
+  isUpcoming,
+  matchesCategory,
+  parseCategoryFilter,
   lastPlayedKey,
   libraryPlatforms,
   matchesPlatform,
@@ -204,5 +207,72 @@ describe('online-only games', () => {
     expect(parseLibraryView('list')).toBe('list');
     expect(parseLibraryView(null)).toBe('list');
     expect(parseLibraryView('poster')).toBe('list');
+  });
+});
+
+describe('category filter', () => {
+  const zelda = game({ id: 1, name: 'Zelda', category: 'SINGLEPLAYER' });
+  const fortnite = game({ id: 2, name: 'Fortnite', category: 'ONLINE' });
+  const cod = game({ id: 3, name: 'COD', category: 'HYBRID' });
+  const uncategorized = game({ id: 4, name: 'Old import', category: null });
+  const games = [zelda, fortnite, cod, uncategorized];
+
+  it('keeps every game for ALL or no category', () => {
+    expect(games.filter((g) => matchesCategory(g, 'ALL'))).toHaveLength(4);
+    expect(games.filter((g) => matchesCategory(g, undefined))).toHaveLength(4);
+  });
+
+  it('keeps only the games of the chosen category', () => {
+    expect(filterGames(games, { text: '', status: 'ALL', sort: 'name', category: 'ONLINE' })).toEqual([fortnite]);
+    expect(filterGames(games, { text: '', status: 'ALL', sort: 'name', category: 'HYBRID' })).toEqual([cod]);
+    expect(filterGames(games, { text: '', status: 'ALL', sort: 'name', category: 'SINGLEPLAYER' })).toEqual([zelda]);
+  });
+
+  it('combines with the platform filter', () => {
+    const ps5Online = { ...fortnite, platformRefs: [PS5] };
+    expect(
+      filterGames([zelda, ps5Online, cod], { text: '', status: 'ALL', sort: 'name', category: 'ONLINE', platform: '2' }),
+    ).toEqual([ps5Online]);
+    expect(
+      filterGames([zelda, ps5Online, cod], { text: '', status: 'ALL', sort: 'name', category: 'HYBRID', platform: '2' }),
+    ).toEqual([]);
+  });
+
+  it('parses the category query param, defaulting to ALL', () => {
+    expect(parseCategoryFilter('ONLINE')).toBe('ONLINE');
+    expect(parseCategoryFilter('HYBRID')).toBe('HYBRID');
+    expect(parseCategoryFilter('SINGLEPLAYER')).toBe('SINGLEPLAYER');
+    expect(parseCategoryFilter('online')).toBe('ALL');
+    expect(parseCategoryFilter(null)).toBe('ALL');
+  });
+});
+
+describe('online platforms in the library', () => {
+  // The API merges online playtime platforms into platformRefs, so online-only games have platforms too.
+  const fortnite = game({ id: 1, name: 'Fortnite', category: 'ONLINE', platformRefs: [PC, PS5] });
+  const zelda = game({ id: 2, name: 'Zelda', platformRefs: [SWITCH] });
+
+  it('offers the platforms of online-only games in the platform filter', () => {
+    expect(libraryPlatforms([fortnite, zelda]).map((p) => p.name)).toEqual(['PC', 'PS5', 'Switch']);
+  });
+
+  it('lets online-only games match a platform', () => {
+    expect(matchesPlatform(fortnite, '2')).toBe(true);
+    expect(matchesPlatform(fortnite, '14')).toBe(false);
+  });
+});
+
+describe('upcoming games', () => {
+  const today = '2026-10-15';
+
+  it('are the ones released after today', () => {
+    expect(isUpcoming({ releaseDate: '2026-10-16' }, today)).toBe(true);
+    expect(isUpcoming({ releaseDate: '2027-03-01' }, today)).toBe(true);
+  });
+
+  it('exclude games released today, before, or without a date', () => {
+    expect(isUpcoming({ releaseDate: '2026-10-15' }, today)).toBe(false);
+    expect(isUpcoming({ releaseDate: '1998-11-21' }, today)).toBe(false);
+    expect(isUpcoming({ releaseDate: null }, today)).toBe(false);
   });
 });

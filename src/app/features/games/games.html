@@ -168,6 +168,22 @@
             }
           </select>
         </label>
+        <label
+          class="relative shrink-0 rounded-full border px-3 py-[7px] whitespace-nowrap"
+          [class]="query().category !== 'ALL' ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-3'"
+        >
+          <span class="sr-only">{{ 'library.categoryLabel' | translate }}</span>
+          <select
+            class="cursor-pointer appearance-none bg-transparent focus:shadow-none"
+            [value]="query().category"
+            (change)="setCategory($any($event.target).value)"
+          >
+            <option value="ALL">{{ 'library.categoryAll' | translate }}</option>
+            @for (c of categories; track c) {
+              <option [value]="c" [selected]="c === query().category">{{ 'category.' + c | translate }}</option>
+            }
+          </select>
+        </label>
       </div>
 
       <div class="ml-auto hidden items-center gap-2.5 md:flex">
@@ -194,6 +210,15 @@
             </button>
           }
         </div>
+        <app-dropdown
+          [options]="categoryOptions"
+          [value]="query().category"
+          (valueChange)="setCategory($event)"
+          [prefix]="'library.categoryPrefix' | translate"
+          [ariaLabel]="'library.categoryLabel' | translate"
+          [highlighted]="query().category !== 'ALL'"
+          align="end"
+        />
         <app-dropdown
           [options]="platformOptions()"
           [value]="query().platform"
@@ -263,6 +288,16 @@
                 <p class="line-clamp-2 text-[13px] leading-snug font-medium group-hover:text-brand-lighter md:text-sm" [title]="game.name">
                   {{ game.name }}
                 </p>
+                @if (game.category || isUpcoming(game)) {
+                  <div class="mt-1 flex min-w-0 flex-wrap items-center gap-1">
+                    @if (game.category; as category) {
+                      <app-category-badge [category]="category" />
+                    }
+                    @if (isUpcoming(game)) {
+                      <app-upcoming-badge />
+                    }
+                  </div>
+                }
                 <p class="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] text-muted md:text-xs">
                   @if (game.lastExperienceStatus; as status) {
                     <app-status-pill dot [status]="status" class="shrink-0" />
@@ -309,6 +344,12 @@
               @if (game.hasPlatinum) {
                 <span class="text-xs" [attr.aria-label]="'library.platinum' | translate">🏆</span>
               }
+              @if (game.category; as category) {
+                <app-category-badge [category]="category" />
+              }
+              @if (isUpcoming(game)) {
+                <app-upcoming-badge />
+              }
             </span>
             <span class="truncate text-text-3" [title]="game.sagaName ?? ''">{{ game.sagaName ?? '—' }}</span>
             <span class="text-right font-mono text-text-3">{{ game.experienceCount ?? 0 }}</span>
@@ -352,12 +393,20 @@
                     <span class="text-xs">🏆</span>
                   }
                 </p>
-                <p class="mt-[3px] truncate text-xs text-muted">
-                  {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
-                  · {{ 'library.runsCount' | translatePlural: game.experienceCount ?? 0 }}
-                  @if (game.totalHours) {
-                    · {{ game.totalHours | hours }}
+                <p class="mt-[3px] flex min-w-0 items-center gap-1.5 text-xs text-muted">
+                  @if (game.category; as category) {
+                    <app-category-badge [category]="category" />
                   }
+                  @if (isUpcoming(game)) {
+                    <app-upcoming-badge />
+                  }
+                  <span class="truncate">
+                    {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
+                    · {{ 'library.runsCount' | translatePlural: game.experienceCount ?? 0 }}
+                    @if (game.totalHours) {
+                      · {{ game.totalHours | hours }}
+                    }
+                  </span>
                 </p>
               </div>
               <span class="shrink-0 font-mono text-[15px]" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>

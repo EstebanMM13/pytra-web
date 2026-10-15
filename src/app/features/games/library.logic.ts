@@ -1,7 +1,8 @@
 import { ExperienceStatus } from '../../core/models/experience.model';
-import { Game } from '../../core/models/game.model';
+import { Game, GameCategory } from '../../core/models/game.model';
 import { PlatformRef } from '../../core/models/platform.model';
 import { distinctPlatformRefs } from '../../core/services/platform.logic';
+import { todayIso } from '../../shared/utils/run-dates';
 
 /**
  * Status tab of the library toolbar. `PENDIENTE` also covers games with no runs yet, except online
@@ -24,7 +25,16 @@ export const LIBRARY_PAGE_SIZE = 10;
 /** Platform dropdown of the toolbar: a catalog platform id (as text, it lives in the URL) or all. */
 export type LibraryPlatformFilter = string;
 
-/** Platforms the user's games have runs on, distinct, by name (the options of the platform filter). */
+/** Category dropdown of the toolbar: a game category or all. */
+export type LibraryCategoryFilter = 'ALL' | GameCategory;
+
+export const GAME_CATEGORIES: readonly GameCategory[] = ['SINGLEPLAYER', 'ONLINE', 'HYBRID'];
+export const LIBRARY_CATEGORY_FILTERS: readonly LibraryCategoryFilter[] = ['ALL', ...GAME_CATEGORIES];
+
+/**
+ * Platforms the user's games were played on, distinct, by name (the options of the platform filter).
+ * The API's platformRefs already merge run platforms with the online playtime's platforms.
+ */
 export function libraryPlatforms(games: readonly Game[]): PlatformRef[] {
   return distinctPlatformRefs(games.flatMap((g) => g.platformRefs ?? [])).sort((a, b) =>
     a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true }),
@@ -37,6 +47,8 @@ export interface LibraryQuery {
   sort: LibrarySort;
   /** Defaults to 'ALL' when omitted. */
   platform?: LibraryPlatformFilter;
+  /** Defaults to 'ALL' when omitted. */
+  category?: LibraryCategoryFilter;
 }
 
 /** Steam imports waiting for review live on /steam until confirmed; the library only lists confirmed games. */
@@ -71,6 +83,15 @@ export function matchesStatus(game: Game, status: LibraryStatusFilter): boolean 
 
 export function matchesPlatform(game: Game, platform: LibraryPlatformFilter | undefined): boolean {
   return !platform || platform === 'ALL' || (game.platformRefs ?? []).some((ref) => String(ref.id) === platform);
+}
+
+export function matchesCategory(game: Game, category: LibraryCategoryFilter | undefined): boolean {
+  return !category || category === 'ALL' || game.category === category;
+}
+
+/** Announced game whose release date (`yyyy-MM-dd`) is still ahead of `today`. */
+export function isUpcoming(game: Pick<Game, 'releaseDate'>, today: string = todayIso()): boolean {
+  return !!game.releaseDate && game.releaseDate.slice(0, 10) > today;
 }
 
 export function matchesText(game: Game, text: string): boolean {
@@ -145,7 +166,11 @@ export function sortGames(games: readonly Game[], sort: LibrarySort): Game[] {
 export function filterGames(games: readonly Game[], query: LibraryQuery): Game[] {
   return sortGames(
     games.filter(
-      (g) => matchesText(g, query.text) && matchesStatus(g, query.status) && matchesPlatform(g, query.platform),
+      (g) =>
+        matchesText(g, query.text) &&
+        matchesStatus(g, query.status) &&
+        matchesPlatform(g, query.platform) &&
+        matchesCategory(g, query.category),
     ),
     query.sort,
   );
@@ -188,6 +213,10 @@ export function parseLibraryView(value: string | null): LibraryView {
 
 export function parsePlatformFilter(value: string | null): LibraryPlatformFilter {
   return value && /^\d+$/.test(value) ? String(Number(value)) : 'ALL';
+}
+
+export function parseCategoryFilter(value: string | null): LibraryCategoryFilter {
+  return (LIBRARY_CATEGORY_FILTERS as readonly string[]).includes(value ?? '') ? (value as LibraryCategoryFilter) : 'ALL';
 }
 
 export function parsePage(value: string | null): number {

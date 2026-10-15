@@ -524,7 +524,12 @@
   "category": {
     "SINGLEPLAYER": "Singleplayer",
     "ONLINE": "Online",
-    "HYBRID": "Hybrid"
+    "HYBRID": "Hybrid",
+    "short": {
+      "SINGLEPLAYER": "Single",
+      "ONLINE": "Online",
+      "HYBRID": "Hybrid"
+    }
   },
   "game": {
     "breadcrumb": "Games",
@@ -617,7 +622,8 @@
         "notFound": "{{source}} has no data for this game.",
         "notAGame": "That's not a game (DLC, soundtrack…). Pick the base game."
       }
-    }
+    },
+    "upcoming": "Coming soon"
   },
   "run": {
     "platinum": "🏆 Platinum",
@@ -771,7 +777,11 @@
       "label": "View",
       "list": "List",
       "grid": "Grid"
-    }
+    },
+    "categoryLabel": "Filter by category",
+    "categoryAll": "Category: all",
+    "categoryPrefix": "Category:",
+    "categoryAllShort": "All"
   },
   "sagas": {
     "title": "Sagas",

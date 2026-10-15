@@ -18,9 +18,14 @@ import { GameCover } from '../../shared/ui/game-cover';
 import { Pagination } from '../../shared/ui/pagination';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusPill } from '../../shared/ui/status-pill';
+import { CategoryBadge, UpcomingBadge } from '../../shared/ui/game-badges';
+import { todayIso } from '../../shared/utils/run-dates';
 import { GameEditDialog } from './game-edit-dialog/game-edit-dialog';
 import {
+  GAME_CATEGORIES,
+  isUpcoming,
   libraryPlatforms,
+  LibraryCategoryFilter,
   LIBRARY_SORTS,
   LIBRARY_STATUS_FILTERS,
   isOnlineOnly,
@@ -32,9 +37,11 @@ import {
   isLibraryGame,
   LIBRARY_VIEW_KEY,
   LibraryView,
+  matchesCategory,
   matchesPlatform,
   matchesText,
   paginate,
+  parseCategoryFilter,
   parseLibraryView,
   parsePage,
   parsePlatformFilter,
@@ -44,7 +51,7 @@ import {
 
 /**
  * Library (/games): confirmed games with their run aggregates, filtered, sorted and paged on the
- * client. Filters live in the URL (`q`, `status`, `platform`, `sort`, `page`) so back navigation restores them.
+ * client. Filters live in the URL (`q`, `status`, `platform`, `category`, `sort`, `page`) so back navigation restores them.
  * The list / grid view is a per-device preference (localStorage); the grid shows every result, unpaged.
  */
 @Component({
@@ -62,6 +69,8 @@ import {
     Dropdown,
     Skeleton,
     StatusPill,
+    CategoryBadge,
+    UpcomingBadge,
     GameEditDialog,
     LucideDynamicIcon,
   ],
@@ -77,6 +86,14 @@ export class Games {
 
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
   protected readonly isOnlineOnly = isOnlineOnly;
+  protected readonly categories = GAME_CATEGORIES;
+  protected readonly categoryOptions: DropdownOption[] = [
+    { value: 'ALL', label: 'library.categoryAllShort' },
+    ...GAME_CATEGORIES.map((c) => ({ value: c, label: `category.${c}` })),
+  ];
+  /** Fixed when the page loads: good enough for a "coming soon" badge. */
+  private readonly today = todayIso();
+  protected readonly isUpcoming = (game: Game): boolean => isUpcoming(game, this.today);
   protected readonly sorts = LIBRARY_SORTS;
   protected readonly sortOptions: DropdownOption[] = LIBRARY_SORTS.map((s) => ({ value: s, label: `library.sort.${s}` }));
   protected readonly skeletonRows = Array.from({ length: 8 }, (_, i) => i);
@@ -97,6 +114,7 @@ export class Games {
             status: parseStatusFilter(params.get('status')),
             sort: parseSort(params.get('sort')),
             platform: parsePlatformFilter(params.get('platform')),
+            category: parseCategoryFilter(params.get('category')),
             page: parsePage(params.get('page')),
           }) satisfies LibraryQuery & { page: number },
       ),
@@ -109,7 +127,7 @@ export class Games {
   protected readonly pendingReviewCount = computed(
     () => (this.allGames() ?? []).filter((g) => !isLibraryGame(g)).length,
   );
-  /** Only the platforms the user's games have runs on. */
+  /** Only the platforms the user's games were played on (runs or online). */
   protected readonly platforms = computed(() => libraryPlatforms(this.libraryGames()));
   protected readonly platformOptions = computed<DropdownOption[]>(() => [
     { value: 'ALL', label: 'library.platformAllShort' },
@@ -120,18 +138,25 @@ export class Games {
     this.libraryGames().reduce((sum, g) => sum + (g.experienceCount ?? 0), 0),
   );
 
-  /** Tab counters follow the name and platform filters, so they add up to what each tab would show. */
+  /** Tab counters follow the name, platform and category filters, so they add up to what each tab would show. */
   protected readonly statusCounts = computed(() =>
     countByStatus(
       this.libraryGames().filter(
-        (g) => matchesText(g, this.query().text) && matchesPlatform(g, this.query().platform),
+        (g) =>
+          matchesText(g, this.query().text) &&
+          matchesPlatform(g, this.query().platform) &&
+          matchesCategory(g, this.query().category),
       ),
     ),
   );
   protected readonly filtered = computed(() => filterGames(this.libraryGames(), this.query()));
   protected readonly page = computed(() => paginate(this.filtered(), this.query().page));
   protected readonly hasFilters = computed(
-    () => !!this.query().text.trim() || this.query().status !== 'ALL' || this.query().platform !== 'ALL',
+    () =>
+      !!this.query().text.trim() ||
+      this.query().status !== 'ALL' ||
+      this.query().platform !== 'ALL' ||
+      this.query().category !== 'ALL',
   );
 
   constructor() {
@@ -185,6 +210,11 @@ export class Games {
     this.updateQuery({ platform: parsed === 'ALL' ? null : parsed, page: null });
   }
 
+  protected setCategory(category: string): void {
+    const parsed: LibraryCategoryFilter = parseCategoryFilter(category);
+    this.updateQuery({ category: parsed === 'ALL' ? null : parsed, page: null });
+  }
+
   protected setPage(page: number): void {
     this.updateQuery({ page: page > 1 ? page : null }, false);
   }
@@ -199,7 +229,7 @@ export class Games {
   }
 
   protected clearFilters(): void {
-    this.updateQuery({ q: null, status: null, platform: null, page: null });
+    this.updateQuery({ q: null, status: null, platform: null, category: null, page: null });
   }
 
   /** Typing and toggles replace the history entry; page changes push one so "back" pages back. */
