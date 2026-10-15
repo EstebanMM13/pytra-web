@@ -419,7 +419,7 @@ export class Combobox {
 
   private scrollActiveIntoView(): void {
     queueMicrotask(() =>
-      this.host.querySelector(`#${this.listId}-${this.activeIndex()}`)?.scrollIntoView({ block: 'nearest' }),
+      this.host.querySelector(`#${this.listId}-${this.activeIndex()}`)?.scrollIntoView?.({ block: 'nearest' }),
     );
   }
 }
