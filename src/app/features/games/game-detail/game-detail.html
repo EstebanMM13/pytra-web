@@ -330,11 +330,11 @@
                 class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center"
               >
                 <p class="text-sm font-medium text-text-2">{{ 'game.noRuns' | translate }}</p>
-                @if (canAddRun()) {
+                @if (canEdit() && canAddRun()) {
                   <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
                     {{ 'game.firstRun' | translate }}
                   </button>
-                } @else {
+                } @else if (!canAddRun()) {
                   <p class="text-[13px] text-muted">{{ 'game.onlineNoRuns' | translate }}</p>
                 }
               </div>
