@@ -95,8 +95,24 @@
           [url]="coverPreview()"
           [name]="form.controls.name.value || '?'"
           [attr.title]="'game.form.coverPreview' | translate"
+          (portraitChange)="coverPortrait.set($event)"
         />
       </div>
+      @if (showCoverWarning()) {
+        <div
+          class="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg bg-gold-tint px-3 py-2 text-xs text-gold-tint-fg"
+          role="status"
+          data-cover-warning
+        >
+          <span class="flex items-center gap-1.5">
+            <svg [lucideIcon]="icons.circleAlert" [size]="14" class="shrink-0" aria-hidden="true"></svg>
+            {{ 'game.form.coverNotPortrait' | translate }}
+          </span>
+          <button type="button" (click)="openAutofill()" class="font-semibold underline-offset-2 hover:underline">
+            {{ 'game.form.coverFindPortrait' | translate }}
+          </button>
+        </div>
+      }
       @if (form.controls.coverImageUrl.invalid && form.controls.coverImageUrl.touched) {
         <p class="text-xs text-danger">{{ 'game.form.coverUrlInvalid' | translate }}</p>
       } @else {

@@ -613,7 +613,9 @@
       "sagaPlaceholder": "Buscar saga…",
       "createSaga": "Crear saga «{{name}}»",
       "genrePlaceholder": "Buscar o crear géneros…",
-      "createGenre": "Crear género «{{name}}»"
+      "createGenre": "Crear género «{{name}}»",
+      "coverNotPortrait": "Esta portada no es vertical",
+      "coverFindPortrait": "Buscar una oficial"
     },
     "createTitle": "Añadir juego",
     "saveCreate": "Añadir juego",

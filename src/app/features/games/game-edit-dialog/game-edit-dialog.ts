@@ -11,6 +11,7 @@ import {
   output,
   signal,
   viewChild,
+  linkedSignal,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -40,6 +41,11 @@ import { IgdbMetadataService } from '../../../core/services/igdb-metadata.servic
 import { MetadataAutofill } from './metadata-autofill';
 import { AUTOFILL_SOURCE_LABELS, AutofillPick, matchGenres } from './metadata-autofill.logic';
 import { toastApiError } from '../../../shared/utils/api-error';
+
+/** Warn about a cover only once its preview loaded and turned out not to be portrait art. */
+export function coverNeedsWarning(previewUrl: string | null, portrait: boolean): boolean {
+  return !!previewUrl && !portrait;
+}
 
 function sortByName(sagas: readonly Saga[]): Saga[] {
   return [...sagas].sort((a, b) => a.name.localeCompare(b.name, 'es'));
@@ -157,6 +163,10 @@ export class GameEditDialog implements OnInit {
     { initialValue: null },
   );
 
+  /** Whether the previewed cover loaded as portrait art; resets (to true) whenever the url changes. */
+  protected readonly coverPortrait = linkedSignal({ source: this.coverPreview, computation: () => true });
+  protected readonly showCoverWarning = computed(() => coverNeedsWarning(this.coverPreview(), this.coverPortrait()));
+
   ngOnInit(): void {
     const game = this.game();
     if (game) {
@@ -247,6 +257,11 @@ export class GameEditDialog implements OnInit {
     this.suggestedGenres.set(unmatched);
     this.filledFrom.set({ name: metadata.name, source: AUTOFILL_SOURCE_LABELS[source] });
     this.closeAutofill();
+  }
+
+  /** Opens the IGDB / Steam search (it focuses its own input) to pick an official portrait cover. */
+  protected openAutofill(): void {
+    this.autofillOpen.set(true);
   }
 
   /** Hides the autofill search and gives focus back to the button that opened it. */

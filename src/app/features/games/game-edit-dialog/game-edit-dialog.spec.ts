@@ -9,7 +9,7 @@ import { GenreService } from '../../../core/services/genre.service';
 import { IgdbMetadataService } from '../../../core/services/igdb-metadata.service';
 import { SagaService } from '../../../core/services/saga.service';
 import { ToastService } from '../../../shared/toast/toast.service';
-import { GameEditDialog } from './game-edit-dialog';
+import { GameEditDialog, coverNeedsWarning } from './game-edit-dialog';
 
 const SAGAS: Saga[] = [
   { id: 1, name: 'God of War', updatedAt: '' },
@@ -60,7 +60,7 @@ describe('GameEditDialog pickers', () => {
       input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
       fixture.detectChanges();
     };
-    return { fixture, dialog, sagaInput, genreInput, type, enter };
+    return { fixture, el, dialog, sagaInput, genreInput, type, enter };
   }
 
   beforeEach(() => {
@@ -119,5 +119,37 @@ describe('GameEditDialog pickers', () => {
     genreCreate.mockReturnValue(of({ id: 12, name: 'METROIDVANIA' }));
     enter(genreInput);
     expect(genreCreate).toHaveBeenCalledTimes(2);
+  });
+
+  it('warns about a cover that loads as non-portrait and offers the autofill search', () => {
+    const { fixture, el, dialog } = setup();
+    dialog.form.controls.coverImageUrl.setValue('https://images.example.com/wide.jpg');
+    fixture.detectChanges();
+    expect(el.querySelector('[data-cover-warning]')).toBeNull();
+
+    const img = el.querySelector('app-game-cover img') as HTMLImageElement;
+    Object.defineProperty(img, 'naturalWidth', { value: 460 });
+    Object.defineProperty(img, 'naturalHeight', { value: 215 });
+    img.dispatchEvent(new Event('load'));
+    fixture.detectChanges();
+    const warning = el.querySelector('[data-cover-warning]')!;
+    expect(warning.textContent).toContain('game.form.coverNotPortrait');
+
+    warning.querySelector('button')!.click();
+    fixture.detectChanges();
+    expect(el.querySelector('app-metadata-autofill')).not.toBeNull();
+
+    // A new url clears the warning until its own image loads.
+    dialog.form.controls.coverImageUrl.setValue('https://images.example.com/other.jpg');
+    fixture.detectChanges();
+    expect(el.querySelector('[data-cover-warning]')).toBeNull();
+  });
+});
+
+describe('coverNeedsWarning', () => {
+  it('warns only for a previewed cover that is not portrait', () => {
+    expect(coverNeedsWarning('https://x/c.jpg', false)).toBe(true);
+    expect(coverNeedsWarning('https://x/c.jpg', true)).toBe(false);
+    expect(coverNeedsWarning(null, false)).toBe(false);
   });
 });
