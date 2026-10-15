@@ -38,6 +38,8 @@ export function barRatios(values: readonly number[]): number[] {
     role: 'list',
     '[style.height.px]': 'height()',
     '[class.h-full]': 'height() === null',
+    // Filling a parent whose height turns out indefinite would collapse the bars: keep a floor.
+    '[style.min-height.px]': 'height() === null ? minHeight() : null',
     '[class]': "dense() ? 'gap-[7px]' : large() ? 'gap-5' : 'gap-3.5'",
   },
   template: `
@@ -80,6 +82,8 @@ export class MiniBarChart {
   readonly bars = input.required<readonly MiniBar[]>();
   /** Chart height in px (labels included); null fills the parent's height (which must be definite). */
   readonly height = input<number | null>(170);
+  /** Least height in px when `height` is null, so the bars keep room if the parent's height is not definite. */
+  readonly minHeight = input(140);
   readonly dense = input(false, { transform: booleanAttribute });
   /** Bigger labels, for charts with few bars and room to spare. */
   readonly large = input(false, { transform: booleanAttribute });

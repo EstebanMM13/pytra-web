@@ -180,8 +180,10 @@
           <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
             <app-section-header collapseKey="years.hoursByMonth" collapseGroup="years.activity" collapseGroupFrom="lg" class="mb-3 md:mb-[18px]" [label]="'years.hoursByMonth' | translate" />
             @if (hasMonthHours()) {
+              <!-- Grows with the runs card when the grid stretches it; with few runs (items-start) the
+                   chart's own 180px floor keeps the bars' height definite. -->
               <div class="hidden min-h-[180px] flex-1 flex-col md:flex">
-                <app-mini-bar-chart class="flex-1" [bars]="monthBars()" [height]="null" topTone="muted" dense />
+                <app-mini-bar-chart class="flex-1" [bars]="monthBars()" [height]="null" [minHeight]="180" topTone="muted" dense />
               </div>
               <div class="md:hidden">
                 <app-mini-bar-chart [bars]="monthBarsMobile()" [height]="90" dense />
