@@ -768,7 +768,7 @@
       "PENDIENTE": "Pendientes",
       "ONLINE": "Online"
     },
-    "filterPlaceholder": "Filtrar por nombre",
+    "filterPlaceholder": "Filtrar por nombre o estudio",
     "steamPending": "{{count}} juegos de Steam por revisar",
     "steamPending_one": "{{count}} juego de Steam por revisar",
     "loadError": "No se pudo cargar la lista de juegos.",
@@ -814,7 +814,11 @@
       "clear": "Limpiar filtros",
       "done": "Listo",
       "active": "Filtros activos",
-      "sortChanged": "Orden personalizado"
+      "sortChanged": "Orden personalizado",
+      "developers": "Desarrolladora",
+      "developersPlaceholder": "Buscar desarrolladoras…",
+      "publishers": "Distribuidora",
+      "publishersPlaceholder": "Buscar distribuidoras…"
     }
   },
   "sagas": {

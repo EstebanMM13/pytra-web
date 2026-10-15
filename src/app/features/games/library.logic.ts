@@ -48,6 +48,10 @@ export interface LibraryQuery {
   genres?: readonly number[];
   /** Defaults to 'ALL' when omitted. */
   category?: LibraryCategoryFilter;
+  /** Developer names; a game matches when its developer is ANY of them (accent/case-insensitive). Empty: all. */
+  developers?: readonly string[];
+  /** Publisher names; same rules as `developers`. */
+  publishers?: readonly string[];
 }
 
 /** Steam imports waiting for review live on /steam until confirmed; the library only lists confirmed games. */
@@ -90,21 +94,54 @@ export function matchesGenres(game: Game, genres: readonly number[] | undefined)
   return !genres?.length || (game.genres ?? []).some((g) => genres.includes(g.id));
 }
 
-/** Text, platform, genre and category filters: everything except the status tab. */
+/** ANY of the names, compared accent/case-insensitively (none picked: every game). */
+export function matchesName(value: string | null | undefined, names: readonly string[] | undefined): boolean {
+  if (!names?.length) {
+    return true;
+  }
+  const key = normalizeText(value ?? '');
+  return !!key && names.some((name) => normalizeText(name) === key);
+}
+
+/** Text, platform, genre, category, developer and publisher filters: everything except the status tab. */
 export function matchesPanelFilters(game: Game, query: LibraryQuery): boolean {
   return (
     matchesText(game, query.text) &&
     matchesPlatforms(game, query.platforms) &&
     matchesGenres(game, query.genres) &&
-    matchesCategory(game, query.category)
+    matchesCategory(game, query.category) &&
+    matchesName(game.developer, query.developers) &&
+    matchesName(game.publisher, query.publishers)
   );
 }
 
-/** Number of filters set in the filter panel (category, each platform, each genre). */
-export function panelFilterCount(query: Pick<LibraryQuery, 'category' | 'platforms' | 'genres'>): number {
+/** Number of filters set in the filter panel (category, each platform, genre, developer and publisher). */
+export function panelFilterCount(
+  query: Pick<LibraryQuery, 'category' | 'platforms' | 'genres' | 'developers' | 'publishers'>,
+): number {
   return (
-    (query.category && query.category !== 'ALL' ? 1 : 0) + (query.platforms?.length ?? 0) + (query.genres?.length ?? 0)
+    (query.category && query.category !== 'ALL' ? 1 : 0) +
+    (query.platforms?.length ?? 0) +
+    (query.genres?.length ?? 0) +
+    (query.developers?.length ?? 0) +
+    (query.publishers?.length ?? 0)
   );
+}
+
+/**
+ * Distinct non-blank values of a game field (developer or publisher), trimmed, sorted for Spanish.
+ * Values differing only in case or accents collapse into the first one seen.
+ */
+export function libraryNames(games: readonly Game[], pick: (game: Game) => string | null | undefined): string[] {
+  const byKey = new Map<string, string>();
+  for (const game of games) {
+    const name = cleanName(pick(game) ?? '');
+    const key = normalizeText(name);
+    if (key && !byKey.has(key)) {
+      byKey.set(key, name);
+    }
+  }
+  return [...byKey.values()].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base', numeric: true }));
 }
 
 /** Genres present in the games, distinct, by display name (the options of the genre filter). */
@@ -128,9 +165,13 @@ export function isUpcoming(game: Pick<Game, 'releaseDate'>, today: string = toda
   return !!game.releaseDate && game.releaseDate.slice(0, 10) > today;
 }
 
+/** The search box matches the game's name, developer or publisher. */
 export function matchesText(game: Game, text: string): boolean {
   const needle = normalizeText(text);
-  return !needle || normalizeText(game.name).includes(needle);
+  return (
+    !needle ||
+    [game.name, game.developer, game.publisher].some((value) => !!value && normalizeText(value).includes(needle))
+  );
 }
 
 /** Count per status tab, for the given (already name-filtered) games. */
@@ -270,6 +311,57 @@ export function pruneIds<T extends number | string>(ids: readonly T[], known: It
 /** URL form of an id list; null (param removed) when empty. */
 export function serializeIdList(ids: readonly (number | string)[]): string | null {
   return ids.length ? ids.join(',') : null;
+}
+
+/** Most characters a developer / publisher name keeps from the URL. */
+const MAX_NAME_LENGTH = 100;
+
+/** Trimmed, single-spaced name without control characters. */
+function cleanName(value: string): string {
+  return value
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Developer / publisher names from repeated URL params (`dev=Nintendo&dev=Capcom`): cleaned,
+ * non-blank, at most MAX_NAME_LENGTH characters, distinct (accent/case-insensitive), in order,
+ * capped like the id lists. Anything else is dropped.
+ */
+export function parseNameList(values: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const names: string[] = [];
+  for (const raw of values) {
+    const name = cleanName(raw);
+    const key = normalizeText(name);
+    if (!key || name.length > MAX_NAME_LENGTH || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    names.push(name);
+    if (names.length === MAX_FILTER_IDS) {
+      break;
+    }
+  }
+  return names;
+}
+
+/**
+ * Keeps the names the library has (accent/case-insensitive), spelled as the library spells them,
+ * in order; drops the rest (stale links), like pruneIds.
+ */
+export function pruneNames(names: readonly string[], known: readonly string[]): string[] {
+  const byKey = new Map(known.map((name) => [normalizeText(name), name]));
+  return names.flatMap((name) => {
+    const match = byKey.get(normalizeText(name));
+    return match === undefined ? [] : [match];
+  });
+}
+
+/** URL form of a name list (one repeated param per name); null (param removed) when empty. */
+export function serializeNameList(names: readonly string[]): string[] | null {
+  return names.length ? [...names] : null;
 }
 
 export function parseCategoryFilter(value: string | null): LibraryCategoryFilter {

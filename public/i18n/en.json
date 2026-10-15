@@ -768,7 +768,7 @@
       "PENDIENTE": "Pending",
       "ONLINE": "Online"
     },
-    "filterPlaceholder": "Filter by name",
+    "filterPlaceholder": "Filter by name or studio",
     "steamPending": "{{count}} Steam games to review",
     "steamPending_one": "{{count}} Steam game to review",
     "loadError": "Could not load your games.",
@@ -814,7 +814,11 @@
       "clear": "Clear filters",
       "done": "Done",
       "active": "Active filters",
-      "sortChanged": "Custom sort"
+      "sortChanged": "Custom sort",
+      "developers": "Developer",
+      "developersPlaceholder": "Search developers…",
+      "publishers": "Publisher",
+      "publishersPlaceholder": "Search publishers…"
     }
   },
   "sagas": {

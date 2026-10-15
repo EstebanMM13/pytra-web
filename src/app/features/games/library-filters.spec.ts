@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { LibraryCategoryFilter, LibrarySort } from './library.logic';
-import { LibraryFilters } from './library-filters';
+import { LibraryFilters, idsOf, namesOf } from './library-filters';
 
 @Component({
   imports: [LibraryFilters],
@@ -17,6 +17,12 @@ import { LibraryFilters } from './library-filters';
     (categoryChange)="category.set($event)"
     (platformsChange)="platforms.set($event)"
     (genresChange)="genres.set($event)"
+    [developerNames]="developerNames()"
+    [publisherNames]="publisherNames()"
+    [developers]="developers"
+    [publishers]="publishers"
+    (developersChange)="developerNames.set($event)"
+    (publishersChange)="publisherNames.set($event)"
     (cleared)="cleared = cleared + 1"
   />`,
 })
@@ -30,6 +36,10 @@ class Host {
     { id: 2, name: 'PS5', color: '#44f' },
   ];
   readonly genreOptions = [{ id: 7, label: 'RPG' }];
+  readonly developerNames = signal<readonly string[]>([]);
+  readonly publisherNames = signal<readonly string[]>([]);
+  readonly developers = ['Capcom', 'FromSoftware', 'Nintendo EPD'];
+  readonly publishers = ['Bandai Namco', 'Nintendo'];
   cleared = 0;
 }
 
@@ -129,5 +139,38 @@ describe('LibraryFilters', () => {
     expect(el.querySelector('[data-sort-dot]')).not.toBeNull();
     expect(trigger.querySelector('.font-mono')).toBeNull();
     expect(button('library.sort.rating').getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('filters by developer and publisher with searchable multi-selects that count as filters', () => {
+    const { fixture, el, trigger } = setup();
+    fixture.componentInstance.publisherNames.set(['Nintendo']);
+    trigger.click();
+    fixture.detectChanges();
+    expect(el.querySelector('#library-filter-developers')?.textContent).toContain('library.filters.developers');
+    expect(el.querySelector('#library-filter-publishers')?.textContent).toContain('library.filters.publishers');
+
+    const devInput = el.querySelector<HTMLInputElement>('input[aria-labelledby="library-filter-developers"]')!;
+    devInput.focus();
+    devInput.click();
+    fixture.detectChanges();
+    const option = [...el.querySelectorAll<HTMLElement>('[role="option"]')].find(
+      (o) => o.textContent?.trim() === 'FromSoftware',
+    )!;
+    option.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.developerNames()).toEqual(['FromSoftware']);
+    expect(fixture.componentInstance.publisherNames()).toEqual(['Nintendo']);
+    // Count badge: 1 developer + 1 publisher.
+    expect(trigger.querySelector('.font-mono')?.textContent?.trim()).toBe('2');
+  });
+});
+
+describe('library filter name ids', () => {
+  const names = ['Capcom', 'FromSoftware', 'Sega'];
+
+  it('maps picked names to option ids and back, skipping unknown ones', () => {
+    expect(idsOf(names, ['Sega', 'Konami', 'Capcom'])).toEqual([2, 0]);
+    expect(namesOf(names, [2, 0, 9, -1])).toEqual(['Sega', 'Capcom']);
+    expect(namesOf(names, idsOf(names, ['FromSoftware']))).toEqual(['FromSoftware']);
   });
 });

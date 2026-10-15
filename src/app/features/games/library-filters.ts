@@ -23,7 +23,8 @@ import { ICONS } from '../../shared/ui/icons';
 import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } from './library.logic';
 
 /**
- * "Filtrar y ordenar" button of the library toolbar with its panel: sort, type (category), platforms and genres.
+ * "Filtrar y ordenar" button of the library toolbar with its panel: sort, type (category), platforms, genres,
+ * developers and publishers.
  * A bottom sheet on phones, a popover under the button from md. Changes apply right away; the
  * parent keeps them in the URL.
  */
@@ -171,6 +172,40 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
           </section>
         }
 
+        @if (developerOptions().length) {
+          <section class="flex flex-col gap-2 border-t border-divider py-3.5">
+            <h3 id="library-filter-developers" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+              {{ 'library.filters.developers' | translate }}
+            </h3>
+            <app-combobox
+              multiple
+              labelledBy="library-filter-developers"
+              [options]="developerOptions()"
+              [selected]="developerIds()"
+              (selectedChange)="developersChange.emit(namesOf(developers(), $event))"
+              placeholder="library.filters.developersPlaceholder"
+            />
+            <p class="text-xs text-faint">{{ 'library.filters.anyHint' | translate }}</p>
+          </section>
+        }
+
+        @if (publisherOptions().length) {
+          <section class="flex flex-col gap-2 border-t border-divider py-3.5">
+            <h3 id="library-filter-publishers" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+              {{ 'library.filters.publishers' | translate }}
+            </h3>
+            <app-combobox
+              multiple
+              labelledBy="library-filter-publishers"
+              [options]="publisherOptions()"
+              [selected]="publisherIds()"
+              (selectedChange)="publishersChange.emit(namesOf(publishers(), $event))"
+              placeholder="library.filters.publishersPlaceholder"
+            />
+            <p class="text-xs text-faint">{{ 'library.filters.anyHint' | translate }}</p>
+          </section>
+        }
+
         <div class="flex items-center justify-between gap-3 border-t border-divider pt-3.5">
           <button
             type="button"
@@ -215,12 +250,20 @@ export class LibraryFilters {
   readonly platforms = input.required<readonly PlatformRef[]>();
   /** Genres present in the library. */
   readonly genreOptions = input.required<readonly ComboboxOption[]>();
+  /** Picked developer / publisher names (spelled as in `developers` / `publishers`). */
+  readonly developerNames = input<readonly string[]>([]);
+  readonly publisherNames = input<readonly string[]>([]);
+  /** Developers / publishers present in the library, sorted. */
+  readonly developers = input<readonly string[]>([]);
+  readonly publishers = input<readonly string[]>([]);
 
   readonly categoryChange = output<LibraryCategoryFilter>();
   readonly platformsChange = output<string[]>();
   readonly genresChange = output<readonly number[]>();
+  readonly developersChange = output<string[]>();
+  readonly publishersChange = output<string[]>();
   readonly sortChange = output<LibrarySort>();
-  /** Clears the filters (type, platforms, genres); the sort stays. */
+  /** Clears the filters (type, platforms, genres, developers, publishers); the sort stays. */
   readonly cleared = output<void>();
 
   protected readonly categoryChoices: readonly LibraryCategoryFilter[] = ['ALL', ...GAME_CATEGORIES];
@@ -229,8 +272,19 @@ export class LibraryFilters {
   protected readonly customSort = computed(() => this.sort() !== 'recent');
   protected readonly open = signal(false);
   protected readonly count = computed(
-    () => (this.category() !== 'ALL' ? 1 : 0) + this.platformIds().length + this.genreIds().length,
+    () =>
+      (this.category() !== 'ALL' ? 1 : 0) +
+      this.platformIds().length +
+      this.genreIds().length +
+      this.developerNames().length +
+      this.publisherNames().length,
   );
+  /** The combobox works with numeric ids: a name's id is its index in the (sorted) option list. */
+  protected readonly developerOptions = computed(() => nameOptions(this.developers()));
+  protected readonly publisherOptions = computed(() => nameOptions(this.publishers()));
+  protected readonly developerIds = computed(() => idsOf(this.developers(), this.developerNames()));
+  protected readonly publisherIds = computed(() => idsOf(this.publishers(), this.publisherNames()));
+  protected readonly namesOf = namesOf;
   protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
 
   protected isPlatformPicked(id: number): boolean {
@@ -323,4 +377,18 @@ export class LibraryFilters {
     this.document.body.style.overflow = this.previousOverflow;
     this.previousOverflow = null;
   }
+}
+
+function nameOptions(names: readonly string[]): ComboboxOption[] {
+  return names.map((label, id) => ({ id, label }));
+}
+
+/** Option ids (indexes in `names`) of the picked names; unknown names are skipped. */
+export function idsOf(names: readonly string[], picked: readonly string[]): number[] {
+  return picked.map((name) => names.indexOf(name)).filter((id) => id >= 0);
+}
+
+/** Names behind combobox option ids (indexes in `names`), in pick order. */
+export function namesOf(names: readonly string[], ids: readonly number[]): string[] {
+  return ids.flatMap((id) => (id >= 0 && id < names.length ? [names[id]] : []));
 }

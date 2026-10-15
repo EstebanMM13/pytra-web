@@ -24,6 +24,12 @@ import {
   parseSort,
   parseStatusFilter,
   sortGames,
+  libraryNames,
+  matchesName,
+  matchesText,
+  parseNameList,
+  pruneNames,
+  serializeNameList,
 } from './library.logic';
 
 const PC = { id: 1, name: 'PC', color: '#8A857C' };
@@ -331,5 +337,69 @@ describe('upcoming games', () => {
     expect(isUpcoming({ releaseDate: '2026-10-15' }, today)).toBe(false);
     expect(isUpcoming({ releaseDate: '1998-11-21' }, today)).toBe(false);
     expect(isUpcoming({ releaseDate: null }, today)).toBe(false);
+  });
+});
+
+describe('developer and publisher filters', () => {
+  const games = [
+    game({ id: 1, name: 'Elden Ring', developer: 'FromSoftware', publisher: 'Bandai Namco' }),
+    game({ id: 2, name: 'Sekiro', developer: 'FromSoftware', publisher: 'Activision' }),
+    game({ id: 3, name: 'Pokémon Rojo', developer: 'Game Freak', publisher: 'Nintendo' }),
+    game({ id: 4, name: 'Tekken 8', developer: ' Bandai  Namco ', publisher: 'BANDAI NAMCO' }),
+    game({ id: 5, name: 'Indie', developer: null, publisher: '  ' }),
+  ];
+  const ids = (list: Game[]) => list.map((g) => g.id).sort();
+
+  it('matches the search text on name, developer and publisher, accent/case-insensitively', () => {
+    expect(matchesText(games[0], 'fromsoft')).toBe(true);
+    expect(matchesText(games[0], 'BANDAI')).toBe(true);
+    expect(matchesText(games[2], 'pokemon')).toBe(true);
+    expect(matchesText(games[2], 'nintendo')).toBe(true);
+    expect(matchesText(games[4], 'nintendo')).toBe(false);
+    expect(ids(filterGames(games, { text: 'freak', status: 'ALL', sort: 'name' }))).toEqual([3]);
+  });
+
+  it('matches ANY name within a kind and every kind together', () => {
+    expect(matchesName('FromSoftware', undefined)).toBe(true);
+    expect(matchesName(null, [])).toBe(true);
+    expect(matchesName(null, ['FromSoftware'])).toBe(false);
+    expect(matchesName('Bandai Namco', ['bandai namco'])).toBe(true);
+
+    const query = { text: '', status: 'ALL', sort: 'name' } as const;
+    expect(ids(filterGames(games, { ...query, developers: ['FromSoftware', 'Game Freak'] }))).toEqual([1, 2, 3]);
+    expect(
+      ids(filterGames(games, { ...query, developers: ['FromSoftware'], publishers: ['Activision', 'Nintendo'] })),
+    ).toEqual([2]);
+  });
+
+  it('counts each picked developer and publisher as a filter', () => {
+    expect(panelFilterCount({ category: 'ALL', developers: ['A', 'B'], publishers: ['C'] })).toBe(3);
+  });
+
+  it('lists the distinct names present, trimmed, case/accent-merged and sorted', () => {
+    expect(libraryNames(games, (g) => g.developer)).toEqual(['Bandai Namco', 'FromSoftware', 'Game Freak']);
+    expect(libraryNames(games, (g) => g.publisher)).toEqual(['Activision', 'Bandai Namco', 'Nintendo']);
+  });
+
+  it('parses names from repeated URL params: cleaned, distinct, bounded', () => {
+    expect(parseNameList(['  Capcom ', 'capcom', '', '   ', 'Square\nEnix','x'.repeat(101), 'Sega'])).toEqual([
+      'Capcom',
+      'Square Enix',
+      'Sega',
+    ]);
+    expect(parseNameList(Array.from({ length: 50 }, (_, i) => `Studio ${i}`))).toHaveLength(30);
+  });
+
+  it('round-trips names through the URL, commas and symbols included', () => {
+    const names = ['Square Enix, Inc.', 'Bandai Namco & Co', 'Ubisoft/Montreal'];
+    expect(parseNameList(serializeNameList(names) ?? [])).toEqual(names);
+    expect(serializeNameList([])).toBeNull();
+  });
+
+  it('prunes names the library does not have and adopts its spelling', () => {
+    expect(pruneNames(['fromsoftware', 'Konami', 'BANDAI NAMCO'], ['Bandai Namco', 'FromSoftware'])).toEqual([
+      'FromSoftware',
+      'Bandai Namco',
+    ]);
   });
 });

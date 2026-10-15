@@ -35,6 +35,7 @@ import {
   LIBRARY_VIEW_KEY,
   LibraryView,
   libraryGenres,
+  libraryNames,
   libraryStatusLine,
   matchesPanelFilters,
   paginate,
@@ -42,19 +43,29 @@ import {
   parseCategoryFilter,
   parseIdList,
   parseLibraryView,
+  parseNameList,
   parsePage,
   parseSort,
   parseStatusFilter,
   pruneIds,
+  pruneNames,
   serializeIdList,
+  serializeNameList,
 } from './library.logic';
 import { LibraryFilters } from './library-filters';
 import { formatGenreName } from '../../shared/pipes/genre-name.pipe';
 
+/** Removable chip of an active panel filter; `id` is the platform / genre id or the developer / publisher name. */
+interface FilterChip {
+  kind: 'category' | 'platform' | 'genre' | 'developer' | 'publisher';
+  id: string;
+  label: string;
+}
+
 /**
  * Library (/games): confirmed games with their run aggregates, filtered, sorted and paged on the
- * client. Filters live in the URL (`q`, `status`, `platform` and `genre` as comma-separated ids, `category`,
- * `sort`, `page`) so back navigation restores them.
+ * client. Filters live in the URL (`q`, `status`, `platform` and `genre` as comma-separated ids, `dev` and
+ * `pub` as repeated names, `category`, `sort`, `page`) so back navigation restores them.
  * The list / grid view is a per-device preference (localStorage); the grid shows every result, unpaged.
  */
 @Component({
@@ -114,6 +125,8 @@ export class Games {
             platforms: parseIdList(params.get('platform')).map(String),
             genres: parseIdList(params.get('genre')),
             category: parseCategoryFilter(params.get('category')),
+            developers: parseNameList(params.getAll('dev')),
+            publishers: parseNameList(params.getAll('pub')),
             page: parsePage(params.get('page')),
           }) satisfies LibraryQuery & { page: number },
       ),
@@ -123,7 +136,7 @@ export class Games {
 
   protected readonly loading = computed(() => this.allGames() === null);
 
-  /** The URL filters, minus platform / genre ids the loaded library does not have. */
+  /** The URL filters, minus platform / genre ids and developer / publisher names the loaded library does not have. */
   protected readonly query = computed(() => {
     const query = this.urlQuery();
     if (this.loading()) {
@@ -133,6 +146,8 @@ export class Games {
       ...query,
       platforms: pruneIds(query.platforms, this.platforms().map((p) => String(p.id))),
       genres: pruneIds(query.genres, this.genreOptions().map((g) => g.id)),
+      developers: pruneNames(query.developers, this.developers()),
+      publishers: pruneNames(query.publishers, this.publishers()),
     };
   });
   protected readonly libraryGames = computed(() => (this.allGames() ?? []).filter(isLibraryGame));
@@ -143,11 +158,14 @@ export class Games {
   protected readonly platforms = computed(() => libraryPlatforms(this.libraryGames()));
   /** Only the genres present in the library. */
   protected readonly genreOptions = computed(() => libraryGenres(this.libraryGames(), formatGenreName));
+  /** Developers and publishers present in the library. */
+  protected readonly developers = computed(() => libraryNames(this.libraryGames(), (g) => g.developer));
+  protected readonly publishers = computed(() => libraryNames(this.libraryGames(), (g) => g.publisher));
   protected readonly filterCount = computed(() => panelFilterCount(this.query()));
   /** Removable chips for the active panel filters. */
   protected readonly filterChips = computed(() => {
     const query = this.query();
-    const chips: { kind: 'category' | 'platform' | 'genre'; id: string; label: string }[] = [];
+    const chips: FilterChip[] = [];
     if (query.category !== 'ALL') {
       chips.push({ kind: 'category', id: query.category, label: `category.${query.category}` });
     }
@@ -161,6 +179,8 @@ export class Games {
       const label = genres.get(id);
       if (label) chips.push({ kind: 'genre', id: String(id), label });
     }
+    for (const name of query.developers) chips.push({ kind: 'developer', id: name, label: name });
+    for (const name of query.publishers) chips.push({ kind: 'publisher', id: name, label: name });
     return chips;
   });
   protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
@@ -191,16 +211,26 @@ export class Games {
     });
     this.load();
 
-    // Unknown platform / genre ids (stale links): drop them from the URL too.
+    // Unknown platform / genre ids and developer / publisher names (stale links): drop them from the URL too.
     effect(() => {
       if (this.loading()) {
         return;
       }
       const url = this.urlQuery();
-      const { platforms, genres } = this.query();
-      if (platforms.length !== url.platforms.length || genres.length !== url.genres.length) {
+      const { platforms, genres, developers, publishers } = this.query();
+      if (
+        platforms.length !== url.platforms.length ||
+        genres.length !== url.genres.length ||
+        developers.length !== url.developers.length ||
+        publishers.length !== url.publishers.length
+      ) {
         untracked(() =>
-          this.updateQuery({ platform: serializeIdList(platforms), genre: serializeIdList(genres) }),
+          this.updateQuery({
+            platform: serializeIdList(platforms),
+            genre: serializeIdList(genres),
+            dev: serializeNameList(developers),
+            pub: serializeNameList(publishers),
+          }),
         );
       }
     });
@@ -249,16 +279,26 @@ export class Games {
     this.updateQuery({ genre: serializeIdList(parseIdList(genres.join(','))), page: null });
   }
 
-  protected removeChip(chip: { kind: 'category' | 'platform' | 'genre'; id: string }): void {
+  protected setDevelopers(developers: readonly string[]): void {
+    this.updateQuery({ dev: serializeNameList(parseNameList(developers)), page: null });
+  }
+
+  protected setPublishers(publishers: readonly string[]): void {
+    this.updateQuery({ pub: serializeNameList(parseNameList(publishers)), page: null });
+  }
+
+  protected removeChip(chip: Pick<FilterChip, 'kind' | 'id'>): void {
     const query = this.query();
     if (chip.kind === 'category') this.setCategory('ALL');
     else if (chip.kind === 'platform') this.setPlatforms(query.platforms.filter((p) => p !== chip.id));
+    else if (chip.kind === 'developer') this.setDevelopers(query.developers.filter((d) => d !== chip.id));
+    else if (chip.kind === 'publisher') this.setPublishers(query.publishers.filter((p) => p !== chip.id));
     else this.setGenres(query.genres.filter((g) => String(g) !== chip.id));
   }
 
-  /** Clears the filter panel only (type, platforms, genres); search and status tab stay. */
+  /** Clears the filter panel only (type, platforms, genres, developers, publishers); search and status tab stay. */
   protected clearPanelFilters(): void {
-    this.updateQuery({ platform: null, genre: null, category: null, page: null });
+    this.updateQuery({ platform: null, genre: null, category: null, dev: null, pub: null, page: null });
   }
 
   protected setCategory(category: string): void {
@@ -280,7 +320,16 @@ export class Games {
   }
 
   protected clearFilters(): void {
-    this.updateQuery({ q: null, status: null, platform: null, genre: null, category: null, page: null });
+    this.updateQuery({
+      q: null,
+      status: null,
+      platform: null,
+      genre: null,
+      category: null,
+      dev: null,
+      pub: null,
+      page: null,
+    });
   }
 
   /** Typing and toggles replace the history entry; page changes push one so "back" pages back. */
