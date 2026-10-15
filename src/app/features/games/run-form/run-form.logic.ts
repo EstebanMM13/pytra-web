@@ -1,5 +1,6 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Experience, ExperienceRequest, ExperienceStatus } from '../../../core/models/experience.model';
+import { Game } from '../../../core/models/game.model';
 import { RatingPrecision } from '../../../core/services/preferences.service';
 import { decimalValidator, parseDecimal } from '../../../shared/utils/decimal-input';
 
@@ -58,15 +59,25 @@ export const dateRangeValidator: ValidatorFn = (group: AbstractControl): Validat
 };
 
 /**
- * Status after the user edits the end date: a date on a run in progress or pending finishes it
- * (COMPLETADO); clearing the date of a completed run reopens it (EN_CURSO). ABANDONADO is never
- * changed, and any other combination keeps the current status.
+ * Status after the user edits the end date: a date up to `today` on a run in progress or pending
+ * finishes it (COMPLETADO); clearing the date of a completed run reopens it (EN_CURSO). A future end
+ * date changes nothing, ABANDONADO is never changed, and any other combination keeps the status.
+ * Dates are ISO `yyyy-mm-dd`, so they compare as text.
  */
-export function statusForEndDate(status: ExperienceStatus, endDate: string | null | undefined): ExperienceStatus {
+export function statusForEndDate(
+  status: ExperienceStatus,
+  endDate: string | null | undefined,
+  today: string,
+): ExperienceStatus {
   if (endDate) {
-    return status === 'EN_CURSO' || status === 'PENDIENTE' ? 'COMPLETADO' : status;
+    return (status === 'EN_CURSO' || status === 'PENDIENTE') && endDate <= today ? 'COMPLETADO' : status;
   }
   return status === 'COMPLETADO' ? 'EN_CURSO' : status;
+}
+
+/** ONLINE games are tracked through online playtime only: new runs are not offered for them. */
+export function canStartRun(game: Pick<Game, 'category'>): boolean {
+  return game.category !== 'ONLINE';
 }
 
 function yearOf(date: string | null | undefined): number | null {

@@ -33,6 +33,7 @@ import {
   dateRangeValidator,
   hoursValidator,
   nextRunLabel,
+  canStartRun,
   ratingValidatorFor,
   statusForEndDate,
 } from './run-form.logic';
@@ -204,7 +205,9 @@ export class RunForm implements OnInit {
         this.lockToGame(request.gameId, true);
       } else {
         this.gameService.findAll().subscribe({
-          next: (games) => this.games.set([...games].sort((a, b) => a.name.localeCompare(b.name))),
+          // ONLINE games have no runs to start: they are tracked through online playtime.
+          next: (games) =>
+            this.games.set([...games].filter(canStartRun).sort((a, b) => a.name.localeCompare(b.name))),
           error: () => this.games.set([]),
         });
       }
@@ -236,7 +239,19 @@ export class RunForm implements OnInit {
   private lockToGame(gameId: number, suggestLabel: boolean): void {
     this.locked.set(true);
     this.form.controls.gameId.setValue(gameId);
-    this.gameService.findById(gameId).subscribe({ next: (game) => this.lockedGame.set(game), error: () => {} });
+    const creating = suggestLabel;
+    this.gameService.findById(gameId).subscribe({
+      next: (game) => {
+        if (creating && !canStartRun(game)) {
+          // A new run for an ONLINE game (e.g. from a Steam import): show the game page instead.
+          this.close();
+          void this.router.navigate(['/games', game.id]);
+          return;
+        }
+        this.lockedGame.set(game);
+      },
+      error: () => {},
+    });
     if (suggestLabel) {
       this.suggestRunLabel(gameId);
     }
@@ -316,10 +331,16 @@ export class RunForm implements OnInit {
     }
   }
 
-  /** The user picked or cleared the end date: keep the status consistent with it (see statusForEndDate). */
-  protected onEndDateChange(endDate: string): void {
+  /**
+   * The user picked or cleared the end date: keep the status consistent with it (see statusForEndDate).
+   * An empty value with `badInput` is a date being typed segment by segment, not a cleared one.
+   */
+  protected onEndDateChange(input: Pick<HTMLInputElement, 'value' | 'validity'>): void {
+    if (!input.value && input.validity?.badInput) {
+      return;
+    }
     const status = this.form.controls.status;
-    const next = statusForEndDate(status.value, endDate);
+    const next = statusForEndDate(status.value, input.value, todayIso());
     if (next !== status.value) {
       status.setValue(next);
     }

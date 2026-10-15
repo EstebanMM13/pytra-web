@@ -9,34 +9,51 @@ import {
   isValidRating,
   nextRunLabel,
   ratingValidator,
+  canStartRun,
   ratingValidatorFor,
   statusForEndDate,
 } from './run-form.logic';
 
 describe('run form logic', () => {
   describe('statusForEndDate', () => {
-    it('completes a run in progress or pending when an end date is set', () => {
-      expect(statusForEndDate('EN_CURSO', '2026-10-01')).toBe('COMPLETADO');
-      expect(statusForEndDate('PENDIENTE', '2026-10-01')).toBe('COMPLETADO');
+    const today = '2026-10-15';
+
+    it('completes a run in progress or pending when an end date up to today is set', () => {
+      expect(statusForEndDate('EN_CURSO', '2026-10-01', today)).toBe('COMPLETADO');
+      expect(statusForEndDate('PENDIENTE', '2026-10-15', today)).toBe('COMPLETADO');
+    });
+
+    it('does not complete a run for a future end date', () => {
+      expect(statusForEndDate('EN_CURSO', '2026-10-16', today)).toBe('EN_CURSO');
+      expect(statusForEndDate('PENDIENTE', '2027-01-01', today)).toBe('PENDIENTE');
     });
 
     it('reopens a completed run when its end date is cleared', () => {
-      expect(statusForEndDate('COMPLETADO', '')).toBe('EN_CURSO');
-      expect(statusForEndDate('COMPLETADO', null)).toBe('EN_CURSO');
+      expect(statusForEndDate('COMPLETADO', '', today)).toBe('EN_CURSO');
+      expect(statusForEndDate('COMPLETADO', null, today)).toBe('EN_CURSO');
     });
 
     it('keeps a completed run completed when its end date moves', () => {
-      expect(statusForEndDate('COMPLETADO', '2026-09-30')).toBe('COMPLETADO');
+      expect(statusForEndDate('COMPLETADO', '2026-09-30', today)).toBe('COMPLETADO');
     });
 
     it('never changes an abandoned run', () => {
-      expect(statusForEndDate('ABANDONADO', '2026-10-01')).toBe('ABANDONADO');
-      expect(statusForEndDate('ABANDONADO', '')).toBe('ABANDONADO');
+      expect(statusForEndDate('ABANDONADO', '2026-10-01', today)).toBe('ABANDONADO');
+      expect(statusForEndDate('ABANDONADO', '', today)).toBe('ABANDONADO');
     });
 
     it('leaves runs without an end date in progress or pending', () => {
-      expect(statusForEndDate('EN_CURSO', '')).toBe('EN_CURSO');
-      expect(statusForEndDate('PENDIENTE', null)).toBe('PENDIENTE');
+      expect(statusForEndDate('EN_CURSO', '', today)).toBe('EN_CURSO');
+      expect(statusForEndDate('PENDIENTE', null, today)).toBe('PENDIENTE');
+    });
+  });
+
+  describe('canStartRun', () => {
+    it('offers new runs for every category but ONLINE', () => {
+      expect(canStartRun({ category: 'SINGLEPLAYER' })).toBe(true);
+      expect(canStartRun({ category: 'HYBRID' })).toBe(true);
+      expect(canStartRun({ category: null })).toBe(true);
+      expect(canStartRun({ category: 'ONLINE' })).toBe(false);
     });
   });
 

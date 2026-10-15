@@ -230,7 +230,7 @@
             class="run-form-cell-input"
             [attr.aria-invalid]="dateRangeError()"
             (input)="endSuggested.set(false)"
-            (change)="onEndDateChange($any($event.target).value)"
+            (change)="onEndDateChange($any($event.target))"
           />
         </label>
         <label class="run-form-cell">

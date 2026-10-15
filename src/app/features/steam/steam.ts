@@ -227,9 +227,14 @@ export class Steam {
   /**
    * Confirming a SINGLEPLAYER game makes the API create a run with the Steam hours, so we open that
    * run to complete it (status, rating…) instead of a new one that would count the hours twice.
-   * ONLINE/HYBRID hours go to the game's online playtime: open a fresh PC run without hours.
+   * HYBRID hours go to the game's online playtime: open a fresh PC run without hours. ONLINE games
+   * have no runs at all, so their page (with the online hours) is shown instead.
    */
   private openRunFor(game: Game): void {
+    if (game.category === 'ONLINE') {
+      void this.router.navigate(['/games', game.id]);
+      return;
+    }
     if (game.category !== 'SINGLEPLAYER') {
       this.runFormLauncher.openNewRun(game.id, { platform: 'PC' });
       return;
