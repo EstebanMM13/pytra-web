@@ -18,6 +18,25 @@ import { TranslatePipe } from '@ngx-translate/core';
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+/** Open sheets, oldest first: the last one is on top. */
+const openSheets: ModalSheet[] = [];
+/** Body overflow before the first open sheet locked it; restored when the last one closes, in any order. */
+let savedOverflow: string | null = null;
+
+function lockScroll(body: HTMLElement): void {
+  if (savedOverflow === null) {
+    savedOverflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+  }
+}
+
+function unlockScroll(body: HTMLElement): void {
+  if (openSheets.length === 0 && savedOverflow !== null) {
+    body.style.overflow = savedOverflow;
+    savedOverflow = null;
+  }
+}
+
 /**
  * Dialog shell. Web (md+): centred modal (max 720px) over the overlay, fade + 8px rise.
  * Mobile: full-screen sheet sliding up, header "Cancelar · title · Guardar".
@@ -129,16 +148,18 @@ export class ModalSheet {
 
   constructor() {
     const body = this.document.body;
-    const previousOverflow = body.style.overflow;
     const previousFocus = this.document.activeElement as HTMLElement | null;
-    body.style.overflow = 'hidden';
+    openSheets.push(this);
+    lockScroll(body);
 
     const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
     inject(DestroyRef).onDestroy(() => {
       // Angular also removes the host on destroy; this covers a host already moved to <body>.
       host.remove();
-      body.style.overflow = previousOverflow;
+      const index = openSheets.indexOf(this);
+      if (index >= 0) openSheets.splice(index, 1);
+      unlockScroll(body);
       previousFocus?.focus?.();
     });
 
@@ -153,8 +174,9 @@ export class ModalSheet {
     });
   }
 
+  /** Only the topmost open sheet closes on Escape (a sheet opened from another one closes first). */
   protected onEscape(event: Event): void {
-    if (!event.defaultPrevented) {
+    if (!event.defaultPrevented && openSheets.at(-1) === this) {
       event.preventDefault();
       this.cancel();
     }
