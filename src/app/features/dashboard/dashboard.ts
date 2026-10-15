@@ -1,20 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import {
-  LucideArrowRight,
-  LucideClock,
-  LucideDownload,
-  LucideDynamicIcon,
-  LucideGamepad2,
-  LucideLayers,
-  LucidePlay,
-  LucidePlus,
-  LucideSparkles,
-  LucideStar,
-  LucideWifi,
-  LucideX,
-} from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, catchError, of } from 'rxjs';
@@ -76,11 +64,7 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
     Segmented,
     MiniBarChart,
     Skeleton,
-    LucideDownload,
-    LucideArrowRight,
     LucideDynamicIcon,
-    LucideX,
-    LucideSparkles,
     AchievementBadge,
     PytraMark,
   ],
@@ -88,6 +72,8 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
+  protected readonly icons = ICONS;
+
   protected readonly installPrompt = inject(InstallPromptService);
   private readonly statsService = inject(StatsService);
   private readonly steamService = inject(SteamService);
@@ -97,15 +83,15 @@ export class Dashboard {
   private readonly sagaService = inject(SagaService);
   protected readonly displayName = inject(UserService).displayName;
 
-  protected readonly icons = {
-    games: LucideGamepad2,
-    sagas: LucideLayers,
-    runs: LucidePlay,
-    single: LucideClock,
-    online: LucideWifi,
-    rating: LucideStar,
-    steam: LucideDownload,
-    addGame: LucidePlus,
+  protected readonly statIcons = {
+    games: ICONS.gamepad2,
+    sagas: ICONS.layers,
+    runs: ICONS.play,
+    single: ICONS.clock,
+    online: ICONS.wifi,
+    rating: ICONS.star,
+    steam: ICONS.download,
+    addGame: ICONS.plus,
   };
 
   readonly summary = signal<StatsSummary | null>(null);

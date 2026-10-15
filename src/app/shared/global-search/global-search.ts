@@ -10,18 +10,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  LucideChartColumn,
-  LucideDownload,
-  LucideDynamicIcon,
-  LucideGamepad2,
-  LucideHouse,
-  LucideIconInput,
-  LucideLayers,
-  LucideSearch,
-  LucideUser,
-  LucideX,
-} from '@lucide/angular';
+import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
+import { ICONS } from '../ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Game } from '../../core/models/game.model';
 import { platformNameKey } from '../../core/services/platform.logic';
@@ -41,12 +31,12 @@ import {
 } from './global-search.logic';
 
 const PAGES: (SearchPage & { icon: LucideIconInput })[] = [
-  { path: '/dashboard', labelKey: 'nav.home', icon: LucideHouse },
-  { path: '/games', labelKey: 'nav.games', icon: LucideGamepad2 },
-  { path: '/sagas', labelKey: 'nav.sagas', icon: LucideLayers },
-  { path: '/years', labelKey: 'nav.years', icon: LucideChartColumn },
-  { path: '/steam', labelKey: 'nav.steam', icon: LucideDownload },
-  { path: '/profile', labelKey: 'nav.profile', icon: LucideUser },
+  { path: '/dashboard', labelKey: 'nav.home', icon: ICONS.house },
+  { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
+  { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.layers },
+  { path: '/years', labelKey: 'nav.years', icon: ICONS.chartColumn },
+  { path: '/steam', labelKey: 'nav.steam', icon: ICONS.download },
+  { path: '/profile', labelKey: 'nav.profile', icon: ICONS.user },
 ];
 
 const GROUP_LABEL_KEYS: Record<SearchGroupKind, string> = {
@@ -62,12 +52,14 @@ const GROUP_LABEL_KEYS: Record<SearchGroupKind, string> = {
  */
 @Component({
   selector: 'app-global-search',
-  imports: [TranslatePipe, LucideSearch, LucideX, LucideDynamicIcon, GameCover],
+  imports: [TranslatePipe, LucideDynamicIcon, GameCover],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './global-search.html',
   host: { '(document:keydown.escape)': 'close()' },
 })
 export class GlobalSearch {
+  protected readonly icons = ICONS;
+
   private readonly gameService = inject(GameService);
   private readonly sagaService = inject(SagaService);
   private readonly statsService = inject(StatsService);
@@ -87,8 +79,8 @@ export class GlobalSearch {
   /** Translation key for seeded platform names that have one, else the name (renders as-is). */
   protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
   protected readonly pageIcons = new Map(PAGES.map((p) => [p.path, p.icon]));
-  protected readonly sagaIcon = LucideLayers;
-  protected readonly yearIcon = LucideChartColumn;
+  protected readonly sagaIcon = ICONS.layers;
+  protected readonly yearIcon = ICONS.chartColumn;
   protected readonly releaseYear = releaseYear;
 
   private readonly pages = PAGES.map(({ path, labelKey }) => ({

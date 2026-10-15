@@ -1,4 +1,5 @@
-import { LucideEye, LucideEyeOff } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../../shared/ui/icons';
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -10,10 +11,12 @@ import { ResendVerification } from '../../../shared/resend-verification/resend-v
 
 @Component({
   selector: 'app-register',
-  imports: [AuthShell, ReactiveFormsModule, RouterLink, TranslatePipe, ResendVerification, LucideEye, LucideEyeOff],
+  imports: [AuthShell, ReactiveFormsModule, RouterLink, TranslatePipe, ResendVerification, LucideDynamicIcon],
   templateUrl: './register.html',
 })
 export class Register {
+  protected readonly icons = ICONS;
+
   protected readonly showPassword = signal(false);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly authService = inject(AuthService);

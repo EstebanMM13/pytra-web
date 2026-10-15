@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LucideChevronLeft, LucidePencil, LucidePlus } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
 import { forkJoin, map } from 'rxjs';
 import { Game } from '../../core/models/game.model';
@@ -42,14 +43,14 @@ import { SagaSummary, isPlayed, playedPercent, releaseYear, sagaMetaLine, summar
     StatusPill,
     SagaDialog,
     GameCover,
-    LucideChevronLeft,
-    LucidePencil,
-    LucidePlus,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sagas.html',
 })
 export class Sagas {
+  protected readonly icons = ICONS;
+
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sagaService = inject(SagaService);

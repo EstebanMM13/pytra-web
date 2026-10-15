@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, si
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NavigationStart, Router } from '@angular/router';
-import { LucideSearch } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, filter, map, startWith } from 'rxjs';
 import { Experience, ExperienceStatus } from '../../../core/models/experience.model';
@@ -50,12 +51,14 @@ function normalize(text: string): string {
  */
 @Component({
   selector: 'app-run-form',
-  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, LucideSearch],
+  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './run-form.html',
   styleUrl: './run-form.css',
 })
 export class RunForm implements OnInit {
+  protected readonly icons = ICONS;
+
   readonly request = input.required<RunFormRequest>();
 
   private readonly fb = inject(NonNullableFormBuilder);

@@ -1,70 +1,39 @@
 import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input } from '@angular/core';
-import {
-  LucideArchive,
-  LucideAward,
-  LucideBookOpen,
-  LucideCircleCheck,
-  LucideClock,
-  LucideGlobe,
-  LucideHeart,
-  LucideHourglass,
-  LucideMountain,
-  LucideRepeat,
-  LucideShuffle,
-  LucideSparkles,
-  LucideTarget,
-  LucideThumbsDown,
-  LucideUsers,
-  LucideWifi,
-  LucideZap,
-  LucideCalendar,
-  LucideCrown,
-  LucideDynamicIcon,
-  LucideFlame,
-  LucideGem,
-  LucideIconInput,
-  LucideLayers,
-  LucideLibrary,
-  LucideMedal,
-  LucideMonitor,
-  LucidePlay,
-  LucideStar,
-  LucideTimer,
-  LucideTrophy,
-} from '@lucide/angular';
+import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
+import { ICONS } from '../ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Achievement, AchievementIcon, AchievementTier } from './achievements';
 
-const ICONS: Record<AchievementIcon, LucideIconInput> = {
-  trophy: LucideTrophy,
-  crown: LucideCrown,
-  timer: LucideTimer,
-  play: LucidePlay,
-  flame: LucideFlame,
-  medal: LucideMedal,
-  library: LucideLibrary,
-  archive: LucideArchive,
-  gem: LucideGem,
-  layers: LucideLayers,
-  star: LucideStar,
-  monitor: LucideMonitor,
-  calendar: LucideCalendar,
-  check: LucideCircleCheck,
-  repeat: LucideRepeat,
-  hourglass: LucideHourglass,
-  clock: LucideClock,
-  mountain: LucideMountain,
-  sparkles: LucideSparkles,
-  heart: LucideHeart,
-  thumbsDown: LucideThumbsDown,
-  award: LucideAward,
-  globe: LucideGlobe,
-  zap: LucideZap,
-  users: LucideUsers,
-  wifi: LucideWifi,
-  shuffle: LucideShuffle,
-  target: LucideTarget,
-  bookOpen: LucideBookOpen,
+const BADGE_ICONS: Record<AchievementIcon, LucideIconInput> = {
+  trophy: ICONS.trophy,
+  crown: ICONS.crown,
+  timer: ICONS.timer,
+  play: ICONS.play,
+  flame: ICONS.flame,
+  medal: ICONS.medal,
+  library: ICONS.library,
+  archive: ICONS.archive,
+  gem: ICONS.gem,
+  layers: ICONS.layers,
+  star: ICONS.star,
+  monitor: ICONS.monitor,
+  calendar: ICONS.calendar,
+  check: ICONS.circleCheck,
+  repeat: ICONS.repeat,
+  hourglass: ICONS.hourglass,
+  clock: ICONS.clock,
+  mountain: ICONS.mountain,
+  sparkles: ICONS.sparkles,
+  heart: ICONS.heart,
+  thumbsDown: ICONS.thumbsDown,
+  award: ICONS.award,
+  globe: ICONS.globe,
+  zap: ICONS.zap,
+  users: ICONS.users,
+  wifi: ICONS.wifi,
+  shuffle: ICONS.shuffle,
+  target: ICONS.target,
+  bookOpen: ICONS.bookOpen,
 };
 
 /** Unlocked chip tone per tier (bronze = copper, silver = slate, gold = the app's gold). */
@@ -141,7 +110,7 @@ export class AchievementBadge {
   readonly compact = input(false, { transform: booleanAttribute });
 
   protected readonly a = this.achievement;
-  protected readonly icon = computed(() => ICONS[this.achievement().icon]);
+  protected readonly icon = computed(() => BADGE_ICONS[this.achievement().icon]);
   protected readonly tone = computed(() => TIER_TONE[this.achievement().tier]);
   protected readonly percent = computed(() => Math.round(this.achievement().progress * 100));
   protected readonly shown = computed(() => Math.min(Math.floor(this.achievement().current), this.achievement().target));

@@ -1,4 +1,5 @@
-import { LucideEye, LucideEyeOff } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../../shared/ui/icons';
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, Validators, NonNullableFormBuilder } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -11,10 +12,12 @@ import { ResendVerification } from '../../../shared/resend-verification/resend-v
 
 @Component({
   selector: 'app-login',
-  imports: [AuthShell, ReactiveFormsModule, RouterLink, TranslatePipe, ResendVerification, LucideEye, LucideEyeOff],
+  imports: [AuthShell, ReactiveFormsModule, RouterLink, TranslatePipe, ResendVerification, LucideDynamicIcon],
   templateUrl: './login.html',
 })
 export class Login {
+  protected readonly icons = ICONS;
+
   protected readonly showPassword = signal(false);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly authService = inject(AuthService);

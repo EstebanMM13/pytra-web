@@ -72,7 +72,7 @@
                 [disabled]="syncing() || !s.configured"
                 class="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong disabled:opacity-50 md:flex-none"
               >
-                <svg lucideRefreshCw [size]="14" [class.animate-spin]="syncing()"></svg>
+                <svg [lucideIcon]="icons.refreshCw" [size]="14" [class.animate-spin]="syncing()"></svg>
                 {{ (syncing() ? 'steam.syncing' : 'steam.sync') | translate }}
               </button>
               <button
@@ -115,7 +115,7 @@
         class="flex flex-col gap-3.5 rounded-2xl border border-card-border card-glass p-6 md:max-w-[560px] md:rounded-[14px]"
       >
         <span class="flex size-12 items-center justify-center rounded-xl bg-brand-tint text-brand-lighter" aria-hidden="true">
-          <svg lucideLink [size]="22"></svg>
+          <svg [lucideIcon]="icons.link" [size]="22"></svg>
         </span>
         <h2 class="text-[22px] font-semibold tracking-[-0.01em]">{{ 'steam.linkTitle' | translate }}</h2>
         <p class="text-[15px] leading-normal text-text-3">{{ 'steam.linkText' | translate }}</p>
@@ -249,7 +249,7 @@
         [attr.aria-expanded]="showIgnored()"
         class="flex w-fit items-center gap-2 rounded-md text-[13px] text-muted hover:text-text-2"
       >
-        <svg lucideEyeOff [size]="15"></svg>
+        <svg [lucideIcon]="icons.eyeOff" [size]="15"></svg>
         {{ 'steam.ignoredCount' | translatePlural: ignoredTotal() }}
       </button>
       @if (linkedGamesCount(); as linked) {

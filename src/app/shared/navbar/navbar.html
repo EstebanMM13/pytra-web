@@ -28,7 +28,7 @@
       class="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-[13px] text-faint hover:border-border-strong lg:w-[200px]"
       [attr.aria-label]="'nav.search' | translate"
     >
-      <svg lucideSearch [size]="15" class="shrink-0"></svg>
+      <svg [lucideIcon]="icons.search" [size]="15" class="shrink-0"></svg>
       <span class="hidden lg:inline">{{ 'nav.search' | translate }}</span>
       <kbd class="ml-auto hidden font-mono text-[11px] lg:inline">{{ shortcutLabel }}</kbd>
     </button>
@@ -42,9 +42,9 @@
         aria-haspopup="menu"
         [attr.aria-expanded]="addOpen()"
       >
-        <svg lucidePlus [size]="15"></svg>
+        <svg [lucideIcon]="icons.plus" [size]="15"></svg>
         {{ 'nav.add' | translate }}
-        <svg lucideChevronDown [size]="14" class="transition-transform" [class.rotate-180]="addOpen()"></svg>
+        <svg [lucideIcon]="icons.chevronDown" [size]="14" class="transition-transform" [class.rotate-180]="addOpen()"></svg>
       </button>
       @if (addOpen()) {
         <div
@@ -94,7 +94,7 @@
       class="flex size-10 items-center justify-center rounded-full text-text-2 hover:bg-hover hover:text-text active:bg-hover"
       [attr.aria-label]="'nav.search' | translate"
     >
-      <svg lucideSearch [size]="20"></svg>
+      <svg [lucideIcon]="icons.search" [size]="20"></svg>
     </button>
 
     <div class="relative">
@@ -124,7 +124,7 @@
             (click)="menuOpen.set(false)"
             class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
           >
-            <svg lucideDownload [size]="16" class="text-brand-light"></svg>
+            <svg [lucideIcon]="icons.download" [size]="16" class="text-brand-light"></svg>
             {{ 'nav.steam' | translate }}
           </a>
           <a
@@ -133,7 +133,7 @@
             (click)="menuOpen.set(false)"
             class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
           >
-            <svg lucideUser [size]="16" class="text-brand-light"></svg>
+            <svg [lucideIcon]="icons.user" [size]="16" class="text-brand-light"></svg>
             {{ 'nav.profile' | translate }}
           </a>
           <button
@@ -142,7 +142,7 @@
             (click)="logout()"
             class="flex w-full items-center gap-3 border-t border-divider px-4 py-2.5 text-danger hover:bg-hover"
           >
-            <svg lucideLogOut [size]="16"></svg>
+            <svg [lucideIcon]="icons.logOut" [size]="16"></svg>
             {{ 'nav.logout' | translate }}
           </button>
         </div>
@@ -157,7 +157,7 @@
     role="status"
   >
     <span class="flex min-w-0 items-center gap-1.5 font-medium">
-      <svg lucideEye [size]="14" class="shrink-0" aria-hidden="true"></svg>
+      <svg [lucideIcon]="icons.eye" [size]="14" class="shrink-0" aria-hidden="true"></svg>
       <span class="truncate sm:hidden">{{ 'demo.bannerShort' | translate }}</span>
       <span class="hidden truncate sm:inline">{{ 'demo.banner' | translate }}</span>
     </span>
@@ -190,7 +190,7 @@
       aria-haspopup="menu"
       [attr.aria-expanded]="addOpen()"
     >
-      <svg lucidePlus [size]="26" class="transition-transform" [class.rotate-45]="addOpen()"></svg>
+      <svg [lucideIcon]="icons.plus" [size]="26" class="transition-transform" [class.rotate-45]="addOpen()"></svg>
     </button>
     }
     @if (addOpen()) {

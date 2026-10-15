@@ -1,15 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, effect, untracked } from '@angular/core';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
-import {
-  LucideArrowDownWideNarrow,
-  LucideArrowRight,
-  LucideDownload,
-  LucideLayoutGrid,
-  LucideList,
-  LucidePlus,
-  LucideSearch,
-} from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Dropdown, DropdownOption } from '../../shared/ui/dropdown';
 import { map } from 'rxjs';
@@ -70,18 +63,14 @@ import {
     Skeleton,
     StatusPill,
     GameEditDialog,
-    LucideArrowDownWideNarrow,
-    LucideArrowRight,
-    LucideDownload,
-    LucideLayoutGrid,
-    LucideList,
-    LucidePlus,
-    LucideSearch,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './games.html',
 })
 export class Games {
+  protected readonly icons = ICONS;
+
   private readonly gameService = inject(GameService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

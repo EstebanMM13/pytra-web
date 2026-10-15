@@ -32,7 +32,7 @@
             class="flex items-center gap-2.5 rounded-xl border bg-surface px-3.5 md:rounded-[10px] md:bg-bg"
             [class]="showError('gameId') ? 'border-danger' : 'border-border'"
           >
-            <svg lucideSearch [size]="16" class="shrink-0 text-muted"></svg>
+            <svg [lucideIcon]="icons.search" [size]="16" class="shrink-0 text-muted"></svg>
             <input
               id="run-form-game"
               data-autofocus

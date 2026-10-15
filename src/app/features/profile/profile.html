@@ -46,20 +46,20 @@
         (click)="scrollTo('account')"
         class="flex w-full items-center gap-3 border-b border-border px-3.5 py-[15px] text-left text-[15px]"
       >
-        <svg lucideUser [size]="18" class="text-brand-light"></svg>
+        <svg [lucideIcon]="icons.user" [size]="18" class="text-brand-light"></svg>
         {{ 'profile.sections.account' | translate }}
-        <svg lucideChevronRight [size]="18" class="ml-auto text-faint"></svg>
+        <svg [lucideIcon]="icons.chevronRight" [size]="18" class="ml-auto text-faint"></svg>
       </button>
       }
       <a routerLink="/steam" class="flex items-center gap-3 border-border px-3.5 py-[15px] text-[15px]" [class.border-b]="!isDemo()">
-        <svg lucideGamepad2 [size]="18" class="text-brand-light"></svg>
+        <svg [lucideIcon]="icons.gamepad2" [size]="18" class="text-brand-light"></svg>
         {{ 'nav.steam' | translate }}
         <span class="ml-auto truncate text-[13px] text-muted">
           @if (steamStatus(); as st) {
             {{ (st.linked ? 'profile.steamLinked' : 'profile.steamNotLinked') | translate }}
           }
         </span>
-        <svg lucideChevronRight [size]="18" class="shrink-0 text-faint"></svg>
+        <svg [lucideIcon]="icons.chevronRight" [size]="18" class="shrink-0 text-faint"></svg>
       </a>
       @if (!isDemo()) {
       <button
@@ -67,9 +67,9 @@
         (click)="scrollTo('data')"
         class="flex w-full items-center gap-3 px-3.5 py-[15px] text-left text-[15px]"
       >
-        <svg lucideDownload [size]="18" class="text-brand-light"></svg>
+        <svg [lucideIcon]="icons.download" [size]="18" class="text-brand-light"></svg>
         {{ 'profile.exportData' | translate }}
-        <svg lucideChevronRight [size]="18" class="ml-auto text-faint"></svg>
+        <svg [lucideIcon]="icons.chevronRight" [size]="18" class="ml-auto text-faint"></svg>
       </button>
       }
     </div>
@@ -256,7 +256,7 @@
               class="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border py-2.5 text-[13px] text-text-2 hover:border-border-strong"
             >
               {{ (showAllAchievements() ? 'achievements.showLess' : 'achievements.showAll') | translate: { total: list.length } }}
-              <svg lucideChevronDown [size]="16" class="transition-transform" [class.rotate-180]="showAllAchievements()"></svg>
+              <svg [lucideIcon]="icons.chevronDown" [size]="16" class="transition-transform" [class.rotate-180]="showAllAchievements()"></svg>
             </button>
           </div>
         } @else {
@@ -334,7 +334,7 @@
               (click)="installPrompt.install()"
               class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark"
             >
-              <svg lucideDownload [size]="14"></svg>
+              <svg [lucideIcon]="icons.download" [size]="14"></svg>
               {{ 'profile.installApp' | translate }}
             </button>
           } @else if (installPrompt.showIosHint()) {

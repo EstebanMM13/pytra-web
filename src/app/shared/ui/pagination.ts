@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { LucideChevronLeft, LucideChevronRight } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from './icons';
 import { TranslatePipe } from '@ngx-translate/core';
 
 export type PageSlot = number | 'gap';
@@ -33,7 +34,7 @@ export function pageSlots(current: number, total: number): PageSlot[] {
 /** Compact page selector; the active page uses the brand tint. Hidden when there is a single page. */
 @Component({
   selector: 'app-pagination',
-  imports: [TranslatePipe, LucideChevronLeft, LucideChevronRight],
+  imports: [TranslatePipe, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (total() > 1) {
@@ -45,7 +46,7 @@ export function pageSlots(current: number, total: number): PageSlot[] {
           (click)="go(page() - 1)"
           [attr.aria-label]="'pagination.previous' | translate"
         >
-          <svg lucideChevronLeft [size]="16"></svg>
+          <svg [lucideIcon]="icons.chevronLeft" [size]="16"></svg>
         </button>
         @for (slot of slots(); track $index) {
           @if (slot === 'gap') {
@@ -69,13 +70,15 @@ export function pageSlots(current: number, total: number): PageSlot[] {
           (click)="go(page() + 1)"
           [attr.aria-label]="'pagination.next' | translate"
         >
-          <svg lucideChevronRight [size]="16"></svg>
+          <svg [lucideIcon]="icons.chevronRight" [size]="16"></svg>
         </button>
       </nav>
     }
   `,
 })
 export class Pagination {
+  protected readonly icons = ICONS;
+
   /** 1-based current page. */
   readonly page = input.required<number>();
   readonly total = input.required<number>();

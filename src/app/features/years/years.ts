@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LucideChartColumn, LucidePlus, LucideSparkles, LucideTrendingDown } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, catchError, map, of, switchMap } from 'rxjs';
 import { YearStat, YearSummary } from '../../core/models/stats.model';
@@ -57,15 +58,14 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
     SectionHeader,
     MiniBarChart,
     Skeleton,
-    LucideChartColumn,
-    LucidePlus,
-    LucideSparkles,
-    LucideTrendingDown,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './years.html',
 })
 export class Years {
+  protected readonly icons = ICONS;
+
   private readonly statsService = inject(StatsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

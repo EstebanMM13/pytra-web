@@ -2,20 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  LucideBuilding,
-  LucideCalendar,
-  LucideChevronLeft,
-  LucideClock,
-  LucideDownload,
-  LucideGamepad2,
-  LucideLayers,
-  LucidePencil,
-  LucidePlay,
-  LucidePlus,
-  LucideStar,
-  LucideTrophy,
-} from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Experience } from '../../../core/models/experience.model';
 import { Game } from '../../../core/models/game.model';
@@ -74,19 +62,14 @@ function byRelease(a: Game, b: Game): number {
     StatCard,
     StatusPill,
     GameEditDialog,
-    LucideBuilding,
-    LucideCalendar,
-    LucideChevronLeft,
-    LucideGamepad2,
-    LucideLayers,
-    LucidePencil,
-    LucidePlus,
-    LucideDownload,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-detail.html',
 })
 export class GameDetail {
+  protected readonly icons = ICONS;
+
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -97,7 +80,7 @@ export class GameDetail {
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
 
-  protected readonly icons = { runs: LucidePlay, hours: LucideClock, rating: LucideStar, platinum: LucideTrophy };
+  protected readonly statIcons = { runs: ICONS.play, hours: ICONS.clock, rating: ICONS.star, platinum: ICONS.trophy };
 
   readonly gameId = signal(0);
   readonly game = signal<Game | null>(null);

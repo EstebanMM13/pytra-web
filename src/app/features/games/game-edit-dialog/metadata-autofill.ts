@@ -13,7 +13,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { LucideLoaderCircle, LucideSearch, LucideX } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../../shared/ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
   Observable,
@@ -56,7 +57,7 @@ type SearchState = 'idle' | 'loading' | 'ready' | 'error';
  */
 @Component({
   selector: 'app-metadata-autofill',
-  imports: [TranslatePipe, LucideSearch, LucideX, LucideLoaderCircle, Segmented, GameCover],
+  imports: [TranslatePipe, Segmented, GameCover, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-col gap-2 rounded-xl border border-border bg-bg p-3">
@@ -73,7 +74,7 @@ type SearchState = 'idle' | 'loading' | 'ready' | 'error';
       }
       <div class="flex items-center gap-2">
         <div class="flex min-w-0 flex-1 items-center gap-2.5 rounded-[10px] border border-border bg-surface px-3">
-          <svg lucideSearch [size]="16" class="shrink-0 text-muted"></svg>
+          <svg [lucideIcon]="icons.search" [size]="16" class="shrink-0 text-muted"></svg>
           <input
             #queryInput
             id="autofill-query"
@@ -100,7 +101,7 @@ type SearchState = 'idle' | 'loading' | 'ready' | 'error';
           [attr.aria-label]="'game.autofill.close' | translate"
           class="grid size-10 shrink-0 place-items-center rounded-lg text-muted hover:text-text"
         >
-          <svg lucideX [size]="18"></svg>
+          <svg [lucideIcon]="icons.x" [size]="18"></svg>
         </button>
       </div>
 
@@ -147,7 +148,7 @@ type SearchState = 'idle' | 'loading' | 'ready' | 'error';
                 }
               </span>
               @if (loadingId() === result.id) {
-                <svg lucideLoaderCircle [size]="16" class="shrink-0 animate-spin text-muted"></svg>
+                <svg [lucideIcon]="icons.loaderCircle" [size]="16" class="shrink-0 animate-spin text-muted"></svg>
               }
             </li>
           }
@@ -157,6 +158,8 @@ type SearchState = 'idle' | 'loading' | 'ready' | 'error';
   `,
 })
 export class MetadataAutofill implements OnInit {
+  protected readonly icons = ICONS;
+
   /** Whether the API offers IGDB; when it does it is the default source and a switch shows Steam too. */
   readonly igdbEnabled = input(false);
   /** Metadata of the picked game, ready to prefill the form. */

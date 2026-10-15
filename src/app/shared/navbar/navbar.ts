@@ -1,22 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import {
-  LucideChartColumn,
-  LucideChevronDown,
-  LucidePlay,
-  LucideDynamicIcon,
-  LucideGamepad2,
-  LucideHouse,
-  LucideIconInput,
-  LucideLayers,
-  LucideLogOut,
-  LucidePlus,
-  LucideSearch,
-  LucideUser,
-  LucideDownload,
-  LucideEye,
-} from '@lucide/angular';
+import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
+import { ICONS } from '../ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
@@ -32,11 +18,11 @@ interface NavTab {
 }
 
 const WEB_TABS: NavTab[] = [
-  { path: '/dashboard', labelKey: 'nav.home', icon: LucideHouse },
-  { path: '/games', labelKey: 'nav.games', icon: LucideGamepad2 },
-  { path: '/sagas', labelKey: 'nav.sagas', icon: LucideLayers },
-  { path: '/years', labelKey: 'nav.years', icon: LucideChartColumn },
-  { path: '/steam', labelKey: 'nav.steam', icon: LucideDownload },
+  { path: '/dashboard', labelKey: 'nav.home', icon: ICONS.house },
+  { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
+  { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.layers },
+  { path: '/years', labelKey: 'nav.years', icon: ICONS.chartColumn },
+  { path: '/steam', labelKey: 'nav.steam', icon: ICONS.download },
 ];
 
 /**
@@ -55,13 +41,6 @@ const WEB_TABS: NavTab[] = [
     PytraMark,
     Avatar,
     LucideDynamicIcon,
-    LucidePlus,
-    LucideChevronDown,
-    LucideSearch,
-    LucideUser,
-    LucideLogOut,
-    LucideDownload,
-    LucideEye,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './navbar.html',
@@ -71,6 +50,8 @@ const WEB_TABS: NavTab[] = [
   },
 })
 export class Navbar {
+  protected readonly icons = ICONS;
+
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly runFormLauncher = inject(RunFormLauncher);
@@ -93,9 +74,9 @@ export class Navbar {
   protected readonly menuOpen = signal(false);
   protected readonly addOpen = signal(false);
   protected readonly addItems: { kind: 'run' | 'game' | 'saga'; labelKey: string; icon: LucideIconInput }[] = [
-    { kind: 'run', labelKey: 'nav.addRun', icon: LucidePlay },
-    { kind: 'game', labelKey: 'nav.addGame', icon: LucideGamepad2 },
-    { kind: 'saga', labelKey: 'nav.addSaga', icon: LucideLayers },
+    { kind: 'run', labelKey: 'nav.addRun', icon: ICONS.play },
+    { kind: 'game', labelKey: 'nav.addGame', icon: ICONS.gamepad2 },
+    { kind: 'saga', labelKey: 'nav.addSaga', icon: ICONS.layers },
   ];
 
   protected onGlobalKeydown(event: KeyboardEvent): void {

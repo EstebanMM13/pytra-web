@@ -19,7 +19,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { LucidePlus, LucideTrash2, LucideWandSparkles } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../../shared/ui/icons';
 import { map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { GenreNamePipe } from '../../../shared/pipes/genre-name.pipe';
@@ -65,15 +66,15 @@ function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors |
     Segmented,
     GameCover,
     MetadataAutofill,
-    LucideTrash2,
-    LucideWandSparkles,
-    LucidePlus,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-edit-dialog.html',
   styleUrl: './game-edit-dialog.css',
 })
 export class GameEditDialog implements OnInit {
+  protected readonly icons = ICONS;
+
   /** Game to edit; `null` opens the dialog in create mode. */
   readonly game = input<Game | null>(null);
   readonly saved = output<Game>();

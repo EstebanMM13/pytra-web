@@ -6,7 +6,7 @@
     <div
       class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-14 text-center"
     >
-      <svg lucideChartColumn [size]="28" class="text-brand-light"></svg>
+      <svg [lucideIcon]="icons.chartColumn" [size]="28" class="text-brand-light"></svg>
       <p class="text-[15px] font-medium text-text-2">{{ 'years.empty.title' | translate }}</p>
       <p class="max-w-sm text-sm text-muted">{{ 'years.empty.text' | translate }}</p>
       <button
@@ -14,7 +14,7 @@
         (click)="newRun()"
         class="mt-2 flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
       >
-        <svg lucidePlus [size]="15"></svg>
+        <svg [lucideIcon]="icons.plus" [size]="15"></svg>
         {{ 'nav.newRun' | translate }}
       </button>
     </div>
@@ -127,7 +127,7 @@
             <h2
               class="flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-success uppercase md:text-[13px]"
             >
-              <svg lucideSparkles [size]="15" class="hidden md:block"></svg>
+              <svg [lucideIcon]="icons.sparkles" [size]="15" class="hidden md:block"></svg>
               {{ 'years.surprises' | translate }}
             </h2>
             <div class="flex flex-1 flex-col justify-evenly gap-2 md:gap-2.5">
@@ -151,7 +151,7 @@
             <h2
               class="flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-danger uppercase md:text-[13px]"
             >
-              <svg lucideTrendingDown [size]="15" class="hidden md:block"></svg>
+              <svg [lucideIcon]="icons.trendingDown" [size]="15" class="hidden md:block"></svg>
               {{ 'years.disappointments' | translate }}
             </h2>
             <div class="flex flex-1 flex-col justify-evenly gap-2 md:gap-2.5">

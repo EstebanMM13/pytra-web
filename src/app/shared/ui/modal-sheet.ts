@@ -11,7 +11,8 @@ import {
   output,
   viewChild,
 } from '@angular/core';
-import { LucideX } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from './icons';
 import { TranslatePipe } from '@ngx-translate/core';
 
 const FOCUSABLE =
@@ -25,7 +26,7 @@ const FOCUSABLE =
  */
 @Component({
   selector: 'app-modal-sheet',
-  imports: [TranslatePipe, LucideX],
+  imports: [TranslatePipe, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(document:keydown.escape)': 'onEscape($event)' },
   template: `
@@ -66,7 +67,7 @@ const FOCUSABLE =
             class="shrink-0 rounded-md p-1 text-muted hover:text-text disabled:opacity-50"
             [attr.aria-label]="'common.close' | translate"
           >
-            <svg lucideX [size]="20"></svg>
+            <svg [lucideIcon]="icons.x" [size]="20"></svg>
           </button>
         </header>
 
@@ -98,6 +99,8 @@ const FOCUSABLE =
   `,
 })
 export class ModalSheet {
+  protected readonly icons = ICONS;
+
   readonly title = input.required<string>();
   /** Primary button text on web (mobile always shows "Guardar"). */
   readonly saveLabel = input.required<string>();

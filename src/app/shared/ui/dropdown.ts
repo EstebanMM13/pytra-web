@@ -8,7 +8,8 @@ import {
   model,
   signal,
 } from '@angular/core';
-import { LucideCheck, LucideChevronDown } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from './icons';
 import { TranslatePipe } from '@ngx-translate/core';
 
 export interface DropdownOption<T extends string = string> {
@@ -23,7 +24,7 @@ export interface DropdownOption<T extends string = string> {
  */
 @Component({
   selector: 'app-dropdown',
-  imports: [LucideCheck, LucideChevronDown, TranslatePipe],
+  imports: [TranslatePipe, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'relative inline-block',
@@ -45,7 +46,7 @@ export interface DropdownOption<T extends string = string> {
         <span class="text-muted">{{ prefix() }}</span>
       }
       <span class="font-medium" [class]="highlighted() ? 'text-brand-lighter' : 'text-text-2'">{{ selectedLabel() | translate }}</span>
-      <svg lucideChevronDown [size]="14" class="shrink-0 transition-transform" [class.rotate-180]="open()"></svg>
+      <svg [lucideIcon]="icons.chevronDown" [size]="14" class="shrink-0 transition-transform" [class.rotate-180]="open()"></svg>
     </button>
 
     @if (open()) {
@@ -72,7 +73,7 @@ export interface DropdownOption<T extends string = string> {
           >
             {{ option.label | translate }}
             @if (option.value === value()) {
-              <svg lucideCheck [size]="14" class="shrink-0"></svg>
+              <svg [lucideIcon]="icons.check" [size]="14" class="shrink-0"></svg>
             }
           </li>
         }
@@ -81,6 +82,8 @@ export interface DropdownOption<T extends string = string> {
   `,
 })
 export class Dropdown<T extends string = string> {
+  protected readonly icons = ICONS;
+
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly options = input.required<readonly DropdownOption<T>[]>();

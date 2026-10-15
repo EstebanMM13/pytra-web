@@ -1,14 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  LucideCalendar,
-  LucideChevronLeft,
-  LucideMinus,
-  LucidePencil,
-  LucidePlus,
-  LucideTrash2,
-} from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Experience } from '../../../core/models/experience.model';
 import { Game } from '../../../core/models/game.model';
@@ -56,17 +50,14 @@ export function ratingRank(rating: number, topRatings: readonly number[], window
     Skeleton,
     StatCard,
     StatusPill,
-    LucideChevronLeft,
-    LucidePencil,
-    LucideTrash2,
-    LucidePlus,
-    LucideMinus,
-    LucideCalendar,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './experience-detail.html',
 })
 export class ExperienceDetail {
+  protected readonly icons = ICONS;
+
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly experienceService = inject(ExperienceService);

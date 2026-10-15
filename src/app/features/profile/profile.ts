@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LucideChevronDown, LucideChevronRight, LucideDownload, LucideGamepad2, LucideUser } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, forkJoin, of } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
@@ -60,16 +61,14 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
     AvatarPicker,
     DeleteAccountDialog,
     AchievementBadge,
-    LucideUser,
-    LucideGamepad2,
-    LucideDownload,
-    LucideChevronRight,
-    LucideChevronDown,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile.html',
 })
 export class Profile {
+  protected readonly icons = ICONS;
+
   // Read-only demo: no account changes, avatar change, export or deletion (the API rejects them all).
   protected readonly isDemo = inject(AuthService).isDemo;
   protected readonly showAccountSection = computed(() => !this.isDemo());

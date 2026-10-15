@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, signal } from '@angular/core';
-import { LucideChevronDown } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from './icons';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CollapseBreakpoint, CollapseStateService } from '../../core/services/collapse-state.service';
 
@@ -19,7 +20,7 @@ let nextRegionId = 0;
 @Component({
   selector: 'app-section-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideChevronDown, TranslatePipe],
+  imports: [TranslatePipe, LucideDynamicIcon],
   host: { class: 'flex items-center gap-3' },
   template: `
     <h2 class="shrink-0 text-xs font-semibold tracking-[0.08em] text-gold uppercase md:text-[13px]">
@@ -37,7 +38,7 @@ let nextRegionId = 0;
         [attr.aria-label]="(collapsed() ? 'common.expandSection' : 'common.collapseSection') | translate: { name: label() }"
       >
         <svg
-          lucideChevronDown
+          [lucideIcon]="icons.chevronDown"
           [size]="18"
           class="transition-transform duration-200 motion-reduce:transition-none"
           [class.-rotate-90]="collapsed()"
@@ -48,6 +49,8 @@ let nextRegionId = 0;
   `,
 })
 export class SectionHeader {
+  protected readonly icons = ICONS;
+
   readonly label = input.required<string>();
   /** Stable "screen.card" key; enables the collapse toggle when set. */
   readonly collapseKey = input<string>();

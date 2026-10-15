@@ -57,9 +57,9 @@
             [attr.aria-pressed]="showPassword()"
           >
             @if (showPassword()) {
-              <svg lucideEyeOff [size]="18"></svg>
+              <svg [lucideIcon]="icons.eyeOff" [size]="18"></svg>
             } @else {
-              <svg lucideEye [size]="18"></svg>
+              <svg [lucideIcon]="icons.eye" [size]="18"></svg>
             }
           </button>
         </div>

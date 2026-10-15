@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { LucideTrash2 } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Saga } from '../../core/models/saga.model';
 import { SagaService } from '../../core/services/saga.service';
@@ -10,7 +11,7 @@ import { ModalSheet } from '../../shared/ui/modal-sheet';
 /** Create (no `saga`) or rename/delete a saga in a modal / mobile sheet. */
 @Component({
   selector: 'app-saga-dialog',
-  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, LucideTrash2],
+  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-modal-sheet
@@ -46,7 +47,7 @@ import { ModalSheet } from '../../shared/ui/modal-sheet';
               [disabled]="deleting()"
               class="flex items-center gap-2 rounded-md text-[13px] font-medium text-danger hover:underline disabled:opacity-50"
             >
-              <svg lucideTrash2 [size]="15"></svg>
+              <svg [lucideIcon]="icons.trash" [size]="15"></svg>
               {{ 'sagas.delete' | translate }}
             </button>
           </div>
@@ -56,6 +57,8 @@ import { ModalSheet } from '../../shared/ui/modal-sheet';
   `,
 })
 export class SagaDialog implements OnInit {
+  protected readonly icons = ICONS;
+
   readonly saga = input<Saga | null>(null);
   readonly saved = output<Saga>();
   readonly deleted = output<number>();

@@ -10,7 +10,7 @@
     (click)="$event.stopPropagation()"
   >
     <div class="flex shrink-0 items-center gap-3 border-b border-divider px-4">
-      <svg lucideSearch [size]="18" class="shrink-0 text-muted"></svg>
+      <svg [lucideIcon]="icons.search" [size]="18" class="shrink-0 text-muted"></svg>
       <input
         #searchInput
         type="search"
@@ -33,7 +33,7 @@
         class="-mr-1.5 flex size-9 items-center justify-center rounded-md text-muted hover:text-text"
         [attr.aria-label]="'search.close' | translate"
       >
-        <svg lucideX [size]="18"></svg>
+        <svg [lucideIcon]="icons.x" [size]="18"></svg>
       </button>
     </div>
 

@@ -19,7 +19,7 @@
         class="flex items-center gap-1 rounded-lg p-2 text-[13px] font-medium text-brand-light hover:text-brand-lighter md:border md:border-border md:px-2.5 md:py-1.5 md:text-text-2 md:hover:border-border-strong md:hover:text-text"
         [attr.aria-label]="'sagas.new' | translate"
       >
-        <svg lucidePlus [size]="18" class="md:size-[15px]"></svg>
+        <svg [lucideIcon]="icons.plus" [size]="18" class="md:size-[15px]"></svg>
         <span class="hidden md:inline">{{ 'sagas.newShort' | translate }}</span>
       </button>
     </div>
@@ -109,7 +109,7 @@
       <!-- Mobile top bar -->
       <div class="flex items-center justify-between text-text-3 md:hidden">
         <a routerLink="/sagas" class="-ml-1 rounded-lg p-1 hover:text-text" [attr.aria-label]="'sagas.back' | translate">
-          <svg lucideChevronLeft [size]="24"></svg>
+          <svg [lucideIcon]="icons.chevronLeft" [size]="24"></svg>
         </a>
         <button
           type="button"
@@ -117,7 +117,7 @@
           class="rounded-lg p-2 hover:text-text"
           [attr.aria-label]="'sagas.edit' | translate"
         >
-          <svg lucidePencil [size]="20"></svg>
+          <svg [lucideIcon]="icons.pencil" [size]="20"></svg>
         </button>
       </div>
 
@@ -135,7 +135,7 @@
           (click)="dialog.set(s.saga)"
           class="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong md:flex"
         >
-          <svg lucidePencil [size]="14"></svg>
+          <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
           {{ 'sagas.edit' | translate }}
         </button>
       </div>
@@ -199,7 +199,7 @@
       </section>
     } @else if (routeId() !== null) {
       <a routerLink="/sagas" class="flex w-fit items-center gap-1.5 text-[13px] text-muted hover:text-text md:hidden">
-        <svg lucideChevronLeft [size]="16"></svg>
+        <svg [lucideIcon]="icons.chevronLeft" [size]="16"></svg>
         {{ 'sagas.back' | translate }}
       </a>
       <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted">

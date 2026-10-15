@@ -28,7 +28,7 @@
             class="mt-2 inline-flex max-w-full items-center gap-2 rounded-full border border-brand/30 bg-brand-tint/60 px-3 py-1.5 text-sm font-medium text-text-2 md:mt-3"
             [attr.title]="tagline().key | translatePlural: tagline().count : tagline().params"
           >
-            <svg lucideSparkles [size]="14" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+            <svg [lucideIcon]="icons.sparkles" [size]="14" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
             <span class="truncate">{{ tagline().key | translatePlural: tagline().count : tagline().params }}</span>
           </p>
         }
@@ -41,9 +41,9 @@
         routerLink="/steam"
         class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-[13px] text-gold-tint-fg hover:opacity-90 md:self-auto"
       >
-        <svg lucideDownload [size]="14"></svg>
+        <svg [lucideIcon]="icons.download" [size]="14"></svg>
         {{ 'dashboard.steamPending' | translatePlural: steamPendingCount() }}
-        <svg lucideArrowRight [size]="14"></svg>
+        <svg [lucideIcon]="icons.arrowRight" [size]="14"></svg>
       </a>
     }
   </div>
@@ -54,7 +54,7 @@
       role="region"
       [attr.aria-label]="'dashboard.install.title' | translate"
     >
-      <svg lucideDownload [size]="16" class="shrink-0 text-brand-light"></svg>
+      <svg [lucideIcon]="icons.download" [size]="16" class="shrink-0 text-brand-light"></svg>
       <p class="min-w-0 flex-1 text-text-3">{{ 'dashboard.install.text' | translate }}</p>
       <button
         type="button"
@@ -69,7 +69,7 @@
         class="shrink-0 rounded-md p-1 text-faint hover:bg-hover hover:text-text"
         [attr.aria-label]="'dashboard.install.dismiss' | translate"
       >
-        <svg lucideX [size]="16"></svg>
+        <svg [lucideIcon]="icons.x" [size]="16"></svg>
       </button>
     </div>
   }
@@ -87,7 +87,7 @@
       <ol class="mt-5 flex flex-col gap-2.5">
         <li>
           <a routerLink="/steam" class="hover-lift flex items-center gap-3.5 rounded-xl border border-border bg-bg p-3.5 hover:bg-hover">
-            <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: icons.steam }" />
+            <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: statIcons.steam }" />
             <ng-container *ngTemplateOutlet="stepText; context: { title: 'dashboard.onboarding.steam', hint: 'dashboard.onboarding.steamHint' }" />
           </a>
         </li>
@@ -97,7 +97,7 @@
             [queryParams]="{ create: 1 }"
             class="hover-lift flex items-center gap-3.5 rounded-xl border border-border bg-bg p-3.5 hover:bg-hover"
           >
-            <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: icons.addGame }" />
+            <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: statIcons.addGame }" />
             <ng-container *ngTemplateOutlet="stepText; context: { title: 'dashboard.onboarding.addGame', hint: 'dashboard.onboarding.addGameHint' }" />
           </a>
         </li>
@@ -107,7 +107,7 @@
             (click)="newRun()"
             class="hover-lift flex w-full items-center gap-3.5 rounded-xl border border-border bg-bg p-3.5 text-left hover:bg-hover"
           >
-            <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: icons.runs }" />
+            <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: statIcons.runs }" />
             <ng-container *ngTemplateOutlet="stepText; context: { title: 'dashboard.onboarding.firstRun', hint: 'dashboard.onboarding.firstRunHint' }" />
           </button>
         </li>
@@ -117,24 +117,24 @@
     <!-- Stats: same 6 cards everywhere (3 x 2 on mobile and tablet, one row on desktop) -->
     <section class="grid grid-cols-3 gap-2 md:gap-3 lg:grid-cols-6">
       @if (summary(); as s) {
-        <app-stat-card [icon]="icons.games" [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
-        <app-stat-card [icon]="icons.sagas" [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
-        <app-stat-card [icon]="icons.runs" [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" [trend]="trends().runs" />
+        <app-stat-card [icon]="statIcons.games" [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
+        <app-stat-card [icon]="statIcons.sagas" [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
+        <app-stat-card [icon]="statIcons.runs" [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" [trend]="trends().runs" />
         <app-stat-card
-          [icon]="icons.single"
+          [icon]="statIcons.single"
           [label]="'dashboard.stats.singleHours' | translate"
           [shortLabel]="'dashboard.stats.singleHoursShort' | translate"
           [value]="s.totalSingleplayerHours | hours"
           [trend]="trends().hours"
         />
         <app-stat-card
-          [icon]="icons.online"
+          [icon]="statIcons.online"
           [label]="'dashboard.stats.onlineHours' | translate"
           [shortLabel]="'dashboard.stats.onlineHoursShort' | translate"
           [value]="s.totalOnlineHours | hours"
         />
         <app-stat-card
-          [icon]="icons.rating"
+          [icon]="statIcons.rating"
           [label]="'dashboard.stats.avgRating' | translate"
           [shortLabel]="'dashboard.stats.avgRatingShort' | translate"
           [value]="s.averageRating | rating"
@@ -156,7 +156,7 @@
         <app-section-header collapseKey="dashboard.achievements" class="mb-3" [label]="'dashboard.achievements' | translate">
           <a routerLink="/profile" fragment="profile-achievements" class="flex shrink-0 items-center gap-1 text-[13px] text-brand-light hover:underline">
             {{ 'dashboard.achievementsAll' | translate }}
-            <svg lucideArrowRight [size]="14" aria-hidden="true"></svg>
+            <svg [lucideIcon]="icons.arrowRight" [size]="14" aria-hidden="true"></svg>
           </a>
         </app-section-header>
         <ul class="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -379,5 +379,5 @@
     <span class="block text-sm font-medium text-text">{{ title | translate }}</span>
     <span class="mt-0.5 block text-[13px] text-muted">{{ hint | translate }}</span>
   </span>
-  <svg lucideArrowRight [size]="16" class="shrink-0 text-faint" aria-hidden="true"></svg>
+  <svg [lucideIcon]="icons.arrowRight" [size]="16" class="shrink-0 text-faint" aria-hidden="true"></svg>
 </ng-template>

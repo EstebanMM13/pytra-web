@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LucideEyeOff, LucideLink, LucideRefreshCw } from '@lucide/angular';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Game } from '../../core/models/game.model';
 import { SteamIgnoredApp, SteamPendingGame, SteamStatus, SteamSyncResult } from '../../core/models/steam.model';
@@ -42,14 +43,14 @@ import {
     Skeleton,
     SteamConfirmDialog,
     GameCover,
-    LucideEyeOff,
-    LucideLink,
-    LucideRefreshCw,
+    LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './steam.html',
 })
 export class Steam {
+  protected readonly icons = ICONS;
+
   private readonly steamService = inject(SteamService);
   private readonly experienceService = inject(ExperienceService);
   private readonly nativeOAuth = inject(NativeOAuthService);

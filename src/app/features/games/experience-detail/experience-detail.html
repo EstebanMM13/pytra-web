@@ -9,7 +9,7 @@
       [routerLink]="['/games', gameId()]"
       class="flex min-w-0 items-center gap-1.5 rounded-md text-[13px] text-muted hover:text-text"
     >
-      <svg lucideChevronLeft [size]="16" class="shrink-0"></svg>
+      <svg [lucideIcon]="icons.chevronLeft" [size]="16" class="shrink-0"></svg>
       <span class="truncate">{{ game()?.name ?? ('game.breadcrumb' | translate) }}</span>
     </a>
     @if (experience()) {
@@ -21,7 +21,7 @@
           class="rounded-lg p-2 hover:text-danger"
           [attr.aria-label]="'run.delete' | translate"
         >
-          <svg lucideTrash2 [size]="19"></svg>
+          <svg [lucideIcon]="icons.trash" [size]="19"></svg>
         </button>
         <button
           type="button"
@@ -29,7 +29,7 @@
           class="rounded-lg p-2 hover:text-text"
           [attr.aria-label]="'run.edit' | translate"
         >
-          <svg lucidePencil [size]="20"></svg>
+          <svg [lucideIcon]="icons.pencil" [size]="20"></svg>
         </button>
       </div>
     }
@@ -84,7 +84,7 @@
           [disabled]="deleting()"
           class="flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong hover:text-danger disabled:opacity-60"
         >
-          <svg lucideTrash2 [size]="14"></svg>
+          <svg [lucideIcon]="icons.trash" [size]="14"></svg>
           {{ 'run.delete' | translate }}
         </button>
         <button
@@ -92,7 +92,7 @@
           (click)="edit()"
           class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
         >
-          <svg lucidePencil [size]="14"></svg>
+          <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
           {{ 'run.edit' | translate }}
         </button>
       </div>
@@ -115,7 +115,7 @@
       <div
         class="flex items-center gap-2.5 rounded-xl border border-border px-3.5 py-3 font-mono text-[13px] text-text-3 md:hidden"
       >
-        <svg lucideCalendar [size]="16" class="shrink-0 text-brand-light"></svg>
+        <svg [lucideIcon]="icons.calendar" [size]="16" class="shrink-0 text-brand-light"></svg>
         {{ date(e.startDate) }}
         <span class="h-px flex-1 bg-border" aria-hidden="true"></span>
         {{ date(e.endDate) }}
@@ -146,7 +146,7 @@
               <ul class="flex flex-col gap-2.5 text-sm wrap-anywhere text-text-2">
                 @for (item of pros(); track $index) {
                   <li class="flex gap-2.5">
-                    <svg lucidePlus [size]="16" class="mt-0.5 shrink-0 text-success"></svg>{{ item }}
+                    <svg [lucideIcon]="icons.plus" [size]="16" class="mt-0.5 shrink-0 text-success"></svg>{{ item }}
                   </li>
                 } @empty {
                   <li class="text-faint">—</li>
@@ -160,7 +160,7 @@
               <ul class="flex flex-col gap-2.5 text-sm wrap-anywhere text-text-2">
                 @for (item of cons(); track $index) {
                   <li class="flex gap-2.5">
-                    <svg lucideMinus [size]="16" class="mt-0.5 shrink-0 text-danger"></svg>{{ item }}
+                    <svg [lucideIcon]="icons.minus" [size]="16" class="mt-0.5 shrink-0 text-danger"></svg>{{ item }}
                   </li>
                 } @empty {
                   <li class="text-faint">—</li>
@@ -174,12 +174,12 @@
           <ul class="flex flex-col gap-2 text-sm wrap-anywhere text-text-2 md:hidden">
             @for (item of pros(); track $index) {
               <li class="flex gap-2.5">
-                <svg lucidePlus [size]="16" class="mt-0.5 shrink-0 text-success"></svg>{{ item }}
+                <svg [lucideIcon]="icons.plus" [size]="16" class="mt-0.5 shrink-0 text-success"></svg>{{ item }}
               </li>
             }
             @for (item of cons(); track $index) {
               <li class="flex gap-2.5">
-                <svg lucideMinus [size]="16" class="mt-0.5 shrink-0 text-danger"></svg>{{ item }}
+                <svg [lucideIcon]="icons.minus" [size]="16" class="mt-0.5 shrink-0 text-danger"></svg>{{ item }}
               </li>
             }
           </ul>
