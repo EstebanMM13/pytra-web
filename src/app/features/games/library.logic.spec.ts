@@ -15,6 +15,7 @@ import {
   libraryStatusLine,
   panelFilterCount,
   parseIdList,
+  pruneIds,
   serializeIdList,
   matchesStatus,
   paginate,
@@ -221,6 +222,14 @@ describe('library logic', () => {
       expect(serializeIdList([])).toBeNull();
       expect(parseIdList(serializeIdList([]))).toEqual([]);
     });
+  });
+});
+
+describe('pruneIds', () => {
+  it('drops filter ids the library does not have, keeping the order', () => {
+    expect(pruneIds([999, 3, 7], [7, 3])).toEqual([3, 7]);
+    expect(pruneIds(['14', '2'], ['2'])).toEqual(['2']);
+    expect(pruneIds([5], [])).toEqual([]);
   });
 });
 

@@ -258,6 +258,15 @@ export function parseIdList(value: string | null): number[] {
   return [...new Set(ids)].slice(0, MAX_FILTER_IDS);
 }
 
+/**
+ * Drops filter ids the library does not have (a stale `?genre=999` from an old link or a deleted
+ * genre), so they neither empty the list nor count as active filters. Keeps the order.
+ */
+export function pruneIds<T extends number | string>(ids: readonly T[], known: Iterable<T>): T[] {
+  const valid = new Set(known);
+  return ids.filter((id) => valid.has(id));
+}
+
 /** URL form of an id list; null (param removed) when empty. */
 export function serializeIdList(ids: readonly (number | string)[]): string | null {
   return ids.length ? ids.join(',') : null;

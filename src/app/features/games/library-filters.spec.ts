@@ -75,4 +75,43 @@ describe('LibraryFilters', () => {
     fixture.detectChanges();
     expect(el.querySelector('[role="dialog"]')).toBeNull();
   });
+
+  it('moves focus into the panel, locks page scroll on phones and gives focus back on close', async () => {
+    const { fixture, el, trigger, button } = setup();
+    document.body.appendChild(el);
+    trigger.focus();
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const dialog = el.querySelector('[role="dialog"]') as HTMLElement;
+    // jsdom has no matchMedia: the component treats the viewport as a phone.
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    expect(document.body.style.overflow).toBe('hidden');
+    expect(dialog.contains(document.activeElement)).toBe(true);
+
+    button('library.filters.done').click();
+    fixture.detectChanges();
+    expect(el.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.body.style.overflow).toBe('');
+    expect(document.activeElement).toBe(trigger);
+    el.remove();
+  });
+
+  it('keeps Tab inside the sheet on phones', async () => {
+    const { fixture, el, trigger } = setup();
+    document.body.appendChild(el);
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const dialog = el.querySelector('[role="dialog"]') as HTMLElement;
+    const buttons = [...dialog.querySelectorAll('button')];
+    buttons.at(-1)!.focus();
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true, bubbles: true });
+    buttons.at(-1)!.dispatchEvent(tab);
+    expect(tab.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(buttons[0]);
+    fixture.destroy();
+    expect(document.body.style.overflow).toBe('');
+    el.remove();
+  });
 });

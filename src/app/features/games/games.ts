@@ -47,6 +47,7 @@ import {
   parsePage,
   parseSort,
   parseStatusFilter,
+  pruneIds,
   serializeIdList,
 } from './library.logic';
 import { LibraryFilters } from './library-filters';
@@ -106,7 +107,8 @@ export class Games {
   protected readonly views: readonly LibraryView[] = ['list', 'grid'];
   protected readonly view = signal<LibraryView>(readLibraryView());
 
-  protected readonly query = toSignal(
+  /** Filters exactly as in the URL. */
+  private readonly urlQuery = toSignal(
     this.route.queryParamMap.pipe(
       map(
         (params) =>
@@ -125,6 +127,19 @@ export class Games {
   );
 
   protected readonly loading = computed(() => this.allGames() === null);
+
+  /** The URL filters, minus platform / genre ids the loaded library does not have. */
+  protected readonly query = computed(() => {
+    const query = this.urlQuery();
+    if (this.loading()) {
+      return query;
+    }
+    return {
+      ...query,
+      platforms: pruneIds(query.platforms, this.platforms().map((p) => String(p.id))),
+      genres: pruneIds(query.genres, this.genreOptions().map((g) => g.id)),
+    };
+  });
   protected readonly libraryGames = computed(() => (this.allGames() ?? []).filter(isLibraryGame));
   protected readonly pendingReviewCount = computed(
     () => (this.allGames() ?? []).filter((g) => !isLibraryGame(g)).length,
@@ -180,6 +195,20 @@ export class Games {
       }
     });
     this.load();
+
+    // Unknown platform / genre ids (stale links): drop them from the URL too.
+    effect(() => {
+      if (this.loading()) {
+        return;
+      }
+      const url = this.urlQuery();
+      const { platforms, genres } = this.query();
+      if (platforms.length !== url.platforms.length || genres.length !== url.genres.length) {
+        untracked(() =>
+          this.updateQuery({ platform: serializeIdList(platforms), genre: serializeIdList(genres) }),
+        );
+      }
+    });
 
     // `?page=` beyond the last page (or after filtering): rewrite the URL to the page shown.
     effect(() => {

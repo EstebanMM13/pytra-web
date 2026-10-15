@@ -1,4 +1,19 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DOCUMENT,
+  DestroyRef,
+  ElementRef,
+  Injector,
+  afterNextRender,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { CollapseStateService } from '../../core/services/collapse-state.service';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
 import { PlatformRef } from '../../core/models/platform.model';
@@ -19,12 +34,13 @@ import { GAME_CATEGORIES, LibraryCategoryFilter } from './library.logic';
   host: {
     class: 'relative block',
     '(document:click)': 'onDocumentClick($event)',
-    '(document:keydown.escape)': 'close()',
+    '(document:keydown.escape)': 'onEscape()',
   },
   template: `
     <button
+      #trigger
       type="button"
-      (click)="open.set(!open())"
+      (click)="toggle()"
       class="flex h-full items-center gap-2 rounded-xl border px-3.5 py-3 text-[13px] font-medium md:rounded-lg md:px-3 md:py-[9px]"
       [class]="count() ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border bg-surface text-text-2 hover:border-border-strong'"
       aria-haspopup="dialog"
@@ -43,9 +59,13 @@ import { GAME_CATEGORIES, LibraryCategoryFilter } from './library.logic';
     @if (open()) {
       <div class="fixed inset-0 z-40 bg-black/50 md:hidden" (click)="close()" aria-hidden="true"></div>
       <div
+        #panel
         role="dialog"
+        tabindex="-1"
+        [attr.aria-modal]="mobile() || null"
+        (keydown)="trapFocus($event)"
         [attr.aria-label]="'library.filters.title' | translate"
-        class="fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] animate-modal-in flex-col overflow-y-auto rounded-t-2xl border-t border-border bg-surface px-5 pt-4 pb-[max(env(safe-area-inset-bottom),20px)] md:absolute md:inset-x-auto md:top-full md:right-0 md:bottom-auto md:mt-2 md:max-h-[70vh] md:w-[380px] md:rounded-xl md:border md:p-4 md:shadow-[0_12px_32px_#0006]"
+        class="fixed inset-x-0 bottom-0 z-50 flex outline-none max-h-[85dvh] animate-modal-in flex-col overflow-y-auto rounded-t-2xl border-t border-border bg-surface px-5 pt-4 pb-[max(env(safe-area-inset-bottom),20px)] md:absolute md:inset-x-auto md:top-full md:right-0 md:bottom-auto md:mt-2 md:max-h-[70vh] md:w-[380px] md:rounded-xl md:border md:p-4 md:shadow-[0_12px_32px_#0006]"
       >
         <div class="mb-3 flex items-center justify-between gap-3">
           <h2 class="text-[15px] font-semibold">{{ 'library.filters.title' | translate }}</h2>
@@ -146,6 +166,17 @@ import { GAME_CATEGORIES, LibraryCategoryFilter } from './library.logic';
 export class LibraryFilters {
   protected readonly icons = ICONS;
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly document = inject(DOCUMENT);
+  private readonly injector = inject(Injector);
+  private readonly collapse = inject(CollapseStateService);
+  private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');
+  private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
+  /** Body overflow before the sheet locked it; null while unlocked. */
+  private previousOverflow: string | null = null;
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.unlockScroll());
+  }
 
   readonly category = input.required<LibraryCategoryFilter>();
   readonly platformIds = input.required<readonly string[]>();
@@ -177,15 +208,84 @@ export class LibraryFilters {
     this.platformsChange.emit(current.includes(key) ? current.filter((p) => p !== key) : [...current, key]);
   }
 
-  close(): void {
+  /** Below md the panel is a modal bottom sheet: page scroll locked, focus trapped. */
+  protected readonly mobile = computed(() => !this.collapse.atLeast('md')());
+
+  protected toggle(): void {
+    if (this.open()) {
+      this.close();
+    } else {
+      this.openPanel();
+    }
+  }
+
+  private openPanel(): void {
+    this.open.set(true);
+    if (this.mobile()) this.lockScroll();
+    afterNextRender(
+      () => {
+        const panel = this.panel()?.nativeElement;
+        (this.focusables()[0] ?? panel)?.focus?.();
+      },
+      { injector: this.injector },
+    );
+  }
+
+  /** Closes the panel; focus goes back to the trigger unless the user moved it elsewhere (outside click). */
+  close(restoreFocus = true): void {
+    if (!this.open()) return;
     this.open.set(false);
+    this.unlockScroll();
+    if (restoreFocus) this.trigger().nativeElement.focus?.();
+  }
+
+  protected onEscape(): void {
+    this.close();
   }
 
   protected onDocumentClick(event: MouseEvent): void {
-    // Only the desktop popover closes on outside clicks; the mobile sheet has its own backdrop.
+    // Outside clicks close the desktop popover; the mobile sheet has its own backdrop.
     const target = event.target as Node | null;
     if (this.open() && target && target.isConnected && !this.host.contains(target)) {
-      this.close();
+      const active = this.document.activeElement;
+      // Only take focus back when it was in the panel or nowhere (not when the click focused a field).
+      this.close(!active || active === this.document.body || this.host.contains(active));
     }
+  }
+
+  protected trapFocus(event: KeyboardEvent): void {
+    if (event.key !== 'Tab' || !this.mobile()) return;
+    const items = this.focusables();
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = this.document.activeElement;
+    if (event.shiftKey && (active === first || active === this.panel()?.nativeElement)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  private focusables(): HTMLElement[] {
+    const panel = this.panel()?.nativeElement;
+    return panel
+      ? Array.from(panel.querySelectorAll<HTMLElement>('button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'))
+      : [];
+  }
+
+  private lockScroll(): void {
+    if (this.previousOverflow !== null) return;
+    const body = this.document.body;
+    this.previousOverflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+  }
+
+  private unlockScroll(): void {
+    if (this.previousOverflow === null) return;
+    this.document.body.style.overflow = this.previousOverflow;
+    this.previousOverflow = null;
   }
 }
