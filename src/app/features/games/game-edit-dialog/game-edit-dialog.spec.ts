@@ -46,7 +46,8 @@ describe('GameEditDialog pickers', () => {
     });
     const fixture = TestBed.createComponent(GameEditDialog);
     fixture.detectChanges();
-    const el = fixture.nativeElement as HTMLElement;
+    // The modal sheet moves itself to <body> once rendered.
+    const el = document.body.querySelector('app-modal-sheet') as HTMLElement;
     const dialog = fixture.componentInstance as unknown as DialogHarness;
     const sagaInput = el.querySelector('#game-edit-saga') as HTMLInputElement;
     const genreInput = el.querySelector('app-combobox[multiple] input') as HTMLInputElement;

@@ -23,6 +23,8 @@ const FOCUSABLE =
  * Mobile: full-screen sheet sliding up, header "Cancelar · title · Guardar".
  * Handles Escape, a Tab focus trap, body scroll lock and focus restore. The body is projected;
  * the save buttons emit `save` (the content owns validation and submission). `viewOnly` drops them.
+ * The host moves to <body> once rendered: an ancestor with a transform, filter or backdrop-filter
+ * (e.g. a `card-glass` card) would otherwise turn the fixed overlay into one clipped to that ancestor.
  */
 @Component({
   selector: 'app-modal-sheet',
@@ -131,12 +133,20 @@ export class ModalSheet {
     const previousFocus = this.document.activeElement as HTMLElement | null;
     body.style.overflow = 'hidden';
 
+    const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
     inject(DestroyRef).onDestroy(() => {
+      // Angular also removes the host on destroy; this covers a host already moved to <body>.
+      host.remove();
       body.style.overflow = previousOverflow;
       previousFocus?.focus?.();
     });
 
     afterNextRender(() => {
+      // After the first render: the host is in the DOM only once its parent view was inserted.
+      if (host.parentNode !== body) {
+        body.appendChild(host);
+      }
       const panel = this.panel().nativeElement;
       const preferred = panel.querySelector<HTMLElement>('[data-autofocus]');
       (preferred && this.isVisible(preferred) ? preferred : this.focusables()[0])?.focus();
