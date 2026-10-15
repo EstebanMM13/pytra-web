@@ -559,7 +559,8 @@
       "hours": "Hours",
       "label": "Game figures",
       "campaign": "Campaign",
-      "online": "Online"
+      "online": "Online",
+      "rating": "Rating"
     },
     "runs": "Runs",
     "noRuns": "No runs yet.",

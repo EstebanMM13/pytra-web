@@ -67,10 +67,12 @@
         <div class="flex min-w-0 flex-1 flex-col">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
+              <!-- The saga line always takes its room, so the title sits at the same height with or without one -->
               @if (g.sagaId !== null && g.sagaName) {
                 <a
                   [routerLink]="['/sagas', g.sagaId]"
-                  class="mb-1 flex w-fit max-w-full items-center gap-1.5 rounded-md text-[13px] font-medium text-brand-light hover:underline md:mb-2 md:text-sm"
+                  data-saga-line
+                  class="mb-1 flex h-5 w-fit max-w-full items-center gap-1.5 rounded-md text-[13px] font-medium text-brand-light hover:underline md:mb-2 md:h-6 md:text-sm"
                 >
                   <svg [lucideIcon]="icons.layers" [size]="14" class="shrink-0" aria-hidden="true"></svg>
                   <span class="truncate">
@@ -84,6 +86,8 @@
                     }
                   </span>
                 </a>
+              } @else {
+                <span data-saga-line class="mb-1 block h-5 md:mb-2 md:h-6" aria-hidden="true"></span>
               }
               <h1
                 class="font-display line-clamp-3 text-[22px] leading-tight font-bold tracking-[-0.025em] wrap-break-word sm:text-[26px] md:line-clamp-2 md:text-[40px] md:tracking-[-0.035em] lg:text-[48px]"
@@ -234,15 +238,19 @@
       </a>
     }
 
-    <!-- Stats: featured total hours (full row on phones/tablets, double width on desktop) + 4 equal cards -->
+    <!-- Stats: featured total hours (full row on phones/tablets, double width on desktop) + 4 equal cards.
+         ONLINE games have no runs: just total hours and their online rating. -->
     @if (experiences() !== null) {
       @let s = stats();
+      @let online = isOnlineGame();
       <section
-        class="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3 lg:grid-cols-6"
+        class="grid grid-cols-2 gap-2.5 md:gap-3"
+        [class]="online ? 'md:grid-cols-3' : 'md:grid-cols-4 lg:grid-cols-6'"
         [attr.aria-label]="'game.stats.label' | translate"
       >
         <div
-          class="relative col-span-2 min-w-0 overflow-hidden rounded-xl border border-card-border card-glass md:col-span-4 lg:col-span-2"
+          class="relative min-w-0 overflow-hidden rounded-xl border border-card-border card-glass"
+          [class]="online ? 'md:col-span-2' : 'col-span-2 md:col-span-4 lg:col-span-2'"
           data-stat="hours"
         >
           <div
@@ -282,24 +290,33 @@
             }
           </div>
         </div>
-        <app-stat-card [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
-        <app-stat-card
-          [icon]="statIcons.rating"
-          [label]="'game.stats.avgRating' | translate"
-          [value]="s.avgRating | rating"
-          [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
-        />
-        <app-stat-card
-          [icon]="statIcons.best"
-          [label]="'game.stats.bestRating' | translate"
-          [value]="s.bestRating | rating"
-          [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
-        />
-        <app-stat-card
-          [icon]="statIcons.platinum"
-          [label]="'game.stats.platinum' | translate"
-          [value]="s.platinum ? '🏆' : '—'"
-        />
+        @if (online) {
+          <app-stat-card
+            [icon]="statIcons.rating"
+            [label]="'game.stats.rating' | translate"
+            [value]="onlineRating() | rating"
+            [valueClass]="'font-mono ' + (onlineRating() | ratingTone)"
+          />
+        } @else {
+          <app-stat-card [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
+          <app-stat-card
+            [icon]="statIcons.rating"
+            [label]="'game.stats.avgRating' | translate"
+            [value]="s.avgRating | rating"
+            [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
+          />
+          <app-stat-card
+            [icon]="statIcons.best"
+            [label]="'game.stats.bestRating' | translate"
+            [value]="s.bestRating | rating"
+            [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
+          />
+          <app-stat-card
+            [icon]="statIcons.platinum"
+            [label]="'game.stats.platinum' | translate"
+            [value]="s.platinum ? '🏆' : '—'"
+          />
+        }
       </section>
     } @else {
       <section class="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3 lg:grid-cols-6">

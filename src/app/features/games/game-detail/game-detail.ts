@@ -197,10 +197,19 @@ export class GameDetail {
   /** ONLINE games are tracked through online playtime only: no "new run" entry points. */
   protected readonly canAddRun = computed(() => this.game()?.category !== 'ONLINE');
 
-  /** ONLINE / HYBRID games break the total down into campaign + online hours. */
+  /** ONLINE games are tracked through online playtime only: their stats skip runs, best rating and platinum. */
+  protected readonly isOnlineGame = computed(() => this.game()?.category === 'ONLINE');
+
+  /** The online general rating, the "Nota" of an ONLINE game. */
+  protected readonly onlineRating = computed(() => this.onlinePlaytime()?.generalRating ?? null);
+
+  /**
+   * Campaign vs online split under the total: HYBRID games, and ONLINE ones only when some runs exist
+   * (older data); a split of "0 h campaign" says nothing for a pure online game.
+   */
   protected readonly showHoursBreakdown = computed(() => {
     const category = this.game()?.category;
-    return !!category && category !== 'SINGLEPLAYER';
+    return category === 'HYBRID' || (category === 'ONLINE' && this.stats().runHours > 0);
   });
 
   /** Campaign (runs) share of the total hours, for the breakdown bar; 100 without hours. */

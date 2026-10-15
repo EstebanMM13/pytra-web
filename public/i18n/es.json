@@ -559,7 +559,8 @@
       "hours": "Horas",
       "label": "Cifras del juego",
       "campaign": "Campaña",
-      "online": "Online"
+      "online": "Online",
+      "rating": "Nota"
     },
     "runs": "Partidas",
     "noRuns": "Todavía no hay partidas.",

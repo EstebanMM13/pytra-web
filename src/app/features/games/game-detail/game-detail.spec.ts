@@ -113,7 +113,7 @@ describe('GameDetail', () => {
 });
 
 describe('GameDetail stats', () => {
-  function render(category: GameCategory) {
+  function render(category: GameCategory, generalRating: number | null = null) {
     TestBed.configureTestingModule({
       imports: [GameDetail],
       providers: [
@@ -124,7 +124,7 @@ describe('GameDetail stats', () => {
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
         {
           provide: OnlinePlaytimeService,
-          useValue: { findByGame: () => of({ gameId: 7, totalHours: 20, generalRating: null, platforms: [] }) },
+          useValue: { findByGame: () => of({ gameId: 7, totalHours: 20, generalRating, platforms: [] }) },
         },
         { provide: PlatformService, useValue: { platforms: signal([]), load: () => of([]) } },
         { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },
@@ -149,5 +149,26 @@ describe('GameDetail stats', () => {
     const el = render('SINGLEPLAYER');
     expect(el.querySelector('[data-stat="hours"]')!.textContent).not.toContain('game.stats.online');
     expect(el.querySelectorAll('app-stat-card').length).toBe(4);
+  });
+
+  it('shows only total hours and the online rating for ONLINE games', () => {
+    const el = render('ONLINE', 8);
+    const cards = [...el.querySelectorAll('app-stat-card')];
+    expect(cards.length).toBe(1);
+    expect(cards[0].textContent).toContain('game.stats.rating');
+    expect(cards[0].textContent).toContain('8');
+    const hours = el.querySelector('[data-stat="hours"]')!;
+    expect(hours.textContent).toContain('20 h');
+    // No runs: no campaign / online split.
+    expect(hours.textContent).not.toContain('game.stats.campaign');
+    expect(el.textContent).not.toContain('game.stats.platinum');
+    expect(el.textContent).not.toContain('game.stats.bestRating');
+  });
+
+  it('reserves the saga line so the title does not move without a saga', () => {
+    const line = render('SINGLEPLAYER').querySelector('[data-saga-line]')!;
+    expect(line.tagName).toBe('SPAN');
+    expect(line.getAttribute('aria-hidden')).toBe('true');
+    expect(line.nextElementSibling?.tagName).toBe('H1');
   });
 });
