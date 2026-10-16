@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { Capacitor } from '@capacitor/core';
+import { isNativePlatform } from '../native-platform';
 
 /** Chromium's non-standard install prompt event. */
 export interface BeforeInstallPromptEvent extends Event {
@@ -17,7 +17,7 @@ const DASHBOARD_DISMISS_KEY = 'pytra_install_banner_dismissed';
 @Injectable({ providedIn: 'root' })
 export class InstallPromptService {
   private readonly deferred = signal<BeforeInstallPromptEvent | null>(null);
-  private readonly native = Capacitor.isNativePlatform();
+  private readonly native = isNativePlatform();
 
   /** True when running as an installed PWA (standalone display mode). */
   readonly installed = signal(false);

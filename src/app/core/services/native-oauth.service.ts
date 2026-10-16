@@ -1,8 +1,6 @@
 import { Injectable, NgZone, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { App, URLOpenListenerEvent } from '@capacitor/app';
-import { Browser } from '@capacitor/browser';
-import { Capacitor } from '@capacitor/core';
+import { isNativePlatform } from '../native-platform';
 
 /** Custom-scheme callback the API redirects to when a login/link flow was started from the app. */
 const NATIVE_CALLBACK_PROTOCOL = 'com.estebanmm13.pytra:';
@@ -24,7 +22,7 @@ export class NativeOAuthService {
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
 
-  readonly isNative = Capacitor.isNativePlatform();
+  readonly isNative = isNativePlatform();
 
   /** The one-time code must be exchanged once, even if the URL is delivered twice on cold start. */
   private lastHandledUrl: string | null = null;
@@ -34,10 +32,13 @@ export class NativeOAuthService {
     if (!this.isNative) {
       return;
     }
-    App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => this.handleUrl(event.url));
-    // Cold start: the app may have been killed while the Custom Tab was open.
-    App.getLaunchUrl()
-      .then((launch) => launch?.url && this.handleUrl(launch.url))
+    // Plugins load lazily (native only): they and @capacitor/core stay out of the initial bundle.
+    import('@capacitor/app')
+      .then(({ App }) => {
+        void App.addListener('appUrlOpen', (event) => this.handleUrl(event.url));
+        // Cold start: the app may have been killed while the Custom Tab was open.
+        return App.getLaunchUrl().then((launch) => launch?.url && this.handleUrl(launch.url));
+      })
       .catch(() => undefined);
   }
 
@@ -48,6 +49,7 @@ export class NativeOAuthService {
       return;
     }
     const separator = url.includes('?') ? '&' : '?';
+    const { Browser } = await import('@capacitor/browser');
     await Browser.open({ url: `${url}${separator}${NATIVE_CLIENT_PARAM}` });
   }
 
@@ -79,7 +81,9 @@ export class NativeOAuthService {
     const next = params.get('next');
     if (next) queryParams['next'] = next;
 
-    Browser.close().catch(() => undefined);
+    import('@capacitor/browser')
+      .then(({ Browser }) => Browser.close())
+      .catch(() => undefined);
     this.zone.run(() => this.router.navigate(['/oauth-callback'], { queryParams, replaceUrl: true }));
   }
 }
