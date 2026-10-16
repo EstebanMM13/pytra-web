@@ -6,6 +6,14 @@
   <a routerLink="/dashboard" class="flex shrink-0 items-center gap-2.5 rounded-md" aria-label="Pytra">
     <app-pytra-mark class="size-[30px]" />
     <app-pytra-wordmark class="text-[22px] font-semibold tracking-[-0.035em]" />
+    <!-- Brand slogan (same in every language), only where the bar has room; P/T/R echo the wordmark -->
+    <span
+      class="ml-1 hidden border-l border-border pl-3 text-xs whitespace-nowrap text-muted xl:inline"
+      aria-hidden="true"
+      data-slogan
+      ><span class="font-semibold text-brand-light">P</span>lay · <span class="font-semibold text-brand-light">T</span>rack ·
+      <span class="font-semibold text-brand-light">R</span>emember</span
+    >
   </a>
 
   <div class="flex items-center gap-1 text-sm font-medium">
