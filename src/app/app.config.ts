@@ -28,7 +28,10 @@ export const appConfig: ApplicationConfig = {
       // New pages open at the top; Back restores the previous scroll position.
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
     ),
-    provideAppInitializer(() => inject(NativeOAuthService).init()),
+    // Not awaited: the deep-link listener registers in the background instead of delaying startup.
+    provideAppInitializer(() => {
+      void inject(NativeOAuthService).init();
+    }),
     provideAppInitializer(() => {
       inject(ThemeService);
       // Attach the beforeinstallprompt listener before the browser fires it.
