@@ -6,6 +6,8 @@ import {
   coverInitials,
   fitsPortraitBox,
   steamHeaderFallback,
+  steamCoverFallbacks,
+  nextCoverSource,
   steamPortraitCoverUrl,
 } from './game-cover';
 
@@ -65,13 +67,19 @@ describe('GameCover', () => {
     expect(imgs[1].classList).toContain('object-contain');
   });
 
-  it('retries a failed Steam library capsule with the header, then shows the initials', () => {
+  it('retries a failed Steam library capsule with the header and the main capsule, then shows the initials', () => {
     const capsule = steamPortraitCoverUrl(70);
     const { fixture, el } = setup(capsule);
     el.querySelector('img')!.dispatchEvent(new Event('error'));
     fixture.detectChanges();
     expect(el.querySelector('img')!.getAttribute('src')).toBe(
       'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/70/header.jpg',
+    );
+
+    el.querySelector('img')!.dispatchEvent(new Event('error'));
+    fixture.detectChanges();
+    expect(el.querySelector('img')!.getAttribute('src')).toBe(
+      'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/70/capsule_616x353.jpg',
     );
 
     el.querySelector('img')!.dispatchEvent(new Event('error'));
@@ -114,6 +122,23 @@ describe('steam cover urls', () => {
     );
     expect(steamHeaderFallback('https://cdn.cloudflare.steamstatic.com/steam/apps/620/library_600x900_2x.jpg?t=1')).toBe(
       'https://cdn.cloudflare.steamstatic.com/steam/apps/620/header.jpg',
+    );
+  });
+
+  it('walks the fallback chain: library capsule, header, main capsule, then initials', () => {
+    const base = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1030300/';
+    const url = `${base}library_600x900.jpg`;
+    expect(steamCoverFallbacks(url)).toEqual([`${base}header.jpg`, `${base}capsule_616x353.jpg`]);
+    expect(nextCoverSource(url, url)).toBe(`${base}header.jpg`);
+    expect(nextCoverSource(url, `${base}header.jpg`)).toBe(`${base}capsule_616x353.jpg`);
+    expect(nextCoverSource(url, `${base}capsule_616x353.jpg`)).toBeNull();
+    expect(nextCoverSource('https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg', 'https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg')).toBeNull();
+    expect(nextCoverSource(null, url)).toBeNull();
+  });
+
+  it('recognises the older steamcdn host', () => {
+    expect(steamHeaderFallback('https://steamcdn-a.akamaihd.net/steam/apps/1030300/library_600x900.jpg')).toBe(
+      'https://steamcdn-a.akamaihd.net/steam/apps/1030300/header.jpg',
     );
   });
 

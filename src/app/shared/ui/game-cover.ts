@@ -28,16 +28,34 @@ export function steamPortraitCoverUrl(appId: number | string): string {
   return `${STEAM_APPS_BASE}${appId}/library_600x900.jpg`;
 }
 
+/** A Steam library capsule on Steam's CDNs (steamstatic, or the older steamcdn-a.akamaihd.net). */
 const STEAM_LIBRARY_CAPSULE =
-  /^(https:\/\/(?:[a-z0-9-]+\.)*steamstatic\.com\/(?:store_item_assets\/)?steam\/apps\/\d+\/)library_600x900(?:_2x)?\.jpg(?:\?.*)?$/i;
+  /^(https:\/\/(?:(?:[a-z0-9-]+\.)*steamstatic\.com|steamcdn-a\.akamaihd\.net)\/(?:store_item_assets\/)?steam\/apps\/\d+\/)library_600x900(?:_2x)?\.jpg(?:\?.*)?$/i;
+
+/** Landscape art every Steam app has, tried in order when its library capsule fails. */
+const STEAM_LANDSCAPE_ART = ['header.jpg', 'capsule_616x353.jpg'];
 
 /**
- * Some Steam apps (old or small ones) have no library capsule: the same app's landscape store header,
- * or null when `url` is not a Steam library capsule.
+ * Images to try after a Steam library capsule fails to load (some apps have none, or a CDN edge
+ * misses it): the same app's store header, then its main capsule, on the same host. They are
+ * landscape, so the cover letterboxes them. Empty when `url` is not a Steam library capsule.
  */
-export function steamHeaderFallback(url: string): string | null {
+export function steamCoverFallbacks(url: string): string[] {
   const match = STEAM_LIBRARY_CAPSULE.exec(url);
-  return match ? `${match[1]}header.jpg` : null;
+  return match ? STEAM_LANDSCAPE_ART.map((file) => `${match[1]}${file}`) : [];
+}
+
+/** The first fallback (the store header), or null when `url` is not a Steam library capsule. */
+export function steamHeaderFallback(url: string): string | null {
+  return steamCoverFallbacks(url)[0] ?? null;
+}
+
+/** The image to show after `failed` did not load: the next one in the url's fallback chain, else null. */
+export function nextCoverSource(url: string | null | undefined, failed: string): string | null {
+  if (!url) return null;
+  const chain = [url, ...steamCoverFallbacks(url)];
+  const index = chain.indexOf(failed);
+  return index >= 0 ? (chain[index + 1] ?? null) : null;
 }
 
 /**
@@ -82,7 +100,7 @@ export function coverHue(name: string): number {
 
 /**
  * Game cover as portrait box art (2:3). Lazy-loaded, no referrer. A Steam library capsule that fails
- * to load retries once with the app's store header; clearly non-portrait art (that header, a square or a custom url) is
+ * to load falls back to the app's store header, then its main capsule; clearly non-portrait art (those, a square or a custom url) is
  * shown whole over a blurred copy of itself instead of being cropped to a sliver. With no url, or
  * when loading fails, it renders a gradient (brand tint -> surface, faintly hued from the name) with initials.
  */
@@ -144,7 +162,7 @@ export class GameCover {
   /** Emits on each image load whether it is portrait enough to be cropped (see `fitsPortraitBox`). */
   readonly portraitChange = output<boolean>();
 
-  /** Image being shown: the url, then its Steam header fallback, then null (initials). Resets with the url. */
+  /** Image being shown: the url, then its Steam fallbacks, then null (initials). Resets with the url. */
   protected readonly src = linkedSignal<string | null>(() => this.url() || null);
 
   /** The loaded image is not portrait enough to crop (see `fitsPortraitBox`); resets whenever the url changes. */
@@ -170,6 +188,6 @@ export class GameCover {
 
   protected onError(failed: string): void {
     this.letterbox.set(false);
-    this.src.set(failed === this.url() ? steamHeaderFallback(failed) : null);
+    this.src.set(nextCoverSource(this.url(), failed));
   }
 }

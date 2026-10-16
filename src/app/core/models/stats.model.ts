@@ -106,6 +106,8 @@ export interface RatedGame {
   avgRating: number;
   experienceCount: number;
   totalHours: number;
+  /** The game's cover (absent from older API versions). */
+  coverImageUrl?: string | null;
 }
 
 export interface RatedGameBrief {

@@ -1,6 +1,7 @@
 import { YearStat, YearSummary } from '../../core/models/stats.model';
 import {
   latestYear,
+  gotyCoverUrl,
   monthHourBars,
   monthLabels,
   monthValueLabel,
@@ -135,5 +136,23 @@ describe('monthValueLabel', () => {
     expect(monthValueLabel(0.2)).toBe('<1h');
     expect(monthValueLabel(41.6)).toBe('42h');
     expect(monthValueLabel(12)).toBe('12h');
+  });
+});
+
+describe('gotyCoverUrl', () => {
+  const goty = { gameId: 9, gameName: 'Hollow Knight: Silksong', avgRating: 10, experienceCount: 1, totalHours: 40 };
+  const run = { gameId: 9, coverImageUrl: 'https://covers.example/from-run.jpg' } as YearSummary['experiences'][number];
+
+  it('uses the cover sent with the GOTY even when its run is not among the year runs', () => {
+    expect(gotyCoverUrl({ goty: { ...goty, coverImageUrl: 'https://covers.example/goty.jpg' }, experiences: [] })).toBe(
+      'https://covers.example/goty.jpg',
+    );
+  });
+
+  it('falls back to the year runs for older APIs, else null', () => {
+    expect(gotyCoverUrl({ goty, experiences: [run] })).toBe('https://covers.example/from-run.jpg');
+    expect(gotyCoverUrl({ goty, experiences: [] })).toBeNull();
+    expect(gotyCoverUrl({ goty: null, experiences: [run] })).toBeNull();
+    expect(gotyCoverUrl(null)).toBeNull();
   });
 });

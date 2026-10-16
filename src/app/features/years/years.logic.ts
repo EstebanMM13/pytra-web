@@ -15,6 +15,21 @@ export function monthLabels(lang: string, style: 'short' | 'initial'): string[] 
   return style === 'short' ? [...names] : names.map((name) => name.charAt(0));
 }
 
+/**
+ * GOTY cover: the one the API sends with it, else looked up in the year's runs (older APIs). The
+ * lookup alone missed GOTYs completed in the year but attributed to another year (e.g. a run with
+ * `year` 2025 finished in 2026 is not among 2026's runs).
+ */
+export function gotyCoverUrl(summary: Pick<YearSummary, 'goty' | 'experiences'> | null): string | null {
+  const goty = summary?.goty;
+  if (!goty) return null;
+  return (
+    goty.coverImageUrl ||
+    summary.experiences.find((e) => e.gameId === goty.gameId && e.coverImageUrl)?.coverImageUrl ||
+    null
+  );
+}
+
 /** Bars of the "Horas por mes" chart: one per month, hours under each label (none for empty months). */
 export function monthHourBars(
   months: readonly { month: number; hours: number }[],

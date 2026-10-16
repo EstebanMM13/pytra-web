@@ -25,6 +25,7 @@ import { toastApiError } from '../../shared/utils/api-error';
 import {
   STATUS_TEXT,
   latestYear,
+  gotyCoverUrl,
   monthHourBars,
   monthLabels,
   parseYearParam,
@@ -93,12 +94,7 @@ export class Years {
     const state = this.state();
     return !!state && state.year === this.year() && state.failed;
   });
-  /** GOTY cover, looked up from the year's runs (the GOTY entry only carries the game id). */
-  protected readonly gotyCover = computed(() => {
-    const summary = this.summary();
-    const gameId = summary?.goty?.gameId;
-    return gameId == null ? null : (summary!.experiences.find((e) => e.gameId === gameId && e.coverImageUrl)?.coverImageUrl ?? null);
-  });
+  protected readonly gotyCover = computed(() => gotyCoverUrl(this.summary()));
   protected readonly noYears = computed(() => this.year() === null && this.years()?.length === 0);
 
   protected readonly tabs = computed(() => yearTabs(this.years() ?? [], this.year()));
