@@ -1,6 +1,7 @@
 import { YearStat, YearSummary } from '../../core/models/stats.model';
 import {
   latestYear,
+  monthHourBars,
   monthLabels,
   monthValueLabel,
   parseYearParam,
@@ -106,10 +107,33 @@ describe('yearHighlight', () => {
   });
 });
 
+describe('monthHourBars', () => {
+  it('puts each month hours under its label and leaves empty months blank', () => {
+    const bars = monthHourBars(
+      [
+        { month: 1, hours: 12.4 },
+        { month: 2, hours: 0 },
+        { month: 3, hours: 0.3 },
+      ],
+      monthLabels('es', 'short'),
+    );
+    expect(bars.map((b) => [b.label, b.subLabel, b.value])).toEqual([
+      ['Ene', '12h', 12.4],
+      ['Feb', null, 0],
+      ['Mar', '<1h', 0.3],
+    ]);
+    expect(bars.every((b) => !b.topLabel)).toBe(true);
+    expect(bars[0].title).toBe('Ene: 12 h');
+  });
+});
+
 describe('monthValueLabel', () => {
-  it('rounds hours and hides empty months', () => {
+  it('shows compact rounded hours and hides empty months', () => {
     expect(monthValueLabel(0)).toBe('');
-    expect(monthValueLabel(0.2)).toBe('<1');
-    expect(monthValueLabel(41.6)).toBe('42');
+    expect(monthValueLabel(-1)).toBe('');
+    expect(monthValueLabel(Number.NaN)).toBe('');
+    expect(monthValueLabel(0.2)).toBe('<1h');
+    expect(monthValueLabel(41.6)).toBe('42h');
+    expect(monthValueLabel(12)).toBe('12h');
   });
 });

@@ -1,5 +1,6 @@
 import { ExperienceStatus } from '../../core/models/experience.model';
 import { YearStat, YearSummary } from '../../core/models/stats.model';
+import { MiniBar } from '../../shared/ui/mini-bar-chart';
 
 /** Pure helpers behind the yearly summary page. */
 
@@ -12,6 +13,20 @@ const MONTHS: Record<'es' | 'en', readonly string[]> = {
 export function monthLabels(lang: string, style: 'short' | 'initial'): string[] {
   const names = MONTHS[lang === 'en' ? 'en' : 'es'];
   return style === 'short' ? [...names] : names.map((name) => name.charAt(0));
+}
+
+/** Bars of the "Horas por mes" chart: one per month, hours under each label (none for empty months). */
+export function monthHourBars(
+  months: readonly { month: number; hours: number }[],
+  labels: readonly string[],
+): MiniBar[] {
+  return months.map((m) => ({
+    key: m.month,
+    value: m.hours,
+    label: labels[m.month - 1] ?? String(m.month),
+    subLabel: monthValueLabel(m.hours) || null,
+    title: `${labels[m.month - 1] ?? m.month}: ${Math.round(m.hours)} h`,
+  }));
 }
 
 /** Year number from a route param, or null when it is not a plausible year. */
@@ -96,11 +111,11 @@ export const STATUS_TEXT: Record<ExperienceStatus, string> = {
   PENDIENTE: 'text-neutral',
 };
 
-/** Whole hours for the dense month chart: "" for empty months, "<1" for a few minutes. */
+/** Compact whole hours under a month bar ("12h"): "" for empty months, "<1h" for a few minutes. */
 export function monthValueLabel(hours: number): string {
-  if (hours <= 0) {
+  if (!(hours > 0)) {
     return '';
   }
   const rounded = Math.round(hours);
-  return rounded === 0 ? '<1' : String(rounded);
+  return rounded === 0 ? '<1h' : `${rounded}h`;
 }

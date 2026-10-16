@@ -25,8 +25,8 @@ import { toastApiError } from '../../shared/utils/api-error';
 import {
   STATUS_TEXT,
   latestYear,
+  monthHourBars,
   monthLabels,
-  monthValueLabel,
   parseYearParam,
   yearHighlight,
   yearTabs,
@@ -111,19 +111,11 @@ export class Years {
   private readonly lang = computed(() => (this.translate.currentLang() === 'en' ? 'en' : 'es'));
 
   protected readonly monthBars = computed<MiniBar[]>(() => {
-    const months = this.summary()?.months ?? [];
-    const labels = monthLabels(this.lang(), 'short');
-    return months.map((m) => ({
-      key: m.month,
-      value: m.hours,
-      label: labels[m.month - 1] ?? String(m.month),
-      topLabel: monthValueLabel(m.hours) || null,
-      title: `${labels[m.month - 1]}: ${Math.round(m.hours)} h`,
-    }));
+    return monthHourBars(this.summary()?.months ?? [], monthLabels(this.lang(), 'short'));
   });
   protected readonly monthBarsMobile = computed<MiniBar[]>(() => {
     const initials = monthLabels(this.lang(), 'initial');
-    return this.monthBars().map((bar, i) => ({ ...bar, label: initials[i] ?? bar.label, topLabel: null }));
+    return this.monthBars().map((bar, i) => ({ ...bar, label: initials[i] ?? bar.label }));
   });
   protected readonly hasMonthHours = computed(() => this.monthBars().some((b) => b.value > 0));
 
