@@ -36,6 +36,7 @@ import { StatCard } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { formatDayMonthYear, formatRunPeriod } from '../../../shared/utils/run-dates';
 import { GameEditDialog } from '../game-edit-dialog/game-edit-dialog';
+import { GenreChips } from './genre-chips';
 import {
   OnlinePlaytimeLoadState,
   buildOnlinePlaytimeRequest,
@@ -80,6 +81,7 @@ function byRelease(a: Game, b: Game): number {
     GameEditDialog,
     UpcomingBadge,
     CategoryBadge,
+    GenreChips,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

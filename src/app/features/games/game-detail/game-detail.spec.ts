@@ -75,7 +75,13 @@ describe('GameDetail', () => {
     const { buttons } = setup(game('SINGLEPLAYER'));
     expect(buttons('game.editAria').length).toBe(1);
     expect(buttons('game.edit').length).toBe(1);
-    expect(buttons('game.newRun').length).toBeGreaterThan(0);
+    // One "Nueva partida", in the runs section header (not in the hero or the mobile top bar).
+    expect(buttons('game.newRun').length).toBe(1);
+    expect(buttons('game.newRun')[0].closest('app-section-header')).not.toBeNull();
+    expect(buttons('game.newRun')[0].closest('section')?.textContent).toContain('game.runs');
+    buttons('game.newRun')[0].click();
+    expect(launcher.openNewRun).toHaveBeenCalledWith(7);
+    launcher.openNewRun.mockClear();
     expect(buttons('game.firstRun').length).toBe(1);
     buttons('game.firstRun')[0].click();
     expect(launcher.openNewRun).toHaveBeenCalledWith(7);

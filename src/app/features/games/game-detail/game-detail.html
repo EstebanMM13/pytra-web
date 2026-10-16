@@ -19,16 +19,6 @@
         >
           <svg [lucideIcon]="icons.pencil" [size]="20"></svg>
         </button>
-        @if (canAddRun()) {
-          <button
-            type="button"
-            (click)="newRun()"
-            class="rounded-lg p-2 text-brand-light hover:text-brand-lighter"
-            [attr.aria-label]="'game.newRun' | translate"
-          >
-            <svg [lucideIcon]="icons.plus" [size]="22"></svg>
-          </button>
-        }
       </div>
     }
   </div>
@@ -55,7 +45,7 @@
         </div>
       }
 
-      <div class="flex items-start gap-4 sm:gap-5 md:items-stretch md:gap-7">
+      <div class="flex items-center gap-4 sm:gap-5 md:gap-7">
         <app-game-cover
           decorative
           size="hero"
@@ -106,16 +96,6 @@
                   <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
                   {{ 'game.edit' | translate }}
                 </button>
-                @if (canAddRun()) {
-                  <button
-                    type="button"
-                    (click)="newRun()"
-                    class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
-                  >
-                    <svg [lucideIcon]="icons.plus" [size]="15"></svg>
-                    {{ 'game.newRun' | translate }}
-                  </button>
-                }
               </div>
             }
           </div>
@@ -152,18 +132,12 @@
               </span>
             }
             @if (genres().length) {
-              <ul class="mt-1 flex flex-wrap gap-1.5" [attr.aria-label]="'game.genre' | translate">
-                @for (genre of genres(); track genre) {
-                  <li class="rounded-full border border-brand/25 bg-brand-tint px-2.5 py-0.5 text-xs font-medium text-brand-lighter">
-                    {{ genre }}
-                  </li>
-                }
-              </ul>
+              <app-genre-chips class="mt-1" [genres]="genres()" [attr.aria-label]="'game.genre' | translate" role="group" />
             }
           </div>
 
           <!-- md+: the sheet facts as labelled columns across the whole hero -->
-          <dl class="mt-auto hidden grid-cols-2 gap-x-8 gap-y-5 border-t border-divider pt-5 md:grid lg:grid-cols-4">
+          <dl class="mt-5 hidden grid-cols-2 gap-x-8 gap-y-5 border-t border-divider pt-5 md:grid lg:grid-cols-4">
             <div class="min-w-0">
               <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
                 <svg [lucideIcon]="icons.building" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
@@ -212,12 +186,10 @@
                 <svg [lucideIcon]="icons.sparkles" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
                 {{ 'game.genre' | translate }}
               </dt>
-              <dd class="mt-2 flex flex-wrap gap-2">
-                @for (genre of genres(); track genre) {
-                  <span class="rounded-full border border-brand/25 bg-brand-tint px-3 py-1 text-[13px] font-medium text-brand-lighter">
-                    {{ genre }}
-                  </span>
-                } @empty {
+              <dd class="mt-2">
+                @if (genres().length) {
+                  <app-genre-chips size="md" [genres]="genres()" />
+                } @else {
                   <span class="text-[17px] font-semibold">—</span>
                 }
               </dd>
@@ -331,7 +303,19 @@
       <div class="flex flex-col gap-5 self-start">
       <!-- Runs -->
       <section class="md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
-        <app-section-header collapseKey="game.runs" class="mb-3 md:mb-4" [label]="'game.runs' | translate" />
+        <app-section-header collapseKey="game.runs" class="mb-3 md:mb-4" [label]="'game.runs' | translate">
+          @if (canEdit() && canAddRun()) {
+            <button
+              type="button"
+              (click)="newRun()"
+              class="-my-1 flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[13px] font-semibold text-brand-light hover:bg-hover hover:text-brand-lighter"
+              data-new-run
+            >
+              <svg [lucideIcon]="icons.plus" [size]="15" aria-hidden="true"></svg>
+              {{ 'game.newRun' | translate }}
+            </button>
+          }
+        </app-section-header>
         <div class="flex flex-col gap-2.5 md:scroll-list md:max-h-[494px]">
           @if (experiences() === null) {
             @for (i of [1, 2]; track i) {
