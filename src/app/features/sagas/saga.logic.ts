@@ -7,7 +7,7 @@ export interface SagaSummary {
   /** Saga games in release order. */
   games: Game[];
   total: number;
-  /** Games with at least one run. */
+  /** Games with at least one run or online hours. */
   played: number;
   hours: number;
   /** Mean of each played game's best rating; null when nothing is rated. */
@@ -24,8 +24,23 @@ export function releaseYear(game: Game): number | null {
   return match ? Number(match[1]) : null;
 }
 
+/** Played: at least one run, or hours without runs (online playtime counts, as in the library). */
 export function isPlayed(game: Game): boolean {
-  return (game.experienceCount ?? 0) > 0;
+  return (game.experienceCount ?? 0) > 0 || (game.totalHours ?? 0) > 0;
+}
+
+/**
+ * What a saga row says about the game: its last run's status, "Online" when it was only played
+ * through online playtime (hours, no runs), else "Sin jugar".
+ */
+export type SagaGameStatus =
+  | { kind: 'run'; status: NonNullable<Game['lastExperienceStatus']> }
+  | { kind: 'online' }
+  | { kind: 'notPlayed' };
+
+export function sagaGameStatus(game: Game): SagaGameStatus {
+  if (game.lastExperienceStatus) return { kind: 'run', status: game.lastExperienceStatus };
+  return isPlayed(game) ? { kind: 'online' } : { kind: 'notPlayed' };
 }
 
 /** Release order: dated games first by date, undated last; ties by name. */

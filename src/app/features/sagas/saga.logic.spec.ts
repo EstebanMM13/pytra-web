@@ -1,6 +1,6 @@
 import { Game } from '../../core/models/game.model';
 import { Saga } from '../../core/models/saga.model';
-import { playedPercent, sagaMetaLine, summarizeSaga, summarizeSagas } from './saga.logic';
+import { isPlayed, playedPercent, sagaGameStatus, sagaMetaLine, summarizeSaga, summarizeSagas } from './saga.logic';
 
 function game(overrides: Partial<Game> & { id: number; name: string }): Game {
   return {
@@ -72,5 +72,27 @@ describe('saga logic', () => {
       'God of War',
       'Zelda',
     ]);
+  });
+});
+
+describe('online-only saga games', () => {
+  const onlineOnly = game({ id: 1, name: 'Online', category: 'ONLINE', experienceCount: 0, totalHours: 120 });
+  const runs = game({ id: 2, name: 'Runs', experienceCount: 1, totalHours: 30, lastExperienceStatus: 'COMPLETADO' });
+  const untouched = game({ id: 3, name: 'Untouched', experienceCount: 0, totalHours: 0 });
+  const saga: Saga = { id: 1, name: 'Saga', updatedAt: '2025-01-01T00:00:00' };
+
+  it('counts online hours without runs as played, with an Online status', () => {
+    expect(isPlayed(onlineOnly)).toBe(true);
+    expect(sagaGameStatus(onlineOnly)).toEqual({ kind: 'online' });
+    expect(sagaGameStatus(runs)).toEqual({ kind: 'run', status: 'COMPLETADO' });
+    expect(isPlayed(untouched)).toBe(false);
+    expect(sagaGameStatus(untouched)).toEqual({ kind: 'notPlayed' });
+  });
+
+  it('includes them in the saga played count', () => {
+    const summary = summarizeSaga(saga, [onlineOnly, runs, untouched]);
+    expect(summary.played).toBe(2);
+    expect(summary.total).toBe(3);
+    expect(playedPercent(summary)).toBe(67);
   });
 });

@@ -20,7 +20,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { SagaDialog } from './saga-dialog';
-import { SagaSummary, isPlayed, playedPercent, releaseYear, sagaMetaLine, summarizeSagas } from './saga.logic';
+import { SagaSummary, isPlayed, playedPercent, releaseYear, sagaGameStatus, sagaMetaLine, summarizeSagas } from './saga.logic';
 
 /**
  * Sagas master-detail. `/sagas` and `/sagas/:id` render this same view: on web the list and the
@@ -58,6 +58,7 @@ export class Sagas {
 
   protected readonly skeletons = [0, 1, 2, 3, 4];
   protected readonly isPlayed = isPlayed;
+  protected readonly gameStatus = sagaGameStatus;
   protected readonly releaseYear = releaseYear;
   protected readonly playedPercent = playedPercent;
   protected readonly metaLine = sagaMetaLine;

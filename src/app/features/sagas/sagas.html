@@ -180,14 +180,18 @@
                   <span class="text-xs">🏆</span>
                 }
               </p>
+              @let st = gameStatus(g);
               <p class="mt-0.5 truncate text-xs text-muted md:hidden">
                 {{ releaseYear(g) ?? '—' }} ·
-                {{ (g.lastExperienceStatus ? 'status.' + g.lastExperienceStatus : 'game.notPlayed') | translate }}
+                {{ (st.kind === 'run' ? 'status.' + st.status : st.kind === 'online' ? 'library.online' : 'game.notPlayed') | translate }}
               </p>
             </div>
-            <span class="hidden md:block">
-              @if (g.lastExperienceStatus; as status) {
-                <app-status-pill [status]="status" />
+            <span class="hidden md:block" data-saga-status>
+              @if (st.kind === 'run') {
+                <app-status-pill [status]="st.status" />
+              } @else if (st.kind === 'online') {
+                <!-- Played through online playtime only: same pill as the library -->
+                <span class="rounded-full bg-brand-tint px-2 py-0.5 text-xs text-brand-lighter">{{ 'library.online' | translate }}</span>
               } @else {
                 <span class="text-xs text-muted">{{ 'game.notPlayed' | translate }}</span>
               }
