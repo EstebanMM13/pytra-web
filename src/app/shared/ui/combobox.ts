@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Injector,
+  afterNextRender,
   booleanAttribute,
   computed,
   effect,
@@ -167,7 +169,7 @@ let nextId = 0;
         [attr.aria-label]="labelledBy() || !ariaLabel() ? null : (ariaLabel() | translate)"
         [attr.aria-busy]="busy() || null"
         [attr.aria-multiselectable]="multiple() || null"
-        class="scroll-thin mt-1.5 max-h-60 overflow-y-auto rounded-[10px] border border-border bg-surface p-1 shadow-[0_12px_32px_#0006]"
+        class="scroll-thin mt-1.5 max-h-64 overflow-y-auto rounded-[10px] border border-border bg-surface p-1 shadow-[0_12px_32px_#0006]"
       >
         @for (entry of entries(); track $index; let i = $index) {
           <li
@@ -211,6 +213,7 @@ let nextId = 0;
 export class Combobox {
   protected readonly icons = ICONS;
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly injector = inject(Injector);
   private readonly searchInput = viewChild.required<ElementRef<HTMLInputElement>>('search');
 
   readonly options = input.required<readonly ComboboxOption[]>();
@@ -218,8 +221,8 @@ export class Combobox {
   readonly selected = model<readonly number[]>([]);
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly creatable = input(false, { transform: booleanAttribute });
-  /** Max option rows listed at once (the search narrows the rest). */
-  readonly limit = input(8, { transform: numberAttribute });
+  /** Max option rows listed at once; all by default (the list scrolls, the search narrows it). */
+  readonly limit = input(Number.POSITIVE_INFINITY, { transform: numberAttribute });
   /** id of the visible label element. */
   readonly labelledBy = input('');
   /** Accessible name (translation key) when there is no visible label to point at. */
@@ -277,7 +280,7 @@ export class Combobox {
       multiple: this.multiple(),
       creatable: this.creatable(),
       noneRow: !!this.noneLabel(),
-      limit: this.multiple() ? this.limit() : Number.MAX_SAFE_INTEGER,
+      limit: this.limit(),
     }),
   );
 
@@ -304,6 +307,12 @@ export class Combobox {
     if (this.open()) return;
     this.open.set(true);
     this.activeIndex.set(this.firstActiveIndex());
+    // The list renders in the flow under the field: inside a scrolling dialog it may start below
+    // the fold, so bring it into view once rendered (scrollIntoView is missing in jsdom).
+    afterNextRender(
+      () => this.host.querySelector(`#${this.listId}`)?.scrollIntoView?.({ block: 'nearest' }),
+      { injector: this.injector },
+    );
   }
 
   protected onInput(event: Event): void {

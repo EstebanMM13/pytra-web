@@ -237,3 +237,52 @@ describe('Combobox (single)', () => {
     expect(input.value).toBe('Rol');
   });
 });
+
+@Component({
+  imports: [Combobox],
+  template: `<app-combobox multiple [options]="options" [(selected)]="selected" />`,
+})
+class ManyHost {
+  readonly options: ComboboxOption[] = Array.from({ length: 20 }, (_, i) => ({ id: i + 1, label: `Genre ${i + 1}` }));
+  readonly selected = signal<readonly number[]>([]);
+}
+
+describe('Combobox long lists', () => {
+  it('lists every option in a scrollable listbox (no 8-item cap) and brings it into view', async () => {
+    TestBed.configureTestingModule({ imports: [ManyHost], providers: [provideTranslateService()] });
+    const fixture = TestBed.createComponent(ManyHost);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const scrolled: Element[] = [];
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this);
+    };
+    try {
+      el.querySelector('input')!.dispatchEvent(new Event('focus'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const list = el.querySelector('[role="listbox"]')!;
+      expect(list.querySelectorAll('[role="option"]')).toHaveLength(20);
+      expect(list.classList).toContain('max-h-64');
+      expect(list.classList).toContain('overflow-y-auto');
+      expect(scrolled).toContain(list);
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+
+  it('keeps every entry with the default limit', () => {
+    const options = Array.from({ length: 30 }, (_, i) => ({ id: i, label: `G${i}` }));
+    const entries = comboboxEntries({
+      options,
+      selected: [],
+      query: '',
+      multiple: true,
+      creatable: false,
+      noneRow: false,
+      limit: Number.POSITIVE_INFINITY,
+    });
+    expect(entries).toHaveLength(30);
+  });
+});
