@@ -49,14 +49,13 @@ export type AvatarCategory = (typeof AVATAR_CATEGORIES)[number]['id'];
 export type SharedAvatarKey = (typeof AVATAR_CATEGORIES)[number]['keys'][number];
 
 /**
- * Single-owner presets, offered in the picker's "exclusivo" category only to the account whose username matches
- * `owner` (case-insensitive). Not part of AVATAR_KEYS: the API keeps them out of AvatarPolicy.KEYS and enforces
- * ownership server side (ExclusiveAvatars, bound by user id). Any account still renders them if stored.
- * `ext` overrides the default SVG file extension.
+ * Single-owner presets. Not part of AVATAR_KEYS: the API keeps them out of AvatarPolicy.KEYS, decides who owns
+ * them (ExclusiveAvatars, by user id) and lists the signed-in user's keys in CurrentUser.exclusiveAvatars; the
+ * picker offers only those. Any account still renders them if stored. `ext` overrides the default SVG extension.
  */
 export const EXCLUSIVE_AVATARS = [
-  { key: 'estebanexplorador', owner: 'estebank13', ext: 'webp' },
-] as const satisfies readonly { key: string; owner: string; ext?: AvatarFileExt }[];
+  { key: 'estebanexplorador', ext: 'webp' },
+] as const satisfies readonly { key: string; ext?: AvatarFileExt }[];
 
 export type AvatarFileExt = 'svg' | 'webp';
 export type ExclusiveAvatarKey = (typeof EXCLUSIVE_AVATARS)[number]['key'];
@@ -79,10 +78,13 @@ export function findAvatar(key: string | null | undefined): AvatarKey | null {
   return key && KNOWN_KEYS.has(key) ? (key as AvatarKey) : null;
 }
 
-/** Exclusive presets the given username owns (case-insensitive); empty for everyone else. */
-export function exclusiveAvatarsFor(username: string | null | undefined): ExclusiveAvatarKey[] {
-  const normalized = username?.trim().toLowerCase();
-  return normalized ? EXCLUSIVE_AVATARS.filter((a) => a.owner === normalized).map((a) => a.key) : [];
+/**
+ * The exclusive presets among the keys the API granted (CurrentUser.exclusiveAvatars), in catalog order.
+ * Keys this client has no image for are dropped.
+ */
+export function grantedExclusiveAvatars(granted: readonly string[] | null | undefined): ExclusiveAvatarKey[] {
+  const keys = new Set(granted ?? []);
+  return EXCLUSIVE_AVATARS.filter((a) => keys.has(a.key)).map((a) => a.key);
 }
 
 /** Public URL of a preset's image (root-relative so it works on the web and inside the Capacitor shell). */

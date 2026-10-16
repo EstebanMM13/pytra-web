@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, output } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Avatar } from '../../shared/ui/avatar';
-import { AVATAR_CATEGORIES, exclusiveAvatarsFor, findAvatar } from '../../shared/ui/avatar-catalog';
+import { AVATAR_CATEGORIES, findAvatar, grantedExclusiveAvatars } from '../../shared/ui/avatar-catalog';
 
 interface PickerCategory {
   readonly id: string;
@@ -12,7 +12,7 @@ interface PickerCategory {
 /**
  * Preset avatars grouped by category, after a "no avatar" (initial) option. Described categories
  * (player types) add each preset's one-line description to its tooltip and as aria-description.
- * An "exclusivo" category comes first only when the signed-in username owns an exclusive preset.
+ * An "exclusivo" category comes first only with the exclusive presets the API granted this account.
  * Presentational: it only emits the picked key (null = initial); the profile page saves it.
  */
 @Component({
@@ -74,8 +74,8 @@ export class AvatarPicker {
   readonly selected = input<string | null | undefined>(null);
   /** Display name for the initial option. */
   readonly name = input<string | null | undefined>(null);
-  /** Signed-in username; unlocks the exclusive presets it owns. */
-  readonly username = input<string | null | undefined>(null);
+  /** Exclusive keys the API lets this account pick (CurrentUser.exclusiveAvatars). */
+  readonly exclusive = input<readonly string[] | null | undefined>(null);
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly picked = output<string | null>();
 
@@ -87,7 +87,7 @@ export class AvatarPicker {
   }));
 
   protected readonly categories = computed<readonly PickerCategory[]>(() => {
-    const exclusive = exclusiveAvatarsFor(this.username());
+    const exclusive = grantedExclusiveAvatars(this.exclusive());
     return exclusive.length
       ? [{ id: 'exclusivo', keys: exclusive, described: false }, ...AvatarPicker.SHARED_CATEGORIES]
       : AvatarPicker.SHARED_CATEGORIES;

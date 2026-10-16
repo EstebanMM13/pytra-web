@@ -8,6 +8,8 @@ export interface CurrentUser {
   createdAt: string | null;
   /** Preset avatar key (see shared/ui/avatar.ts), null when none is picked. */
   avatar: string | null;
+  /** Exclusive avatar keys this account may pick (API-owned, by user id); absent or empty for almost everyone. */
+  exclusiveAvatars?: string[];
 }
 
 /** PATCH /users/me body: only the fields present are changed; `avatar: null` clears it. */

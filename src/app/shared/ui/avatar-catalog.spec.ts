@@ -3,7 +3,7 @@ import {
   AVATAR_KEYS,
   EXCLUSIVE_AVATARS,
   avatarSrc,
-  exclusiveAvatarsFor,
+  grantedExclusiveAvatars,
   findAvatar,
 } from './avatar-catalog';
 
@@ -72,10 +72,9 @@ describe('avatar catalog', () => {
   });
 
   describe('exclusive presets', () => {
-    it('keeps estebanexplorador out of the shared list, owned by estebank13, served as WebP', () => {
+    it('keeps estebanexplorador out of the shared list, served as WebP', () => {
       // Pinned on purpose: pytra-api AvatarPolicyTest asserts AvatarPolicy.EXCLUSIVE_KEYS is this same set.
       expect(EXCLUSIVE_AVATARS.map((a) => a.key)).toEqual(['estebanexplorador']);
-      expect(EXCLUSIVE_AVATARS[0].owner).toBe('estebank13');
       expect(AVATAR_KEYS).not.toContain('estebanexplorador');
       expect(avatarSrc('estebanexplorador')).toBe('/avatars/estebanexplorador.webp');
     });
@@ -98,14 +97,13 @@ describe('avatar catalog', () => {
       expect(findAvatar('estebanexplorador')).toBe('estebanexplorador');
     });
 
-    it('is offered only to the owner username, case-insensitively', () => {
-      expect(exclusiveAvatarsFor('estebank13')).toEqual(['estebanexplorador']);
-      expect(exclusiveAvatarsFor('EstebanK13')).toEqual(['estebanexplorador']);
-      expect(exclusiveAvatarsFor('alice')).toEqual([]);
-      expect(exclusiveAvatarsFor('estebank131')).toEqual([]);
-      expect(exclusiveAvatarsFor('')).toEqual([]);
-      expect(exclusiveAvatarsFor(null)).toEqual([]);
-      expect(exclusiveAvatarsFor(undefined)).toEqual([]);
+    it('offers only the keys the API granted, ignoring ones without an image here', () => {
+      expect(grantedExclusiveAvatars(['estebanexplorador'])).toEqual(['estebanexplorador']);
+      expect(grantedExclusiveAvatars(['unknownexclusive', 'estebanexplorador'])).toEqual(['estebanexplorador']);
+      expect(grantedExclusiveAvatars(['ESTEBANEXPLORADOR', 'mando'])).toEqual([]);
+      expect(grantedExclusiveAvatars([])).toEqual([]);
+      expect(grantedExclusiveAvatars(null)).toEqual([]);
+      expect(grantedExclusiveAvatars(undefined)).toEqual([]);
     });
   });
 });

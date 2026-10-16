@@ -9,24 +9,24 @@ import { AvatarPicker } from './avatar-picker';
   template: `<app-avatar-picker
     [selected]="selected()"
     name="esteban"
-    [username]="username()"
+    [exclusive]="exclusive()"
     [disabled]="disabled()"
     (picked)="picked.push($event)"
   />`,
 })
 class Host {
   readonly selected = signal<string | null>(null);
-  readonly username = signal<string | null>(null);
+  readonly exclusive = signal<string[] | null>(null);
   readonly disabled = signal(false);
   readonly picked: (string | null)[] = [];
 }
 
 describe('AvatarPicker', () => {
-  function setup(selected: string | null, username: string | null = null) {
+  function setup(selected: string | null, exclusive: string[] | null = null) {
     TestBed.configureTestingModule({ imports: [Host], providers: [provideTranslateService()] });
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.selected.set(selected);
-    fixture.componentInstance.username.set(username);
+    fixture.componentInstance.exclusive.set(exclusive);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const buttons = Array.from(el.querySelectorAll('button'));
@@ -103,8 +103,8 @@ describe('AvatarPicker', () => {
     const headings = (el: HTMLElement) =>
       Array.from(el.querySelectorAll('h3')).map((h) => h.textContent!.trim());
 
-    it('is shown first, with the WebP preset, only to its owner (case-insensitive)', () => {
-      const { el, buttons, byKey } = setup(null, 'EstebanK13');
+    it('is shown first, with the WebP preset, when the API grants it', () => {
+      const { el, buttons, byKey } = setup(null, ['estebanexplorador']);
       expect(headings(el)).toEqual([
         'profile.avatar.categories.exclusivo',
         ...AVATAR_CATEGORIES.map((c) => 'profile.avatar.categories.' + c.id),
@@ -115,15 +115,15 @@ describe('AvatarPicker', () => {
     });
 
     it('lets the owner pick it and highlights it once saved', () => {
-      const { fixture, byKey } = setup('estebanexplorador', 'estebank13');
+      const { fixture, byKey } = setup('estebanexplorador', ['estebanexplorador']);
       expect(byKey('estebanexplorador').getAttribute('aria-pressed')).toBe('true');
       byKey('mando').click();
       expect(fixture.componentInstance.picked).toEqual(['mando']);
     });
 
-    for (const username of [null, 'alice', 'estebank131']) {
-      it(`is hidden from ${String(username)}`, () => {
-        const { el, buttons, byKey } = setup(null, username);
+    for (const exclusive of [null, [], ['unknownexclusive']]) {
+      it(`is hidden when the API grants ${JSON.stringify(exclusive)}`, () => {
+        const { el, buttons, byKey } = setup(null, exclusive);
         expect(headings(el)).not.toContain('profile.avatar.categories.exclusivo');
         expect(buttons.length).toBe(AVATAR_KEYS.length + 1);
         expect(byKey('estebanexplorador')).toBeUndefined();
