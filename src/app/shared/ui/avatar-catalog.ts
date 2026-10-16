@@ -29,7 +29,20 @@ export const AVATAR_CATEGORIES = [
     id: 'generos',
     keys: ['rpg', 'shooter', 'carreras', 'puzzle', 'terror', 'plataformas', 'estrategia', 'deportes'],
   },
-] as const satisfies readonly { id: string; keys: readonly string[] }[];
+  {
+    // Player types: each preset also has a one-line description (profile.avatar.descriptions.<key>).
+    id: 'tipos',
+    described: true,
+    keys: [
+      'tipoexplorador', 'tipocazatrofeos', 'tiporoguelitero', 'tipocuentacuentos',
+      'tipospeedrunner', 'tipocompetitivo', 'tiposofa', 'tipobacklog',
+      'tiponocturno', 'tiporetro', 'tipomelomano', 'tiporejugador',
+      'tipomasoquista', 'tipoestratega', 'tipoconstructor', 'tipocozy',
+      'tipostreamer', 'tipohacker', 'tipopiloto', 'tipoterror',
+      'tipomovil', 'tipocapitan', 'tipocoleccionista', 'tipofotografo',
+    ],
+  },
+] as const satisfies readonly { id: string; described?: boolean; keys: readonly string[] }[];
 
 export type AvatarCategory = (typeof AVATAR_CATEGORIES)[number]['id'];
 export type AvatarKey = (typeof AVATAR_CATEGORIES)[number]['keys'][number];

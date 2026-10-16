@@ -4,8 +4,9 @@ import { Avatar } from '../../shared/ui/avatar';
 import { AVATAR_CATEGORIES, findAvatar } from '../../shared/ui/avatar-catalog';
 
 /**
- * Preset avatars grouped by category, after a "no avatar" (initial) option. Presentational: it only
- * emits the picked key (null = initial); the profile page saves it.
+ * Preset avatars grouped by category, after a "no avatar" (initial) option. Described categories
+ * (player types) add each preset's one-line description to its tooltip and as aria-description.
+ * Presentational: it only emits the picked key (null = initial); the profile page saves it.
  */
 @Component({
   selector: 'app-avatar-picker',
@@ -38,14 +39,18 @@ import { AVATAR_CATEGORIES, findAvatar } from '../../shared/ui/avatar-catalog';
         </h3>
         <ul class="grid grid-cols-4 gap-2 sm:grid-cols-8">
           @for (key of category.keys; track key) {
+            @let label = 'profile.avatar.names.' + key | translate;
+            @let description =
+              category.described ? ('profile.avatar.descriptions.' + key | translate) : null;
             <li class="flex justify-center">
               <button
                 type="button"
                 (click)="pick(key)"
                 [disabled]="disabled()"
                 [attr.aria-pressed]="current() === key"
-                [attr.aria-label]="'profile.avatar.names.' + key | translate"
-                [title]="'profile.avatar.names.' + key | translate"
+                [attr.aria-label]="label"
+                [attr.aria-description]="description"
+                [title]="description ? label + ' — ' + description : label"
                 [class]="optionClass(current() === key)"
               >
                 <app-avatar size="md" lazy [avatar]="key" />
@@ -65,7 +70,12 @@ export class AvatarPicker {
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly picked = output<string | null>();
 
-  protected readonly categories = AVATAR_CATEGORIES;
+  /** Categories with a plain `described` flag (only some carry it), read uniformly by the template. */
+  protected readonly categories = AVATAR_CATEGORIES.map((c) => ({
+    id: c.id,
+    keys: c.keys,
+    described: 'described' in c && c.described,
+  }));
 
   /** The saved key when it is a known preset, otherwise null (the initial option is highlighted). */
   protected current(): string | null {

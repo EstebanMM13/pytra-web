@@ -82,4 +82,17 @@ describe('AvatarPicker', () => {
     fixture.detectChanges();
     expect(buttons.every((b) => b.disabled)).toBe(true);
   });
+
+  it('describes player types in the tooltip and aria-description, and only them', () => {
+    const { byKey } = setup(null);
+    const type = byKey('tipoexplorador');
+    const description = 'profile.avatar.descriptions.tipoexplorador';
+    expect(type.getAttribute('aria-description')).toBe(description);
+    expect(type.title).toBe('profile.avatar.names.tipoexplorador — ' + description);
+    expect(type.querySelector('img')!.getAttribute('src')).toBe('/avatars/tipoexplorador.svg');
+
+    const genre = byKey('terror');
+    expect(genre.hasAttribute('aria-description')).toBe(false);
+    expect(genre.title).toBe('profile.avatar.names.terror');
+  });
 });
