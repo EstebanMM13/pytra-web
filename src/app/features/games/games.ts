@@ -53,6 +53,7 @@ import {
   serializeNameList,
 } from './library.logic';
 import { LibraryFilters } from './library-filters';
+import { LibraryStatusPicker } from './library-status-picker';
 import { formatGenreName } from '../../shared/pipes/genre-name.pipe';
 
 /** Removable chip of an active panel filter; `id` is the platform / genre id or the developer / publisher name. */
@@ -86,6 +87,7 @@ interface FilterChip {
     UpcomingBadge,
     GameEditDialog,
     LibraryFilters,
+    LibraryStatusPicker,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

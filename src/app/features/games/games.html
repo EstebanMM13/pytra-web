@@ -142,9 +142,16 @@
         </div>
       </div>
 
-      <!-- Status pills: wrap on web, scroll with faded edges on phones -->
+      <!-- Status: one compact picker on phones, wrapping pills on web -->
+      <app-library-status-picker
+        class="self-start md:hidden"
+        [statuses]="statusFilters"
+        [status]="query().status"
+        [counts]="statusCounts()"
+        (statusChange)="setStatus($event)"
+      />
       <div
-        class="-mx-5 flex gap-1.5 overflow-x-auto px-5 [mask-image:linear-gradient(to_right,transparent,black_20px,black_calc(100%-20px),transparent)] [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:[mask-image:none] [&::-webkit-scrollbar]:hidden"
+        class="hidden flex-wrap gap-1.5 md:flex"
         role="radiogroup"
         [attr.aria-label]="'library.statusLabel' | translate"
       >

@@ -819,7 +819,8 @@
       "developersPlaceholder": "Buscar desarrolladoras…",
       "publishers": "Distribuidora",
       "publishersPlaceholder": "Buscar distribuidoras…"
-    }
+    },
+    "statusShort": "Estado"
   },
   "sagas": {
     "title": "Sagas",

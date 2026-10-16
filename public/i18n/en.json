@@ -819,7 +819,8 @@
       "developersPlaceholder": "Search developers…",
       "publishers": "Publisher",
       "publishersPlaceholder": "Search publishers…"
-    }
+    },
+    "statusShort": "Status"
   },
   "sagas": {
     "title": "Sagas",
