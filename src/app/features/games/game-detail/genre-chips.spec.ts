@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { CollapseStateService } from '../../../core/services/collapse-state.service';
-import { GenreChips, splitGenres } from './genre-chips';
+import { GenreChips, fitChipCount, splitGenres } from './genre-chips';
 
 describe('splitGenres', () => {
   it('keeps two genres and counts the rest', () => {
@@ -13,12 +13,40 @@ describe('splitGenres', () => {
   });
 });
 
+describe('fitChipCount', () => {
+  // Chips 60, 80, 70 and 90 px wide, 8 px apart; "+N" is 36 px.
+  const widths = [60, 80, 70, 90];
+
+  it('shows every chip when the whole line fits', () => {
+    expect(fitChipCount(widths, 60 + 80 + 70 + 90 + 3 * 8, 8, 36)).toBe(4);
+    expect(fitChipCount(widths, 1000, 8, 36)).toBe(4);
+  });
+
+  it('keeps as many as fit next to the "+N" chip', () => {
+    // 60 + 8 + 80 + 8 + 70 = 226, plus 8 + 36 for "+N" = 270.
+    expect(fitChipCount(widths, 270, 8, 36)).toBe(3);
+    expect(fitChipCount(widths, 269, 8, 36)).toBe(2);
+    expect(fitChipCount(widths, 192, 8, 36)).toBe(2);
+  });
+
+  it('always keeps at least one chip', () => {
+    expect(fitChipCount(widths, 50, 8, 36)).toBe(1);
+  });
+
+  it('shows them all while sizes are unknown (no layout yet, or jsdom)', () => {
+    expect(fitChipCount(widths, 0, 8, 36)).toBe(4);
+    expect(fitChipCount([0, 0, 0], 0, 8, 0)).toBe(3);
+    expect(fitChipCount([], 300, 8, 36)).toBe(0);
+  });
+});
+
 @Component({
   imports: [GenreChips],
-  template: `<app-genre-chips [genres]="genres()" />`,
+  template: `<app-genre-chips [genres]="genres()" [fit]="fit()" size="md" />`,
 })
 class Host {
   readonly genres = signal<string[]>(['Acción', 'Aventura', 'Rol', 'Shooter']);
+  readonly fit = signal(false);
 }
 
 describe('GenreChips', () => {
@@ -92,5 +120,23 @@ describe('GenreChips', () => {
     wideSignal.set(true);
     fixture.detectChanges();
     expect(document.body.querySelector('app-modal-sheet')).toBeNull();
+  });
+
+  it('shows every genre on one line in fit mode until a measurement says otherwise', () => {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [
+        provideTranslateService(),
+        { provide: CollapseStateService, useValue: { atLeast: () => signal(true).asReadonly() } },
+      ],
+    });
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.fit.set(true);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    // jsdom has no layout: nothing measures, so nothing is folded.
+    expect(el.querySelectorAll('app-genre-chips > span')).toHaveLength(4);
+    expect(el.querySelector('[data-more-genres]')).toBeNull();
+    expect(el.querySelector('app-genre-chips')!.className).toContain('flex-nowrap');
   });
 });
