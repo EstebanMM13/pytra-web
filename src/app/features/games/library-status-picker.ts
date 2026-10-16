@@ -15,6 +15,7 @@ import {
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ICONS } from '../../shared/ui/icons';
+import { closeOverlay, isTopOverlay, openOverlay, trapTab } from '../../shared/ui/overlay-stack';
 import { LibraryStatusFilter } from './library.logic';
 
 /**
@@ -25,7 +26,7 @@ import { LibraryStatusFilter } from './library.logic';
   selector: 'app-library-status-picker',
   imports: [TranslatePipe, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block', '(document:keydown.escape)': 'close()' },
+  host: { class: 'block', '(document:keydown.escape)': 'onEscape($event)' },
   template: `
     <button
       #trigger
@@ -48,6 +49,8 @@ import { LibraryStatusFilter } from './library.logic';
         #panel
         role="dialog"
         aria-modal="true"
+        tabindex="-1"
+        (keydown)="onKeydown($event)"
         [attr.aria-label]="'library.statusLabel' | translate"
         class="fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] animate-modal-in flex-col overflow-y-auto rounded-t-2xl border-t border-border bg-surface px-3 pt-3 pb-[max(env(safe-area-inset-bottom),16px)]"
       >
@@ -84,8 +87,6 @@ export class LibraryStatusPicker {
   private readonly injector = inject(Injector);
   private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
-  /** Body overflow before the sheet locked it; null while unlocked. */
-  private previousOverflow: string | null = null;
 
   readonly statuses = input.required<readonly LibraryStatusFilter[]>();
   readonly status = input.required<LibraryStatusFilter>();
@@ -95,14 +96,13 @@ export class LibraryStatusPicker {
   protected readonly open = signal(false);
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.unlockScroll());
+    inject(DestroyRef).onDestroy(() => closeOverlay(this, this.document.body));
   }
 
   protected openSheet(): void {
     this.open.set(true);
-    const body = this.document.body;
-    this.previousOverflow = body.style.overflow;
-    body.style.overflow = 'hidden';
+    // Shared with the modal sheets: one scroll lock and one Escape stack for every overlay.
+    openOverlay(this, this.document.body);
     afterNextRender(
       () => this.panel()?.nativeElement.querySelector<HTMLElement>('[aria-checked="true"]')?.focus?.(),
       { injector: this.injector },
@@ -117,13 +117,20 @@ export class LibraryStatusPicker {
   close(): void {
     if (!this.open()) return;
     this.open.set(false);
-    this.unlockScroll();
+    closeOverlay(this, this.document.body);
     this.trigger().nativeElement.focus?.();
   }
 
-  private unlockScroll(): void {
-    if (this.previousOverflow === null) return;
-    this.document.body.style.overflow = this.previousOverflow;
-    this.previousOverflow = null;
+  protected onEscape(event: Event): void {
+    if (this.open() && !event.defaultPrevented && isTopOverlay(this)) {
+      event.preventDefault();
+      this.close();
+    }
+  }
+
+  /** Tab stays inside the sheet while it is open. */
+  protected onKeydown(event: KeyboardEvent): void {
+    const panel = this.panel()?.nativeElement;
+    if (panel) trapTab(event, panel, Array.from(panel.querySelectorAll<HTMLElement>('button')));
   }
 }

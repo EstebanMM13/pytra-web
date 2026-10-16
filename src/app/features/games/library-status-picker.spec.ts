@@ -77,4 +77,30 @@ describe('LibraryStatusPicker', () => {
     expect(el.querySelector('[role="dialog"]')).toBeNull();
     expect(fixture.componentInstance.status()).toBe('ALL');
   });
+
+  it('keeps Tab inside the sheet', () => {
+    const { fixture, el, trigger } = setup();
+    document.body.appendChild(el);
+    trigger.click();
+    fixture.detectChanges();
+    const radios = [...el.querySelectorAll<HTMLButtonElement>('[role="radio"]')];
+    radios.at(-1)!.focus();
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true, bubbles: true });
+    radios.at(-1)!.dispatchEvent(tab);
+    expect(tab.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(radios[0]);
+    const back = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, cancelable: true, bubbles: true });
+    radios[0].dispatchEvent(back);
+    expect(document.activeElement).toBe(radios.at(-1));
+    el.remove();
+  });
+
+  it('releases the shared scroll lock when destroyed while open', () => {
+    const { fixture, trigger } = setup();
+    trigger.click();
+    fixture.detectChanges();
+    expect(document.body.style.overflow).toBe('hidden');
+    fixture.destroy();
+    expect(document.body.style.overflow).toBe('');
+  });
 });
