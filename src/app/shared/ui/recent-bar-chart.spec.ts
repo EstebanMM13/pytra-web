@@ -2,7 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { MiniBar } from './mini-bar-chart';
-import { RecentBarChart, fitLabels, hasHiddenBars, recentBars } from './recent-bar-chart';
+import { CollapseStateService } from '../../core/services/collapse-state.service';
+import { RecentBarChart, fitLabels, fullChartOrientation, hasHiddenBars, recentBars } from './recent-bar-chart';
 
 function years(from: number, to: number, value = (year: number) => year - from + 1): MiniBar[] {
   return Array.from({ length: to - from + 1 }, (_, i) => {
@@ -58,9 +59,24 @@ describe('fitLabels', () => {
   });
 });
 
+describe('fullChartOrientation', () => {
+  it('lays long series out as rows on phones and as columns on wider screens', () => {
+    expect(fullChartOrientation(false, 11)).toBe('horizontal');
+    expect(fullChartOrientation(true, 11)).toBe('vertical');
+    expect(fullChartOrientation(false, 5)).toBe('vertical');
+    expect(fullChartOrientation(false, 4, 3)).toBe('horizontal');
+  });
+});
+
 describe('RecentBarChart', () => {
-  function setup(bars: MiniBar[]) {
-    TestBed.configureTestingModule({ imports: [Host], providers: [provideTranslateService()] });
+  function setup(bars: MiniBar[], wide = false) {
+    TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [
+        provideTranslateService(),
+        { provide: CollapseStateService, useValue: { atLeast: () => signal(wide).asReadonly() } },
+      ],
+    });
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.bars.set(bars);
     fixture.detectChanges();
@@ -90,10 +106,11 @@ describe('RecentBarChart', () => {
     expect(el.querySelector('[data-card] [role="dialog"]')).toBeNull();
     expect(dialog.closest('app-modal-sheet')?.parentElement).toBe(document.body);
     expect(dialog.getAttribute('aria-label')).toBe('Horas por año');
-    expect(dialog.querySelectorAll('[role="listitem"]')).toHaveLength(11);
-    // Eleven years: compact labels.
-    expect(barLabels(dialog)[0]).toBe("'14");
-    expect((dialog.querySelector('[data-full-plot]') as HTMLElement).className).toContain('h-[220px]');
+    // Phone: one horizontal row per year, full years.
+    expect(dialog.querySelectorAll('[role="listitem"][data-row]')).toHaveLength(11);
+    expect(dialog.querySelector('[data-full-plot]')).toBeNull();
+    expect(barLabels(dialog)[0]).toBe('2014');
+    expect(Number(dialog.querySelector('[data-row] [data-ratio]')?.getAttribute('data-ratio'))).toBeCloseTo(1 / 11);
     // View-only sheet: nothing to save.
     expect([...dialog.querySelectorAll('button')].some((b) => b.textContent?.includes('common.save'))).toBe(false);
 
@@ -110,5 +127,16 @@ describe('RecentBarChart', () => {
     expect(chart.classList.contains('flex-1')).toBe(false);
     const ratios = [...chart.querySelectorAll('[data-ratio]')].map((b) => Number(b.getAttribute('data-ratio')));
     expect(ratios).toEqual([0.2, 0.4, 0.6, 0.8, 1]);
+  });
+
+  it('keeps vertical columns with compact labels in the full view on wide screens', () => {
+    const { fixture, el } = setup(years(2014, 2024), true);
+    el.querySelector<HTMLButtonElement>('[data-show-all]')!.click();
+    fixture.detectChanges();
+    const dialog = document.body.querySelector('[role="dialog"]')!;
+    expect(dialog.querySelector('[data-row]')).toBeNull();
+    expect((dialog.querySelector('[data-full-plot]') as HTMLElement).className).toContain('h-[260px]');
+    expect(dialog.querySelectorAll('[role="listitem"]')).toHaveLength(11);
+    expect(barLabels(dialog)[0]).toBe("'14");
   });
 });

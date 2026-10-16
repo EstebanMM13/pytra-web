@@ -1,6 +1,16 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, numberAttribute, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  booleanAttribute,
+  computed,
+  inject,
+  input,
+  numberAttribute,
+  signal,
+} from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { MiniBar, MiniBarChart } from './mini-bar-chart';
+import { CollapseStateService } from '../../core/services/collapse-state.service';
+import { BarOrientation, MiniBar, MiniBarChart } from './mini-bar-chart';
 import { ModalSheet } from './modal-sheet';
 
 /** Bars a per-year chart shows before "Ver todos". */
@@ -25,6 +35,14 @@ export function recentBars(bars: readonly MiniBar[], limit = RECENT_BARS_LIMIT):
 /** True when the full series has bars the recent view leaves out (the "Ver todos" button shows). */
 export function hasHiddenBars(bars: readonly MiniBar[], limit = RECENT_BARS_LIMIT): boolean {
   return bars.length > recentBars(bars, limit).length;
+}
+
+/**
+ * How the "Ver todos" sheet lays out the whole series: horizontal rows on narrow screens when there
+ * are more bars than the recent view shows (columns would be too thin), vertical columns otherwise.
+ */
+export function fullChartOrientation(wide: boolean, count: number, limit = RECENT_BARS_LIMIT): BarOrientation {
+  return !wide && count > limit ? 'horizontal' : 'vertical';
 }
 
 /** Bars labelled with their full form (`fullLabel`) when few enough fit, else the compact `label`. */
@@ -66,16 +84,17 @@ export function fitLabels(bars: readonly MiniBar[], maxFull = FULL_LABELS_MAX): 
     }
     @if (expanded()) {
       <app-modal-sheet viewOnly [title]="title()" (closed)="expanded.set(false)">
-        <div class="-mx-5 overflow-x-auto px-5 pb-2 md:mx-0 md:px-0">
-          <!-- Definite plot height; at least 44px per bar on phones (scrolls sideways), 28px on wider screens; the sheet's width when that is enough. -->
-          <div
-            class="h-[220px] min-w-[calc(var(--bars)*44px)] md:h-[260px] md:min-w-[calc(var(--bars)*28px)]"
-            [style.--bars]="all().length"
-            data-full-plot
-          >
-            <app-mini-bar-chart [bars]="all()" [height]="null" [dense]="all().length > fullLabelsMax" [topTone]="topTone()" />
+        @if (fullOrientation() === 'horizontal') {
+          <!-- Phones: one row per year, scrolling with the sheet. -->
+          <app-mini-bar-chart [bars]="allFull()" orientation="horizontal" [topTone]="topTone()" />
+        } @else {
+          <div class="overflow-x-auto pb-2">
+            <!-- Definite plot height; at least 28px per bar (scrolls sideways), the sheet's width when that is enough. -->
+            <div class="h-[260px] min-w-[calc(var(--bars)*28px)]" [style.--bars]="all().length" data-full-plot>
+              <app-mini-bar-chart [bars]="all()" [height]="null" [dense]="all().length > fullLabelsMax" [topTone]="topTone()" />
+            </div>
           </div>
-        </div>
+        }
       </app-modal-sheet>
     }
   `,
@@ -98,4 +117,8 @@ export class RecentBarChart {
   protected readonly visible = computed(() => fitLabels(recentBars(this.bars(), this.limit())));
   protected readonly all = computed(() => fitLabels(this.bars()));
   protected readonly hasMore = computed(() => hasHiddenBars(this.bars(), this.limit()));
+  private readonly wide = inject(CollapseStateService).atLeast('md');
+  protected readonly fullOrientation = computed(() => fullChartOrientation(this.wide(), this.bars().length, this.limit()));
+  /** Rows have room for full labels whatever the count. */
+  protected readonly allFull = computed(() => fitLabels(this.bars(), Infinity));
 }
