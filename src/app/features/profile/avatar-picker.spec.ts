@@ -9,21 +9,24 @@ import { AvatarPicker } from './avatar-picker';
   template: `<app-avatar-picker
     [selected]="selected()"
     name="esteban"
+    [username]="username()"
     [disabled]="disabled()"
     (picked)="picked.push($event)"
   />`,
 })
 class Host {
   readonly selected = signal<string | null>(null);
+  readonly username = signal<string | null>(null);
   readonly disabled = signal(false);
   readonly picked: (string | null)[] = [];
 }
 
 describe('AvatarPicker', () => {
-  function setup(selected: string | null) {
+  function setup(selected: string | null, username: string | null = null) {
     TestBed.configureTestingModule({ imports: [Host], providers: [provideTranslateService()] });
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.selected.set(selected);
+    fixture.componentInstance.username.set(username);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const buttons = Array.from(el.querySelectorAll('button'));
@@ -94,5 +97,37 @@ describe('AvatarPicker', () => {
     const genre = byKey('terror');
     expect(genre.hasAttribute('aria-description')).toBe(false);
     expect(genre.title).toBe('profile.avatar.names.terror');
+  });
+
+  describe('exclusive category', () => {
+    const headings = (el: HTMLElement) =>
+      Array.from(el.querySelectorAll('h3')).map((h) => h.textContent!.trim());
+
+    it('is shown first, with the WebP preset, only to its owner (case-insensitive)', () => {
+      const { el, buttons, byKey } = setup(null, 'EstebanK13');
+      expect(headings(el)).toEqual([
+        'profile.avatar.categories.exclusivo',
+        ...AVATAR_CATEGORIES.map((c) => 'profile.avatar.categories.' + c.id),
+      ]);
+      expect(buttons.length).toBe(AVATAR_KEYS.length + 2);
+      const exclusive = byKey('estebanexplorador');
+      expect(exclusive.querySelector('img')!.getAttribute('src')).toBe('/avatars/estebanexplorador.webp');
+    });
+
+    it('lets the owner pick it and highlights it once saved', () => {
+      const { fixture, byKey } = setup('estebanexplorador', 'estebank13');
+      expect(byKey('estebanexplorador').getAttribute('aria-pressed')).toBe('true');
+      byKey('mando').click();
+      expect(fixture.componentInstance.picked).toEqual(['mando']);
+    });
+
+    for (const username of [null, 'alice', 'estebank131']) {
+      it(`is hidden from ${String(username)}`, () => {
+        const { el, buttons, byKey } = setup(null, username);
+        expect(headings(el)).not.toContain('profile.avatar.categories.exclusivo');
+        expect(buttons.length).toBe(AVATAR_KEYS.length + 1);
+        expect(byKey('estebanexplorador')).toBeUndefined();
+      });
+    }
   });
 });

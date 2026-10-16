@@ -1,11 +1,18 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, output } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Avatar } from '../../shared/ui/avatar';
-import { AVATAR_CATEGORIES, findAvatar } from '../../shared/ui/avatar-catalog';
+import { AVATAR_CATEGORIES, exclusiveAvatarsFor, findAvatar } from '../../shared/ui/avatar-catalog';
+
+interface PickerCategory {
+  readonly id: string;
+  readonly keys: readonly string[];
+  readonly described: boolean;
+}
 
 /**
  * Preset avatars grouped by category, after a "no avatar" (initial) option. Described categories
  * (player types) add each preset's one-line description to its tooltip and as aria-description.
+ * An "exclusivo" category comes first only when the signed-in username owns an exclusive preset.
  * Presentational: it only emits the picked key (null = initial); the profile page saves it.
  */
 @Component({
@@ -29,7 +36,7 @@ import { AVATAR_CATEGORIES, findAvatar } from '../../shared/ui/avatar-catalog';
         </button>
       </li>
     </ul>
-    @for (category of categories; track category.id) {
+    @for (category of categories(); track category.id) {
       <section [attr.aria-labelledby]="'avatar-cat-' + category.id">
         <h3
           [id]="'avatar-cat-' + category.id"
@@ -67,15 +74,24 @@ export class AvatarPicker {
   readonly selected = input<string | null | undefined>(null);
   /** Display name for the initial option. */
   readonly name = input<string | null | undefined>(null);
+  /** Signed-in username; unlocks the exclusive presets it owns. */
+  readonly username = input<string | null | undefined>(null);
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly picked = output<string | null>();
 
   /** Categories with a plain `described` flag (only some carry it), read uniformly by the template. */
-  protected readonly categories = AVATAR_CATEGORIES.map((c) => ({
+  private static readonly SHARED_CATEGORIES: readonly PickerCategory[] = AVATAR_CATEGORIES.map((c) => ({
     id: c.id,
     keys: c.keys,
     described: 'described' in c && c.described,
   }));
+
+  protected readonly categories = computed<readonly PickerCategory[]>(() => {
+    const exclusive = exclusiveAvatarsFor(this.username());
+    return exclusive.length
+      ? [{ id: 'exclusivo', keys: exclusive, described: false }, ...AvatarPicker.SHARED_CATEGORIES]
+      : AvatarPicker.SHARED_CATEGORIES;
+  });
 
   /** The saved key when it is a known preset, otherwise null (the initial option is highlighted). */
   protected current(): string | null {

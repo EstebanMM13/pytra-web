@@ -190,7 +190,8 @@
         "animales": "Animals",
         "pixel": "Pixel",
         "generos": "Genres",
-        "tipos": "Player types"
+        "tipos": "Player types",
+        "exclusivo": "Exclusive"
       },
       "names": {
         "mando": "Gamepad",
@@ -264,7 +265,8 @@
         "tipomovil": "The Pocket Gamer",
         "tipocapitan": "The Captain",
         "tipocoleccionista": "The Collector",
-        "tipofotografo": "The Photographer"
+        "tipofotografo": "The Photographer",
+        "estebanexplorador": "Esteban's Explorer"
       },
       "descriptions": {
         "tipoexplorador": "Gets lost in every map, hunting down each secret",

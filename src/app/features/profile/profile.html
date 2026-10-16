@@ -175,6 +175,7 @@
           <app-avatar-picker
             [selected]="u.avatar"
             [name]="displayName()"
+            [username]="u.username"
             [disabled]="savingAvatar()"
             [attr.aria-busy]="savingAvatar()"
             (picked)="setAvatar($event)"

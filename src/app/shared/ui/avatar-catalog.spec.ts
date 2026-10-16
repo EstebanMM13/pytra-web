@@ -1,4 +1,11 @@
-import { AVATAR_CATEGORIES, AVATAR_KEYS, avatarSrc, findAvatar } from './avatar-catalog';
+import {
+  AVATAR_CATEGORIES,
+  AVATAR_KEYS,
+  EXCLUSIVE_AVATARS,
+  avatarSrc,
+  exclusiveAvatarsFor,
+  findAvatar,
+} from './avatar-catalog';
 
 /** "Tipos de jugador" pack (avatares-perfiles-v2); the "tipo" prefix keeps "tipoterror" apart from "terror". */
 const PLAYER_TYPES = [
@@ -62,5 +69,43 @@ describe('avatar catalog', () => {
 
   it('serves each preset from /avatars', () => {
     expect(avatarSrc('buho')).toBe('/avatars/buho.svg');
+  });
+
+  describe('exclusive presets', () => {
+    it('keeps estebanexplorador out of the shared list, owned by estebank13, served as WebP', () => {
+      // Pinned on purpose: pytra-api AvatarPolicyTest asserts AvatarPolicy.EXCLUSIVE_KEYS is this same set.
+      expect(EXCLUSIVE_AVATARS.map((a) => a.key)).toEqual(['estebanexplorador']);
+      expect(EXCLUSIVE_AVATARS[0].owner).toBe('estebank13');
+      expect(AVATAR_KEYS).not.toContain('estebanexplorador');
+      expect(avatarSrc('estebanexplorador')).toBe('/avatars/estebanexplorador.webp');
+    });
+
+    it('uses keys the API accepts', () => {
+      for (const { key } of EXCLUSIVE_AVATARS) {
+        expect(key, key).toMatch(/^[a-z]+$/);
+        expect(key.length, key).toBeLessThanOrEqual(32);
+      }
+    });
+
+    it('has the image file in public/avatars', async () => {
+      const fsModule = 'node:fs';
+      const { existsSync } = (await import(fsModule)) as { existsSync(path: string): boolean };
+      const missing = EXCLUSIVE_AVATARS.filter(({ key }) => !existsSync(`public${avatarSrc(key)}`));
+      expect(missing).toEqual([]);
+    });
+
+    it('still renders when stored, whoever the account is', () => {
+      expect(findAvatar('estebanexplorador')).toBe('estebanexplorador');
+    });
+
+    it('is offered only to the owner username, case-insensitively', () => {
+      expect(exclusiveAvatarsFor('estebank13')).toEqual(['estebanexplorador']);
+      expect(exclusiveAvatarsFor('EstebanK13')).toEqual(['estebanexplorador']);
+      expect(exclusiveAvatarsFor('alice')).toEqual([]);
+      expect(exclusiveAvatarsFor('estebank131')).toEqual([]);
+      expect(exclusiveAvatarsFor('')).toEqual([]);
+      expect(exclusiveAvatarsFor(null)).toEqual([]);
+      expect(exclusiveAvatarsFor(undefined)).toEqual([]);
+    });
   });
 });

@@ -190,7 +190,8 @@
         "animales": "Animales",
         "pixel": "Pixel",
         "generos": "Géneros",
-        "tipos": "Tipos de jugador"
+        "tipos": "Tipos de jugador",
+        "exclusivo": "Exclusivo"
       },
       "names": {
         "mando": "Mando",
@@ -264,7 +265,8 @@
         "tipomovil": "El de Bolsillo",
         "tipocapitan": "El Capitán",
         "tipocoleccionista": "El Coleccionista",
-        "tipofotografo": "El Fotógrafo"
+        "tipofotografo": "El Fotógrafo",
+        "estebanexplorador": "El Explorador de Esteban"
       },
       "descriptions": {
         "tipoexplorador": "Al que se pierde por los mapas y busca cada secreto",
