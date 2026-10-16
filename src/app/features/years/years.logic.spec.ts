@@ -123,7 +123,7 @@ describe('monthHourBars', () => {
       ['Mar', '<1h', 0.3],
     ]);
     expect(bars.every((b) => !b.topLabel)).toBe(true);
-    expect(bars[0].title).toBe('Ene: 12 h');
+    expect(bars.map((b) => b.title)).toEqual(['Ene: 12h', 'Feb: 0h', 'Mar: <1h']);
   });
 });
 

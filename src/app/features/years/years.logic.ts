@@ -25,7 +25,8 @@ export function monthHourBars(
     value: m.hours,
     label: labels[m.month - 1] ?? String(m.month),
     subLabel: monthValueLabel(m.hours) || null,
-    title: `${labels[m.month - 1] ?? m.month}: ${Math.round(m.hours)} h`,
+    // Same wording as the visible label ("12h", "<1h"); empty months read "0h".
+    title: `${labels[m.month - 1] ?? m.month}: ${monthValueLabel(m.hours) || '0h'}`,
   }));
 }
 
