@@ -1,5 +1,15 @@
 import { InProgressExperience, StatsSummary, YearStat } from '../../core/models/stats.model';
-import { dayOfYear, daysSince, pickTagline, taglineCandidates, TaglineInput, topRatedKey, topRatedLink } from './dashboard.logic';
+import {
+  dayOfYear,
+  daysSince,
+  pickTagline,
+  share,
+  statMeters,
+  taglineCandidates,
+  TaglineInput,
+  topRatedKey,
+  topRatedLink,
+} from './dashboard.logic';
 
 const summary = (partial: Partial<StatsSummary> = {}): StatsSummary => ({
   totalGames: 0,
@@ -108,5 +118,43 @@ describe('top rated links', () => {
     const run = topRatedKey({ gameId: 3, gameName: 'G', runLabel: 'Run 1', rating: 9, experienceId: 42, online: false });
     const online = topRatedKey({ gameId: 3, gameName: 'G', runLabel: null, rating: 9, experienceId: null, online: true });
     expect(run).not.toEqual(online);
+  });
+});
+
+describe('dashboard stat meters', () => {
+  it('computes each card share, null when there is nothing to divide', () => {
+    expect(share(1, 4)).toBe(0.25);
+    expect(share(5, 4)).toBe(1);
+    expect(share(1, 0)).toBeNull();
+
+    const games = [
+      { reviewStatus: 'CONFIRMED', sagaId: 1, experienceCount: 2, totalHours: 10 },
+      { reviewStatus: 'CONFIRMED', sagaId: null, experienceCount: 0, totalHours: 3 },
+      { reviewStatus: 'CONFIRMED', sagaId: null, experienceCount: 0, totalHours: 0 },
+      { reviewStatus: 'CONFIRMED', sagaId: 2, experienceCount: 0, totalHours: 0 },
+      { reviewStatus: 'PENDING_REVIEW', sagaId: 3, experienceCount: 0, totalHours: 0 },
+    ];
+    const meters = statMeters(
+      summary({
+        totalExperiences: 4,
+        completedCount: 3,
+        totalSingleplayerHours: 75,
+        totalOnlineHours: 25,
+        averageRating: 8.5,
+      }),
+      games,
+    );
+    expect(meters).toEqual({ games: 0.5, sagas: 0.5, runs: 0.75, singleHours: 0.75, onlineHours: 0.25, rating: 0.85 });
+  });
+
+  it('has no meters without data', () => {
+    expect(statMeters(summary(), null)).toEqual({
+      games: null,
+      sagas: null,
+      runs: null,
+      singleHours: null,
+      onlineHours: null,
+      rating: null,
+    });
   });
 });

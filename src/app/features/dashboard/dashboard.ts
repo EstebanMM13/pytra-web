@@ -35,7 +35,7 @@ import { GameService } from '../../core/services/game.service';
 import { SagaService } from '../../core/services/saga.service';
 import { AchievementBadge } from '../../shared/achievements/achievement-badge';
 import { computeAchievements, topUnlocked } from '../../shared/achievements/achievements';
-import { pickTagline, topRatedKey, topRatedLink } from './dashboard.logic';
+import { pickTagline, statMeters, topRatedKey, topRatedLink } from './dashboard.logic';
 
 type PlayMode = 'single' | 'online';
 
@@ -143,6 +143,12 @@ export class Dashboard {
     if (typeof params['hours'] === 'number') params['hours'] = new HoursPipe().transform(params['hours']);
     const count = typeof params['count'] === 'number' ? params['count'] : null;
     return { key: `dashboard.tagline.${t.key}`, params, count };
+  });
+
+  /** Proportion bars for the stat cards without a per-year sparkline (e.g. online hours). */
+  protected readonly meters = computed(() => {
+    const summary = this.summary();
+    return summary ? statMeters(summary, this.games()) : null;
   });
 
   /** Per-year series (oldest first, last TREND_YEARS) for the stat-card sparklines. */

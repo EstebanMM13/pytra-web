@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { figureFontSize, parseCountUp, StatCard } from './stat-card';
+import { figureFontSize, parseCountUp, StatCard, statVisual } from './stat-card';
 
 @Component({
   imports: [StatCard],
@@ -10,6 +10,7 @@ import { figureFontSize, parseCountUp, StatCard } from './stat-card';
     [hint]="hint()"
     [trend]="trend()"
     [valueClass]="valueClass()"
+    [meter]="meter()"
   />`,
 })
 class Host {
@@ -17,10 +18,11 @@ class Host {
   readonly hint = signal<string | null>(null);
   readonly trend = signal<readonly number[] | null>(null);
   readonly valueClass = signal('');
+  readonly meter = signal<number | null>(null);
 }
 
 describe('StatCard', () => {
-  function setup(patch: Partial<{ value: string; hint: string; trend: number[]; valueClass: string }> = {}) {
+  function setup(patch: Partial<{ value: string; hint: string; trend: number[]; valueClass: string; meter: number }> = {}) {
     TestBed.configureTestingModule({ imports: [Host] });
     const fixture = TestBed.createComponent(Host);
     const host = fixture.componentInstance;
@@ -28,6 +30,7 @@ describe('StatCard', () => {
     if (patch.hint !== undefined) host.hint.set(patch.hint);
     if (patch.trend !== undefined) host.trend.set(patch.trend);
     if (patch.valueClass !== undefined) host.valueClass.set(patch.valueClass);
+    if (patch.meter !== undefined) host.meter.set(patch.meter);
     fixture.detectChanges();
     return (fixture.nativeElement as HTMLElement).querySelector('app-stat-card') as HTMLElement;
   }
@@ -55,6 +58,18 @@ describe('StatCard', () => {
     expect(setup().querySelector('app-sparkline')).toBeNull();
   });
 
+  it('draws a proportion bar with the sparkline strip height when there is no trend', () => {
+    const card = setup({ meter: 0.25 });
+    const meter = card.querySelector('[data-visual="meter"]') as HTMLElement;
+    expect(meter.classList).toContain('mt-auto');
+    expect(meter.classList).toContain('h-5');
+    expect((meter.querySelector('.bg-brand-light') as HTMLElement).style.width).toBe('25%');
+    TestBed.resetTestingModule();
+    const withTrend = setup({ meter: 0.25, trend: [1, 2] });
+    expect(withTrend.querySelector('[data-visual="meter"]')).toBeNull();
+    expect(withTrend.querySelector('[data-visual="trend"]')).not.toBeNull();
+  });
+
   it('shows the hint under the figure', () => {
     const card = setup({ hint: '202 h campaign + 38 h online' });
     expect(card.textContent).toContain('202 h campaign + 38 h online');
@@ -64,6 +79,17 @@ describe('StatCard', () => {
     const card = setup({ value: '8.08', valueClass: 'font-mono text-gold' });
     const figure = card.querySelector('span.text-figure-tone') as HTMLElement;
     expect(figure.classList).toContain('text-gold');
+  });
+});
+
+describe('statVisual', () => {
+  it('prefers the per-year trend, falls back to the proportion bar, else nothing', () => {
+    expect(statVisual([1, 2], 0.5)).toBe('trend');
+    expect(statVisual([1], 0.5)).toBe('meter');
+    expect(statVisual(null, 0)).toBe('meter');
+    expect(statVisual(null, null)).toBe('none');
+    expect(statVisual([], Number.NaN)).toBe('none');
+    expect(statVisual(undefined, 1.5)).toBe('none');
   });
 });
 

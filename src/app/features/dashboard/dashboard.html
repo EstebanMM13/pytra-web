@@ -117,29 +117,56 @@
     <!-- Stats: same 6 cards everywhere (3 x 2 on mobile and tablet, one row on desktop) -->
     <section class="grid grid-cols-3 gap-2 md:gap-3 lg:grid-cols-6">
       @if (summary(); as s) {
-        <app-stat-card [icon]="statIcons.games" [label]="'dashboard.stats.games' | translate" [value]="s.totalGames" />
-        <app-stat-card [icon]="statIcons.sagas" [label]="'dashboard.stats.sagas' | translate" [value]="s.totalSagas" />
-        <app-stat-card [icon]="statIcons.runs" [label]="'dashboard.stats.runs' | translate" [value]="s.totalExperiences" [trend]="trends().runs" />
+        <!-- Every card: centred figure plus one small visual (per-year sparkline, else a proportion bar). -->
+        @let m = meters();
         <app-stat-card
+          centered
+          [icon]="statIcons.games"
+          [label]="'dashboard.stats.games' | translate"
+          [value]="s.totalGames"
+          [meter]="m?.games ?? null"
+        />
+        <app-stat-card
+          centered
+          [icon]="statIcons.sagas"
+          [label]="'dashboard.stats.sagas' | translate"
+          [value]="s.totalSagas"
+          [meter]="m?.sagas ?? null"
+        />
+        <app-stat-card
+          centered
+          [icon]="statIcons.runs"
+          [label]="'dashboard.stats.runs' | translate"
+          [value]="s.totalExperiences"
+          [trend]="trends().runs"
+          [meter]="m?.runs ?? null"
+        />
+        <app-stat-card
+          centered
           [icon]="statIcons.single"
           [label]="'dashboard.stats.singleHours' | translate"
           [shortLabel]="'dashboard.stats.singleHoursShort' | translate"
           [value]="s.totalSingleplayerHours | hours"
           [trend]="trends().hours"
+          [meter]="m?.singleHours ?? null"
         />
         <app-stat-card
+          centered
           [icon]="statIcons.online"
           [label]="'dashboard.stats.onlineHours' | translate"
           [shortLabel]="'dashboard.stats.onlineHoursShort' | translate"
           [value]="s.totalOnlineHours | hours"
+          [meter]="m?.onlineHours ?? null"
         />
         <app-stat-card
+          centered
           [icon]="statIcons.rating"
           [label]="'dashboard.stats.avgRating' | translate"
           [shortLabel]="'dashboard.stats.avgRatingShort' | translate"
           [value]="s.averageRating | rating"
           [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
           [trend]="trends().rating"
+          [meter]="m?.rating ?? null"
         />
       } @else if (!summaryFailed()) {
         @for (i of [1, 2, 3, 4, 5, 6]; track i) {
