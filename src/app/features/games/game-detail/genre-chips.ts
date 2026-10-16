@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CollapseStateService } from '../../../core/services/collapse-state.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
@@ -88,6 +88,19 @@ export class GenreChips {
   );
   protected readonly popover = signal(false);
   protected readonly sheet = signal(false);
+
+  constructor() {
+    // Crossing md swaps popover and sheet: close whichever is open rather than show the wrong one.
+    let wasWide = this.wide();
+    effect(() => {
+      const wide = this.wide();
+      if (wide !== wasWide) {
+        wasWide = wide;
+        this.popover.set(false);
+        this.sheet.set(false);
+      }
+    });
+  }
 
   protected openAll(): void {
     if (this.wide()) {

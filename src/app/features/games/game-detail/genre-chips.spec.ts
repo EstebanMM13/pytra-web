@@ -23,11 +23,12 @@ class Host {
 
 describe('GenreChips', () => {
   function setup(wide: boolean, genres?: string[]) {
+    const wideSignal = signal(wide);
     TestBed.configureTestingModule({
       imports: [Host],
       providers: [
         provideTranslateService(),
-        { provide: CollapseStateService, useValue: { atLeast: () => signal(wide).asReadonly() } },
+        { provide: CollapseStateService, useValue: { atLeast: () => wideSignal.asReadonly() } },
       ],
     });
     const fixture = TestBed.createComponent(Host);
@@ -36,7 +37,7 @@ describe('GenreChips', () => {
     const el = fixture.nativeElement as HTMLElement;
     const chips = () => [...el.querySelectorAll('app-genre-chips > span')].map((c) => c.textContent?.trim());
     const more = () => el.querySelector<HTMLButtonElement>('[data-more-genres]');
-    return { fixture, el, chips, more };
+    return { fixture, el, chips, more, wideSignal };
   }
 
   it('shows every genre when there are two or fewer', () => {
@@ -72,6 +73,23 @@ describe('GenreChips', () => {
     expect(dialog.getAttribute('aria-label')).toBe('game.genre');
     expect(dialog.querySelectorAll('li')).toHaveLength(4);
     (dialog.querySelector('header button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(document.body.querySelector('app-modal-sheet')).toBeNull();
+  });
+
+  it('closes the popover or the sheet when the md breakpoint changes', () => {
+    const { fixture, el, more, wideSignal } = setup(true);
+    more()!.click();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-genre-popover]')).not.toBeNull();
+    wideSignal.set(false);
+    fixture.detectChanges();
+    expect(el.querySelector('[data-genre-popover]')).toBeNull();
+
+    more()!.click();
+    fixture.detectChanges();
+    expect(document.body.querySelector('app-modal-sheet')).not.toBeNull();
+    wideSignal.set(true);
     fixture.detectChanges();
     expect(document.body.querySelector('app-modal-sheet')).toBeNull();
   });
