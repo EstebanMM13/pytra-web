@@ -33,7 +33,8 @@
       class="relative isolate -mx-5 overflow-hidden px-5 pt-2 pb-3 md:mx-0 md:rounded-2xl md:border md:border-card-border md:p-6"
     >
       @if (g.coverImageUrl) {
-        <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+        <!-- Blurred cover backdrop: drifts and grows a little as the page scrolls -->
+        <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true" appScrollParallax>
           <img
             [src]="g.coverImageUrl"
             alt=""

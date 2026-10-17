@@ -37,6 +37,7 @@ import { StatusPill } from '../../../shared/ui/status-pill';
 import { formatDayMonthYear, formatRunPeriod } from '../../../shared/utils/run-dates';
 import { GameEditDialog } from '../game-edit-dialog/game-edit-dialog';
 import { GenreChips } from './genre-chips';
+import { ScrollParallax } from '../../../shared/ui/scroll-parallax';
 import {
   OnlinePlaytimeLoadState,
   buildOnlinePlaytimeRequest,
@@ -63,6 +64,7 @@ function byRelease(a: Game, b: Game): number {
 @Component({
   selector: 'app-game-detail',
   imports: [
+    ScrollParallax,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,
