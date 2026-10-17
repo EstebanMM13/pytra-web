@@ -5,6 +5,11 @@
   <title>Pytra</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Warm up connections the first screen needs: the API (CORS, so `crossorigin`; keep in sync
+       with environment.production.ts) and the cover CDNs (plain <img> requests). -->
+  <link rel="preconnect" href="https://pytra-api-production.up.railway.app" crossorigin>
+  <link rel="preconnect" href="https://shared.akamai.steamstatic.com">
+  <link rel="dns-prefetch" href="https://images.igdb.com">
   <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="brand/favicon-16.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
