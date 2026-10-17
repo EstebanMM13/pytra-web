@@ -280,14 +280,14 @@
         </div>
       </section>
 
-      <!-- Sized to its content (capped plot height) instead of stretching to the playing-now card. -->
-      <section class="flex flex-col self-start rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
+      <!-- Stretches to the playing-now card's height; the plot grows to fill it (with a floor). -->
+      <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
         <app-section-header collapseKey="dashboard.hoursByYear" collapseGroup="dashboard.activity" collapseGroupFrom="lg" class="mb-3 md:mb-[18px]" [label]="'dashboard.hoursByYear' | translate">
         </app-section-header>
         @if (yearBars(); as bars) {
           @if (bars.length) {
-            <div class="hidden md:block">
-              <app-recent-bar-chart [bars]="bars" [height]="220" large [title]="'dashboard.hoursByYear' | translate" />
+            <div class="hidden min-h-[200px] flex-1 flex-col md:flex">
+              <app-recent-bar-chart class="flex-1" [bars]="bars" [height]="null" large [title]="'dashboard.hoursByYear' | translate" />
             </div>
             <div class="md:hidden">
               <app-recent-bar-chart [bars]="bars" [height]="96" dense [title]="'dashboard.hoursByYear' | translate" />
@@ -300,21 +300,23 @@
             }
           }
         } @else {
-          <app-skeleton class="h-24 rounded-lg md:h-[220px]" />
+          <app-skeleton class="h-24 rounded-lg md:min-h-[200px] md:flex-1" />
         }
       </section>
     </div>
 
-    <!-- Rankings: same-length lists share the row height so the cards end flush; lists of
-         different lengths keep their own height rather than stretching a few rows. -->
-    <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3" [class.items-start]="listsUneven()">
+    <!-- Rankings: the cards always share the row height. Same-length lists spread their rows to
+         end flush; lists of different lengths keep natural rows rather than stretching a few. -->
+    @let spreadRows = !listsUneven();
+    <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-3">
       <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header collapseKey="dashboard.topRated" collapseGroup="dashboard.lists" collapseGroupFrom="lg" class="mb-3.5" [label]="'dashboard.topRated' | translate" />
         @if (topRated(); as items) {
           @for (item of items; track topRatedKey(item); let i = $index) {
             <a
               [routerLink]="topRatedLink(item)"
-              class="flex flex-1 items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
+              class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
+              [class.flex-1]="spreadRows"
             >
               <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
               @if (item.online) {
@@ -347,7 +349,7 @@
         </app-section-header>
         @if (mostPlayed(); as items) {
           @for (item of items; track item.gameId) {
-            <a [routerLink]="['/games', item.gameId]" class="flex flex-1 flex-col justify-center hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover">
+            <a [routerLink]="['/games', item.gameId]" [class.flex-1]="spreadRows" class="flex flex-col justify-center hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover">
               <span class="flex justify-between gap-3">
                 <span class="min-w-0 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
                 <span class="shrink-0 font-mono">{{ item.totalHours | hours }}</span>
@@ -374,7 +376,8 @@
           @for (item of items; track item.sagaId) {
             <a
               [routerLink]="['/sagas', item.sagaId]"
-              class="flex flex-1 items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
+              class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
+              [class.flex-1]="spreadRows"
             >
               <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
               <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translatePlural: item.gameCount }}</span>
