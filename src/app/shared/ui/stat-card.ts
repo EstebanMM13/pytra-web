@@ -31,7 +31,7 @@ import { canAnimate } from '../utils/motion';
   styles: `
     @media (prefers-reduced-motion: no-preference) {
       :host {
-        animation: stat-card-in 320ms ease-out backwards;
+        animation: stat-card-in 320ms cubic-bezier(0, 0, 0.58, 1) backwards;
       }
       :host(:nth-child(2)) { animation-delay: 40ms; }
       :host(:nth-child(3)) { animation-delay: 80ms; }

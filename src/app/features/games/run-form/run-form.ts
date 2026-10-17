@@ -24,6 +24,7 @@ import { RunFormLauncher, RunFormRequest } from '../../../core/services/run-form
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
+import { Skeleton } from '../../../shared/ui/skeleton';
 import { todayIso } from '../../../shared/utils/run-dates';
 import { formatDecimalInput } from '../../../shared/utils/decimal-input';
 import { toastApiError } from '../../../shared/utils/api-error';
@@ -54,7 +55,7 @@ function normalize(text: string): string {
  */
 @Component({
   selector: 'app-run-form',
-  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, LucideDynamicIcon],
+  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, Skeleton, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './run-form.html',
   styleUrl: './run-form.css',

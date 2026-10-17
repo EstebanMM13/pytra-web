@@ -21,7 +21,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         color-mix(in srgb, var(--pt-text) 7%, transparent) 50%,
         transparent 80%
       );
-      animation: skeleton-shimmer 1.4s ease-in-out infinite;
+      animation: skeleton-shimmer 1.4s cubic-bezier(0.42, 0, 0.58, 1) infinite;
     }
 
     @keyframes skeleton-shimmer {
