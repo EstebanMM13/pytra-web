@@ -95,7 +95,7 @@ interface FilterChip {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './games.html',
-  styleUrl: './games.css',
+  styleUrls: ['./games.css', '../../shared/ui/platinum-glow.css'],
 })
 export class Games {
   protected readonly icons = ICONS;

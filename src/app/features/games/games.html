@@ -218,25 +218,25 @@
           <li class="library-in min-w-0" [style.--i]="$index">
             <a [routerLink]="['/games', game.id]" class="cover-card group flex flex-col gap-2 rounded-lg">
               <div class="relative">
-                <span class="cover-glow transition duration-200 group-hover:-translate-y-1" aria-hidden="true"></span>
+                <span class="cover-glow cover-lift" aria-hidden="true"></span>
                 <app-game-cover
                   decorative
                   size="fill"
-                  class="cover-art shadow-md ring-1 shadow-black/25 ring-border transition duration-200 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:ring-brand-light"
+                  class="cover-art shadow-md ring-1 shadow-black/25 ring-border cover-lift group-hover:shadow-xl group-hover:ring-brand-light"
                   [url]="game.coverImageUrl"
                   [name]="game.name"
                 />
-                <span class="cover-shine transition duration-200 group-hover:-translate-y-1" aria-hidden="true"></span>
+                <span class="cover-shine cover-lift" aria-hidden="true"></span>
                 @if (game.bestRating !== null && game.bestRating !== undefined) {
                   <span
-                    class="absolute right-1.5 bottom-1.5 rounded-md border border-border bg-bg/85 px-1.5 py-0.5 font-mono text-xs font-medium backdrop-blur-sm transition duration-200 group-hover:-translate-y-1"
+                    class="absolute right-1.5 bottom-1.5 rounded-md border border-border bg-bg/85 px-1.5 py-0.5 font-mono text-xs font-medium backdrop-blur-sm cover-lift"
                     [class]="game.bestRating | ratingTone"
                     >{{ game.bestRating | rating }}</span
                   >
                 }
                 @if (game.hasPlatinum) {
                   <span
-                    class="platinum-glow absolute top-1.5 left-1.5 rounded-md bg-bg/85 px-1 py-0.5 text-xs backdrop-blur-sm transition duration-200 group-hover:-translate-y-1"
+                    class="platinum-glow absolute top-1.5 left-1.5 rounded-md bg-bg/85 px-1 py-0.5 text-xs backdrop-blur-sm cover-lift"
                     [attr.aria-label]="'library.platinum' | translate"
                     >🏆</span
                   >

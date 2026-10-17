@@ -1,0 +1,29 @@
+/*
+ * Platinum marker glow, shared by component stylesheets (styleUrls). `.platinum-glow` is a static
+ * gold halo (host must be positioned); add `.platinum-glow-pulse` for a slow opacity pulse, used
+ * on detail screens only (static with reduced motion).
+ */
+.platinum-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--pt-gold) 60%, transparent);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .platinum-glow-pulse::after {
+    animation: platinum-glow 2.4s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
+  }
+}
+
+@keyframes platinum-glow {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
