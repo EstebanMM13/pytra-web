@@ -262,7 +262,12 @@ describe('online-only games', () => {
     expect(matchesStatus(fortnite, 'ONLINE')).toBe(true);
     expect(matchesStatus(fortnite, 'PENDIENTE')).toBe(false);
     expect(matchesStatus(backlog, 'PENDIENTE')).toBe(true);
-    expect(matchesStatus(codWithRun, 'ONLINE')).toBe(false);
+    expect(matchesStatus(backlog, 'ONLINE')).toBe(false);
+  });
+
+  it('lists hybrids with runs in the ONLINE tab as well as in their run status tab', () => {
+    expect(matchesStatus(codWithRun, 'ONLINE')).toBe(true);
+    expect(matchesStatus(codWithRun, codWithRun.lastExperienceStatus!)).toBe(true);
   });
 
   it('parses the library view, defaulting to the list', () => {

@@ -78,7 +78,8 @@ export function matchesStatus(game: Game, status: LibraryStatusFilter): boolean 
     return true;
   }
   if (status === 'ONLINE') {
-    return isOnlineOnly(game);
+    // Every game with an online side, so hybrids also show here alongside their run status tab.
+    return game.category === 'ONLINE' || game.category === 'HYBRID';
   }
   const last = game.lastExperienceStatus ?? null;
   return status === 'PENDIENTE' ? last === 'PENDIENTE' || (last === null && !isOnlineOnly(game)) : last === status;
