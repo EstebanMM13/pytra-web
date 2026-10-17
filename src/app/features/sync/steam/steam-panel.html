@@ -15,16 +15,15 @@
   [subtitle]="'sync.steamHint' | translate"
   [icon]="icons.monitor"
 >
+  <!-- One @if with a single root element: nested blocks are not projected into [platformBadge]. -->
   @if (status(); as s) {
-    @if (s.linked) {
-      <span platformBadge class="rounded-full bg-success-bg px-[9px] py-[3px] text-xs font-medium whitespace-nowrap text-success">
-        {{ 'steam.linkedPill' | translate }}
-      </span>
-    } @else {
-      <span platformBadge class="rounded-full bg-neutral-bg px-[9px] py-[3px] text-xs font-medium whitespace-nowrap text-neutral">
-        {{ 'steam.notLinkedPill' | translate }}
-      </span>
-    }
+    <span
+      platformBadge
+      class="rounded-full px-[9px] py-[3px] text-xs font-medium whitespace-nowrap"
+      [class]="s.linked ? 'bg-success-bg text-success' : 'bg-neutral-bg text-neutral'"
+    >
+      {{ (s.linked ? 'steam.linkedPill' : 'steam.notLinkedPill') | translate }}
+    </span>
   }
 
   @if (statusLoading()) {
