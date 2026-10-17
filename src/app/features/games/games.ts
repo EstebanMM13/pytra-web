@@ -387,16 +387,28 @@ export class Games {
       this.searchText.set(params['q'] ?? '');
     }
     const q = this.searchText();
-    if (q !== this.urlQuery().text) {
-      this.echoText = q;
+    const echo = q !== this.urlQuery().text ? q : null;
+    if (echo !== null) {
+      this.echoText = echo;
     }
     params = { ...params, q: q || null };
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: params,
-      queryParamsHandling: 'merge',
-      replaceUrl,
-    });
+    // A cancelled or failed navigation never echoes: drop the expectation so it cannot swallow a
+    // later back / forward to the same text.
+    const dropEcho = () => {
+      if (echo !== null && this.echoText === echo) {
+        this.echoText = null;
+      }
+    };
+    this.router
+      .navigate([], {
+        relativeTo: this.route,
+        queryParams: params,
+        queryParamsHandling: 'merge',
+        replaceUrl,
+      })
+      .then((navigated) => {
+        if (!navigated) dropEcho();
+      }, dropEcho);
   }
 
   protected onGameCreated(game: Game): void {

@@ -153,9 +153,13 @@ describe('Games library filters', () => {
 
 describe('Games library search', () => {
   async function setup() {
+    /** Lets a test cancel navigations (the guard reruns on query-only changes). */
+    const guard = { allow: true };
     TestBed.configureTestingModule({
       providers: [
-        provideRouter([{ path: 'games', component: Games }]),
+        provideRouter([
+          { path: 'games', component: Games, canActivate: [() => guard.allow], runGuardsAndResolvers: 'always' },
+        ]),
         provideTranslateService(),
         { provide: GameService, useValue: { findAll: () => of(GAMES) } },
       ],
@@ -179,7 +183,7 @@ describe('Games library search', () => {
       await new Promise((resolve) => setTimeout(resolve, 350));
       await harness.fixture.whenStable();
     };
-    return { harness, router, navigations, el, input, type, listed, pause };
+    return { harness, router, navigations, el, input, type, listed, pause, guard };
   }
 
   it('filters on every keystroke but writes the URL once typing pauses', async () => {
@@ -218,5 +222,49 @@ describe('Games library search', () => {
     expect(navigations.length).toBe(1);
     expect(router.url).toContain('q=Game%201');
     expect(router.url).toContain('status=');
+  });
+
+  it('never writes the URL after the page is destroyed mid-debounce', async () => {
+    const { harness, navigations, type, pause } = await setup();
+
+    await type('Game 2');
+    harness.fixture.destroy();
+    await new Promise((resolve) => setTimeout(resolve, 350));
+
+    expect(navigations).toEqual([]);
+  });
+
+  it('shows the whole library again when the box is cleared while a URL write is pending', async () => {
+    const { router, navigations, type, listed, pause } = await setup();
+
+    await type('Game 2');
+    await type('');
+    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3', '/games/4']);
+
+    await pause();
+    expect(navigations).toEqual([]);
+    expect(router.url).toBe('/games');
+    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3', '/games/4']);
+  });
+
+  it('lets a later back / forward to the same text reach the box after a cancelled search navigation', async () => {
+    const { harness, router, navigations, input, type, listed, pause, guard } = await setup();
+
+    guard.allow = false;
+    await type('Game 2');
+    await pause();
+    expect(navigations).toEqual([]);
+    expect(router.url).toBe('/games');
+
+    // Typing again (still pending), then the URL moves to the text of the cancelled write.
+    guard.allow = true;
+    await type('Game 4');
+    await router.navigateByUrl('/games?q=Game%202');
+    await harness.fixture.whenStable();
+
+    expect(input.value).toBe('Game 2');
+    expect(listed()).toEqual(['/games/2']);
+    await pause();
+    expect(router.url).toBe('/games?q=Game%202');
   });
 });
