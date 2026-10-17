@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { CurrentUser } from '../../core/models/user.model';
@@ -31,7 +32,7 @@ const USER: CurrentUser = {
 };
 
 describe('Profile', () => {
-  function setup(demo = false) {
+  function configure(demo = false) {
     const userService = {
       currentUser: signal(USER),
       displayName: signal('Ana'),
@@ -42,7 +43,7 @@ describe('Profile', () => {
     TestBed.configureTestingModule({
       imports: [Profile],
       providers: [
-        provideRouter([]),
+        provideRouter([{ path: 'profile', component: Profile }]),
         provideTranslateService(),
         { provide: UserService, useValue: userService },
         { provide: AuthService, useValue: { isDemo: signal(demo), logout: vi.fn() } },
@@ -57,11 +58,30 @@ describe('Profile', () => {
       ],
     });
     TestBed.overrideComponent(Profile, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    return { userService, blockWrite };
+  }
+
+  function setup(demo = false) {
+    const mocks = configure(demo);
     const fixture = TestBed.createComponent(Profile);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const rows = () => [...el.querySelectorAll<HTMLElement>('[data-profile-rows] > a, [data-profile-rows] > button')];
-    return { fixture, el, rows, userService, blockWrite };
+    return { fixture, el, rows, ...mocks };
+  }
+
+  /** Opens the page through the router at `url`; returns the highlighted sidebar entry. */
+  async function openAt(url: string) {
+    configure();
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl(url, Profile);
+    await new Promise((resolve) => setTimeout(resolve));
+    harness.detectChanges();
+    const active = () =>
+      [...harness.routeNativeElement!.querySelectorAll<HTMLButtonElement>('nav button')]
+        .find((b) => b.classList.contains('bg-brand-tint'))
+        ?.textContent?.trim();
+    return { harness, active };
   }
 
   const scrollIntoView = vi.fn();
@@ -97,6 +117,26 @@ describe('Profile', () => {
       expect(scrollIntoView).toHaveBeenCalledTimes(1);
       expect(scrollIntoView.mock.contexts[0]).toBe(target);
     }
+  });
+
+  it('opens at the top on "Cuenta" when no entry point targets a section', async () => {
+    const { active } = await openAt('/profile');
+    expect(active()).toBe('profile.sections.account');
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('opens on the section an entry point targets (dashboard "Ver todos" → achievements)', async () => {
+    const { active } = await openAt('/profile?section=achievements');
+    expect(active()).toBe('profile.sections.achievements');
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.contexts[0]).toBe(document.getElementById('profile-achievements'));
+  });
+
+  it('returns to "Cuenta" when the reused page is opened again without a target', async () => {
+    const { harness, active } = await openAt('/profile?section=achievements');
+    await harness.navigateByUrl('/profile');
+    harness.detectChanges();
+    expect(active()).toBe('profile.sections.account');
   });
 
   it('shows every section in the demo, but avatar, username and export never reach the API', () => {

@@ -1,5 +1,18 @@
 /** Pure helpers behind the profile page. */
 
+/** The page's sections, in page order. */
+export const PROFILE_SECTIONS = ['account', 'achievements', 'preferences', 'data'] as const;
+export type ProfileSection = (typeof PROFILE_SECTIONS)[number];
+
+/** Query param an entry point sets to open the profile on a section, e.g. `/profile?section=achievements`. */
+export const PROFILE_SECTION_PARAM = 'section';
+
+/** The section the profile opens on: the one the `section` query param names, else the top ("Cuenta"). */
+export function initialProfileSection(param: string | null | undefined): ProfileSection {
+  const match = PROFILE_SECTIONS.find((section) => section === param);
+  return match ?? 'account';
+}
+
 /** Error key that means "log in again with Google, then retry" (Google-only account, old token). */
 export const REAUTH_REQUIRED_KEY = 'profile.delete.errors.reauth';
 

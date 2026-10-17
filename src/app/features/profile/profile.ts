@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
@@ -38,9 +39,16 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { AvatarPicker } from './avatar-picker';
 import { DeleteAccountDialog } from './delete-account-dialog';
 import { ModalSheet } from '../../shared/ui/modal-sheet';
-import { avatarErrorKey, exportErrorKey, formatMemberSince } from './profile.logic';
+import {
+  PROFILE_SECTIONS,
+  PROFILE_SECTION_PARAM,
+  ProfileSection,
+  avatarErrorKey,
+  exportErrorKey,
+  formatMemberSince,
+  initialProfileSection,
+} from './profile.logic';
 
-type ProfileSection = 'account' | 'achievements' | 'preferences' | 'data';
 /** Scroll targets: the sections plus the delete-account row inside "Datos". */
 type ProfileAnchor = ProfileSection | 'delete';
 
@@ -48,8 +56,6 @@ type ProfileAnchor = ProfileSection | 'delete';
 export type ProfileRow =
   | { kind: 'anchor'; anchor: ProfileAnchor; labelKey: string; icon: LucideIconInput; danger?: boolean }
   | { kind: 'route'; route: string; labelKey: string; icon: LucideIconInput };
-
-const SECTIONS: readonly ProfileSection[] = ['account', 'achievements', 'preferences', 'data'];
 
 const MOBILE_ROWS: readonly ProfileRow[] = [
   { kind: 'anchor', anchor: 'account', labelKey: 'profile.sections.account', icon: ICONS.user },
@@ -95,7 +101,7 @@ export class Profile {
   private readonly demoMode = inject(DemoModeService);
   protected readonly isDemo = this.demoMode.isDemo;
   /** Web sidebar entries. */
-  protected readonly sections = SECTIONS;
+  protected readonly sections = PROFILE_SECTIONS;
   /** Phones and tablets: every section (plus Sync) as tappable rows at the top. */
   protected readonly mobileRows = MOBILE_ROWS;
 
@@ -149,7 +155,10 @@ export class Profile {
   /** Steam link state for the mobile list; null while loading or unavailable. */
   protected readonly steamStatus = signal<SteamStatus | null>(null);
 
-  protected readonly activeSection = signal<ProfileSection>('achievements');
+  /** Highlighted sidebar entry: the targeted section on arrival (the top, "Cuenta", by default). */
+  protected readonly activeSection = signal<ProfileSection>('account');
+  /** Section the URL targets (`?section=`), scrolled to once the achievements are in (they set the page height). */
+  private targetSection: ProfileSection = 'account';
 
   /** All badges in definition order (category, easier first); `null` while loading, `[]` when the data could not load. */
   protected readonly achievements = signal<Achievement[] | null>(null);
@@ -205,6 +214,16 @@ export class Profile {
 
     this.platformService.load().subscribe({ error: () => {} });
 
+    // Opens at the top unless an entry point targets a section (dashboard "Ver todos":
+    // ?section=achievements). Also runs when the page is reused, e.g. the avatar menu from here.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      this.targetSection = initialProfileSection(params.get(PROFILE_SECTION_PARAM));
+      this.activeSection.set(this.targetSection);
+      if (this.achievements() !== null) {
+        this.scrollToTarget();
+      }
+    });
+
     forkJoin({
       games: inject(GameService).findAll(),
       sagas: inject(SagaService).findAll(),
@@ -214,11 +233,7 @@ export class Profile {
       .pipe(catchError(() => of(null)))
       .subscribe((data) => {
         this.achievements.set(data ? computeAchievements(data) : []);
-        // "Ver todos" on the dashboard links here with #profile-achievements; the card only
-        // exists once this data is loaded, so scroll to it now instead of relying on the router.
-        if (this.route.snapshot.fragment === 'profile-achievements') {
-          setTimeout(() => this.scrollTo('achievements'));
-        }
+        this.scrollToTarget();
       });
 
     this.steamService
@@ -240,6 +255,14 @@ export class Profile {
         control.setValue(user.usernameDisplay || user.username);
       }
     });
+  }
+
+  /** Scrolls to the targeted section, if any; the top needs no scroll (the router already lands there). */
+  private scrollToTarget(): void {
+    const section = this.targetSection;
+    if (section !== 'account') {
+      setTimeout(() => this.scrollTo(section));
+    }
   }
 
   protected scrollTo(anchor: ProfileAnchor): void {

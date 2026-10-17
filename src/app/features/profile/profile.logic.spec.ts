@@ -5,6 +5,7 @@ import {
   deleteAccountErrorKey,
   exportErrorKey,
   formatMemberSince,
+  initialProfileSection,
 } from './profile.logic';
 
 const apiError = (status: number, message?: string) => ({ status, error: message ? { message } : null });
@@ -47,6 +48,25 @@ describe('formatMemberSince', () => {
     expect(formatMemberSince('2026-07-14T10:00:00', 'en')).toBe('July 2026');
     expect(formatMemberSince(null, 'es')).toBeNull();
     expect(formatMemberSince('nope', 'es')).toBeNull();
+  });
+});
+
+describe('initialProfileSection', () => {
+  it('opens at the top ("Cuenta") without a target', () => {
+    expect(initialProfileSection(null)).toBe('account');
+    expect(initialProfileSection(undefined)).toBe('account');
+    expect(initialProfileSection('')).toBe('account');
+  });
+
+  it('opens on the targeted section', () => {
+    expect(initialProfileSection('achievements')).toBe('achievements');
+    expect(initialProfileSection('preferences')).toBe('preferences');
+    expect(initialProfileSection('data')).toBe('data');
+  });
+
+  it('ignores unknown targets', () => {
+    expect(initialProfileSection('delete')).toBe('account');
+    expect(initialProfileSection('Achievements')).toBe('account');
   });
 });
 
