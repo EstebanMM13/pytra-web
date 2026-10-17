@@ -17,6 +17,8 @@ export interface SagaSummary {
   studio: string | null;
   firstYear: number | null;
   lastYear: number | null;
+  /** Sortable `yyyy-MM-dd` of the saga's most recent run / online activity; null when unknown. */
+  lastActivity: string | null;
 }
 
 export function releaseYear(game: Game): number | null {
@@ -66,6 +68,22 @@ function mostCommon(values: readonly string[]): string | null {
   return best;
 }
 
+/**
+ * Sortable `yyyy-MM-dd` of a game's latest activity: run or online session date, else its run date,
+ * else the end of its last played year.
+ */
+export function lastActivityKey(game: Game): string | null {
+  const date = game.lastActivityAt ?? game.lastPlayedAt;
+  if (date) {
+    return date.slice(0, 10);
+  }
+  return game.lastPlayedYear != null ? `${String(game.lastPlayedYear).padStart(4, '0')}-12-31` : null;
+}
+
+function latest(keys: readonly (string | null)[]): string | null {
+  return keys.reduce<string | null>((a, b) => (b !== null && (a === null || b > a) ? b : a), null);
+}
+
 export function summarizeSaga(saga: Saga, allGames: readonly Game[]): SagaSummary {
   const games = allGames
     .filter((g) => g.sagaId === saga.id && g.reviewStatus !== 'PENDING_REVIEW')
@@ -83,6 +101,7 @@ export function summarizeSaga(saga: Saga, allGames: readonly Game[]): SagaSummar
     studio: mostCommon(games.map((g) => g.developer?.trim() ?? '').filter((d) => !!d)),
     firstYear: years.length ? Math.min(...years) : null,
     lastYear: years.length ? Math.max(...years) : null,
+    lastActivity: latest(games.map(lastActivityKey)),
   };
 }
 
@@ -104,4 +123,46 @@ export function sagaMetaLine(summary: SagaSummary): string {
 /** Share of played games, 0–100. */
 export function playedPercent(summary: SagaSummary): number {
   return summary.total ? Math.round((summary.played / summary.total) * 100) : 0;
+}
+
+/** Sagas list orders; `name` (A–Z) is the default and stays out of the URL. */
+export type SagaSort = 'name' | 'hours' | 'rating' | 'completion' | 'recent';
+
+export const SAGA_SORTS: readonly SagaSort[] = ['name', 'hours', 'rating', 'completion', 'recent'];
+
+export const DEFAULT_SAGA_SORT: SagaSort = 'name';
+
+/** The `sort` query param, whitelisted: anything unknown falls back to the default. */
+export function parseSagaSort(value: string | null | undefined): SagaSort {
+  return (SAGA_SORTS as readonly string[]).includes(value ?? '') ? (value as SagaSort) : DEFAULT_SAGA_SORT;
+}
+
+const byName = (a: SagaSummary, b: SagaSummary): number =>
+  a.saga.name.localeCompare(b.saga.name, 'es', { sensitivity: 'base' });
+
+/** Descending by a nullable key (nulls last), ties alphabetically. */
+function descending<K extends number | string>(key: (s: SagaSummary) => K | null) {
+  return (a: SagaSummary, b: SagaSummary): number => {
+    const ka = key(a);
+    const kb = key(b);
+    if (ka !== kb) {
+      if (ka === null) return 1;
+      if (kb === null) return -1;
+      return ka < kb ? 1 : -1;
+    }
+    return byName(a, b);
+  };
+}
+
+const SAGA_COMPARATORS: Record<SagaSort, (a: SagaSummary, b: SagaSummary) => number> = {
+  name: byName,
+  hours: descending((s) => s.hours),
+  rating: descending((s) => s.avgRating),
+  // Sagas without games have no completion: last.
+  completion: descending((s) => (s.total ? s.played / s.total : null)),
+  recent: descending((s) => s.lastActivity),
+};
+
+export function sortSagas(summaries: readonly SagaSummary[], sort: SagaSort): SagaSummary[] {
+  return [...summaries].sort(SAGA_COMPARATORS[sort]);
 }

@@ -24,6 +24,19 @@
       </button>
     </div>
 
+    @if (!loading() && summaries().length > 1) {
+      <app-dropdown
+        class="-mt-1 mb-1 self-start md:mx-2"
+        [options]="sortOptions"
+        [value]="sort()"
+        (valueChange)="setSort($event)"
+        [ariaLabel]="'sagas.sortLabel' | translate"
+        [highlighted]="sort() !== 'name'"
+      >
+        <svg [lucideIcon]="icons.arrowUpDown" [size]="14" class="shrink-0" aria-hidden="true"></svg>
+      </app-dropdown>
+    }
+
     <!-- Web: the column is capped to the viewport and the list scrolls inside it; phones keep page scroll. -->
     <div class="flex flex-col gap-2.5 md:min-h-0 md:scroll-list md:gap-2">
       @if (loading()) {
@@ -40,51 +53,71 @@
           <button
             type="button"
             (click)="dialog.set(null)"
-            class="rounded-lg bg-brand px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark"
+            class="press rounded-lg bg-brand px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark"
           >
             {{ 'sagas.new' | translate }}
           </button>
         </div>
       } @else {
-        @for (s of summaries(); track s.saga.id) {
+        @for (s of summaries(); track s.saga.id; let idx = $index) {
           <a
             [routerLink]="['/sagas', s.saga.id]"
+            queryParamsHandling="preserve"
             [attr.aria-current]="selected()?.saga?.id === s.saga.id ? 'true' : null"
-            class="flex items-center gap-3.5 rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
+            class="saga-card saga-in press flex items-center gap-3.5 rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
             [class]="
               selected()?.saga?.id === s.saga.id
                 ? 'border-border md:border-brand md:bg-brand-tint'
                 : 'hover-lift border-border md:border-transparent md:bg-transparent md:hover:bg-hover'
             "
+            [style.--i]="idx"
           >
-            <!-- First games of the saga as a fanned stack of box art -->
-            <span class="flex w-14 shrink-0 items-center" aria-hidden="true">
-              @for (g of s.games.slice(0, 3); track g.id; let i = $index) {
+            <!-- Up to four of the saga's games as an overlapping, slightly fanned collage of box art -->
+            <span class="saga-collage relative h-12 w-[74px] shrink-0" aria-hidden="true">
+              @for (g of s.games.slice(0, 4); track g.id; let i = $index) {
                 <app-game-cover
                   decorative
                   size="sm"
-                  class="shadow-md ring-2 shadow-black/30 ring-bg"
-                  [class.-ml-5]="i > 0"
-                  [style.z-index]="3 - i"
+                  class="saga-collage-cover absolute top-0 shadow-md ring-2 shadow-black/30 ring-bg"
+                  [style.left.px]="i * 14"
+                  [style.z-index]="4 - i"
+                  [style.--n]="i"
                   [url]="g.coverImageUrl"
                   [name]="g.name"
                 />
               } @empty {
-                <app-game-cover decorative size="sm" [name]="s.saga.name" />
+                <app-game-cover decorative size="sm" class="absolute top-0 left-0" [name]="s.saga.name" />
               }
             </span>
             <div class="min-w-0 flex-1">
-            <div class="flex justify-between gap-3 text-[15px] font-semibold">
-              <span class="truncate" [title]="s.saga.name">{{ s.saga.name }}</span>
-              <span class="shrink-0 font-mono font-medium" [class]="s.avgRating | ratingTone">{{ s.avgRating | rating }}</span>
-            </div>
-            <div class="mt-1.5 flex justify-between gap-3 text-xs text-muted">
-              <span>{{ 'sagas.playedOf' | translatePlural: s.total : { played: s.played, total: s.total } }}</span>
-              <span class="font-mono">{{ s.hours | hours }}</span>
-            </div>
-            <div class="mt-[9px] h-[3px] rounded-sm bg-border">
-              <div class="h-[3px] rounded-sm bg-brand-light" [style.width.%]="playedPercent(s)"></div>
-            </div>
+              <div class="flex items-baseline justify-between gap-3 text-[15px] font-semibold">
+                <span class="truncate" [title]="s.saga.name">{{ s.saga.name }}</span>
+                <span
+                  class="flex shrink-0 items-center gap-1 font-mono text-[13px] font-medium"
+                  [class]="s.avgRating | ratingTone"
+                  [attr.title]="'sagas.stats.avgRating' | translate"
+                >
+                  <svg [lucideIcon]="icons.star" [size]="12" aria-hidden="true"></svg>
+                  {{ s.avgRating | rating }}
+                </span>
+              </div>
+              <div class="mt-1.5 flex justify-between gap-3 text-xs text-muted">
+                <span class="truncate">{{ 'sagas.playedOf' | translatePlural: s.total : { played: s.played, total: s.total } }}</span>
+                <span class="flex shrink-0 items-center gap-1 font-mono" [attr.title]="'sagas.stats.hours' | translate">
+                  <svg [lucideIcon]="icons.clock" [size]="12" aria-hidden="true"></svg>
+                  {{ s.hours | hours }}
+                </span>
+              </div>
+              <div
+                class="mt-[9px] h-1 overflow-hidden rounded-full bg-border"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="playedPercent(s)"
+                [attr.aria-label]="'sagas.stats.played' | translate"
+              >
+                <div class="bar-fill h-full rounded-full bg-brand-light" [style.width.%]="playedPercent(s)"></div>
+              </div>
             </div>
           </a>
         }
@@ -108,7 +141,7 @@
     } @else if (selected(); as s) {
       <!-- Mobile top bar -->
       <div class="flex items-center justify-between text-text-3 md:hidden">
-        <a routerLink="/sagas" class="-ml-1 rounded-lg p-1 hover:text-text" [attr.aria-label]="'sagas.back' | translate">
+        <a routerLink="/sagas" queryParamsHandling="preserve" class="-ml-1 rounded-lg p-1 hover:text-text" [attr.aria-label]="'sagas.back' | translate">
           <svg [lucideIcon]="icons.chevronLeft" [size]="24"></svg>
         </a>
         <button
@@ -202,7 +235,7 @@
         }
       </section>
     } @else if (routeId() !== null) {
-      <a routerLink="/sagas" class="flex w-fit items-center gap-1.5 text-[13px] text-muted hover:text-text md:hidden">
+      <a routerLink="/sagas" queryParamsHandling="preserve" class="flex w-fit items-center gap-1.5 text-[13px] text-muted hover:text-text md:hidden">
         <svg [lucideIcon]="icons.chevronLeft" [size]="16"></svg>
         {{ 'sagas.back' | translate }}
       </a>

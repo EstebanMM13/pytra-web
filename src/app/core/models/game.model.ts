@@ -36,6 +36,8 @@ export interface Game {
   platformRefs?: PlatformRef[] | null;
   /** Date (`yyyy-MM-dd`) of the most recent run activity; null when unknown. */
   lastPlayedAt?: string | null;
+  /** Date (`yyyy-MM-dd`) of the most recent run or online session; null when unknown. */
+  lastActivityAt?: string | null;
 }
 
 export interface GameRequest {

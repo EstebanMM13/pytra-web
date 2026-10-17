@@ -1,6 +1,18 @@
 import { Game } from '../../core/models/game.model';
 import { Saga } from '../../core/models/saga.model';
-import { isPlayed, playedPercent, sagaGameStatus, sagaMetaLine, summarizeSaga, summarizeSagas } from './saga.logic';
+import {
+  SAGA_SORTS,
+  SagaSummary,
+  isPlayed,
+  lastActivityKey,
+  parseSagaSort,
+  playedPercent,
+  sagaGameStatus,
+  sagaMetaLine,
+  sortSagas,
+  summarizeSaga,
+  summarizeSagas,
+} from './saga.logic';
 
 function game(overrides: Partial<Game> & { id: number; name: string }): Game {
   return {
@@ -94,5 +106,86 @@ describe('online-only saga games', () => {
     expect(summary.played).toBe(2);
     expect(summary.total).toBe(3);
     expect(playedPercent(summary)).toBe(67);
+  });
+});
+
+describe('saga activity', () => {
+  it('keys a game by its activity date, then run date, then the end of its last played year', () => {
+    expect(lastActivityKey(game({ id: 1, name: 'A', lastActivityAt: '2025-04-02', lastPlayedAt: '2024-01-01' }))).toBe('2025-04-02');
+    expect(lastActivityKey(game({ id: 1, name: 'A', lastPlayedAt: '2024-01-01T10:00:00' }))).toBe('2024-01-01');
+    expect(lastActivityKey(game({ id: 1, name: 'A', lastPlayedYear: 2019 }))).toBe('2019-12-31');
+    expect(lastActivityKey(game({ id: 1, name: 'A' }))).toBeNull();
+  });
+
+  it('summarizes the latest activity among the saga games', () => {
+    const summary = summarizeSaga(gow, [
+      game({ id: 1, name: 'A', lastPlayedYear: 2023 }),
+      game({ id: 2, name: 'B', lastActivityAt: '2024-06-01' }),
+      game({ id: 3, name: 'C' }),
+    ]);
+    expect(summary.lastActivity).toBe('2024-06-01');
+    expect(summarizeSaga(empty, games).lastActivity).toBeNull();
+  });
+});
+
+describe('saga sorting', () => {
+  function summary(name: string, figures: Partial<SagaSummary>): SagaSummary {
+    return {
+      saga: { id: name.length, name, updatedAt: '' },
+      games: [],
+      total: 0,
+      played: 0,
+      hours: 0,
+      avgRating: null,
+      platinums: 0,
+      studio: null,
+      firstYear: null,
+      lastYear: null,
+      lastActivity: null,
+      ...figures,
+    };
+  }
+
+  const halo = summary('Halo', { hours: 80, avgRating: 7.5, total: 4, played: 1, lastActivity: '2023-05-01' });
+  const zeldaS = summary('zelda', { hours: 200, avgRating: 9, total: 2, played: 2, lastActivity: '2022-01-01' });
+  const alan = summary('Alan Wake', { hours: 10, avgRating: null, total: 0, played: 0, lastActivity: null });
+  const bio = summary('Bioshock', { hours: 80, avgRating: 9, total: 3, played: 3, lastActivity: '2025-02-02' });
+  const list = [halo, zeldaS, alan, bio];
+  const names = (sort: Parameters<typeof sortSagas>[1]) => sortSagas(list, sort).map((s) => s.saga.name);
+
+  it('sorts by name A–Z, case-insensitively', () => {
+    expect(names('name')).toEqual(['Alan Wake', 'Bioshock', 'Halo', 'zelda']);
+  });
+
+  it('sorts by hours, most first, ties by name', () => {
+    expect(names('hours')).toEqual(['zelda', 'Bioshock', 'Halo', 'Alan Wake']);
+  });
+
+  it('sorts by average rating, best first, unrated last', () => {
+    expect(names('rating')).toEqual(['Bioshock', 'zelda', 'Halo', 'Alan Wake']);
+  });
+
+  it('sorts by completion, sagas without games last', () => {
+    expect(names('completion')).toEqual(['Bioshock', 'zelda', 'Halo', 'Alan Wake']);
+  });
+
+  it('sorts by recent activity, sagas without activity last', () => {
+    expect(names('recent')).toEqual(['Bioshock', 'Halo', 'zelda', 'Alan Wake']);
+  });
+
+  it('does not mutate the input', () => {
+    sortSagas(list, 'hours');
+    expect(list.map((s) => s.saga.name)).toEqual(['Halo', 'zelda', 'Alan Wake', 'Bioshock']);
+  });
+
+  it('whitelists the sort query param', () => {
+    for (const sort of SAGA_SORTS) {
+      expect(parseSagaSort(sort)).toBe(sort);
+    }
+    expect(parseSagaSort(null)).toBe('name');
+    expect(parseSagaSort(undefined)).toBe('name');
+    expect(parseSagaSort('')).toBe('name');
+    expect(parseSagaSort('HOURS')).toBe('name');
+    expect(parseSagaSort('constructor')).toBe('name');
   });
 });

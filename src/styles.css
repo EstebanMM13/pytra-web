@@ -162,6 +162,24 @@
   animation: bar-grow 500ms ease-out both;
 }
 
+/*
+ * Progress / completion bars fill from their start on mount: scaleX from 0 (the width stays the
+ * real value). `--bar-delay` lets a list hold the fill until its row has landed.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .bar-fill {
+    transform-origin: left center;
+    animation: bar-fill 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: var(--bar-delay, 0ms);
+  }
+}
+
+@keyframes bar-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 /* Route changes (router withViewTransitions): short cross-fade. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -452,6 +470,22 @@
   @media (prefers-reduced-motion: reduce) {
     &:hover {
       transform: none;
+    }
+  }
+}
+
+/*
+ * Tactile press feedback for primary buttons and cards: shrink to 97% while pressed. Uses the
+ * independent `scale` property so it composes with hover-lift's transform; none with reduced motion.
+ */
+@utility press {
+  @media (prefers-reduced-motion: no-preference) {
+    transition-property: scale, transform, color, background-color, border-color, opacity;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+
+    &:active:not(:disabled) {
+      scale: 0.97;
     }
   }
 }

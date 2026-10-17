@@ -913,7 +913,16 @@
     "saved": "Saga updated.",
     "deleted": "Saga deleted.",
     "saveError": "Couldn't save the saga.",
-    "deleteError": "Could not delete the saga."
+    "deleteError": "Could not delete the saga.",
+    "sortLabel": "Sort sagas",
+    "sortPrefix": "Sort:",
+    "sort": {
+      "name": "Name (A–Z)",
+      "hours": "Hours",
+      "rating": "Average rating",
+      "completion": "% completed",
+      "recent": "Recent activity"
+    }
   },
   "language": {
     "es": "Español",

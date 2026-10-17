@@ -20,12 +20,27 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { SagaDialog } from './saga-dialog';
-import { SagaSummary, isPlayed, playedPercent, releaseYear, sagaGameStatus, sagaMetaLine, summarizeSagas } from './saga.logic';
+import { Dropdown, DropdownOption } from '../../shared/ui/dropdown';
+import {
+  DEFAULT_SAGA_SORT,
+  SAGA_SORTS,
+  SagaSort,
+  SagaSummary,
+  isPlayed,
+  parseSagaSort,
+  playedPercent,
+  releaseYear,
+  sagaGameStatus,
+  sagaMetaLine,
+  sortSagas,
+  summarizeSagas,
+} from './saga.logic';
 
 /**
  * Sagas master-detail. `/sagas` and `/sagas/:id` render this same view: on web the list and the
  * selected saga sit side by side (first saga when none is in the URL); on mobile `/sagas` is the
- * list and `/sagas/:id` the detail screen.
+ * list and `/sagas/:id` the detail screen. The list order lives in the `sort` query param
+ * (whitelisted; the default A–Z stays out of the URL) and survives moving between sagas.
  */
 @Component({
   selector: 'app-sagas',
@@ -43,10 +58,12 @@ import { SagaSummary, isPlayed, playedPercent, releaseYear, sagaGameStatus, saga
     StatusPill,
     SagaDialog,
     GameCover,
+    Dropdown,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sagas.html',
+  styleUrl: './sagas.css',
 })
 export class Sagas {
   protected readonly icons = ICONS;
@@ -80,8 +97,19 @@ export class Sagas {
     { requireSync: true },
   );
 
+  protected readonly sort = toSignal(
+    this.route.queryParamMap.pipe(map((params) => parseSagaSort(params.get('sort')))),
+    { requireSync: true },
+  );
+  protected readonly sortOptions: readonly DropdownOption<SagaSort>[] = SAGA_SORTS.map((value) => ({
+    value,
+    label: `sagas.sort.${value}`,
+  }));
+
   protected readonly loading = computed(() => this.sagas() === null);
-  protected readonly summaries = computed(() => summarizeSagas(this.sagas() ?? [], this.games()));
+  protected readonly summaries = computed(() =>
+    sortSagas(summarizeSagas(this.sagas() ?? [], this.games()), this.sort()),
+  );
 
   protected readonly selected = computed<SagaSummary | null>(() => {
     const list = this.summaries();
@@ -109,6 +137,14 @@ export class Sagas {
     });
   }
 
+  protected setSort(sort: SagaSort): void {
+    void this.router.navigate([], {
+      queryParams: { sort: sort === DEFAULT_SAGA_SORT ? null : sort },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
   protected onSaved(saga: Saga): void {
     const creating = this.dialog() === null;
     this.dialog.set(undefined);
@@ -116,7 +152,7 @@ export class Sagas {
       creating ? [...(list ?? []), saga] : (list ?? []).map((s) => (s.id === saga.id ? saga : s)),
     );
     if (creating) {
-      this.router.navigate(['/sagas', saga.id]);
+      this.router.navigate(['/sagas', saga.id], { queryParamsHandling: 'preserve' });
     }
   }
 
@@ -125,6 +161,6 @@ export class Sagas {
     this.sagas.update((list) => (list ?? []).filter((s) => s.id !== id));
     // The API leaves the saga's games without saga.
     this.games.update((list) => list.map((g) => (g.sagaId === id ? { ...g, sagaId: null, sagaName: null } : g)));
-    this.router.navigate(['/sagas'], { replaceUrl: true });
+    this.router.navigate(['/sagas'], { replaceUrl: true, queryParamsHandling: 'preserve' });
   }
 }

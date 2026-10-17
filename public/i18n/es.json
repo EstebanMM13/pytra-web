@@ -913,7 +913,16 @@
     "saved": "Saga actualizada.",
     "deleted": "Saga borrada.",
     "saveError": "No se pudo guardar la saga.",
-    "deleteError": "No se pudo borrar la saga."
+    "deleteError": "No se pudo borrar la saga.",
+    "sortLabel": "Ordenar sagas",
+    "sortPrefix": "Orden:",
+    "sort": {
+      "name": "Nombre (A–Z)",
+      "hours": "Horas",
+      "rating": "Nota media",
+      "completion": "% completado",
+      "recent": "Actividad reciente"
+    }
   },
   "language": {
     "es": "Español",
