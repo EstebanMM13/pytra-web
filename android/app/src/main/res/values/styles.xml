@@ -13,10 +13,19 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Brand purple behind the WebView until the web app paints (no white flash). -->
+        <item name="android:windowBackground">@color/splash_background</item>
     </style>
 
-
+    <!--
+      Launch theme. Android 12+ splash = centered icon on a flat colour only, so it stays minimal:
+      the Pytra mark on the brand purple. BridgeActivity switches to AppTheme.NoActionBar in
+      onCreate, so the system splash leaves on the first frame; the in-app intro
+      (SplashOverlay, native only) takes over on the same background.
+    -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>

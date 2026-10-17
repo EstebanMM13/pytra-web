@@ -3,4 +3,7 @@
     <color name="colorPrimary">#724DCE</color>
     <color name="colorPrimaryDark">#5D3DAB</color>
     <color name="colorAccent">#9D7CFF</color>
+    <!-- Native splash + window background: deep brand purple, continued by the in-app intro
+         (src/app/shared/splash/splash.logic.ts SPLASH_BACKGROUND). -->
+    <color name="splash_background">#1E1833</color>
 </resources>

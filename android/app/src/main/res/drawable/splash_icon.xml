@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Native splash icon: the Pytra mark (src/app/shared/ui/pytra-mark.ts geometry, dark-theme
+  colours) centered in the 240dp splash icon box, inside the 160dp safe circle.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+    <group
+        android:scaleX="1.15"
+        android:scaleY="1.15"
+        android:translateX="57.9"
+        android:translateY="62.5">
+        <path
+            android:fillColor="#9D7CFF"
+            android:fillType="evenOdd"
+            android:pathData="M22,12 Q14,8 14,18 V82 Q14,92 22,88 L86,56 Q94,50 86,44 Z M28,58h5a2,2 0,0 1,2 2v16a2,2 0,0 1,-2 2h-5a2,2 0,0 1,-2 -2v-16a2,2 0,0 1,2 -2Z M41,48h5a2,2 0,0 1,2 2v20a2,2 0,0 1,-2 2h-5a2,2 0,0 1,-2 -2v-20a2,2 0,0 1,2 -2Z M54,40h5a2,2 0,0 1,2 2v21a2,2 0,0 1,-2 2h-5a2,2 0,0 1,-2 -2v-21a2,2 0,0 1,2 -2Z" />
+        <path
+            android:fillColor="#E2AE5F"
+            android:pathData="M67,42h5a2,2 0,0 1,2 2v12a2,2 0,0 1,-2 2h-5a2,2 0,0 1,-2 -2v-12a2,2 0,0 1,2 -2Z" />
+    </group>
+</vector>

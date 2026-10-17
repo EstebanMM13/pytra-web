@@ -4,6 +4,14 @@
 
 <router-outlet />
 
+<!-- Native cold-start intro (never on the web or with reduced motion). Deferred so its chunk
+     stays out of the initial bundle; the WebView already shows the same purple meanwhile. -->
+@if (showSplash) {
+  @defer (on immediate) {
+    <app-splash-overlay />
+  }
+}
+
 @for (request of runFormRequests(); track request) {
   @defer {
     <app-run-form [request]="request" />
