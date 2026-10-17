@@ -703,7 +703,8 @@
     },
     "upcoming": "Próximamente",
     "onlineNoRuns": "Los juegos online se registran con horas online, no con partidas.",
-    "allGenres": "Ver los {{count}} géneros"
+    "allGenres": "Ver los {{count}} géneros",
+    "showLessGenres": "Ver menos"
   },
   "run": {
     "platinum": "🏆 Platino",

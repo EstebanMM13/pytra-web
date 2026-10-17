@@ -703,7 +703,8 @@
     },
     "upcoming": "Coming soon",
     "onlineNoRuns": "Online games are tracked with online hours, not runs.",
-    "allGenres": "See all {{count}} genres"
+    "allGenres": "See all {{count}} genres",
+    "showLessGenres": "Show less"
   },
   "run": {
     "platinum": "🏆 Platinum",

@@ -93,20 +93,37 @@ describe('GenreChips', () => {
     expect(el.querySelector('[data-genre-popover]')).toBeNull();
   });
 
-  it('lists every genre in a view-only sheet on phones', () => {
-    const { fixture, more } = setup(false);
+  it('reveals the rest in place on phones and folds them back with "Ver menos"', () => {
+    const { fixture, chips, more } = setup(false);
+    expect(more()!.getAttribute('aria-expanded')).toBe('false');
+    expect(more()!.hasAttribute('aria-haspopup')).toBe(false);
+
     more()!.click();
     fixture.detectChanges();
-    const dialog = document.body.querySelector('app-modal-sheet [role="dialog"]')!;
-    expect(dialog.getAttribute('aria-label')).toBe('game.genre');
-    expect(dialog.querySelectorAll('li')).toHaveLength(4);
-    (dialog.querySelector('header button') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    expect(chips()).toEqual(['Acción', 'Aventura', 'Rol', 'Shooter']);
+    expect(more()!.textContent?.trim()).toBe('game.showLessGenres');
+    expect(more()!.getAttribute('aria-expanded')).toBe('true');
+    expect(more()!.hasAttribute('aria-label')).toBe(false);
     expect(document.body.querySelector('app-modal-sheet')).toBeNull();
+    // Only the revealed chips animate in.
+    const animated = (fixture.nativeElement as HTMLElement).querySelectorAll('app-genre-chips > span.genre-reveal');
+    expect([...animated].map((c) => c.textContent?.trim())).toEqual(['Rol', 'Shooter']);
+
+    more()!.click();
+    fixture.detectChanges();
+    expect(chips()).toEqual(['Acción', 'Aventura']);
+    expect(more()!.textContent?.trim()).toBe('+2');
+    expect(more()!.getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('closes the popover or the sheet when the md breakpoint changes', () => {
-    const { fixture, el, more, wideSignal } = setup(true);
+  it('keeps the popover semantics on wide screens', () => {
+    const { more } = setup(true);
+    expect(more()!.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(more()!.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('closes the popover or folds the chips when the md breakpoint changes', () => {
+    const { fixture, el, chips, more, wideSignal } = setup(true);
     more()!.click();
     fixture.detectChanges();
     expect(el.querySelector('[data-genre-popover]')).not.toBeNull();
@@ -116,10 +133,11 @@ describe('GenreChips', () => {
 
     more()!.click();
     fixture.detectChanges();
-    expect(document.body.querySelector('app-modal-sheet')).not.toBeNull();
+    expect(chips()).toHaveLength(4);
     wideSignal.set(true);
     fixture.detectChanges();
-    expect(document.body.querySelector('app-modal-sheet')).toBeNull();
+    expect(chips()).toEqual(['Acción', 'Aventura']);
+    expect(el.querySelector('[data-genre-popover]')).toBeNull();
   });
 
   it('shows every genre on one line in fit mode until a measurement says otherwise', () => {

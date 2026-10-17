@@ -15,7 +15,6 @@ import {
 } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CollapseStateService } from '../../../core/services/collapse-state.service';
-import { ModalSheet } from '../../../shared/ui/modal-sheet';
 
 /** Genre chips the phone hero shows before folding the rest into "+N". */
 export const HERO_GENRE_LIMIT = 2;
@@ -50,23 +49,44 @@ export function fitChipCount(widths: readonly number[], available: number, gap: 
 
 /**
  * Genre chips of the game hero, so a long genre list never makes the hero taller than its cover.
- * Phones: at most two, then a "+N" chip opening a view-only sheet with them all.
+ * Phones: at most two, then a "+N" chip that reveals the rest in place (fading in) and turns into a
+ * "Ver menos" chip folding them back.
  * Web (`fit`): one line with as many chips as fit its width (measured, and again on resize), the
  * rest folded into "+N", which opens a popover (upwards: the hero clips overflow and the genres sit
  * at its bottom).
  */
 @Component({
   selector: 'app-genre-chips',
-  imports: [TranslatePipe, ModalSheet],
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': "'relative flex items-center gap-1.5 md:gap-2 ' + (fit() ? 'flex-nowrap' : 'flex-wrap')",
     '(document:click)': 'onDocumentClick($event)',
     '(document:keydown.escape)': 'popover.set(false)',
   },
+  styles: `
+    @media (prefers-reduced-motion: no-preference) {
+      .genre-reveal {
+        animation: genre-reveal 220ms cubic-bezier(0, 0, 0.58, 1) backwards;
+        animation-delay: calc(min(var(--i, 0), 10) * 30ms);
+      }
+    }
+
+    @keyframes genre-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.96);
+      }
+    }
+  `,
   template: `
-    @for (genre of split().shown; track genre) {
-      <span class="shrink-0 rounded-full border border-brand/25 bg-brand-tint font-medium whitespace-nowrap text-brand-lighter" [class]="chipClass()">
+    @for (genre of visible(); track genre; let i = $index) {
+      <span
+        class="shrink-0 rounded-full border border-brand/25 bg-brand-tint font-medium whitespace-nowrap text-brand-lighter"
+        [class]="chipClass()"
+        [class.genre-reveal]="i >= split().shown.length"
+        [style.--i]="i - split().shown.length"
+      >
         {{ genre }}
       </span>
     }
@@ -74,14 +94,16 @@ export function fitChipCount(widths: readonly number[], available: number, gap: 
       <button
         type="button"
         (click)="openAll()"
-        class="shrink-0 rounded-full border border-border bg-surface/60 font-medium text-text-2 hover:border-border-strong hover:text-text"
+        class="shrink-0 rounded-full border border-border bg-surface/60 font-medium whitespace-nowrap text-text-2 hover:border-border-strong hover:text-text"
         [class]="chipClass()"
-        aria-haspopup="dialog"
-        [attr.aria-expanded]="popover() || sheet()"
-        [attr.aria-label]="'game.allGenres' | translate: { count: genres().length }"
+        [class.genre-reveal]="expanded()"
+        [style.--i]="split().hidden"
+        [attr.aria-haspopup]="wide() ? 'dialog' : null"
+        [attr.aria-expanded]="wide() ? popover() : expanded()"
+        [attr.aria-label]="expanded() ? null : ('game.allGenres' | translate: { count: genres().length })"
         data-more-genres
       >
-        +{{ split().hidden }}
+        {{ expanded() ? ('game.showLessGenres' | translate) : '+' + split().hidden }}
       </button>
     }
     @if (fit()) {
@@ -113,15 +135,6 @@ export function fitChipCount(widths: readonly number[], available: number, gap: 
         </ul>
       </div>
     }
-    @if (sheet()) {
-      <app-modal-sheet viewOnly [title]="'game.genre' | translate" (closed)="sheet.set(false)">
-        <ul class="flex flex-col divide-y divide-divider">
-          @for (genre of genres(); track genre) {
-            <li class="py-3 text-[15px] text-text-2">{{ genre }}</li>
-          }
-        </ul>
-      </app-modal-sheet>
-    }
   `,
 })
 export class GenreChips {
@@ -135,7 +148,7 @@ export class GenreChips {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly wide = inject(CollapseStateService).atLeast('md');
+  protected readonly wide = inject(CollapseStateService).atLeast('md');
   private readonly measureBox = viewChild<ElementRef<HTMLElement>>('measure');
 
   /** Chips that fit the line in `fit` mode; all until measured. */
@@ -148,17 +161,20 @@ export class GenreChips {
     this.size() === 'md' ? 'px-3 py-1 text-[13px]' : 'px-2.5 py-0.5 text-xs',
   );
   protected readonly popover = signal(false);
-  protected readonly sheet = signal(false);
+  /** Phones: the folded genres shown in place. */
+  protected readonly expanded = signal(false);
+  /** Chips on screen: the split's, or every genre once expanded. */
+  protected readonly visible = computed(() => (this.expanded() ? this.genres() : this.split().shown));
 
   constructor() {
-    // Crossing md swaps popover and sheet: close whichever is open rather than show the wrong one.
+    // Crossing md swaps popover and inline expansion: reset both rather than show the wrong one.
     let wasWide = this.wide();
     effect(() => {
       const wide = this.wide();
       if (wide !== wasWide) {
         wasWide = wide;
         this.popover.set(false);
-        this.sheet.set(false);
+        this.expanded.set(false);
       }
     });
 
@@ -175,7 +191,6 @@ export class GenreChips {
     });
   }
 
-
   private measure(): void {
     const box = this.measureBox()?.nativeElement;
     if (!this.fit() || !box) return;
@@ -189,7 +204,7 @@ export class GenreChips {
     if (this.wide()) {
       this.popover.update((open) => !open);
     } else {
-      this.sheet.set(true);
+      this.expanded.update((open) => !open);
     }
   }
 
