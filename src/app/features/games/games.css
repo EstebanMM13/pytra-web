@@ -1,0 +1,90 @@
+/* Library effects: transform / opacity only, hover effects on pointer devices only, no motion with reduced motion. */
+
+/* Rows and posters fade + rise in, staggered by their index (capped so long lists stay quick). */
+@media (prefers-reduced-motion: no-preference) {
+  .library-in {
+    animation: library-in 260ms cubic-bezier(0, 0, 0.58, 1) backwards;
+    animation-delay: calc(min(var(--i, 0), 12) * 25ms);
+  }
+}
+
+@keyframes library-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Poster hover: soft brand glow under the cover, slight scale, and a light sweep across it. */
+.cover-glow,
+.cover-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem; /* the poster's rounded-lg */
+  pointer-events: none;
+}
+
+.cover-glow {
+  box-shadow: 0 14px 30px -10px color-mix(in srgb, var(--pt-brand) 70%, transparent);
+  opacity: 0;
+}
+
+.cover-shine {
+  overflow: hidden;
+}
+
+.cover-shine::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    color-mix(in srgb, #fff 22%, transparent) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cover-card:hover .cover-glow {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .cover-card:hover .cover-art {
+    scale: 1.03;
+  }
+
+  .cover-card:hover .cover-shine::before {
+    transform: translateX(120%);
+    transition: transform 400ms cubic-bezier(0, 0, 0.58, 1);
+  }
+}
+
+/* Platinum trophy chip: a slow gold glow pulse (static with reduced motion). */
+.platinum-glow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--pt-gold) 65%, transparent);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .platinum-glow::after {
+    animation: platinum-glow 2.4s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
+  }
+}
+
+@keyframes platinum-glow {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
