@@ -42,7 +42,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
       #trigger
       type="button"
       (click)="toggle()"
-      class="relative flex h-11 items-center gap-2 rounded-full border px-4 text-[13px] font-medium whitespace-nowrap md:h-9 md:px-3.5"
+      class="relative flex h-11 items-center gap-2 rounded-full border px-3.5 text-[13px] font-medium whitespace-nowrap sm:px-4 md:h-9 md:px-3.5"
       [class]="count() ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border bg-surface text-text-2 hover:border-border-strong'"
       aria-haspopup="dialog"
       [attr.aria-expanded]="open()"
@@ -51,7 +51,8 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
       "
     >
       <svg [lucideIcon]="icons.slidersHorizontal" [size]="15" class="shrink-0"></svg>
-      <span>{{ 'library.filters.button' | translate }}</span>
+      <!-- Icon only on phones so the search placeholder fits; the aria-label keeps the name. -->
+      <span class="hidden sm:inline">{{ 'library.filters.button' | translate }}</span>
       @if (count()) {
         <span class="grid min-w-5 place-items-center rounded-full bg-brand px-1.5 font-mono text-[11px] leading-5 text-white">
           {{ count() }}

@@ -55,7 +55,9 @@ export class Segmented<T extends string = string> {
     return [
       'font-medium whitespace-nowrap',
       this.stretch() ? 'min-w-0 flex-1 truncate' : '',
-      this.size() === 'sm' ? 'rounded-[5px] px-2 py-[3px] text-xs' : 'rounded-md px-3 py-1.5 text-[13px]',
+      this.size() === 'sm' ? 'rounded-[5px] px-2 py-[3px] text-xs' : 'rounded-md py-1.5 text-[13px]',
+      // Stretched options share narrow widths (4 statuses on a phone): tighter padding keeps labels whole.
+      this.size() === 'sm' ? '' : this.stretch() ? 'px-1' : 'px-3',
       active
         ? this.tone() === 'neutral'
           ? 'bg-border text-text'
