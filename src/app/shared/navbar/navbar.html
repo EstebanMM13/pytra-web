@@ -128,21 +128,21 @@
           }
           <a
             role="menuitem"
-            routerLink="/steam"
-            (click)="menuOpen.set(false)"
-            class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
-          >
-            <svg [lucideIcon]="icons.download" [size]="16" class="text-brand-light"></svg>
-            {{ 'nav.steam' | translate }}
-          </a>
-          <a
-            role="menuitem"
             routerLink="/profile"
             (click)="menuOpen.set(false)"
             class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
           >
             <svg [lucideIcon]="icons.user" [size]="16" class="text-brand-light"></svg>
             {{ 'nav.profile' | translate }}
+          </a>
+          <a
+            role="menuitem"
+            routerLink="/steam"
+            (click)="menuOpen.set(false)"
+            class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
+          >
+            <svg [lucideIcon]="icons.download" [size]="16" class="text-brand-light"></svg>
+            {{ 'nav.steam' | translate }}
           </a>
           <button
             role="menuitem"

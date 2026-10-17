@@ -28,7 +28,7 @@ const WEB_TABS: NavTab[] = [
 
 /**
  * App chrome for authenticated pages: top navbar on web (md+), and below md a
- * compact header (logo, search button and avatar menu with Steam/Profile) plus a fixed bottom
+ * compact header (logo, search button and avatar menu: Profile, Steam, Log out) plus a fixed bottom
  * tab bar. Also owns the global Ctrl/⌘+K search.
  */
 @Component({
