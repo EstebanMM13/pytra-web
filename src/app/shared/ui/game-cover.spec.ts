@@ -211,11 +211,17 @@ describe('sizedCoverUrl', () => {
 
   it('rewrites the size segment of IGDB urls', () => {
     expect(sizedCoverUrl(igdb('t_cover_big'), 'small')).toBe(igdb('t_cover_small_2x'));
-    expect(sizedCoverUrl(igdb('t_thumb'), 'big')).toBe(igdb('t_cover_big'));
+    expect(sizedCoverUrl(igdb('t_1080p'), 'small')).toBe(igdb('t_cover_small_2x'));
     expect(sizedCoverUrl(igdb('t_cover_big_2x'), 'small')).toBe(igdb('t_cover_small_2x'));
     expect(sizedCoverUrl('//images.igdb.com/igdb/image/upload/t_cover_big/co1.png', 'small')).toBe(
       '//images.igdb.com/igdb/image/upload/t_cover_small_2x/co1.png',
     );
+  });
+
+  it('keeps big boxes and already-small IGDB images as they are', () => {
+    expect(sizedCoverUrl(igdb('t_cover_big'), 'big')).toBe(igdb('t_cover_big'));
+    expect(sizedCoverUrl(igdb('t_cover_small'), 'small')).toBe(igdb('t_cover_small'));
+    expect(sizedCoverUrl(igdb('t_thumb'), 'small')).toBe(igdb('t_thumb'));
   });
 
   it('leaves other urls unchanged', () => {

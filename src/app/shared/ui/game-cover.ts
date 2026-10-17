@@ -29,13 +29,21 @@ const INITIALS_TEXT: Record<GameCoverSize, string> = {
   fill: 'text-3xl',
 };
 
-/** IGDB image size per variant: `t_cover_small_2x` (180x256) is retina-safe up to ~90px wide. */
+/** Image variant per box: `small` for boxes up to ~90px wide, `big` (the url as stored) otherwise. */
 export type CoverImageVariant = 'small' | 'big';
 
-const IGDB_SIZE: Record<CoverImageVariant, string> = {
-  small: 't_cover_small_2x',
-  big: 't_cover_big',
-};
+/** IGDB size for small boxes: `t_cover_small_2x` (180x256) is retina-safe up to ~90px wide. */
+const IGDB_SMALL_SIZE = 't_cover_small_2x';
+
+/** IGDB sizes already no bigger than `IGDB_SMALL_SIZE`: never swapped for it. */
+const IGDB_SMALL_SIZES = new Set([
+  't_cover_small',
+  't_cover_small_2x',
+  't_thumb',
+  't_thumb_2x',
+  't_micro',
+  't_micro_2x',
+]);
 
 /** Image variant per box: small boxes (<= ~90px wide) fetch the small IGDB cover. */
 const SIZE_VARIANT: Record<GameCoverSize, CoverImageVariant> = {
@@ -48,19 +56,19 @@ const SIZE_VARIANT: Record<GameCoverSize, CoverImageVariant> = {
 };
 
 /** The `/t_<size>/` segment of an images.igdb.com url. */
-const IGDB_IMAGE_SIZE =
-  /^((?:https?:)?\/\/images\.igdb\.com\/igdb\/image\/upload\/)t_[a-z0-9_]+\//i;
+const IGDB_IMAGE_SIZE = /^((?:https?:)?\/\/images\.igdb\.com\/igdb\/image\/upload\/)(t_[a-z0-9_]+)\//i;
 
 /**
- * The url sized for `variant`: an IGDB image gets its `/t_<size>/` segment rewritten; any other url
- * (Steam, custom) is returned unchanged.
+ * The url sized for `variant`: for `small`, a larger IGDB image (e.g. `t_cover_big`) is swapped for
+ * `t_cover_small_2x` by rewriting its `/t_<size>/` segment. `big`, already-small IGDB images and any
+ * other url (Steam, custom) are returned unchanged.
  */
-export function sizedCoverUrl(
-  url: string | null | undefined,
-  variant: CoverImageVariant,
-): string | null {
+export function sizedCoverUrl(url: string | null | undefined, variant: CoverImageVariant): string | null {
   if (!url) return null;
-  return url.replace(IGDB_IMAGE_SIZE, `$1${IGDB_SIZE[variant]}/`);
+  if (variant === 'big') return url;
+  return url.replace(IGDB_IMAGE_SIZE, (segment, base: string, size: string) =>
+    IGDB_SMALL_SIZES.has(size.toLowerCase()) ? segment : `${base}${IGDB_SMALL_SIZE}/`,
+  );
 }
 
 const STEAM_APPS_BASE = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/';
