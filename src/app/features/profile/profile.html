@@ -128,6 +128,19 @@
             </div>
           }
         </div>
+        <button
+          type="button"
+          (click)="avatarOpen.set(true)"
+          class="flex w-full items-center justify-between gap-4 border-t border-divider py-2.5 text-left text-sm"
+          aria-haspopup="dialog"
+          data-avatar-row
+        >
+          <span class="text-muted">{{ 'profile.avatar.title' | translate }}</span>
+          <span class="flex items-center gap-2">
+            <app-avatar size="sm" [avatar]="u.avatar" [name]="displayName()" />
+            <svg [lucideIcon]="icons.chevronRight" [size]="18" class="shrink-0 text-faint" aria-hidden="true"></svg>
+          </span>
+        </button>
         <div class="flex items-center justify-between gap-4 border-t border-divider py-3.5 text-sm">
           <span class="text-muted">{{ 'profile.email' | translate }}</span>
           <span class="flex min-w-0 items-center gap-2">
@@ -164,26 +177,6 @@
         </div>
       } @else {
         <app-skeleton class="h-[150px] rounded-[10px]" />
-      }
-    </section>
-
-    <!-- AVATAR -->
-    <section id="profile-avatar" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-      <app-section-header collapseKey="profile.avatar" class="mb-2" [label]="'profile.avatar.title' | translate" />
-      @if (user(); as u) {
-        <div class="border-t border-divider pt-3.5">
-          <p class="mb-3 text-xs text-muted">{{ 'profile.avatar.hint' | translate }}</p>
-          <app-avatar-picker
-            [selected]="u.avatar"
-            [name]="displayName()"
-            [exclusive]="u.exclusiveAvatars"
-            [disabled]="savingAvatar()"
-            [attr.aria-busy]="savingAvatar()"
-            (picked)="setAvatar($event)"
-          />
-        </div>
-      } @else {
-        <app-skeleton class="h-[120px] rounded-[10px]" />
       }
     </section>
 
@@ -397,4 +390,18 @@
 
 @if (deleteOpen() && user(); as u) {
   <app-delete-account-dialog [user]="u" (closed)="deleteOpen.set(false)" />
+}
+
+@if (avatarOpen() && user(); as u) {
+  <app-modal-sheet viewOnly [title]="'profile.avatar.title' | translate" (closed)="avatarOpen.set(false)">
+    <p class="mb-3 text-xs text-muted">{{ 'profile.avatar.hint' | translate }}</p>
+    <app-avatar-picker
+      [selected]="u.avatar"
+      [name]="displayName()"
+      [exclusive]="u.exclusiveAvatars"
+      [disabled]="savingAvatar()"
+      [attr.aria-busy]="savingAvatar()"
+      (picked)="setAvatar($event)"
+    />
+  </app-modal-sheet>
 }

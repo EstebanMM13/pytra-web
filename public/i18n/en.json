@@ -164,8 +164,7 @@
       "account": "Account",
       "achievements": "Achievements",
       "preferences": "Preferences",
-      "data": "Data",
-      "avatar": "Avatar"
+      "data": "Data"
     },
     "steamLinked": "Linked",
     "steamNotLinked": "Not linked",

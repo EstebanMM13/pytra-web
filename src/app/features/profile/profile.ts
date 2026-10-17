@@ -36,9 +36,10 @@ import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { AvatarPicker } from './avatar-picker';
 import { DeleteAccountDialog } from './delete-account-dialog';
+import { ModalSheet } from '../../shared/ui/modal-sheet';
 import { avatarErrorKey, exportErrorKey, formatMemberSince } from './profile.logic';
 
-type ProfileSection = 'account' | 'avatar' | 'achievements' | 'preferences' | 'data';
+type ProfileSection = 'account' | 'achievements' | 'preferences' | 'data';
 /** Scroll targets: the sections plus the delete-account row inside "Datos". */
 type ProfileAnchor = ProfileSection | 'delete';
 
@@ -47,11 +48,10 @@ export type ProfileRow =
   | { kind: 'anchor'; anchor: ProfileAnchor; labelKey: string; icon: LucideIconInput; danger?: boolean }
   | { kind: 'route'; route: string; labelKey: string; icon: LucideIconInput };
 
-const SECTIONS: readonly ProfileSection[] = ['account', 'avatar', 'achievements', 'preferences', 'data'];
+const SECTIONS: readonly ProfileSection[] = ['account', 'achievements', 'preferences', 'data'];
 
 const MOBILE_ROWS: readonly ProfileRow[] = [
   { kind: 'anchor', anchor: 'account', labelKey: 'profile.sections.account', icon: ICONS.user },
-  { kind: 'anchor', anchor: 'avatar', labelKey: 'profile.sections.avatar', icon: ICONS.sparkles },
   { kind: 'anchor', anchor: 'achievements', labelKey: 'profile.sections.achievements', icon: ICONS.trophy },
   { kind: 'anchor', anchor: 'preferences', labelKey: 'profile.sections.preferences', icon: ICONS.slidersHorizontal },
   { kind: 'route', route: '/steam', labelKey: 'nav.steam', icon: ICONS.gamepad2 },
@@ -80,6 +80,7 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
     Avatar,
     AvatarPicker,
     DeleteAccountDialog,
+    ModalSheet,
     AchievementBadge,
     LucideDynamicIcon,
   ],
@@ -182,6 +183,8 @@ export class Profile {
   readonly errorKey = signal<string | null>(null);
 
   protected readonly savingAvatar = signal(false);
+  /** The avatar picker sheet, opened from the "Avatar" row of the account section. */
+  protected readonly avatarOpen = signal(false);
 
   protected readonly exporting = signal<ExportFormat | null>(null);
   protected readonly deleteOpen = signal(false);
@@ -290,6 +293,7 @@ export class Profile {
     this.userService.updateProfile({ avatar }).subscribe({
       next: () => {
         this.savingAvatar.set(false);
+        this.avatarOpen.set(false);
         this.toast.success(this.translate.instant('profile.avatar.saved'));
       },
       error: (err) => {

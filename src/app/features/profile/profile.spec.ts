@@ -75,22 +75,20 @@ describe('Profile', () => {
     const { el, rows } = setup();
     expect(rows().map((r) => r.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
       'profile.sections.account',
-      'profile.sections.avatar',
       'profile.sections.achievements',
       'profile.sections.preferences',
       'nav.steam profile.steamLinked',
       'profile.exportData',
       'profile.delete.label',
     ]);
-    expect(rows()[4].getAttribute('href')).toBe('/steam');
+    expect(rows()[3].getAttribute('href')).toBe('/steam');
 
     for (const [index, anchor] of [
       [0, 'account'],
-      [1, 'avatar'],
-      [2, 'achievements'],
-      [3, 'preferences'],
-      [5, 'data'],
-      [6, 'delete'],
+      [1, 'achievements'],
+      [2, 'preferences'],
+      [4, 'data'],
+      [5, 'delete'],
     ] as const) {
       const target = el.querySelector(`#profile-${anchor}`);
       expect(target).not.toBeNull();
@@ -103,8 +101,8 @@ describe('Profile', () => {
 
   it('shows every section in the demo, but avatar, username and export never reach the API', () => {
     const { fixture, el, rows, userService, blockWrite } = setup(true);
-    expect(rows()).toHaveLength(7);
-    for (const id of ['account', 'avatar', 'achievements', 'preferences', 'data', 'delete']) {
+    expect(rows()).toHaveLength(6);
+    for (const id of ['account', 'achievements', 'preferences', 'data', 'delete']) {
       expect(el.querySelector(`#profile-${id}`)).not.toBeNull();
     }
     const profile = fixture.componentInstance as unknown as { setAvatar(a: string | null): void };
@@ -114,5 +112,23 @@ describe('Profile', () => {
     expect(blockWrite).toHaveBeenCalledTimes(3);
     expect(userService.updateProfile).not.toHaveBeenCalled();
     expect(userService.exportData).not.toHaveBeenCalled();
+  });
+
+  it('opens the avatar picker from the account section, and closes it once the avatar is saved', () => {
+    const { fixture, el, userService } = setup();
+    expect(el.querySelector('#profile-avatar')).toBeNull();
+    const row = el.querySelector<HTMLButtonElement>('#profile-account [data-avatar-row]')!;
+    expect(row.textContent).toContain('profile.avatar.title');
+    expect(row.querySelector('app-avatar')).not.toBeNull();
+    expect(document.querySelector('app-avatar-picker')).toBeNull();
+
+    row.click();
+    fixture.detectChanges();
+    expect(document.querySelector('app-modal-sheet app-avatar-picker')).not.toBeNull();
+
+    (fixture.componentInstance as unknown as { setAvatar(a: string | null): void }).setAvatar('cat');
+    fixture.detectChanges();
+    expect(userService.updateProfile).toHaveBeenCalledWith({ avatar: 'cat' });
+    expect(document.querySelector('app-avatar-picker')).toBeNull();
   });
 });
