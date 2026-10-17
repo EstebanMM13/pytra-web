@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LucideDynamicIcon } from '@lucide/angular';
+import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, forkJoin, of } from 'rxjs';
@@ -15,6 +15,7 @@ import { PlatformService } from '../../core/services/platform.service';
 import { SteamStatus } from '../../core/models/steam.model';
 import { ExportFormat } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
+import { DemoModeService } from '../../core/services/demo-mode.service';
 import { InstallPromptService } from '../../core/services/install-prompt.service';
 import { FileExportService, filenameFromContentDisposition } from '../../core/services/file-export.service';
 import {
@@ -38,6 +39,25 @@ import { DeleteAccountDialog } from './delete-account-dialog';
 import { avatarErrorKey, exportErrorKey, formatMemberSince } from './profile.logic';
 
 type ProfileSection = 'account' | 'avatar' | 'achievements' | 'preferences' | 'data';
+/** Scroll targets: the sections plus the delete-account row inside "Datos". */
+type ProfileAnchor = ProfileSection | 'delete';
+
+/** A row of the mobile section list: scrolls to an anchor on this page, or opens another route. */
+export type ProfileRow =
+  | { kind: 'anchor'; anchor: ProfileAnchor; labelKey: string; icon: LucideIconInput; danger?: boolean }
+  | { kind: 'route'; route: string; labelKey: string; icon: LucideIconInput };
+
+const SECTIONS: readonly ProfileSection[] = ['account', 'avatar', 'achievements', 'preferences', 'data'];
+
+const MOBILE_ROWS: readonly ProfileRow[] = [
+  { kind: 'anchor', anchor: 'account', labelKey: 'profile.sections.account', icon: ICONS.user },
+  { kind: 'anchor', anchor: 'avatar', labelKey: 'profile.sections.avatar', icon: ICONS.sparkles },
+  { kind: 'anchor', anchor: 'achievements', labelKey: 'profile.sections.achievements', icon: ICONS.trophy },
+  { kind: 'anchor', anchor: 'preferences', labelKey: 'profile.sections.preferences', icon: ICONS.slidersHorizontal },
+  { kind: 'route', route: '/steam', labelKey: 'nav.steam', icon: ICONS.gamepad2 },
+  { kind: 'anchor', anchor: 'data', labelKey: 'profile.exportData', icon: ICONS.download },
+  { kind: 'anchor', anchor: 'delete', labelKey: 'profile.delete.label', icon: ICONS.trash, danger: true },
+];
 type AchievementFilter = 'all' | 'unlocked' | 'locked';
 
 const FEATURED_ACHIEVEMENTS = 6;
@@ -69,13 +89,13 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
 export class Profile {
   protected readonly icons = ICONS;
 
-  // Read-only demo: no account changes, avatar change, export or deletion (the API rejects them all).
-  protected readonly isDemo = inject(AuthService).isDemo;
-  protected readonly showAccountSection = computed(() => !this.isDemo());
-  protected readonly showDeleteAccount = computed(() => !this.isDemo());
-  protected readonly sections = (['account', 'avatar', 'achievements', 'preferences', 'data'] as const).filter(
-    (s) => (s !== 'account' || this.showAccountSection()) && ((s !== 'data' && s !== 'avatar') || !this.isDemo()),
-  );
+  // Read-only demo: every section is shown; its writes (and the export) stop at the demo toast.
+  private readonly demoMode = inject(DemoModeService);
+  protected readonly isDemo = this.demoMode.isDemo;
+  /** Web sidebar entries. */
+  protected readonly sections = SECTIONS;
+  /** Phones and tablets: every section (plus Steam) as tappable rows at the top. */
+  protected readonly mobileRows = MOBILE_ROWS;
 
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly userService = inject(UserService);
@@ -213,9 +233,14 @@ export class Profile {
     });
   }
 
-  protected scrollTo(section: ProfileSection): void {
-    this.activeSection.set(section);
-    document.getElementById(`profile-${section}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  protected scrollTo(anchor: ProfileAnchor): void {
+    this.activeSection.set(anchor === 'delete' ? 'data' : anchor);
+    document.getElementById(`profile-${anchor}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /** The password page sends a reset email: not something a demo visitor may trigger. */
+  protected onPasswordLink(): void {
+    this.demoMode.blockWrite();
   }
 
   protected startEditName(): void {
@@ -233,6 +258,9 @@ export class Profile {
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
+    }
+    if (this.demoMode.blockWrite()) {
       return;
     }
 
@@ -255,7 +283,7 @@ export class Profile {
 
   /** Saves the picked preset (null = initial); the navbar follows through the shared user state. */
   protected setAvatar(avatar: string | null): void {
-    if (this.savingAvatar()) {
+    if (this.savingAvatar() || this.demoMode.blockWrite()) {
       return;
     }
     this.savingAvatar.set(true);
@@ -278,7 +306,7 @@ export class Profile {
   }
 
   protected exportData(format: ExportFormat): void {
-    if (this.exporting()) {
+    if (this.exporting() || this.demoMode.blockWrite()) {
       return;
     }
     this.exporting.set(format);

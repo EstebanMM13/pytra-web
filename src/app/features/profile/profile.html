@@ -38,46 +38,39 @@
       </button>
     </nav>
 
-    <!-- Mobile grouped list -->
-    <div class="mt-4 overflow-hidden rounded-xl border border-card-border card-glass md:hidden">
-      @if (showAccountSection()) {
-      <button
-        type="button"
-        (click)="scrollTo('account')"
-        class="flex w-full items-center gap-3 border-b border-border px-3.5 py-[15px] text-left text-[15px]"
-      >
-        <svg [lucideIcon]="icons.user" [size]="18" class="text-brand-light"></svg>
-        {{ 'profile.sections.account' | translate }}
-        <svg [lucideIcon]="icons.chevronRight" [size]="18" class="ml-auto text-faint"></svg>
-      </button>
+    <!-- Below the sidebar breakpoint: every section as a tappable row -->
+    <nav class="mt-4 overflow-hidden rounded-xl border border-card-border card-glass lg:hidden" [attr.aria-label]="'profile.sectionsLabel' | translate" data-profile-rows>
+      @for (row of mobileRows; track row.labelKey; let last = $last) {
+        @if (row.kind === 'route') {
+          <a [routerLink]="row.route" class="flex items-center gap-3 border-border px-3.5 py-[15px] text-[15px]" [class.border-b]="!last">
+            <svg [lucideIcon]="row.icon" [size]="18" class="shrink-0 text-brand-light"></svg>
+            {{ row.labelKey | translate }}
+            <span class="ml-auto truncate text-[13px] text-muted">
+              @if (steamStatus(); as st) {
+                {{ (st.linked ? 'profile.steamLinked' : 'profile.steamNotLinked') | translate }}
+              }
+            </span>
+            <svg [lucideIcon]="icons.chevronRight" [size]="18" class="shrink-0 text-faint"></svg>
+          </a>
+        } @else {
+          <button
+            type="button"
+            (click)="scrollTo(row.anchor)"
+            class="flex w-full items-center gap-3 border-border px-3.5 py-[15px] text-left text-[15px]"
+            [class.border-b]="!last"
+            [class.text-danger]="row.danger"
+          >
+            <svg [lucideIcon]="row.icon" [size]="18" class="shrink-0" [class]="row.danger ? 'text-danger' : 'text-brand-light'"></svg>
+            {{ row.labelKey | translate }}
+            <svg [lucideIcon]="icons.chevronRight" [size]="18" class="ml-auto shrink-0 text-faint"></svg>
+          </button>
+        }
       }
-      <a routerLink="/steam" class="flex items-center gap-3 border-border px-3.5 py-[15px] text-[15px]" [class.border-b]="!isDemo()">
-        <svg [lucideIcon]="icons.gamepad2" [size]="18" class="text-brand-light"></svg>
-        {{ 'nav.steam' | translate }}
-        <span class="ml-auto truncate text-[13px] text-muted">
-          @if (steamStatus(); as st) {
-            {{ (st.linked ? 'profile.steamLinked' : 'profile.steamNotLinked') | translate }}
-          }
-        </span>
-        <svg [lucideIcon]="icons.chevronRight" [size]="18" class="shrink-0 text-faint"></svg>
-      </a>
-      @if (!isDemo()) {
-      <button
-        type="button"
-        (click)="scrollTo('data')"
-        class="flex w-full items-center gap-3 px-3.5 py-[15px] text-left text-[15px]"
-      >
-        <svg [lucideIcon]="icons.download" [size]="18" class="text-brand-light"></svg>
-        {{ 'profile.exportData' | translate }}
-        <svg [lucideIcon]="icons.chevronRight" [size]="18" class="ml-auto text-faint"></svg>
-      </button>
-      }
-    </div>
+    </nav>
   </aside>
 
   <div class="flex max-w-[760px] min-w-0 flex-col gap-4 md:gap-5">
     <!-- CUENTA -->
-    @if (showAccountSection()) {
     <section id="profile-account" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
       <app-section-header collapseKey="profile.account" class="mb-2" [label]="'profile.sections.account' | translate" />
       @if (user(); as u) {
@@ -147,13 +140,23 @@
         <div class="flex items-center justify-between gap-4 border-t border-divider py-3.5 text-sm">
           <span class="text-muted">{{ 'profile.password' | translate }}</span>
           @if (u.hasPassword) {
-            <a routerLink="/forgot-password" [queryParams]="{ email: u.email }" class="text-brand-light hover:underline">
+            <a
+              [routerLink]="isDemo() ? null : '/forgot-password'"
+              [queryParams]="{ email: u.email }"
+              (click)="onPasswordLink()"
+              class="cursor-pointer text-brand-light hover:underline"
+            >
               {{ 'profile.changePassword' | translate }}
             </a>
           } @else {
             <span class="flex min-w-0 flex-col items-end gap-0.5 text-right">
               <span class="text-xs text-muted">{{ 'profile.noPassword' | translate }}</span>
-              <a routerLink="/forgot-password" [queryParams]="{ email: u.email }" class="text-brand-light hover:underline">
+              <a
+                [routerLink]="isDemo() ? null : '/forgot-password'"
+                [queryParams]="{ email: u.email }"
+                (click)="onPasswordLink()"
+                class="cursor-pointer text-brand-light hover:underline"
+              >
                 {{ 'profile.createPassword' | translate }}
               </a>
             </span>
@@ -163,10 +166,8 @@
         <app-skeleton class="h-[150px] rounded-[10px]" />
       }
     </section>
-    }
 
     <!-- AVATAR -->
-    @if (!isDemo()) {
     <section id="profile-avatar" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
       <app-section-header collapseKey="profile.avatar" class="mb-2" [label]="'profile.avatar.title' | translate" />
       @if (user(); as u) {
@@ -185,7 +186,6 @@
         <app-skeleton class="h-[120px] rounded-[10px]" />
       }
     </section>
-    }
 
     <!-- LOGROS -->
     <section
@@ -349,7 +349,6 @@
     </section>
 
     <!-- DATOS -->
-    @if (!isDemo()) {
     <section id="profile-data" class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
       <app-section-header collapseKey="profile.data" class="mb-2" [label]="'profile.sections.data' | translate" />
       <div class="flex flex-col gap-2.5 border-t border-divider py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
@@ -373,8 +372,7 @@
           </button>
         </div>
       </div>
-      @if (showDeleteAccount()) {
-      <div class="flex items-center justify-between gap-4 border-t border-divider py-3 text-sm">
+      <div id="profile-delete" class="flex scroll-mt-6 items-center justify-between gap-4 border-t border-divider py-3 text-sm">
         <span class="text-muted">{{ 'profile.delete.label' | translate }}</span>
         <button
           type="button"
@@ -385,9 +383,7 @@
           {{ 'profile.delete.open' | translate }}
         </button>
       </div>
-      }
     </section>
-    }
 
     <button
       type="button"
@@ -399,6 +395,6 @@
   </div>
 </main>
 
-@if (showDeleteAccount() && deleteOpen() && user(); as u) {
+@if (deleteOpen() && user(); as u) {
   <app-delete-account-dialog [user]="u" (closed)="deleteOpen.set(false)" />
 }
