@@ -418,6 +418,7 @@
       "linkSyncInProgress": "Could not switch Steam accounts because a sync is running. Wait for it to finish and try again."
     },
     "linkedPill": "Linked",
+    "notLinkedPill": "Not linked",
     "accountFallback": "Steam account",
     "sync": "Sync",
     "syncedAgo": "synced {{when}}",

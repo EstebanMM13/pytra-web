@@ -17,6 +17,7 @@ import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 import { TranslatePluralPipe } from '../../../shared/pipes/translate-plural.pipe';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { GameCover } from '../../../shared/ui/game-cover';
+import { PlatformCard } from '../../../shared/ui/platform-card';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { SteamConfirmDialog, SteamConfirmMode } from './steam-confirm-dialog';
 import {
@@ -42,6 +43,7 @@ import {
     SteamConfirmDialog,
     GameCover,
     LucideDynamicIcon,
+    PlatformCard,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './steam-panel.html',

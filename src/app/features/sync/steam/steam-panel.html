@@ -9,16 +9,33 @@
   </p>
 }
 
-@if (statusLoading()) {
-  <app-skeleton class="h-24 rounded-[14px]" />
-} @else if (status(); as s) {
-  @if (!s.configured) {
-    <p class="rounded-xl bg-gold-tint px-4 py-3 text-sm text-gold-tint-fg">{{ 'steam.notConfigured' | translate }}</p>
+<app-platform-card
+  platform="steam"
+  [name]="'steam.title' | translate"
+  [subtitle]="'sync.steamHint' | translate"
+  [icon]="icons.monitor"
+>
+  @if (status(); as s) {
+    @if (s.linked) {
+      <span platformBadge class="rounded-full bg-success-bg px-[9px] py-[3px] text-xs font-medium whitespace-nowrap text-success">
+        {{ 'steam.linkedPill' | translate }}
+      </span>
+    } @else {
+      <span platformBadge class="rounded-full bg-neutral-bg px-[9px] py-[3px] text-xs font-medium whitespace-nowrap text-neutral">
+        {{ 'steam.notLinkedPill' | translate }}
+      </span>
+    }
   }
 
-  @if (s.linked) {
-    <!-- Linked account -->
-    <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
+  @if (statusLoading()) {
+    <app-skeleton class="h-24 rounded-[14px]" />
+  } @else if (status(); as s) {
+    @if (!s.configured) {
+      <p class="mb-4 rounded-xl bg-gold-tint px-4 py-3 text-sm text-gold-tint-fg">{{ 'steam.notConfigured' | translate }}</p>
+    }
+
+    @if (s.linked) {
+      <!-- Linked account -->
       <div class="flex flex-col gap-4 md:flex-row md:items-center md:gap-[18px]">
         <div class="flex min-w-0 flex-1 items-center gap-3.5 md:gap-[18px]">
           <span
@@ -28,13 +45,8 @@
             {{ avatarInitial() }}
           </span>
           <div class="min-w-0 flex-1">
-            <p class="flex flex-wrap items-center gap-2.5 text-[17px] font-semibold">
-              <span class="min-w-0 truncate" [title]="s.personaName || s.steamId || ('steam.accountFallback' | translate)">{{
-                s.personaName || s.steamId || ('steam.accountFallback' | translate)
-              }}</span>
-              <span class="rounded-full bg-success-bg px-[9px] py-[3px] text-xs font-medium text-success">
-                {{ 'steam.linkedPill' | translate }}
-              </span>
+            <p class="truncate text-[17px] font-semibold" [title]="s.personaName || s.steamId || ('steam.accountFallback' | translate)">
+              {{ s.personaName || s.steamId || ('steam.accountFallback' | translate) }}
             </p>
             <!-- Separators come from CSS so none is left dangling when the Steam id is hidden (demo). -->
             <p
@@ -103,29 +115,24 @@
           </div>
         </div>
       }
-    </section>
-  } @else {
-    <!-- Not linked -->
-    <section
-      class="flex flex-col gap-3.5 rounded-2xl border border-card-border card-glass p-6 md:max-w-[560px] md:rounded-[14px]"
-    >
-      <span class="flex size-12 items-center justify-center rounded-xl bg-brand-tint text-brand-lighter" aria-hidden="true">
-        <svg [lucideIcon]="icons.link" [size]="22"></svg>
-      </span>
-      <h2 class="text-[22px] font-semibold tracking-[-0.01em]">{{ 'steam.linkTitle' | translate }}</h2>
-      <p class="text-[15px] leading-normal text-text-3">{{ 'steam.linkText' | translate }}</p>
-      <button
-        type="button"
-        (click)="connect()"
-        [disabled]="connecting()"
-        class="press mt-1 rounded-xl bg-brand p-[15px] text-base font-semibold text-white hover:bg-brand-dark disabled:opacity-50 md:w-fit md:rounded-lg md:px-5 md:py-2.5 md:text-sm"
-      >
-        {{ 'steam.connect' | translate }}
-      </button>
-      <p class="text-xs leading-normal text-muted">{{ 'steam.publicNote' | translate }}</p>
-    </section>
+    } @else {
+      <!-- Not linked -->
+      <div class="flex flex-col gap-3.5">
+        <h3 class="text-[19px] font-semibold tracking-[-0.01em] md:text-xl">{{ 'steam.linkTitle' | translate }}</h3>
+        <p class="max-w-[60ch] text-[15px] leading-normal text-text-3">{{ 'steam.linkText' | translate }}</p>
+        <button
+          type="button"
+          (click)="connect()"
+          [disabled]="connecting()"
+          class="press mt-1 rounded-xl bg-brand p-[15px] text-base font-semibold text-white hover:bg-brand-dark disabled:opacity-50 md:w-fit md:rounded-lg md:px-5 md:py-2.5 md:text-sm"
+        >
+          {{ 'steam.connect' | translate }}
+        </button>
+        <p class="text-xs leading-normal text-muted">{{ 'steam.publicNote' | translate }}</p>
+      </div>
+    }
   }
-}
+</app-platform-card>
 
 <!-- Last sync result -->
 @if (syncResult(); as result) {

@@ -6,36 +6,19 @@
     <p class="mt-1 text-sm text-text-3 md:text-[15px]">{{ 'sync.subtitle' | translate }}</p>
   </header>
 
-  <!-- Steam -->
-  <section class="flex flex-col gap-4 md:gap-5" aria-labelledby="sync-steam-title" data-platform="steam">
-    <div class="flex items-center gap-3">
-      <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-tint text-brand-lighter" aria-hidden="true">
-        <svg [lucideIcon]="icons.monitor" [size]="20"></svg>
-      </span>
-      <div class="min-w-0">
-        <h2 id="sync-steam-title" class="text-lg font-semibold tracking-[-0.01em]">{{ 'steam.title' | translate }}</h2>
-        <p class="text-[13px] text-muted">{{ 'sync.steamHint' | translate }}</p>
-      </div>
-    </div>
-    <app-steam-panel />
-  </section>
+  <!-- Steam: renders its own platform card (badge and body follow the link status). -->
+  <app-steam-panel />
 
   <!-- PlayStation: announced, not available yet -->
-  <section
-    class="flex items-center gap-3 rounded-[14px] border border-card-border card-glass p-4 opacity-70 md:p-[22px]"
-    aria-labelledby="sync-psn-title"
-    aria-disabled="true"
-    data-platform="playstation"
+  <app-platform-card
+    platform="playstation"
+    disabled
+    [name]="'sync.playstation' | translate"
+    [subtitle]="'sync.playstationHint' | translate"
+    [icon]="icons.gamepad2"
   >
-    <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-hover text-muted" aria-hidden="true">
-      <svg [lucideIcon]="icons.gamepad2" [size]="20"></svg>
-    </span>
-    <div class="min-w-0 flex-1">
-      <h2 id="sync-psn-title" class="text-lg font-semibold tracking-[-0.01em]">{{ 'sync.playstation' | translate }}</h2>
-      <p class="text-[13px] text-muted">{{ 'sync.playstationHint' | translate }}</p>
-    </div>
-    <span class="shrink-0 rounded-full bg-gold-tint px-[9px] py-[3px] text-xs font-medium text-gold-tint-fg">
+    <span platformBadge class="rounded-full bg-gold-tint px-[9px] py-[3px] text-xs font-medium whitespace-nowrap text-gold-tint-fg">
       {{ 'sync.comingSoon' | translate }}
     </span>
-  </section>
+  </app-platform-card>
 </main>

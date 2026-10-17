@@ -50,9 +50,13 @@ describe('Sync', () => {
     const el = harness.routeNativeElement as HTMLElement;
 
     expect(el.querySelector('h1')?.textContent).toContain('sync.title');
-    expect(el.querySelector('[data-platform="steam"] app-steam-panel')).not.toBeNull();
+    const steamCard = el.querySelector('app-steam-panel [data-platform="steam"]');
+    expect(steamCard?.querySelector('h2')?.textContent).toContain('steam.title');
+    expect(steamCard?.textContent).toContain('steam.notLinkedPill');
+    expect(steamCard?.textContent).toContain('steam.connect');
     const psn = el.querySelector('[data-platform="playstation"]');
     expect(psn?.getAttribute('aria-disabled')).toBe('true');
+    expect(psn?.querySelector('h2')?.textContent).toContain('sync.playstation');
     expect(psn?.textContent).toContain('sync.comingSoon');
     expect(psn?.querySelector('button, a')).toBeNull();
   });
