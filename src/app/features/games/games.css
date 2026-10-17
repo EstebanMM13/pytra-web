@@ -57,6 +57,12 @@
   transform: translateX(-120%);
 }
 
+/* 3D tilt that follows the mouse (CoverTilt): eases between frames and back to flat on leave. */
+.cover-tilt {
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .cover-card:hover .cover-glow {
     opacity: 1;
