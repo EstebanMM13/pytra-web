@@ -1,4 +1,5 @@
 import { ActivatedRouteSnapshot, ViewTransitionInfo, ViewTransitionsFeatureOptions } from '@angular/router';
+import { prefersReducedMotion } from '../shared/utils/motion';
 
 /** Path of the primary route chain (`games/7`), without query params or fragment. */
 export function routePath(root: ActivatedRouteSnapshot): string {
@@ -13,10 +14,11 @@ export function routePath(root: ActivatedRouteSnapshot): string {
  * Router `onViewTransitionCreated`: only page changes cross-fade. A navigation that just rewrites
  * the query (library filters, search, pagination) skips the transition, because while one runs the
  * page is a frozen snapshot that takes no clicks: they land on `<html>`, which closes open popovers
- * (e.g. the library filter panel) and drops the next pick.
+ * (e.g. the library filter panel) and drops the next pick. With reduced motion (OS or the in-app
+ * Animations preference) every transition is skipped: the new page shows at once.
  */
 export function skipSamePageTransition({ transition, from, to }: ViewTransitionInfo): void {
-  if (routePath(from) === routePath(to)) {
+  if (prefersReducedMotion() || routePath(from) === routePath(to)) {
     transition.skipTransition();
   }
 }

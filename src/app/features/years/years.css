@@ -36,14 +36,12 @@
   transform: translateX(-110%);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .goty-aura::before {
-    animation: goty-breathe 4s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
-  }
+.goty-aura::before {
+  animation: goty-breathe 4s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
+}
 
-  .goty-aura::after {
-    animation: goty-sweep 600ms cubic-bezier(0, 0, 0.58, 1) 250ms;
-  }
+.goty-aura::after {
+  animation: goty-sweep 600ms cubic-bezier(0, 0, 0.58, 1) 250ms;
 }
 
 @keyframes goty-breathe {

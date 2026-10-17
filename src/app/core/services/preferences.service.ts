@@ -1,5 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { MOTION_PREFERENCES, MotionPreference, setMotionPreference } from '../../shared/utils/motion';
 
 /** How finely ratings are typed in the run form: 9 / 9.5 / 9.25. */
 export type RatingPrecision = 'integer' | 'half' | 'hundredths';
@@ -15,6 +16,8 @@ export interface Preferences {
    */
   defaultPlatform: string;
   language: Language;
+  /** Animations: follow the OS, always on, or reduced (see shared/utils/motion.ts). */
+  motion: MotionPreference;
 }
 
 export const PREFERENCES_KEY = 'pytra_preferences';
@@ -23,6 +26,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   ratingPrecision: 'hundredths',
   defaultPlatform: 'PC',
   language: 'es',
+  motion: 'system',
 };
 
 const PRECISIONS: readonly RatingPrecision[] = ['integer', 'half', 'hundredths'];
@@ -55,6 +59,9 @@ export function parsePreferences(raw: string | null): Preferences {
       : DEFAULT_PREFERENCES.ratingPrecision,
     defaultPlatform: isPlatformKey(value.defaultPlatform) ? value.defaultPlatform : DEFAULT_PREFERENCES.defaultPlatform,
     language: LANGUAGES.includes(value.language as Language) ? (value.language as Language) : DEFAULT_PREFERENCES.language,
+    motion: MOTION_PREFERENCES.includes(value.motion as MotionPreference)
+      ? (value.motion as MotionPreference)
+      : DEFAULT_PREFERENCES.motion,
   };
 }
 
@@ -64,6 +71,14 @@ function readStored(): Preferences {
   } catch {
     return { ...DEFAULT_PREFERENCES };
   }
+}
+
+/**
+ * Applies the stored motion preference to `<html data-motion>` and the JS gates. Called from
+ * main.ts before bootstrap so the first frame already honours it.
+ */
+export function applyStoredMotion(): void {
+  setMotionPreference(readStored().motion);
 }
 
 /** Applies the UI language: ngx-translate and `<html lang>`. */
@@ -76,7 +91,7 @@ export function applyLanguage(translate: TranslateService, language: Language): 
   }
 }
 
-/** Device-local UI preferences (rating precision, default platform for new runs, language). */
+/** Device-local UI preferences (rating precision, default platform for new runs, language, motion). */
 @Injectable({ providedIn: 'root' })
 export class PreferencesService {
   private readonly state = signal<Preferences>(readStored());
@@ -84,6 +99,7 @@ export class PreferencesService {
   readonly ratingPrecision = computed(() => this.state().ratingPrecision);
   readonly defaultPlatform = computed(() => this.state().defaultPlatform);
   readonly language = computed(() => this.state().language);
+  readonly motion = computed(() => this.state().motion);
   readonly ratingStep = computed(() => ratingStep(this.ratingPrecision()));
 
   setRatingPrecision(ratingPrecision: RatingPrecision): void {
@@ -96,6 +112,11 @@ export class PreferencesService {
 
   setLanguage(language: Language): void {
     this.update({ language });
+  }
+
+  setMotion(motion: MotionPreference): void {
+    this.update({ motion });
+    setMotionPreference(motion);
   }
 
   private update(change: Partial<Preferences>): void {

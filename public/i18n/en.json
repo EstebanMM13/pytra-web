@@ -158,6 +158,7 @@
     "usernameRequired": "Username is required.",
     "preferences": "Preferences",
     "theme": "Theme",
+    "motion": "Animations",
     "memberSince": "On Pytra since {{date}}",
     "sectionsLabel": "Profile sections",
     "sections": {
@@ -573,6 +574,11 @@
     "dark": "Dark",
     "light": "Light",
     "system": "System"
+  },
+  "motion": {
+    "system": "System",
+    "full": "On",
+    "reduce": "Reduced"
   },
   "toast": {
     "close": "Dismiss"

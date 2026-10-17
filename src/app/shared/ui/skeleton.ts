@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 /**
  * Loading placeholder: size and radius come from host classes, e.g. `class="h-24 rounded-xl"`.
- * A soft highlight sweeps across it (transform only); static with reduced motion.
+ * A soft highlight sweeps across it (transform only); static with reduced motion (src/motion.css).
  */
 @Component({
   selector: 'app-skeleton',
@@ -27,12 +27,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     @keyframes skeleton-shimmer {
       to {
         transform: translateX(100%);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      :host::after {
-        content: none;
       }
     }
   `,

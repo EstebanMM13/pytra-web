@@ -280,6 +280,18 @@
         </div>
       </div>
       <div class="flex flex-col gap-2.5 border-t border-divider py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <span id="pref-motion" class="text-muted">{{ 'profile.motion' | translate }}</span>
+        <div class="w-full sm:w-[264px]">
+          <app-segmented
+            stretch
+            aria-labelledby="pref-motion"
+            [options]="motionOptions"
+            [value]="preferences.motion()"
+            (valueChange)="preferences.setMotion($event)"
+          />
+        </div>
+      </div>
+      <div class="flex flex-col gap-2.5 border-t border-divider py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <span id="pref-language" class="text-muted">{{ 'profile.language' | translate }}</span>
         <div class="w-full sm:w-[264px]">
           <app-segmented

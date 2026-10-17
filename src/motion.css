@@ -1,0 +1,29 @@
+/*
+ * Motion gates, driven by <html data-motion="full | reduce"> (shared/utils/motion.ts resolves the
+ * Animations preference: System follows prefers-reduced-motion, On / Reduced override it).
+ *
+ * Effects are declared unconditionally in their own stylesheets; this file is the single switch:
+ * - `--pt-motion` (1 / 0) scales hover and press movement (`translate: 0 calc(-4px * var(--pt-motion))`).
+ * - With `reduce`, every CSS animation (entrances, stagger, shimmer, pulses, sweeps, bar fills,
+ *   sparkline draw...) and the route view transition are switched off, so the final state shows
+ *   at once. Loading spinners keep turning: they report progress, not decoration.
+ */
+:root {
+  --pt-motion: 1;
+}
+
+:root[data-motion='reduce'] {
+  --pt-motion: 0;
+}
+
+[data-motion='reduce'] *:not(.animate-spin),
+[data-motion='reduce'] *::before,
+[data-motion='reduce'] *::after {
+  animation: none !important;
+}
+
+:root[data-motion='reduce']::view-transition-group(*),
+:root[data-motion='reduce']::view-transition-old(*),
+:root[data-motion='reduce']::view-transition-new(*) {
+  animation: none !important;
+}

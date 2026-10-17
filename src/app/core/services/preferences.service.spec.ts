@@ -19,14 +19,18 @@ describe('parsePreferences', () => {
       ratingPrecision: 'half',
       defaultPlatform: 'PC',
       language: 'es',
+      motion: 'system',
     });
     expect(parsePreferences(JSON.stringify({ ratingPrecision: 'x', defaultPlatform: 'SWITCH' }))).toEqual({
       ratingPrecision: 'hundredths',
       defaultPlatform: 'SWITCH',
       language: 'es',
+      motion: 'system',
     });
     expect(parsePreferences(JSON.stringify({ language: 'en' })).language).toBe('en');
     expect(parsePreferences(JSON.stringify({ language: 'fr' })).language).toBe('es');
+    expect(parsePreferences(JSON.stringify({ motion: 'reduce' })).motion).toBe('reduce');
+    expect(parsePreferences(JSON.stringify({ motion: 'fast' })).motion).toBe('system');
   });
 });
 
@@ -60,7 +64,23 @@ describe('PreferencesService', () => {
       ratingPrecision: 'half',
       defaultPlatform: 'PS5',
       language: 'en',
+      motion: 'system',
     });
+  });
+
+  it('stores the motion preference and mirrors it on <html data-motion>', () => {
+    const service = TestBed.inject(PreferencesService);
+    expect(service.motion()).toBe('system');
+
+    service.setMotion('reduce');
+    expect(document.documentElement.dataset['motion']).toBe('reduce');
+    expect(JSON.parse(localStorage.getItem(PREFERENCES_KEY)!).motion).toBe('reduce');
+
+    service.setMotion('full');
+    expect(document.documentElement.dataset['motion']).toBe('full');
+
+    service.setMotion('system');
+    delete document.documentElement.dataset['motion'];
   });
 
   it('reads previously stored preferences', () => {

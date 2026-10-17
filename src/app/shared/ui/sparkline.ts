@@ -37,14 +37,12 @@ function round(n: number): number {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block', 'aria-hidden': 'true' },
   styles: `
-    @media (prefers-reduced-motion: no-preference) {
-      .spark-line {
-        animation: spark-draw 900ms cubic-bezier(0.65, 0, 0.35, 1) backwards;
-      }
+    .spark-line {
+      animation: spark-draw 900ms cubic-bezier(0.65, 0, 0.35, 1) backwards;
+    }
 
-      .spark-area {
-        animation: spark-fade 500ms ease-out 450ms backwards;
-      }
+    .spark-area {
+      animation: spark-fade 500ms ease-out 450ms backwards;
     }
 
     @keyframes spark-draw {

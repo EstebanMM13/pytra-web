@@ -13,10 +13,8 @@
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .platinum-glow-pulse::after {
-    animation: platinum-glow 2.4s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
-  }
+.platinum-glow-pulse::after {
+  animation: platinum-glow 2.4s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
 }
 
 @keyframes platinum-glow {

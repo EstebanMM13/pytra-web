@@ -33,6 +33,7 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Avatar } from '../../shared/ui/avatar';
 import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
+import { MotionPreference } from '../../shared/utils/motion';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { AvatarPicker } from './avatar-picker';
 import { DeleteAccountDialog } from './delete-account-dialog';
@@ -120,6 +121,11 @@ export class Profile {
     { value: 'integer', label: '9' },
     { value: 'half', label: '9.5' },
     { value: 'hundredths', label: '9.25' },
+  ];
+  protected readonly motionOptions: SegmentedOption<MotionPreference>[] = [
+    { value: 'system', label: 'motion.system' },
+    { value: 'full', label: 'motion.full' },
+    { value: 'reduce', label: 'motion.reduce' },
   ];
   protected readonly languageOptions: SegmentedOption<Language>[] = [
     { value: 'es', label: 'language.es' },

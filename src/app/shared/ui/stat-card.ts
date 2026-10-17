@@ -35,16 +35,14 @@ import { canAnimate } from '../utils/motion';
   },
   // Entrance: a short rise + fade, staggered across a row of cards (none with reduced motion).
   styles: `
-    @media (prefers-reduced-motion: no-preference) {
-      :host {
-        animation: stat-card-in 320ms cubic-bezier(0, 0, 0.58, 1) backwards;
-      }
-      :host(:nth-child(2)) { animation-delay: 40ms; }
-      :host(:nth-child(3)) { animation-delay: 80ms; }
-      :host(:nth-child(4)) { animation-delay: 120ms; }
-      :host(:nth-child(5)) { animation-delay: 160ms; }
-      :host(:nth-child(n + 6)) { animation-delay: 200ms; }
+    :host {
+      animation: stat-card-in 320ms cubic-bezier(0, 0, 0.58, 1) backwards;
     }
+    :host(:nth-child(2)) { animation-delay: 40ms; }
+    :host(:nth-child(3)) { animation-delay: 80ms; }
+    :host(:nth-child(4)) { animation-delay: 120ms; }
+    :host(:nth-child(5)) { animation-delay: 160ms; }
+    :host(:nth-child(n + 6)) { animation-delay: 200ms; }
 
     @keyframes stat-card-in {
       from {

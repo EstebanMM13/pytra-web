@@ -65,11 +65,9 @@ export function fitChipCount(widths: readonly number[], available: number, gap: 
     '(document:keydown.escape)': 'popover.set(false)',
   },
   styles: `
-    @media (prefers-reduced-motion: no-preference) {
-      .genre-reveal {
-        animation: genre-reveal 220ms cubic-bezier(0, 0, 0.58, 1) backwards;
-        animation-delay: calc(min(var(--i, 0), 10) * 30ms);
-      }
+    .genre-reveal {
+      animation: genre-reveal 220ms cubic-bezier(0, 0, 0.58, 1) backwards;
+      animation-delay: calc(min(var(--i, 0), 10) * 30ms);
     }
 
     @keyframes genre-reveal {

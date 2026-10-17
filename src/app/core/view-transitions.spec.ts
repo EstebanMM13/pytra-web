@@ -1,4 +1,5 @@
 import { ActivatedRouteSnapshot, UrlSegment, ViewTransitionInfo } from '@angular/router';
+import { setMotionPreference } from '../shared/utils/motion';
 import { routePath, skipSamePageTransition } from './view-transitions';
 
 function snapshot(...paths: string[][]): ActivatedRouteSnapshot {
@@ -30,5 +31,14 @@ describe('view transitions', () => {
     const { skipTransition, info } = transitionInfo(snapshot([], ['games']), snapshot([], ['games', '7']));
     skipSamePageTransition(info);
     expect(skipTransition).not.toHaveBeenCalled();
+  });
+
+  it('skips every transition with reduced motion', () => {
+    setMotionPreference('reduce');
+    const { skipTransition, info } = transitionInfo(snapshot([], ['games']), snapshot([], ['dashboard']));
+    skipSamePageTransition(info);
+    expect(skipTransition).toHaveBeenCalledOnce();
+    setMotionPreference('system');
+    delete document.documentElement.dataset['motion'];
   });
 });
