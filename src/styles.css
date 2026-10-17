@@ -75,60 +75,69 @@
   --pt-grid: #ffffff0a;
   --pt-card: color-mix(in srgb, var(--pt-surface) 85%, transparent);
   --pt-card-border: #ffffff14;
+  --pt-card-shadow: none;
 
   color-scheme: dark;
 }
 
 :root[data-theme='light'] {
-  --pt-bg: #e5ded2;
-  --pt-nav: #ece6dc;
-  --pt-surface: #efeae1;
-  --pt-border: #d2c9ba;
-  --pt-border-strong: #bfb5a4;
-  --pt-divider: #dcd4c7;
-  --pt-hover: #e7e1d6;
+  /*
+   * Light: soft lavender-tinted paper. The page sits a step darker than the cards (bg < surface),
+   * borders carry a hint of plum and cards get a faint shadow, so layers read without dark lines.
+   * Text, muted text, brand, gold and status tones all clear WCAG AA (4.5:1) on bg / surface / their
+   * tinted pills (see the contrast check in the light-theme commit).
+   */
+  --pt-bg: #eeeaf2;
+  --pt-nav: #f7f5f9;
+  --pt-surface: #fcfbfd;
+  --pt-border: #ddd6e4;
+  --pt-border-strong: #c3b9cf;
+  --pt-divider: #e9e4ee;
+  --pt-hover: #f2eef6;
 
-  --pt-text: #1c1a17;
-  --pt-text-2: #2e2b27;
-  --pt-text-3: #5f5a52;
-  --pt-muted: #6b665e;
-  --pt-faint: #8a857c;
+  --pt-text: #1c1924;
+  --pt-text-2: #2c2836;
+  --pt-text-3: #4b4557;
+  --pt-muted: #5c5568;
+  --pt-faint: #7a7386;
 
-  --pt-brand: #724dce;
-  --pt-brand-dark: #5d3dab;
-  /* Icons, links and focus use the solid brand in light mode for contrast. */
-  --pt-brand-light: #724dce;
-  --pt-brand-lighter: #5b3bb0;
-  --pt-brand-tint: #dfd6ee;
+  /* Richer, slightly bluer violet; links / icons / focus use the solid brand for contrast. */
+  --pt-brand: #6a3fd1;
+  --pt-brand-dark: #5530b3;
+  --pt-brand-light: #6a3fd1;
+  --pt-brand-lighter: #5530b3;
+  --pt-brand-tint: #ebe4fb;
 
-  --pt-gold: #94661f;
-  --pt-gold-line: #94661f55;
-  --pt-gold-tint: #e8d8ba;
-  --pt-gold-tint-fg: #7e5617;
-  --pt-gold-card: #efe3cb;
-  --pt-gold-card-border: #e6d2a8;
+  /* Amber deep enough for text on paper; warm cream fills for GOTY / platinum cards. */
+  --pt-gold: #8c5b0c;
+  --pt-gold-line: #c08a2e80;
+  --pt-gold-tint: #f8ead0;
+  --pt-gold-tint-fg: #774c08;
+  --pt-gold-card: #fcf4e3;
+  --pt-gold-card-border: #e9cf9a;
 
-  --pt-rating-high: #2d7444;
-  --pt-rating-mid: #9a6a1f;
-  --pt-platform-playstation: #3563d8;
-  --pt-platform-xbox: #3f8f3f;
-  --pt-platform-switch: #cf3f39;
-  --pt-platform-neutral: #8a8478;
+  --pt-rating-high: #1f6f3c;
+  --pt-rating-mid: #8a5a10;
+  --pt-platform-playstation: #2e5bd0;
+  --pt-platform-xbox: #2d7a31;
+  --pt-platform-switch: #c4302a;
+  --pt-platform-neutral: #7a7386;
 
-  --pt-success: #2d7444;
-  --pt-success-bg: #d5e6d6;
-  --pt-danger: #b23b3b;
-  --pt-danger-bg: #eed6d2;
-  --pt-danger-solid: #b23b3b;
-  --pt-neutral: #5f5a52;
-  --pt-neutral-bg: #dcd4c7;
+  --pt-success: #1f6f3c;
+  --pt-success-bg: #dff0e3;
+  --pt-danger: #b02a2a;
+  --pt-danger-bg: #fbe2df;
+  --pt-danger-solid: #b02a2a;
+  --pt-neutral: #514a5d;
+  --pt-neutral-bg: #ebe6f0;
 
-  --pt-overlay: #1c1a1799;
+  --pt-overlay: #1c192499;
 
-  --pt-aura: 14%;
-  --pt-grid: #1c1a170f;
-  --pt-card: color-mix(in srgb, var(--pt-surface) 85%, transparent);
+  --pt-aura: 16%;
+  --pt-grid: #2a1f4512;
+  --pt-card: color-mix(in srgb, var(--pt-surface) 88%, transparent);
   --pt-card-border: var(--pt-border);
+  --pt-card-shadow: 0 1px 2px #2a1f450d, 0 6px 18px -8px #2a1f4524;
 
   color-scheme: light;
 }
@@ -565,6 +574,7 @@
 /* Cards (StatCard, page sections): translucent surface + blur. Pair with `border-card-border`. */
 @utility card-glass {
   background-color: var(--pt-card);
+  box-shadow: var(--pt-card-shadow);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
