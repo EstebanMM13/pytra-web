@@ -12,6 +12,8 @@ import {
 } from '@angular/core';
 import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
 import { Sparkline } from './sparkline';
+import { countUpValue, parseCountUp } from '../utils/count-up';
+import { canAnimate } from '../utils/motion';
 
 /**
  * Label + big figure tile, one design for every screen size: label row on top, the figure on
@@ -119,13 +121,12 @@ export class StatCard {
     }
     const start = performance.now();
     const step = (now: number) => {
-      const t = Math.min(1, (now - start) / COUNT_UP_MS);
-      if (t >= 1) {
+      const elapsed = now - start;
+      if (elapsed >= COUNT_UP_MS) {
         this.display.set(final);
         return;
       }
-      const eased = 1 - Math.pow(1 - t, 3);
-      this.display.set(parsed.format(parsed.target * eased));
+      this.display.set(parsed.format(countUpValue(parsed.target, elapsed, COUNT_UP_MS)));
       this.frame = requestAnimationFrame(step);
     };
     this.display.set(parsed.format(0));
@@ -154,33 +155,6 @@ export function figureFontSize(text: string): string {
   const chars = Math.max(1, Array.from(text).length);
   const ems = Math.round(chars * FIGURE_EM_PER_CHAR * 100) / 100;
   return `min(var(--fig-max), calc(100cqi / ${ems}))`;
-}
-
-/**
- * Numeric figures the count-up understands: plain integers/decimals with an optional
- * unit suffix ("42", "9.25", "112,9 h"). Anything else (grouped numbers, "3 / 10", "—") renders as-is.
- */
-const COUNT_UP_PATTERN = /^(\d+)(?:([.,])(\d+))?(\s*h)?$/;
-
-export function parseCountUp(
-  text: string,
-): { target: number; format: (n: number) => string } | null {
-  const match = COUNT_UP_PATTERN.exec(text);
-  if (!match) return null;
-  const [, int, sep = '', frac = '', suffix = ''] = match;
-  const decimals = frac.length;
-  return {
-    target: Number(`${int}.${frac || '0'}`),
-    format: (n) => n.toFixed(decimals).replace('.', sep) + suffix,
-  };
-}
-
-function canAnimate(): boolean {
-  return (
-    typeof requestAnimationFrame === 'function' &&
-    typeof matchMedia === 'function' &&
-    !matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
 }
 
 function cancelFrame(id: number): void {

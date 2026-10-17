@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { figureFontSize, parseCountUp, StatCard, statVisual } from './stat-card';
+import { figureFontSize, StatCard, statVisual } from './stat-card';
 
 @Component({
   imports: [StatCard],
@@ -102,18 +102,5 @@ describe('figureFontSize', () => {
   it('counts emoji as one glyph and never divides by zero', () => {
     expect(figureFontSize('🏆')).toBe(figureFontSize('x'));
     expect(figureFontSize('')).toBe(figureFontSize('x'));
-  });
-});
-
-describe('parseCountUp', () => {
-  it('keeps decimals, separator and unit', () => {
-    const parsed = parseCountUp('112,9 h')!;
-    expect(parsed.target).toBe(112.9);
-    expect(parsed.format(50)).toBe('50,0 h');
-  });
-
-  it('ignores non numeric figures', () => {
-    expect(parseCountUp('3 / 10')).toBeNull();
-    expect(parseCountUp('—')).toBeNull();
   });
 });
