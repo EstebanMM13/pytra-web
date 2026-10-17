@@ -50,4 +50,15 @@ describe('ThemeService', () => {
     expect(['dark', 'light']).toContain(service.theme());
     expect(document.documentElement.dataset['theme']).toBe(service.theme());
   });
+
+  it('switches a live theme under the forced-repaint flag', () => {
+    const service = TestBed.inject(ThemeService);
+    service.setPreference('dark');
+    delete document.documentElement.dataset['themeSwitching'];
+
+    service.setPreference('light');
+
+    expect(document.documentElement.dataset['theme']).toBe('light');
+    expect('themeSwitching' in document.documentElement.dataset).toBe(true);
+  });
 });

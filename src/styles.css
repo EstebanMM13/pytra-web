@@ -613,6 +613,27 @@
   box-shadow: var(--pt-card-shadow);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+  /*
+   * Native shell (Android WebView): no blur. Over the near-flat app background it adds little, and
+   * many blurred layers are what Chromium's compositor fails to repaint after a theme switch.
+   */
+  &:where([data-native] *) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/*
+ * Forced repaint during a theme switch (shared/utils/theme-repaint.ts): for two frames every
+ * backdrop-filter and transition is dropped, so the compositor rebuilds those layers with the new
+ * palette instead of leaving stale or blank tiles (Android WebView).
+ */
+:root[data-theme-switching] *,
+:root[data-theme-switching] *::before,
+:root[data-theme-switching] *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  transition: none !important;
 }
 
 @utility scroll-thin {

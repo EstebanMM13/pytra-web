@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { applyWithRepaint } from '../../shared/utils/theme-repaint';
 
 export type ThemePreference = 'dark' | 'light' | 'system';
 export type ResolvedTheme = 'dark' | 'light';
@@ -43,6 +44,18 @@ function applyTheme(theme: ResolvedTheme): void {
 }
 
 /**
+ * Theme change on a live page: wrapped in a forced repaint so Android WebView does not leave
+ * blur/promoted layers painted with the old palette (or blank). See shared/utils/theme-repaint.ts.
+ */
+function applyThemeLive(theme: ResolvedTheme): void {
+  if (document.documentElement.dataset['theme'] === theme) {
+    applyTheme(theme);
+    return;
+  }
+  applyWithRepaint(() => applyTheme(theme));
+}
+
+/**
  * Applies the stored theme synchronously. Called from main.ts before bootstrap so
  * the first paint already uses the right palette (no inline script needed: CSP
  * `script-src 'self'`).
@@ -78,7 +91,7 @@ export class ThemeService {
     } catch {
       // Storage unavailable (private mode): the choice still applies for this session.
     }
-    applyTheme(this.theme());
+    applyThemeLive(this.theme());
   }
 
   private listenToSystemChanges(): void {
@@ -88,7 +101,7 @@ export class ThemeService {
     const query = matchMedia(LIGHT_QUERY);
     const onChange = (event: MediaQueryListEvent) => {
       this.systemLight.set(event.matches);
-      applyTheme(this.theme());
+      applyThemeLive(this.theme());
     };
     query.addEventListener?.('change', onChange);
     inject(DestroyRef).onDestroy(() => query.removeEventListener?.('change', onChange));
