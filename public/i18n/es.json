@@ -338,8 +338,7 @@
     "subtitle": "Conecta tus plataformas para traer tu biblioteca y tus horas de juego.",
     "steamHint": "Biblioteca y horas de juego",
     "playstation": "PlayStation",
-    "playstationHint": "Biblioteca y trofeos de PlayStation Network.",
-    "comingSoon": "Próximamente"
+    "playstationHint": "Biblioteca y horas de juego"
   },
   "steam": {
     "title": "Steam",
@@ -444,6 +443,73 @@
     "lastSession": "Última sesión {{when}}",
     "linkedCount": "{{count}} ya vinculados a un juego de Pytra",
     "linkedCount_one": "{{count}} ya vinculado a un juego de Pytra"
+  },
+  "psn": {
+    "linkedPill": "Vinculada",
+    "notLinkedPill": "Sin vincular",
+    "unavailablePill": "No disponible",
+    "notConfigured": "La sincronización con PlayStation no está disponible en este servidor ahora mismo.",
+    "serviceAuthFailed": "Administración: Sony rechaza la cuenta de servicio de PSN. Renueva PSN_NPSSO en el servidor.",
+    "serviceAuthFailedSince": "Administración: Sony rechaza la cuenta de servicio de PSN desde {{when}}. Renueva PSN_NPSSO en el servidor.",
+    "accountFallback": "Cuenta de PSN",
+    "sync": "Sincronizar",
+    "syncing": "Sincronizando...",
+    "syncedAgo": "sincronizado {{when}}",
+    "neverSynced": "sin sincronizar",
+    "unlink": "Desvincular",
+    "unlinkConfirm": "¿Desvincular tu cuenta de PSN? Los juegos confirmados y sus horas se conservan; los juegos pendientes de revisar y la lista de ignorados se eliminan.",
+    "unlinkYes": "Sí, desvincular",
+    "linked": "Cuenta de PSN vinculada.",
+    "unlinked": "Cuenta de PSN desvinculada.",
+    "unignored": "Juego restaurado: volverá a aparecer como pendiente en la próxima sincronización.",
+    "linkTitle": "Vincula tu cuenta de PlayStation",
+    "linkText": "Escribe tu ID online de PSN. Pytra lee tus juegos y horas para proponerte partidas. No publica nada en tu perfil.",
+    "onlineIdLabel": "Tu ID online de PSN",
+    "onlineIdPlaceholder": "Por ejemplo, Kratos_99",
+    "link": "Vincular",
+    "linking": "Vinculando...",
+    "publicNote": "Tu lista de juegos debe estar visible para «Cualquiera». En PS5: Ajustes → Usuarios y cuentas → Privacidad → Ver y personalizar tu configuración de privacidad → Juegos | Multimedia.",
+    "private": {
+      "title": "Tu lista de juegos de PSN no es pública",
+      "intro": "PlayStation no deja ver tus juegos. Para que Pytra pueda leerlos:",
+      "step1": "En tu PS5, ve a Ajustes → Usuarios y cuentas → Privacidad → Ver y personalizar tu configuración de privacidad.",
+      "step2": "Abre «Juegos | Multimedia».",
+      "step3": "Haz que tus juegos sean visibles para «Cualquiera».",
+      "retryLink": "Después vuelve aquí y pulsa «Vincular» (PlayStation puede tardar unos minutos en aplicar el cambio).",
+      "retrySync": "Después vuelve aquí y pulsa «Sincronizar» (PlayStation puede tardar unos minutos en aplicar el cambio)."
+    },
+    "result": {
+      "title": "Resultado de la sincronización",
+      "skipped": "{{count}} omitidos (ya hay otro juego con ese nombre vinculado en esa consola)",
+      "skipped_one": "{{count}} omitido (ya hay otro juego con ese nombre vinculado en esa consola)"
+    },
+    "pendingHint": "Juegos de PlayStation que aún no están en tu biblioteca",
+    "confirmed": "«{{name}}» añadido a tu biblioteca.",
+    "ignoredHint": "Estos juegos de PlayStation no se volverán a importar.",
+    "confirmDialog": {
+      "title": "Revisar juego de PlayStation",
+      "save": "Confirmar juego",
+      "saveAndRun": "Confirmar y crear partida",
+      "intro": "Elige la categoría para añadirlo a tu biblioteca. Sus horas de PSN se importan al confirmar.",
+      "introRun": "Primero se añade a tu biblioteca; después se abre la partida para completarla.",
+      "categoryHint": "Singleplayer: las horas van a una partida. Online/Híbrido: a las horas online del juego."
+    },
+    "errors": {
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "invalidOnlineId": "El ID online debe tener entre 3 y 16 caracteres: letras, números, guiones o guiones bajos.",
+      "userNotFound": "No hay ningún usuario de PSN con ese ID online. Revisa que esté bien escrito.",
+      "profilePrivate": "Tu perfil de PSN no deja ver tu lista de juegos.",
+      "notLinked": "Primero vincula tu cuenta de PSN.",
+      "syncInProgress": "Ya hay una sincronización en curso. Espera a que termine.",
+      "linkChanged": "Tu vinculación con PSN cambió durante la sincronización. Vuelve a intentarlo.",
+      "rateLimited": "PlayStation Network está limitando las peticiones. Inténtalo más tarde.",
+      "notConfigured": "La sincronización con PlayStation no está configurada en el servidor.",
+      "unavailable": "PlayStation Network no responde ahora mismo. Inténtalo más tarde.",
+      "linkFailed": "No se pudo vincular tu cuenta de PSN. Inténtalo de nuevo.",
+      "syncFailed": "No se pudo sincronizar.",
+      "unlinkFailed": "No se pudo desvincular la cuenta de PSN.",
+      "ignoreFailed": "No se pudo ignorar el juego."
+    }
   },
   "nav": {
     "home": "Inicio",

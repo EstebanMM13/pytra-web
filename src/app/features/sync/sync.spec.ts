@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { DemoModeService } from '../../core/services/demo-mode.service';
 import { ExperienceService } from '../../core/services/experience.service';
 import { NativeOAuthService } from '../../core/services/native-oauth.service';
+import { PsnService } from '../../core/services/psn.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { SteamService } from '../../core/services/steam.service';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -25,12 +26,19 @@ describe('Sync', () => {
       requestConnectToken: vi.fn(() => of({ token: 't' })),
       buildLoginUrl: vi.fn((token: string) => `/login?state=${token}`),
     };
+    const psn = {
+      getStatus: vi.fn(() => of({ configured: true, linked: false })),
+      getPending: vi.fn(() => of([])),
+      getIgnored: vi.fn(() => of([])),
+      link: vi.fn(),
+    };
     const blockWrite = vi.fn(() => demo);
     TestBed.configureTestingModule({
       providers: [
         provideRouter([{ path: 'sync', component: Sync }]),
         provideTranslateService(),
         { provide: SteamService, useValue: steam },
+        { provide: PsnService, useValue: psn },
         { provide: DemoModeService, useValue: { isDemo: signal(demo), blockWrite } },
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
         { provide: NativeOAuthService, useValue: { isNative: false, openExternalFlow: vi.fn(() => Promise.resolve()) } },
@@ -39,12 +47,12 @@ describe('Sync', () => {
       ],
     });
     TestBed.overrideComponent(Sync, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
-    return { steam, blockWrite };
+    return { steam, psn, blockWrite };
   }
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('shows the Steam platform and PlayStation as coming soon (disabled)', async () => {
+  it('shows the Steam and PlayStation platforms', async () => {
     setup();
     const harness = await RouterTestingHarness.create('/sync');
     const el = harness.routeNativeElement as HTMLElement;
@@ -54,11 +62,11 @@ describe('Sync', () => {
     expect(steamCard?.querySelector('h2')?.textContent).toContain('steam.title');
     expect(steamCard?.textContent).toContain('steam.notLinkedPill');
     expect(steamCard?.textContent).toContain('steam.connect');
-    const psn = el.querySelector('[data-platform="playstation"]');
-    expect(psn?.getAttribute('aria-disabled')).toBe('true');
-    expect(psn?.querySelector('h2')?.textContent).toContain('sync.playstation');
-    expect(psn?.textContent).toContain('sync.comingSoon');
-    expect(psn?.querySelector('button, a')).toBeNull();
+    const psnCard = el.querySelector('app-psn-panel [data-platform="playstation"]');
+    expect(psnCard?.getAttribute('aria-disabled')).toBeNull();
+    expect(psnCard?.querySelector('h2')?.textContent).toContain('sync.playstation');
+    expect(psnCard?.textContent).toContain('psn.notLinkedPill');
+    expect(psnCard?.querySelector('#psn-online-id')).not.toBeNull();
   });
 
   it('reads the Steam link callback params and drops them from the URL', async () => {

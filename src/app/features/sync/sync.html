@@ -9,16 +9,6 @@
   <!-- Steam: renders its own platform card (badge and body follow the link status). -->
   <app-steam-panel />
 
-  <!-- PlayStation: announced, not available yet -->
-  <app-platform-card
-    platform="playstation"
-    disabled
-    [name]="'sync.playstation' | translate"
-    [subtitle]="'sync.playstationHint' | translate"
-    [icon]="icons.gamepad2"
-  >
-    <span platformBadge class="rounded-full bg-gold-tint px-[9px] py-[3px] text-xs font-medium whitespace-nowrap text-gold-tint-fg">
-      {{ 'sync.comingSoon' | translate }}
-    </span>
-  </app-platform-card>
+  <!-- PlayStation: link by online ID, sync and pending review (same layout as Steam). -->
+  <app-psn-panel />
 </main>

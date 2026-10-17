@@ -338,8 +338,7 @@
     "subtitle": "Connect your platforms to bring in your library and playtime.",
     "steamHint": "Library and playtime",
     "playstation": "PlayStation",
-    "playstationHint": "PlayStation Network library and trophies.",
-    "comingSoon": "Coming soon"
+    "playstationHint": "Library and playtime"
   },
   "steam": {
     "title": "Steam",
@@ -444,6 +443,73 @@
     "lastSession": "Last session {{when}}",
     "linkedCount": "{{count}} already linked to a Pytra game",
     "linkedCount_one": "{{count}} already linked to a Pytra game"
+  },
+  "psn": {
+    "linkedPill": "Linked",
+    "notLinkedPill": "Not linked",
+    "unavailablePill": "Unavailable",
+    "notConfigured": "PlayStation sync is not available on this server right now.",
+    "serviceAuthFailed": "Admin: Sony is rejecting the PSN service account. Renew PSN_NPSSO on the server.",
+    "serviceAuthFailedSince": "Admin: Sony has been rejecting the PSN service account (first failure {{when}}). Renew PSN_NPSSO on the server.",
+    "accountFallback": "PSN account",
+    "sync": "Sync",
+    "syncing": "Syncing...",
+    "syncedAgo": "synced {{when}}",
+    "neverSynced": "never synced",
+    "unlink": "Unlink",
+    "unlinkConfirm": "Unlink your PSN account? Confirmed games and their hours are kept; games pending review and the ignore list are removed.",
+    "unlinkYes": "Yes, unlink",
+    "linked": "PSN account linked.",
+    "unlinked": "PSN account unlinked.",
+    "unignored": "Game restored: it will show up as pending again on the next sync.",
+    "linkTitle": "Link your PlayStation account",
+    "linkText": "Enter your PSN online ID. Pytra reads your games and hours to suggest runs. It never posts anything to your profile.",
+    "onlineIdLabel": "Your PSN online ID",
+    "onlineIdPlaceholder": "For example, Kratos_99",
+    "link": "Link",
+    "linking": "Linking...",
+    "publicNote": "Your game list must be visible to \"Anyone\". On PS5: Settings → Users and Accounts → Privacy → View and Customize Your Privacy Settings → Gaming | Media.",
+    "private": {
+      "title": "Your PSN game list is not public",
+      "intro": "PlayStation does not let Pytra see your games. To fix it:",
+      "step1": "On your PS5, go to Settings → Users and Accounts → Privacy → View and Customize Your Privacy Settings.",
+      "step2": "Open \"Gaming | Media\".",
+      "step3": "Make your games visible to \"Anyone\".",
+      "retryLink": "Then come back here and press \"Link\" (PlayStation may take a few minutes to apply the change).",
+      "retrySync": "Then come back here and press \"Sync\" (PlayStation may take a few minutes to apply the change)."
+    },
+    "result": {
+      "title": "Sync result",
+      "skipped": "{{count}} skipped (another game with that name is already linked on that console)",
+      "skipped_one": "{{count}} skipped (another game with that name is already linked on that console)"
+    },
+    "pendingHint": "PlayStation games not in your library yet",
+    "confirmed": "\"{{name}}\" added to your library.",
+    "ignoredHint": "These PlayStation games will not be imported again.",
+    "confirmDialog": {
+      "title": "Review PlayStation game",
+      "save": "Confirm game",
+      "saveAndRun": "Confirm and create run",
+      "intro": "Pick a category to add it to your library. Its PSN hours are imported when you confirm.",
+      "introRun": "It is added to your library first; then the run opens so you can complete it.",
+      "categoryHint": "Singleplayer: hours go to a run. Online/Hybrid: to the game's online hours."
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "invalidOnlineId": "The online ID must be 3 to 16 characters: letters, numbers, hyphens or underscores.",
+      "userNotFound": "There is no PSN user with that online ID. Check that it is spelled correctly.",
+      "profilePrivate": "Your PSN profile does not let Pytra see your game list.",
+      "notLinked": "Link your PSN account first.",
+      "syncInProgress": "A sync is already running. Wait for it to finish.",
+      "linkChanged": "Your PSN link changed during the sync. Please try again.",
+      "rateLimited": "PlayStation Network is rate limiting requests. Try again later.",
+      "notConfigured": "PlayStation sync is not configured on the server.",
+      "unavailable": "PlayStation Network is not responding right now. Try again later.",
+      "linkFailed": "Could not link your PSN account. Please try again.",
+      "syncFailed": "Could not sync.",
+      "unlinkFailed": "Could not unlink the PSN account.",
+      "ignoreFailed": "Could not ignore the game."
+    }
   },
   "nav": {
     "home": "Home",

@@ -1,0 +1,326 @@
+@if (errorKey(); as key) {
+  <p class="rounded-xl border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger" role="alert">
+    {{ key | translate }}
+  </p>
+}
+@if (noticeKey(); as key) {
+  <p class="rounded-xl border border-success/40 bg-success-bg px-4 py-3 text-sm text-success" role="status">
+    {{ key | translate }}
+  </p>
+}
+
+<app-platform-card
+  platform="playstation"
+  [name]="'sync.playstation' | translate"
+  [subtitle]="'sync.playstationHint' | translate"
+  [icon]="icons.gamepad2"
+>
+  <!-- One @if with a single root element: nested blocks are not projected into [platformBadge]. -->
+  @if (badge(); as b) {
+    <span platformBadge class="rounded-full px-[9px] py-[3px] text-xs font-medium whitespace-nowrap" [class]="b.cls">
+      {{ b.key | translate }}
+    </span>
+  }
+
+  @if (statusLoading()) {
+    <app-skeleton class="h-24 rounded-[14px]" />
+  } @else if (status(); as s) {
+    @if (s.serviceAuthError) {
+      <!-- Admins only (the API hides it from everyone else): the service account needs a new NPSSO. -->
+      <p class="mb-4 rounded-xl border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger" role="alert">
+        @if (serviceAuthSince(); as since) {
+          {{ 'psn.serviceAuthFailedSince' | translate: { when: since } }}
+        } @else {
+          {{ 'psn.serviceAuthFailed' | translate }}
+        }
+      </p>
+    }
+    @if (!s.configured) {
+      <p class="mb-4 rounded-xl bg-gold-tint px-4 py-3 text-sm text-gold-tint-fg">{{ 'psn.notConfigured' | translate }}</p>
+    }
+
+    @if (s.linked) {
+      <!-- Linked account -->
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:gap-[18px]">
+        <div class="flex min-w-0 flex-1 items-center gap-3.5 md:gap-[18px]">
+          <span
+            class="flex size-[52px] shrink-0 items-center justify-center rounded-xl bg-brand-tint text-xl font-semibold text-brand-lighter"
+            aria-hidden="true"
+          >
+            {{ avatarInitial() }}
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-[17px] font-semibold" [title]="s.onlineId || ('psn.accountFallback' | translate)">
+              {{ s.onlineId || ('psn.accountFallback' | translate) }}
+            </p>
+            <!-- Separators come from CSS so none is left dangling when a part is missing. -->
+            <p class="mt-[5px] font-mono text-xs text-muted md:text-[13px] [&>span+span]:before:content-['_·_']">
+              @if (linkedGamesCount(); as linked) {
+                <span>{{ 'common.games' | translatePlural: linked }}</span>
+              } @else if (syncResult(); as r) {
+                <span>{{ 'common.games' | translatePlural: r.gamesScanned }}</span>
+              }
+              <span>
+                @if (lastSyncRelative(); as rel) {
+                  {{ 'psn.syncedAgo' | translate: { when: rel } }}
+                } @else {
+                  {{ 'psn.neverSynced' | translate }}
+                }
+              </span>
+            </p>
+          </div>
+        </div>
+
+        @if (!confirmingUnlink()) {
+          <div class="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              (click)="sync()"
+              [disabled]="syncing() || !s.configured"
+              class="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong disabled:opacity-50 md:flex-none"
+            >
+              <span class="grid place-items-center" [class.animate-spin]="syncing()"><svg [lucideIcon]="icons.refreshCw" [size]="14"></svg></span>
+              {{ (syncing() ? 'psn.syncing' : 'psn.sync') | translate }}
+            </button>
+            <button
+              type="button"
+              (click)="askUnlink()"
+              class="rounded-lg px-2.5 py-[9px] text-[13px] text-muted hover:text-danger"
+            >
+              {{ 'psn.unlink' | translate }}
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (confirmingUnlink()) {
+        <div class="mt-4 rounded-[10px] border border-danger/40 bg-bg p-4">
+          <p class="mb-3 text-sm text-text-2">{{ 'psn.unlinkConfirm' | translate }}</p>
+          <div class="flex flex-wrap gap-2.5">
+            <button
+              type="button"
+              (click)="unlink()"
+              [disabled]="unlinking()"
+              class="rounded-lg bg-danger-solid px-3.5 py-2 text-[13px] font-semibold text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {{ 'psn.unlinkYes' | translate }}
+            </button>
+            <button
+              type="button"
+              (click)="cancelUnlink()"
+              class="rounded-lg border border-border px-3.5 py-2 text-[13px] font-medium text-text-2 hover:border-border-strong"
+            >
+              {{ 'steam.cancel' | translate }}
+            </button>
+          </div>
+        </div>
+      }
+    } @else {
+      <!-- Not linked: PSN has no OAuth, the user types their public online ID. -->
+      <form class="flex flex-col gap-3.5" novalidate (submit)="$event.preventDefault(); link()">
+        <h3 class="text-[19px] font-semibold tracking-[-0.01em] md:text-xl">{{ 'psn.linkTitle' | translate }}</h3>
+        <p class="max-w-[60ch] text-[15px] leading-normal text-text-3">{{ 'psn.linkText' | translate }}</p>
+        <div class="flex flex-col gap-2">
+          <label for="psn-online-id" class="text-[13px] text-text-3">{{ 'psn.onlineIdLabel' | translate }}</label>
+          <div class="flex flex-col gap-2.5 md:flex-row">
+            <input
+              id="psn-online-id"
+              type="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              maxlength="32"
+              [value]="onlineId()"
+              (input)="onOnlineIdInput($any($event.target).value)"
+              [disabled]="!s.configured"
+              [attr.aria-invalid]="onlineIdInvalid()"
+              [attr.aria-describedby]="onlineIdInvalid() ? 'psn-online-id-error' : null"
+              [placeholder]="'psn.onlineIdPlaceholder' | translate"
+              class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-[16px] text-text disabled:opacity-50 md:h-[42px] md:max-w-[320px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+            />
+            <button
+              type="submit"
+              [disabled]="linking() || !s.configured"
+              class="press rounded-xl bg-brand p-[15px] text-base font-semibold text-white hover:bg-brand-dark disabled:opacity-50 md:w-fit md:rounded-lg md:px-5 md:py-2.5 md:text-sm"
+            >
+              {{ (linking() ? 'psn.linking' : 'psn.link') | translate }}
+            </button>
+          </div>
+          @if (onlineIdInvalid()) {
+            <p id="psn-online-id-error" class="text-xs text-danger">{{ 'psn.errors.invalidOnlineId' | translate }}</p>
+          }
+        </div>
+        @if (!showPrivacyHelp()) {
+          <p class="text-xs leading-normal text-muted">{{ 'psn.publicNote' | translate }}</p>
+        }
+      </form>
+    }
+  }
+</app-platform-card>
+
+<!-- PSN hides the game list: privacy steps (after linking or syncing a private profile). -->
+@if (showPrivacyHelp()) {
+  <section class="rounded-[14px] border border-gold-card-border bg-gold-card p-4 text-sm text-text-2 md:p-[22px]" role="alert">
+    <p class="mb-2 font-semibold text-gold">{{ 'psn.private.title' | translate }}</p>
+    <p class="mb-2">{{ 'psn.private.intro' | translate }}</p>
+    <ol class="list-decimal space-y-1 pl-5">
+      <li>{{ 'psn.private.step1' | translate }}</li>
+      <li>{{ 'psn.private.step2' | translate }}</li>
+      <li>{{ 'psn.private.step3' | translate }}</li>
+    </ol>
+    <p class="mt-2">{{ (linkPrivate() ? 'psn.private.retryLink' : 'psn.private.retrySync') | translate }}</p>
+  </section>
+}
+
+<!-- Last sync result -->
+@if (syncResult(); as result) {
+  @if (!result.profilePrivate) {
+    <section class="rounded-[14px] border border-card-border card-glass p-4 text-sm text-text-3 md:p-[22px]">
+      <app-section-header collapseKey="psn.result" [label]="'psn.result.title' | translate" class="mb-3" />
+      <ul class="grid grid-cols-1 gap-1 sm:grid-cols-2">
+        <li>{{ 'steam.result.scanned' | translatePlural: result.gamesScanned }}</li>
+        <li>{{ 'steam.result.newPending' | translatePlural: result.newGamesPending }}</li>
+        <li>{{ 'steam.result.linkedExisting' | translatePlural: result.linkedExisting }}</li>
+        <li>{{ 'steam.result.updated' | translatePlural: result.gamesUpdated }}</li>
+        @if (result.ignored > 0) {
+          <li>{{ 'steam.result.ignored' | translatePlural: result.ignored }}</li>
+        }
+        @if (result.skipped > 0) {
+          <li class="text-gold">{{ 'psn.result.skipped' | translatePlural: result.skipped }}</li>
+        }
+        @if (result.errored > 0) {
+          <li class="text-danger">{{ 'steam.result.errored' | translatePlural: result.errored }}</li>
+        }
+      </ul>
+    </section>
+  }
+}
+
+<!-- Pending review -->
+@if (status()?.linked || pending().length > 0) {
+  <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
+    <app-section-header collapseKey="psn.pending" [label]="('steam.pendingHeader' | translate: { count: pendingTotal() })" class="mb-1.5">
+      <span class="hidden text-[13px] text-muted md:inline">{{ 'psn.pendingHint' | translate }}</span>
+    </app-section-header>
+    <p class="mb-1 text-xs text-muted md:hidden">{{ 'psn.pendingHint' | translate }}</p>
+
+    @if (loading()) {
+      <div class="flex flex-col gap-2 pt-2">
+        <app-skeleton class="h-14 rounded-[10px]" />
+        <app-skeleton class="h-14 rounded-[10px]" />
+      </div>
+    } @else if (pending().length === 0) {
+      <p class="border-t border-divider pt-4 pb-1 text-sm text-muted">{{ 'steam.noPending' | translate }}</p>
+    } @else {
+      <!-- Web: ~8 rows then internal scroll; phones keep page scroll (it is the page's main list). -->
+      <ul class="md:scroll-list md:max-h-[560px]">
+        @for (game of pending(); track game.id) {
+          <li
+            class="flex flex-col gap-3 border-t border-divider py-3.5 text-sm md:grid md:grid-cols-[minmax(0,1fr)_110px_72px_auto] md:items-center md:gap-4"
+          >
+            <div class="flex min-w-0 items-center justify-between gap-3">
+              <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
+              <div class="min-w-0 flex-1">
+                <p class="text-[15px] font-semibold break-words">
+                  {{ game.name }}
+                  <span class="ml-1 inline-block rounded-full bg-brand-tint px-2 py-px align-middle font-mono text-[11px] font-medium text-brand-lighter">{{ game.psnPlatform }}</span>
+                </p>
+                @if (lastSession(game); as when) {
+                  <p class="mt-1 text-xs text-muted">{{ 'steam.lastSession' | translate: { when } }}</p>
+                }
+              </div>
+              <span class="shrink-0 font-mono text-sm md:hidden">{{ psnHours(game.psnPlaytimeMinutes) | hours }}</span>
+            </div>
+            <span class="hidden text-xs text-text-3 md:block">
+              {{ game.category ? ('category.' + game.category | translate) : '' }}
+            </span>
+            <span class="hidden text-right font-mono text-sm md:block">
+              {{ psnHours(game.psnPlaytimeMinutes) | hours }}
+            </span>
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                (click)="ignore(game)"
+                [disabled]="busyGameId() === game.id"
+                class="rounded-lg border border-border px-3 py-[7px] text-[13px] text-muted hover:border-border-strong hover:text-text-2 disabled:opacity-50"
+              >
+                {{ 'steam.ignore' | translate }}
+              </button>
+              <button
+                type="button"
+                (click)="openConfirm(game, 'confirm')"
+                class="rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong"
+              >
+                {{ 'steam.confirmOnly' | translate }}
+              </button>
+              <button
+                type="button"
+                (click)="openConfirm(game, 'run')"
+                class="press rounded-lg bg-brand px-3 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+              >
+                {{ 'steam.createRun' | translate }}
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+}
+
+<!-- Ignored titles -->
+@if (ignoredTotal() > 0 || ignoredTitles().length > 0 || (linkedGamesCount() ?? 0) > 0) {
+  <div class="flex flex-col gap-3">
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
+      <button
+        type="button"
+        (click)="showIgnored.set(!showIgnored())"
+        [disabled]="ignoredTitles().length === 0"
+        [attr.aria-expanded]="showIgnored()"
+        class="flex w-fit items-center gap-2 rounded-md text-[13px] text-muted hover:text-text-2"
+      >
+        <svg [lucideIcon]="icons.eyeOff" [size]="15"></svg>
+        {{ 'steam.ignoredCount' | translatePlural: ignoredTotal() }}
+      </button>
+      @if (linkedGamesCount(); as linked) {
+        <span aria-hidden="true">·</span>
+        <span>{{ 'steam.linkedCount' | translatePlural: linked }}</span>
+      }
+    </div>
+
+    @if (showIgnored()) {
+      <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
+        <p class="mb-2 text-[13px] text-muted">{{ 'psn.ignoredHint' | translate }}</p>
+        <!-- Secondary list: ~6 rows then internal scroll on every size. -->
+        <ul class="scroll-list max-h-[344px]">
+          @for (title of ignoredTitles(); track title.titleId) {
+            <li class="flex items-center justify-between gap-3 border-t border-divider py-3">
+              <span class="min-w-0 text-sm break-words text-text-3">
+                {{ title.name }}
+                <span class="ml-1 font-mono text-[11px] text-muted">{{ title.platform }}</span>
+              </span>
+              <button
+                type="button"
+                (click)="unignore(title)"
+                class="shrink-0 rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong"
+              >
+                {{ 'steam.unignore' | translate }}
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
+}
+
+@if (confirmTarget(); as target) {
+  <app-pending-confirm-dialog
+    source="psn"
+    [game]="target.game"
+    [mode]="target.mode"
+    [confirmWith]="confirmPending"
+    (confirmed)="onConfirmed($event)"
+    (closed)="confirmTarget.set(null)"
+  />
+}
