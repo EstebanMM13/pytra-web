@@ -33,6 +33,10 @@
           {{ 'profile.sections.' + section | translate }}
         </button>
       }
+      <a routerLink="/sync" class="flex items-center gap-2 rounded-lg px-3 py-[9px] text-text-3 hover:text-text">
+        {{ 'nav.sync' | translate }}
+        <svg [lucideIcon]="icons.chevronRight" [size]="16" class="ml-auto shrink-0 text-faint" aria-hidden="true"></svg>
+      </a>
       <button type="button" (click)="logout()" class="rounded-lg px-3 py-[9px] text-left text-danger hover:bg-danger-bg">
         {{ 'nav.logout' | translate }}
       </button>
