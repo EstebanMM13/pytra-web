@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { API_ORIGIN } from '../../core/api-base-url';
 import {
   GameCover,
   GameCoverSize,
@@ -90,6 +91,12 @@ describe('GameCover', () => {
   it('retries a failed Steam library capsule with the header and the main capsule, then shows the initials', () => {
     const capsule = steamPortraitCoverUrl(70);
     const { fixture, el } = setup(capsule);
+    // A small box first asks the API for a thumbnail, then the capsule itself.
+    expect(el.querySelector('img')!.getAttribute('src')).toBe(sizedCoverUrl(capsule, 'small'));
+    el.querySelector('img')!.dispatchEvent(new Event('error'));
+    fixture.detectChanges();
+    expect(el.querySelector('img')!.getAttribute('src')).toBe(capsule);
+
     el.querySelector('img')!.dispatchEvent(new Event('error'));
     fixture.detectChanges();
     expect(el.querySelector('img')!.getAttribute('src')).toBe(
@@ -224,9 +231,16 @@ describe('sizedCoverUrl', () => {
     expect(sizedCoverUrl(igdb('t_thumb'), 'small')).toBe(igdb('t_thumb'));
   });
 
-  it('leaves other urls unchanged', () => {
+  it('sends small Steam capsules through the API thumbnail endpoint', () => {
     const steam = steamPortraitCoverUrl(620);
-    expect(sizedCoverUrl(steam, 'small')).toBe(steam);
+    const sized = sizedCoverUrl(steam, 'small');
+    expect(sized).toBe(`${API_ORIGIN}/api/v1/covers/thumb?url=${encodeURIComponent(steam)}&w=180`);
+    expect(sizedCoverUrl(steam, 'big')).toBe(steam);
+    // A failed thumbnail falls back to the original capsule.
+    expect(nextCoverSource(steam, sized!, sized)).toBe(steam);
+  });
+
+  it('leaves other urls unchanged', () => {
     expect(
       sizedCoverUrl('https://evil.example.com/igdb/image/upload/t_cover_big/co1.jpg', 'small'),
     ).toBe('https://evil.example.com/igdb/image/upload/t_cover_big/co1.jpg');

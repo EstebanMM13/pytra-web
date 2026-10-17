@@ -6,6 +6,7 @@ import { IgdbGameMetadata, IgdbSearchResult } from '../../../core/models/igdb-me
 import { SteamGameMetadata, SteamStoreSearchResult } from '../../../core/models/steam-metadata.model';
 import { IgdbMetadataService } from '../../../core/services/igdb-metadata.service';
 import { SteamMetadataService } from '../../../core/services/steam-metadata.service';
+import { sizedCoverUrl } from '../../../shared/ui/game-cover';
 import { AUTOFILL_SEARCH_DEBOUNCE_MS, MetadataAutofill } from './metadata-autofill';
 
 const STEAM_RESULTS: SteamStoreSearchResult[] = [
@@ -97,7 +98,7 @@ describe('MetadataAutofill', () => {
     const options = el.querySelectorAll('[role="option"]');
     expect(options.length).toBe(2);
     expect(options[0].querySelector('img')?.getAttribute('src')).toBe(
-      'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/library_600x900.jpg',
+      sizedCoverUrl('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1245620/library_600x900.jpg', 'small'),
     );
     expect(input.getAttribute('aria-expanded')).toBe('true');
   });

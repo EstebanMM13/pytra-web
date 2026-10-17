@@ -7,6 +7,7 @@ import {
   linkedSignal,
   output,
 } from '@angular/core';
+import { API_ORIGIN } from '../../core/api-base-url';
 
 export type GameCoverSize = 'xs' | 'sm' | 'md' | 'lg' | 'hero' | 'fill';
 
@@ -58,14 +59,22 @@ const SIZE_VARIANT: Record<GameCoverSize, CoverImageVariant> = {
 /** The `/t_<size>/` segment of an images.igdb.com url. */
 const IGDB_IMAGE_SIZE = /^((?:https?:)?\/\/images\.igdb\.com\/igdb\/image\/upload\/)(t_[a-z0-9_]+)\//i;
 
+/** Width the API thumbnails Steam capsules to for small boxes: retina-safe up to ~90px wide. */
+const STEAM_THUMB_WIDTH = 180;
+
 /**
  * The url sized for `variant`: for `small`, a larger IGDB image (e.g. `t_cover_big`) is swapped for
- * `t_cover_small_2x` by rewriting its `/t_<size>/` segment. `big`, already-small IGDB images and any
- * other url (Steam, custom) are returned unchanged.
+ * `t_cover_small_2x` by rewriting its `/t_<size>/` segment, and a Steam library capsule (600x900,
+ * ~60 KB; Steam has no small portrait) goes through the API's thumbnail endpoint. `big`,
+ * already-small IGDB images and any other url (custom) are returned unchanged. If the thumbnail
+ * fails, the cover falls back to the original url (see `nextCoverSource`).
  */
 export function sizedCoverUrl(url: string | null | undefined, variant: CoverImageVariant): string | null {
   if (!url) return null;
   if (variant === 'big') return url;
+  if (STEAM_LIBRARY_CAPSULE.test(url)) {
+    return `${API_ORIGIN}/api/v1/covers/thumb?url=${encodeURIComponent(url)}&w=${STEAM_THUMB_WIDTH}`;
+  }
   return url.replace(IGDB_IMAGE_SIZE, (segment, base: string, size: string) =>
     IGDB_SMALL_SIZES.has(size.toLowerCase()) ? segment : `${base}${IGDB_SMALL_SIZE}/`,
   );
