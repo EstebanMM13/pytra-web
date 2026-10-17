@@ -12,7 +12,7 @@
       <button
         type="button"
         (click)="newRun()"
-        class="mt-2 flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+        class="press mt-2 flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
       >
         <svg [lucideIcon]="icons.plus" [size]="15"></svg>
         {{ 'nav.newRun' | translate }}
@@ -285,7 +285,7 @@
                   <span class="shrink-0 font-mono">{{ g.totalHours | hours }}</span>
                 </span>
                 <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
-                  <span class="block h-[3px] rounded-sm bg-brand-light" [style.width.%]="barWidth(g.totalHours)"></span>
+                  <span class="bar-fill block h-[3px] rounded-sm bg-brand-light" [style.width.%]="barWidth(g.totalHours)"></span>
                 </span>
               </a>
             } @empty {
@@ -380,7 +380,7 @@
             type="button"
             (click)="saveNote()"
             [disabled]="!noteDirty() || savingNote() || noteTooLong()"
-            class="rounded-lg bg-brand px-[18px] py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
+            class="press rounded-lg bg-brand px-[18px] py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
           >
             {{ (savingNote() ? 'years.note.saving' : 'years.note.save') | translate }}
           </button>

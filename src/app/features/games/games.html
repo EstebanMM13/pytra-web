@@ -65,7 +65,7 @@
       <div class="flex flex-wrap justify-center gap-2.5">
         <a
           routerLink="/steam"
-          class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+          class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
         >
           <svg [lucideIcon]="icons.download" [size]="15"></svg>
           {{ 'library.empty.steam' | translate }}
@@ -216,7 +216,7 @@
       <ul class="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 md:grid-cols-5 md:gap-x-5 md:gap-y-7 lg:grid-cols-6">
         @for (game of filtered(); track game.id) {
           <li class="library-in min-w-0" [style.--i]="$index">
-            <a [routerLink]="['/games', game.id]" class="cover-card group flex flex-col gap-2 rounded-lg">
+            <a [routerLink]="['/games', game.id]" class="cover-card press group flex flex-col gap-2 rounded-lg">
               <div class="relative">
                 <span class="cover-glow cover-lift" aria-hidden="true"></span>
                 <app-game-cover

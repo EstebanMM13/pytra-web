@@ -83,7 +83,7 @@ import { canAnimate } from '../utils/motion';
           <!-- Same strip height as the sparkline, so cards with either visual line up. -->
           <div class="mt-auto flex h-5 w-full items-end pt-2.5 md:h-7 md:pt-3" aria-hidden="true" data-visual="meter">
             <div class="h-1.5 w-full overflow-hidden rounded-full bg-hover">
-              <div class="h-full rounded-full bg-brand-light" [style.width.%]="meter()! * 100"></div>
+              <div class="bar-fill h-full rounded-full bg-brand-light" [style.width.%]="meter()! * 100"></div>
             </div>
           </div>
         }

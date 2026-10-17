@@ -59,7 +59,7 @@
       <button
         type="button"
         (click)="installPrompt.install()"
-        class="shrink-0 rounded-lg bg-brand px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-brand-dark"
+        class="press shrink-0 rounded-lg bg-brand px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-brand-dark"
       >
         {{ 'dashboard.install.action' | translate }}
       </button>
@@ -340,7 +340,7 @@
                 <span class="shrink-0 font-mono">{{ item.totalHours | hours }}</span>
               </span>
               <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
-                <span class="block h-[3px] rounded-sm bg-brand-light" [style.width.%]="barWidth(item.totalHours)"></span>
+                <span class="bar-fill block h-[3px] rounded-sm bg-brand-light" [style.width.%]="barWidth(item.totalHours)"></span>
               </span>
             </a>
           } @empty {

@@ -90,7 +90,7 @@
         <button
           type="button"
           (click)="edit()"
-          class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+          class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
         >
           <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
           {{ 'run.edit' | translate }}
@@ -203,7 +203,7 @@
               <span class="text-base text-faint">{{ 'run.outOf' | translate }}</span>
             </p>
             <div class="mt-3 h-1 rounded-sm bg-bg" aria-hidden="true">
-              <div class="h-1 rounded-sm bg-gold" [style.width.%]="e.rating * 10"></div>
+              <div class="bar-fill h-1 rounded-sm bg-gold" [style.width.%]="e.rating * 10"></div>
             </div>
             @if (rank(); as r) {
               <p class="mt-2.5 text-[13px] text-muted">{{ 'run.rank' | translate: { rank: r } }}</p>

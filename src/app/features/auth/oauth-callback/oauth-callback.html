@@ -4,7 +4,7 @@
       {{ 'auth.oauthCallback.errorTitle' | translate }}
     </h1>
     <p class="text-sm leading-relaxed text-danger" role="alert">{{ errorKey() | translate }}</p>
-    <a routerLink="/login" class="auth-primary">{{ 'auth.verifyEmail.goToLogin' | translate }}</a>
+    <a routerLink="/login" class="press auth-primary">{{ 'auth.verifyEmail.goToLogin' | translate }}</a>
   } @else {
     <h1 class="text-[30px] font-semibold tracking-[-0.02em] md:text-[28px]">{{ 'auth.login.title' | translate }}</h1>
     <p class="text-[15px] text-muted" role="status">{{ 'auth.oauthCallback.processing' | translate }}</p>

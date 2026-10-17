@@ -45,7 +45,7 @@
       <button
         type="button"
         (click)="addOpen.set(!addOpen())"
-        class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+        class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
         aria-haspopup="menu"
         [attr.aria-expanded]="addOpen()"
       >
@@ -198,7 +198,7 @@
     <button
       type="button"
       (click)="addOpen.set(!addOpen())"
-      class="-mt-[26px] flex size-[54px] items-center justify-center rounded-[18px] border-4 border-bg bg-brand text-white shadow-[0_8px_24px_#724DCE66] hover:bg-brand-dark"
+      class="press -mt-[26px] flex size-[54px] items-center justify-center rounded-[18px] border-4 border-bg bg-brand text-white shadow-[0_8px_24px_#724DCE66] hover:bg-brand-dark"
       [attr.aria-label]="'nav.add' | translate"
       aria-haspopup="menu"
       [attr.aria-expanded]="addOpen()"

@@ -456,15 +456,24 @@
  * primary content, so phones keep natural page scroll. `scroll-thin` only styles the scrollbar,
  * for containers that already manage their own overflow and padding (dropdowns, popovers).
  */
-/* Clickable cards/rows: 1px lift + stronger border on hover (no motion with reduced-motion). */
+/* Clickable cards/rows: 1px lift + stronger border on hover (pointer devices), a press shrink, no motion with reduced-motion. */
 @utility hover-lift {
-  transition-property: transform, border-color, background-color;
+  transition-property: transform, scale, border-color, background-color;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 
-  &:hover {
-    transform: translateY(-1px);
-    border-color: var(--pt-border-strong);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-1px);
+      border-color: var(--pt-border-strong);
+    }
+  }
+
+  /* Tactile press (same as the press utility): shrink while held. */
+  @media (prefers-reduced-motion: no-preference) {
+    &:active {
+      scale: 0.97;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

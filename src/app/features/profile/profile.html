@@ -110,7 +110,7 @@
                 <button
                   type="submit"
                   [disabled]="submitting()"
-                  class="rounded-lg bg-brand px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
+                  class="press rounded-lg bg-brand px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
                 >
                   {{ 'profile.submit' | translate }}
                 </button>
@@ -210,7 +210,7 @@
               aria-valuemax="100"
               [attr.aria-label]="'achievements.progress' | translate"
             >
-              <span class="block h-full rounded-full bg-linear-to-r from-brand to-gold" [style.width.%]="unlockedPercent()"></span>
+              <span class="bar-fill block h-full rounded-full bg-linear-to-r from-brand to-gold" [style.width.%]="unlockedPercent()"></span>
             </div>
 
             @if (!showAllAchievements()) {
@@ -333,7 +333,7 @@
             <button
               type="button"
               (click)="installPrompt.install()"
-              class="flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+              class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark"
             >
               <svg [lucideIcon]="icons.download" [size]="14"></svg>
               {{ 'profile.installApp' | translate }}

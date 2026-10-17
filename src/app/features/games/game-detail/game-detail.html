@@ -442,7 +442,7 @@
               <button
                 type="submit"
                 [disabled]="savingOnline() || onlineLoadState() === 'error' || onlineLoadState() === 'loading'"
-                class="h-10 rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
+                class="press h-10 rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
               >
                 {{ (onlinePlaytime() ? 'game.online.update' : 'game.online.save') | translate }}
               </button>

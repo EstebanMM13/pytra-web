@@ -53,7 +53,7 @@ export type BarOrientation = 'vertical' | 'horizontal';
         <div class="flex items-center gap-3 text-[13px]" role="listitem" [attr.aria-label]="bar.title ?? bar.label" data-row>
           <span class="w-10 shrink-0 text-muted tabular-nums">{{ bar.label }}</span>
           <div class="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-hover">
-            <div class="h-full rounded-full bg-brand" [style.width.%]="bar.ratio * 100" [attr.data-ratio]="bar.ratio"></div>
+            <div class="bar-fill h-full rounded-full bg-brand" [style.width.%]="bar.ratio * 100" [attr.data-ratio]="bar.ratio"></div>
           </div>
           <span class="w-[92px] shrink-0 text-right font-mono text-xs whitespace-nowrap">
             @if (bar.subLabel) {

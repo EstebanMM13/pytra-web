@@ -112,7 +112,7 @@ const FOCUSABLE =
               type="button"
               (click)="onSave()"
               [disabled]="saving() || saveDisabled()"
-              class="rounded-lg px-[18px] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              class="press rounded-lg px-[18px] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
               [class]="danger() ? 'bg-danger-solid hover:opacity-90' : 'bg-brand hover:bg-brand-dark'"
             >
               {{ saveLabel() }}

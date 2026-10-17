@@ -218,7 +218,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
           <button
             type="button"
             (click)="close()"
-            class="rounded-lg bg-brand px-4 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark"
+            class="press rounded-lg bg-brand px-4 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark"
           >
             {{ 'library.filters.done' | translate }}
           </button>

@@ -77,7 +77,7 @@ const TIER_TONE: Record<AchievementTier, string> = {
       }
       @if (compact() && !a().unlocked) {
         <span class="mt-1 block h-0.5 overflow-hidden rounded-full bg-bg" aria-hidden="true">
-          <span class="block h-full rounded-full bg-brand-light/60" [style.width.%]="percent()"></span>
+          <span class="bar-fill block h-full rounded-full bg-brand-light/60" [style.width.%]="percent()"></span>
         </span>
       }
       @if (!compact()) {
@@ -94,7 +94,7 @@ const TIER_TONE: Record<AchievementTier, string> = {
               aria-valuemax="100"
               [attr.aria-label]="'achievements.progress' | translate"
             >
-              <span class="block h-full rounded-full bg-brand-light/60" [style.width.%]="percent()"></span>
+              <span class="bar-fill block h-full rounded-full bg-brand-light/60" [style.width.%]="percent()"></span>
             </span>
             @if (a().target > 1) {
               <span class="shrink-0 font-mono text-[11px] text-faint">{{ shown() }}/{{ a().target }}</span>

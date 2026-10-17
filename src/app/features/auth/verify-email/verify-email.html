@@ -8,7 +8,7 @@
       <p class="rounded-[10px] border border-border bg-surface px-4 py-3 text-sm leading-relaxed text-success">
         {{ 'auth.verifyEmail.success' | translate }}
       </p>
-      <a routerLink="/login" class="auth-primary">{{ 'auth.verifyEmail.goToLogin' | translate }}</a>
+      <a routerLink="/login" class="press auth-primary">{{ 'auth.verifyEmail.goToLogin' | translate }}</a>
     }
     @case ('expired') {
       <p class="text-sm leading-relaxed text-danger" role="alert">{{ 'auth.verifyEmail.expired' | translate }}</p>
