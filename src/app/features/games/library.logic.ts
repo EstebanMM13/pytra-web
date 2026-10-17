@@ -44,7 +44,7 @@ export interface LibraryQuery {
   sort: LibrarySort;
   /** Catalog platform ids (as text, they live in the URL); a game matches with ANY of them. Empty: all. */
   platforms?: readonly string[];
-  /** Genre ids; a game matches when it has ANY of them. Empty: all. */
+  /** Genre ids; a game matches when it has ALL of them. Empty: all. */
   genres?: readonly number[];
   /** Defaults to 'ALL' when omitted. */
   category?: LibraryCategoryFilter;
@@ -90,9 +90,11 @@ export function matchesPlatforms(game: Game, platforms: readonly string[] | unde
   return !platforms?.length || (game.platformRefs ?? []).some((ref) => platforms.includes(String(ref.id)));
 }
 
-/** ANY of the genres (none picked: every game). */
+/** ALL of the genres, so each extra genre narrows the list (none picked: every game). */
 export function matchesGenres(game: Game, genres: readonly number[] | undefined): boolean {
-  return !genres?.length || (game.genres ?? []).some((g) => genres.includes(g.id));
+  if (!genres?.length) return true;
+  const ids = new Set((game.genres ?? []).map((g) => g.id));
+  return genres.every((id) => ids.has(id));
 }
 
 /** ANY of the names, compared accent/case-insensitively (none picked: every game). */

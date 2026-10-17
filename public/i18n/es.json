@@ -873,7 +873,8 @@
       "developers": "Desarrolladora",
       "developersPlaceholder": "Buscar desarrolladoras…",
       "publishers": "Distribuidora",
-      "publishersPlaceholder": "Buscar distribuidoras…"
+      "publishersPlaceholder": "Buscar distribuidoras…",
+      "allHint": "Solo se muestran los juegos que tienen todos los géneros elegidos."
     },
     "statusShort": "Estado"
   },

@@ -168,7 +168,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
               (selectedChange)="genresChange.emit($event)"
               placeholder="library.filters.genresPlaceholder"
             />
-            <p class="text-xs text-faint">{{ 'library.filters.anyHint' | translate }}</p>
+            <p class="text-xs text-faint">{{ 'library.filters.allHint' | translate }}</p>
           </section>
         }
 

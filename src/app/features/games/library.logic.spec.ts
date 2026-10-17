@@ -111,14 +111,15 @@ describe('library logic', () => {
       expect(matchesPlatforms(game({ id: 12, name: 'X', platformRefs: null }), ['1'])).toBe(false);
     });
 
-    it('filters by genre: a game matches with ANY picked genre', () => {
+    it('filters by genre: a game matches only with ALL picked genres', () => {
       const rpg = { id: 1, name: 'RPG' };
       const acc = { id: 2, name: 'ACCIÓN' };
       const both = game({ id: 10, name: 'Elden Ring', genres: [rpg, acc] });
       const action = game({ id: 11, name: 'DOOM', genres: [acc] });
       const list = [both, action, unplayed];
       expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', genres: [1] }).map((g) => g.id)).toEqual([10]);
-      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', genres: [1, 2] }).map((g) => g.id)).toEqual([11, 10]);
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', genres: [1, 2] }).map((g) => g.id)).toEqual([10]);
+      expect(filterGames(list, { text: '', status: 'ALL', sort: 'name', genres: [2] }).map((g) => g.id)).toEqual([11, 10]);
       expect(matchesGenres(unplayed, [])).toBe(true);
       expect(matchesGenres(game({ id: 12, name: 'X', genres: undefined as never }), [1])).toBe(false);
       expect(libraryGenres(list, (n) => n.toLowerCase())).toEqual([

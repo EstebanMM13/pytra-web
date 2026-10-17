@@ -873,7 +873,8 @@
       "developers": "Developer",
       "developersPlaceholder": "Search developers…",
       "publishers": "Publisher",
-      "publishersPlaceholder": "Search publishers…"
+      "publishersPlaceholder": "Search publishers…",
+      "allHint": "Only games that have all the chosen genres are shown."
     },
     "statusShort": "Status"
   },

@@ -30,10 +30,14 @@ function game(id: number, genres: { id: number; name: string }[], developer: str
   };
 }
 
+const ACTION = { id: 10, name: 'Action' };
+const RPG = { id: 20, name: 'RPG' };
+const PUZZLE = { id: 30, name: 'Puzzle' };
+
 const GAMES = [
-  game(1, [{ id: 10, name: 'Action' }], 'Capcom'),
-  game(2, [{ id: 20, name: 'RPG' }], 'FromSoftware'),
-  game(3, [{ id: 30, name: 'Puzzle' }], 'Nintendo'),
+  game(1, [ACTION, RPG, PUZZLE], 'Capcom'),
+  game(2, [ACTION, RPG], 'FromSoftware'),
+  game(3, [ACTION], 'Nintendo'),
   game(4, [{ id: 40, name: 'Shooter' }], 'Valve'),
 ];
 
@@ -111,15 +115,18 @@ describe('Games library filters', () => {
   it('keeps several picked genres in the URL, the panel and the list, with one navigation per pick', async () => {
     const { harness, router, navigations, el, pick, chips, listed } = await setup();
 
+    // Each extra genre narrows the list: games must have every picked genre.
     await pick('library-filter-genres', 'Action');
+    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3']);
     await pick('library-filter-genres', 'RPG');
+    expect(listed()).toEqual(['/games/1', '/games/2']);
     await pick('library-filter-genres', 'Puzzle');
     await harness.fixture.whenStable();
 
     expect(router.url).toBe('/games?genre=10,20,30');
     expect(navigations).toEqual(['/games?genre=10', '/games?genre=10,20', '/games?genre=10,20,30']);
     expect(chips('library-filter-genres')).toEqual(['Action', 'RPG', 'Puzzle']);
-    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3']);
+    expect(listed()).toEqual(['/games/1']);
     // The panel and the open list survive every pick.
     expect(el.querySelector('[role="dialog"]')).not.toBeNull();
     expect(el.querySelector('[role="listbox"]')).not.toBeNull();
