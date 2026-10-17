@@ -150,3 +150,73 @@ describe('Games library filters', () => {
     expect(transitions.every((t) => t.skipped)).toBe(true);
   });
 });
+
+describe('Games library search', () => {
+  async function setup() {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: 'games', component: Games }]),
+        provideTranslateService(),
+        { provide: GameService, useValue: { findAll: () => of(GAMES) } },
+      ],
+    });
+    TestBed.overrideComponent(Games, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const harness = await RouterTestingHarness.create('/games');
+    const router = TestBed.inject(Router);
+    const navigations: string[] = [];
+    router.events.subscribe((e) => {
+      if (e instanceof NavigationEnd) navigations.push(e.urlAfterRedirects);
+    });
+    const el = harness.routeNativeElement!;
+    const input = el.querySelector<HTMLInputElement>('input[type="search"]')!;
+    const type = async (text: string) => {
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      await harness.fixture.whenStable();
+    };
+    const listed = () => [...new Set([...el.querySelectorAll('a[href^="/games/"]')].map((a) => a.getAttribute('href')))];
+    const pause = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      await harness.fixture.whenStable();
+    };
+    return { harness, router, navigations, el, input, type, listed, pause };
+  }
+
+  it('filters on every keystroke but writes the URL once typing pauses', async () => {
+    const { router, navigations, type, listed, pause } = await setup();
+
+    await type('G');
+    await type('Game');
+    await type('Game 2');
+    expect(listed()).toEqual(['/games/2']);
+    expect(navigations).toEqual([]);
+
+    await pause();
+    expect(navigations).toEqual(['/games?q=Game%202']);
+    expect(router.url).toBe('/games?q=Game%202');
+    expect(listed()).toEqual(['/games/2']);
+  });
+
+  it('shows a search text changed from outside (back / forward, links) in the box', async () => {
+    const { harness, router, input, listed } = await setup();
+
+    await router.navigateByUrl('/games?q=Game%203');
+    await harness.fixture.whenStable();
+
+    expect(input.value).toBe('Game 3');
+    expect(listed()).toEqual(['/games/3']);
+  });
+
+  it('carries a pending search into the next filter change instead of losing it', async () => {
+    const { harness, router, navigations, type, el, pause } = await setup();
+
+    await type('Game 1');
+    el.querySelector<HTMLButtonElement>('[aria-label="library.statusLabel"] button[aria-checked="false"]')!.click();
+    await harness.fixture.whenStable();
+    await pause();
+
+    expect(navigations.length).toBe(1);
+    expect(router.url).toContain('q=Game%201');
+    expect(router.url).toContain('status=');
+  });
+});

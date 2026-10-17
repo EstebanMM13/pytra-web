@@ -91,7 +91,7 @@
           <input
             type="search"
             class="min-w-0 flex-1 bg-transparent text-[16px] text-text outline-none focus:shadow-none md:text-[13px]"
-            [value]="query().text"
+            [value]="searchText()"
             (input)="setText($any($event.target).value)"
             [placeholder]="'library.filterPlaceholder' | translate"
             [attr.aria-label]="'library.filterPlaceholder' | translate"

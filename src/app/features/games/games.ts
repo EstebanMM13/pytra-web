@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, effect, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, effect, untracked } from '@angular/core';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -55,6 +55,9 @@ import {
 import { LibraryFilters } from './library-filters';
 import { LibraryStatusPicker } from './library-status-picker';
 import { formatGenreName } from '../../shared/pipes/genre-name.pipe';
+
+/** Pause in typing after which the library search text is written to the URL. */
+const SEARCH_URL_DELAY_MS = 300;
 
 /** Removable chip of an active panel filter; `id` is the platform / genre id or the developer / publisher name. */
 interface FilterChip {
@@ -138,9 +141,23 @@ export class Games {
 
   protected readonly loading = computed(() => this.allGames() === null);
 
+  /**
+   * Search box text. It filters on every keystroke; the URL (`q`) follows once typing pauses, so
+   * a fast typist does not trigger a router navigation (and a history.replaceState) per key.
+   */
+  protected readonly searchText = signal(this.urlQuery().text);
+  private searchTimer: ReturnType<typeof setTimeout> | undefined;
+  /** `q` this component wrote and whose URL echo has not arrived yet (it must not overwrite newer typing). */
+  private echoText: string | null = null;
+  /** Last `q` seen in the URL: other filter changes re-emit the params without touching the search box. */
+  private urlText = this.searchText();
+
   /** The URL filters, minus platform / genre ids and developer / publisher names the loaded library does not have. */
   protected readonly query = computed(() => {
-    const query = this.urlQuery();
+    const url = this.urlQuery();
+    const text = this.searchText();
+    // Typing ahead of the URL behaves like `setText` did: back to the first page.
+    const query = text === url.text ? url : { ...url, text, page: 1 };
     if (this.loading()) {
       return query;
     }
@@ -213,6 +230,23 @@ export class Games {
     });
     this.load();
 
+    // External `q` changes (back / forward, links) reach the search box; the echo of our own write is skipped.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const text = params.get('q') ?? '';
+      if (text === this.urlText) {
+        return;
+      }
+      this.urlText = text;
+      if (text === this.echoText) {
+        this.echoText = null;
+        return;
+      }
+      this.echoText = null;
+      this.cancelSearchSync();
+      this.searchText.set(text);
+    });
+    inject(DestroyRef).onDestroy(() => this.cancelSearchSync());
+
     // Unknown platform / genre ids and developer / publisher names (stale links): drop them from the URL too.
     effect(() => {
       if (this.loading()) {
@@ -261,7 +295,17 @@ export class Games {
   }
 
   protected setText(text: string): void {
-    this.updateQuery({ q: text || null, page: null });
+    this.searchText.set(text);
+    this.cancelSearchSync();
+    this.searchTimer = setTimeout(() => {
+      this.searchTimer = undefined;
+      this.updateQuery({ page: null });
+    }, SEARCH_URL_DELAY_MS);
+  }
+
+  private cancelSearchSync(): void {
+    clearTimeout(this.searchTimer);
+    this.searchTimer = undefined;
   }
 
   protected setStatus(status: LibraryStatusFilter): void {
@@ -336,6 +380,16 @@ export class Games {
 
   /** Typing and toggles replace the history entry; page changes push one so "back" pages back. */
   private updateQuery(params: Params, replaceUrl = true): void {
+    // Every URL write carries the search text, so a pending search is never lost or reverted.
+    this.cancelSearchSync();
+    if ('q' in params) {
+      this.searchText.set(params['q'] ?? '');
+    }
+    const q = this.searchText();
+    if (q !== this.urlQuery().text) {
+      this.echoText = q;
+    }
+    params = { ...params, q: q || null };
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: params,
