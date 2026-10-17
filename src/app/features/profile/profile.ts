@@ -214,10 +214,17 @@ export class Profile {
 
     this.platformService.load().subscribe({ error: () => {} });
 
+    // Back from a Google re-login started by the delete dialog: reopen it to retry. Read before the
+    // section subscription so the cleanup navigation below keeps "Datos" highlighted.
+    if (this.route.snapshot.queryParamMap.get('delete') === '1') {
+      this.deleteOpen.set(true);
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+    }
+
     // Opens at the top unless an entry point targets a section (dashboard "Ver todos":
     // ?section=achievements). Also runs when the page is reused, e.g. the avatar menu from here.
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-      this.targetSection = initialProfileSection(params.get(PROFILE_SECTION_PARAM));
+      this.targetSection = this.deleteOpen() ? 'data' : initialProfileSection(params.get(PROFILE_SECTION_PARAM));
       this.activeSection.set(this.targetSection);
       if (this.achievements() !== null) {
         this.scrollToTarget();
@@ -241,12 +248,6 @@ export class Profile {
       .pipe(catchError(() => of(null)))
       .subscribe((status) => this.steamStatus.set(status));
 
-    // Back from a Google re-login started by the delete dialog: reopen it to retry.
-    if (this.route.snapshot.queryParamMap.get('delete') === '1') {
-      this.deleteOpen.set(true);
-      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
-    }
-
     // Prefill once the profile is available (it loads asynchronously after the token is read).
     effect(() => {
       const user = this.user();
@@ -257,15 +258,21 @@ export class Profile {
     });
   }
 
-  /** Scrolls to the targeted section, if any; the top needs no scroll (the router already lands there). */
+  /**
+   * Scrolls to the targeted section once, if any; the top needs no scroll (the router already lands
+   * there). The target is consumed so a later data load cannot pull the user back to it.
+   */
   private scrollToTarget(): void {
     const section = this.targetSection;
+    this.targetSection = 'account';
     if (section !== 'account') {
       setTimeout(() => this.scrollTo(section));
     }
   }
 
   protected scrollTo(anchor: ProfileAnchor): void {
+    // A section the user picks wins over a pending arrival target.
+    this.targetSection = 'account';
     this.activeSection.set(anchor === 'delete' ? 'data' : anchor);
     document.getElementById(`profile-${anchor}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
