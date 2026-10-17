@@ -27,6 +27,26 @@ import { canAnimate } from '../utils/motion';
   imports: [LucideDynamicIcon, Sparkline],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block min-w-0 rounded-xl border border-card-border card-glass' },
+  // Entrance: a short rise + fade, staggered across a row of cards (none with reduced motion).
+  styles: `
+    @media (prefers-reduced-motion: no-preference) {
+      :host {
+        animation: stat-card-in 320ms ease-out backwards;
+      }
+      :host(:nth-child(2)) { animation-delay: 40ms; }
+      :host(:nth-child(3)) { animation-delay: 80ms; }
+      :host(:nth-child(4)) { animation-delay: 120ms; }
+      :host(:nth-child(5)) { animation-delay: 160ms; }
+      :host(:nth-child(n + 6)) { animation-delay: 200ms; }
+    }
+
+    @keyframes stat-card-in {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+    }
+  `,
   template: `
     <div
       class="@container flex h-full flex-col p-3 [--fig-max:22px] md:px-[18px] md:py-4 md:[--fig-max:26px] lg:[--fig-max:28px]"
