@@ -13,7 +13,7 @@ import { SteamService } from '../../core/services/steam.service';
 import { UserService } from '../../core/services/user.service';
 import { InstallPromptService } from '../../core/services/install-prompt.service';
 import { Navbar } from '../../shared/navbar/navbar';
-import { HoursPipe } from '../../shared/pipes/hours.pipe';
+import { HoursPipe, formatHours } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { formatRating, ratingDecimals, ratingLocale } from '../../shared/utils/rating-format';
 import { PreferencesService } from '../../core/services/preferences.service';
@@ -145,7 +145,7 @@ export class Dashboard {
     });
     const params: Record<string, string | number> = { ...t.params };
     if (typeof params['rating'] === 'number') params['rating'] = formatRating(params['rating'], this.ratingDecimals(), locale);
-    if (typeof params['hours'] === 'number') params['hours'] = new HoursPipe().transform(params['hours']);
+    if (typeof params['hours'] === 'number') params['hours'] = formatHours(params['hours'], locale);
     const count = typeof params['count'] === 'number' ? params['count'] : null;
     return { key: `dashboard.tagline.${t.key}`, params, count };
   });
@@ -190,7 +190,6 @@ export class Dashboard {
     if (years === null) {
       return null;
     }
-    const hoursPipe = new HoursPipe();
     return [...years]
       .sort((a, b) => a.year - b.year)
       .map((y) => ({
