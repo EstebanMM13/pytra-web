@@ -55,7 +55,7 @@ const MOBILE_ROWS: readonly ProfileRow[] = [
   { kind: 'anchor', anchor: 'account', labelKey: 'profile.sections.account', icon: ICONS.user },
   { kind: 'anchor', anchor: 'achievements', labelKey: 'profile.sections.achievements', icon: ICONS.trophy },
   { kind: 'anchor', anchor: 'preferences', labelKey: 'profile.sections.preferences', icon: ICONS.slidersHorizontal },
-  { kind: 'route', route: '/steam', labelKey: 'nav.steam', icon: ICONS.gamepad2 },
+  { kind: 'route', route: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw },
   { kind: 'anchor', anchor: 'data', labelKey: 'profile.exportData', icon: ICONS.download },
   { kind: 'anchor', anchor: 'delete', labelKey: 'profile.delete.label', icon: ICONS.trash, danger: true },
 ];
@@ -96,7 +96,7 @@ export class Profile {
   protected readonly isDemo = this.demoMode.isDemo;
   /** Web sidebar entries. */
   protected readonly sections = SECTIONS;
-  /** Phones and tablets: every section (plus Steam) as tappable rows at the top. */
+  /** Phones and tablets: every section (plus Sync) as tappable rows at the top. */
   protected readonly mobileRows = MOBILE_ROWS;
 
   private readonly fb = inject(NonNullableFormBuilder);

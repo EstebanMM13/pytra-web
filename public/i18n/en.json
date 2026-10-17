@@ -167,8 +167,8 @@
       "preferences": "Preferences",
       "data": "Data"
     },
-    "steamLinked": "Linked",
-    "steamNotLinked": "Not linked",
+    "syncSteamLinked": "Steam linked",
+    "syncSteamNotLinked": "Steam not linked",
     "exportData": "Export data",
     "password": "Password",
     "changePassword": "Change",
@@ -333,6 +333,14 @@
     "installIosHint": "In Safari: Share → Add to Home Screen",
     "appInstalled": "Installed"
   },
+  "sync": {
+    "title": "Sync",
+    "subtitle": "Connect your platforms to bring in your library and playtime.",
+    "steamHint": "Library and playtime",
+    "playstation": "PlayStation",
+    "playstationHint": "PlayStation Network library and trophies.",
+    "comingSoon": "Coming soon"
+  },
   "steam": {
     "title": "Steam",
     "loading": "Loading...",
@@ -441,7 +449,7 @@
     "games": "Games",
     "sagas": "Sagas",
     "years": "Years",
-    "steam": "Steam",
+    "sync": "Sync",
     "profile": "Profile",
     "search": "Search",
     "newRun": "Run",

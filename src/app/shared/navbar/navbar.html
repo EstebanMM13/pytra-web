@@ -143,12 +143,12 @@
           </a>
           <a
             role="menuitem"
-            routerLink="/steam"
+            routerLink="/sync"
             (click)="menuOpen.set(false)"
             class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
           >
-            <svg [lucideIcon]="icons.download" [size]="16" class="text-brand-light"></svg>
-            {{ 'nav.steam' | translate }}
+            <svg [lucideIcon]="icons.refreshCw" [size]="16" class="text-brand-light"></svg>
+            {{ 'nav.sync' | translate }}
           </a>
           <button
             role="menuitem"

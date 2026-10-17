@@ -8,11 +8,14 @@ import { consumePostLoginRedirect } from '../../../shared/utils/post-login-redir
 /** Error value the API sends when a Google sign-up is blocked by the invite allowlist. */
 const REGISTRATION_CLOSED_ERROR = 'registration_closed';
 
+/** Page that hosts the Steam link flow (the API still sends `next=steam`). */
+export const STEAM_LINK_ROUTE = '/sync';
+
 /**
  * Where to land after the callback, keyed by the `next` value the API sets server-side.
  * Only whitelisted values are honoured, so a crafted `next` can never redirect elsewhere.
  */
-const NEXT_ROUTES = new Map<string, string>([['steam', '/steam']]);
+const NEXT_ROUTES = new Map<string, string>([['steam', STEAM_LINK_ROUTE]]);
 
 @Component({
   selector: 'app-oauth-callback',
@@ -32,8 +35,8 @@ export class OauthCallback {
     const error = this.route.snapshot.queryParamMap.get('error');
     const nextRoute = NEXT_ROUTES.get(this.route.snapshot.queryParamMap.get('next') ?? '') ?? null;
 
-    // Steam link flow: the user already has a session, so errors are shown on the Steam page.
-    if (nextRoute === '/steam' && (!code || error)) {
+    // Steam link flow: the user already has a session, so errors are shown on the Sync page.
+    if (nextRoute === STEAM_LINK_ROUTE && (!code || error)) {
       this.router.navigate([nextRoute], {
         queryParams: { linkError: error ?? 'steam_link_failed' },
         replaceUrl: true,
@@ -59,7 +62,7 @@ export class OauthCallback {
           return;
         }
         this.router.navigate([nextRoute ?? '/dashboard'], {
-          queryParams: nextRoute === '/steam' ? { linked: '1' } : {},
+          queryParams: nextRoute === STEAM_LINK_ROUTE ? { linked: '1' } : {},
           replaceUrl: true,
         });
       },

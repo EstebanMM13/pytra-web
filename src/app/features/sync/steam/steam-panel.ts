@@ -2,23 +2,22 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
-import { ICONS } from '../../shared/ui/icons';
+import { ICONS } from '../../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Game } from '../../core/models/game.model';
-import { SteamIgnoredApp, SteamPendingGame, SteamStatus, SteamSyncResult } from '../../core/models/steam.model';
-import { DemoModeService } from '../../core/services/demo-mode.service';
-import { ExperienceService } from '../../core/services/experience.service';
-import { NativeOAuthService } from '../../core/services/native-oauth.service';
-import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
-import { SteamService } from '../../core/services/steam.service';
-import { Navbar } from '../../shared/navbar/navbar';
-import { ToastService } from '../../shared/toast/toast.service';
-import { SectionHeader } from '../../shared/ui/section-header';
-import { HoursPipe } from '../../shared/pipes/hours.pipe';
-import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
-import { Skeleton } from '../../shared/ui/skeleton';
-import { GameCover } from '../../shared/ui/game-cover';
-import { formatRelativeTime } from '../../shared/utils/relative-time';
+import { Game } from '../../../core/models/game.model';
+import { SteamIgnoredApp, SteamPendingGame, SteamStatus, SteamSyncResult } from '../../../core/models/steam.model';
+import { DemoModeService } from '../../../core/services/demo-mode.service';
+import { ExperienceService } from '../../../core/services/experience.service';
+import { NativeOAuthService } from '../../../core/services/native-oauth.service';
+import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
+import { SteamService } from '../../../core/services/steam.service';
+import { ToastService } from '../../../shared/toast/toast.service';
+import { SectionHeader } from '../../../shared/ui/section-header';
+import { HoursPipe } from '../../../shared/pipes/hours.pipe';
+import { TranslatePluralPipe } from '../../../shared/pipes/translate-plural.pipe';
+import { Skeleton } from '../../../shared/ui/skeleton';
+import { GameCover } from '../../../shared/ui/game-cover';
+import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { SteamConfirmDialog, SteamConfirmMode } from './steam-confirm-dialog';
 import {
   LINK_ERROR_KEYS,
@@ -33,12 +32,11 @@ import {
 } from './steam.logic';
 
 @Component({
-  selector: 'app-steam',
+  selector: 'app-steam-panel',
   imports: [
     HoursPipe,
     TranslatePipe,
     TranslatePluralPipe,
-    Navbar,
     SectionHeader,
     Skeleton,
     SteamConfirmDialog,
@@ -46,9 +44,11 @@ import {
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './steam.html',
+  templateUrl: './steam-panel.html',
+  host: { class: 'flex flex-col gap-4 md:gap-6' },
 })
-export class Steam {
+/** Steam platform on the Sync page: link, sync, pending review and ignored apps. */
+export class SteamPanel {
   protected readonly icons = ICONS;
 
   private readonly steamService = inject(SteamService);

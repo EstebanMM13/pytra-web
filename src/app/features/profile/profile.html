@@ -47,7 +47,7 @@
             {{ row.labelKey | translate }}
             <span class="ml-auto truncate text-[13px] text-muted">
               @if (steamStatus(); as st) {
-                {{ (st.linked ? 'profile.steamLinked' : 'profile.steamNotLinked') | translate }}
+                {{ (st.linked ? 'profile.syncSteamLinked' : 'profile.syncSteamNotLinked') | translate }}
               }
             </span>
             <svg [lucideIcon]="icons.chevronRight" [size]="18" class="shrink-0 text-faint"></svg>

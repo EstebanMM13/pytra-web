@@ -1,4 +1,5 @@
-import { Routes, UrlMatchResult, UrlSegment } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes, UrlMatchResult, UrlSegment } from '@angular/router';
 import { authGuard, guestGuard } from './core/guards/auth.guard';
 
 export function sagasMatcher(segments: UrlSegment[]): UrlMatchResult | null {
@@ -8,6 +9,11 @@ export function sagasMatcher(segments: UrlSegment[]): UrlMatchResult | null {
   return segments.length === 2
     ? { consumed: segments, posParams: { id: segments[1] } }
     : { consumed: segments };
+}
+
+/** Matches `/steam` and any path below it (redirected to /sync). */
+export function steamLegacyMatcher(segments: UrlSegment[]): UrlMatchResult | null {
+  return segments[0]?.path === 'steam' ? { consumed: segments } : null;
 }
 
 export const routes: Routes = [
@@ -82,9 +88,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/years/years').then((m) => m.Years),
   },
   {
-    path: 'steam',
+    path: 'sync',
     canActivate: [authGuard],
-    loadComponent: () => import('./features/steam/steam').then((m) => m.Steam),
+    loadComponent: () => import('./features/sync/sync').then((m) => m.Sync),
+  },
+  {
+    // Legacy Steam page (old links, bookmarks, an older API's link callback): `/steam` and anything
+    // below it land on /sync with the same query params (linked / linkError) and fragment.
+    matcher: steamLegacyMatcher,
+    redirectTo: ({ queryParams, fragment }) =>
+      inject(Router).createUrlTree(['/sync'], { queryParams, fragment: fragment ?? undefined }),
   },
   {
     path: 'profile',

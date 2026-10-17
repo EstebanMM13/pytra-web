@@ -167,8 +167,8 @@
       "preferences": "Preferencias",
       "data": "Datos"
     },
-    "steamLinked": "Vinculada",
-    "steamNotLinked": "Sin vincular",
+    "syncSteamLinked": "Steam vinculada",
+    "syncSteamNotLinked": "Steam sin vincular",
     "exportData": "Exportar datos",
     "password": "Contraseña",
     "changePassword": "Cambiar",
@@ -333,6 +333,14 @@
     "installIosHint": "En Safari: Compartir → Añadir a pantalla de inicio",
     "appInstalled": "Instalada"
   },
+  "sync": {
+    "title": "Sincronizar",
+    "subtitle": "Conecta tus plataformas para traer tu biblioteca y tus horas de juego.",
+    "steamHint": "Biblioteca y horas de juego",
+    "playstation": "PlayStation",
+    "playstationHint": "Biblioteca y trofeos de PlayStation Network.",
+    "comingSoon": "Próximamente"
+  },
   "steam": {
     "title": "Steam",
     "loading": "Cargando...",
@@ -441,7 +449,7 @@
     "games": "Juegos",
     "sagas": "Sagas",
     "years": "Años",
-    "steam": "Steam",
+    "sync": "Sincronizar",
     "profile": "Perfil",
     "search": "Buscar",
     "newRun": "Partida",

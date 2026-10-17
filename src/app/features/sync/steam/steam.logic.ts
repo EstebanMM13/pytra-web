@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Experience } from '../../core/models/experience.model';
-import { SteamStatus } from '../../core/models/steam.model';
+import { Experience } from '../../../core/models/experience.model';
+import { SteamStatus } from '../../../core/models/steam.model';
 
 /** Run label the API gives the run it creates when a SINGLEPLAYER Steam game is confirmed. */
 export const STEAM_RUN_LABEL = 'Importado de Steam';

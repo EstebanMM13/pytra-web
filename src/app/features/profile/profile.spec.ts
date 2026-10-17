@@ -71,17 +71,17 @@ describe('Profile', () => {
   });
   afterEach(() => TestBed.resetTestingModule());
 
-  it('lists every section as a tappable row, each scrolling to its section (Steam opens its page)', () => {
+  it('lists every section as a tappable row, each scrolling to its section (Sync opens its page)', () => {
     const { el, rows } = setup();
     expect(rows().map((r) => r.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
       'profile.sections.account',
       'profile.sections.achievements',
       'profile.sections.preferences',
-      'nav.steam profile.steamLinked',
+      'nav.sync profile.syncSteamLinked',
       'profile.exportData',
       'profile.delete.label',
     ]);
-    expect(rows()[3].getAttribute('href')).toBe('/steam');
+    expect(rows()[3].getAttribute('href')).toBe('/sync');
 
     for (const [index, anchor] of [
       [0, 'account'],

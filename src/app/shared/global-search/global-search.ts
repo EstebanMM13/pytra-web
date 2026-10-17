@@ -35,7 +35,7 @@ const PAGES: (SearchPage & { icon: LucideIconInput })[] = [
   { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
   { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.layers },
   { path: '/years', labelKey: 'nav.years', icon: ICONS.chartColumn },
-  { path: '/steam', labelKey: 'nav.steam', icon: ICONS.download },
+  { path: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw },
   { path: '/profile', labelKey: 'nav.profile', icon: ICONS.user },
 ];
 

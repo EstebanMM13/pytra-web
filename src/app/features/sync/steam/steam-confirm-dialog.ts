@@ -2,16 +2,16 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { GenreNamePipe } from '../../shared/pipes/genre-name.pipe';
-import { Game, GameCategory } from '../../core/models/game.model';
-import { Genre } from '../../core/models/genre.model';
-import { Saga } from '../../core/models/saga.model';
-import { GenreService } from '../../core/services/genre.service';
-import { SagaService } from '../../core/services/saga.service';
-import { SteamService } from '../../core/services/steam.service';
-import { ToastService } from '../../shared/toast/toast.service';
-import { ModalSheet } from '../../shared/ui/modal-sheet';
-import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
+import { GenreNamePipe } from '../../../shared/pipes/genre-name.pipe';
+import { Game, GameCategory } from '../../../core/models/game.model';
+import { Genre } from '../../../core/models/genre.model';
+import { Saga } from '../../../core/models/saga.model';
+import { GenreService } from '../../../core/services/genre.service';
+import { SagaService } from '../../../core/services/saga.service';
+import { SteamService } from '../../../core/services/steam.service';
+import { ToastService } from '../../../shared/toast/toast.service';
+import { ModalSheet } from '../../../shared/ui/modal-sheet';
+import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { confirmErrorKey } from './steam.logic';
 
 /** `confirm`: only add the game to the library. `run`: the caller opens a run right after. */

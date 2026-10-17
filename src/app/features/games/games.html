@@ -45,7 +45,7 @@
 
   @if (pendingReviewCount() > 0) {
     <a
-      routerLink="/steam"
+      routerLink="/sync"
       class="flex w-fit items-center gap-2 rounded-lg bg-gold-tint px-3 py-2 text-[13px] font-medium text-gold-tint-fg hover:opacity-90"
     >
       {{ 'library.steamPending' | translatePlural: pendingReviewCount() }}
@@ -64,7 +64,7 @@
       <p class="max-w-md text-sm text-muted">{{ 'library.empty.text' | translate }}</p>
       <div class="flex flex-wrap justify-center gap-2.5">
         <a
-          routerLink="/steam"
+          routerLink="/sync"
           class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
         >
           <svg [lucideIcon]="icons.download" [size]="15"></svg>

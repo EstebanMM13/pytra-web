@@ -38,7 +38,7 @@
     </div>
     @if (steamPendingCount() > 0) {
       <a
-        routerLink="/steam"
+        routerLink="/sync"
         class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-[13px] text-gold-tint-fg hover:opacity-90 md:self-auto"
       >
         <svg [lucideIcon]="icons.download" [size]="14"></svg>
@@ -86,7 +86,7 @@
       <p class="mt-1.5 text-sm text-muted">{{ 'dashboard.onboarding.subtitle' | translate }}</p>
       <ol class="mt-5 flex flex-col gap-2.5">
         <li>
-          <a routerLink="/steam" class="hover-lift flex items-center gap-3.5 rounded-xl border border-border bg-bg p-3.5 hover:bg-hover">
+          <a routerLink="/sync" class="hover-lift flex items-center gap-3.5 rounded-xl border border-border bg-bg p-3.5 hover:bg-hover">
             <ng-container *ngTemplateOutlet="stepIcon; context: { $implicit: statIcons.steam }" />
             <ng-container *ngTemplateOutlet="stepText; context: { title: 'dashboard.onboarding.steam', hint: 'dashboard.onboarding.steamHint' }" />
           </a>

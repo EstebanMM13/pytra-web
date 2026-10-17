@@ -41,12 +41,12 @@ describe('Navbar', () => {
     expect(el.querySelector('header button[aria-label="nav.menu"]')).not.toBeNull();
   });
 
-  it('orders the mobile avatar menu: Profile, Steam, Log out', () => {
+  it('orders the mobile avatar menu: Profile, Sync, Log out', () => {
     const { fixture, el } = setup();
     el.querySelector<HTMLButtonElement>('button[aria-label="nav.menu"]')!.click();
     fixture.detectChanges();
     const items = [...el.querySelectorAll('header [role="menu"] [role="menuitem"]')].map((i) => i.textContent!.trim());
-    expect(items).toEqual(['nav.profile', 'nav.steam', 'nav.logout']);
+    expect(items).toEqual(['nav.profile', 'nav.sync', 'nav.logout']);
   });
 
   it('keeps the "+" entry points in the demo, and they open the run form', () => {

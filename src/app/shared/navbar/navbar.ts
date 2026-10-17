@@ -23,12 +23,11 @@ const WEB_TABS: NavTab[] = [
   { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
   { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.layers },
   { path: '/years', labelKey: 'nav.years', icon: ICONS.chartColumn },
-  { path: '/steam', labelKey: 'nav.steam', icon: ICONS.download },
 ];
 
 /**
  * App chrome for authenticated pages: top navbar on web (md+), and below md a
- * compact header (logo, search button and avatar menu: Profile, Steam, Log out) plus a fixed bottom
+ * compact header (logo, search button and avatar menu: Profile, Sync, Log out) plus a fixed bottom
  * tab bar. Also owns the global Ctrl/⌘+K search.
  */
 @Component({
