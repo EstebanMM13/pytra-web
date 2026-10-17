@@ -191,11 +191,29 @@
   }
 }
 
-/* Route changes (router withViewTransitions): short cross-fade. */
-::view-transition-old(root),
+/*
+ * Route changes between pages (router withViewTransitions; same-page query changes skip it, see
+ * core/view-transitions.ts): the old page fades out fast, the new one fades in with a short rise.
+ */
+::view-transition-old(root) {
+  animation: pt-route-out 120ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
 ::view-transition-new(root) {
-  animation-duration: 150ms;
-  animation-timing-function: ease-out;
+  animation: pt-route-in 240ms cubic-bezier(0.22, 1, 0.36, 1) 40ms both;
+}
+
+@keyframes pt-route-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pt-route-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
 /*
@@ -509,7 +527,14 @@
   pointer-events: none;
 }
 
+/*
+ * The aura drifts very slowly behind the page headers (transform / opacity on this one layer; its
+ * gradients fade out long before the edges, so the shift never shows a border). Off with reduced
+ * motion (motion.css).
+ */
 .bg-aura {
+  animation: pt-aura-drift 28s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+  will-change: transform, opacity;
   background-image:
     radial-gradient(
       800px 380px at 50% -60px,
@@ -521,6 +546,17 @@
       color-mix(in srgb, var(--pt-gold) 8%, transparent),
       transparent 70%
     );
+}
+
+@keyframes pt-aura-drift {
+  from {
+    opacity: 0.85;
+    transform: translate3d(-4%, -1%, 0) scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(4%, 2%, 0) scale(1.08);
+  }
 }
 
 .bg-grid {
