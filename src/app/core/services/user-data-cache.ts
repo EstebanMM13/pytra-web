@@ -100,7 +100,7 @@ function sameData(a: unknown, b: unknown): boolean {
 
 /**
  * Client cache of the per-user lists and stats several screens share (games, sagas, stats summary
- * and by-year, Steam pending), so revisits render instantly. Every mutation of user data
+ * and by-year, Steam and PSN pending), so revisits render instantly. Every mutation of user data
  * invalidates all of it (`invalidateAll` / `invalidateOnWrite`): the payloads are small and most
  * writes touch several of them (a run changes game totals, saga totals and the stats).
  */
