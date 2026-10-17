@@ -1,5 +1,6 @@
 import { YearStat, YearSummary } from '../../core/models/stats.model';
 import {
+  adjacentYears,
   latestYear,
   gotyCoverUrl,
   monthHourBars,
@@ -154,5 +155,24 @@ describe('gotyCoverUrl', () => {
     expect(gotyCoverUrl({ goty, experiences: [] })).toBeNull();
     expect(gotyCoverUrl({ goty: null, experiences: [run] })).toBeNull();
     expect(gotyCoverUrl(null)).toBeNull();
+  });
+});
+
+describe('adjacentYears', () => {
+  const tabs = [2026, 2025, 2023];
+
+  it('returns the older and newer neighbours of the viewed year', () => {
+    expect(adjacentYears(tabs, 2025)).toEqual({ older: 2023, newer: 2026 });
+  });
+
+  it('has no newer year at the most recent end and no older one at the oldest', () => {
+    expect(adjacentYears(tabs, 2026)).toEqual({ older: 2025, newer: null });
+    expect(adjacentYears(tabs, 2023)).toEqual({ older: null, newer: 2025 });
+  });
+
+  it('returns no neighbours for a missing or unknown year', () => {
+    expect(adjacentYears(tabs, null)).toEqual({ older: null, newer: null });
+    expect(adjacentYears(tabs, 1999)).toEqual({ older: null, newer: null });
+    expect(adjacentYears([], 2026)).toEqual({ older: null, newer: null });
   });
 });

@@ -71,6 +71,24 @@ export function yearTabs(years: readonly number[], current: number | null): numb
   return [...all].sort((a, b) => b - a);
 }
 
+/**
+ * Neighbours of the viewed year in the tab list (most recent first): `older` is the next tab, `newer`
+ * the previous one. Null at either end (or when the year is not in the list).
+ */
+export function adjacentYears(
+  tabs: readonly number[],
+  current: number | null,
+): { older: number | null; newer: number | null } {
+  const index = current === null ? -1 : tabs.indexOf(current);
+  if (index === -1) {
+    return { older: null, newer: null };
+  }
+  return {
+    older: index < tabs.length - 1 ? tabs[index + 1] : null,
+    newer: index > 0 ? tabs[index - 1] : null,
+  };
+}
+
 export interface YearHighlight {
   /** Translation key under `years.highlight`. */
   key: string;

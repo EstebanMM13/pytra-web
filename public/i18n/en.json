@@ -514,6 +514,9 @@
   "years": {
     "title": "Years",
     "tabsLabel": "Years with runs",
+    "pickYear": "Choose year",
+    "prevYear": "Previous year",
+    "nextYear": "Next year",
     "yearTitle": "Year {{year}}",
     "statsLabel": "Year figures",
     "empty": {

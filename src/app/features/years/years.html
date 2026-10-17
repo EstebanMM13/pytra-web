@@ -19,9 +19,18 @@
       </button>
     </div>
   } @else {
-    <!-- Year tabs -->
+    <!-- Phones: compact "‹ 2026 ›" selector (no horizontally scrolling tabs) -->
+    <nav class="md:hidden" [attr.aria-label]="'years.tabsLabel' | translate">
+      @if (years() === null) {
+        <app-skeleton class="mx-auto block h-10 w-full rounded-full" />
+      } @else {
+        <app-year-selector [years]="tabs()" [year]="year()" (yearChange)="goToYear($event)" />
+      }
+    </nav>
+
+    <!-- Year tabs (md+) -->
     <nav
-      class="-mx-5 flex gap-0.5 overflow-x-auto border-b border-border px-5 font-mono text-[13px] [scrollbar-width:none] md:mx-0 md:gap-1 md:px-0"
+      class="hidden gap-1 overflow-x-auto border-b border-border font-mono text-[13px] [scrollbar-width:none] md:flex"
       [attr.aria-label]="'years.tabsLabel' | translate"
     >
       @if (years() === null) {
@@ -33,7 +42,7 @@
         <a
           [routerLink]="['/years', y]"
           [attr.aria-current]="y === year() ? 'page' : null"
-          class="shrink-0 px-3 py-2.5 md:px-3.5"
+          class="shrink-0 px-3.5 py-2.5"
           [class]="
             y === year()
               ? 'text-brand-lighter shadow-[inset_0_-2px_0_var(--pt-brand-light)]'

@@ -21,6 +21,7 @@ import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { formatRelativeTime } from '../../shared/utils/relative-time';
+import { YearSelector } from './year-selector';
 import { toastApiError } from '../../shared/utils/api-error';
 import {
   STATUS_TEXT,
@@ -61,6 +62,7 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
     MiniBarChart,
     Skeleton,
     LucideDynamicIcon,
+    YearSelector,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './years.html',
@@ -196,6 +198,11 @@ export class Years {
 
     // A run created or edited elsewhere changes the totals.
     this.runFormLauncher.saved$.pipe(takeUntilDestroyed()).subscribe(() => this.reload());
+  }
+
+  /** Phone year selector: same navigation as the desktop tabs. */
+  protected goToYear(year: number): void {
+    void this.router.navigate(['/years', year]);
   }
 
   /** `/years` lands on the most recent year with data. */

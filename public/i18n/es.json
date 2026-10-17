@@ -514,6 +514,9 @@
   "years": {
     "title": "Años",
     "tabsLabel": "Años con partidas",
+    "pickYear": "Elegir año",
+    "prevYear": "Año anterior",
+    "nextYear": "Año siguiente",
     "yearTitle": "Año {{year}}",
     "statsLabel": "Cifras del año",
     "empty": {
