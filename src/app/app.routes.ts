@@ -11,6 +11,16 @@ export function sagasMatcher(segments: UrlSegment[]): UrlMatchResult | null {
     : { consumed: segments };
 }
 
+/** Matches `/years` and `/years/:year` (an invalid year is handled by the page itself). */
+export function yearsMatcher(segments: UrlSegment[]): UrlMatchResult | null {
+  if (segments[0]?.path !== 'years' || segments.length > 2) {
+    return null;
+  }
+  return segments.length === 2
+    ? { consumed: segments, posParams: { year: segments[1] } }
+    : { consumed: segments };
+}
+
 /** Matches `/steam` and any path below it (redirected to /sync). */
 export function steamLegacyMatcher(segments: UrlSegment[]): UrlMatchResult | null {
   return segments[0]?.path === 'steam' ? { consumed: segments } : null;
@@ -78,12 +88,9 @@ export const routes: Routes = [
       import('./features/games/experience-detail/experience-detail').then((m) => m.ExperienceDetail),
   },
   {
-    path: 'years',
-    canActivate: [authGuard],
-    loadComponent: () => import('./features/years/years').then((m) => m.Years),
-  },
-  {
-    path: 'years/:year',
+    // `/years` and `/years/:year` share one route so the `/years` -> latest-year redirect (and
+    // switching years) reuses the page instead of recreating it and refetching its data.
+    matcher: yearsMatcher,
     canActivate: [authGuard],
     loadComponent: () => import('./features/years/years').then((m) => m.Years),
   },
