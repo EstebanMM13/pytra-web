@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, booleanAttribute, Component, computed, input, linkedSignal, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  booleanAttribute,
+  Component,
+  computed,
+  input,
+  linkedSignal,
+  output,
+} from '@angular/core';
 
 export type GameCoverSize = 'xs' | 'sm' | 'md' | 'lg' | 'hero' | 'fill';
 
@@ -20,6 +28,40 @@ const INITIALS_TEXT: Record<GameCoverSize, string> = {
   hero: 'text-3xl md:text-4xl',
   fill: 'text-3xl',
 };
+
+/** IGDB image size per variant: `t_cover_small_2x` (180x256) is retina-safe up to ~90px wide. */
+export type CoverImageVariant = 'small' | 'big';
+
+const IGDB_SIZE: Record<CoverImageVariant, string> = {
+  small: 't_cover_small_2x',
+  big: 't_cover_big',
+};
+
+/** Image variant per box: small boxes (<= ~90px wide) fetch the small IGDB cover. */
+const SIZE_VARIANT: Record<GameCoverSize, CoverImageVariant> = {
+  xs: 'small',
+  sm: 'small',
+  md: 'small',
+  lg: 'big',
+  hero: 'big',
+  fill: 'big',
+};
+
+/** The `/t_<size>/` segment of an images.igdb.com url. */
+const IGDB_IMAGE_SIZE =
+  /^((?:https?:)?\/\/images\.igdb\.com\/igdb\/image\/upload\/)t_[a-z0-9_]+\//i;
+
+/**
+ * The url sized for `variant`: an IGDB image gets its `/t_<size>/` segment rewritten; any other url
+ * (Steam, custom) is returned unchanged.
+ */
+export function sizedCoverUrl(
+  url: string | null | undefined,
+  variant: CoverImageVariant,
+): string | null {
+  if (!url) return null;
+  return url.replace(IGDB_IMAGE_SIZE, `$1${IGDB_SIZE[variant]}/`);
+}
 
 const STEAM_APPS_BASE = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/';
 
@@ -50,10 +92,17 @@ export function steamHeaderFallback(url: string): string | null {
   return steamCoverFallbacks(url)[0] ?? null;
 }
 
-/** The image to show after `failed` did not load: the next one in the url's fallback chain, else null. */
-export function nextCoverSource(url: string | null | undefined, failed: string): string | null {
+/**
+ * The image to show after `failed` did not load: the next one in the url's fallback chain, else null.
+ * `sized` (the url resized for the box, see `sizedCoverUrl`) is tried first, then the original url.
+ */
+export function nextCoverSource(
+  url: string | null | undefined,
+  failed: string,
+  sized: string | null = null,
+): string | null {
   if (!url) return null;
-  const chain = [url, ...steamCoverFallbacks(url)];
+  const chain = [...(sized && sized !== url ? [sized] : []), url, ...steamCoverFallbacks(url)];
   const index = chain.indexOf(failed);
   return index >= 0 ? (chain[index + 1] ?? null) : null;
 }
@@ -165,8 +214,11 @@ export class GameCover {
   /** Emits on each image load whether it is portrait enough to be cropped (see `fitsPortraitBox`). */
   readonly portraitChange = output<boolean>();
 
-  /** Image being shown: the url, then its Steam fallbacks, then null (initials). Resets with the url. */
-  protected readonly src = linkedSignal<string | null>(() => this.url() || null);
+  /** The url resized for this box (small IGDB variant for small boxes). */
+  private readonly sizedUrl = computed(() => sizedCoverUrl(this.url(), SIZE_VARIANT[this.size()]));
+
+  /** Image being shown: the sized url, the url, its Steam fallbacks, then null (initials). Resets with the url. */
+  protected readonly src = linkedSignal<string | null>(() => this.sizedUrl());
 
   /** The loaded image is not portrait enough to crop (see `fitsPortraitBox`); resets whenever the url changes. */
   protected readonly letterbox = linkedSignal({ source: this.url, computation: () => false });
@@ -191,6 +243,6 @@ export class GameCover {
 
   protected onError(failed: string): void {
     this.letterbox.set(false);
-    this.src.set(nextCoverSource(this.url(), failed));
+    this.src.set(nextCoverSource(this.url(), failed, this.sizedUrl()));
   }
 }

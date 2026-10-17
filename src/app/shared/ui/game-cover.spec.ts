@@ -2,23 +2,32 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   GameCover,
+  GameCoverSize,
   coverHue,
   coverInitials,
   fitsPortraitBox,
   steamHeaderFallback,
   steamCoverFallbacks,
   nextCoverSource,
+  sizedCoverUrl,
   steamPortraitCoverUrl,
 } from './game-cover';
 
 @Component({
   imports: [GameCover],
-  template: `<app-game-cover class="extra" [url]="url()" [name]="name()" [priority]="priority()" size="sm" />`,
+  template: `<app-game-cover
+    class="extra"
+    [url]="url()"
+    [name]="name()"
+    [priority]="priority()"
+    [size]="size()"
+  />`,
 })
 class Host {
   readonly url = signal<string | null>(null);
   readonly name = signal('Hollow Knight');
   readonly priority = signal(false);
+  readonly size = signal<GameCoverSize>('sm');
 }
 
 describe('GameCover', () => {
@@ -99,6 +108,28 @@ describe('GameCover', () => {
     expect(el.textContent?.trim()).toBe('HK');
   });
 
+  it('requests the small IGDB cover in a small box and the big one in a large box', () => {
+    const igdb = (size: string) => `https://images.igdb.com/igdb/image/upload/${size}/co1abc.jpg`;
+    const { fixture, el } = setup(igdb('t_cover_big'));
+    expect(el.querySelector('img')!.getAttribute('src')).toBe(igdb('t_cover_small_2x'));
+    expect(el.querySelector('img')!.getAttribute('decoding')).toBe('async');
+
+    fixture.componentInstance.size.set('hero');
+    fixture.detectChanges();
+    expect(el.querySelector('img')!.getAttribute('src')).toBe(igdb('t_cover_big'));
+  });
+
+  it('retries the original url when the resized IGDB cover fails, then shows the initials', () => {
+    const igdb = (size: string) => `https://images.igdb.com/igdb/image/upload/${size}/co1abc.jpg`;
+    const { fixture, el } = setup(igdb('t_cover_big'));
+    el.querySelector('img')!.dispatchEvent(new Event('error'));
+    fixture.detectChanges();
+    expect(el.querySelector('img')!.getAttribute('src')).toBe(igdb('t_cover_big'));
+    el.querySelector('img')!.dispatchEvent(new Event('error'));
+    fixture.detectChanges();
+    expect(el.querySelector('img')).toBeNull();
+  });
+
   it('shows the initials fallback without a url', () => {
     const { el } = setup(null);
     expect(el.querySelector('img')).toBeNull();
@@ -131,9 +162,11 @@ describe('steam cover urls', () => {
     expect(steamHeaderFallback(steamPortraitCoverUrl(620))).toBe(
       'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/620/header.jpg',
     );
-    expect(steamHeaderFallback('https://cdn.cloudflare.steamstatic.com/steam/apps/620/library_600x900_2x.jpg?t=1')).toBe(
-      'https://cdn.cloudflare.steamstatic.com/steam/apps/620/header.jpg',
-    );
+    expect(
+      steamHeaderFallback(
+        'https://cdn.cloudflare.steamstatic.com/steam/apps/620/library_600x900_2x.jpg?t=1',
+      ),
+    ).toBe('https://cdn.cloudflare.steamstatic.com/steam/apps/620/header.jpg');
   });
 
   it('walks the fallback chain: library capsule, header, main capsule, then initials', () => {
@@ -143,20 +176,60 @@ describe('steam cover urls', () => {
     expect(nextCoverSource(url, url)).toBe(`${base}header.jpg`);
     expect(nextCoverSource(url, `${base}header.jpg`)).toBe(`${base}capsule_616x353.jpg`);
     expect(nextCoverSource(url, `${base}capsule_616x353.jpg`)).toBeNull();
-    expect(nextCoverSource('https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg', 'https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg')).toBeNull();
+    expect(
+      nextCoverSource(
+        'https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg',
+        'https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg',
+      ),
+    ).toBeNull();
     expect(nextCoverSource(null, url)).toBeNull();
   });
 
   it('recognises the older steamcdn host', () => {
-    expect(steamHeaderFallback('https://steamcdn-a.akamaihd.net/steam/apps/1030300/library_600x900.jpg')).toBe(
-      'https://steamcdn-a.akamaihd.net/steam/apps/1030300/header.jpg',
-    );
+    expect(
+      steamHeaderFallback('https://steamcdn-a.akamaihd.net/steam/apps/1030300/library_600x900.jpg'),
+    ).toBe('https://steamcdn-a.akamaihd.net/steam/apps/1030300/header.jpg');
   });
 
   it('has no fallback for other urls', () => {
-    expect(steamHeaderFallback('https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/620/header.jpg')).toBeNull();
-    expect(steamHeaderFallback('https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg')).toBeNull();
-    expect(steamHeaderFallback('https://evil.example.com/steam/apps/620/library_600x900.jpg')).toBeNull();
+    expect(
+      steamHeaderFallback(
+        'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/620/header.jpg',
+      ),
+    ).toBeNull();
+    expect(
+      steamHeaderFallback('https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg'),
+    ).toBeNull();
+    expect(
+      steamHeaderFallback('https://evil.example.com/steam/apps/620/library_600x900.jpg'),
+    ).toBeNull();
+  });
+});
+
+describe('sizedCoverUrl', () => {
+  const igdb = (size: string) => `https://images.igdb.com/igdb/image/upload/${size}/co1abc.jpg`;
+
+  it('rewrites the size segment of IGDB urls', () => {
+    expect(sizedCoverUrl(igdb('t_cover_big'), 'small')).toBe(igdb('t_cover_small_2x'));
+    expect(sizedCoverUrl(igdb('t_thumb'), 'big')).toBe(igdb('t_cover_big'));
+    expect(sizedCoverUrl(igdb('t_cover_big_2x'), 'small')).toBe(igdb('t_cover_small_2x'));
+    expect(sizedCoverUrl('//images.igdb.com/igdb/image/upload/t_cover_big/co1.png', 'small')).toBe(
+      '//images.igdb.com/igdb/image/upload/t_cover_small_2x/co1.png',
+    );
+  });
+
+  it('leaves other urls unchanged', () => {
+    const steam = steamPortraitCoverUrl(620);
+    expect(sizedCoverUrl(steam, 'small')).toBe(steam);
+    expect(
+      sizedCoverUrl('https://evil.example.com/igdb/image/upload/t_cover_big/co1.jpg', 'small'),
+    ).toBe('https://evil.example.com/igdb/image/upload/t_cover_big/co1.jpg');
+  });
+
+  it('is null-safe', () => {
+    expect(sizedCoverUrl(null, 'small')).toBeNull();
+    expect(sizedCoverUrl(undefined, 'big')).toBeNull();
+    expect(sizedCoverUrl('', 'small')).toBeNull();
   });
 });
 
