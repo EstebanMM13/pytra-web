@@ -10,6 +10,9 @@
   <link rel="preconnect" href="https://pytra-api-production.up.railway.app" crossorigin>
   <link rel="preconnect" href="https://shared.akamai.steamstatic.com">
   <link rel="dns-prefetch" href="https://images.igdb.com">
+  <!-- The default (and fallback) language file is always loaded at startup, by the translate
+       loader through fetch(); `as="fetch" crossorigin` matches that request so it reuses this one. -->
+  <link rel="preload" href="/i18n/es.json" as="fetch" crossorigin>
   <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="brand/favicon-16.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
