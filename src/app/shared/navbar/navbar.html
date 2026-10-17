@@ -88,12 +88,20 @@
 <header
   class="nav-glass relative z-30 flex h-[calc(env(safe-area-inset-top)+56px)] items-center justify-between gap-3 pt-[env(safe-area-inset-top)] pr-3 pl-4 md:hidden"
 >
-  <a routerLink="/dashboard" class="flex h-10 items-center gap-2 rounded-md" aria-label="Pytra">
-    <app-pytra-mark class="size-[26px]" />
-    <app-pytra-wordmark class="text-[21px] font-semibold tracking-[-0.035em]" />
+  <a routerLink="/dashboard" class="flex h-10 min-w-0 items-center gap-2 rounded-md" aria-label="Pytra">
+    <app-pytra-mark class="size-[26px] shrink-0" />
+    <app-pytra-wordmark class="shrink-0 text-[21px] font-semibold tracking-[-0.035em]" />
+    <!-- Brand slogan in the free space of the phone bar; dropped below 360px where it would crowd the buttons -->
+    <span
+      class="ml-0.5 hidden truncate border-l border-border pl-2 text-[11px] leading-4 whitespace-nowrap text-text-3 min-[360px]:inline"
+      aria-hidden="true"
+      data-slogan-mobile
+      ><span class="font-semibold text-brand-light">P</span>lay · <span class="font-semibold text-brand-light">T</span>rack ·
+      <span class="font-semibold text-brand-light">R</span>emember</span
+    >
   </a>
 
-  <div class="flex items-center gap-1">
+  <div class="flex shrink-0 items-center gap-1">
     <button
       type="button"
       (click)="searchOpen.set(true)"
