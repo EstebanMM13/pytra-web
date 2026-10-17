@@ -181,17 +181,15 @@
           </section>
         </div>
 
-        <!-- Hours per month · runs of the year: the chart grows to the list's height; with only a
-             few runs the rows would stretch too far, so both cards keep their own height instead. -->
-        <div
-          class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]"
-          [class.items-start]="visibleRuns().length < 4"
-        >
+        <!-- Hours per month · runs of the year: both cards share the row height and the chart grows
+             to the list's height; with only a few runs the rows keep their natural height instead of
+             stretching too far. -->
+        @let spreadRuns = visibleRuns().length >= 4;
+        <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
             <app-section-header collapseKey="years.hoursByMonth" collapseGroup="years.activity" collapseGroupFrom="lg" class="mb-3 md:mb-[18px]" [label]="'years.hoursByMonth' | translate" />
             @if (hasMonthHours()) {
-              <!-- Grows with the runs card when the grid stretches it; with few runs (items-start) the
-                   chart's own 180px floor keeps the bars' height definite. -->
+              <!-- Grows with the runs card; with few runs the chart's own 180px floor sets the row height. -->
               <div class="hidden min-h-[180px] flex-1 flex-col md:flex">
                 <app-mini-bar-chart class="flex-1" [bars]="monthBars()" [height]="null" [minHeight]="180" topTone="muted" dense />
               </div>
@@ -216,7 +214,8 @@
             <div class="flex flex-1 flex-col md:scroll-list md:max-h-[410px]">
               @for (run of visibleRuns(); track run.experienceId) {
                 <div
-                  class="grid flex-1 grid-cols-[minmax(0,1fr)_auto_auto_40px] items-center gap-3 border-t border-divider py-1.5 text-sm md:grid-cols-[minmax(0,1fr)_110px_64px_56px] md:gap-3.5"
+                  [class.flex-1]="spreadRuns"
+                  class="grid grid-cols-[minmax(0,1fr)_auto_auto_40px] items-center gap-3 border-t border-divider py-1.5 text-sm md:grid-cols-[minmax(0,1fr)_110px_64px_56px] md:gap-3.5"
                 >
                   <span class="flex min-w-0 items-center gap-2.5">
                   <app-game-cover decorative size="xs" [url]="run.coverImageUrl" [name]="run.gameName" />
@@ -256,19 +255,17 @@
           </section>
         </div>
 
-        <!-- Rankings (Obsidian sections). Same-length lists fill the row (rows share the height);
-             lists of different lengths keep their own height rather than stretching a few rows. -->
-        @let rankingsUneven = s.topRated.length !== s.mostPlayed.length;
+        <!-- Rankings (Obsidian sections): cards that share a row always share its height. Same-length
+             lists spread their rows to end flush; lists of different lengths keep natural rows. -->
+        @let spreadRankings = s.topRated.length === s.mostPlayed.length;
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
-          <section
-            class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]"
-            [class.self-start]="rankingsUneven"
-          >
+          <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="years.topRated" collapseGroup="years.rankings" class="mb-3.5" [label]="'years.topRated' | translate" />
             @for (g of s.topRated; track g.gameId; let i = $index) {
               <a
                 [routerLink]="['/games', g.gameId]"
-                class="flex flex-1 items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
+                class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
+                [class.flex-1]="spreadRankings"
               >
                 <span class="w-[18px] shrink-0 font-mono text-xs text-faint">{{ i + 1 }}</span>
                 <span class="min-w-0 flex-1 truncate text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
@@ -282,13 +279,10 @@
             }
           </section>
 
-          <section
-            class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]"
-            [class.self-start]="rankingsUneven"
-          >
+          <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="years.mostPlayed" collapseGroup="years.rankings" class="mb-3.5" [label]="'years.mostPlayed' | translate" />
             @for (g of s.mostPlayed; track g.gameId) {
-              <a [routerLink]="['/games', g.gameId]" class="flex flex-1 flex-col justify-center border-t border-divider py-[9px] text-sm hover:bg-hover">
+              <a [routerLink]="['/games', g.gameId]" [class.flex-1]="spreadRankings" class="flex flex-col justify-center border-t border-divider py-[9px] text-sm hover:bg-hover">
                 <span class="flex justify-between gap-3">
                   <span class="min-w-0 truncate text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
                   <span class="shrink-0 font-mono">{{ g.totalHours | hours }}</span>
@@ -302,7 +296,7 @@
             }
           </section>
 
-          <section class="self-start rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="years.topSagas" collapseGroup="years.breakdown" class="mb-3.5" [label]="'years.topSagas' | translate" />
             @for (saga of s.topSagas; track saga.sagaId) {
               <a
@@ -321,7 +315,7 @@
             }
           </section>
 
-          <section class="self-start rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="years.topGenres" collapseGroup="years.breakdown" class="mb-3.5" [label]="'years.topGenres' | translate" />
             @for (genre of s.topGenres; track genre.genreId) {
               <div class="flex items-center gap-3 border-t border-divider py-[9px] text-sm">
