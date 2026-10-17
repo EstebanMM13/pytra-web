@@ -98,6 +98,29 @@ describe('Combobox (multiple)', () => {
     expect(input.value).toBe('');
   });
 
+  it('keeps the field a plain search box and lists the picks as removable chips below it', () => {
+    const { fixture, el, input } = setup();
+    const field = input.parentElement!;
+    expect(field.querySelector('[data-combobox-chip]')).toBeNull();
+    const chipList = el.querySelector('ul[aria-label="common.combobox.selected"]')!;
+    expect(chipList).not.toBeNull();
+    expect(field.compareDocumentPosition(chipList) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect([...chipList.querySelectorAll('[data-combobox-chip]')].map((c) => c.textContent?.trim())).toEqual(['Rol']);
+
+    fixture.componentInstance.selected.set([3, 5]);
+    fixture.detectChanges();
+    const remove = chipList.querySelectorAll<HTMLButtonElement>('button[aria-label="common.combobox.remove"]');
+    expect(remove).toHaveLength(2);
+    remove[0].click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selected()).toEqual([5]);
+    expect(document.activeElement).toBe(input);
+
+    fixture.componentInstance.selected.set([]);
+    fixture.detectChanges();
+    expect(el.querySelector('ul[aria-label="common.combobox.selected"]')).toBeNull();
+  });
+
   it('moves with the arrows and removes the last chip with Backspace on an empty search', () => {
     const { fixture, input, type, key } = setup();
     input.dispatchEvent(new Event('focus'));

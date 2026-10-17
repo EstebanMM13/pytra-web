@@ -81,8 +81,8 @@ let nextId = 0;
 
 /**
  * Searchable select with a typeahead list, for single (`multiple` off) or multiple picks.
- * Multiple: picks show as removable chips before the input; Backspace on an empty search removes
- * the last one. Single: the field shows the pick's label and an optional "none" row clears it.
+ * Multiple: the field stays a plain search box and the picks show as a wrapping list of removable
+ * chips below it; Backspace on an empty search removes the last one. Single: the field shows the pick's label and an optional "none" row clears it.
  * With `creatable`, a query matching no option offers a "create" row that emits `create`
  * (the parent creates the item and adds its id to `selected`).
  * Keyboard: arrows move, Enter picks, Escape closes the list (without closing a host dialog).
@@ -98,7 +98,7 @@ let nextId = 0;
   },
   template: `
     <div
-      class="flex min-h-[50px] w-full cursor-text flex-wrap items-center gap-1.5 rounded-xl border bg-surface py-1.5 pr-2 pl-2 transition-colors md:min-h-[46px] md:rounded-[10px] md:bg-bg"
+      class="flex min-h-[50px] w-full cursor-text items-center gap-1.5 rounded-xl border bg-surface py-1.5 pr-2 pl-2 transition-colors md:min-h-[46px] md:rounded-[10px] md:bg-bg"
       [class]="
         open()
           ? 'border-brand-light shadow-[0_0_0_3px_color-mix(in_srgb,var(--pt-brand)_20%,transparent)]'
@@ -106,25 +106,7 @@ let nextId = 0;
       "
       (click)="focusInput()"
     >
-      @if (multiple()) {
-        @for (option of selectedOptions(); track option.id) {
-          <span
-            class="inline-flex max-w-full items-center gap-1 rounded-full border border-brand/25 bg-brand-tint py-1 pr-1 pl-2.5 text-[13px] text-brand-lighter"
-          >
-            <span class="truncate">{{ option.label }}</span>
-            <button
-              type="button"
-              (click)="$event.stopPropagation(); remove(option.id)"
-              class="grid size-5 shrink-0 place-items-center rounded-full text-brand-light hover:bg-hover hover:text-text"
-              [attr.aria-label]="removeLabel() | translate: { name: option.label }"
-            >
-              <svg [lucideIcon]="icons.x" [size]="12"></svg>
-            </button>
-          </span>
-        }
-      } @else {
-        <svg [lucideIcon]="icons.search" [size]="16" class="ml-1.5 shrink-0 text-faint" aria-hidden="true"></svg>
-      }
+      <svg [lucideIcon]="icons.search" [size]="16" class="ml-1.5 shrink-0 text-faint" aria-hidden="true"></svg>
       <input
         #search
         type="text"
@@ -146,7 +128,7 @@ let nextId = 0;
         (focus)="openList()"
         (click)="openList()"
         (keydown)="onKeydown($event)"
-        class="h-9 min-w-24 flex-1 border-0 bg-transparent px-1.5 text-[16px] text-text shadow-none outline-none focus:border-0 focus:shadow-none md:text-[15px]"
+        class="h-9 min-w-0 flex-1 border-0 bg-transparent px-1.5 text-[16px] text-text shadow-none outline-none focus:border-0 focus:shadow-none md:text-[15px]"
         [class]="!multiple() && selectedOptions().length ? 'placeholder:text-text-2' : ''"
       />
       @if (!multiple() && selectedOptions().length) {
@@ -160,6 +142,27 @@ let nextId = 0;
         </button>
       }
     </div>
+
+    @if (multiple() && selectedOptions().length) {
+      <ul class="mt-2 flex flex-wrap gap-1.5" [attr.aria-label]="selectedLabel() | translate">
+        @for (option of selectedOptions(); track option.id) {
+          <li
+            data-combobox-chip
+            class="inline-flex max-w-full items-center gap-1 rounded-full border border-brand/25 bg-brand-tint py-1 pr-1 pl-2.5 text-[13px] text-brand-lighter"
+          >
+            <span class="truncate">{{ option.label }}</span>
+            <button
+              type="button"
+              (click)="remove(option.id)"
+              class="grid size-5 shrink-0 place-items-center rounded-full text-brand-light hover:bg-hover hover:text-text"
+              [attr.aria-label]="removeLabel() | translate: { name: option.label }"
+            >
+              <svg [lucideIcon]="icons.x" [size]="12" aria-hidden="true"></svg>
+            </button>
+          </li>
+        }
+      </ul>
+    }
 
     @if (open()) {
       <ul
@@ -238,6 +241,8 @@ export class Combobox {
   readonly createLabel = input('common.combobox.create');
   readonly emptyLabel = input('common.combobox.empty');
   readonly removeLabel = input('common.combobox.remove');
+  /** Accessible name of the chip list (multiple mode). */
+  readonly selectedLabel = input('common.combobox.selected');
   readonly clearLabel = input('common.combobox.clear');
   /** Emits the trimmed query when the user picks the "create" row. */
   readonly create = output<string>();

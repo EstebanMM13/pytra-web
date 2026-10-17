@@ -498,6 +498,7 @@
       "create": "Crear «{{name}}»",
       "empty": "Sin resultados",
       "remove": "Quitar {{name}}",
+      "selected": "Seleccionados",
       "clear": "Quitar selección"
     },
     "showAll": "Ver todos"

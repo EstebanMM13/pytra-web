@@ -498,6 +498,7 @@
       "create": "Create “{{name}}”",
       "empty": "No results",
       "remove": "Remove {{name}}",
+      "selected": "Selected",
       "clear": "Clear selection"
     },
     "showAll": "Show all"
