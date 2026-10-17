@@ -22,6 +22,8 @@ import { PlatformService } from '../../../core/services/platform.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { RunFormLauncher, RunFormRequest } from '../../../core/services/run-form-launcher.service';
 import { ToastService } from '../../../shared/toast/toast.service';
+import { burstConfetti, shouldCelebrate } from '../../../shared/utils/confetti';
+import { DemoModeService } from '../../../core/services/demo-mode.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { Skeleton } from '../../../shared/ui/skeleton';
@@ -72,6 +74,7 @@ export class RunForm implements OnInit {
   private readonly platformService = inject(PlatformService);
   private readonly launcher = inject(RunFormLauncher);
   private readonly toast = inject(ToastService);
+  private readonly demo = inject(DemoModeService);
   private readonly translate = inject(TranslateService);
   protected readonly preferences = inject(PreferencesService);
 
@@ -426,6 +429,9 @@ export class RunForm implements OnInit {
       next: (experience) => {
         const created = this.original === null;
         this.toast.success(this.translate.instant(created ? 'runForm.created' : 'runForm.updated'));
+        if (shouldCelebrate(experience, this.original, this.demo.isDemo())) {
+          burstConfetti();
+        }
         this.launcher.notifySaved({ experience, created });
         if (created && request.mode === 'create' && request.navigateOnCreate) {
           this.router.navigate(['/games', experience.gameId, 'experiences', experience.id]);
