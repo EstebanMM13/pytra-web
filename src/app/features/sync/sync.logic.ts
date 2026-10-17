@@ -14,14 +14,6 @@ export function lookup(map: Record<string, string>, key: string): string | null 
   return Object.hasOwn(map, key) ? map[key] : null;
 }
 
-/** Error key for a failed confirm: a running sync and a duplicate name both answer 409. */
-export function confirmErrorKey(err: HttpErrorResponse): string {
-  if (apiCode(err) === 'SYNC_IN_PROGRESS') {
-    return 'steam.errors.syncInProgress';
-  }
-  return err.status === 409 ? 'steam.errors.duplicateName' : 'steam.errors.confirmFailed';
-}
-
 /**
  * The run that already holds a just-confirmed game's imported hours (SINGLEPLAYER only): the one
  * the API labelled `runLabel`, or the game's only run. Creating another run would count the hours twice.

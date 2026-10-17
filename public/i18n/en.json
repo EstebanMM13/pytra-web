@@ -508,7 +508,9 @@
       "linkFailed": "Could not link your PSN account. Please try again.",
       "syncFailed": "Could not sync.",
       "unlinkFailed": "Could not unlink the PSN account.",
-      "ignoreFailed": "Could not ignore the game."
+      "ignoreFailed": "Could not ignore the game.",
+      "duplicateName": "You already have a game with that name.",
+      "confirmFailed": "Could not confirm the game."
     }
   },
   "nav": {

@@ -508,7 +508,9 @@
       "linkFailed": "No se pudo vincular tu cuenta de PSN. Inténtalo de nuevo.",
       "syncFailed": "No se pudo sincronizar.",
       "unlinkFailed": "No se pudo desvincular la cuenta de PSN.",
-      "ignoreFailed": "No se pudo ignorar el juego."
+      "ignoreFailed": "No se pudo ignorar el juego.",
+      "duplicateName": "Ya tienes un juego con ese nombre.",
+      "confirmFailed": "No se pudo confirmar el juego."
     }
   },
   "nav": {

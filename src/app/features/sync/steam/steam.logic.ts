@@ -1,5 +1,6 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Experience } from '../../../core/models/experience.model';
-import { findImportedRun, playtimeHours } from '../sync.logic';
+import { apiCode, findImportedRun, playtimeHours } from '../sync.logic';
 
 /** Run label the API gives the run it creates when a SINGLEPLAYER Steam game is confirmed. */
 export const STEAM_RUN_LABEL = 'Importado de Steam';
@@ -21,6 +22,14 @@ export const LINK_ERROR_KEYS: Record<string, string> = {
   steam_account_already_linked: 'steam.errors.alreadyLinked',
   steam_sync_in_progress: 'steam.errors.linkSyncInProgress',
 };
+
+/** Error key for a failed Steam confirm: a running sync and a duplicate name both answer 409. */
+export function steamConfirmErrorKey(err: HttpErrorResponse): string {
+  if (apiCode(err) === 'SYNC_IN_PROGRESS') {
+    return 'steam.errors.syncInProgress';
+  }
+  return err.status === 409 ? 'steam.errors.duplicateName' : 'steam.errors.confirmFailed';
+}
 
 /** Masks all but the first 10 digits of a SteamID64: `7656119800•••••••`. */
 export function maskSteamId(steamId: string | null | undefined): string {

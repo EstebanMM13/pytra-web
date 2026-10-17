@@ -28,6 +28,9 @@ import { PendingConfirmDialog, PendingConfirmFn, PendingConfirmMode } from '../s
 import { PendingChange, applyPendingChange } from '../sync.logic';
 import { findPsnRun, isProfilePrivate, isValidOnlineId, normalizeOnlineId, psnErrorKey, psnHours } from './psn.logic';
 
+/** Banner shown when GET /status fails. */
+const STATUS_ERROR_KEY = 'psn.errors.generic';
+
 /**
  * PlayStation platform on the Sync page: link by online ID, sync, pending review and ignored
  * titles. Mirrors `SteamPanel`; PSN has no OAuth, the user types their public online ID.
@@ -300,10 +303,12 @@ export class PsnPanel {
       next: (status) => {
         this.status.set(status);
         this.statusLoading.set(false);
+        // A later successful load clears the banner a failed one left behind.
+        if (this.errorKey() === STATUS_ERROR_KEY) this.errorKey.set(null);
       },
       error: () => {
         this.statusLoading.set(false);
-        this.errorKey.set('psn.errors.generic');
+        this.errorKey.set(STATUS_ERROR_KEY);
       },
     });
   }

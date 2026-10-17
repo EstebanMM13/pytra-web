@@ -6,6 +6,7 @@ import {
   findPsnRun,
   isProfilePrivate,
   isValidOnlineId,
+  psnConfirmErrorKey,
   normalizeOnlineId,
   psnErrorKey,
   psnHours,
@@ -59,6 +60,16 @@ describe('psn logic', () => {
         'psn.errors.linkFailed',
       );
       expect(psnErrorKey(err(400, 'constructor'), 'x')).toBe('x');
+    });
+
+    it('maps confirm errors to PSN messages', () => {
+      expect(psnConfirmErrorKey(err(409, 'SYNC_IN_PROGRESS'))).toBe('psn.errors.syncInProgress');
+      expect(psnConfirmErrorKey(err(409, 'PSN_LINK_CHANGED'))).toBe('psn.errors.linkChanged');
+      expect(psnConfirmErrorKey(err(404, 'PSN_NOT_LINKED'))).toBe('psn.errors.notLinked');
+      expect(psnConfirmErrorKey(err(429, 'PSN_RATE_LIMITED'))).toBe('psn.errors.rateLimited');
+      expect(psnConfirmErrorKey(err(503, 'PSN_UNAVAILABLE'))).toBe('psn.errors.unavailable');
+      expect(psnConfirmErrorKey(err(409, 'Game already exists'))).toBe('psn.errors.duplicateName');
+      expect(psnConfirmErrorKey(err(500))).toBe('psn.errors.confirmFailed');
     });
 
     it('detects a private profile', () => {

@@ -1,8 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Experience } from '../../../core/models/experience.model';
 import { SteamStatus } from '../../../core/models/steam.model';
-import { applyPendingChange, confirmErrorKey, lookup } from '../sync.logic';
-import { STEAM_RUN_LABEL, findSteamRun, maskSteamId, steamHours } from './steam.logic';
+import { applyPendingChange, lookup } from '../sync.logic';
+import {
+  STEAM_RUN_LABEL,
+  findSteamRun,
+  maskSteamId,
+  steamConfirmErrorKey,
+  steamHours,
+} from './steam.logic';
 
 const run = (id: number, runLabel: string) => ({ id, runLabel }) as Experience;
 
@@ -21,9 +27,9 @@ describe('steam logic', () => {
 
   it('maps confirm errors', () => {
     const err = (status: number, message?: string) => new HttpErrorResponse({ status, error: { message } });
-    expect(confirmErrorKey(err(409, 'SYNC_IN_PROGRESS'))).toBe('steam.errors.syncInProgress');
-    expect(confirmErrorKey(err(409, 'Game already exists'))).toBe('steam.errors.duplicateName');
-    expect(confirmErrorKey(err(500))).toBe('steam.errors.confirmFailed');
+    expect(steamConfirmErrorKey(err(409, 'SYNC_IN_PROGRESS'))).toBe('steam.errors.syncInProgress');
+    expect(steamConfirmErrorKey(err(409, 'Game already exists'))).toBe('steam.errors.duplicateName');
+    expect(steamConfirmErrorKey(err(500))).toBe('steam.errors.confirmFailed');
   });
 
   it('only looks up own keys', () => {

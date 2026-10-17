@@ -12,7 +12,9 @@ import { SagaService } from '../../../core/services/saga.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
-import { SyncSource, confirmErrorKey } from '../sync.logic';
+import { psnConfirmErrorKey } from '../psn/psn.logic';
+import { steamConfirmErrorKey } from '../steam/steam.logic';
+import { SyncSource } from '../sync.logic';
 
 /** `confirm`: only add the game to the library. `run`: the caller opens a run right after. */
 export type PendingConfirmMode = 'confirm' | 'run';
@@ -66,7 +68,7 @@ export type PendingConfirmFn = (gameId: number, request: GameRequest) => Observa
             [value]="category()"
             (valueChange)="category.set($event)"
           />
-          <p class="text-xs text-muted">{{ 'steam.confirmDialog.categoryHint' | translate }}</p>
+          <p class="text-xs text-muted">{{ source() + '.confirmDialog.categoryHint' | translate }}</p>
         </div>
 
         <div class="flex flex-col gap-2">
@@ -162,6 +164,11 @@ export class PendingConfirmDialog implements OnInit {
     });
   }
 
+  /** Each integration maps its own API codes (Steam and PSN messages differ). */
+  private confirmErrorKey(err: HttpErrorResponse): string {
+    return this.source() === 'psn' ? psnConfirmErrorKey(err) : steamConfirmErrorKey(err);
+  }
+
   protected submit(): void {
     if (this.saving()) {
       return;
@@ -187,7 +194,7 @@ export class PendingConfirmDialog implements OnInit {
       next: (confirmed) => this.confirmed.emit(confirmed),
       error: (err: HttpErrorResponse) => {
         this.saving.set(false);
-        this.toast.error(this.translate.instant(confirmErrorKey(err)));
+        this.toast.error(this.translate.instant(this.confirmErrorKey(err)));
       },
     });
   }

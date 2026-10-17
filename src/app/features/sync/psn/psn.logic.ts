@@ -35,6 +35,18 @@ export function psnErrorKey(err: HttpErrorResponse, fallback: string): string {
   return lookup(PSN_ERROR_KEYS, apiCode(err)) ?? fallback;
 }
 
+/**
+ * Error key for a failed PSN confirm: the PSN codes keep their message (a running sync, a link that
+ * changed or a PSN outage); any other 409 is a duplicate name.
+ */
+export function psnConfirmErrorKey(err: HttpErrorResponse): string {
+  const known = lookup(PSN_ERROR_KEYS, apiCode(err));
+  if (known) {
+    return known;
+  }
+  return err.status === 409 ? 'psn.errors.duplicateName' : 'psn.errors.confirmFailed';
+}
+
 /** Linking failed because the profile hides its game list: show the privacy steps. */
 export function isProfilePrivate(err: HttpErrorResponse): boolean {
   return apiCode(err) === 'PSN_PROFILE_PRIVATE';

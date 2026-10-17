@@ -55,6 +55,7 @@ describe('PsnPanel', () => {
     pending = [] as PsnPendingGame[],
     demo = false,
     runs = [] as Experience[],
+    firstStatusFails = false,
   } = {}) {
     const psn = {
       getStatus: vi.fn(() => of(psnStatus)),
@@ -66,6 +67,9 @@ describe('PsnPanel', () => {
       ignorePending: vi.fn(() => of(undefined)),
       confirmPending: vi.fn(),
     };
+    if (firstStatusFails) {
+      psn.getStatus.mockReturnValueOnce(throwError(() => apiError(500, 'BOOM')));
+    }
     const launcher = { openNewRun: vi.fn(), openEditRun: vi.fn() };
     const blockWrite = vi.fn(() => demo);
     TestBed.configureTestingModule({
@@ -208,6 +212,16 @@ describe('PsnPanel', () => {
     expect(el().textContent).toContain('psn.private.title');
     expect(el().textContent).toContain('psn.private.retrySync');
     expect(el().textContent).not.toContain('psn.result.title');
+  });
+
+  it('clears the status error banner after a later successful status load', () => {
+    const { component } = setup({ psnStatus: status({ linked: true }), firstStatusFails: true });
+    expect(el().querySelector('[role="alert"]')?.textContent).toContain('psn.errors.generic');
+
+    (component as unknown as { loadStatus(): void }).loadStatus();
+    fixture.detectChanges();
+    expect(el().querySelector('[role="alert"]')).toBeNull();
+    expect(card().textContent).toContain('psn.linkedPill');
   });
 
   it('warns admins when the PSN service account is rejected', () => {
