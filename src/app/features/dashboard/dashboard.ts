@@ -15,7 +15,7 @@ import { InstallPromptService } from '../../core/services/install-prompt.service
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
-import { formatRating, ratingDecimals } from '../../shared/utils/rating-format';
+import { formatRating, ratingDecimals, ratingLocale } from '../../shared/utils/rating-format';
 import { PreferencesService } from '../../core/services/preferences.service';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
@@ -135,7 +135,7 @@ export class Dashboard {
 
   /** Contextual line under the greeting, rotating daily among the ones the data supports. */
   protected readonly tagline = computed(() => {
-    this.translate.currentLang();
+    const locale = ratingLocale(this.translate.currentLang());
     const t = pickTagline({
       playing: this.playing(),
       byYear: this.byYear(),
@@ -144,7 +144,7 @@ export class Dashboard {
       today: new Date(),
     });
     const params: Record<string, string | number> = { ...t.params };
-    if (typeof params['rating'] === 'number') params['rating'] = formatRating(params['rating'], this.ratingDecimals());
+    if (typeof params['rating'] === 'number') params['rating'] = formatRating(params['rating'], this.ratingDecimals(), locale);
     if (typeof params['hours'] === 'number') params['hours'] = new HoursPipe().transform(params['hours']);
     const count = typeof params['count'] === 'number' ? params['count'] : null;
     return { key: `dashboard.tagline.${t.key}`, params, count };
