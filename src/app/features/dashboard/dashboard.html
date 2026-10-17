@@ -189,23 +189,6 @@
       }
     </section>
 
-    <!-- Top unlocked achievements (hidden when none) -->
-    @if (topBadges().length) {
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:px-[22px] md:py-4">
-        <app-section-header collapseKey="dashboard.achievements" class="mb-3" [label]="'dashboard.achievements' | translate">
-          <a routerLink="/profile" fragment="profile-achievements" class="flex shrink-0 items-center gap-1 text-[13px] text-brand-light hover:underline">
-            {{ 'dashboard.achievementsAll' | translate }}
-            <svg [lucideIcon]="icons.arrowRight" [size]="14" aria-hidden="true"></svg>
-          </a>
-        </app-section-header>
-        <ul class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          @for (badge of topBadges(); track badge.id) {
-            <li><app-achievement-badge compact [achievement]="badge" /></li>
-          }
-        </ul>
-      </section>
-    }
-
     <!-- Playing now + hours per year -->
     <div class="grid grid-cols-1 gap-[18px] md:gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
@@ -304,6 +287,23 @@
         }
       </section>
     </div>
+
+    <!-- Top unlocked achievements (hidden when none) -->
+    @if (topBadges().length) {
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:px-[22px] md:py-4">
+        <app-section-header collapseKey="dashboard.achievements" class="mb-3" [label]="'dashboard.achievements' | translate">
+          <a routerLink="/profile" fragment="profile-achievements" class="flex shrink-0 items-center gap-1 text-[13px] text-brand-light hover:underline">
+            {{ 'dashboard.achievementsAll' | translate }}
+            <svg [lucideIcon]="icons.arrowRight" [size]="14" aria-hidden="true"></svg>
+          </a>
+        </app-section-header>
+        <ul class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          @for (badge of topBadges(); track badge.id) {
+            <li><app-achievement-badge compact [achievement]="badge" /></li>
+          }
+        </ul>
+      </section>
+    }
 
     <!-- Rankings: same-length lists share the row height so the cards end flush; lists of
          different lengths keep their own height rather than stretching a few rows. -->
