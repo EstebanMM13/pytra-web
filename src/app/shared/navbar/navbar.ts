@@ -23,6 +23,7 @@ const WEB_TABS: NavTab[] = [
   { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
   { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.layers },
   { path: '/years', labelKey: 'nav.years', icon: ICONS.chartColumn },
+  { path: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw },
 ];
 
 /**
