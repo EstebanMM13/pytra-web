@@ -841,7 +841,7 @@
       "PENDIENTE": "Pendientes",
       "ONLINE": "Online"
     },
-    "filterPlaceholder": "Filtrar por nombre o estudio",
+    "filterPlaceholder": "Buscar juego o estudio",
     "steamPending": "{{count}} juegos de Steam por revisar",
     "steamPending_one": "{{count}} juego de Steam por revisar",
     "loadError": "No se pudo cargar la lista de juegos.",

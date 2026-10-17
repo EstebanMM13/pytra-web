@@ -841,7 +841,7 @@
       "PENDIENTE": "Pending",
       "ONLINE": "Online"
     },
-    "filterPlaceholder": "Filter by name or studio",
+    "filterPlaceholder": "Search game or studio",
     "steamPending": "{{count}} Steam games to review",
     "steamPending_one": "{{count}} Steam game to review",
     "loadError": "Could not load your games.",

@@ -47,7 +47,9 @@ export class Segmented<T extends string = string> {
     [
       'shrink-0 border border-border bg-bg',
       this.size() === 'sm' ? 'rounded-[7px] p-0.5' : 'rounded-lg p-[3px]',
-      this.stretch() ? 'flex w-full' : 'inline-flex',
+      // Four or more stretched options wrap into two columns on phones, so labels never truncate
+      // (narrow screens or a large system font size).
+      this.stretch() ? (this.options().length > 3 ? 'grid w-full grid-cols-2 gap-0.5 sm:flex sm:gap-0' : 'flex w-full') : 'inline-flex',
     ].join(' '),
   );
 
@@ -57,7 +59,7 @@ export class Segmented<T extends string = string> {
       this.stretch() ? 'min-w-0 flex-1 truncate' : '',
       this.size() === 'sm' ? 'rounded-[5px] px-2 py-[3px] text-xs' : 'rounded-md py-1.5 text-[13px]',
       // Stretched options share narrow widths (4 statuses on a phone): tighter padding keeps labels whole.
-      this.size() === 'sm' ? '' : this.stretch() ? 'px-1' : 'px-3',
+      this.size() === 'sm' ? '' : this.stretch() ? 'px-2' : 'px-3',
       active
         ? this.tone() === 'neutral'
           ? 'bg-border text-text'
