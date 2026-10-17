@@ -126,9 +126,10 @@ export function coverHue(name: string): number {
         />
       }
       <img
+        [attr.loading]="priority() ? 'eager' : 'lazy'"
+        [attr.fetchpriority]="priority() ? 'high' : null"
         [src]="current"
         [alt]="decorative() ? '' : name()"
-        loading="lazy"
         decoding="async"
         referrerpolicy="no-referrer"
         class="relative size-full"
@@ -159,6 +160,8 @@ export class GameCover {
   readonly size = input<GameCoverSize>('sm');
   /** Next to a visible game name: hide from assistive tech instead of repeating the name. */
   readonly decorative = input(false, { transform: booleanAttribute });
+  /** Above-the-fold hero (e.g. the game detail cover): load eagerly with high fetch priority. */
+  readonly priority = input(false, { transform: booleanAttribute });
   /** Emits on each image load whether it is portrait enough to be cropped (see `fitsPortraitBox`). */
   readonly portraitChange = output<boolean>();
 

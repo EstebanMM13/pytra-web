@@ -13,11 +13,12 @@ import {
 
 @Component({
   imports: [GameCover],
-  template: `<app-game-cover class="extra" [url]="url()" [name]="name()" size="sm" />`,
+  template: `<app-game-cover class="extra" [url]="url()" [name]="name()" [priority]="priority()" size="sm" />`,
 })
 class Host {
   readonly url = signal<string | null>(null);
   readonly name = signal('Hollow Knight');
+  readonly priority = signal(false);
 }
 
 describe('GameCover', () => {
@@ -46,6 +47,16 @@ describe('GameCover', () => {
     expect(host.classList).toContain('extra');
     expect(host.classList).toContain('w-8');
     expect(host.classList).toContain('h-12');
+  });
+
+  it('has no fetch priority by default and loads a priority (hero) cover eagerly at high priority', () => {
+    const { fixture, el } = setup('https://cdn.example.com/cover.jpg');
+    expect(el.querySelector('img')!.hasAttribute('fetchpriority')).toBe(false);
+    fixture.componentInstance.priority.set(true);
+    fixture.detectChanges();
+    const img = el.querySelector('img')!;
+    expect(img.getAttribute('loading')).toBe('eager');
+    expect(img.getAttribute('fetchpriority')).toBe('high');
   });
 
   it('crops portrait art to fill the box', () => {
