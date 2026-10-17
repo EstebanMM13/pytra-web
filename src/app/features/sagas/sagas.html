@@ -75,18 +75,19 @@
             <!-- Up to four of the saga's games as an overlapping, slightly fanned collage of box art -->
             <span class="saga-collage relative h-12 w-[74px] shrink-0" aria-hidden="true">
               @for (g of s.games.slice(0, 4); track g.id; let i = $index) {
-                <app-game-cover
-                  decorative
-                  size="sm"
-                  class="saga-collage-cover absolute top-0 shadow-md ring-2 shadow-black/30 ring-bg"
+                <!-- The wrapper is positioned: GameCover owns its host classes and would drop `absolute`. -->
+                <span
+                  class="saga-collage-cover absolute top-0 block rounded-[6px] shadow-md ring-2 shadow-black/30 ring-bg"
                   [style.left.px]="i * 14"
                   [style.z-index]="4 - i"
                   [style.--n]="i"
-                  [url]="g.coverImageUrl"
-                  [name]="g.name"
-                />
+                >
+                  <app-game-cover decorative size="sm" [url]="g.coverImageUrl" [name]="g.name" />
+                </span>
               } @empty {
-                <app-game-cover decorative size="sm" class="absolute top-0 left-0" [name]="s.saga.name" />
+                <span class="absolute top-0 left-0 block">
+                  <app-game-cover decorative size="sm" [name]="s.saga.name" />
+                </span>
               }
             </span>
             <div class="min-w-0 flex-1">
