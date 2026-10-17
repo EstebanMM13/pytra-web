@@ -10,6 +10,8 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { RouterLink, type Params } from '@angular/router';
 import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
 import { Sparkline } from './sparkline';
 import { countUpValue, parseCountUp } from '../utils/count-up';
@@ -24,9 +26,13 @@ import { canAnimate } from '../utils/motion';
  */
 @Component({
   selector: 'app-stat-card',
-  imports: [LucideDynamicIcon, Sparkline],
+  imports: [LucideDynamicIcon, NgTemplateOutlet, RouterLink, Sparkline],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block min-w-0 rounded-xl border border-card-border card-glass' },
+  host: {
+    class: 'block min-w-0 rounded-xl border border-card-border card-glass',
+    // Linked cards lift on hover and shrink while pressed, like the other clickable cards.
+    '[class.hover-lift]': 'link() !== null',
+  },
   // Entrance: a short rise + fade, staggered across a row of cards (none with reduced motion).
   styles: `
     @media (prefers-reduced-motion: no-preference) {
@@ -48,6 +54,14 @@ import { canAnimate } from '../utils/motion';
     }
   `,
   template: `
+    @if (link(); as l) {
+      <a [routerLink]="l" [queryParams]="queryParams()" class="block h-full rounded-xl" data-stat-link>
+        <ng-container *ngTemplateOutlet="body" />
+      </a>
+    } @else {
+      <ng-container *ngTemplateOutlet="body" />
+    }
+    <ng-template #body>
     <div
       class="@container flex h-full flex-col p-3 [--fig-max:22px] md:px-[18px] md:py-4 md:[--fig-max:26px] lg:[--fig-max:28px]"
     >
@@ -89,6 +103,7 @@ import { canAnimate } from '../utils/motion';
         }
       }
     </div>
+    </ng-template>
   `,
 })
 export class StatCard {
@@ -107,6 +122,10 @@ export class StatCard {
   readonly meter = input<number | null>(null);
   /** Centres the label and figure (cards of a row that should read as one set). */
   readonly centered = input(false, { transform: booleanAttribute });
+  /** Makes the whole card a link (router commands), e.g. to the list behind the figure. */
+  readonly link = input<string | readonly (string | number)[] | null>(null);
+  /** Query params of `link`. */
+  readonly queryParams = input<Params | null>(null);
 
   protected readonly visual = computed(() => statVisual(this.trend(), this.meter()));
   /** Toned figures (ratings) keep their color with a brand hint; plain ones get the brand gradient. */

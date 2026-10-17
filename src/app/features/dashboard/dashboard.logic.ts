@@ -1,3 +1,4 @@
+import type { LibraryCategoryFilter, LibrarySort, LibraryStatusFilter } from '../games/library.logic';
 import { InProgressExperience, StatsSummary, TopRatedExperience, YearStat } from '../../core/models/stats.model';
 
 /** One contextual line under the dashboard greeting: i18n key under `dashboard.tagline.*` + params. */
@@ -68,6 +69,24 @@ export function pickTagline(input: TaglineInput): Tagline {
   if (!candidates.length) return { key: 'fallback', params: {} };
   return candidates[dayOfYear(input.today) % candidates.length];
 }
+
+/** A main stat card's destination: the list behind its figure. */
+export interface StatLink {
+  link: string;
+  queryParams: { category?: LibraryCategoryFilter; status?: LibraryStatusFilter; sort?: LibrarySort } | null;
+}
+
+export type StatLinkKey = 'games' | 'sagas' | 'runs' | 'singleHours' | 'onlineHours' | 'rating';
+
+/** Library filters use the query params `games.ts` parses (`category`, `status`, `sort`). */
+export const STAT_LINKS: Readonly<Record<StatLinkKey, StatLink>> = {
+  games: { link: '/games', queryParams: null },
+  sagas: { link: '/sagas', queryParams: null },
+  runs: { link: '/games', queryParams: null },
+  singleHours: { link: '/games', queryParams: { category: 'SINGLEPLAYER', sort: 'hours' } },
+  onlineHours: { link: '/games', queryParams: { status: 'ONLINE', sort: 'hours' } },
+  rating: { link: '/games', queryParams: { sort: 'rating' } },
+};
 
 /**
  * Where a top-rated entry leads: the run's own page, or the game page for online entries (and for

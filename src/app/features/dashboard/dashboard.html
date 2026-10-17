@@ -121,6 +121,8 @@
         @let m = meters();
         <app-stat-card
           centered
+          [link]="statLinks.games.link"
+          [queryParams]="statLinks.games.queryParams"
           [icon]="statIcons.games"
           [label]="'dashboard.stats.games' | translate"
           [value]="s.totalGames"
@@ -128,6 +130,8 @@
         />
         <app-stat-card
           centered
+          [link]="statLinks.sagas.link"
+          [queryParams]="statLinks.sagas.queryParams"
           [icon]="statIcons.sagas"
           [label]="'dashboard.stats.sagas' | translate"
           [value]="s.totalSagas"
@@ -135,6 +139,8 @@
         />
         <app-stat-card
           centered
+          [link]="statLinks.runs.link"
+          [queryParams]="statLinks.runs.queryParams"
           [icon]="statIcons.runs"
           [label]="'dashboard.stats.runs' | translate"
           [value]="s.totalExperiences"
@@ -143,6 +149,8 @@
         />
         <app-stat-card
           centered
+          [link]="statLinks.singleHours.link"
+          [queryParams]="statLinks.singleHours.queryParams"
           [icon]="statIcons.single"
           [label]="'dashboard.stats.singleHours' | translate"
           [shortLabel]="'dashboard.stats.singleHoursShort' | translate"
@@ -152,6 +160,8 @@
         />
         <app-stat-card
           centered
+          [link]="statLinks.onlineHours.link"
+          [queryParams]="statLinks.onlineHours.queryParams"
           [icon]="statIcons.online"
           [label]="'dashboard.stats.onlineHours' | translate"
           [shortLabel]="'dashboard.stats.onlineHoursShort' | translate"
@@ -160,6 +170,8 @@
         />
         <app-stat-card
           centered
+          [link]="statLinks.rating.link"
+          [queryParams]="statLinks.rating.queryParams"
           [icon]="statIcons.rating"
           [label]="'dashboard.stats.avgRating' | translate"
           [shortLabel]="'dashboard.stats.avgRatingShort' | translate"

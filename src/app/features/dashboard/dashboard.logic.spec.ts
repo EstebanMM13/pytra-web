@@ -1,8 +1,10 @@
 import { InProgressExperience, StatsSummary, YearStat } from '../../core/models/stats.model';
+import { parseCategoryFilter, parseSort, parseStatusFilter } from '../games/library.logic';
 import {
   dayOfYear,
   daysSince,
   pickTagline,
+  STAT_LINKS,
   share,
   statMeters,
   taglineCandidates,
@@ -156,5 +158,24 @@ describe('dashboard stat meters', () => {
       onlineHours: null,
       rating: null,
     });
+  });
+});
+
+describe('STAT_LINKS', () => {
+  it('leads each stat card to the list behind its figure', () => {
+    expect(STAT_LINKS.singleHours).toEqual({ link: '/games', queryParams: { category: 'SINGLEPLAYER', sort: 'hours' } });
+    expect(STAT_LINKS.onlineHours).toEqual({ link: '/games', queryParams: { status: 'ONLINE', sort: 'hours' } });
+    expect(STAT_LINKS.rating).toEqual({ link: '/games', queryParams: { sort: 'rating' } });
+    expect(STAT_LINKS.games).toEqual({ link: '/games', queryParams: null });
+    expect(STAT_LINKS.runs).toEqual({ link: '/games', queryParams: null });
+    expect(STAT_LINKS.sagas).toEqual({ link: '/sagas', queryParams: null });
+  });
+
+  it('only uses values the library accepts from the URL', () => {
+    for (const { queryParams } of Object.values(STAT_LINKS)) {
+      if (queryParams?.category) expect(parseCategoryFilter(queryParams.category)).toBe(queryParams.category);
+      if (queryParams?.status) expect(parseStatusFilter(queryParams.status)).toBe(queryParams.status);
+      if (queryParams?.sort) expect(parseSort(queryParams.sort)).toBe(queryParams.sort);
+    }
   });
 });

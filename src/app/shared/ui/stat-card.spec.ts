@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { figureFontSize, StatCard, statVisual } from './stat-card';
 
 @Component({
@@ -11,6 +12,8 @@ import { figureFontSize, StatCard, statVisual } from './stat-card';
     [trend]="trend()"
     [valueClass]="valueClass()"
     [meter]="meter()"
+    [link]="link()"
+    [queryParams]="queryParams()"
   />`,
 })
 class Host {
@@ -19,11 +22,13 @@ class Host {
   readonly trend = signal<readonly number[] | null>(null);
   readonly valueClass = signal('');
   readonly meter = signal<number | null>(null);
+  readonly link = signal<string | null>(null);
+  readonly queryParams = signal<Record<string, string> | null>(null);
 }
 
 describe('StatCard', () => {
-  function setup(patch: Partial<{ value: string; hint: string; trend: number[]; valueClass: string; meter: number }> = {}) {
-    TestBed.configureTestingModule({ imports: [Host] });
+  function setup(patch: Partial<{ value: string; hint: string; trend: number[]; valueClass: string; meter: number; link: string; queryParams: Record<string, string> }> = {}) {
+    TestBed.configureTestingModule({ imports: [Host], providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(Host);
     const host = fixture.componentInstance;
     if (patch.value !== undefined) host.value.set(patch.value);
@@ -31,6 +36,8 @@ describe('StatCard', () => {
     if (patch.trend !== undefined) host.trend.set(patch.trend);
     if (patch.valueClass !== undefined) host.valueClass.set(patch.valueClass);
     if (patch.meter !== undefined) host.meter.set(patch.meter);
+    if (patch.link !== undefined) host.link.set(patch.link);
+    if (patch.queryParams !== undefined) host.queryParams.set(patch.queryParams);
     fixture.detectChanges();
     return (fixture.nativeElement as HTMLElement).querySelector('app-stat-card') as HTMLElement;
   }
@@ -73,6 +80,20 @@ describe('StatCard', () => {
   it('shows the hint under the figure', () => {
     const card = setup({ hint: '202 h campaign + 38 h online' });
     expect(card.textContent).toContain('202 h campaign + 38 h online');
+  });
+
+  it('is a plain tile without a link', () => {
+    const card = setup();
+    expect(card.querySelector('a')).toBeNull();
+    expect(card.classList).not.toContain('hover-lift');
+  });
+
+  it('becomes a keyboard-focusable link with its query params', () => {
+    const card = setup({ link: '/games', queryParams: { sort: 'hours', category: 'SINGLEPLAYER' } });
+    const link = card.querySelector('a[data-stat-link]') as HTMLAnchorElement;
+    expect(link.getAttribute('href')).toBe('/games?sort=hours&category=SINGLEPLAYER');
+    expect(link.textContent).toContain('Hours');
+    expect(card.classList).toContain('hover-lift');
   });
 
   it('keeps toned figures on their own color', () => {
