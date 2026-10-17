@@ -39,18 +39,29 @@ export function applyWithRepaint(
   }
   pending++;
   root.dataset[THEME_SWITCHING_ATTR] = '';
-  apply();
-  // Reading layout forces the new styles (no backdrop-filter, new tokens) to be resolved now.
-  void root.offsetHeight;
-  nextFrame(() =>
-    nextFrame(() => {
-      pending = Math.max(0, pending - 1);
-      if (pending === 0) {
-        delete root.dataset[THEME_SWITCHING_ATTR];
-      }
-    }),
-  );
+  let settled = false;
+  const settle = () => {
+    if (settled) return;
+    settled = true;
+    pending = Math.max(0, pending - 1);
+    if (pending === 0) {
+      delete root.dataset[THEME_SWITCHING_ATTR];
+    }
+  };
+  // rAF is paused in hidden tabs / a backgrounded WebView: cap how long the flag can linger.
+  setTimeout(settle, SETTLE_FALLBACK_MS);
+  try {
+    apply();
+    // Reading layout forces the new styles (no backdrop-filter, new tokens) to be resolved now.
+    void root.offsetHeight;
+  } finally {
+    // Even if apply() throws, the flag must not stick (it would keep blur and transitions off).
+    nextFrame(() => nextFrame(settle));
+  }
 }
+
+/** Upper bound for the repaint flag when animation frames don't run. */
+export const SETTLE_FALLBACK_MS = 500;
 
 /** Test hook: resets the overlapping-call counter. */
 export function resetRepaintStateForTests(): void {
