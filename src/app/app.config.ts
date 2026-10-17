@@ -12,6 +12,7 @@ import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideServiceWorker } from '@angular/service-worker';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { routes } from './app.routes';
+import { VIEW_TRANSITION_OPTIONS } from './core/view-transitions';
 import { isNativePlatform } from './core/native-platform';
 import { NativeOAuthService } from './core/services/native-oauth.service';
 import { ThemeService } from './core/services/theme.service';
@@ -24,7 +25,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(
       routes,
-      withViewTransitions({ skipInitialTransition: true }),
+      withViewTransitions(VIEW_TRANSITION_OPTIONS),
       // New pages open at the top; Back restores the previous scroll position.
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
     ),
