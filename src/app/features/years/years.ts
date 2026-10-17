@@ -64,6 +64,7 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './years.html',
+  styleUrl: './years.css',
 })
 export class Years {
   protected readonly icons = ICONS;

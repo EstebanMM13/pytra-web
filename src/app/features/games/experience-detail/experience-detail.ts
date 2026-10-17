@@ -55,6 +55,33 @@ export function ratingRank(rating: number, topRatings: readonly number[], window
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './experience-detail.html',
+  // Platinum pill: a slow gold glow pulse (opacity only; static with reduced motion).
+  styles: `
+    .platinum-glow::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      box-shadow: 0 0 12px 1px color-mix(in srgb, var(--pt-gold) 55%, transparent);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .platinum-glow::after {
+        animation: platinum-glow 2.4s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
+      }
+    }
+
+    @keyframes platinum-glow {
+      from {
+        opacity: 0.25;
+      }
+      to {
+        opacity: 0.9;
+      }
+    }
+  `,
 })
 export class ExperienceDetail {
   protected readonly icons = ICONS;
