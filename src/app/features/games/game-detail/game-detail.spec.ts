@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
-import { EMPTY, of, throwError } from 'rxjs';
+import { EMPTY, Subject, of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Game, GameCategory } from '../../../core/models/game.model';
 import { DemoModeService } from '../../../core/services/demo-mode.service';
@@ -171,5 +171,50 @@ describe('GameDetail stats', () => {
     expect(line.tagName).toBe('SPAN');
     expect(line.getAttribute('aria-hidden')).toBe('true');
     expect(line.nextElementSibling?.tagName).toBe('H1');
+  });
+});
+
+describe('GameDetail loading', () => {
+  function setup() {
+    const game$ = new Subject<Game>();
+    const findByGame = vi.fn(() => of({ gameId: 7, totalHours: 20, generalRating: null, platforms: [] }));
+    const loadPlatforms = vi.fn(() => of([]));
+    TestBed.configureTestingModule({
+      imports: [GameDetail],
+      providers: [
+        provideRouter([]),
+        provideTranslateService(),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '7' })) } },
+        { provide: GameService, useValue: { findById: () => game$, findAll: () => of([]) } },
+        { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        { provide: OnlinePlaytimeService, useValue: { findByGame } },
+        { provide: PlatformService, useValue: { platforms: signal([]), load: loadPlatforms } },
+        { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },
+        { provide: DemoModeService, useValue: { isDemo: signal(false), blockWrite: () => false } },
+        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
+      ],
+    });
+    TestBed.overrideComponent(GameDetail, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const fixture = TestBed.createComponent(GameDetail);
+    fixture.detectChanges();
+    return { fixture, game$, findByGame, loadPlatforms };
+  }
+
+  it('requests the online playtime and the platform catalog alongside the game, once', () => {
+    const { fixture, game$, findByGame, loadPlatforms } = setup();
+    expect(findByGame).toHaveBeenCalledExactlyOnceWith(7);
+    expect(loadPlatforms).toHaveBeenCalled();
+
+    game$.next(game('HYBRID'));
+    fixture.detectChanges();
+    expect(findByGame).toHaveBeenCalledTimes(1);
+    expect(fixture.nativeElement.textContent).toContain('20');
+  });
+
+  it('ignores the prefetched online playtime of a SINGLEPLAYER game', () => {
+    const { fixture, game$ } = setup();
+    game$.next(game('SINGLEPLAYER'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.onlinePlaytime()).toBeNull();
   });
 });

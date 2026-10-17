@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, shareReplay } from 'rxjs';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -128,6 +129,8 @@ export class GameDetail {
   private readonly onlinePlatformsTouched = signal(false);
   readonly savingOnlinePlatforms = signal(false);
   readonly onlineLoadState = signal<OnlinePlaytimeLoadState>('loading');
+  /** Online playtime requested alongside the game (by route id), consumed by the first `loadOnlinePlaytime`. */
+  private onlinePrefetch: { id: number; playtime$: Observable<OnlinePlaytime> } | null = null;
 
   // Text inputs so "12,5" works on every keyboard/locale (number inputs drop it as empty).
   readonly onlinePlaytimeForm = this.fb.group({
@@ -271,6 +274,13 @@ export class GameDetail {
     this.loadError.set(false);
     this.editing.set(false);
 
+    // Requests that only need the id start alongside the game instead of after it: the platform
+    // catalog (cached after the first load) and the online playtime (ignored for SINGLEPLAYER games).
+    this.platformService.load().subscribe({ error: () => {} });
+    const playtime$ = this.onlinePlaytimeService.findByGame(id).pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    playtime$.subscribe({ error: () => {} });
+    this.onlinePrefetch = { id, playtime$ };
+
     // Every handler checks the id: a late answer for the previous game must not overwrite this one.
     this.gameService.findById(id).subscribe({
       next: (game) => {
@@ -303,6 +313,9 @@ export class GameDetail {
   }
 
   private loadOnlinePlaytime(game: Game): void {
+    // The prefetched answer serves the first call for that game only; later calls (after an edit) refetch.
+    const prefetch = this.onlinePrefetch?.id === game.id ? this.onlinePrefetch.playtime$ : null;
+    this.onlinePrefetch = null;
     // Online hours only exist for ONLINE/HYBRID games; a SINGLEPLAYER game never has them.
     // Also drop hours loaded earlier, e.g. when an edit turns the game into SINGLEPLAYER.
     this.onlinePlaytime.set(null);
@@ -316,7 +329,7 @@ export class GameDetail {
     // Catalog for the online platform picker (cached after the first load).
     this.platformService.load().subscribe({ error: () => {} });
     const id = game.id;
-    this.onlinePlaytimeService.findByGame(id).subscribe({
+    (prefetch ?? this.onlinePlaytimeService.findByGame(id)).subscribe({
       next: (playtime) => {
         if (id !== this.gameId()) return;
         const lang = this.lang();
