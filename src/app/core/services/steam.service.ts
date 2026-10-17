@@ -3,12 +3,22 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
 import { Game, GameRequest } from '../models/game.model';
-import { SteamIgnoredApp, SteamPendingGame, SteamStatus, SteamSyncResult } from '../models/steam.model';
+import {
+  SteamIgnoredApp,
+  SteamPendingGame,
+  SteamStatus,
+  SteamSyncResult,
+} from '../models/steam.model';
+import { UserDataCache } from './user-data-cache';
 
 @Injectable({ providedIn: 'root' })
 export class SteamService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/integrations/steam`;
+  private readonly cache = inject(UserDataCache);
+  private readonly pending = this.cache.resource(() =>
+    this.http.get<SteamPendingGame[]>(`${this.baseUrl}/pending`),
+  );
 
   /**
    * XHR autenticada que emite un token de estado de un solo uso (lleva el JWT
@@ -29,23 +39,30 @@ export class SteamService {
   }
 
   unlink(): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/link`);
+    return this.http.delete<void>(`${this.baseUrl}/link`).pipe(this.cache.invalidateOnWrite());
   }
 
   sync(): Observable<SteamSyncResult> {
-    return this.http.post<SteamSyncResult>(`${this.baseUrl}/sync`, {});
+    return this.http
+      .post<SteamSyncResult>(`${this.baseUrl}/sync`, {})
+      .pipe(this.cache.invalidateOnWrite());
   }
 
+  /** Cached (see `UserDataCache`): may emit the cached list, then a fresher one. */
   getPending(): Observable<SteamPendingGame[]> {
-    return this.http.get<SteamPendingGame[]>(`${this.baseUrl}/pending`);
+    return this.pending.get();
   }
 
   confirmPending(gameId: number, request: GameRequest): Observable<Game> {
-    return this.http.put<Game>(`${this.baseUrl}/pending/${gameId}/confirm`, request);
+    return this.http
+      .put<Game>(`${this.baseUrl}/pending/${gameId}/confirm`, request)
+      .pipe(this.cache.invalidateOnWrite());
   }
 
   ignorePending(gameId: number): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/pending/${gameId}/ignore`, {});
+    return this.http
+      .put<void>(`${this.baseUrl}/pending/${gameId}/ignore`, {})
+      .pipe(this.cache.invalidateOnWrite());
   }
 
   getIgnored(): Observable<SteamIgnoredApp[]> {
@@ -53,6 +70,8 @@ export class SteamService {
   }
 
   unignore(appId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/ignored/${encodeURIComponent(appId)}`);
+    return this.http
+      .delete<void>(`${this.baseUrl}/ignored/${encodeURIComponent(appId)}`)
+      .pipe(this.cache.invalidateOnWrite());
   }
 }

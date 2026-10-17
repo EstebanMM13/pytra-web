@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
-import { forkJoin, map } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
 import { Game } from '../../core/models/game.model';
 import { Saga } from '../../core/models/saga.model';
 import { GameService } from '../../core/services/game.service';
@@ -125,7 +125,8 @@ export class Sagas {
         void this.router.navigate([], { queryParams: { create: null }, queryParamsHandling: 'merge', replaceUrl: true });
       }
     });
-    forkJoin([this.sagaService.findAll(), this.gameService.findAll()]).subscribe({
+    // combineLatest, not forkJoin: cached lists render at once and a fresher emission replaces them.
+    combineLatest([this.sagaService.findAll(), this.gameService.findAll()]).subscribe({
       next: ([sagas, games]) => {
         this.games.set(games);
         this.sagas.set(sagas);

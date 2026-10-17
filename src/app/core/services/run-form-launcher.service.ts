@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Experience } from '../models/experience.model';
+import { UserDataCache } from './user-data-cache';
 
 /** Optional values to prefill a new run with (e.g. hours and platform from a Steam import). */
 export interface RunPrefill {
@@ -35,13 +36,19 @@ export interface RunSaved {
 export class RunFormLauncher {
   private readonly requestState = signal<RunFormRequest | null>(null);
   private readonly savedSubject = new Subject<RunSaved>();
+  private readonly cache = inject(UserDataCache);
 
   readonly request = this.requestState.asReadonly();
   readonly saved$: Observable<RunSaved> = this.savedSubject.asObservable();
 
   // The read-only demo opens the form too (to explore it); its save is stopped by ModalSheet.
   openNewRun(gameId?: number, prefill?: RunPrefill): void {
-    this.requestState.set({ mode: 'create', gameId, prefill, navigateOnCreate: gameId === undefined });
+    this.requestState.set({
+      mode: 'create',
+      gameId,
+      prefill,
+      navigateOnCreate: gameId === undefined,
+    });
   }
 
   openEditRun(experience: Experience): void {
@@ -55,6 +62,9 @@ export class RunFormLauncher {
   /** Called by the form after a successful save; closes it and notifies listeners. */
   notifySaved(saved: RunSaved): void {
     this.requestState.set(null);
+    // The run service already invalidated on the write; repeated so listeners reload fresh data
+    // whatever path saved the run.
+    this.cache.invalidateAll();
     this.savedSubject.next(saved);
   }
 }

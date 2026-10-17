@@ -3,13 +3,20 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, catchError, of, switchMap, tap } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
-import { CurrentUser, DeleteAccountRequest, ExportFormat, UpdateProfileRequest } from '../models/user.model';
+import {
+  CurrentUser,
+  DeleteAccountRequest,
+  ExportFormat,
+  UpdateProfileRequest,
+} from '../models/user.model';
 import { TokenStorageService } from './token-storage.service';
+import { UserDataCache } from './user-data-cache';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly http = inject(HttpClient);
   private readonly tokenStorage = inject(TokenStorageService);
+  private readonly cache = inject(UserDataCache);
   private readonly baseUrl = `${API_BASE_URL}/users`;
 
   private readonly currentUserState = signal<CurrentUser | null>(null);
@@ -53,6 +60,8 @@ export class UserService {
 
   /** Permanently deletes the account and all its data (204). The caller clears the session. */
   deleteAccount(request: DeleteAccountRequest): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/me`, { body: request });
+    return this.http
+      .delete<void>(`${this.baseUrl}/me`, { body: request })
+      .pipe(this.cache.invalidateOnWrite());
   }
 }

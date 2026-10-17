@@ -14,18 +14,28 @@ import {
   YearStat,
   YearSummary,
 } from '../models/stats.model';
+import { UserDataCache } from './user-data-cache';
 
 @Injectable({ providedIn: 'root' })
 export class StatsService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/stats`;
+  private readonly cache = inject(UserDataCache);
+  private readonly summary = this.cache.resource(() =>
+    this.http.get<StatsSummary>(`${this.baseUrl}/summary`),
+  );
+  private readonly byYear = this.cache.resource(() =>
+    this.http.get<YearStat[]>(`${this.baseUrl}/by-year`),
+  );
 
+  /** Cached (see `UserDataCache`): may emit the cached summary, then a fresher one. */
   getSummary(): Observable<StatsSummary> {
-    return this.http.get<StatsSummary>(`${this.baseUrl}/summary`);
+    return this.summary.get();
   }
 
+  /** Cached (see `UserDataCache`): may emit the cached list, then a fresher one. */
   getByYear(): Observable<YearStat[]> {
-    return this.http.get<YearStat[]>(`${this.baseUrl}/by-year`);
+    return this.byYear.get();
   }
 
   /** Years with data, most recent first. */
@@ -38,7 +48,9 @@ export class StatsService {
   }
 
   saveYearNote(year: number, request: YearNoteRequest): Observable<YearNote> {
-    return this.http.put<YearNote>(`${this.baseUrl}/years/${year}/note`, request);
+    return this.http
+      .put<YearNote>(`${this.baseUrl}/years/${year}/note`, request)
+      .pipe(this.cache.invalidateOnWrite());
   }
 
   /** EN_CURSO runs across all games, most recently started first. */

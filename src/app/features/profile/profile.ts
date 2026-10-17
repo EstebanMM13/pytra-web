@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, combineLatest, of } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { SagaService } from '../../core/services/saga.service';
 import { StatsService } from '../../core/services/stats.service';
@@ -231,7 +231,8 @@ export class Profile {
       }
     });
 
-    forkJoin({
+    // combineLatest, not forkJoin: the cached lists render at once, a fresher emission recomputes.
+    combineLatest({
       games: inject(GameService).findAll(),
       sagas: inject(SagaService).findAll(),
       summary: inject(StatsService).getSummary(),
