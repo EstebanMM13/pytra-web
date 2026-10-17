@@ -87,20 +87,15 @@ describe('GameDetail', () => {
     expect(launcher.openNewRun).toHaveBeenCalledWith(7);
   });
 
-  it('hides every edit and run entry point in the read-only demo', () => {
-    const { buttons, el } = setup(game('SINGLEPLAYER'), true);
-    expect(buttons('game.editAria')).toEqual([]);
-    expect(buttons('game.edit')).toEqual([]);
-    expect(buttons('game.newRun')).toEqual([]);
-    expect(buttons('game.firstRun')).toEqual([]);
-    expect(el.textContent).toContain('game.noRuns');
-  });
-
-  it('never starts a run in demo mode, even when called directly', () => {
-    const { fixture } = setup(game('SINGLEPLAYER'), true);
-    (fixture.componentInstance as unknown as { newRun(): void }).newRun();
-    expect(blockWrite).toHaveBeenCalled();
-    expect(launcher.openNewRun).not.toHaveBeenCalled();
+  it('shows every edit and run entry point in the demo too, so it can be explored', () => {
+    const { buttons } = setup(game('SINGLEPLAYER'), true);
+    expect(buttons('game.editAria').length).toBe(1);
+    expect(buttons('game.edit').length).toBe(1);
+    expect(buttons('game.firstRun').length).toBe(1);
+    buttons('game.newRun')[0].click();
+    // The form opens; only its save is stopped (ModalSheet), so nothing is blocked here.
+    expect(launcher.openNewRun).toHaveBeenCalledWith(7);
+    expect(blockWrite).not.toHaveBeenCalled();
   });
 
   it('gives ONLINE games no way to add a run', () => {

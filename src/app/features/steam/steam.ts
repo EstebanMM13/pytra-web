@@ -6,7 +6,7 @@ import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Game } from '../../core/models/game.model';
 import { SteamIgnoredApp, SteamPendingGame, SteamStatus, SteamSyncResult } from '../../core/models/steam.model';
-import { AuthService } from '../../core/services/auth.service';
+import { DemoModeService } from '../../core/services/demo-mode.service';
 import { ExperienceService } from '../../core/services/experience.service';
 import { NativeOAuthService } from '../../core/services/native-oauth.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
@@ -55,8 +55,8 @@ export class Steam {
   private readonly experienceService = inject(ExperienceService);
   private readonly nativeOAuth = inject(NativeOAuthService);
   private readonly runFormLauncher = inject(RunFormLauncher);
-  /** Read-only demo: no link, sync or unlink buttons (the API rejects them anyway). */
-  protected readonly isDemo = inject(AuthService).isDemo;
+  /** Read-only demo: every action is shown, but each one stops at the demo toast (no inline error). */
+  private readonly demoMode = inject(DemoModeService);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
@@ -111,6 +111,7 @@ export class Steam {
   }
 
   connect(): void {
+    if (this.demoMode.blockWrite()) return;
     this.connecting.set(true);
     this.errorKey.set(null);
     this.steamService.requestConnectToken().subscribe({
@@ -128,6 +129,7 @@ export class Steam {
   }
 
   sync(): void {
+    if (this.demoMode.blockWrite()) return;
     this.syncing.set(true);
     this.errorKey.set(null);
     this.noticeKey.set(null);
@@ -156,6 +158,7 @@ export class Steam {
   }
 
   unlink(): void {
+    if (this.demoMode.blockWrite()) return;
     this.unlinking.set(true);
     this.errorKey.set(null);
     this.steamService.unlink().subscribe({
@@ -176,6 +179,7 @@ export class Steam {
   }
 
   ignore(game: Game): void {
+    if (this.demoMode.blockWrite()) return;
     this.busyGameId.set(game.id);
     this.errorKey.set(null);
     this.steamService.ignorePending(game.id).subscribe({
@@ -196,6 +200,7 @@ export class Steam {
   }
 
   unignore(app: SteamIgnoredApp): void {
+    if (this.demoMode.blockWrite()) return;
     this.steamService.unignore(app.appId).subscribe({
       next: () => {
         this.ignoredApps.update((list) => list.filter((a) => a.appId !== app.appId));

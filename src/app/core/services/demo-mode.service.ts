@@ -7,8 +7,10 @@ import { TokenStorageService } from './token-storage.service';
 export const DEMO_READ_ONLY = 'DEMO_READ_ONLY';
 
 /**
- * UI side of the read-only demo. Hiding write actions is only a courtesy: the API rejects every
- * write from a demo token, and the auth interceptor turns that 403 into the same toast.
+ * UI side of the read-only demo. The demo user sees every button, form and dialog so the app can be
+ * explored, but nothing is persisted: dialogs (`ModalSheet`) stop at their save button, and the auth
+ * interceptor short-circuits every other write before it leaves the browser. The API still rejects
+ * any write from a demo token as the backstop.
  */
 @Injectable({ providedIn: 'root' })
 export class DemoModeService {

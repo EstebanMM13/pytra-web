@@ -9,7 +9,7 @@
       <svg [lucideIcon]="icons.chevronLeft" [size]="16"></svg>
       {{ 'game.breadcrumb' | translate }}
     </a>
-    @if (game() && canEdit()) {
+    @if (game()) {
       <div class="flex items-center gap-1 text-text-3 md:hidden">
         <button
           type="button"
@@ -86,18 +86,16 @@
                 {{ g.name }}
               </h1>
             </div>
-            @if (canEdit()) {
-              <div class="hidden shrink-0 gap-2.5 md:flex">
-                <button
-                  type="button"
-                  (click)="editing.set(true)"
-                  class="flex items-center gap-1.5 rounded-lg border border-border bg-bg/40 px-3.5 py-[9px] text-[13px] font-medium text-text-2 backdrop-blur-sm hover:border-border-strong hover:text-text light:bg-surface/70"
-                >
-                  <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
-                  {{ 'game.edit' | translate }}
-                </button>
-              </div>
-            }
+            <div class="hidden shrink-0 gap-2.5 md:flex">
+              <button
+                type="button"
+                (click)="editing.set(true)"
+                class="flex items-center gap-1.5 rounded-lg border border-border bg-bg/40 px-3.5 py-[9px] text-[13px] font-medium text-text-2 backdrop-blur-sm hover:border-border-strong hover:text-text light:bg-surface/70"
+              >
+                <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
+                {{ 'game.edit' | translate }}
+              </button>
+            </div>
           </div>
 
           <!-- Phones: compact meta lines beside the cover -->
@@ -304,7 +302,7 @@
       <!-- Runs -->
       <section class="md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
         <app-section-header collapseKey="game.runs" class="mb-3 md:mb-4" [label]="'game.runs' | translate">
-          @if (canEdit() && canAddRun()) {
+          @if (canAddRun()) {
             <button
               type="button"
               (click)="newRun()"
@@ -341,11 +339,11 @@
                 class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center"
               >
                 <p class="text-sm font-medium text-text-2">{{ 'game.noRuns' | translate }}</p>
-                @if (canEdit() && canAddRun()) {
+                @if (canAddRun()) {
                   <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
                     {{ 'game.firstRun' | translate }}
                   </button>
-                } @else if (!canAddRun()) {
+                } @else {
                   <p class="text-[13px] text-muted">{{ 'game.onlineNoRuns' | translate }}</p>
                 }
               </div>

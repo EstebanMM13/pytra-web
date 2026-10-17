@@ -35,4 +35,18 @@ describe('Navbar', () => {
     const items = [...el.querySelectorAll('header [role="menu"] [role="menuitem"]')].map((i) => i.textContent!.trim());
     expect(items).toEqual(['nav.profile', 'nav.steam', 'nav.logout']);
   });
+
+  it('keeps the "+" entry points in the demo, and they open the run form', () => {
+    const { fixture, el, launcher } = setup(true);
+    const addButtons = el.querySelectorAll<HTMLButtonElement>('[data-add-menu] > button');
+    // Web "+ Añadir" and the mobile tab bar "+".
+    expect(addButtons).toHaveLength(2);
+    addButtons[1].click();
+    fixture.detectChanges();
+    const runItem = [...el.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].find(
+      (b) => b.textContent!.trim() === 'nav.addRun',
+    );
+    runItem!.click();
+    expect(launcher.openNewRun).toHaveBeenCalled();
+  });
 });

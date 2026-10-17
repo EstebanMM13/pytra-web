@@ -6,6 +6,7 @@ import {
   ElementRef,
   afterNextRender,
   booleanAttribute,
+  computed,
   inject,
   input,
   output,
@@ -15,6 +16,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from './icons';
 import { TranslatePipe } from '@ngx-translate/core';
 import { closeOverlay, isTopOverlay, openOverlay } from './overlay-stack';
+import { DemoModeService } from '../../core/services/demo-mode.service';
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -24,6 +26,9 @@ const FOCUSABLE =
  * Mobile: full-screen sheet sliding up, header "Cancelar · title · Guardar".
  * Handles Escape, a Tab focus trap, body scroll lock and focus restore. The body is projected;
  * the save buttons emit `save` (the content owns validation and submission). `viewOnly` drops them.
+ * Read-only demo: the dialog opens normally with a notice, and save shows the demo toast instead of
+ * emitting (an inner form submitted with Enter is stopped too), so no dialog ever submits; writes
+ * outside dialogs are stopped by the auth interceptor.
  * The host moves to <body> once rendered: an ancestor with a transform, filter or backdrop-filter
  * (e.g. a `card-glass` card) would otherwise turn the fixed overlay into one clipped to that ancestor.
  */
@@ -56,7 +61,7 @@ const FOCUSABLE =
           } @else {
             <button
               type="button"
-              (click)="save.emit()"
+              (click)="onSave()"
               [disabled]="saving() || saveDisabled()"
               class="text-[15px] font-semibold disabled:opacity-50"
               [class]="danger() ? 'text-danger' : 'text-brand-lighter'"
@@ -80,6 +85,16 @@ const FOCUSABLE =
         </header>
 
         <div class="min-h-0 flex-1 overflow-y-auto px-5 py-[18px] pb-[calc(env(safe-area-inset-bottom)+24px)] md:px-[26px] md:py-6">
+          @if (demoNotice()) {
+            <p
+              class="mb-4 flex items-center gap-2 rounded-lg border border-gold-card-border bg-gold-tint px-3 py-2 text-xs text-gold-tint-fg"
+              role="note"
+              data-demo-notice
+            >
+              <svg [lucideIcon]="icons.eye" [size]="14" class="shrink-0" aria-hidden="true"></svg>
+              {{ 'demo.dialogNotice' | translate }}
+            </p>
+          }
           <ng-content />
         </div>
 
@@ -95,7 +110,7 @@ const FOCUSABLE =
             </button>
             <button
               type="button"
-              (click)="save.emit()"
+              (click)="onSave()"
               [disabled]="saving() || saveDisabled()"
               class="rounded-lg px-[18px] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
               [class]="danger() ? 'bg-danger-solid hover:opacity-90' : 'bg-brand hover:bg-brand-dark'"
@@ -125,6 +140,9 @@ export class ModalSheet {
   readonly save = output<void>();
   readonly closed = output<void>();
 
+  private readonly demoMode = inject(DemoModeService);
+  protected readonly demoNotice = computed(() => this.demoMode.isDemo() && !this.viewOnly());
+
   private readonly document = inject(DOCUMENT);
   private readonly panel = viewChild.required<ElementRef<HTMLElement>>('panel');
 
@@ -135,8 +153,20 @@ export class ModalSheet {
 
     const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
+    // Demo: a form inside the sheet submitted with Enter must stop like the save button does. A
+    // capture listener on the host runs before the form's own (ngSubmit) and keeps it from firing.
+    const onSubmit = (event: Event) => {
+      if (!this.viewOnly() && this.demoMode.isDemo()) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.demoMode.blockWrite();
+      }
+    };
+    host.addEventListener('submit', onSubmit, true);
+
     inject(DestroyRef).onDestroy(() => {
       // Angular also removes the host on destroy; this covers a host already moved to <body>.
+      host.removeEventListener('submit', onSubmit, true);
       host.remove();
       closeOverlay(this, body);
       previousFocus?.focus?.();
@@ -158,6 +188,12 @@ export class ModalSheet {
     if (!event.defaultPrevented && isTopOverlay(this)) {
       event.preventDefault();
       this.cancel();
+    }
+  }
+
+  protected onSave(): void {
+    if (!this.demoMode.blockWrite()) {
+      this.save.emit();
     }
   }
 

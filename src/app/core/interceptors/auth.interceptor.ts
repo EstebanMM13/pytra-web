@@ -1,10 +1,20 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
 import { DEMO_READ_ONLY, DemoModeService } from '../services/demo-mode.service';
 import { TokenStorageService } from '../services/token-storage.service';
+
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+/**
+ * What the API's demo filter rejects: any non-safe method, plus the data export (a GET, but it is
+ * rate limited per user and every demo visitor shares the same account).
+ */
+export function isBlockedInDemo(req: HttpRequest<unknown>): boolean {
+  return !SAFE_METHODS.has(req.method.toUpperCase()) || req.url.startsWith(`${API_BASE_URL}/users/me/export`);
+}
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenStorage = inject(TokenStorageService);
@@ -15,6 +25,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Public auth endpoints never need the Bearer token and must not trigger a logout.
   if (!token || !req.url.startsWith(API_BASE_URL) || req.url.startsWith(`${API_BASE_URL}/auth/`)) {
     return next(req);
+  }
+
+  // Read-only demo: never send the write. Answer with the same error the API would, so callers
+  // unwind exactly as they do for a server rejection (dialogs stay open, optimistic edits revert).
+  if (demoMode.isDemo() && isBlockedInDemo(req)) {
+    demoMode.notifyReadOnly();
+    return throwError(
+      () => new HttpErrorResponse({ status: 403, statusText: 'Forbidden', url: req.url, error: { message: DEMO_READ_ONLY } }),
+    );
   }
 
   return next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })).pipe(

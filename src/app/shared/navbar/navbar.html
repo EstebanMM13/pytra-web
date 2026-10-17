@@ -41,7 +41,6 @@
       <kbd class="ml-auto hidden font-mono text-[11px] lg:inline">{{ shortcutLabel }}</kbd>
     </button>
 
-    @if (!isDemo()) {
     <div class="relative" data-add-menu>
       <button
         type="button"
@@ -73,7 +72,6 @@
         </div>
       }
     </div>
-    }
 
     <a
       routerLink="/profile"
@@ -189,7 +187,6 @@
     <ng-container *ngTemplateOutlet="tabItem; context: { $implicit: tab }" />
   }
   <div class="relative flex justify-center" data-add-menu>
-    @if (!isDemo()) {
     <button
       type="button"
       (click)="addOpen.set(!addOpen())"
@@ -200,7 +197,6 @@
     >
       <svg [lucideIcon]="icons.plus" [size]="26" class="transition-transform" [class.rotate-45]="addOpen()"></svg>
     </button>
-    }
     @if (addOpen()) {
       <div
         role="menu"

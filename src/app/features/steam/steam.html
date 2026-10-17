@@ -64,7 +64,7 @@
             </div>
           </div>
 
-          @if (!confirmingUnlink() && !isDemo()) {
+          @if (!confirmingUnlink()) {
             <div class="flex shrink-0 items-center gap-2">
               <button
                 type="button"
@@ -119,7 +119,6 @@
         </span>
         <h2 class="text-[22px] font-semibold tracking-[-0.01em]">{{ 'steam.linkTitle' | translate }}</h2>
         <p class="text-[15px] leading-normal text-text-3">{{ 'steam.linkText' | translate }}</p>
-        @if (!isDemo()) {
         <button
           type="button"
           (click)="connect()"
@@ -128,7 +127,6 @@
         >
           {{ 'steam.connect' | translate }}
         </button>
-        }
         <p class="text-xs leading-normal text-muted">{{ 'steam.publicNote' | translate }}</p>
       </section>
     }

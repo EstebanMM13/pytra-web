@@ -1114,8 +1114,9 @@
     "banner": "Modo demo · solo lectura",
     "createAccount": "Crear cuenta",
     "exit": "Salir",
-    "readOnly": "En el modo demo no se pueden hacer cambios",
-    "bannerShort": "Demo · solo lectura"
+    "readOnly": "Modo demo: los cambios no se guardan",
+    "bannerShort": "Demo · solo lectura",
+    "dialogNotice": "Modo demo: puedes explorar, pero no se guardará nada"
   },
   "platformFamily": {
     "PC": "PC",

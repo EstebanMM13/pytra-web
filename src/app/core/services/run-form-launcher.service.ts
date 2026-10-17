@@ -1,7 +1,6 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Experience } from '../models/experience.model';
-import { DemoModeService } from './demo-mode.service';
 
 /** Optional values to prefill a new run with (e.g. hours and platform from a Steam import). */
 export interface RunPrefill {
@@ -36,23 +35,16 @@ export interface RunSaved {
 export class RunFormLauncher {
   private readonly requestState = signal<RunFormRequest | null>(null);
   private readonly savedSubject = new Subject<RunSaved>();
-  private readonly demoMode = inject(DemoModeService);
 
   readonly request = this.requestState.asReadonly();
   readonly saved$: Observable<RunSaved> = this.savedSubject.asObservable();
 
-  // The read-only demo never opens the form: it would only end in a rejected save.
+  // The read-only demo opens the form too (to explore it); its save is stopped by ModalSheet.
   openNewRun(gameId?: number, prefill?: RunPrefill): void {
-    if (this.demoMode.blockWrite()) {
-      return;
-    }
     this.requestState.set({ mode: 'create', gameId, prefill, navigateOnCreate: gameId === undefined });
   }
 
   openEditRun(experience: Experience): void {
-    if (this.demoMode.blockWrite()) {
-      return;
-    }
     this.requestState.set({ mode: 'edit', experience });
   }
 

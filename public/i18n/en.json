@@ -1114,8 +1114,9 @@
     "banner": "Demo mode · read-only",
     "createAccount": "Create account",
     "exit": "Exit",
-    "readOnly": "Changes are not allowed in demo mode",
-    "bannerShort": "Demo · read-only"
+    "readOnly": "Demo mode: changes are not saved",
+    "bannerShort": "Demo · read-only",
+    "dialogNotice": "Demo mode: feel free to explore, but nothing will be saved"
   },
   "platformFamily": {
     "PC": "PC",

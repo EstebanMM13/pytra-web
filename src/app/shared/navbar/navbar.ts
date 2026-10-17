@@ -60,7 +60,7 @@ export class Navbar {
   private readonly userService = inject(UserService);
   protected readonly displayName = this.userService.displayName;
   protected readonly avatar = computed(() => this.userService.currentUser()?.avatar ?? null);
-  /** Read-only demo: no "+" entry points and a banner with a way out. */
+  /** Read-only demo: a banner with a way out (every entry point stays, nothing is saved). */
   protected readonly isDemo = this.authService.isDemo;
 
   protected readonly webTabs = WEB_TABS;
