@@ -115,6 +115,19 @@ describe('UserDataCache (through the cached services)', () => {
     http.expectOne(gamesUrl).flush(games('Hades'));
   });
 
+  it('drops a background refresh that started before a write', () => {
+    read();
+    http.expectOne(gamesUrl).flush(games('Hades'));
+
+    const revisit = read();
+    const refresh = http.expectOne(gamesUrl);
+    gameService.create({ name: 'Celeste' } as GameRequest).subscribe();
+    http.expectOne({ method: 'POST', url: gamesUrl }).flush(games('Celeste')[0]);
+    refresh.flush(games('Old'));
+
+    expect(revisit).toEqual([games('Hades')]);
+  });
+
   it('invalidates every cached resource, including when a run is saved from the form', () => {
     const stats = TestBed.inject(StatsService);
     stats.getSummary().subscribe();

@@ -41,10 +41,12 @@ export class CachedResource<T> {
         return this.fetch(token);
       }
       const stale = cached.value;
+      const generation = this.generation;
       return concat(
         of(stale),
         this.fetch(token).pipe(
-          filter((fresh) => !sameData(fresh, stale)),
+          // A refresh that started before a write must not overwrite what the reload after it shows.
+          filter((fresh) => generation === this.generation && !sameData(fresh, stale)),
           catchError(() => EMPTY),
         ),
       );
