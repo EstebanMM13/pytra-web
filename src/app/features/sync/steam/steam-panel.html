@@ -281,9 +281,11 @@
 }
 
 @if (confirmTarget(); as target) {
-  <app-steam-confirm-dialog
+  <app-pending-confirm-dialog
+    source="steam"
     [game]="target.game"
     [mode]="target.mode"
+    [confirmWith]="confirmPending"
     (confirmed)="onConfirmed($event)"
     (closed)="confirmTarget.set(null)"
   />

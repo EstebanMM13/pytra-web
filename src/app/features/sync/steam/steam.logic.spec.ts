@@ -1,15 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Experience } from '../../../core/models/experience.model';
 import { SteamStatus } from '../../../core/models/steam.model';
-import {
-  STEAM_RUN_LABEL,
-  applyPendingChange,
-  confirmErrorKey,
-  findSteamRun,
-  lookup,
-  maskSteamId,
-  steamHours,
-} from './steam.logic';
+import { applyPendingChange, confirmErrorKey, lookup } from '../sync.logic';
+import { STEAM_RUN_LABEL, findSteamRun, maskSteamId, steamHours } from './steam.logic';
 
 const run = (id: number, runLabel: string) => ({ id, runLabel }) as Experience;
 

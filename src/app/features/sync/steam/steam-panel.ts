@@ -19,18 +19,9 @@ import { Skeleton } from '../../../shared/ui/skeleton';
 import { GameCover } from '../../../shared/ui/game-cover';
 import { PlatformCard } from '../../../shared/ui/platform-card';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
-import { SteamConfirmDialog, SteamConfirmMode } from './steam-confirm-dialog';
-import {
-  LINK_ERROR_KEYS,
-  PendingChange,
-  SYNC_ERROR_KEYS,
-  apiCode,
-  applyPendingChange,
-  findSteamRun,
-  lookup,
-  maskSteamId,
-  steamHours,
-} from './steam.logic';
+import { PendingConfirmDialog, PendingConfirmFn, PendingConfirmMode } from '../shared/pending-confirm-dialog';
+import { PendingChange, apiCode, applyPendingChange, lookup } from '../sync.logic';
+import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRun, maskSteamId, steamHours } from './steam.logic';
 
 @Component({
   selector: 'app-steam-panel',
@@ -40,7 +31,7 @@ import {
     TranslatePluralPipe,
     SectionHeader,
     Skeleton,
-    SteamConfirmDialog,
+    PendingConfirmDialog,
     GameCover,
     LucideDynamicIcon,
     PlatformCard,
@@ -79,7 +70,7 @@ export class SteamPanel {
   readonly noticeKey = signal<string | null>(null);
   readonly showIgnored = signal(false);
   /** Pending game under review in the confirm dialog, and what happens after confirming. */
-  readonly confirmTarget = signal<{ game: Game; mode: SteamConfirmMode } | null>(null);
+  readonly confirmTarget = signal<{ game: Game; mode: PendingConfirmMode } | null>(null);
 
   protected readonly maskedSteamId = computed(() => maskSteamId(this.status()?.steamId));
   protected readonly avatarInitial = computed(() => {
@@ -95,6 +86,8 @@ export class SteamPanel {
   protected readonly linkedGamesCount = computed(() => this.status()?.linkedGamesCount ?? null);
 
   protected readonly steamHours = steamHours;
+  protected readonly confirmPending: PendingConfirmFn = (gameId, request) =>
+    this.steamService.confirmPending(gameId, request);
 
   protected lastSession(game: SteamPendingGame): string | null {
     return formatRelativeTime(game.lastPlayedAt, this.locale());
@@ -213,7 +206,7 @@ export class SteamPanel {
     });
   }
 
-  openConfirm(game: Game, mode: SteamConfirmMode): void {
+  openConfirm(game: Game, mode: PendingConfirmMode): void {
     this.errorKey.set(null);
     this.confirmTarget.set({ game, mode });
   }

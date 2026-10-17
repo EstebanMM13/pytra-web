@@ -2,46 +2,50 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
 import { GenreNamePipe } from '../../../shared/pipes/genre-name.pipe';
-import { Game, GameCategory } from '../../../core/models/game.model';
+import { Game, GameCategory, GameRequest } from '../../../core/models/game.model';
 import { Genre } from '../../../core/models/genre.model';
 import { Saga } from '../../../core/models/saga.model';
 import { GenreService } from '../../../core/services/genre.service';
 import { SagaService } from '../../../core/services/saga.service';
-import { SteamService } from '../../../core/services/steam.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
-import { confirmErrorKey } from './steam.logic';
+import { SyncSource, confirmErrorKey } from '../sync.logic';
 
 /** `confirm`: only add the game to the library. `run`: the caller opens a run right after. */
-export type SteamConfirmMode = 'confirm' | 'run';
+export type PendingConfirmMode = 'confirm' | 'run';
+
+/** Confirms a pending game on the integration that imported it (PUT /pending/{id}/confirm). */
+export type PendingConfirmFn = (gameId: number, request: GameRequest) => Observable<Game>;
 
 /**
- * Compact review step for a Steam game pending review: name, category (required) and optional
- * saga/genres, then PUT /pending/{id}/confirm. Emits the confirmed game.
+ * Compact review step for a game pending review (Steam or PSN): name, category (required) and
+ * optional saga/genres, then `confirmWith`. Emits the confirmed game. Copy comes from the
+ * `<source>.confirmDialog.*` keys; the form labels are shared.
  */
 @Component({
-  selector: 'app-steam-confirm-dialog',
+  selector: 'app-pending-confirm-dialog',
   imports: [ReactiveFormsModule, TranslatePipe, GenreNamePipe, ModalSheet, Segmented],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-modal-sheet
-      [title]="'steam.confirmDialog.title' | translate"
-      [saveLabel]="(mode() === 'run' ? 'steam.confirmDialog.saveAndRun' : 'steam.confirmDialog.save') | translate"
+      [title]="source() + '.confirmDialog.title' | translate"
+      [saveLabel]="source() + (mode() === 'run' ? '.confirmDialog.saveAndRun' : '.confirmDialog.save') | translate"
       [saving]="saving()"
       (save)="submit()"
       (closed)="closed.emit()"
     >
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4 md:gap-[18px]">
         <p class="text-[13px] leading-relaxed text-muted">
-          {{ (mode() === 'run' ? 'steam.confirmDialog.introRun' : 'steam.confirmDialog.intro') | translate }}
+          {{ source() + (mode() === 'run' ? '.confirmDialog.introRun' : '.confirmDialog.intro') | translate }}
         </p>
 
         <div class="flex flex-col gap-2">
-          <label for="steam-confirm-name" class="text-[13px] text-text-3">{{ 'steam.form.name' | translate }}</label>
+          <label for="pending-confirm-name" class="text-[13px] text-text-3">{{ 'steam.form.name' | translate }}</label>
           <input
-            id="steam-confirm-name"
+            id="pending-confirm-name"
             data-autofocus
             type="text"
             formControlName="name"
@@ -54,10 +58,10 @@ export type SteamConfirmMode = 'confirm' | 'run';
         </div>
 
         <div class="flex flex-col gap-2">
-          <span id="steam-confirm-category" class="text-[13px] text-text-3">{{ 'steam.form.category' | translate }}</span>
+          <span id="pending-confirm-category" class="text-[13px] text-text-3">{{ 'steam.form.category' | translate }}</span>
           <app-segmented
             stretch
-            aria-labelledby="steam-confirm-category"
+            aria-labelledby="pending-confirm-category"
             [options]="categoryOptions"
             [value]="category()"
             (valueChange)="category.set($event)"
@@ -66,9 +70,9 @@ export type SteamConfirmMode = 'confirm' | 'run';
         </div>
 
         <div class="flex flex-col gap-2">
-          <label for="steam-confirm-saga" class="text-[13px] text-text-3">{{ 'steam.form.saga' | translate }}</label>
+          <label for="pending-confirm-saga" class="text-[13px] text-text-3">{{ 'steam.form.saga' | translate }}</label>
           <select
-            id="steam-confirm-saga"
+            id="pending-confirm-saga"
             formControlName="sagaId"
             class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-[16px] text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
           >
@@ -81,8 +85,8 @@ export type SteamConfirmMode = 'confirm' | 'run';
 
         @if (genres().length > 0) {
           <div class="flex flex-col gap-2">
-            <span id="steam-confirm-genres" class="text-[13px] text-text-3">{{ 'steam.form.genres' | translate }}</span>
-            <div class="scroll-list -my-1 -ml-1 flex max-h-[192px] flex-wrap gap-2 py-1 pl-1" role="group" aria-labelledby="steam-confirm-genres">
+            <span id="pending-confirm-genres" class="text-[13px] text-text-3">{{ 'steam.form.genres' | translate }}</span>
+            <div class="scroll-list -my-1 -ml-1 flex max-h-[192px] flex-wrap gap-2 py-1 pl-1" role="group" aria-labelledby="pending-confirm-genres">
               @for (genre of genres(); track genre.id) {
                 <button
                   type="button"
@@ -105,14 +109,15 @@ export type SteamConfirmMode = 'confirm' | 'run';
     </app-modal-sheet>
   `,
 })
-export class SteamConfirmDialog implements OnInit {
+export class PendingConfirmDialog implements OnInit {
+  readonly source = input.required<SyncSource>();
   readonly game = input.required<Game>();
-  readonly mode = input<SteamConfirmMode>('confirm');
+  readonly mode = input<PendingConfirmMode>('confirm');
+  readonly confirmWith = input.required<PendingConfirmFn>();
   readonly confirmed = output<Game>();
   readonly closed = output<void>();
 
   private readonly fb = inject(NonNullableFormBuilder);
-  private readonly steamService = inject(SteamService);
   private readonly sagaService = inject(SagaService);
   private readonly genreService = inject(GenreService);
   private readonly toast = inject(ToastService);
@@ -168,24 +173,22 @@ export class SteamConfirmDialog implements OnInit {
     const game = this.game();
     const raw = this.form.getRawValue();
     this.saving.set(true);
-    this.steamService
-      .confirmPending(game.id, {
-        name: raw.name.trim(),
-        // Fields this step does not edit: send what the import already has.
-        developer: game.developer,
-        publisher: game.publisher,
-        releaseDate: game.releaseDate,
-        coverImageUrl: game.coverImageUrl,
-        category: this.category(),
-        sagaId: raw.sagaId,
-        genreIds: [...this.selectedGenreIds()],
-      })
-      .subscribe({
-        next: (confirmed) => this.confirmed.emit(confirmed),
-        error: (err: HttpErrorResponse) => {
-          this.saving.set(false);
-          this.toast.error(this.translate.instant(confirmErrorKey(err)));
-        },
-      });
+    this.confirmWith()(game.id, {
+      name: raw.name.trim(),
+      // Fields this step does not edit: send what the import already has.
+      developer: game.developer,
+      publisher: game.publisher,
+      releaseDate: game.releaseDate,
+      coverImageUrl: game.coverImageUrl,
+      category: this.category(),
+      sagaId: raw.sagaId,
+      genreIds: [...this.selectedGenreIds()],
+    }).subscribe({
+      next: (confirmed) => this.confirmed.emit(confirmed),
+      error: (err: HttpErrorResponse) => {
+        this.saving.set(false);
+        this.toast.error(this.translate.instant(confirmErrorKey(err)));
+      },
+    });
   }
 }
