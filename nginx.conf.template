@@ -46,6 +46,17 @@ server {
         add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
     }
 
+    # Older alias of the safety worker: not hashed, so it must not get the 1y cache of *.js below.
+    location = /worker-basic.min.js {
+        try_files $uri =404;
+        add_header Cache-Control "no-cache";
+        add_header Content-Security-Policy $csp_worker always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+    }
+
     location = /ngsw.json {
         try_files $uri =404;
         add_header Cache-Control "no-cache";
@@ -60,6 +71,43 @@ server {
         try_files $uri =404;
         default_type application/manifest+json;
         add_header Cache-Control "no-cache";
+        add_header Content-Security-Policy $csp always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+    }
+
+    # Fonts referenced from the CSS are emitted to /media/ with a content hash in the name.
+    location ^~ /media/ {
+        try_files $uri =404;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header Content-Security-Policy $csp always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+    }
+
+    # Unhashed but rarely changing images: a day is fresh enough, and a changed file is picked up
+    # within that window (the service worker, when installed, revalidates them per deploy anyway).
+    location ~ ^/(?:avatars|brand|icons)/ {
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=86400";
+        add_header Content-Security-Policy $csp always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+    }
+
+    # Translations are not hashed and a deploy can add keys the new bundle needs, so keep the
+    # window short: an hour saves the revalidation round trip on the startup critical path while
+    # bounding how long a stale file can show raw keys after a release.
+    location ^~ /i18n/ {
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=3600";
         add_header Content-Security-Policy $csp always;
         add_header X-Content-Type-Options "nosniff" always;
         add_header Referrer-Policy "strict-origin-when-cross-origin" always;
