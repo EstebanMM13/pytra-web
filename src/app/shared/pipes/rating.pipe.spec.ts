@@ -1,16 +1,26 @@
+import { TestBed } from '@angular/core/testing';
+import { PreferencesService } from '../../core/services/preferences.service';
 import { RatingPipe } from './rating.pipe';
 
 describe('RatingPipe', () => {
-  const pipe = new RatingPipe();
+  let pipe: RatingPipe;
+  let preferences: PreferencesService;
 
-  it('keeps up to two decimals with a dot separator', () => {
-    expect(pipe.transform(9.25)).toBe('9.25');
-    expect(pipe.transform(8.083333)).toBe('8.08');
+  beforeEach(() => {
+    localStorage.clear();
+    preferences = TestBed.inject(PreferencesService);
+    pipe = TestBed.runInInjectionContext(() => new RatingPipe());
   });
 
-  it('drops trailing zeros', () => {
-    expect(pipe.transform(8)).toBe('8');
-    expect(pipe.transform(7.5)).toBe('7.5');
+  afterEach(() => localStorage.clear());
+
+  it('uses the fixed decimals of the precision preference', () => {
+    preferences.setRatingPrecision('hundredths');
+    expect(pipe.transform(9.5)).toBe('9.50');
+    preferences.setRatingPrecision('half');
+    expect(pipe.transform(9.25)).toBe('9.3');
+    preferences.setRatingPrecision('integer');
+    expect(pipe.transform(9.25)).toBe('9');
   });
 
   it('renders missing values as an em dash', () => {

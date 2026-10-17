@@ -15,6 +15,8 @@ import { InstallPromptService } from '../../core/services/install-prompt.service
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
+import { formatRating, ratingDecimals } from '../../shared/utils/rating-format';
+import { PreferencesService } from '../../core/services/preferences.service';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
 import { translatePlural } from '../../shared/utils/plural';
@@ -84,6 +86,8 @@ export class Dashboard {
   private readonly gameService = inject(GameService);
   private readonly sagaService = inject(SagaService);
   protected readonly displayName = inject(UserService).displayName;
+  private readonly preferences = inject(PreferencesService);
+  private readonly ratingDecimals = computed(() => ratingDecimals(this.preferences.ratingPrecision()));
 
   protected readonly statIcons = {
     games: ICONS.gamepad2,
@@ -139,7 +143,7 @@ export class Dashboard {
       today: new Date(),
     });
     const params: Record<string, string | number> = { ...t.params };
-    if (typeof params['rating'] === 'number') params['rating'] = new RatingPipe().transform(params['rating']);
+    if (typeof params['rating'] === 'number') params['rating'] = formatRating(params['rating'], this.ratingDecimals());
     if (typeof params['hours'] === 'number') params['hours'] = new HoursPipe().transform(params['hours']);
     const count = typeof params['count'] === 'number' ? params['count'] : null;
     return { key: `dashboard.tagline.${t.key}`, params, count };
@@ -185,7 +189,6 @@ export class Dashboard {
     if (years === null) {
       return null;
     }
-    const ratingPipe = new RatingPipe();
     const hoursPipe = new HoursPipe();
     return [...years]
       .sort((a, b) => a.year - b.year)
@@ -194,7 +197,7 @@ export class Dashboard {
         value: y.totalHours,
         label: `'${String(y.year).slice(-2)}`,
         fullLabel: String(y.year),
-        topLabel: y.averageRating == null ? null : ratingPipe.transform(y.averageRating),
+        topLabel: y.averageRating == null ? null : formatRating(y.averageRating, this.ratingDecimals()),
         // Whole hours keep the per-year label on one line under narrow bars.
         subLabel: `${Math.round(y.totalHours)}h`,
         title: `${y.year}: ${Math.round(y.totalHours)} h`,

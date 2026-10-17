@@ -1,20 +1,16 @@
-import { Pipe, PipeTransform } from '@angular/core';
-
-const RATING_FORMAT = new Intl.NumberFormat('en-US', {
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
-  useGrouping: false,
-});
+import { inject, Pipe, PipeTransform } from '@angular/core';
+import { PreferencesService } from '../../core/services/preferences.service';
+import { formatRating, ratingDecimals } from '../utils/rating-format';
 
 /**
- * Formats a 0–10 rating for display, e.g. 9.25 -> "9.25", 8 -> "8".
- * Missing ratings render as an em dash. Pair with `font-mono text-gold`.
+ * Formats a 0–10 rating with the decimals of the user's precision preference (see `formatRating`).
+ * Impure so a preference change re-renders every rating on screen. Pair with `font-mono`.
  */
-@Pipe({ name: 'rating' })
+@Pipe({ name: 'rating', pure: false })
 export class RatingPipe implements PipeTransform {
+  private readonly preferences = inject(PreferencesService);
+
   transform(value: number | null | undefined): string {
-    return value === null || value === undefined || Number.isNaN(value)
-      ? '—'
-      : RATING_FORMAT.format(value);
+    return formatRating(value, ratingDecimals(this.preferences.ratingPrecision()));
   }
 }
