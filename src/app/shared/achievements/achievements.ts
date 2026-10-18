@@ -95,7 +95,9 @@ type Def = [id: string, category: AchievementCategory, tier: AchievementTier, ic
  * summary, by-year stats and sagas). Ordered by category, easier first; callers sort
  * unlocked-first for display.
  */
-export function computeAchievements({ games, summary, sagas, years }: AchievementInput): Achievement[] {
+export function computeAchievements({ games: allGames, summary, sagas, years }: AchievementInput): Achievement[] {
+  // Games pending review (imported, not confirmed yet) are not in the library.
+  const games = allGames.filter((g) => g.reviewStatus !== 'PENDING_REVIEW');
   const played = games.filter((g) => (g.experienceCount ?? 0) > 0);
   const platinums = summary?.totalPlatinums ?? games.filter((g) => g.hasPlatinum).length;
   const runs = summary?.totalExperiences ?? games.reduce((n, g) => n + (g.experienceCount ?? 0), 0);

@@ -122,6 +122,17 @@ describe('computeAchievements', () => {
     expect(a['collector25'].current).toBe(2);
   });
 
+  it('ignores games pending review', () => {
+    const games = [
+      game(1, { platformRefs: [PC] }),
+      game(2, { platformRefs: [PS5, SWITCH], totalHours: 500, reviewStatus: 'PENDING_REVIEW' }),
+    ];
+    const a = byId(computeAchievements({ games, summary: null, sagas: [] }));
+    expect(a['collector25'].current).toBe(1);
+    expect(a['platforms'].current).toBe(1);
+    expect(a['marathon'].unlocked).toBe(false);
+  });
+
   it('completes a saga only when every game (>= 2) has runs', () => {
     const sagas = [
       { id: 1, name: 'Solo', updatedAt: '' },
