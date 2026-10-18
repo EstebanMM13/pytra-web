@@ -53,6 +53,15 @@ export class CachedResource<T> {
     });
   }
 
+  /**
+   * The current session's cached value, without any request; null when nothing is cached. For
+   * seeding a screen from data another one already loaded (then refresh it the usual way).
+   */
+  peek(): T | null {
+    const token = this.currentToken();
+    return this.entry?.token === token ? this.entry.value : null;
+  }
+
   /** Drops the cached value and any in-flight request (the data changed on the server). */
   invalidate(): void {
     this.generation++;

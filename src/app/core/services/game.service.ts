@@ -17,6 +17,14 @@ export class GameService {
     return this.all.get();
   }
 
+  /**
+   * The game as the cached library list has it (same payload as `findById`), or null when the list
+   * is not cached. Lets a detail screen render at once, then refresh with `findById`.
+   */
+  cachedById(id: number): Game | null {
+    return this.all.peek()?.find((game) => game.id === id) ?? null;
+  }
+
   findById(id: number): Observable<Game> {
     return this.http.get<Game>(`${this.baseUrl}/${id}`);
   }

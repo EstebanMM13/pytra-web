@@ -132,7 +132,8 @@ export class ExperienceDetail {
       },
     });
     if (this.game()?.id !== gameId) {
-      this.game.set(null);
+      // Seeded from the cached library list when available (instant hero), then refreshed.
+      this.game.set(this.gameService.cachedById(gameId));
       this.gameService.findById(gameId).subscribe({
         next: (game) => {
           if (gameId === this.gameId()) this.game.set(game);

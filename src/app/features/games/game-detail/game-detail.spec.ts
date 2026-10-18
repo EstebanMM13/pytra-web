@@ -48,7 +48,7 @@ describe('GameDetail', () => {
         provideRouter([]),
         provideTranslateService(),
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: String(g.id) })) } },
-        { provide: GameService, useValue: { findById: () => of(g), findAll: () => of([g]) } },
+        { provide: GameService, useValue: { cachedById: () => null, findById: () => of(g), findAll: () => of([g]) } },
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
         {
           provide: OnlinePlaytimeService,
@@ -131,7 +131,7 @@ describe('GameDetail stats', () => {
         provideRouter([]),
         provideTranslateService(),
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '7' })) } },
-        { provide: GameService, useValue: { findById: () => of(game(category)), findAll: () => of([]) } },
+        { provide: GameService, useValue: { cachedById: () => null, findById: () => of(game(category)), findAll: () => of([]) } },
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
         {
           provide: OnlinePlaytimeService,
@@ -185,7 +185,7 @@ describe('GameDetail stats', () => {
 });
 
 describe('GameDetail loading', () => {
-  function setup() {
+  function setup(cached: Game | null = null) {
     const game$ = new Subject<Game>();
     const findByGame = vi.fn(() => of({ gameId: 7, totalHours: 20, generalRating: null, platforms: [] }));
     const loadPlatforms = vi.fn(() => of([]));
@@ -195,7 +195,7 @@ describe('GameDetail loading', () => {
         provideRouter([]),
         provideTranslateService(),
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '7' })) } },
-        { provide: GameService, useValue: { findById: () => game$, findAll: () => of([]) } },
+        { provide: GameService, useValue: { cachedById: () => cached, findById: () => game$, findAll: () => of([]) } },
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
         { provide: OnlinePlaytimeService, useValue: { findByGame } },
         { provide: PlatformService, useValue: { platforms: signal([]), load: loadPlatforms } },
@@ -219,6 +219,31 @@ describe('GameDetail loading', () => {
     fixture.detectChanges();
     expect(findByGame).toHaveBeenCalledTimes(1);
     expect(fixture.nativeElement.textContent).toContain('20');
+  });
+
+  it('renders the cached game at once, then refreshes it without reloading the online card', () => {
+    const { fixture, game$, findByGame } = setup({ ...game('HYBRID'), name: 'Cached Name' });
+    expect(fixture.nativeElement.textContent).toContain('Cached Name');
+    expect(findByGame).toHaveBeenCalledTimes(1);
+
+    game$.next({ ...game('HYBRID'), name: 'Fresh Name' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Fresh Name');
+    expect(findByGame).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the cached game when the refresh fails, but drops it when the game is gone', () => {
+    const { fixture, game$ } = setup(game('SINGLEPLAYER'));
+    game$.error(new HttpErrorResponse({ status: 500 }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.game()).not.toBeNull();
+    TestBed.resetTestingModule();
+
+    const gone = setup(game('SINGLEPLAYER'));
+    gone.game$.error(new HttpErrorResponse({ status: 404 }));
+    gone.fixture.detectChanges();
+    expect(gone.fixture.componentInstance.game()).toBeNull();
+    expect(gone.fixture.componentInstance.loadError()).toBe(true);
   });
 
   it('ignores the prefetched online playtime of a SINGLEPLAYER game', () => {

@@ -182,4 +182,42 @@ describe('UserDataCache (through the cached services)', () => {
     expect(read()).toEqual([]);
     http.expectOne(gamesUrl).flush(games('Ana game'));
   });
+
+  it('peeks the cached game for a detail seed, never for another session', () => {
+    expect(gameService.cachedById(1)).toBeNull();
+    read();
+    http.expectOne(gamesUrl).flush(games('Hades'));
+    expect(gameService.cachedById(1)?.name).toBe('Hades');
+    expect(gameService.cachedById(99)).toBeNull();
+
+    tokens.setToken(tokenFor('bob'));
+    expect(gameService.cachedById(1)).toBeNull();
+  });
+
+  it('caches the dashboard stats per limit and drops them on a write', () => {
+    const stats = TestBed.inject(StatsService);
+    const topUrl = `${API_BASE_URL}/stats/top-rated`;
+    stats.getTopRated(5).subscribe();
+    http.expectOne(`${topUrl}?limit=5`).flush([]);
+    stats.getTopRated(50).subscribe();
+    http.expectOne(`${topUrl}?limit=50`).flush([]);
+
+    const revisit: unknown[] = [];
+    stats.getTopRated(5).subscribe((value) => revisit.push(value));
+    expect(revisit).toEqual([[]]);
+    http.expectOne(`${topUrl}?limit=5`).flush([]);
+
+    const yearsUrl = `${API_BASE_URL}/stats/years`;
+    stats.getYears().subscribe();
+    http.expectOne(yearsUrl).flush([2026]);
+
+    gameService.delete(1).subscribe();
+    http.expectOne(`${gamesUrl}/1`).flush(null);
+
+    const afterWrite: unknown[] = [];
+    stats.getYears().subscribe((value) => afterWrite.push(value));
+    expect(afterWrite).toEqual([]);
+    http.expectOne(yearsUrl).flush([2025]);
+    expect(afterWrite).toEqual([[2025]]);
+  });
 });

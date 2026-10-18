@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, shareReplay } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -285,16 +286,32 @@ export class GameDetail {
     playtime$.subscribe({ error: () => {} });
     this.onlinePrefetch = { id, playtime$ };
 
+    // Stale-while-revalidate: coming from the library or the dashboard the game is already in the
+    // cached list, so the hero renders at once; findById then refreshes it.
+    const seeded = this.gameService.cachedById(id);
+    if (seeded) {
+      this.game.set(seeded);
+      this.loadOnlinePlaytime(seeded);
+      this.loadSaga(seeded);
+    }
+
     // Every handler checks the id: a late answer for the previous game must not overwrite this one.
     this.gameService.findById(id).subscribe({
       next: (game) => {
         if (id !== this.gameId()) return;
+        const previous = this.game();
         this.game.set(game);
-        this.loadOnlinePlaytime(game);
-        this.loadSaga(game);
+        // After a seed, only reload what the fresh game changes (the online card keeps its edits).
+        if (!previous || previous.category !== game.category) this.loadOnlinePlaytime(game);
+        if (!previous || previous.sagaId !== game.sagaId) this.loadSaga(game);
       },
-      error: () => {
-        if (id === this.gameId()) this.loadError.set(true);
+      error: (error: unknown) => {
+        if (id !== this.gameId()) return;
+        // A seeded game stays on a failed refresh, unless the game no longer exists.
+        if (!this.game() || (error instanceof HttpErrorResponse && error.status === 404)) {
+          this.game.set(null);
+          this.loadError.set(true);
+        }
       },
     });
     this.loadRuns();
