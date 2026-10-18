@@ -28,7 +28,7 @@ import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { todayIso } from '../../../shared/utils/run-dates';
-import { formatDecimalInput } from '../../../shared/utils/decimal-input';
+import { formatDecimalInput, formatHoursInput } from '../../../shared/utils/decimal-input';
 import { toastApiError } from '../../../shared/utils/api-error';
 import {
   RUN_STATUSES,
@@ -204,7 +204,7 @@ export class RunForm implements OnInit {
       this.initEdit(request.experience);
     } else {
       this.form.patchValue({
-        hours: formatDecimalInput(request.prefill?.hours ?? null, this.lang()),
+        hours: formatHoursInput(request.prefill?.hours ?? null, this.lang()),
       });
       if (request.gameId !== undefined) {
         this.lockToGame(request.gameId, true);
@@ -228,7 +228,7 @@ export class RunForm implements OnInit {
       platformId: experience.platformId,
       startDate: experience.startDate ?? '',
       endDate: experience.endDate ?? '',
-      hours: formatDecimalInput(experience.hours, this.lang()),
+      hours: formatHoursInput(experience.hours, this.lang()),
       rating: formatDecimalInput(experience.rating, this.lang()),
       summary: experience.summary ?? '',
       platinum: experience.platinum,

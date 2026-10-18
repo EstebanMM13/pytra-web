@@ -32,6 +32,17 @@ export function formatDecimalInput(value: number | null | undefined, lang: strin
 }
 
 /**
+ * Text for an hours input: rounded to at most two decimals with trailing zeros trimmed, so imported
+ * minute counts read "0,32" instead of "0,316666666666". Two decimals is what the hours fields accept.
+ */
+export function formatHoursInput(value: number | null | undefined, lang: string): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '';
+  }
+  return formatDecimalInput(Math.round(value * 100) / 100, lang);
+}
+
+/**
  * Validator for a text decimal input: empty is valid (combine with `required` if needed),
  * unparsable text and values rejected by `isValid` produce `{ [errorKey]: true }`.
  */

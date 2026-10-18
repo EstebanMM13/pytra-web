@@ -32,7 +32,7 @@ import { RunRow } from '../../../shared/ui/run-row';
 import { GameCover } from '../../../shared/ui/game-cover';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
-import { decimalValidator, formatDecimalInput, parseDecimal } from '../../../shared/utils/decimal-input';
+import { decimalValidator, formatDecimalInput, formatHoursInput, parseDecimal } from '../../../shared/utils/decimal-input';
 import { StatCard } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { formatDayMonthYear, formatRunPeriod } from '../../../shared/utils/run-dates';
@@ -341,7 +341,7 @@ export class GameDetail {
         this.onlinePlatforms.set(playtime.platforms ?? []);
         this.onlineLoadState.set('loaded');
         this.onlinePlaytimeForm.setValue({
-          totalHours: formatDecimalInput(playtime.totalHours, lang),
+          totalHours: formatHoursInput(playtime.totalHours, lang),
           generalRating: formatDecimalInput(playtime.generalRating, lang),
         });
       },

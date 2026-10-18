@@ -1,5 +1,5 @@
 import { FormControl } from '@angular/forms';
-import { decimalValidator, formatDecimalInput, parseDecimal } from './decimal-input';
+import { decimalValidator, formatDecimalInput, formatHoursInput, parseDecimal } from './decimal-input';
 
 describe('parseDecimal', () => {
   it('accepts comma and dot separators', () => {
@@ -30,6 +30,21 @@ describe('formatDecimalInput', () => {
     expect(formatDecimalInput(9.25, 'es')).toBe('9,25');
     expect(formatDecimalInput(9.25, 'en')).toBe('9.25');
     expect(formatDecimalInput(null, 'es')).toBe('');
+  });
+});
+
+describe('formatHoursInput', () => {
+  it('rounds to two decimals and trims trailing zeros', () => {
+    expect(formatHoursInput(19 / 60, 'es')).toBe('0,32');
+    expect(formatHoursInput(19 / 60, 'en')).toBe('0.32');
+    expect(formatHoursInput(12.5, 'es')).toBe('12,5');
+    expect(formatHoursInput(2.999, 'en')).toBe('3');
+    expect(formatHoursInput(40, 'es')).toBe('40');
+  });
+
+  it('returns an empty string for missing values', () => {
+    expect(formatHoursInput(null, 'es')).toBe('');
+    expect(formatHoursInput(undefined, 'en')).toBe('');
   });
 });
 
