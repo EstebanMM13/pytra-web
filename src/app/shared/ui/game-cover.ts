@@ -18,18 +18,19 @@ import { canObserveReveal, observeReveal } from '../utils/reveal-observer';
 export type GameCoverSize = 'xs' | 'sm' | 'md' | 'lg' | 'hero' | 'fill';
 
 /**
- * Box size per variant: portrait box art at IGDB's cover ratio (264x374, ~0.706), so IGDB covers fit
- * uncropped and Steam's 2:3 capsules lose only a sliver. Fixed variants keep explicit heights (a
+ * Box size per variant: portrait box art at 3:4, the ratio real IGDB covers come in (`t_cover_big`
+ * is a 264x374 *fit*, and almost every cover is served at 264x352), so they fit uncropped; Steam's
+ * 2:3 capsules lose a strip at the bottom. Fixed variants keep explicit heights (a
  * stretched flex item would ignore `aspect-ratio`) with widths derived from the ratio; `hero` and
  * `fill` take a width and let the ratio set the height.
  */
 const SIZE_CLASS: Record<GameCoverSize, string> = {
-  xs: 'h-9 w-[1.59rem] rounded-[3px]',
-  sm: 'h-12 w-[2.12rem] rounded',
-  md: 'h-[84px] w-[59px] rounded-md',
-  lg: 'h-[150px] w-[106px] rounded-lg md:h-[216px] md:w-[152px] md:rounded-xl',
-  hero: 'aspect-[264/374] w-28 rounded-lg sm:w-32 md:w-40 md:rounded-xl lg:w-44',
-  fill: 'aspect-[264/374] w-full rounded-lg',
+  xs: 'h-9 w-[1.6875rem] rounded-[3px]',
+  sm: 'h-12 w-9 rounded',
+  md: 'h-[84px] w-[63px] rounded-md',
+  lg: 'h-[148px] w-[111px] rounded-lg md:h-[216px] md:w-[162px] md:rounded-xl',
+  hero: 'aspect-[3/4] w-28 rounded-lg sm:w-32 md:w-40 md:rounded-xl lg:w-44',
+  fill: 'aspect-[3/4] w-full rounded-lg',
 };
 
 const INITIALS_TEXT: Record<GameCoverSize, string> = {
@@ -135,13 +136,13 @@ export function nextCoverSource(
   return index >= 0 ? (chain[index + 1] ?? null) : null;
 }
 
-/** Aspect (width / height) of the cover box: IGDB's `t_cover_big` (264x374). */
-export const COVER_BOX_RATIO = 264 / 374;
+/** Aspect (width / height) of the cover box: 3:4, the median of real IGDB covers. */
+export const COVER_BOX_RATIO = 3 / 4;
 
 /**
- * Widest aspect (width / height) still cropped to fill the cover box: 20% wider than the box (~0.85),
+ * Widest aspect (width / height) still cropped to fill the cover box: 20% wider than the box (0.9),
  * so at most a sixth of the width is cut. Any reasonably portrait image (Steam's 600x900, IGDB's
- * 264x374, 3:4, slightly-off custom covers, tall art) is cropped, anchored to the top so a title
+ * 264x352 (3:4), slightly-off custom covers, tall art) is cropped, anchored to the top so a title
  * there survives; only clearly non-portrait art (square, landscape) is letterboxed over a blurred
  * copy of itself.
  */
@@ -194,7 +195,7 @@ export const REVEAL_PENDING_CLASS = 'cover-reveal-pending';
 export const REVEAL_IN_CLASS = 'cover-reveal-in';
 
 /**
- * Game cover as portrait box art (IGDB cover ratio, ~0.706). Lazy-loaded, no referrer. A Steam library capsule that fails
+ * Game cover as portrait box art (3:4). Lazy-loaded, no referrer. A Steam library capsule that fails
  * to load falls back to the app's store header, then its main capsule; clearly non-portrait art (those, a square or a custom url) is
  * shown whole over a blurred copy of itself instead of being cropped to a sliver. With no url, or
  * when loading fails, it renders a gradient (brand tint -> surface, faintly hued from the name) with initials.

@@ -59,7 +59,7 @@ describe('GameCover', () => {
     expect(img.getAttribute('loading')).toBe('lazy');
     expect(img.getAttribute('referrerpolicy')).toBe('no-referrer');
     expect(host.classList).toContain('extra');
-    expect(host.classList).toContain('w-[2.12rem]');
+    expect(host.classList).toContain('w-9');
     expect(host.classList).toContain('h-12');
   });
 
@@ -274,17 +274,18 @@ describe('coverInitials / coverHue', () => {
 });
 
 describe('fitsPortraitBox', () => {
-  it('crops any reasonably portrait art (up to 20% wider than the cover box, ~0.85)', () => {
+  it('crops any reasonably portrait art (up to 20% wider than the 3:4 box, 0.9)', () => {
     expect(fitsPortraitBox(600, 900)).toBe(true);
     expect(fitsPortraitBox(264, 374)).toBe(true);
     expect(fitsPortraitBox(3, 4)).toBe(true);
     expect(fitsPortraitBox(800, 1000)).toBe(true);
     expect(fitsPortraitBox(300, 600)).toBe(true);
     expect(fitsPortraitBox(840, 1000)).toBe(true);
+    expect(fitsPortraitBox(890, 1000)).toBe(true);
   });
 
   it('letterboxes only clearly non-portrait art (square or landscape)', () => {
-    expect(fitsPortraitBox(860, 1000)).toBe(false);
+    expect(fitsPortraitBox(920, 1000)).toBe(false);
     expect(fitsPortraitBox(512, 512)).toBe(false);
     expect(fitsPortraitBox(460, 215)).toBe(false);
   });

@@ -73,7 +73,7 @@
             [style.--i]="idx"
           >
             <!-- Up to four of the saga's games as an overlapping, slightly fanned collage of box art -->
-            <span class="saga-collage relative h-12 w-[calc(42px+2.12rem)] shrink-0" aria-hidden="true">
+            <span class="saga-collage relative h-12 w-[calc(42px+2.25rem)] shrink-0" aria-hidden="true">
               @for (g of s.games.slice(0, 4); track g.id; let i = $index) {
                 <!-- The wrapper is positioned: GameCover owns its host classes and would drop `absolute`. -->
                 <span
@@ -197,7 +197,7 @@
         @for (g of s.games; track g.id) {
           <a
             [routerLink]="['/games', g.id]"
-            class="flex items-center gap-3 border-b border-divider py-2.5 hover:bg-hover md:grid md:grid-cols-[56px_18px_2.12rem_minmax(0,1fr)_120px_70px_70px] md:gap-4 md:border-t md:border-b-0 md:py-2 md:text-sm"
+            class="flex items-center gap-3 border-b border-divider py-2.5 hover:bg-hover md:grid md:grid-cols-[56px_18px_2.25rem_minmax(0,1fr)_120px_70px_70px] md:gap-4 md:border-t md:border-b-0 md:py-2 md:text-sm"
             [style.opacity]="isPlayed(g) ? 1 : 0.55"
           >
             <span class="hidden font-mono text-muted md:block">{{ releaseYear(g) ?? '—' }}</span>
