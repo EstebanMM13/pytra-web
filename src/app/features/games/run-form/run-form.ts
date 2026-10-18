@@ -263,13 +263,22 @@ export class RunForm implements OnInit {
     }
   }
 
-  /** "Run N+1" for a game with N runs, unless the user already typed a label. */
+  /**
+   * Defaults for a new run from the game's existing runs: "Run N+1" as label and Replay on when
+   * the game was already played. Values the user already changed are kept.
+   */
   private suggestRunLabel(gameId: number): void {
-    const label = this.form.controls.runLabel;
+    const { runLabel: label, replay } = this.form.controls;
     this.experienceService.findAllByGame(gameId).subscribe({
       next: (runs) => {
-        if (!label.dirty && this.form.controls.gameId.value === gameId) {
+        if (this.form.controls.gameId.value !== gameId) {
+          return;
+        }
+        if (!label.dirty) {
           label.setValue(nextRunLabel(runs.length));
+        }
+        if (!replay.dirty) {
+          replay.setValue(runs.length > 0);
         }
       },
       error: () => {
@@ -390,6 +399,8 @@ export class RunForm implements OnInit {
   protected toggle(control: 'platinum' | 'replay'): void {
     const c = this.form.controls[control];
     c.setValue(!c.value);
+    // A user choice: later defaults (e.g. Replay from the game's runs) must not override it.
+    c.markAsDirty();
   }
 
   protected showError(name: 'gameId' | 'runLabel' | 'platformId' | 'hours' | 'rating'): boolean {

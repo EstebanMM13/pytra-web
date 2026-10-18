@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { ExperienceStatus } from '../../../core/models/experience.model';
+import { Experience, ExperienceStatus } from '../../../core/models/experience.model';
 import { Game, GameCategory } from '../../../core/models/game.model';
 import { Platform } from '../../../core/models/platform.model';
 import { ExperienceService } from '../../../core/services/experience.service';
@@ -42,6 +42,34 @@ interface RunFormHarness {
   setStatus(status: ExperienceStatus): void;
   onEndDateChange(input: Pick<HTMLInputElement, 'value' | 'validity'>): void;
   games(): Game[] | null;
+  selectGame(game: Game): void;
+  toggle(control: 'platinum' | 'replay'): void;
+}
+
+function experience(overrides: Partial<Experience> = {}): Experience {
+  return {
+    id: 9,
+    gameId: 2,
+    runLabel: 'Season 1',
+    year: null,
+    status: 'EN_CURSO',
+    rating: null,
+    hours: 3,
+    startDate: null,
+    endDate: null,
+    platform: 'PC',
+    platformId: 1,
+    platformName: 'PC',
+    platformColor: '#8A857C',
+    platinum: false,
+    replay: false,
+    summary: null,
+    pros: null,
+    cons: null,
+    notes: null,
+    updatedAt: '2026-01-01T00:00:00',
+    ...overrides,
+  };
 }
 
 function dateInput(value: string, badInput = false): Pick<HTMLInputElement, 'value' | 'validity'> {
@@ -52,7 +80,8 @@ describe('RunForm', () => {
   const launcher = { close: vi.fn(), notifySaved: vi.fn(), request: signal(null) };
   const toast = { success: vi.fn(), error: vi.fn(), show: vi.fn() };
 
-  function setup(request: RunFormRequest) {
+  /** `runCounts`: how many runs each game id already has (none by default). */
+  function setup(request: RunFormRequest, runCounts: Record<number, number> = {}) {
     launcher.close.mockClear();
     toast.show.mockClear();
     TestBed.configureTestingModule({
@@ -61,7 +90,10 @@ describe('RunForm', () => {
         provideRouter([]),
         provideTranslateService(),
         { provide: GameService, useValue: { findAll: () => of(GAMES), findById: (id: number) => of(GAMES.find((g) => g.id === id)) } },
-        { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        {
+          provide: ExperienceService,
+          useValue: { findAllByGame: (id: number) => of(Array.from({ length: runCounts[id] ?? 0 }, (_, i) => ({ id: i }))) },
+        },
         { provide: PlatformService, useValue: { platforms: signal([PC]), load: () => of([PC]) } },
         { provide: PreferencesService, useValue: { defaultPlatform: () => 'PC', ratingPrecision: () => 'hundredths' } },
         { provide: RunFormLauncher, useValue: launcher },
@@ -118,6 +150,44 @@ describe('RunForm', () => {
     });
   });
 
+  describe('Replay default', () => {
+    const create: RunFormRequest = { mode: 'create', gameId: 1, navigateOnCreate: false };
+
+    it('is off for the first run of a game', () => {
+      const { form } = setup(create);
+      expect(form.form.controls.replay.value).toBe(false);
+      expect(form.form.controls.runLabel.value).toBe('Run 1');
+    });
+
+    it('is on for a new run of a game that already has runs', () => {
+      const { form } = setup(create, { 1: 2 });
+      expect(form.form.controls.replay.value).toBe(true);
+    });
+
+    it('follows the game picked in the global form', () => {
+      const { form } = setup({ mode: 'create', navigateOnCreate: true }, { 1: 1 });
+      expect(form.form.controls.replay.value).toBe(false);
+      form.selectGame(GAMES[0]);
+      expect(form.form.controls.replay.value).toBe(true);
+      form.selectGame(GAMES[2]);
+      expect(form.form.controls.replay.value).toBe(false);
+    });
+
+    it('keeps the user choice once toggled', () => {
+      const { form } = setup({ mode: 'create', navigateOnCreate: true }, { 1: 1, 3: 1 });
+      form.selectGame(GAMES[0]);
+      form.toggle('replay');
+      expect(form.form.controls.replay.value).toBe(false);
+      form.selectGame(GAMES[2]);
+      expect(form.form.controls.replay.value).toBe(false);
+    });
+
+    it('keeps the stored value when editing a run', () => {
+      const { form } = setup({ mode: 'edit', experience: experience({ gameId: 1, replay: false }) }, { 1: 3 });
+      expect(form.form.controls.replay.value).toBe(false);
+    });
+  });
+
   describe('ONLINE games', () => {
     it('are left out of the game picker of a new run', () => {
       const { form } = setup({ mode: 'create', navigateOnCreate: true });
@@ -132,31 +202,7 @@ describe('RunForm', () => {
     });
 
     it('existing runs can still be edited', () => {
-      const { navigate } = setup({
-        mode: 'edit',
-        experience: {
-          id: 9,
-          gameId: 2,
-          runLabel: 'Season 1',
-          year: null,
-          status: 'EN_CURSO',
-          rating: null,
-          hours: 3,
-          startDate: null,
-          endDate: null,
-          platform: 'PC',
-          platformId: 1,
-          platformName: 'PC',
-          platformColor: '#8A857C',
-          platinum: false,
-          replay: false,
-          summary: null,
-          pros: null,
-          cons: null,
-          notes: null,
-          updatedAt: '2026-01-01T00:00:00',
-        },
-      });
+      const { navigate } = setup({ mode: 'edit', experience: experience({ gameId: 2, runLabel: 'Season 1' }) });
       expect(launcher.close).not.toHaveBeenCalled();
       expect(navigate).not.toHaveBeenCalled();
       expect(toast.show).not.toHaveBeenCalled();
