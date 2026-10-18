@@ -272,18 +272,6 @@
       }
     </div>
 
-    <!-- Summary -->
-    <div class="flex flex-col gap-2">
-      <label for="run-form-summary" class="text-[13px] text-text-3">{{ 'runForm.summary' | translate }}</label>
-      <textarea
-        id="run-form-summary"
-        formControlName="summary"
-        rows="3"
-        [placeholder]="'runForm.summaryPlaceholder' | translate"
-        class="run-form-textarea"
-      ></textarea>
-    </div>
-
     <!-- Toggles -->
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
       <div class="divide-y divide-border rounded-xl border border-border bg-surface md:contents">
@@ -300,6 +288,18 @@
           <span>{{ 'runForm.replay' | translate }}</span>
         </button>
       </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="flex flex-col gap-2">
+      <label for="run-form-summary" class="text-[13px] text-text-3">{{ 'runForm.summary' | translate }}</label>
+      <textarea
+        id="run-form-summary"
+        formControlName="summary"
+        rows="2"
+        [placeholder]="'runForm.summaryPlaceholder' | translate"
+        class="run-form-textarea"
+      ></textarea>
     </div>
 
     <!-- Best / worst + notes: its own bordered row so it reads as a form control, not a footnote -->
