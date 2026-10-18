@@ -88,6 +88,7 @@ function byRelease(a: Game, b: Game): number {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-detail.html',
+  styleUrl: '../../../shared/ui/platinum-glow.css',
 })
 export class GameDetail {
   protected readonly icons = ICONS;
@@ -168,6 +169,9 @@ export class GameDetail {
       platinum: runs.some((r) => r.platinum),
     };
   });
+
+  /** Any run earned the platinum (or the API says the game has one): the header shows the platinum pill. */
+  protected readonly platinum = computed(() => this.stats().platinum || !!this.game()?.hasPlatinum);
 
   /** Highlighted only when there is something to compare against. */
   protected readonly bestRunId = computed(() => {
@@ -374,7 +378,6 @@ export class GameDetail {
     return [
       platformDisplayName(run.platformName, this.translate),
       formatRunPeriod(run.startDate, run.endDate, locale) ?? (run.year ? String(run.year) : null),
-      run.platinum ? '🏆' : null,
       run.replay ? (this.translate.instant('run.replay') as string) : null,
     ]
       .filter((part) => !!part)

@@ -87,6 +87,14 @@
               >
                 {{ g.name }}
               </h1>
+              @if (platinum()) {
+                <span
+                  class="platinum-glow platinum-pill relative mt-2 inline-flex w-fit items-center rounded-full px-2.5 py-1 text-xs font-medium md:mt-3"
+                  data-platinum
+                >
+                  {{ 'run.platinum' | translate }}
+                </span>
+              }
             </div>
             <div class="hidden shrink-0 gap-2.5 md:flex">
               <button
@@ -331,6 +339,7 @@
                   [hours]="run.hours"
                   [rating]="run.rating"
                   [best]="run.id === bestRunId()"
+                  [platinum]="run.platinum"
                 >
                   <span runRowBelow class="mt-1.5 block sm:hidden"><app-status-pill [status]="run.status" /></span>
                   <span class="hidden shrink-0 sm:block"><app-status-pill [status]="run.status" /></span>

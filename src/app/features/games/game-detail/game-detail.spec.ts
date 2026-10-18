@@ -71,6 +71,15 @@ describe('GameDetail', () => {
     return { fixture, el, buttons };
   }
 
+  it('shows the platinum pill in the header only when the game has a platinum', () => {
+    expect(setup(game('SINGLEPLAYER')).el.querySelector('[data-platinum]')).toBeNull();
+    TestBed.resetTestingModule();
+    const { el } = setup({ ...game('SINGLEPLAYER'), hasPlatinum: true });
+    const pill = el.querySelector('[data-platinum]')!;
+    expect(pill.classList).toContain('platinum-pill');
+    expect(pill.textContent).toContain('run.platinum');
+  });
+
   it('offers edit, new run and the first-run link to a signed-in user', () => {
     const { buttons } = setup(game('SINGLEPLAYER'));
     expect(buttons('game.editAria').length).toBe(1);
