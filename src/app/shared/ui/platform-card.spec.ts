@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ICONS } from './icons';
 import { PlatformCard } from './platform-card';
 
 @Component({
   imports: [PlatformCard],
   template: `
-    <app-platform-card platform="steam" name="Steam" subtitle="Library" [icon]="icon" [disabled]="disabled()">
+    <app-platform-card platform="steam" name="Steam" subtitle="Library" [disabled]="disabled()">
+      <svg platformIcon data-logo></svg>
       <span platformBadge>Linked</span>
       @if (withBody()) {
         <p data-body>Account</p>
@@ -15,7 +15,6 @@ import { PlatformCard } from './platform-card';
   `,
 })
 class Host {
-  readonly icon = ICONS.monitor;
   readonly disabled = signal(false);
   readonly withBody = signal(true);
 }
@@ -37,6 +36,7 @@ describe('PlatformCard', () => {
     expect(card.getAttribute('aria-labelledby')).toBe(title.id);
     expect(title.textContent).toContain('Steam');
     expect(card.querySelector('header')?.textContent).toContain('Library');
+    expect(card.querySelector('header [data-logo]')).not.toBeNull();
     expect(card.querySelector('header [platformBadge]')?.textContent).toContain('Linked');
     expect(card.querySelector('header [data-body]')).toBeNull();
     expect(card.querySelector('[data-body]')?.textContent).toContain('Account');

@@ -13,8 +13,8 @@
   platform="steam"
   [name]="'steam.title' | translate"
   [subtitle]="'sync.steamHint' | translate"
-  [icon]="icons.monitor"
 >
+  <app-brand-logo platformIcon brand="steam" />
   <!-- One @if with a single root element: nested blocks are not projected into [platformBadge]. -->
   @if (status(); as s) {
     <span

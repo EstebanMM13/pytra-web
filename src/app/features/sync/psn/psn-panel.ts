@@ -21,6 +21,7 @@ import { ToastService } from '../../../shared/toast/toast.service';
 import { GameCover } from '../../../shared/ui/game-cover';
 import { ICONS } from '../../../shared/ui/icons';
 import { PlatformCard } from '../../../shared/ui/platform-card';
+import { BrandLogo } from '../shared/brand-logo';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
@@ -48,6 +49,7 @@ const STATUS_ERROR_KEY = 'psn.errors.generic';
     GameCover,
     LucideDynamicIcon,
     PlatformCard,
+    BrandLogo,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './psn-panel.html',

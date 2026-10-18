@@ -18,6 +18,7 @@ import { TranslatePluralPipe } from '../../../shared/pipes/translate-plural.pipe
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { GameCover } from '../../../shared/ui/game-cover';
 import { PlatformCard } from '../../../shared/ui/platform-card';
+import { BrandLogo } from '../shared/brand-logo';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
 import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
@@ -36,6 +37,7 @@ import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRun, maskSteamId, steamHours
     GameCover,
     LucideDynamicIcon,
     PlatformCard,
+    BrandLogo,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './steam-panel.html',
