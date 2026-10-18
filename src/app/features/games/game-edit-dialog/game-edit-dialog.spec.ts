@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
+import { Game } from '../../../core/models/game.model';
 import { Genre } from '../../../core/models/genre.model';
 import { Saga } from '../../../core/models/saga.model';
 import { GameService } from '../../../core/services/game.service';
@@ -9,7 +10,9 @@ import { GenreService } from '../../../core/services/genre.service';
 import { IgdbMetadataService } from '../../../core/services/igdb-metadata.service';
 import { SagaService } from '../../../core/services/saga.service';
 import { ToastService } from '../../../shared/toast/toast.service';
+import { PendingConfirmFn, PendingReview } from '../../sync/shared/pending-review';
 import { GameEditDialog, coverNeedsWarning } from './game-edit-dialog';
+import { AutofillPick } from './metadata-autofill.logic';
 
 const SAGAS: Saga[] = [
   { id: 1, name: 'God of War', updatedAt: '' },
@@ -144,6 +147,138 @@ describe('GameEditDialog pickers', () => {
     dialog.form.controls.coverImageUrl.setValue('https://images.example.com/other.jpg');
     fixture.detectChanges();
     expect(el.querySelector('[data-cover-warning]')).toBeNull();
+  });
+});
+
+describe('GameEditDialog pending review', () => {
+  const PENDING = {
+    id: 7,
+    name: 'Astro Bot',
+    developer: 'Team Asobi',
+    publisher: 'Sony',
+    releaseDate: '2024-09-06',
+    category: null,
+    sagaId: 2,
+    sagaName: 'Hollow Knight',
+    coverImageUrl: 'https://images.example.com/astro.jpg',
+    reviewStatus: 'PENDING_REVIEW',
+    genres: [{ id: 11, name: 'AVENTURA' }],
+    titleId: 'PPSA01234_00',
+  } as unknown as Game;
+
+  const failWith = (status: number, message: string): PendingConfirmFn => () =>
+    throwError(() => new HttpErrorResponse({ status, error: { message } }));
+
+  function setup(review: PendingReview) {
+    const toast = { success: vi.fn(), error: vi.fn() };
+    const gameService = { create: vi.fn(), update: vi.fn(), delete: vi.fn() };
+    TestBed.configureTestingModule({
+      imports: [GameEditDialog],
+      providers: [
+        provideTranslateService(),
+        { provide: GameService, useValue: gameService },
+        { provide: SagaService, useValue: { findAll: () => of(SAGAS) } },
+        { provide: GenreService, useValue: { findAll: () => of(GENRES) } },
+        { provide: IgdbMetadataService, useValue: { providers: () => of({ igdb: false }) } },
+        { provide: ToastService, useValue: toast },
+      ],
+    });
+    const fixture = TestBed.createComponent(GameEditDialog);
+    fixture.componentRef.setInput('game', PENDING);
+    fixture.componentRef.setInput('pendingReview', review);
+    fixture.detectChanges();
+    const el = document.body.querySelector('app-modal-sheet') as HTMLElement;
+    const dialog = fixture.componentInstance as unknown as DialogHarness;
+    const submit = () => {
+      el.querySelector('form')!.dispatchEvent(new Event('submit'));
+      fixture.detectChanges();
+    };
+    return { fixture, el, dialog, toast, gameService, submit };
+  }
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('prefills every field from the pending game and defaults a missing category', () => {
+    const { dialog, el } = setup({ source: 'steam', mode: 'confirm', confirmWith: vi.fn() });
+    expect(dialog.form.getRawValue()).toEqual({
+      name: 'Astro Bot',
+      developer: 'Team Asobi',
+      publisher: 'Sony',
+      releaseDate: '2024-09-06',
+      sagaId: 2,
+      coverImageUrl: 'https://images.example.com/astro.jpg',
+    });
+    expect([...dialog.selectedGenreIds()]).toEqual([11]);
+    expect(el.querySelector('[role="radio"][aria-checked="true"]')!.textContent).toContain('category.SINGLEPLAYER');
+  });
+
+  it('uses the source copy, the run variants and offers no delete', () => {
+    const { el } = setup({ source: 'psn', mode: 'run', confirmWith: vi.fn() });
+    expect(el.textContent).toContain('psn.confirmDialog.title');
+    expect(el.textContent).toContain('psn.confirmDialog.saveAndRun');
+    expect(el.querySelector('[data-review-intro]')!.textContent).toContain('psn.confirmDialog.introRun');
+    expect(el.textContent).not.toContain('steam.confirmDialog');
+    expect(el.textContent).not.toContain('game.delete');
+  });
+
+  it('confirms with the edited form and emits the confirmed game without a toast', () => {
+    const confirmed = { ...PENDING, reviewStatus: 'CONFIRMED' } as Game;
+    const confirmWith = vi.fn<PendingConfirmFn>(() => of(confirmed));
+    const { fixture, dialog, toast, gameService, submit } = setup({ source: 'steam', mode: 'confirm', confirmWith });
+    const saved = vi.fn();
+    fixture.componentInstance.saved.subscribe(saved);
+    dialog.form.controls.developer.setValue('  ');
+
+    submit();
+    expect(confirmWith).toHaveBeenCalledWith(7, {
+      name: 'Astro Bot',
+      developer: null,
+      publisher: 'Sony',
+      releaseDate: '2024-09-06',
+      category: 'SINGLEPLAYER',
+      sagaId: 2,
+      coverImageUrl: 'https://images.example.com/astro.jpg',
+      genreIds: [11],
+    });
+    expect(saved).toHaveBeenCalledWith(confirmed);
+    expect(gameService.create).not.toHaveBeenCalled();
+    expect(gameService.update).not.toHaveBeenCalled();
+    expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it('keeps the autofill search and its "filled from" note', () => {
+    const { fixture, el, dialog } = setup({ source: 'steam', mode: 'confirm', confirmWith: vi.fn() });
+    const button = el.querySelector('form > div > button') as HTMLButtonElement;
+    expect(button.textContent).toContain('game.autofill.open');
+    button.click();
+    fixture.detectChanges();
+    expect(el.querySelector('app-metadata-autofill')).not.toBeNull();
+
+    (dialog as unknown as { applyAutofill(pick: AutofillPick): void }).applyAutofill({
+      source: 'igdb',
+      metadata: { name: 'Astro Bot', developer: 'Team Asobi', publisher: null, releaseDate: null, coverImageUrl: null, genres: [] },
+    });
+    fixture.detectChanges();
+    expect(el.querySelector('app-metadata-autofill')).toBeNull();
+    expect(el.querySelector('p[role="status"]')!.textContent).toContain('game.autofill.filled');
+  });
+
+  it('uses the PSN error messages for PSN games', () => {
+    const { toast, submit } = setup({ source: 'psn', mode: 'confirm', confirmWith: failWith(409, 'PSN_LINK_CHANGED') });
+    submit();
+    expect(toast.error).toHaveBeenCalledWith('psn.errors.linkChanged');
+  });
+
+  it('maps a PSN duplicate name to the PSN message', () => {
+    const { toast, submit } = setup({ source: 'psn', mode: 'confirm', confirmWith: failWith(409, 'Game already exists') });
+    submit();
+    expect(toast.error).toHaveBeenCalledWith('psn.errors.duplicateName');
+  });
+
+  it('keeps the Steam messages for Steam games', () => {
+    const { toast, submit } = setup({ source: 'steam', mode: 'confirm', confirmWith: failWith(409, 'SYNC_IN_PROGRESS') });
+    submit();
+    expect(toast.error).toHaveBeenCalledWith('steam.errors.syncInProgress');
   });
 });
 

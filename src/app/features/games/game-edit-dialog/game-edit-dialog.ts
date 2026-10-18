@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -41,6 +42,7 @@ import { IgdbMetadataService } from '../../../core/services/igdb-metadata.servic
 import { MetadataAutofill } from './metadata-autofill';
 import { AUTOFILL_SOURCE_LABELS, AutofillPick, matchGenres } from './metadata-autofill.logic';
 import { toastApiError } from '../../../shared/utils/api-error';
+import { PendingReview, pendingConfirmErrorKey } from '../../sync/shared/pending-review';
 
 /** Warn about a cover only once its preview loaded and turned out not to be portrait art. */
 export function coverNeedsWarning(previewUrl: string | null, portrait: boolean): boolean {
@@ -68,6 +70,8 @@ function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors |
 /**
  * Create or edit a game's sheet (name, studio, release, category, saga, genres) in a modal / mobile sheet.
  * Without `game` it creates a new one; in edit mode it also offers deleting the game.
+ * With `pendingReview`, `game` is a game imported by Steam or PSN that the form prefills, and saving
+ * confirms it on that integration instead (no delete).
  */
 @Component({
   selector: 'app-game-edit-dialog',
@@ -88,8 +92,11 @@ function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors |
 export class GameEditDialog implements OnInit {
   protected readonly icons = ICONS;
 
-  /** Game to edit; `null` opens the dialog in create mode. */
+  /** Game to edit (or, with `pendingReview`, to confirm); `null` opens the dialog in create mode. */
   readonly game = input<Game | null>(null);
+  /** Reviews `game` as a pending import: confirm copy, no delete, save confirms on the integration. */
+  readonly pendingReview = input<PendingReview | null>(null);
+  /** Emits the created, updated or confirmed game. */
   readonly saved = output<Game>();
   /** Emits the id of the deleted game (edit mode only). */
   readonly deleted = output<number>();
@@ -104,6 +111,27 @@ export class GameEditDialog implements OnInit {
   private readonly injector = inject(Injector);
   private readonly igdbService = inject(IgdbMetadataService);
   private readonly autofillButton = viewChild<ElementRef<HTMLButtonElement>>('autofillButton');
+
+  /** Editing an existing library game (offers delete); false when creating or reviewing a pending game. */
+  protected readonly isEdit = computed(() => !!this.game() && !this.pendingReview());
+
+  protected readonly title = computed(() => {
+    const review = this.pendingReview();
+    if (review) return `${review.source}.confirmDialog.title`;
+    return this.game() ? 'game.editTitle' : 'game.createTitle';
+  });
+
+  protected readonly saveLabel = computed(() => {
+    const review = this.pendingReview();
+    if (review) return `${review.source}.confirmDialog.${review.mode === 'run' ? 'saveAndRun' : 'save'}`;
+    return this.game() ? 'game.saveEdit' : 'game.saveCreate';
+  });
+
+  /** Intro shown above the form while reviewing a pending game. */
+  protected readonly reviewIntro = computed(() => {
+    const review = this.pendingReview();
+    return review ? `${review.source}.confirmDialog.${review.mode === 'run' ? 'introRun' : 'intro'}` : null;
+  });
 
   protected readonly categoryOptions: SegmentedOption<GameCategory>[] = (
     ['SINGLEPLAYER', 'ONLINE', 'HYBRID'] as const
@@ -279,7 +307,6 @@ export class GameEditDialog implements OnInit {
       return;
     }
     const raw = this.form.getRawValue();
-    const game = this.game();
     const request: GameRequest = {
       name: raw.name.trim(),
       developer: raw.developer.trim() || null,
@@ -291,6 +318,12 @@ export class GameEditDialog implements OnInit {
       genreIds: [...this.selectedGenreIds()],
     };
     this.saving.set(true);
+    const review = this.pendingReview();
+    const game = this.game();
+    if (review && game) {
+      this.confirmPending(review, game.id, request);
+      return;
+    }
     const request$ = game ? this.gameService.update(game.id, request) : this.gameService.create(request);
     request$.subscribe({
       next: (updated) => {
@@ -304,9 +337,20 @@ export class GameEditDialog implements OnInit {
     });
   }
 
+  /** The panel that opened the review toasts and refreshes its counts, so no success toast here. */
+  private confirmPending(review: PendingReview, gameId: number, request: GameRequest): void {
+    review.confirmWith(gameId, request).subscribe({
+      next: (confirmed) => this.saved.emit(confirmed),
+      error: (err: HttpErrorResponse) => {
+        this.saving.set(false);
+        this.toast.error(this.translate.instant(pendingConfirmErrorKey(review.source, err)));
+      },
+    });
+  }
+
   protected remove(): void {
     const game = this.game();
-    if (!game || this.deleting() || !confirm(this.translate.instant('game.deleteConfirm'))) {
+    if (!game || !this.isEdit() || this.deleting() || !confirm(this.translate.instant('game.deleteConfirm'))) {
       return;
     }
     this.deleting.set(true);

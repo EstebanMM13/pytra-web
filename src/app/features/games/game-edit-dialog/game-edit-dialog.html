@@ -1,11 +1,15 @@
 <app-modal-sheet
-  [title]="(game() ? 'game.editTitle' : 'game.createTitle') | translate"
-  [saveLabel]="(game() ? 'game.saveEdit' : 'game.saveCreate') | translate"
+  [title]="title() | translate"
+  [saveLabel]="saveLabel() | translate"
   [saving]="saving()"
   (save)="submit()"
   (closed)="closed.emit()"
 >
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4 md:gap-[18px]">
+    @if (reviewIntro(); as intro) {
+      <p class="text-[13px] leading-relaxed text-muted" data-review-intro>{{ intro | translate }}</p>
+    }
+
     @if (autofillOpen()) {
       <app-metadata-autofill [igdbEnabled]="igdbEnabled()" (picked)="applyAutofill($event)" (cancelled)="closeAutofill()" />
     } @else {
@@ -129,6 +133,9 @@
         [value]="category()"
         (valueChange)="category.set($event)"
       />
+      @if (pendingReview(); as review) {
+        <p class="text-xs text-muted">{{ review.source + '.confirmDialog.categoryHint' | translate }}</p>
+      }
     </div>
 
     <div class="flex flex-col gap-2">
@@ -167,7 +174,7 @@
       }
     </div>
 
-    @if (game()) {
+    @if (isEdit()) {
       <div class="border-t border-divider pt-4">
         <button
           type="button"
