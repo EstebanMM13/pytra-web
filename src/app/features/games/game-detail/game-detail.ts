@@ -12,6 +12,7 @@ import { Game } from '../../../core/models/game.model';
 import { OnlinePlaytime } from '../../../core/models/online-playtime.model';
 import { ExperienceService } from '../../../core/services/experience.service';
 import { GameService } from '../../../core/services/game.service';
+import { UserDataCache } from '../../../core/services/user-data-cache';
 import { OnlinePlaytimeService } from '../../../core/services/online-playtime.service';
 import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
 import { Navbar } from '../../../shared/navbar/navbar';
@@ -98,6 +99,7 @@ export class GameDetail {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly gameService = inject(GameService);
+  private readonly cache = inject(UserDataCache);
   private readonly experienceService = inject(ExperienceService);
   private readonly onlinePlaytimeService = inject(OnlinePlaytimeService);
   private readonly platformService = inject(PlatformService);
@@ -133,6 +135,11 @@ export class GameDetail {
   readonly onlineLoadState = signal<OnlinePlaytimeLoadState>('loading');
   /** Online playtime requested alongside the game (by route id), consumed by the first `loadOnlinePlaytime`. */
   private onlinePrefetch: { id: number; playtime$: Observable<OnlinePlaytime> } | null = null;
+  /**
+   * Bumped by every local write on this page (game edit, online playtime / platforms). A findById
+   * refresh started before a write answers with pre-write data and is ignored.
+   */
+  private localWrites = 0;
 
   // Text inputs so "12,5" works on every keyboard/locale (number inputs drop it as empty).
   readonly onlinePlaytimeForm = this.fb.group({
@@ -295,10 +302,13 @@ export class GameDetail {
       this.loadSaga(seeded);
     }
 
-    // Every handler checks the id: a late answer for the previous game must not overwrite this one.
+    // Every handler checks the id: a late answer for the previous game must not overwrite this one,
+    // nor an answer requested before a local write (the seed lets the user edit while it loads).
+    const writes = this.localWrites;
+    const stale = (): boolean => id !== this.gameId() || writes !== this.localWrites;
     this.gameService.findById(id).subscribe({
       next: (game) => {
-        if (id !== this.gameId()) return;
+        if (stale()) return;
         const previous = this.game();
         this.game.set(game);
         // After a seed, only reload what the fresh game changes (the online card keeps its edits).
@@ -306,9 +316,12 @@ export class GameDetail {
         if (!previous || previous.sagaId !== game.sagaId) this.loadSaga(game);
       },
       error: (error: unknown) => {
-        if (id !== this.gameId()) return;
+        if (stale()) return;
+        const gone = error instanceof HttpErrorResponse && error.status === 404;
+        // Deleted elsewhere: the cached lists (library, dashboard) must not keep showing it.
+        if (gone) this.cache.invalidateAll();
         // A seeded game stays on a failed refresh, unless the game no longer exists.
-        if (!this.game() || (error instanceof HttpErrorResponse && error.status === 404)) {
+        if (!this.game() || gone) {
           this.game.set(null);
           this.loadError.set(true);
         }
@@ -466,6 +479,7 @@ export class GameDetail {
         next: (playtime) => {
           this.savingOnlinePlatforms.set(false);
           if (id !== this.gameId()) return;
+          this.localWrites++;
           this.onlinePlaytime.set(playtime);
           this.onlinePlatforms.set(playtime.platforms ?? []);
           this.toast.success(this.translate.instant('game.online.saved'));
@@ -479,6 +493,7 @@ export class GameDetail {
   }
 
   protected onGameSaved(game: Game): void {
+    this.localWrites++;
     const sagaChanged = game.sagaId !== this.game()?.sagaId;
     this.game.set(game);
     this.editing.set(false);
@@ -519,6 +534,7 @@ export class GameDetail {
         next: (playtime) => {
           this.savingOnline.set(false);
           if (id !== this.gameId()) return;
+          this.localWrites++;
           this.onlinePlaytime.set(playtime);
           this.onlinePlatforms.set(playtime.platforms ?? []);
           this.onlineLoadState.set('loaded');

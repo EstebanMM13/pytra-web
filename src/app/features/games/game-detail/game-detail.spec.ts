@@ -8,6 +8,7 @@ import { Game, GameCategory } from '../../../core/models/game.model';
 import { DemoModeService } from '../../../core/services/demo-mode.service';
 import { ExperienceService } from '../../../core/services/experience.service';
 import { GameService } from '../../../core/services/game.service';
+import { UserDataCache } from '../../../core/services/user-data-cache';
 import { OnlinePlaytimeService } from '../../../core/services/online-playtime.service';
 import { PlatformService } from '../../../core/services/platform.service';
 import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
@@ -232,6 +233,20 @@ describe('GameDetail loading', () => {
     expect(findByGame).toHaveBeenCalledTimes(1);
   });
 
+  it('ignores a refresh that answers after a local save (no stale data, online card kept)', () => {
+    const { fixture, game$, findByGame } = setup({ ...game('HYBRID'), name: 'Cached Name' });
+    const saved = { ...game('SINGLEPLAYER'), name: 'Saved Name' };
+    fixture.componentInstance['onGameSaved'](saved);
+    fixture.detectChanges();
+    const callsAfterSave = findByGame.mock.calls.length;
+
+    game$.next({ ...game('HYBRID'), name: 'Old Server Name' });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.game()).toEqual(saved);
+    expect(fixture.nativeElement.textContent).toContain('Saved Name');
+    expect(findByGame).toHaveBeenCalledTimes(callsAfterSave);
+  });
+
   it('keeps the cached game when the refresh fails, but drops it when the game is gone', () => {
     const { fixture, game$ } = setup(game('SINGLEPLAYER'));
     game$.error(new HttpErrorResponse({ status: 500 }));
@@ -240,7 +255,9 @@ describe('GameDetail loading', () => {
     TestBed.resetTestingModule();
 
     const gone = setup(game('SINGLEPLAYER'));
+    const invalidateAll = vi.spyOn(TestBed.inject(UserDataCache), 'invalidateAll');
     gone.game$.error(new HttpErrorResponse({ status: 404 }));
+    expect(invalidateAll).toHaveBeenCalled();
     gone.fixture.detectChanges();
     expect(gone.fixture.componentInstance.game()).toBeNull();
     expect(gone.fixture.componentInstance.loadError()).toBe(true);
