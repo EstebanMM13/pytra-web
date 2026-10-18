@@ -1,6 +1,6 @@
 /*
  * Platinum marker glow, shared by component stylesheets (styleUrls). `.platinum-glow` is a static
- * gold halo (host must be positioned); add `.platinum-glow-pulse` for a slow opacity pulse, used
+ * icy blue-white halo with a crisp silver edge (host must be positioned); add `.platinum-glow-pulse` for a slow opacity pulse, used
  * on detail screens only (static with reduced motion).
  */
 .platinum-glow::after {
@@ -8,7 +8,9 @@
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--pt-gold) 60%, transparent);
+  box-shadow:
+    0 0 0 0.5px color-mix(in srgb, var(--pt-platinum) 45%, transparent),
+    0 0 10px 1px color-mix(in srgb, var(--pt-platinum-sheen) 60%, transparent);
   opacity: 0.5;
   pointer-events: none;
 }

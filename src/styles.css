@@ -52,6 +52,14 @@
   --pt-gold-card: #2a2418;
   --pt-gold-card-border: #5a4a2c;
 
+  /* Platinum markers: icy silver with a faint blue-white diamond sheen (not the GOTY gold). */
+  --pt-platinum: #dbe7f3;
+  --pt-platinum-sheen: #9fd3ff;
+  --pt-platinum-glint: #3b4d5d;
+  --pt-platinum-line: #b8d4ee66;
+  --pt-platinum-tint: #222b35;
+  --pt-platinum-tint-fg: #d6e6f5;
+
   /* Rating tones (>=9 high, 6-<7 mid, <6 danger, 7-<9 gold) and platform brand dots. */
   --pt-rating-high: #8fd6a5;
   --pt-rating-mid: #d9a05b;
@@ -108,13 +116,21 @@
   --pt-brand-lighter: #5530b3;
   --pt-brand-tint: #ebe4fb;
 
-  /* Amber deep enough for text on paper; warm cream fills for GOTY / platinum cards. */
+  /* Amber deep enough for text on paper; warm cream fills for GOTY cards. */
   --pt-gold: #8c5b0c;
   --pt-gold-line: #c08a2e80;
   --pt-gold-tint: #f8ead0;
   --pt-gold-tint-fg: #774c08;
   --pt-gold-card: #fcf4e3;
   --pt-gold-card-border: #e9cf9a;
+
+  /* Cool steel for platinum text on paper (AA on bg / surface / the tinted pill), icy blue fills. */
+  --pt-platinum: #4a6178;
+  --pt-platinum-sheen: #7fb8e8;
+  --pt-platinum-glint: #d0e2f3;
+  --pt-platinum-line: #8fa9c280;
+  --pt-platinum-tint: #e4edf6;
+  --pt-platinum-tint-fg: #33475c;
 
   --pt-rating-high: #1f6f3c;
   --pt-rating-mid: #8a5a10;
@@ -272,6 +288,10 @@
   --color-gold-tint-fg: var(--pt-gold-tint-fg);
   --color-gold-card: var(--pt-gold-card);
   --color-gold-card-border: var(--pt-gold-card-border);
+
+  --color-platinum: var(--pt-platinum);
+  --color-platinum-tint: var(--pt-platinum-tint);
+  --color-platinum-tint-fg: var(--pt-platinum-tint-fg);
 
   --color-rating-high: var(--pt-rating-high);
   --color-rating-mid: var(--pt-rating-mid);
@@ -513,6 +533,22 @@
         var(--pt-gold) 100%
       )
       border-box;
+}
+
+/*
+ * Platinum pill: icy tint with a diagonal blue-white diamond glint (tint + 20% sheen, precomputed so
+ * no color-mix fallback is emitted) and a crisp silver hairline.
+ * Text (platinum-tint-fg) clears AA even on the brightest band of the sheen, in both themes.
+ */
+@utility platinum-pill {
+  border: 1px solid var(--pt-platinum-line);
+  color: var(--pt-platinum-tint-fg);
+  background: linear-gradient(
+    135deg,
+    var(--pt-platinum-tint) 0%,
+    var(--pt-platinum-glint) 48%,
+    var(--pt-platinum-tint) 100%
+  );
 }
 
 /*
