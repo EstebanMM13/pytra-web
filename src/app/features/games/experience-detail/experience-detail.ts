@@ -18,7 +18,7 @@ import { RatingTonePipe } from '../../../shared/pipes/rating-tone.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
-import { StatCard } from '../../../shared/ui/stat-card';
+import { figureFontSize } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { translatePlural } from '../../../shared/utils/plural';
 import { formatDayMonthYear, runDuration, splitLines } from '../../../shared/utils/run-dates';
@@ -49,7 +49,6 @@ export function ratingRank(rating: number, topRatings: readonly number[], window
     PlatformLabel,
     SectionHeader,
     Skeleton,
-    StatCard,
     StatusPill,
     LucideDynamicIcon,
   ],
@@ -59,6 +58,8 @@ export function ratingRank(rating: number, topRatings: readonly number[], window
 })
 export class ExperienceDetail {
   protected readonly icons = ICONS;
+  /** Figure font size that fits its tile (see `figureFontSize`). */
+  protected readonly figureSize = (value: string | number): string => figureFontSize(String(value));
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
