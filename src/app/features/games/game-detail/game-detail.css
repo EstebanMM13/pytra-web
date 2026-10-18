@@ -1,0 +1,32 @@
+/*
+ * Earned "Platinum" stat tile: icy silver hairline, a faint diagonal diamond sheen over the card
+ * fill, label in platinum tones and a trophy stroked with a silver -> blue-white gradient
+ * (#platinum-trophy-sheen in the template). Colours come from the --pt-platinum* tokens, so the
+ * light theme gets the steel variant (AA on the card) automatically.
+ */
+.platinum-tile {
+  border-color: var(--pt-platinum-line);
+}
+
+.platinum-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    transparent 30%,
+    color-mix(in srgb, var(--pt-platinum-sheen) 14%, transparent) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.platinum-tile-label {
+  color: var(--pt-platinum);
+}
+
+.platinum-trophy {
+  stroke: url(#platinum-trophy-sheen);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pt-platinum-sheen) 55%, transparent));
+}

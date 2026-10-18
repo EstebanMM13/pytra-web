@@ -88,7 +88,7 @@ function byRelease(a: Game, b: Game): number {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './game-detail.html',
-  styleUrl: '../../../shared/ui/platinum-glow.css',
+  styleUrls: ['./game-detail.css', '../../../shared/ui/platinum-glow.css'],
 })
 export class GameDetail {
   protected readonly icons = ICONS;
@@ -170,7 +170,7 @@ export class GameDetail {
     };
   });
 
-  /** Any run earned the platinum (or the API says the game has one): the header shows the platinum pill. */
+  /** Any run earned the platinum (or the API says the game has one): the Platinum tile lights up. */
   protected readonly platinum = computed(() => this.stats().platinum || !!this.game()?.hasPlatinum);
 
   /** Highlighted only when there is something to compare against. */
