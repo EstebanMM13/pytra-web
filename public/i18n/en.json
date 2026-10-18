@@ -79,8 +79,7 @@
     },
     "or": "or",
     "panel": {
-      "eyebrow": "Play · Track · Remember",
-      "headline": "Every run, with its score and its story.",
+      "tagline": "Your video game library: runs, hours, scores and memories, synced with Steam and PlayStation.",
       "point1": "Every run, rated",
       "point2": "Your year in numbers",
       "point3": "Import from Steam and PlayStation"

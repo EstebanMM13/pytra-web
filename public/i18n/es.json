@@ -79,8 +79,7 @@
     },
     "or": "o",
     "panel": {
-      "eyebrow": "Play · Track · Remember",
-      "headline": "Cada partida, con su nota y su historia.",
+      "tagline": "Tu biblioteca de videojuegos: partidas, horas, notas y recuerdos, sincronizada con Steam y PlayStation.",
       "point1": "Cada partida, con nota",
       "point2": "Tu año en cifras",
       "point3": "Importa desde Steam y PlayStation"

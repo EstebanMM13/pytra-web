@@ -1,18 +1,19 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { PytraMark } from '../../shared/ui/pytra-mark';
 import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
 
 /**
  * Layout for the signed-out screens. Web (md+): 50/50 split with the brand panel on the left
- * (nav background, mark + wordmark, gold slogan header and headline) and the projected form
- * centred in a 380px column. Mobile: a bigger lockup above the form over a fixed backdrop
- * with the panel's glows and watermark mark. The page background
- * stays transparent so the app's grid + aura layers show through.
+ * (nav background, mark + wordmark, the "Play / Track / Remember" slogan as the hero with a one-line
+ * pitch below) and the projected form centred in a 380px column. Mobile: the lockup and a compact
+ * hero above the form over a fixed backdrop with the panel's glows and watermark mark. The page
+ * background stays transparent so the app's grid + aura layers show through.
  */
 @Component({
   selector: 'app-auth-shell',
-  imports: [TranslatePipe, PytraMark, PytraWordmark],
+  imports: [NgTemplateOutlet, TranslatePipe, PytraMark, PytraWordmark],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
@@ -44,15 +45,8 @@ import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
         </div>
 
         <div class="relative">
-          <div class="mb-6 flex items-center gap-3">
-            <span class="text-[15px] font-semibold tracking-[0.04em] text-gold">
-              {{ 'auth.panel.eyebrow' | translate }}
-            </span>
-            <span class="h-px w-[140px] bg-linear-to-r from-gold-line to-transparent" aria-hidden="true"></span>
-          </div>
-          <p class="max-w-[480px] text-[44px] leading-[1.03] font-semibold tracking-[-0.03em] lg:text-[54px]">
-            {{ 'auth.panel.headline' | translate }}
-          </p>
+          <ng-container *ngTemplateOutlet="slogan; context: { $implicit: 'hero--panel' }" />
+          <p class="tagline tagline--panel max-w-[480px] text-text-2">{{ 'auth.panel.tagline' | translate }}</p>
         </div>
 
         <ul class="relative flex flex-wrap gap-2.5 text-[13px] text-text-2">
@@ -74,20 +68,68 @@ import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
               <app-pytra-mark class="size-12 drop-shadow-[0_6px_18px_rgba(114,77,206,0.4)]" />
               <app-pytra-wordmark class="text-[36px] font-bold tracking-[-0.04em]" />
             </div>
-            <div class="mt-4 flex items-center gap-3">
-              <span class="text-[13px] font-semibold tracking-[0.04em] text-gold">
-                {{ 'auth.panel.eyebrow' | translate }}
-              </span>
-              <span class="h-px flex-1 bg-linear-to-r from-gold-line to-transparent" aria-hidden="true"></span>
-            </div>
-            <p class="text-[28px] leading-[1.08] font-semibold tracking-[-0.025em]">
-              {{ 'auth.panel.headline' | translate }}
-            </p>
+            <ng-container *ngTemplateOutlet="slogan; context: { $implicit: 'hero--compact' }" />
+            <p class="tagline text-text-2">{{ 'auth.panel.tagline' | translate }}</p>
           </div>
           <ng-content />
         </div>
       </main>
     </div>
+
+    <!-- The slogan, one word per line; "Remember" takes the brand accent (gradient in dark mode). -->
+    <ng-template #slogan let-size>
+      <p class="hero" [class]="size">
+        <span class="hero-word">Play</span>
+        <span class="hero-word">Track</span>
+        <span class="hero-word text-figure text-brand-light">Remember</span>
+      </p>
+    </ng-template>
+  `,
+  // Scoped here (not in the global stylesheet) so the hero only ships with the lazy auth pages.
+  styles: `
+    .hero {
+      margin: 0;
+      font-family: var(--font-display);
+      font-optical-sizing: auto;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 0.92;
+    }
+    .hero--compact {
+      margin-top: 0.75rem;
+      font-size: 2.25rem;
+    }
+    .hero--panel {
+      font-size: clamp(3.75rem, 6.4vw, 6rem);
+    }
+    .hero-word {
+      display: block;
+      /* Room for descenders and the gradient clip at the tight line height. */
+      padding-bottom: 0.04em;
+      animation: hero-word-in 560ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    }
+    .hero-word:nth-child(2) {
+      animation-delay: 90ms;
+    }
+    .hero-word:nth-child(3) {
+      animation-delay: 180ms;
+    }
+    .tagline {
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      line-height: 1.45;
+    }
+    .tagline--panel {
+      margin-top: 1.5rem;
+      font-size: 1.125rem;
+    }
+    /* Disabled with every other entrance by the global motion gate (data-motion="reduce"). */
+    @keyframes hero-word-in {
+      from {
+        opacity: 0;
+        transform: translateY(0.25em);
+      }
+    }
   `,
 })
 export class AuthShell {
