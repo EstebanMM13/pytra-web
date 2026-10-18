@@ -19,7 +19,8 @@ import { Skeleton } from '../../../shared/ui/skeleton';
 import { GameCover } from '../../../shared/ui/game-cover';
 import { PlatformCard } from '../../../shared/ui/platform-card';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
-import { PendingConfirmDialog, PendingConfirmFn, PendingConfirmMode } from '../shared/pending-confirm-dialog';
+import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
+import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
 import { PendingChange, apiCode, applyPendingChange, lookup } from '../sync.logic';
 import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRun, maskSteamId, steamHours } from './steam.logic';
 
@@ -31,7 +32,7 @@ import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRun, maskSteamId, steamHours
     TranslatePluralPipe,
     SectionHeader,
     Skeleton,
-    PendingConfirmDialog,
+    GameEditDialog,
     GameCover,
     LucideDynamicIcon,
     PlatformCard,

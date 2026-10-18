@@ -366,13 +366,6 @@
     "ignoredTitle": "Ignored",
     "ignoredHint": "These Steam games will not be imported again.",
     "unignore": "Restore",
-    "form": {
-      "name": "Name",
-      "category": "Category",
-      "saga": "Saga (optional)",
-      "noSaga": "No saga",
-      "genres": "Genres"
-    },
     "result": {
       "title": "Sync result",
       "scanned": "{{count}} games checked",

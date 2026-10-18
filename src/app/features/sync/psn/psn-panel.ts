@@ -24,7 +24,8 @@ import { PlatformCard } from '../../../shared/ui/platform-card';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
-import { PendingConfirmDialog, PendingConfirmFn, PendingConfirmMode } from '../shared/pending-confirm-dialog';
+import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
+import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
 import { PendingChange, applyPendingChange } from '../sync.logic';
 import { findPsnRun, isProfilePrivate, isValidOnlineId, normalizeOnlineId, psnErrorKey, psnHours } from './psn.logic';
 
@@ -43,7 +44,7 @@ const STATUS_ERROR_KEY = 'psn.errors.generic';
     TranslatePluralPipe,
     SectionHeader,
     Skeleton,
-    PendingConfirmDialog,
+    GameEditDialog,
     GameCover,
     LucideDynamicIcon,
     PlatformCard,

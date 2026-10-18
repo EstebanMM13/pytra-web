@@ -281,12 +281,10 @@
 }
 
 @if (confirmTarget(); as target) {
-  <app-pending-confirm-dialog
-    source="steam"
+  <app-game-edit-dialog
     [game]="target.game"
-    [mode]="target.mode"
-    [confirmWith]="confirmPending"
-    (confirmed)="onConfirmed($event)"
+    [pendingReview]="{ source: 'steam', mode: target.mode, confirmWith: confirmPending }"
+    (saved)="onConfirmed($event)"
     (closed)="confirmTarget.set(null)"
   />
 }
