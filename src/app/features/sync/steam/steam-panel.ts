@@ -233,6 +233,7 @@ export class SteamPanel {
    */
   private openRunFor(game: Game): void {
     if (game.category === 'ONLINE') {
+      this.toast.show(this.translate.instant('game.onlineNoRuns'), 'info');
       void this.router.navigate(['/games', game.id]);
       return;
     }

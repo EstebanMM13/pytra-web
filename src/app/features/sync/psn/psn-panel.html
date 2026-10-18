@@ -253,13 +253,20 @@
               >
                 {{ 'steam.confirmOnly' | translate }}
               </button>
+              <!-- ONLINE games have no runs: they are tracked through online playtime. -->
               <button
                 type="button"
                 (click)="openConfirm(game, 'run')"
-                class="press rounded-lg bg-brand px-3 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+                [disabled]="game.category === 'ONLINE'"
+                [attr.title]="game.category === 'ONLINE' ? ('game.onlineNoRuns' | translate) : null"
+                class="press rounded-lg bg-brand px-3 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
+                data-create-run
               >
                 {{ 'steam.createRun' | translate }}
               </button>
+              @if (game.category === 'ONLINE') {
+                <p class="w-full text-xs text-muted" data-online-hint>{{ 'game.onlineNoRuns' | translate }}</p>
+              }
             </div>
           </li>
         }

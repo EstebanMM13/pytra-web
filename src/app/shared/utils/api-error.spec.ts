@@ -27,6 +27,7 @@ describe('describeApiError', () => {
     expect(describeApiError(httpError(400, { message: 'INVALID_PLATFORM' }), fallback)?.key).toBe(
       'errors.invalidPlatform',
     );
+    expect(describeApiError(httpError(400, { message: 'ONLINE_GAME_RUN' }), fallback)?.key).toBe('game.onlineNoRuns');
   });
 
   it('explains a known validation field, or shows the raw field message', () => {

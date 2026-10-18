@@ -19,6 +19,7 @@ const MESSAGE_KEYS: Record<string, string> = {
   EXPORT_RATE_LIMITED: 'profile.export.rateLimited',
   INVALID_PLATFORM: 'errors.invalidPlatform',
   INVALID_YEAR: 'errors.invalidYear',
+  ONLINE_GAME_RUN: 'game.onlineNoRuns',
 };
 
 /** Request fields whose validation error has a full translated sentence. */

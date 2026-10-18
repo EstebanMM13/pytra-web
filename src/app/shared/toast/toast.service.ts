@@ -42,7 +42,8 @@ export class ToastService {
     this.items.update((list) => list.filter((t) => t.id !== id));
   }
 
-  private show(message: string, tone: ToastTone): void {
+  /** Any tone; used directly for `info` (no wrapper method: the service ships in the initial bundle). */
+  show(message: string, tone: ToastTone): void {
     const id = this.nextId++;
     this.items.update((list) => [...list.slice(-2), { id, message, tone }]);
     setTimeout(() => this.dismiss(id), DURATION_MS);

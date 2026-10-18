@@ -248,7 +248,8 @@ export class RunForm implements OnInit {
     this.gameService.findById(gameId).subscribe({
       next: (game) => {
         if (creating && !canStartRun(game)) {
-          // A new run for an ONLINE game (e.g. from a Steam import): show the game page instead.
+          // A new run for an ONLINE game (e.g. from a Steam import): explain why and show the game page.
+          this.toast.show(this.translate.instant('game.onlineNoRuns'), 'info');
           this.close();
           void this.router.navigate(['/games', game.id]);
           return;

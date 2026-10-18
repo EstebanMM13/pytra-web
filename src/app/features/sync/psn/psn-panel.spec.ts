@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { Observable, of, throwError } from 'rxjs';
 import { Experience } from '../../../core/models/experience.model';
@@ -73,6 +73,7 @@ describe('PsnPanel', () => {
       psn.getStatus.mockReturnValueOnce(throwError(() => apiError(500, 'BOOM')));
     }
     const launcher = { openNewRun: vi.fn(), openEditRun: vi.fn() };
+    const toast = { success: vi.fn(), error: vi.fn(), show: vi.fn() };
     const blockWrite = vi.fn(() => demo);
     TestBed.configureTestingModule({
       providers: [
@@ -82,7 +83,7 @@ describe('PsnPanel', () => {
         { provide: DemoModeService, useValue: { isDemo: signal(demo), blockWrite } },
         { provide: ExperienceService, useValue: { findAllByGame: vi.fn(() => of(runs)) } },
         { provide: RunFormLauncher, useValue: launcher },
-        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: ToastService, useValue: toast },
         { provide: SagaService, useValue: { findAll: () => of([]) } },
         { provide: GenreService, useValue: { findAll: () => of([]) } },
         { provide: GameService, useValue: { create: vi.fn(), update: vi.fn() } },
@@ -91,7 +92,7 @@ describe('PsnPanel', () => {
     });
     fixture = TestBed.createComponent(PsnPanel);
     fixture.detectChanges();
-    return { psn, launcher, blockWrite, component: fixture.componentInstance };
+    return { psn, launcher, toast, blockWrite, component: fixture.componentInstance };
   }
 
   const el = () => fixture.nativeElement as HTMLElement;
@@ -172,6 +173,34 @@ describe('PsnPanel', () => {
     expect(row.textContent).toMatch(/2[.,]5 h/);
     expect(row.textContent).toContain('steam.ignore');
     expect(row.textContent).toContain('steam.createRun');
+  });
+
+  it('ONLINE pending games cannot start a run and say why', () => {
+    setup({
+      psnStatus: status({ linked: true, pendingCount: 2 }),
+      pending: [pendingGame({ category: 'ONLINE' }), pendingGame({ id: 8, name: 'Hybrid', category: 'HYBRID' })],
+    });
+
+    const [online, hybrid] = [...el().querySelectorAll('li')] as HTMLElement[];
+    expect(online.querySelector<HTMLButtonElement>('[data-create-run]')!.disabled).toBe(true);
+    expect(online.querySelector('[data-online-hint]')?.textContent).toContain('game.onlineNoRuns');
+    expect(hybrid.querySelector<HTMLButtonElement>('[data-create-run]')!.disabled).toBe(false);
+    expect(hybrid.querySelector('[data-online-hint]')).toBeNull();
+  });
+
+  it('a game confirmed as ONLINE in run mode shows its page with an explanation instead of a run', () => {
+    const { component, launcher, toast } = setup({
+      psnStatus: status({ linked: true, pendingCount: 1 }),
+      pending: [pendingGame()],
+    });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    component.openConfirm(component.pending()[0], 'run');
+    component.onConfirmed({ id: 7, name: 'Astro Bot', category: 'ONLINE' } as Game);
+
+    expect(toast.show).toHaveBeenCalledWith('game.onlineNoRuns', 'info');
+    expect(navigate).toHaveBeenCalledWith(['/games', 7]);
+    expect(launcher.openNewRun).not.toHaveBeenCalled();
   });
 
   it('ignores a pending game and updates the counters', () => {

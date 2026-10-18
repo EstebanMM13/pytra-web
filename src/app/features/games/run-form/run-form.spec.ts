@@ -50,9 +50,11 @@ function dateInput(value: string, badInput = false): Pick<HTMLInputElement, 'val
 
 describe('RunForm', () => {
   const launcher = { close: vi.fn(), notifySaved: vi.fn(), request: signal(null) };
+  const toast = { success: vi.fn(), error: vi.fn(), show: vi.fn() };
 
   function setup(request: RunFormRequest) {
     launcher.close.mockClear();
+    toast.show.mockClear();
     TestBed.configureTestingModule({
       imports: [RunForm],
       providers: [
@@ -63,7 +65,7 @@ describe('RunForm', () => {
         { provide: PlatformService, useValue: { platforms: signal([PC]), load: () => of([PC]) } },
         { provide: PreferencesService, useValue: { defaultPlatform: () => 'PC', ratingPrecision: () => 'hundredths' } },
         { provide: RunFormLauncher, useValue: launcher },
-        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: ToastService, useValue: toast },
       ],
     });
     const router = TestBed.inject(Router);
@@ -122,8 +124,9 @@ describe('RunForm', () => {
       expect(form.games()?.map((g) => g.name)).toEqual(['COD', 'Zelda']);
     });
 
-    it('opening a new run for one shows the game page instead', () => {
+    it('opening a new run for one explains why and shows the game page instead', () => {
       const { navigate } = setup({ mode: 'create', gameId: 2, navigateOnCreate: false });
+      expect(toast.show).toHaveBeenCalledWith('game.onlineNoRuns', 'info');
       expect(launcher.close).toHaveBeenCalled();
       expect(navigate).toHaveBeenCalledWith(['/games', 2]);
     });
@@ -156,6 +159,7 @@ describe('RunForm', () => {
       });
       expect(launcher.close).not.toHaveBeenCalled();
       expect(navigate).not.toHaveBeenCalled();
+      expect(toast.show).not.toHaveBeenCalled();
     });
   });
 });

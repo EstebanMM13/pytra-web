@@ -778,7 +778,7 @@
       }
     },
     "upcoming": "Próximamente",
-    "onlineNoRuns": "Los juegos online se registran con horas online, no con partidas.",
+    "onlineNoRuns": "Este juego es solo online: sus horas se registran como tiempo online, no como partidas.",
     "allGenres": "Ver los {{count}} géneros",
     "showLessGenres": "Ver menos"
   },
