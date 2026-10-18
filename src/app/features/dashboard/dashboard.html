@@ -36,13 +36,13 @@
         <app-skeleton class="h-9 w-56 rounded-lg" />
       }
     </div>
-    @if (steamPendingCount() > 0) {
+    @if (pending().count > 0) {
       <a
         routerLink="/sync"
         class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-[13px] text-gold-tint-fg hover:opacity-90 md:self-auto"
       >
         <svg [lucideIcon]="icons.download" [size]="14"></svg>
-        {{ 'dashboard.steamPending' | translatePlural: steamPendingCount() }}
+        {{ pendingBannerKey() | translatePlural: pending().count }}
         <svg [lucideIcon]="icons.arrowRight" [size]="14"></svg>
       </a>
     }

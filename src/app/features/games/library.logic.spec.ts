@@ -6,6 +6,7 @@ import {
   isOnlineOnly,
   isUpcoming,
   pendingSource,
+  pendingSummary,
   matchesCategory,
   parseCategoryFilter,
   lastPlayedKey,
@@ -424,5 +425,24 @@ describe('pendingSource', () => {
     expect(pendingSource([a, b], new Set([101]), new Set([102]))).toBe('mixed');
     expect(pendingSource([a, b], new Set([101]), new Set())).toBe('mixed');
     expect(pendingSource([a], new Set(), new Set())).toBe('mixed');
+  });
+});
+
+describe('pendingSummary', () => {
+  const a = game({ id: 101, name: 'A', reviewStatus: 'PENDING_REVIEW' });
+  const b = game({ id: 102, name: 'B', reviewStatus: 'PENDING_REVIEW' });
+
+  it('counts Steam and PSN pending games together and names a single source', () => {
+    expect(pendingSummary([a, b], [])).toEqual({ count: 2, source: 'steam' });
+    expect(pendingSummary([], [a])).toEqual({ count: 1, source: 'psn' });
+  });
+
+  it('is mixed with both sources, counting a game in both lists once', () => {
+    expect(pendingSummary([a], [b])).toEqual({ count: 2, source: 'mixed' });
+    expect(pendingSummary([a, b], [b]).count).toBe(2);
+  });
+
+  it('is empty with nothing pending', () => {
+    expect(pendingSummary([], []).count).toBe(0);
   });
 });

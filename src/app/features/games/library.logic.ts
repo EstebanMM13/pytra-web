@@ -84,6 +84,19 @@ export function pendingSource(
   return 'mixed';
 }
 
+/** Pending games of both integrations together: how many (distinct ids) and their source. */
+export interface PendingSummary {
+  count: number;
+  source: PendingSource;
+}
+
+/** Sums the Steam and PSN pending lists (a game in both counts once) and names their source. */
+export function pendingSummary(steam: readonly Game[], psn: readonly Game[]): PendingSummary {
+  const pending = [...new Map([...steam, ...psn].map((g) => [g.id, g])).values()];
+  const source = pendingSource(pending, new Set(steam.map((g) => g.id)), new Set(psn.map((g) => g.id)));
+  return { count: pending.length, source };
+}
+
 /** Lower-case, accent-free text for forgiving name matching ("pokemon" finds "Pokémon"). */
 export function normalizeText(value: string): string {
   return value

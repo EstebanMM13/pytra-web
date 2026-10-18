@@ -88,8 +88,6 @@
   },
   "dashboard": {
     "greetingHello": "Hi,",
-    "steamPending": "{{count}} Steam games to review",
-    "steamPending_one": "{{count}} Steam game to review",
     "stats": {
       "games": "Games",
       "sagas": "Sagas",

@@ -9,7 +9,9 @@ import { Observable, catchError, of } from 'rxjs';
 import { InProgressExperience, MostPlayedGame, SagaStat, StatsSummary, TopRatedExperience, YearStat } from '../../core/models/stats.model';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
+import { PsnService } from '../../core/services/psn.service';
 import { SteamService } from '../../core/services/steam.service';
+import { PENDING_BANNER_KEYS, pendingSummary } from '../games/library.logic';
 import { UserService } from '../../core/services/user.service';
 import { InstallPromptService } from '../../core/services/install-prompt.service';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -82,6 +84,7 @@ export class Dashboard {
   protected readonly installPrompt = inject(InstallPromptService);
   private readonly statsService = inject(StatsService);
   private readonly steamService = inject(SteamService);
+  private readonly psnService = inject(PsnService);
   private readonly translate = inject(TranslateService);
   private readonly runFormLauncher = inject(RunFormLauncher);
   private readonly gameService = inject(GameService);
@@ -109,7 +112,11 @@ export class Dashboard {
   readonly topRated = signal<TopRatedExperience[] | null>(null);
   readonly mostPlayedSingleplayer = signal<MostPlayedGame[] | null>(null);
   readonly mostPlayedOnline = signal<MostPlayedGame[] | null>(null);
-  readonly steamPendingCount = signal(0);
+  private readonly steamPending = signal<readonly Game[]>([]);
+  private readonly psnPending = signal<readonly Game[]>([]);
+  /** Steam and PSN games waiting for review, together, and the copy naming their source. */
+  protected readonly pending = computed(() => pendingSummary(this.steamPending(), this.psnPending()));
+  protected readonly pendingBannerKey = computed(() => PENDING_BANNER_KEYS[this.pending().source]);
   /** Library and sagas, only for achievements; `null` while loading (badges stay hidden). */
   readonly games = signal<Game[] | null>(null);
   readonly sagas = signal<Saga[] | null>(null);
@@ -260,7 +267,11 @@ export class Dashboard {
     this.steamService
       .getPending()
       .pipe(catchError(() => of([])))
-      .subscribe((games) => this.steamPendingCount.set(games.length));
+      .subscribe((games) => this.steamPending.set(games));
+    this.psnService
+      .getPending()
+      .pipe(catchError(() => of([])))
+      .subscribe((games) => this.psnPending.set(games));
   }
 
   /** Retry after a failure: back to skeletons, then reload everything. */

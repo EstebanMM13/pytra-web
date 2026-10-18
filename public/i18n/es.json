@@ -88,8 +88,6 @@
   },
   "dashboard": {
     "greetingHello": "Hola,",
-    "steamPending": "{{count}} juegos de Steam por revisar",
-    "steamPending_one": "{{count}} juego de Steam por revisar",
     "stats": {
       "games": "Juegos",
       "sagas": "Sagas",
