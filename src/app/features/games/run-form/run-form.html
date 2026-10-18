@@ -284,7 +284,7 @@
       ></textarea>
     </div>
 
-    <!-- Toggles + reveal -->
+    <!-- Toggles -->
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
       <div class="divide-y divide-border rounded-xl border border-border bg-surface md:contents">
         <button type="button" role="switch" [attr.aria-checked]="platinum()" (click)="toggle('platinum')" class="run-form-switch">
@@ -300,18 +300,31 @@
           <span>{{ 'runForm.replay' | translate }}</span>
         </button>
       </div>
-      <button
-        type="button"
-        (click)="showMore.set(!showMore())"
-        [attr.aria-expanded]="showMore()"
-        class="self-start text-[13px] text-brand-light hover:underline md:ml-auto md:self-auto"
-      >
-        {{ (showMore() ? 'runForm.less' : 'runForm.more') | translate }}
-      </button>
     </div>
 
+    <!-- Best / worst + notes: its own bordered row so it reads as a form control, not a footnote -->
+    <button
+      type="button"
+      (click)="showMore.set(!showMore())"
+      [attr.aria-expanded]="showMore()"
+      aria-controls="run-form-more"
+      class="run-form-reveal"
+    >
+      <svg [lucideIcon]="showMore() ? icons.minus : icons.plus" [size]="18" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+      <span class="flex min-w-0 flex-1 flex-col">
+        <span class="text-text">{{ 'runForm.bestWorst' | translate }}</span>
+        <span class="text-xs text-muted">{{ 'runForm.bestWorstHint' | translate }}</span>
+      </span>
+      <svg
+        [lucideIcon]="icons.chevronDown"
+        [size]="18"
+        class="run-form-reveal-chevron shrink-0 text-muted"
+        aria-hidden="true"
+      ></svg>
+    </button>
+
     @if (showMore()) {
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-3.5">
+      <div id="run-form-more" class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-3.5">
         <div class="flex flex-col gap-2">
           <label for="run-form-pros" class="text-[13px] text-success">{{ 'runForm.pros' | translate }}</label>
           <textarea

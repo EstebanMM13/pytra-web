@@ -105,7 +105,7 @@ describe('RunForm', () => {
     const fixture = TestBed.createComponent(RunForm);
     fixture.componentRef.setInput('request', request);
     fixture.detectChanges();
-    return { form: fixture.componentInstance as unknown as RunFormHarness, navigate };
+    return { form: fixture.componentInstance as unknown as RunFormHarness, navigate, fixture };
   }
 
   describe('status and end date', () => {
@@ -185,6 +185,36 @@ describe('RunForm', () => {
     it('keeps the stored value when editing a run', () => {
       const { form } = setup({ mode: 'edit', experience: experience({ gameId: 1, replay: false }) }, { 1: 3 });
       expect(form.form.controls.replay.value).toBe(false);
+    });
+  });
+
+  describe('best / worst section', () => {
+    /** ModalSheet moves itself to <body>, so its content is queried from the document. */
+    function parts() {
+      return {
+        reveal: document.querySelector<HTMLButtonElement>('button[aria-controls="run-form-more"]')!,
+        pros: () => document.querySelector('#run-form-pros'),
+      };
+    }
+
+    it('is collapsed behind a visible toggle row for a new run, and opens on click', () => {
+      const { fixture } = setup({ mode: 'create', gameId: 1, navigateOnCreate: false });
+      const { reveal, pros } = parts();
+      expect(reveal.textContent).toContain('runForm.bestWorst');
+      expect(reveal.getAttribute('aria-expanded')).toBe('false');
+      expect(pros()).toBeNull();
+
+      reveal.click();
+      fixture.detectChanges();
+      expect(reveal.getAttribute('aria-expanded')).toBe('true');
+      expect(pros()).not.toBeNull();
+    });
+
+    it('starts expanded when the edited run already has best / worst content', () => {
+      setup({ mode: 'edit', experience: experience({ gameId: 1, cons: 'Backtracking' }) });
+      const { reveal, pros } = parts();
+      expect(reveal.getAttribute('aria-expanded')).toBe('true');
+      expect(pros()).not.toBeNull();
     });
   });
 

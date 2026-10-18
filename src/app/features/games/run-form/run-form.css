@@ -77,6 +77,34 @@
     background-color 150ms ease-out;
 }
 
+/* "Lo mejor / lo peor" disclosure: a bordered row as tall as the inputs, so it is noticed. */
+.run-form-reveal {
+  display: flex;
+  width: 100%;
+  min-height: 50px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--pt-border);
+  border-radius: 12px;
+  background: var(--pt-surface);
+  padding: 10px 14px;
+  font-size: 15px;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.run-form-reveal:hover {
+  border-color: var(--pt-border-strong);
+}
+
+.run-form-reveal-chevron {
+  transition: transform 150ms ease-out;
+}
+
+.run-form-reveal[aria-expanded='true'] .run-form-reveal-chevron {
+  transform: rotate(180deg);
+}
+
 @media (width >= 48rem) {
   .run-form-cell {
     flex-direction: column;
@@ -110,6 +138,14 @@
     background: var(--pt-bg);
     padding: 11px 14px;
     font-size: 15px;
+  }
+
+  .run-form-reveal {
+    min-height: 46px;
+    border-radius: 10px;
+    background: var(--pt-bg);
+    padding: 8px 14px;
+    font-size: 14px;
   }
 
   .run-form-switch {
