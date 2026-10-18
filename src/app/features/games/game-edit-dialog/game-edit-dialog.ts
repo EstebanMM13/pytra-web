@@ -54,17 +54,30 @@ function sortByName(sagas: readonly Saga[]): Saga[] {
 }
 
 /** Empty, or an absolute https URL with a host. */
-function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors | null {
-  const value = control.value.trim();
+function isEmptyOrHttpsUrl(raw: string): boolean {
+  const value = raw.trim();
   if (!value) {
-    return null;
+    return true;
   }
   try {
     const url = new URL(value);
-    return url.protocol === 'https:' && url.hostname ? null : { httpsUrl: true };
+    return url.protocol === 'https:' && !!url.hostname;
   } catch {
-    return { httpsUrl: true };
+    return false;
   }
+}
+
+function httpsUrlValidator(control: AbstractControl<string>): ValidationErrors | null {
+  return isEmptyOrHttpsUrl(control.value) ? null : { httpsUrl: true };
+}
+
+/**
+ * Cover of a pending import, ready for the form: `http://` is upgraded to `https://`, and a url that
+ * is still invalid is dropped so it cannot block confirming (the user can add a cover later).
+ */
+export function pendingCoverUrl(url: string | null): string {
+  const upgraded = (url ?? '').trim().replace(/^http:\/\//i, 'https://');
+  return isEmptyOrHttpsUrl(upgraded) ? upgraded : '';
 }
 
 /**
@@ -203,8 +216,8 @@ export class GameEditDialog implements OnInit {
         developer: game.developer ?? '',
         publisher: game.publisher ?? '',
         releaseDate: game.releaseDate ?? '',
-        sagaId: game.sagaId,
-        coverImageUrl: game.coverImageUrl ?? '',
+        sagaId: game.sagaId ?? null,
+        coverImageUrl: this.pendingReview() ? pendingCoverUrl(game.coverImageUrl) : (game.coverImageUrl ?? ''),
       });
       this.category.set(game.category ?? 'SINGLEPLAYER');
       this.selectedGenreIds.set(new Set(game.genres.map((g) => g.id)));
@@ -302,6 +315,13 @@ export class GameEditDialog implements OnInit {
     if (this.saving()) {
       return;
     }
+    const review = this.pendingReview();
+    const game = this.game();
+    if (review && !game) {
+      // Pending copy without a pending game: never fall through to creating a new game.
+      console.error('GameEditDialog: pendingReview requires a game to confirm');
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -318,8 +338,6 @@ export class GameEditDialog implements OnInit {
       genreIds: [...this.selectedGenreIds()],
     };
     this.saving.set(true);
-    const review = this.pendingReview();
-    const game = this.game();
     if (review && game) {
       this.confirmPending(review, game.id, request);
       return;

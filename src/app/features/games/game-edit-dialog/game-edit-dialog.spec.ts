@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
-import { Subject, of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { Game } from '../../../core/models/game.model';
 import { Genre } from '../../../core/models/genre.model';
 import { Saga } from '../../../core/models/saga.model';
@@ -11,7 +11,7 @@ import { IgdbMetadataService } from '../../../core/services/igdb-metadata.servic
 import { SagaService } from '../../../core/services/saga.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { PendingConfirmFn, PendingReview } from '../../sync/shared/pending-review';
-import { GameEditDialog, coverNeedsWarning } from './game-edit-dialog';
+import { GameEditDialog, coverNeedsWarning, pendingCoverUrl } from './game-edit-dialog';
 import { AutofillPick } from './metadata-autofill.logic';
 
 const SAGAS: Saga[] = [
@@ -22,6 +22,13 @@ const GENRES: Genre[] = [
   { id: 10, name: 'ACCIÓN' },
   { id: 11, name: 'AVENTURA' },
 ];
+
+/** Buttons by role and accessible name (aria-label, else their trimmed text). */
+function buttonsNamed(root: HTMLElement, name: string): HTMLButtonElement[] {
+  return [...root.querySelectorAll<HTMLButtonElement>('button, [role="button"]')].filter(
+    (b) => (b.getAttribute('aria-label') ?? b.textContent ?? '').trim() === name,
+  );
+}
 
 /** The parts of the dialog the specs read. */
 interface DialogHarness {
@@ -169,9 +176,13 @@ describe('GameEditDialog pending review', () => {
   const failWith = (status: number, message: string): PendingConfirmFn => () =>
     throwError(() => new HttpErrorResponse({ status, error: { message } }));
 
-  function setup(review: PendingReview) {
+  function setup(review: PendingReview | null, game: Game | null = PENDING) {
     const toast = { success: vi.fn(), error: vi.fn() };
-    const gameService = { create: vi.fn(), update: vi.fn(), delete: vi.fn() };
+    const gameService = {
+      create: vi.fn((): Observable<Game> => of({ ...PENDING, id: 99 })),
+      update: vi.fn((): Observable<Game> => of(PENDING)),
+      delete: vi.fn(),
+    };
     TestBed.configureTestingModule({
       imports: [GameEditDialog],
       providers: [
@@ -184,16 +195,18 @@ describe('GameEditDialog pending review', () => {
       ],
     });
     const fixture = TestBed.createComponent(GameEditDialog);
-    fixture.componentRef.setInput('game', PENDING);
+    fixture.componentRef.setInput('game', game);
     fixture.componentRef.setInput('pendingReview', review);
     fixture.detectChanges();
     const el = document.body.querySelector('app-modal-sheet') as HTMLElement;
     const dialog = fixture.componentInstance as unknown as DialogHarness;
+    const saved = vi.fn();
+    fixture.componentInstance.saved.subscribe(saved);
     const submit = () => {
       el.querySelector('form')!.dispatchEvent(new Event('submit'));
       fixture.detectChanges();
     };
-    return { fixture, el, dialog, toast, gameService, submit };
+    return { fixture, el, dialog, toast, gameService, submit, saved };
   }
 
   afterEach(() => TestBed.resetTestingModule());
@@ -218,15 +231,98 @@ describe('GameEditDialog pending review', () => {
     expect(el.textContent).toContain('psn.confirmDialog.saveAndRun');
     expect(el.querySelector('[data-review-intro]')!.textContent).toContain('psn.confirmDialog.introRun');
     expect(el.textContent).not.toContain('steam.confirmDialog');
-    expect(el.textContent).not.toContain('game.delete');
+    expect(buttonsNamed(el, 'game.delete')).toEqual([]);
+  });
+
+  it('upgrades an http cover and drops one that is still invalid, so confirming is never blocked', () => {
+    const http = setup(
+      { source: 'steam', mode: 'confirm', confirmWith: vi.fn() },
+      { ...PENDING, coverImageUrl: 'http://cdn.example.com/c.jpg' },
+    );
+    expect(http.dialog.form.controls.coverImageUrl.value).toBe('https://cdn.example.com/c.jpg');
+    expect(http.dialog.form.valid).toBe(true);
+    TestBed.resetTestingModule();
+
+    const broken = setup({ source: 'steam', mode: 'confirm', confirmWith: vi.fn() }, { ...PENDING, coverImageUrl: 'not a url' });
+    expect(broken.dialog.form.controls.coverImageUrl.value).toBe('');
+    expect(broken.dialog.form.valid).toBe(true);
+  });
+
+  it('shows the field errors when the form is invalid on save', () => {
+    const confirmWith = vi.fn<PendingConfirmFn>();
+    const { fixture, el, dialog, submit } = setup({ source: 'steam', mode: 'confirm', confirmWith });
+    dialog.form.controls.name.setValue('  ');
+    dialog.form.controls.coverImageUrl.setValue('ftp://x');
+    fixture.detectChanges();
+
+    submit();
+    expect(confirmWith).not.toHaveBeenCalled();
+    expect(el.textContent).toContain('game.form.nameRequired');
+    expect(el.textContent).toContain('game.form.coverUrlInvalid');
+  });
+
+  it('confirms once while a confirm is in flight', () => {
+    const response = new Subject<Game>();
+    const confirmWith = vi.fn<PendingConfirmFn>(() => response);
+    const { submit, saved } = setup({ source: 'psn', mode: 'confirm', confirmWith });
+
+    submit();
+    submit();
+    expect(confirmWith).toHaveBeenCalledTimes(1);
+
+    response.next(PENDING);
+    expect(saved).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not emit on a failed confirm and lets the user retry', () => {
+    const confirmWith = vi.fn<PendingConfirmFn>(() => throwError(() => new HttpErrorResponse({ status: 500 })));
+    const { submit, saved, toast } = setup({ source: 'steam', mode: 'confirm', confirmWith });
+
+    submit();
+    expect(toast.error).toHaveBeenCalledWith('steam.errors.confirmFailed');
+    expect(saved).not.toHaveBeenCalled();
+
+    confirmWith.mockReturnValue(of(PENDING));
+    submit();
+    expect(confirmWith).toHaveBeenCalledTimes(2);
+    expect(saved).toHaveBeenCalledWith(PENDING);
+  });
+
+  it('never creates a game when a pending review has no game', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const confirmWith = vi.fn<PendingConfirmFn>();
+    const { dialog, gameService, submit, saved } = setup({ source: 'steam', mode: 'confirm', confirmWith }, null);
+    dialog.form.controls.name.setValue('Typed name');
+
+    submit();
+    expect(error).toHaveBeenCalled();
+    expect(gameService.create).not.toHaveBeenCalled();
+    expect(confirmWith).not.toHaveBeenCalled();
+    expect(saved).not.toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  it('still creates and updates library games outside pending review', () => {
+    const created = setup(null, null);
+    created.dialog.form.controls.name.setValue('New game');
+    created.submit();
+    expect(created.gameService.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'New game' }));
+    expect(created.toast.success).toHaveBeenCalledWith('game.created');
+    expect(created.saved).toHaveBeenCalledWith({ ...PENDING, id: 99 });
+    TestBed.resetTestingModule();
+
+    const edited = setup(null, PENDING);
+    expect(buttonsNamed(edited.el, 'game.delete')).toHaveLength(1);
+    edited.submit();
+    expect(edited.gameService.update).toHaveBeenCalledWith(7, expect.objectContaining({ name: 'Astro Bot' }));
+    expect(edited.toast.success).toHaveBeenCalledWith('game.saved');
+    expect(edited.saved).toHaveBeenCalledWith(PENDING);
   });
 
   it('confirms with the edited form and emits the confirmed game without a toast', () => {
     const confirmed = { ...PENDING, reviewStatus: 'CONFIRMED' } as Game;
     const confirmWith = vi.fn<PendingConfirmFn>(() => of(confirmed));
-    const { fixture, dialog, toast, gameService, submit } = setup({ source: 'steam', mode: 'confirm', confirmWith });
-    const saved = vi.fn();
-    fixture.componentInstance.saved.subscribe(saved);
+    const { dialog, toast, gameService, submit, saved } = setup({ source: 'steam', mode: 'confirm', confirmWith });
     dialog.form.controls.developer.setValue('  ');
 
     submit();
@@ -248,8 +344,7 @@ describe('GameEditDialog pending review', () => {
 
   it('keeps the autofill search and its "filled from" note', () => {
     const { fixture, el, dialog } = setup({ source: 'steam', mode: 'confirm', confirmWith: vi.fn() });
-    const button = el.querySelector('form > div > button') as HTMLButtonElement;
-    expect(button.textContent).toContain('game.autofill.open');
+    const [button] = buttonsNamed(el, 'game.autofill.open');
     button.click();
     fixture.detectChanges();
     expect(el.querySelector('app-metadata-autofill')).not.toBeNull();
@@ -279,6 +374,16 @@ describe('GameEditDialog pending review', () => {
     const { toast, submit } = setup({ source: 'steam', mode: 'confirm', confirmWith: failWith(409, 'SYNC_IN_PROGRESS') });
     submit();
     expect(toast.error).toHaveBeenCalledWith('steam.errors.syncInProgress');
+  });
+});
+
+describe('pendingCoverUrl', () => {
+  it('upgrades http, keeps https and empties anything else', () => {
+    expect(pendingCoverUrl('http://x.com/c.jpg')).toBe('https://x.com/c.jpg');
+    expect(pendingCoverUrl(' https://x.com/c.jpg ')).toBe('https://x.com/c.jpg');
+    expect(pendingCoverUrl('ftp://x.com/c.jpg')).toBe('');
+    expect(pendingCoverUrl('nope')).toBe('');
+    expect(pendingCoverUrl(null)).toBe('');
   });
 });
 
