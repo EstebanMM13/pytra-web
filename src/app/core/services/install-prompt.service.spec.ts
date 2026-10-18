@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { BeforeInstallPromptEvent, InstallPromptService } from './install-prompt.service';
+import { resetInstallPromptStash, stashInstallPrompt } from '../install-prompt-stash';
 
 function fakePromptEvent(outcome: 'accepted' | 'dismissed'): BeforeInstallPromptEvent & { prompted: boolean } {
   const event = new Event('beforeinstallprompt', { cancelable: true }) as BeforeInstallPromptEvent & {
@@ -18,6 +19,7 @@ function fakePromptEvent(outcome: 'accepted' | 'dismissed'): BeforeInstallPrompt
 describe('InstallPromptService', () => {
   beforeEach(() => {
     localStorage.clear();
+    resetInstallPromptStash();
     TestBed.resetTestingModule();
   });
 
@@ -59,5 +61,15 @@ describe('InstallPromptService', () => {
     expect(service.showBanner()).toBe(false);
     expect(service.canInstall()).toBe(true);
     expect(localStorage.getItem('pytra_install_banner_dismissed')).toBe('1');
+  });
+
+  it('picks up a prompt the startup stash caught before the service existed', () => {
+    stashInstallPrompt();
+    const event = fakePromptEvent('accepted');
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+
+    const service = TestBed.inject(InstallPromptService);
+    expect(service.canInstall()).toBe(true);
   });
 });

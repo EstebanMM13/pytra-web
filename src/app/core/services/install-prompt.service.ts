@@ -1,18 +1,21 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { isNativePlatform } from '../native-platform';
+import {
+  BeforeInstallPromptEvent,
+  clearDeferredInstallPrompt,
+  installPromptState,
+  onInstallPromptChange,
+  stashInstallPrompt,
+} from '../install-prompt-stash';
 
-/** Chromium's non-standard install prompt event. */
-export interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>;
-  readonly userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform?: string }>;
-}
+export type { BeforeInstallPromptEvent } from '../install-prompt-stash';
 
 const DASHBOARD_DISMISS_KEY = 'pytra_install_banner_dismissed';
 
 /**
- * PWA install flow. Must be instantiated at startup (see app.config) so the
- * `beforeinstallprompt` listener is attached before the browser fires it.
- * Inert inside the Capacitor native shell.
+ * PWA install flow. Loaded lazily by the screens that offer it (dashboard, profile): the early
+ * `beforeinstallprompt` is caught by the startup stash (main.ts, `install-prompt-stash.ts`) and
+ * read from there. Inert inside the Capacitor native shell.
  */
 @Injectable({ providedIn: 'root' })
 export class InstallPromptService {
@@ -32,18 +35,21 @@ export class InstallPromptService {
   constructor() {
     if (this.native || typeof window === 'undefined') return;
 
+    // Normally attached by main.ts already; idempotent.
+    stashInstallPrompt();
     this.installed.set(isStandalone());
     this.showIosHint.set(!this.installed() && isIosSafari());
 
-    window.addEventListener('beforeinstallprompt', (event) => {
-      event.preventDefault();
-      this.deferred.set(event as BeforeInstallPromptEvent);
-    });
-    window.addEventListener('appinstalled', () => {
-      this.deferred.set(null);
-      this.installed.set(true);
-      this.showIosHint.set(false);
-    });
+    const sync = (): void => {
+      const { deferred, installed } = installPromptState();
+      this.deferred.set(deferred);
+      if (installed) {
+        this.installed.set(true);
+        this.showIosHint.set(false);
+      }
+    };
+    sync();
+    inject(DestroyRef).onDestroy(onInstallPromptChange(sync));
   }
 
   /** Shows the browser install prompt. Resolves true when the user accepted. */
@@ -51,7 +57,7 @@ export class InstallPromptService {
     const event = this.deferred();
     if (!event) return false;
     // The event can only be used once, whatever the outcome.
-    this.deferred.set(null);
+    clearDeferredInstallPrompt();
     await event.prompt();
     const choice = await event.userChoice;
     return choice.outcome === 'accepted';
