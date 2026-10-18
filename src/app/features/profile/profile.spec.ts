@@ -129,6 +129,18 @@ describe('Profile', () => {
     expect(navigate).toHaveBeenCalledWith(['/login']);
   });
 
+  it('logs out from the button at the bottom of the mobile page', () => {
+    const { el } = setup();
+    const auth = TestBed.inject(AuthService) as unknown as { logout: ReturnType<typeof vi.fn> };
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const button = [...el.querySelectorAll<HTMLButtonElement>('main > div > button')].pop()!;
+    expect(button.textContent!.trim()).toBe('nav.logout');
+    expect(button.classList).toContain('lg:hidden');
+    button.click();
+    expect(auth.logout).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith(['/login']);
+  });
+
   it('keeps "Borrar cuenta" inside the Datos section (no separate mobile row)', () => {
     const { el, rows } = setup();
     const open = el.querySelector<HTMLButtonElement>('#profile-data #profile-delete button')!;

@@ -397,6 +397,14 @@
         </button>
       </div>
     </section>
+
+    <button
+      type="button"
+      (click)="logout()"
+      class="rounded-xl border border-border py-[15px] text-[15px] text-danger hover:bg-danger-bg lg:hidden"
+    >
+      {{ 'nav.logout' | translate }}
+    </button>
   </div>
 </main>
 
