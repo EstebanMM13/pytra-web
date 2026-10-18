@@ -9,7 +9,9 @@ import { Game } from '../../../core/models/game.model';
 import { PsnPendingGame, PsnStatus, PsnSyncResult } from '../../../core/models/psn.model';
 import { DemoModeService } from '../../../core/services/demo-mode.service';
 import { ExperienceService } from '../../../core/services/experience.service';
+import { GameService } from '../../../core/services/game.service';
 import { GenreService } from '../../../core/services/genre.service';
+import { IgdbMetadataService } from '../../../core/services/igdb-metadata.service';
 import { PsnService } from '../../../core/services/psn.service';
 import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
 import { SagaService } from '../../../core/services/saga.service';
@@ -83,6 +85,8 @@ describe('PsnPanel', () => {
         { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: SagaService, useValue: { findAll: () => of([]) } },
         { provide: GenreService, useValue: { findAll: () => of([]) } },
+        { provide: GameService, useValue: { create: vi.fn(), update: vi.fn() } },
+        { provide: IgdbMetadataService, useValue: { providers: () => of({ igdb: false }) } },
       ],
     });
     fixture = TestBed.createComponent(PsnPanel);
@@ -200,6 +204,25 @@ describe('PsnPanel', () => {
     component.onConfirmed({ id: 8, name: 'Hybrid', category: 'HYBRID' } as Game);
     expect(launcher.openNewRun).toHaveBeenCalledWith(8, { platform: 'PS4' });
     expect(component.status()?.pendingCount).toBe(0);
+  });
+
+  it('confirming in the review dialog in run mode opens the run for the confirmed game', () => {
+    const { component, psn, launcher } = setup({
+      psnStatus: status({ linked: true, pendingCount: 1 }),
+      pending: [pendingGame({ category: 'HYBRID', psnPlatform: 'PS4' })],
+    });
+    psn.confirmPending.mockReturnValue(of({ id: 7, name: 'Astro Bot', category: 'HYBRID' } as Game));
+
+    component.openConfirm(component.pending()[0], 'run');
+    fixture.detectChanges();
+    // The dialog's modal sheet moves itself to <body>.
+    document.body.querySelector('app-modal-sheet form')!.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+
+    expect(psn.confirmPending).toHaveBeenCalledWith(7, expect.objectContaining({ name: 'Astro Bot', category: 'HYBRID' }));
+    expect(launcher.openNewRun).toHaveBeenCalledWith(7, { platform: 'PS4' });
+    expect(component.confirmTarget()).toBeNull();
+    expect(document.body.querySelector('app-modal-sheet')).toBeNull();
   });
 
   it('shows the privacy steps instead of the summary after syncing a private profile', () => {
