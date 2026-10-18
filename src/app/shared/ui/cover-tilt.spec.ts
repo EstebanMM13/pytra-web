@@ -1,7 +1,15 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { setMotionPreference } from '../utils/motion';
-import { CoverTilt, MAX_TILT_DEG, tiltAngles, tiltTransform } from './cover-tilt';
+import {
+  CoverTilt,
+  MAX_TILT_DEG,
+  PRESS_TILT_DEG,
+  PRESSED_CLASS,
+  pressTransform,
+  tiltAngles,
+  tiltTransform,
+} from './cover-tilt';
 
 describe('tiltAngles', () => {
   it('is flat at the centre', () => {
@@ -109,5 +117,48 @@ describe('CoverTilt', () => {
     setMotionPreference('reduce');
     el.dispatchEvent(pointer('pointermove', 100, 75));
     expect(frames).toHaveLength(0);
+  });
+
+  it('presses a touched cover: shrinks, tilts toward the touch point and sweeps the shine', () => {
+    mockMedia(false);
+    const el = setup();
+    el.dispatchEvent(pointer('pointerdown', 100, 75, 'touch'));
+    expect(el.style.transform).toBe(pressTransform({ rotateX: 0, rotateY: PRESS_TILT_DEG }));
+    expect(el.classList).toContain(PRESSED_CLASS);
+
+    el.dispatchEvent(pointer('pointerup', 100, 75, 'touch'));
+    expect(el.style.transform).toBe('');
+    expect(el.classList).not.toContain(PRESSED_CLASS);
+  });
+
+  it('springs back on cancel and when the page starts scrolling', () => {
+    const el = setup();
+    el.dispatchEvent(pointer('pointerdown', 50, 0, 'pen'));
+    el.dispatchEvent(pointer('pointercancel', 50, 0, 'pen'));
+    expect(el.classList).not.toContain(PRESSED_CLASS);
+
+    el.dispatchEvent(pointer('pointerdown', 50, 0, 'touch'));
+    window.dispatchEvent(new Event('scroll'));
+    expect(el.style.transform).toBe('');
+    expect(el.classList).not.toContain(PRESSED_CLASS);
+  });
+
+  it('never blocks the default action of a press', () => {
+    const el = setup();
+    const down = new MouseEvent('pointerdown', { clientX: 10, clientY: 10, cancelable: true });
+    Object.defineProperty(down, 'pointerType', { value: 'touch' });
+    el.dispatchEvent(down);
+    expect(down.defaultPrevented).toBe(false);
+  });
+
+  it('does not press for the mouse or with reduced motion', () => {
+    const el = setup();
+    el.dispatchEvent(pointer('pointerdown', 100, 75, 'mouse'));
+    expect(el.classList).not.toContain(PRESSED_CLASS);
+
+    setMotionPreference('reduce');
+    el.dispatchEvent(pointer('pointerdown', 100, 75, 'touch'));
+    expect(el.style.transform).toBe('');
+    expect(el.classList).not.toContain(PRESSED_CLASS);
   });
 });

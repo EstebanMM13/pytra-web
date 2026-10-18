@@ -29,6 +29,20 @@ export function tiltTransform({ rotateX, rotateY }: TiltAngles): string {
   return `perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 }
 
+/** Tilt of a touch / pen press, in degrees at the edges: gentler than the mouse tilt. */
+export const PRESS_TILT_DEG = 4;
+
+/** Scale of a pressed cover. */
+export const PRESS_SCALE = 0.96;
+
+/** Pressed cover: tilted toward the touch point and slightly shrunk. */
+export function pressTransform(angles: TiltAngles): string {
+  return `${tiltTransform(angles)} scale(${PRESS_SCALE})`;
+}
+
+/** Class set while a touch / pen press holds the cover: drives the shine sweep (games.css). */
+export const PRESSED_CLASS = 'cover-pressed';
+
 const FINE_HOVER_QUERY = '(hover: hover) and (pointer: fine)';
 
 /**
@@ -36,6 +50,11 @@ const FINE_HOVER_QUERY = '(hover: hover) and (pointer: fine)';
  * not with reduced motion). One style write per animation frame, back to flat on leave. Native
  * listeners, so pointer moves never trigger change detection. Uses `transform`, so it composes
  * with the `translate` / `scale` hover lift.
+ *
+ * Touch and pen get press feedback instead: on pointerdown the cover shrinks a little, tilts toward
+ * the touch point and gets `cover-pressed` (a shine sweep); it springs back on pointerup / cancel /
+ * leave and as soon as the page scrolls. Listeners are passive and never call preventDefault, so
+ * scrolling and the tap's navigation are untouched. Nothing moves with reduced motion.
  */
 @Directive({
   selector: '[appCoverTilt]',
@@ -46,14 +65,26 @@ export class CoverTilt {
   private frame = 0;
   private pointer = { x: 0, y: 0 };
 
+  private readonly release = (): void => this.endPress();
+  private pressed = false;
+
   constructor() {
     const move = (event: PointerEvent): void => this.onMove(event);
     const leave = (): void => this.reset();
-    this.el.addEventListener('pointermove', move);
-    this.el.addEventListener('pointerleave', leave);
+    const down = (event: PointerEvent): void => this.onDown(event);
+    const passive = { passive: true };
+    this.el.addEventListener('pointermove', move, passive);
+    this.el.addEventListener('pointerleave', leave, passive);
+    this.el.addEventListener('pointerdown', down, passive);
+    this.el.addEventListener('pointerup', this.release, passive);
+    this.el.addEventListener('pointercancel', this.release, passive);
     inject(DestroyRef).onDestroy(() => {
       this.el.removeEventListener('pointermove', move);
       this.el.removeEventListener('pointerleave', leave);
+      this.el.removeEventListener('pointerdown', down);
+      this.el.removeEventListener('pointerup', this.release);
+      this.el.removeEventListener('pointercancel', this.release);
+      this.endPress();
       this.cancelFrame();
     });
   }
@@ -78,8 +109,40 @@ export class CoverTilt {
     });
   }
 
+  private onDown(event: PointerEvent): void {
+    if ((event.pointerType !== 'touch' && event.pointerType !== 'pen') || !canAnimate()) {
+      return;
+    }
+    const rect = this.el.getBoundingClientRect();
+    const angles = tiltAngles(
+      event.clientX - rect.left,
+      event.clientY - rect.top,
+      rect.width,
+      rect.height,
+      PRESS_TILT_DEG,
+    );
+    this.el.style.transform = pressTransform(angles);
+    this.el.classList.add(PRESSED_CLASS);
+    if (!this.pressed) {
+      this.pressed = true;
+      // A scroll starting under the finger springs the cover back (capture: any scroll container).
+      window.addEventListener('scroll', this.release, { capture: true, passive: true });
+    }
+  }
+
+  private endPress(): void {
+    if (!this.pressed) {
+      return;
+    }
+    this.pressed = false;
+    window.removeEventListener('scroll', this.release, { capture: true });
+    this.el.classList.remove(PRESSED_CLASS);
+    this.el.style.transform = '';
+  }
+
   private reset(): void {
     this.cancelFrame();
+    this.endPress();
     this.el.style.transform = '';
   }
 

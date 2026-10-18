@@ -83,3 +83,32 @@
     transition: transform calc(400ms * var(--pt-motion, 1)) cubic-bezier(0, 0, 0.58, 1);
   }
 }
+
+/*
+ * Touch / pen press (CoverTilt sets .cover-pressed and the press transform): a quick shine sweep;
+ * on release the shine snaps back off-card unseen. Without hover, the tilt eases in fast and springs
+ * back with a small overshoot. Desktop hover keeps the transitions above.
+ */
+.cover-pressed .cover-shine::before {
+  transform: translateX(120%);
+  transition: transform calc(380ms * var(--pt-motion, 1)) cubic-bezier(0, 0, 0.58, 1);
+}
+
+@media (hover: none) {
+  .cover-tilt {
+    transition: transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .cover-tilt.cover-pressed {
+    transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/*
+ * Native shell (Android WebView): no blur on the chips over a poster. The press transforms their
+ * parent, and blurred layers under a transform are what the compositor leaves stale.
+ */
+:host-context([data-native]) .cover-card .backdrop-blur-sm {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}

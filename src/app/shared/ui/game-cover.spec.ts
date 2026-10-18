@@ -1,9 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { API_ORIGIN } from '../../core/api-base-url';
+import { setMotionPreference } from '../utils/motion';
 import {
   GameCover,
   GameCoverSize,
+  REVEAL_IN_CLASS,
+  REVEAL_PENDING_CLASS,
+  revealDelay,
   coverHue,
   coverInitials,
   fitsPortraitBox,
@@ -288,5 +292,92 @@ describe('fitsPortraitBox', () => {
   it('treats a missing size as portrait (nothing to decide yet)', () => {
     expect(fitsPortraitBox(0, 0)).toBe(true);
     expect(fitsPortraitBox(Number.NaN, 900)).toBe(true);
+  });
+});
+
+describe('GameCover scroll reveal', () => {
+  let observers: { callback: IntersectionObserverCallback; targets: Set<Element> }[];
+
+  function fire(target: Element, isIntersecting: boolean): void {
+    const observer = observers.find((o) => o.targets.has(target))!;
+    observer.callback([{ target, isIntersecting } as IntersectionObserverEntry], {} as IntersectionObserver);
+  }
+
+  beforeEach(() => {
+    observers = [];
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        readonly targets = new Set<Element>();
+        constructor(readonly callback: IntersectionObserverCallback) {
+          observers.push(this);
+        }
+        observe(el: Element) {
+          this.targets.add(el);
+        }
+        unobserve(el: Element) {
+          this.targets.delete(el);
+        }
+        disconnect() {
+          this.targets.clear();
+        }
+      },
+    );
+    vi.stubGlobal('requestAnimationFrame', () => 0);
+    vi.stubGlobal('matchMedia', (query: string) => ({ matches: false, media: query, addEventListener: () => undefined }));
+    TestBed.configureTestingModule({ imports: [Host] });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    setMotionPreference('system');
+    delete document.documentElement.dataset['motion'];
+  });
+
+  function setup(size: GameCoverSize = 'fill', priority = false) {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.size.set(size);
+    fixture.componentInstance.priority.set(priority);
+    fixture.detectChanges();
+    return (fixture.nativeElement as HTMLElement).querySelector('app-game-cover') as HTMLElement;
+  }
+
+  it('never hides a cover that is on screen at first paint', () => {
+    const host = setup();
+    fire(host, true);
+    expect(host.classList).not.toContain(REVEAL_PENDING_CLASS);
+    expect(host.classList).not.toContain(REVEAL_IN_CLASS);
+    expect(observers[0].targets.has(host)).toBe(false);
+  });
+
+  it('hides an off-screen cover, then fades it in once and stops observing it', () => {
+    const host = setup();
+    fire(host, false);
+    expect(host.classList).toContain(REVEAL_PENDING_CLASS);
+
+    fire(host, true);
+    expect(host.classList).not.toContain(REVEAL_PENDING_CLASS);
+    expect(host.classList).toContain(REVEAL_IN_CLASS);
+    expect(host.style.getPropertyValue('--reveal-delay')).toBe('0ms');
+    expect(observers[0].targets.has(host)).toBe(false);
+
+    host.dispatchEvent(new Event('animationend'));
+    expect(host.classList).not.toContain(REVEAL_IN_CLASS);
+  });
+
+  it('skips hero / priority covers and reduced motion', () => {
+    setup('hero');
+    setup('lg', true);
+    expect(observers).toHaveLength(0);
+
+    setMotionPreference('reduce');
+    setup('sm');
+    expect(observers).toHaveLength(0);
+  });
+
+  it('staggers covers revealed together, capped', () => {
+    expect(revealDelay(0)).toBe(0);
+    expect(revealDelay(2)).toBe(90);
+    expect(revealDelay(50)).toBe(revealDelay(8));
   });
 });

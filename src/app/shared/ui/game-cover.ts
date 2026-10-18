@@ -1,13 +1,19 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   booleanAttribute,
   Component,
   computed,
+  DestroyRef,
+  ElementRef,
+  inject,
   input,
   linkedSignal,
   output,
 } from '@angular/core';
 import { API_ORIGIN } from '../../core/api-base-url';
+import { canAnimate } from '../utils/motion';
+import { canObserveReveal, observeReveal } from '../utils/reveal-observer';
 
 export type GameCoverSize = 'xs' | 'sm' | 'md' | 'lg' | 'hero' | 'fill';
 
@@ -173,11 +179,30 @@ export function coverHue(name: string): number {
   return Math.abs(hash) % 360;
 }
 
+/** Stagger step between covers revealed together, and the cap (so a long batch stays quick). */
+const REVEAL_STAGGER_MS = 45;
+const REVEAL_STAGGER_MAX = 8;
+
+/** Delay of the n-th cover (0-based) among those revealed in the same scroll batch. */
+export function revealDelay(batchIndex: number): number {
+  return Math.min(Math.max(batchIndex, 0), REVEAL_STAGGER_MAX) * REVEAL_STAGGER_MS;
+}
+
+/** Hidden while still below the fold (only ever set on covers that start off-screen). */
+export const REVEAL_PENDING_CLASS = 'cover-reveal-pending';
+/** Fade + slide in, removed again when the animation ends. */
+export const REVEAL_IN_CLASS = 'cover-reveal-in';
+
 /**
  * Game cover as portrait box art (IGDB cover ratio, ~0.706). Lazy-loaded, no referrer. A Steam library capsule that fails
  * to load falls back to the app's store header, then its main capsule; clearly non-portrait art (those, a square or a custom url) is
  * shown whole over a blurred copy of itself instead of being cropped to a sliver. With no url, or
  * when loading fails, it renders a gradient (brand tint -> surface, faintly hued from the name) with initials.
+ *
+ * Scroll reveal (every size but `hero` / `priority`): a cover that starts off-screen fades and
+ * slides in, staggered, the first time it enters the viewport; covers visible on first paint are
+ * never hidden. One shared IntersectionObserver (see `observeReveal`), each cover unobserved once
+ * settled; class toggles only, no layout reads. Off with reduced motion.
  */
 @Component({
   selector: 'app-game-cover',
@@ -187,6 +212,21 @@ export function coverHue(name: string): number {
     '[attr.aria-hidden]': 'decorative() || null',
     '[class]': 'sizeClass()',
   },
+  styles: `
+    :host(.cover-reveal-pending) {
+      opacity: 0;
+    }
+    :host(.cover-reveal-in) {
+      animation: cover-reveal 380ms cubic-bezier(0, 0, 0.58, 1) backwards;
+      animation-delay: var(--reveal-delay, 0ms);
+    }
+    @keyframes cover-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+    }
+  `,
   template: `
     @if (src(); as current) {
       @if (letterbox()) {
@@ -260,6 +300,31 @@ export class GameCover {
     );
   });
 
+  constructor() {
+    const host: HTMLElement = inject(ElementRef).nativeElement;
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      if (this.size() === 'hero' || this.priority() || !canAnimate() || !canObserveReveal()) {
+        return;
+      }
+      let first = true;
+      const stop = observeReveal(host, (visible, batchIndex) => {
+        if (first) {
+          first = false;
+          // On screen at first paint: never hide it. Off-screen: hide until it scrolls in.
+          if (visible) stop();
+          else host.classList.add(REVEAL_PENDING_CLASS);
+          return;
+        }
+        if (visible) {
+          stop();
+          revealCover(host, revealDelay(batchIndex));
+        }
+      });
+      destroyRef.onDestroy(stop);
+    });
+  }
+
   protected onLoad(event: Event): void {
     const img = event.target as HTMLImageElement;
     const portrait = fitsPortraitBox(img.naturalWidth, img.naturalHeight);
@@ -271,4 +336,18 @@ export class GameCover {
     this.letterbox.set(false);
     this.src.set(nextCoverSource(this.url(), failed, this.sizedUrl()));
   }
+}
+
+/** Swaps the pending state for the fade + slide in (motion.css drops the animation with reduce). */
+function revealCover(host: HTMLElement, delayMs: number): void {
+  const done = (event: AnimationEvent): void => {
+    if (event.target === host) {
+      host.classList.remove(REVEAL_IN_CLASS);
+      host.removeEventListener('animationend', done);
+    }
+  };
+  host.addEventListener('animationend', done);
+  host.style.setProperty('--reveal-delay', `${delayMs}ms`);
+  host.classList.remove(REVEAL_PENDING_CLASS);
+  host.classList.add(REVEAL_IN_CLASS);
 }
