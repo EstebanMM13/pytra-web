@@ -76,12 +76,13 @@ import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
       </main>
     </div>
 
-    <!-- The slogan, one word per line; "Remember" takes the brand accent (gradient in dark mode). -->
+    <!-- The slogan, one word per line: Play in the text colour, Track in brand purple (gradient in
+         dark mode), Remember in the GOTY gold (darker on light, AA there). -->
     <ng-template #slogan let-size>
       <p class="hero" [class]="size">
         <span class="hero-word">Play</span>
-        <span class="hero-word">Track</span>
-        <span class="hero-word text-figure text-brand-light">Remember</span>
+        <span class="hero-word text-figure text-brand-light">Track</span>
+        <span class="hero-word hero-word--gold">Remember</span>
       </p>
     </ng-template>
   `,
@@ -107,6 +108,9 @@ import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
       /* Room for descenders and the gradient clip at the tight line height. */
       padding-bottom: 0.04em;
       animation: hero-word-in 560ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    }
+    .hero-word--gold {
+      color: var(--pt-gold);
     }
     .hero-word:nth-child(2) {
       animation-delay: 90ms;
