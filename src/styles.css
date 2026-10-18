@@ -567,10 +567,11 @@
  * The aura drifts very slowly behind the page headers (transform / opacity on this one layer; its
  * gradients fade out long before the edges, so the shift never shows a border). Off with reduced
  * motion (motion.css).
+ * Finite: four 28s legs (~2 min), then it rests on the `from` keyframe (`both` keeps that frame,
+ * so there is no jump). The animation promotes the layer while it runs; no permanent will-change.
  */
 .bg-aura {
-  animation: pt-aura-drift 28s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
-  will-change: transform, opacity;
+  animation: pt-aura-drift 28s cubic-bezier(0.45, 0, 0.55, 1) 4 alternate both;
   background-image:
     radial-gradient(
       800px 380px at 50% -60px,
@@ -625,6 +626,22 @@
 }
 
 /*
+ * Phones, touch devices and the native shell: a static aura. A full-viewport layer animating under
+ * the blurred chrome and cards keeps the compositor (and the battery) busy for nothing.
+ */
+@media (width < 48rem), (hover: none) {
+  .bg-aura {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+[data-native] .bg-aura {
+  animation: none;
+  will-change: auto;
+}
+
+/*
  * Translucent app chrome (web navbar, mobile header, mobile tab bar). The fill + blur sit on a
  * ::before layer so the bar itself does not become a containing block for `position: fixed`
  * descendants (e.g. the mobile menu's click-catcher). The host must be positioned with a
@@ -640,6 +657,13 @@
     background: color-mix(in srgb, var(--pt-nav) 80%, transparent);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
+  }
+
+  /* Native shell (Android WebView): solid bar, no blur (same reasoning as card-glass below). */
+  &:where([data-native] *)::before {
+    background: var(--pt-nav);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 
