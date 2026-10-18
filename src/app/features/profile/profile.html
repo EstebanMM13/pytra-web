@@ -26,7 +26,7 @@
       @for (section of sections; track section) {
         <button
           type="button"
-          (click)="scrollTo($any(section))"
+          (click)="scrollTo(section)"
           class="rounded-lg px-3 py-[9px] text-left"
           [class]="activeSection() === section ? 'bg-brand-tint text-brand-lighter' : 'text-text-3 hover:text-text'"
         >
@@ -49,22 +49,26 @@
           <a [routerLink]="row.route" class="flex items-center gap-3 border-border px-3.5 py-[15px] text-[15px]" [class.border-b]="!last">
             <svg [lucideIcon]="row.icon" [size]="18" class="shrink-0 text-brand-light"></svg>
             {{ row.labelKey | translate }}
-            <span class="ml-auto truncate text-[13px] text-muted">
-              @if (steamStatus(); as st) {
-                {{ (st.linked ? 'profile.syncSteamLinked' : 'profile.syncSteamNotLinked') | translate }}
-              }
-            </span>
-            <svg [lucideIcon]="icons.chevronRight" [size]="18" class="shrink-0 text-faint"></svg>
+            <svg [lucideIcon]="icons.chevronRight" [size]="18" class="ml-auto shrink-0 text-faint"></svg>
           </a>
+        } @else if (row.kind === 'logout') {
+          <button
+            type="button"
+            (click)="logout()"
+            class="flex w-full items-center gap-3 border-border px-3.5 py-[15px] text-left text-[15px] text-danger"
+            [class.border-b]="!last"
+          >
+            <svg [lucideIcon]="row.icon" [size]="18" class="shrink-0 text-danger"></svg>
+            {{ row.labelKey | translate }}
+          </button>
         } @else {
           <button
             type="button"
             (click)="scrollTo(row.anchor)"
             class="flex w-full items-center gap-3 border-border px-3.5 py-[15px] text-left text-[15px]"
             [class.border-b]="!last"
-            [class.text-danger]="row.danger"
           >
-            <svg [lucideIcon]="row.icon" [size]="18" class="shrink-0" [class]="row.danger ? 'text-danger' : 'text-brand-light'"></svg>
+            <svg [lucideIcon]="row.icon" [size]="18" class="shrink-0 text-brand-light"></svg>
             {{ row.labelKey | translate }}
             <svg [lucideIcon]="icons.chevronRight" [size]="18" class="ml-auto shrink-0 text-faint"></svg>
           </button>
@@ -393,14 +397,6 @@
         </button>
       </div>
     </section>
-
-    <button
-      type="button"
-      (click)="logout()"
-      class="rounded-xl border border-border py-[15px] text-[15px] text-danger hover:bg-danger-bg lg:hidden"
-    >
-      {{ 'nav.logout' | translate }}
-    </button>
   </div>
 </main>
 

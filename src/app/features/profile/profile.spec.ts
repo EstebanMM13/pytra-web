@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
@@ -12,7 +12,6 @@ import { GameService } from '../../core/services/game.service';
 import { PlatformService } from '../../core/services/platform.service';
 import { SagaService } from '../../core/services/saga.service';
 import { StatsService } from '../../core/services/stats.service';
-import { SteamService } from '../../core/services/steam.service';
 import { UserService } from '../../core/services/user.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { ToastService } from '../../shared/toast/toast.service';
@@ -48,7 +47,6 @@ describe('Profile', () => {
         { provide: UserService, useValue: userService },
         { provide: AuthService, useValue: { isDemo: signal(demo), logout: vi.fn() } },
         { provide: DemoModeService, useValue: { isDemo: signal(demo), blockWrite } },
-        { provide: SteamService, useValue: { getStatus: () => of({ linked: true }) } },
         { provide: GameService, useValue: { findAll: () => of([]) } },
         { provide: SagaService, useValue: { findAll: () => of([]) } },
         { provide: StatsService, useValue: { getSummary: () => of(null), getByYear: () => of([]) } },
@@ -91,24 +89,27 @@ describe('Profile', () => {
   });
   afterEach(() => TestBed.resetTestingModule());
 
-  it('lists every section as a tappable row, each scrolling to its section (Sync opens its page)', () => {
+  it('lists the same entries as the desktop sidebar, in the same order (Sync opens its page)', () => {
     const { el, rows } = setup();
-    expect(rows().map((r) => r.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
+    const labels = (nodes: HTMLElement[]) => nodes.map((n) => n.textContent!.replace(/\s+/g, ' ').trim());
+    const sidebar = [...el.querySelectorAll<HTMLElement>('aside nav:not([data-profile-rows]) > *')];
+
+    expect(labels(rows())).toEqual([
       'profile.sections.account',
       'profile.sections.achievements',
       'profile.sections.preferences',
-      'nav.sync profile.syncSteamLinked',
-      'profile.exportData',
-      'profile.delete.label',
+      'profile.sections.data',
+      'nav.sync',
+      'nav.logout',
     ]);
-    expect(rows()[3].getAttribute('href')).toBe('/sync');
+    expect(labels(rows())).toEqual(labels(sidebar));
+    expect(rows()[4].getAttribute('href')).toBe('/sync');
 
     for (const [index, anchor] of [
       [0, 'account'],
       [1, 'achievements'],
       [2, 'preferences'],
-      [4, 'data'],
-      [5, 'delete'],
+      [3, 'data'],
     ] as const) {
       const target = el.querySelector(`#profile-${anchor}`);
       expect(target).not.toBeNull();
@@ -117,6 +118,22 @@ describe('Profile', () => {
       expect(scrollIntoView).toHaveBeenCalledTimes(1);
       expect(scrollIntoView.mock.contexts[0]).toBe(target);
     }
+  });
+
+  it('logs out from the last mobile row', () => {
+    const { rows } = setup();
+    const auth = TestBed.inject(AuthService) as unknown as { logout: ReturnType<typeof vi.fn> };
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    rows()[5].click();
+    expect(auth.logout).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('keeps "Borrar cuenta" inside the Datos section (no separate mobile row)', () => {
+    const { el, rows } = setup();
+    const open = el.querySelector<HTMLButtonElement>('#profile-data #profile-delete button')!;
+    expect(open.textContent).toContain('profile.delete.open');
+    expect(rows().some((r) => r.textContent!.includes('profile.delete'))).toBe(false);
   });
 
   it('opens at the top on "Cuenta" when no entry point targets a section', async () => {

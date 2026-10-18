@@ -165,9 +165,6 @@
       "preferences": "Preferencias",
       "data": "Datos"
     },
-    "syncSteamLinked": "Steam vinculada",
-    "syncSteamNotLinked": "Steam sin vincular",
-    "exportData": "Exportar datos",
     "password": "Contraseña",
     "changePassword": "Cambiar",
     "noPassword": "Entras con Google: no tienes contraseña.",

@@ -13,7 +13,6 @@ import { AchievementBadge } from '../../shared/achievements/achievement-badge';
 import { Achievement, computeAchievements, groupByCategory, topUnlocked } from '../../shared/achievements/achievements';
 import { findPlatformByKey, groupPlatformsByFamily, platformNameKey } from '../../core/services/platform.logic';
 import { PlatformService } from '../../core/services/platform.service';
-import { SteamStatus } from '../../core/models/steam.model';
 import { ExportFormat } from '../../core/models/user.model';
 import { AuthService } from '../../core/services/auth.service';
 import { DemoModeService } from '../../core/services/demo-mode.service';
@@ -25,7 +24,6 @@ import {
   RatingPrecision,
   applyLanguage,
 } from '../../core/services/preferences.service';
-import { SteamService } from '../../core/services/steam.service';
 import { ThemePreference, ThemeService } from '../../core/services/theme.service';
 import { UserService } from '../../core/services/user.service';
 import { usernameValidators } from '../../core/validators/username';
@@ -49,21 +47,33 @@ import {
   initialProfileSection,
 } from './profile.logic';
 
-/** Scroll targets: the sections plus the delete-account row inside "Datos". */
-type ProfileAnchor = ProfileSection | 'delete';
-
-/** A row of the mobile section list: scrolls to an anchor on this page, or opens another route. */
+/**
+ * A row of the mobile section list: scrolls to a section on this page, opens another route or logs
+ * out. Same entries and order as the desktop sidebar (sections, Sync, log out).
+ */
 export type ProfileRow =
-  | { kind: 'anchor'; anchor: ProfileAnchor; labelKey: string; icon: LucideIconInput; danger?: boolean }
-  | { kind: 'route'; route: string; labelKey: string; icon: LucideIconInput };
+  | { kind: 'anchor'; anchor: ProfileSection; labelKey: string; icon: LucideIconInput }
+  | { kind: 'route'; route: string; labelKey: string; icon: LucideIconInput }
+  | { kind: 'logout'; labelKey: string; icon: LucideIconInput };
+
+const SECTION_ICONS: Record<ProfileSection, LucideIconInput> = {
+  account: ICONS.user,
+  achievements: ICONS.trophy,
+  preferences: ICONS.slidersHorizontal,
+  data: ICONS.download,
+};
 
 const MOBILE_ROWS: readonly ProfileRow[] = [
-  { kind: 'anchor', anchor: 'account', labelKey: 'profile.sections.account', icon: ICONS.user },
-  { kind: 'anchor', anchor: 'achievements', labelKey: 'profile.sections.achievements', icon: ICONS.trophy },
-  { kind: 'anchor', anchor: 'preferences', labelKey: 'profile.sections.preferences', icon: ICONS.slidersHorizontal },
+  ...PROFILE_SECTIONS.map(
+    (section): ProfileRow => ({
+      kind: 'anchor',
+      anchor: section,
+      labelKey: `profile.sections.${section}`,
+      icon: SECTION_ICONS[section],
+    }),
+  ),
   { kind: 'route', route: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw },
-  { kind: 'anchor', anchor: 'data', labelKey: 'profile.exportData', icon: ICONS.download },
-  { kind: 'anchor', anchor: 'delete', labelKey: 'profile.delete.label', icon: ICONS.trash, danger: true },
+  { kind: 'logout', labelKey: 'nav.logout', icon: ICONS.logOut },
 ];
 type AchievementFilter = 'all' | 'unlocked' | 'locked';
 
@@ -108,7 +118,6 @@ export class Profile {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly userService = inject(UserService);
   private readonly authService = inject(AuthService);
-  private readonly steamService = inject(SteamService);
   private readonly fileExport = inject(FileExportService);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
@@ -152,8 +161,6 @@ export class Profile {
     formatMemberSince(this.user()?.createdAt, this.translate.currentLang() === 'en' ? 'en' : 'es'),
   );
 
-  /** Steam link state for the mobile list; null while loading or unavailable. */
-  protected readonly steamStatus = signal<SteamStatus | null>(null);
 
   /** Highlighted sidebar entry: the targeted section on arrival (the top, "Cuenta", by default). */
   protected readonly activeSection = signal<ProfileSection>('account');
@@ -244,11 +251,6 @@ export class Profile {
         this.scrollToTarget();
       });
 
-    this.steamService
-      .getStatus()
-      .pipe(catchError(() => of(null)))
-      .subscribe((status) => this.steamStatus.set(status));
-
     // Prefill once the profile is available (it loads asynchronously after the token is read).
     effect(() => {
       const user = this.user();
@@ -271,11 +273,11 @@ export class Profile {
     }
   }
 
-  protected scrollTo(anchor: ProfileAnchor): void {
+  protected scrollTo(section: ProfileSection): void {
     // A section the user picks wins over a pending arrival target.
     this.targetSection = 'account';
-    this.activeSection.set(anchor === 'delete' ? 'data' : anchor);
-    document.getElementById(`profile-${anchor}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    this.activeSection.set(section);
+    document.getElementById(`profile-${section}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   /** The password page sends a reset email: not something a demo visitor may trigger. */
