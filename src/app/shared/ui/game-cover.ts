@@ -11,14 +11,19 @@ import { API_ORIGIN } from '../../core/api-base-url';
 
 export type GameCoverSize = 'xs' | 'sm' | 'md' | 'lg' | 'hero' | 'fill';
 
-/** Box size per variant: portrait box art (2:3). `fill` takes the parent's width. */
+/**
+ * Box size per variant: portrait box art at IGDB's cover ratio (264x374, ~0.706), so IGDB covers fit
+ * uncropped and Steam's 2:3 capsules lose only a sliver. Fixed variants keep explicit heights (a
+ * stretched flex item would ignore `aspect-ratio`) with widths derived from the ratio; `hero` and
+ * `fill` take a width and let the ratio set the height.
+ */
 const SIZE_CLASS: Record<GameCoverSize, string> = {
-  xs: 'h-9 w-6 rounded-[3px]',
-  sm: 'h-12 w-8 rounded',
-  md: 'h-[84px] w-14 rounded-md',
-  lg: 'h-[150px] w-[100px] rounded-lg md:h-[216px] md:w-36 md:rounded-xl',
-  hero: 'aspect-[2/3] w-28 rounded-lg sm:w-32 md:w-40 md:rounded-xl lg:w-44',
-  fill: 'aspect-[2/3] w-full rounded-lg',
+  xs: 'h-9 w-[1.59rem] rounded-[3px]',
+  sm: 'h-12 w-[2.12rem] rounded',
+  md: 'h-[84px] w-[59px] rounded-md',
+  lg: 'h-[150px] w-[106px] rounded-lg md:h-[216px] md:w-[152px] md:rounded-xl',
+  hero: 'aspect-[264/374] w-28 rounded-lg sm:w-32 md:w-40 md:rounded-xl lg:w-44',
+  fill: 'aspect-[264/374] w-full rounded-lg',
 };
 
 const INITIALS_TEXT: Record<GameCoverSize, string> = {
@@ -124,13 +129,17 @@ export function nextCoverSource(
   return index >= 0 ? (chain[index + 1] ?? null) : null;
 }
 
+/** Aspect (width / height) of the cover box: IGDB's `t_cover_big` (264x374). */
+export const COVER_BOX_RATIO = 264 / 374;
+
 /**
- * Widest aspect (width / height) still cropped to fill the 2:3 box. Any reasonably portrait image
- * (Steam's 600x900, IGDB's 264x374, slightly-off custom covers, tall art) is cropped, anchored to
- * the top so a title there survives; only clearly non-portrait art (square, landscape) is
- * letterboxed over a blurred copy of itself.
+ * Widest aspect (width / height) still cropped to fill the cover box: 20% wider than the box (~0.85),
+ * so at most a sixth of the width is cut. Any reasonably portrait image (Steam's 600x900, IGDB's
+ * 264x374, 3:4, slightly-off custom covers, tall art) is cropped, anchored to the top so a title
+ * there survives; only clearly non-portrait art (square, landscape) is letterboxed over a blurred
+ * copy of itself.
  */
-export const MAX_PORTRAIT_RATIO = 0.8;
+export const MAX_PORTRAIT_RATIO = COVER_BOX_RATIO * 1.2;
 
 /** Whether an image of the given size is portrait enough to be cropped (object-cover). */
 export function fitsPortraitBox(width: number, height: number): boolean {
@@ -165,7 +174,7 @@ export function coverHue(name: string): number {
 }
 
 /**
- * Game cover as portrait box art (2:3). Lazy-loaded, no referrer. A Steam library capsule that fails
+ * Game cover as portrait box art (IGDB cover ratio, ~0.706). Lazy-loaded, no referrer. A Steam library capsule that fails
  * to load falls back to the app's store header, then its main capsule; clearly non-portrait art (those, a square or a custom url) is
  * shown whole over a blurred copy of itself instead of being cropped to a sliver. With no url, or
  * when loading fails, it renders a gradient (brand tint -> surface, faintly hued from the name) with initials.
@@ -181,7 +190,7 @@ export function coverHue(name: string): number {
   template: `
     @if (src(); as current) {
       @if (letterbox()) {
-        <!-- Art far from 2:3: a blurred copy fills the poster, the whole image sits on top. -->
+        <!-- Art far from the box ratio: a blurred copy fills the poster, the whole image sits on top. -->
         <img
           [src]="current"
           alt=""
