@@ -6,6 +6,8 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
+import { PsnService } from '../../core/services/psn.service';
+import { SteamService } from '../../core/services/steam.service';
 import { VIEW_TRANSITION_OPTIONS } from '../../core/view-transitions';
 import { Navbar } from '../../shared/navbar/navbar';
 import { Games } from './games';
@@ -39,6 +41,12 @@ const GAMES = [
   game(2, [ACTION, RPG], 'FromSoftware'),
   game(3, [ACTION], 'Nintendo'),
   game(4, [{ id: 40, name: 'Shooter' }], 'Valve'),
+];
+
+/** Steam and PSN with nothing pending (the library only reads their pending lists for the banner). */
+const NO_PENDING = [
+  { provide: SteamService, useValue: { getPending: () => of([]) } },
+  { provide: PsnService, useValue: { getPending: () => of([]) } },
 ];
 
 interface FakeTransition {
@@ -80,6 +88,7 @@ describe('Games library filters', () => {
         provideRouter([{ path: 'games', component: Games }], withViewTransitions(VIEW_TRANSITION_OPTIONS)),
         provideTranslateService(),
         { provide: GameService, useValue: { findAll: () => of(GAMES) } },
+        ...NO_PENDING,
       ],
     });
     TestBed.overrideComponent(Games, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
@@ -162,6 +171,7 @@ describe('Games library search', () => {
         ]),
         provideTranslateService(),
         { provide: GameService, useValue: { findAll: () => of(GAMES) } },
+        ...NO_PENDING,
       ],
     });
     TestBed.overrideComponent(Games, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
@@ -266,5 +276,39 @@ describe('Games library search', () => {
     expect(listed()).toEqual(['/games/2']);
     await pause();
     expect(router.url).toBe('/games?q=Game%202');
+  });
+});
+
+describe('Games library pending banner', () => {
+  const pending = (id: number): Game => ({ ...game(id, [], 'Studio'), reviewStatus: 'PENDING_REVIEW' });
+
+  async function setup(steamIds: number[], psnIds: number[]) {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: 'games', component: Games }]),
+        provideTranslateService(),
+        { provide: GameService, useValue: { findAll: () => of([...GAMES, pending(101), pending(102)]) } },
+        { provide: SteamService, useValue: { getPending: () => of(steamIds.map(pending)) } },
+        { provide: PsnService, useValue: { getPending: () => of(psnIds.map(pending)) } },
+      ],
+    });
+    TestBed.overrideComponent(Games, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const harness = await RouterTestingHarness.create('/games');
+    return harness.routeNativeElement!.querySelector<HTMLAnchorElement>('a[href="/sync"]');
+  }
+
+  it('names Steam when every pending game came from Steam, linking to /sync', async () => {
+    const banner = await setup([101, 102], []);
+    expect(banner?.textContent).toContain('library.pendingSteam');
+  });
+
+  it('names PlayStation when every pending game came from PSN', async () => {
+    const banner = await setup([], [101, 102]);
+    expect(banner?.textContent).toContain('library.pendingPsn');
+  });
+
+  it('uses neutral copy when the pending games came from both', async () => {
+    const banner = await setup([101], [102]);
+    expect(banner?.textContent).toContain('library.pendingMixed');
   });
 });

@@ -4,9 +4,11 @@ import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
-import { map } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
+import { PsnService } from '../../core/services/psn.service';
+import { SteamService } from '../../core/services/steam.service';
 import { platformNameKey } from '../../core/services/platform.logic';
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
@@ -33,6 +35,8 @@ import {
   countByStatus,
   filterGames,
   isLibraryGame,
+  PENDING_BANNER_KEYS,
+  pendingSource,
   LIBRARY_VIEW_KEY,
   LibraryView,
   libraryGenres,
@@ -173,8 +177,31 @@ export class Games {
     };
   });
   protected readonly libraryGames = computed(() => (this.allGames() ?? []).filter(isLibraryGame));
-  protected readonly pendingReviewCount = computed(
-    () => (this.allGames() ?? []).filter((g) => !isLibraryGame(g)).length,
+  /** Games imported by Steam or PSN still waiting for review (not part of the library yet). */
+  private readonly pendingGames = computed(() => (this.allGames() ?? []).filter((g) => !isLibraryGame(g)));
+  protected readonly pendingReviewCount = computed(() => this.pendingGames().length);
+  /** Ids of each integration's pending list (empty when not linked or on failure), to name the source. */
+  private readonly steamPendingIds = toSignal(
+    inject(SteamService)
+      .getPending()
+      .pipe(
+        map((games) => new Set(games.map((g) => g.id))),
+        catchError(() => of(new Set<number>())),
+      ),
+    { initialValue: new Set<number>() },
+  );
+  private readonly psnPendingIds = toSignal(
+    inject(PsnService)
+      .getPending()
+      .pipe(
+        map((games) => new Set(games.map((g) => g.id))),
+        catchError(() => of(new Set<number>())),
+      ),
+    { initialValue: new Set<number>() },
+  );
+  /** Banner copy: Steam only, PSN only, or neutral when both (or the source is unknown). */
+  protected readonly pendingBannerKey = computed(
+    () => PENDING_BANNER_KEYS[pendingSource(this.pendingGames(), this.steamPendingIds(), this.psnPendingIds())],
   );
   /** Only the platforms the user's games were played on (runs or online). */
   protected readonly platforms = computed(() => libraryPlatforms(this.libraryGames()));

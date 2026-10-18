@@ -903,8 +903,12 @@
       "ONLINE": "Online"
     },
     "filterPlaceholder": "Search game or studio",
-    "steamPending": "{{count}} Steam games to review",
-    "steamPending_one": "{{count}} Steam game to review",
+    "pendingSteam": "{{count}} Steam games to review",
+    "pendingSteam_one": "{{count}} Steam game to review",
+    "pendingPsn": "{{count}} PlayStation games to review",
+    "pendingPsn_one": "{{count}} PlayStation game to review",
+    "pendingMixed": "{{count}} imported games to review",
+    "pendingMixed_one": "{{count}} imported game to review",
     "loadError": "Could not load your games.",
     "empty": {
       "title": "Your library is empty",

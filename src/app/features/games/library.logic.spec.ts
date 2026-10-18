@@ -5,6 +5,7 @@ import {
   isLibraryGame,
   isOnlineOnly,
   isUpcoming,
+  pendingSource,
   matchesCategory,
   parseCategoryFilter,
   lastPlayedKey,
@@ -407,5 +408,21 @@ describe('developer and publisher filters', () => {
       'FromSoftware',
       'Bandai Namco',
     ]);
+  });
+});
+
+describe('pendingSource', () => {
+  const a = game({ id: 101, name: 'A', reviewStatus: 'PENDING_REVIEW' });
+  const b = game({ id: 102, name: 'B', reviewStatus: 'PENDING_REVIEW' });
+
+  it('is steam or psn only when every pending game is in that list', () => {
+    expect(pendingSource([a, b], new Set([101, 102]), new Set())).toBe('steam');
+    expect(pendingSource([a, b], new Set(), new Set([101, 102]))).toBe('psn');
+  });
+
+  it('is mixed with games from both sources, or when a source is unknown', () => {
+    expect(pendingSource([a, b], new Set([101]), new Set([102]))).toBe('mixed');
+    expect(pendingSource([a, b], new Set([101]), new Set())).toBe('mixed');
+    expect(pendingSource([a], new Set(), new Set())).toBe('mixed');
   });
 });

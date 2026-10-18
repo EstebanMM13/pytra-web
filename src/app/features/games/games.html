@@ -48,7 +48,7 @@
       routerLink="/sync"
       class="flex w-fit items-center gap-2 rounded-lg bg-gold-tint px-3 py-2 text-[13px] font-medium text-gold-tint-fg hover:opacity-90"
     >
-      {{ 'library.steamPending' | translatePlural: pendingReviewCount() }}
+      {{ pendingBannerKey() | translatePlural: pendingReviewCount() }}
       <svg [lucideIcon]="icons.arrowRight" [size]="14"></svg>
     </a>
   }

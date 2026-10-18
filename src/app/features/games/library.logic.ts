@@ -59,6 +59,31 @@ export function isLibraryGame(game: Game): boolean {
   return game.reviewStatus !== 'PENDING_REVIEW';
 }
 
+/** Integration the library's pending games were imported from; `mixed` when both or unknown. */
+export type PendingSource = 'steam' | 'psn' | 'mixed';
+
+/** i18n key (pluralized by count) of the library's pending review banner, per source. */
+export const PENDING_BANNER_KEYS: Record<PendingSource, string> = {
+  steam: 'library.pendingSteam',
+  psn: 'library.pendingPsn',
+  mixed: 'library.pendingMixed',
+};
+
+/**
+ * Source of the pending games, from the ids of the Steam and PSN pending lists: `steam` or `psn`
+ * only when every pending game is in that list, otherwise (both sources, or a list that failed to
+ * load) `mixed`, so the copy never names the wrong store.
+ */
+export function pendingSource(
+  pending: readonly Game[],
+  steamIds: ReadonlySet<number>,
+  psnIds: ReadonlySet<number>,
+): PendingSource {
+  if (pending.length > 0 && pending.every((g) => steamIds.has(g.id))) return 'steam';
+  if (pending.length > 0 && pending.every((g) => psnIds.has(g.id))) return 'psn';
+  return 'mixed';
+}
+
 /** Lower-case, accent-free text for forgiving name matching ("pokemon" finds "Pokémon"). */
 export function normalizeText(value: string): string {
   return value

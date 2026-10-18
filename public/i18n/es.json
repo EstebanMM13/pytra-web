@@ -903,8 +903,12 @@
       "ONLINE": "Online"
     },
     "filterPlaceholder": "Buscar juego o estudio",
-    "steamPending": "{{count}} juegos de Steam por revisar",
-    "steamPending_one": "{{count}} juego de Steam por revisar",
+    "pendingSteam": "{{count}} juegos de Steam por revisar",
+    "pendingSteam_one": "{{count}} juego de Steam por revisar",
+    "pendingPsn": "{{count}} juegos de PlayStation por revisar",
+    "pendingPsn_one": "{{count}} juego de PlayStation por revisar",
+    "pendingMixed": "{{count}} juegos importados por revisar",
+    "pendingMixed_one": "{{count}} juego importado por revisar",
     "loadError": "No se pudo cargar la lista de juegos.",
     "empty": {
       "title": "Tu biblioteca está vacía",
