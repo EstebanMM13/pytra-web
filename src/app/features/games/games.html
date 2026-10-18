@@ -215,12 +215,14 @@
       <!-- Poster grid (all results) -->
       <ul class="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 md:grid-cols-5 md:gap-x-5 md:gap-y-7 lg:grid-cols-6">
         @for (game of filtered(); track game.id) {
-          <li class="library-in min-w-0" [style.--i]="$index">
+          <li class="library-in poster-item min-w-0" [style.--i]="$index">
             <a [routerLink]="['/games', game.id]" class="cover-card press group flex flex-col gap-2 rounded-lg">
               <div class="relative" appCoverTilt>
                 <span class="cover-glow cover-lift" aria-hidden="true"></span>
+                <!-- The li's library-in is the poster's only entrance: no scroll reveal on top. -->
                 <app-game-cover
                   decorative
+                  noReveal
                   size="fill"
                   class="cover-art shadow-md ring-1 shadow-black/25 ring-border cover-lift group-hover:shadow-xl group-hover:ring-brand-light"
                   [url]="game.coverImageUrl"
@@ -280,9 +282,9 @@
           </li>
         }
       </ul>
-    } @else {
-      <!-- Web table (paged) -->
-      <section class="hidden overflow-hidden rounded-[14px] border border-card-border card-glass md:block">
+    } @else if (wide()) {
+      <!-- Web table (paged), md and up -->
+      <section class="overflow-hidden rounded-[14px] border border-card-border card-glass">
         <div
           class="grid grid-cols-[minmax(0,3fr)_minmax(0,1.6fr)_90px_90px_90px_130px_80px] gap-4 border-b border-border px-[22px] py-3 text-xs tracking-[0.04em] text-muted uppercase"
           aria-hidden="true"
@@ -337,11 +339,11 @@
           <app-pagination [page]="page().page" [total]="page().totalPages" (pageChange)="setPage($event)" />
         </div>
       </section>
-
-      <!-- Mobile list (all results) -->
-      <ul class="flex flex-col md:hidden">
+    } @else {
+      <!-- Mobile list (all results), below md -->
+      <ul class="flex flex-col">
         @for (game of filtered(); track game.id) {
-          <li class="library-in" [style.--i]="$index">
+          <li class="library-in list-item" [style.--i]="$index">
             <a [routerLink]="['/games', game.id]" class="flex items-center gap-3 border-b border-divider py-2.5">
               @if (game.lastExperienceStatus; as status) {
                 <app-status-pill dot [status]="status" class="shrink-0" />

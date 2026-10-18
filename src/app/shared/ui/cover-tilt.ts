@@ -1,5 +1,6 @@
 import { DestroyRef, Directive, ElementRef, inject } from '@angular/core';
 import { canAnimate } from '../utils/motion';
+import { mediaQuery } from '../utils/media-query';
 
 /** Strongest tilt, in degrees, at the cover's edges. */
 export const MAX_TILT_DEG = 6;
@@ -90,7 +91,8 @@ export class CoverTilt {
   }
 
   private enabled(): boolean {
-    return canAnimate() && matchMedia(FINE_HOVER_QUERY).matches;
+    // Shared MediaQueryLists (motion + fine hover): read per pointermove, created once.
+    return canAnimate() && (mediaQuery(FINE_HOVER_QUERY)?.matches ?? false);
   }
 
   private onMove(event: PointerEvent): void {

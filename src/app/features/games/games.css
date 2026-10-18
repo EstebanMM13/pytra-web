@@ -57,10 +57,41 @@
   transform: translateX(-120%);
 }
 
-/* 3D tilt that follows the mouse (CoverTilt): eases between frames and back to flat on leave. */
+/*
+ * Off-screen rows and posters skip layout and paint (content-visibility); the intrinsic size keeps
+ * the scrollbar steady and is replaced by the real size once an item has rendered (`auto`).
+ * Paint containment clips at the item box: posters keep their hover lift / glow / tilt visible
+ * through overflow-clip-margin, and on desktop (fine pointer with hover) they are not contained.
+ */
+.list-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 69px;
+}
+
+@media not ((hover: hover) and (pointer: fine)) {
+  .poster-item {
+    content-visibility: auto;
+    contain-intrinsic-size: auto none auto 230px;
+    overflow-clip-margin: 1rem;
+  }
+}
+
+/*
+ * 3D tilt that follows the mouse (CoverTilt): eases between frames and back to flat on leave. The
+ * layer hint is only set while the cover is hovered or pressed, not on every poster at rest.
+ */
 .cover-tilt {
   transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cover-tilt.cover-pressed {
   will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cover-card:hover .cover-tilt {
+    will-change: transform;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -105,10 +136,18 @@
 }
 
 /*
- * Native shell (Android WebView): no blur on the chips over a poster. The press transforms their
- * parent, and blurred layers under a transform are what the compositor leaves stale.
+ * Native shell (Android WebView) and touch devices: no blur on the chips over a poster; their solid
+ * bg-bg/85 fill stays. The press transforms their parent, and blurred layers under a transform are
+ * what the compositor leaves stale (and a blur per poster is costly on phones).
  */
 :host-context([data-native]) .cover-card .backdrop-blur-sm {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+}
+
+@media (hover: none) {
+  .cover-card .backdrop-blur-sm {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }

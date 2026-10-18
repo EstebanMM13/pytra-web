@@ -10,6 +10,7 @@ import { GameService } from '../../core/services/game.service';
 import { PsnService } from '../../core/services/psn.service';
 import { SteamService } from '../../core/services/steam.service';
 import { platformNameKey } from '../../core/services/platform.logic';
+import { CollapseStateService } from '../../core/services/collapse-state.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
@@ -109,6 +110,12 @@ export class Games {
   private readonly gameService = inject(GameService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
+  /**
+   * md and up (48rem): the list view renders the paged table, below it the mobile list. Only one
+   * branch is built, so the desktop never pays for a hidden list of every result.
+   */
+  protected readonly wide = inject(CollapseStateService).atLeast('md');
 
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
   protected readonly isOnlineOnly = isOnlineOnly;

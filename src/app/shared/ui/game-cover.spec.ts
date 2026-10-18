@@ -25,6 +25,7 @@ import {
     [url]="url()"
     [name]="name()"
     [priority]="priority()"
+    [noReveal]="noReveal()"
     [size]="size()"
   />`,
 })
@@ -32,6 +33,7 @@ class Host {
   readonly url = signal<string | null>(null);
   readonly name = signal('Hollow Knight');
   readonly priority = signal(false);
+  readonly noReveal = signal(false);
   readonly size = signal<GameCoverSize>('sm');
 }
 
@@ -373,6 +375,14 @@ describe('GameCover scroll reveal', () => {
 
     setMotionPreference('reduce');
     setup('sm');
+    expect(observers).toHaveLength(0);
+  });
+
+  it('skips covers whose parent runs its own entrance (noReveal)', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.size.set('fill');
+    fixture.componentInstance.noReveal.set(true);
+    fixture.detectChanges();
     expect(observers).toHaveLength(0);
   });
 

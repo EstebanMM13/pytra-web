@@ -1,3 +1,5 @@
+import { mediaQuery } from './media-query';
+
 /**
  * Motion preference: `system` follows the OS (`prefers-reduced-motion`), `full` animates even when
  * the OS asks to reduce, `reduce` turns effects off. Stored with the other local preferences.
@@ -17,7 +19,7 @@ let osListenerAttached = false;
 /** Whether the OS asks to minimise motion. False where `matchMedia` is missing (jsdom, SSR). */
 function osPrefersReducedMotion(): boolean {
   try {
-    return typeof matchMedia === 'function' && matchMedia(REDUCE_QUERY).matches;
+    return mediaQuery(REDUCE_QUERY)?.matches ?? false;
   } catch {
     return false;
   }

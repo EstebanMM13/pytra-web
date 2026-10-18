@@ -200,7 +200,7 @@ export const REVEAL_IN_CLASS = 'cover-reveal-in';
  * shown whole over a blurred copy of itself instead of being cropped to a sliver. With no url, or
  * when loading fails, it renders a gradient (brand tint -> surface, faintly hued from the name) with initials.
  *
- * Scroll reveal (every size but `hero` / `priority`): a cover that starts off-screen fades and
+ * Scroll reveal (every size but `hero` / `priority`, unless `noReveal`): a cover that starts off-screen fades and
  * slides in, staggered, the first time it enters the viewport; covers visible on first paint are
  * never hidden. One shared IntersectionObserver (see `observeReveal`), each cover unobserved once
  * settled; class toggles only, no layout reads. Off with reduced motion.
@@ -278,6 +278,8 @@ export class GameCover {
   readonly decorative = input(false, { transform: booleanAttribute });
   /** Above-the-fold hero (e.g. the game detail cover): load eagerly with high fetch priority. */
   readonly priority = input(false, { transform: booleanAttribute });
+  /** Skip the scroll reveal: the parent already runs its own entrance (e.g. the library grid). */
+  readonly noReveal = input(false, { transform: booleanAttribute });
   /** Emits on each image load whether it is portrait enough to be cropped (see `fitsPortraitBox`). */
   readonly portraitChange = output<boolean>();
 
@@ -305,7 +307,7 @@ export class GameCover {
     const host: HTMLElement = inject(ElementRef).nativeElement;
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      if (this.size() === 'hero' || this.priority() || !canAnimate() || !canObserveReveal()) {
+      if (this.size() === 'hero' || this.priority() || this.noReveal() || !canAnimate() || !canObserveReveal()) {
         return;
       }
       let first = true;
