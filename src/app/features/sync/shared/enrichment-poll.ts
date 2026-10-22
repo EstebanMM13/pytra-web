@@ -1,4 +1,4 @@
-import { EMPTY, Observable, catchError, exhaustMap, filter, takeWhile, timer } from 'rxjs';
+import { EMPTY, Observable, catchError, defer, exhaustMap, filter, takeWhile, tap, timer } from 'rxjs';
 import {
   ENRICHMENT_POLL_INTERVAL_MS,
   ENRICHMENT_POLL_MAX_MS,
@@ -15,19 +15,22 @@ export interface EnrichmentSnapshot<S, P> {
 /**
  * Refreshes status and pending list every {@link ENRICHMENT_POLL_INTERVAL_MS} while the API reports the
  * IGDB fill as active. Emits each refresh (the last one is the one reporting the fill done) and
- * completes then, or at {@link ENRICHMENT_POLL_MAX_MS}. No request while the page is hidden, never two
- * at once, and a failed refresh is skipped (the next tick retries).
+ * completes then, or after {@link ENRICHMENT_POLL_MAX_MS} of VISIBLE time: no request is sent while the
+ * page is hidden and hidden time does not count, so backgrounding the app (mobile) never ends the
+ * polling early. Never two requests at once; a failed refresh is skipped (the next tick retries).
  */
-export function pollWhileEnriching<S extends { enrichment?: EnrichmentProgress | null }, P>(
-  refresh: () => Observable<EnrichmentSnapshot<S, P>>,
+export function pollWhileEnriching<T extends { status: { enrichment?: EnrichmentProgress | null } }>(
+  refresh: () => Observable<T>,
   isHidden: () => boolean,
-  now: () => number = Date.now,
-): Observable<EnrichmentSnapshot<S, P>> {
-  const startedAt = now();
-  return timer(ENRICHMENT_POLL_INTERVAL_MS, ENRICHMENT_POLL_INTERVAL_MS).pipe(
-    takeWhile(() => now() - startedAt < ENRICHMENT_POLL_MAX_MS),
-    filter(() => !isHidden()),
-    exhaustMap(() => refresh().pipe(catchError(() => EMPTY))),
-    takeWhile((snapshot) => shouldKeepPolling(snapshot.status.enrichment, now() - startedAt), true),
-  );
+): Observable<T> {
+  return defer(() => {
+    let visibleMs = 0;
+    return timer(ENRICHMENT_POLL_INTERVAL_MS, ENRICHMENT_POLL_INTERVAL_MS).pipe(
+      filter(() => !isHidden()),
+      tap(() => (visibleMs += ENRICHMENT_POLL_INTERVAL_MS)),
+      takeWhile(() => visibleMs <= ENRICHMENT_POLL_MAX_MS),
+      exhaustMap(() => refresh().pipe(catchError(() => EMPTY))),
+      takeWhile((snapshot) => shouldKeepPolling(snapshot.status.enrichment, visibleMs), true),
+    );
+  });
 }

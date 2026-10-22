@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { Experience } from '../../../core/models/experience.model';
 import { Game } from '../../../core/models/game.model';
 import { PsnPendingGame, PsnStatus, PsnSyncResult } from '../../../core/models/psn.model';
@@ -139,6 +139,37 @@ describe('PsnPanel', () => {
 
       expect(psn.getPending.mock.calls.length).toBe(calls);
       expect(el().textContent).not.toContain('sync.enrichment');
+    });
+
+    it('an answer requested before a local ignore keeps the local counters', () => {
+      const { psn, component } = setup({
+        psnStatus: filling(0),
+        pending: [pendingGame({ id: 7 }), pendingGame({ id: 8 })],
+      });
+      const statusAnswer = new Subject<PsnStatus>();
+      psn.getStatus.mockReturnValue(statusAnswer);
+      vi.advanceTimersByTime(2500);
+
+      component.ignore(component.pending()[0]);
+      expect(component.status()?.pendingCount).toBe(1);
+      statusAnswer.next(filling(1));
+      statusAnswer.complete();
+
+      expect(component.status()?.pendingCount).toBe(1);
+      expect(component.status()?.ignoredCount).toBe(1);
+      expect(component.status()?.enrichment).toEqual({ active: true, processed: 1, total: 2 });
+    });
+
+    it('when the cap is reached with the fill still running, asks the status again instead of hiding it', () => {
+      const { psn, component } = setup({ psnStatus: filling(0) });
+      const statusCalls = () => psn.getStatus.mock.calls.length;
+
+      vi.advanceTimersByTime(3 * 60 * 1000);
+      const afterCap = statusCalls();
+      vi.advanceTimersByTime(2500);
+
+      expect(component.status()?.enrichment?.active).toBe(true);
+      expect(statusCalls()).toBeGreaterThan(afterCap);
     });
 
     it('does not poll when the API reports no fill', () => {

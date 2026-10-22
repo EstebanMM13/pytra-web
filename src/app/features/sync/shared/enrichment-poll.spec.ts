@@ -18,7 +18,7 @@ describe('pollWhileEnriching', () => {
   function run(refresh: () => Observable<Snapshot>, isHidden: () => boolean = () => false) {
     const seen: Snapshot[] = [];
     let completed = false;
-    pollWhileEnriching(refresh, isHidden, Date.now).subscribe({
+    pollWhileEnriching(refresh, isHidden).subscribe({
       next: (s) => seen.push(s),
       complete: () => (completed = true),
     });
@@ -65,7 +65,21 @@ describe('pollWhileEnriching', () => {
     expect(isCompleted()).toBe(true);
   });
 
-  it('gives up at the time cap even if the fill is still active', () => {
+  it('does not count hidden time towards the cap (app in the background)', () => {
+    let hidden = true;
+    const refresh = vi.fn(() => of(active(1)));
+    const { isCompleted } = run(refresh, () => hidden);
+
+    vi.advanceTimersByTime(ENRICHMENT_POLL_MAX_MS * 2);
+    expect(isCompleted()).toBe(false);
+
+    hidden = false;
+    vi.advanceTimersByTime(ENRICHMENT_POLL_INTERVAL_MS);
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(isCompleted()).toBe(false);
+  });
+
+  it('gives up after the cap of visible time even if the fill is still active', () => {
     const refresh = vi.fn(() => of(active(1)));
     const { isCompleted } = run(refresh);
 

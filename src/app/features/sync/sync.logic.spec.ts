@@ -3,6 +3,7 @@ import {
   EnrichmentProgress,
   enrichmentCount,
   mergePending,
+  mergePolledStatus,
   shouldKeepPolling,
 } from './sync.logic';
 
@@ -44,6 +45,23 @@ describe('mergePending', () => {
     const fresh = [{ id: 1 }, { id: 2 }, { id: 3 }];
 
     expect(mergePending(fresh, new Set([2]))).toEqual([{ id: 1 }, { id: 3 }]);
+  });
+});
+
+describe('mergePolledStatus', () => {
+  const local = { pendingCount: 1, ignoredCount: 3, enrichment: progress({ processed: 1, total: 4 }) };
+  const polled = { pendingCount: 2, ignoredCount: 2, enrichment: progress({ processed: 2, total: 4 }) };
+
+  it('takes the polled status when no local change happened meanwhile', () => {
+    expect(mergePolledStatus(local, polled, false)).toEqual(polled);
+  });
+
+  it('keeps the local counters of a stale answer but takes its fill progress', () => {
+    expect(mergePolledStatus(local, polled, true)).toEqual({ ...local, enrichment: polled.enrichment });
+  });
+
+  it('takes a stale answer as is when nothing is shown yet', () => {
+    expect(mergePolledStatus(null, polled, true)).toEqual(polled);
   });
 });
 

@@ -79,6 +79,18 @@ export function mergePending<T extends { id: number }>(fresh: readonly T[], remo
   return fresh.filter((game) => !removedIds.has(game.id));
 }
 
+/**
+ * Status after a background refresh. A `stale` answer (requested before a local confirm, ignore or
+ * un-ignore) still brings the fill progress, but its counters predate that change: the local ones stay.
+ */
+export function mergePolledStatus<S extends { enrichment?: EnrichmentProgress | null }>(
+  current: S | null,
+  polled: S,
+  stale: boolean,
+): S {
+  return stale && current ? { ...current, enrichment: polled.enrichment } : polled;
+}
+
 /** Translation params of the "filling from IGDB" indicator; null while the fill has no count yet. */
 export function enrichmentCount(progress: EnrichmentProgress | null | undefined): { processed: number; total: number } | null {
   if (!progress?.active || !(progress.total > 0)) return null;

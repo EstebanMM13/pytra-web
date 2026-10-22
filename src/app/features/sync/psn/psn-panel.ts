@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subscription, forkJoin } from 'rxjs';
+import { Subscription, forkJoin, map } from 'rxjs';
 import { Router } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -31,7 +31,7 @@ import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
 import { pollWhileEnriching } from '../shared/enrichment-poll';
 import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
-import { PendingChange, applyPendingChange, enrichmentCount, mergePending } from '../sync.logic';
+import { PendingChange, applyPendingChange, enrichmentCount, mergePending, mergePolledStatus } from '../sync.logic';
 import { findPsnRun, isProfilePrivate, isValidOnlineId, normalizeOnlineId, psnErrorKey, psnHours } from './psn.logic';
 
 /** Banner shown when GET /status fails. */
@@ -100,6 +100,8 @@ export class PsnPanel {
   /** Refreshes the pending list while IGDB fills it in the background; null when not polling. */
   private enrichmentPoll: Subscription | null = null;
   private destroyed = false;
+  /** Bumped on every local change to the status counters (confirm, ignore, un-ignore). */
+  private localChanges = 0;
   /** Pending game under review in the confirm dialog, and what happens after confirming. */
   readonly confirmTarget = signal<{ game: PsnPendingGame; mode: PendingConfirmMode } | null>(null);
 
@@ -154,6 +156,7 @@ export class PsnPanel {
 
   /** Keeps the status counters in step with local list changes (no refetch needed). */
   private applyChange(change: PendingChange): void {
+    this.localChanges++;
     this.status.update((status) => (status ? applyPendingChange(status, change) : status));
   }
 
@@ -357,21 +360,28 @@ export class PsnPanel {
   private watchEnrichment(): void {
     if (this.enrichmentPoll || this.destroyed) return;
     this.enrichmentPoll = pollWhileEnriching(
-      () => forkJoin({ status: this.psnService.getStatus(), pending: this.psnService.getPending() }),
+      () => {
+        const changesAtRequest = this.localChanges;
+        return forkJoin({ status: this.psnService.getStatus(), pending: this.psnService.getPending() }).pipe(
+          map((snapshot) => ({ ...snapshot, stale: changesAtRequest !== this.localChanges })),
+        );
+      },
       () => this.document.hidden,
     )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ status, pending }) => {
-          this.status.set(status);
+        next: ({ status, pending, stale }) => {
+          this.status.update((current) => mergePolledStatus(current, status, stale));
           this.pending.set(mergePending(pending, this.removedPendingIds));
         },
         complete: () => {
           this.enrichmentPoll = null;
           if (this.destroyed) return;
-          // Time cap reached while still active: hide the indicator, the list stops refreshing.
-          this.status.update((s) => (s?.enrichment?.active ? { ...s, enrichment: null } : s));
+          const capReached = !!this.status()?.enrichment?.active;
           this.loadPending();
+          // Cap reached while the fill still runs: ask again instead of hiding the indicator; a fresh
+          // status restarts the polling if the fill is still active (the API always ends it).
+          if (capReached) this.loadStatus();
         },
       });
   }
