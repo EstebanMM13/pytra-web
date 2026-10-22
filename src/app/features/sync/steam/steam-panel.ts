@@ -1,5 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription, forkJoin } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../../../shared/ui/icons';
@@ -21,8 +24,9 @@ import { PlatformCard } from '../../../shared/ui/platform-card';
 import { BrandLogo } from '../shared/brand-logo';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
+import { pollWhileEnriching } from '../shared/enrichment-poll';
 import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
-import { PendingChange, apiCode, applyPendingChange, lookup } from '../sync.logic';
+import { PendingChange, apiCode, applyPendingChange, enrichmentCount, lookup, mergePending } from '../sync.logic';
 import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRun, maskSteamId, steamHours } from './steam.logic';
 
 @Component({
@@ -47,6 +51,8 @@ import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRun, maskSteamId, steamHours
 export class SteamPanel {
   protected readonly icons = ICONS;
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   private readonly steamService = inject(SteamService);
   private readonly experienceService = inject(ExperienceService);
   private readonly nativeOAuth = inject(NativeOAuthService);
@@ -72,6 +78,14 @@ export class SteamPanel {
   readonly errorKey = signal<string | null>(null);
   readonly noticeKey = signal<string | null>(null);
   readonly showIgnored = signal(false);
+  /**
+   * Pending games confirmed or ignored here: a background refresh sent before that change must not
+   * bring them back (ids are never reused).
+   */
+  private readonly removedPendingIds = new Set<number>();
+  /** Refreshes the pending list while IGDB fills it in the background; null when not polling. */
+  private enrichmentPoll: Subscription | null = null;
+  private destroyed = false;
   /** Pending game under review in the confirm dialog, and what happens after confirming. */
   readonly confirmTarget = signal<{ game: Game; mode: PendingConfirmMode } | null>(null);
 
@@ -87,6 +101,9 @@ export class SteamPanel {
   protected readonly pendingTotal = computed(() => this.status()?.pendingCount ?? this.pending().length);
   protected readonly ignoredTotal = computed(() => this.status()?.ignoredCount ?? this.ignoredApps().length);
   protected readonly linkedGamesCount = computed(() => this.status()?.linkedGamesCount ?? null);
+  /** IGDB is filling the pending games in the background (after a sync). */
+  protected readonly enriching = computed(() => !!this.status()?.enrichment?.active);
+  protected readonly enrichmentCount = computed(() => enrichmentCount(this.status()?.enrichment));
 
   protected readonly steamHours = steamHours;
   protected readonly confirmPending: PendingConfirmFn = (gameId, request) =>
@@ -102,6 +119,7 @@ export class SteamPanel {
   }
 
   constructor() {
+    this.destroyRef.onDestroy(() => (this.destroyed = true));
     this.readCallbackParams();
     this.loadStatus();
     this.loadPending();
@@ -183,6 +201,7 @@ export class SteamPanel {
     this.steamService.ignorePending(game.id).subscribe({
       next: () => {
         this.busyGameId.set(null);
+        this.removedPendingIds.add(game.id);
         this.pending.update((list) => list.filter((g) => g.id !== game.id));
         if (this.confirmTarget()?.game.id === game.id) this.confirmTarget.set(null);
         this.applyChange('ignored');
@@ -220,6 +239,7 @@ export class SteamPanel {
     if (this.pending().some((g) => g.id === game.id)) {
       this.applyChange('confirmed');
     }
+    this.removedPendingIds.add(game.id);
     this.pending.update((list) => list.filter((g) => g.id !== game.id));
     this.toast.success(this.translate.instant('steam.confirmed', { name: game.name }));
     if (mode === 'run') {
@@ -276,6 +296,7 @@ export class SteamPanel {
       next: (status) => {
         this.status.set(status);
         this.statusLoading.set(false);
+        if (status.enrichment?.active) this.watchEnrichment();
       },
       error: () => {
         this.statusLoading.set(false);
@@ -287,11 +308,38 @@ export class SteamPanel {
   private loadPending(): void {
     this.steamService.getPending().subscribe({
       next: (pending) => {
-        this.pending.set(pending);
+        this.pending.set(mergePending(pending, this.removedPendingIds));
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  /**
+   * While IGDB fills the pending games (the sync queues it), refreshes status and list so filled
+   * covers, names and genres show up without a reload. Rows confirmed or ignored here meanwhile stay
+   * gone, and an open review dialog keeps the game it was opened with.
+   */
+  private watchEnrichment(): void {
+    if (this.enrichmentPoll || this.destroyed) return;
+    this.enrichmentPoll = pollWhileEnriching(
+      () => forkJoin({ status: this.steamService.getStatus(), pending: this.steamService.getPending() }),
+      () => this.document.hidden,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ status, pending }) => {
+          this.status.set(status);
+          this.pending.set(mergePending(pending, this.removedPendingIds));
+        },
+        complete: () => {
+          this.enrichmentPoll = null;
+          if (this.destroyed) return;
+          // Time cap reached while still active: hide the indicator, the list stops refreshing.
+          this.status.update((s) => (s?.enrichment?.active ? { ...s, enrichment: null } : s));
+          this.loadPending();
+        },
+      });
   }
 
   private loadIgnored(): void {

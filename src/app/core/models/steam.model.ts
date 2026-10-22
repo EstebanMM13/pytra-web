@@ -1,3 +1,4 @@
+import { EnrichmentProgress } from './enrichment.model';
 import { Game } from './game.model';
 
 export interface SteamSyncResult {
@@ -24,6 +25,8 @@ export interface SteamStatus {
   /** Steam games waiting for review (same list as GET /pending). */
   pendingCount: number;
   ignoredCount: number;
+  /** Background IGDB fill of the pending games; absent from older API versions. */
+  enrichment?: EnrichmentProgress | null;
 }
 
 /**

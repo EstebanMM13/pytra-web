@@ -1,5 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { EnrichmentProgress } from '../../core/models/enrichment.model';
 import { Experience } from '../../core/models/experience.model';
+
+export type { EnrichmentProgress };
 
 /** Platform integrations on the Sync page that import games for review. */
 export type SyncSource = 'steam' | 'psn';
@@ -56,4 +59,28 @@ export function applyPendingChange<S extends PendingCounters>(status: S, change:
 /** Playtime in hours (the integrations send minutes). */
 export function playtimeHours(minutes: number | null | undefined): number {
   return Math.max(0, minutes ?? 0) / 60;
+}
+
+/** Time between two refreshes of the pending list while IGDB fills it. */
+export const ENRICHMENT_POLL_INTERVAL_MS = 2500;
+/** Polling gives up after this long, even if the API still reports the fill as active. */
+export const ENRICHMENT_POLL_MAX_MS = 3 * 60 * 1000;
+
+/** Keep refreshing while the fill is active and the time cap is not reached. */
+export function shouldKeepPolling(progress: EnrichmentProgress | null | undefined, elapsedMs: number): boolean {
+  return !!progress?.active && elapsedMs < ENRICHMENT_POLL_MAX_MS;
+}
+
+/**
+ * Pending list after a background refresh: the server's rows, in the server's order, minus the ones
+ * the user confirmed or ignored here meanwhile (a refresh sent before that change would bring them back).
+ */
+export function mergePending<T extends { id: number }>(fresh: readonly T[], removedIds: ReadonlySet<number>): T[] {
+  return fresh.filter((game) => !removedIds.has(game.id));
+}
+
+/** Translation params of the "filling from IGDB" indicator; null while the fill has no count yet. */
+export function enrichmentCount(progress: EnrichmentProgress | null | undefined): { processed: number; total: number } | null {
+  if (!progress?.active || !(progress.total > 0)) return null;
+  return { processed: Math.min(progress.processed, progress.total), total: progress.total };
 }

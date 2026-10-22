@@ -110,6 +110,47 @@ describe('PsnPanel', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
+  describe('while IGDB fills the pending games', () => {
+    const filling = (processed: number) =>
+      status({ linked: true, pendingCount: 2, enrichment: { active: true, processed, total: 2 } });
+
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    it('refreshes the list until the fill is done, without bringing back a row ignored meanwhile', () => {
+      const { psn, component } = setup({
+        psnStatus: filling(0),
+        pending: [pendingGame({ id: 7 }), pendingGame({ id: 8, name: 'Gran Turismo 7' })],
+      });
+      expect(el().textContent).toContain('sync.enrichment.progress');
+
+      component.ignore(component.pending()[0]);
+      psn.getStatus.mockReturnValue(of(filling(1)));
+      // Answer of a refresh sent before the ignore: game 7 is still in it.
+      psn.getPending.mockReturnValue(of([pendingGame({ id: 7 }), pendingGame({ id: 8, name: 'Gran Turismo 7 (filled)' })]));
+      vi.advanceTimersByTime(2500);
+      expect(component.pending().map((g) => [g.id, g.name])).toEqual([[8, 'Gran Turismo 7 (filled)']]);
+
+      psn.getStatus.mockReturnValue(of(status({ linked: true, enrichment: { active: false, processed: 0, total: 0 } })));
+      vi.advanceTimersByTime(2500);
+      fixture.detectChanges();
+      const calls = psn.getPending.mock.calls.length;
+      vi.advanceTimersByTime(10_000);
+
+      expect(psn.getPending.mock.calls.length).toBe(calls);
+      expect(el().textContent).not.toContain('sync.enrichment');
+    });
+
+    it('does not poll when the API reports no fill', () => {
+      const { psn } = setup({ psnStatus: status({ linked: true }) });
+      const calls = psn.getPending.mock.calls.length;
+
+      vi.advanceTimersByTime(10_000);
+
+      expect(psn.getPending.mock.calls.length).toBe(calls);
+    });
+  });
+
   it('not configured: shows "unavailable" and disables linking', () => {
     setup({ psnStatus: status({ configured: false }) });
 

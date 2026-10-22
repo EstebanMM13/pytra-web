@@ -332,7 +332,11 @@
     "subtitle": "Connect your platforms to bring in your library and playtime.",
     "steamHint": "Library and playtime",
     "playstation": "PlayStation",
-    "playstationHint": "Library and playtime"
+    "playstationHint": "Library and playtime",
+    "enrichment": {
+      "filling": "Filling details from IGDB…",
+      "progress": "Filling details from IGDB… {{processed}}/{{total}}"
+    }
   },
   "steam": {
     "title": "Steam",

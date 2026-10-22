@@ -1,5 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription, forkJoin } from 'rxjs';
 import { Router } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -26,8 +29,9 @@ import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
+import { pollWhileEnriching } from '../shared/enrichment-poll';
 import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
-import { PendingChange, applyPendingChange } from '../sync.logic';
+import { PendingChange, applyPendingChange, enrichmentCount, mergePending } from '../sync.logic';
 import { findPsnRun, isProfilePrivate, isValidOnlineId, normalizeOnlineId, psnErrorKey, psnHours } from './psn.logic';
 
 /** Banner shown when GET /status fails. */
@@ -58,6 +62,8 @@ const STATUS_ERROR_KEY = 'psn.errors.generic';
 export class PsnPanel {
   protected readonly icons = ICONS;
 
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   private readonly psnService = inject(PsnService);
   private readonly experienceService = inject(ExperienceService);
   private readonly runFormLauncher = inject(RunFormLauncher);
@@ -86,6 +92,14 @@ export class PsnPanel {
   /** PSN answered PROFILE_PRIVATE when linking: the privacy steps are shown prominently. */
   readonly linkPrivate = signal(false);
   readonly showIgnored = signal(false);
+  /**
+   * Pending games confirmed or ignored here: a background refresh sent before that change must not
+   * bring them back (ids are never reused).
+   */
+  private readonly removedPendingIds = new Set<number>();
+  /** Refreshes the pending list while IGDB fills it in the background; null when not polling. */
+  private enrichmentPoll: Subscription | null = null;
+  private destroyed = false;
   /** Pending game under review in the confirm dialog, and what happens after confirming. */
   readonly confirmTarget = signal<{ game: PsnPendingGame; mode: PendingConfirmMode } | null>(null);
 
@@ -115,6 +129,9 @@ export class PsnPanel {
     () => this.status()?.ignoredCount ?? this.ignoredTitles().length,
   );
   protected readonly linkedGamesCount = computed(() => this.status()?.linkedGamesCount ?? null);
+  /** IGDB is filling the pending games in the background (after a sync). */
+  protected readonly enriching = computed(() => !!this.status()?.enrichment?.active);
+  protected readonly enrichmentCount = computed(() => enrichmentCount(this.status()?.enrichment));
   /** The privacy steps, shown big after a private-profile answer (link or sync). */
   protected readonly showPrivacyHelp = computed(
     () => this.linkPrivate() || !!this.syncResult()?.profilePrivate,
@@ -125,6 +142,7 @@ export class PsnPanel {
     this.psnService.confirmPending(gameId, request);
 
   constructor() {
+    this.destroyRef.onDestroy(() => (this.destroyed = true));
     this.loadStatus();
     this.loadPending();
     this.loadIgnored();
@@ -232,6 +250,7 @@ export class PsnPanel {
     this.psnService.ignorePending(game.id).subscribe({
       next: () => {
         this.busyGameId.set(null);
+        this.removedPendingIds.add(game.id);
         this.pending.update((list) => list.filter((g) => g.id !== game.id));
         if (this.confirmTarget()?.game.id === game.id) this.confirmTarget.set(null);
         this.applyChange('ignored');
@@ -267,6 +286,7 @@ export class PsnPanel {
     if (this.pending().some((g) => g.id === game.id)) {
       this.applyChange('confirmed');
     }
+    this.removedPendingIds.add(game.id);
     this.pending.update((list) => list.filter((g) => g.id !== game.id));
     this.toast.success(this.translate.instant('psn.confirmed', { name: game.name }));
     if (target?.mode === 'run') {
@@ -308,6 +328,7 @@ export class PsnPanel {
       next: (status) => {
         this.status.set(status);
         this.statusLoading.set(false);
+        if (status.enrichment?.active) this.watchEnrichment();
         // A later successful load clears the banner a failed one left behind.
         if (this.errorKey() === STATUS_ERROR_KEY) this.errorKey.set(null);
       },
@@ -321,11 +342,38 @@ export class PsnPanel {
   private loadPending(): void {
     this.psnService.getPending().subscribe({
       next: (pending) => {
-        this.pending.set(pending);
+        this.pending.set(mergePending(pending, this.removedPendingIds));
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  /**
+   * While IGDB fills the pending games (the sync queues it), refreshes status and list so filled
+   * covers, names and genres show up without a reload. Rows confirmed or ignored here meanwhile stay
+   * gone, and an open review dialog keeps the game it was opened with.
+   */
+  private watchEnrichment(): void {
+    if (this.enrichmentPoll || this.destroyed) return;
+    this.enrichmentPoll = pollWhileEnriching(
+      () => forkJoin({ status: this.psnService.getStatus(), pending: this.psnService.getPending() }),
+      () => this.document.hidden,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ status, pending }) => {
+          this.status.set(status);
+          this.pending.set(mergePending(pending, this.removedPendingIds));
+        },
+        complete: () => {
+          this.enrichmentPoll = null;
+          if (this.destroyed) return;
+          // Time cap reached while still active: hide the indicator, the list stops refreshing.
+          this.status.update((s) => (s?.enrichment?.active ? { ...s, enrichment: null } : s));
+          this.loadPending();
+        },
+      });
   }
 
   private loadIgnored(): void {

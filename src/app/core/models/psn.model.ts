@@ -1,3 +1,4 @@
+import { EnrichmentProgress } from './enrichment.model';
 import { Game } from './game.model';
 
 /** Console of a PSN title, as the catalog legacy code the imported run uses. */
@@ -30,6 +31,8 @@ export interface PsnStatus {
   /** Admins only: `PSN_SERVICE_AUTH_FAILED` while Sony rejects the service account; null otherwise. */
   serviceAuthError: string | null;
   serviceAuthFailingSince: string | null;
+  /** Background IGDB fill of the pending games; absent from older API versions. */
+  enrichment?: EnrichmentProgress | null;
 }
 
 /**

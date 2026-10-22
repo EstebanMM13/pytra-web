@@ -332,7 +332,11 @@
     "subtitle": "Conecta tus plataformas para traer tu biblioteca y tus horas de juego.",
     "steamHint": "Biblioteca y horas de juego",
     "playstation": "PlayStation",
-    "playstationHint": "Biblioteca y horas de juego"
+    "playstationHint": "Biblioteca y horas de juego",
+    "enrichment": {
+      "filling": "Completando datos desde IGDB…",
+      "progress": "Completando datos desde IGDB… {{processed}}/{{total}}"
+    }
   },
   "steam": {
     "title": "Steam",
