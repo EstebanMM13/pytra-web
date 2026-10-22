@@ -238,4 +238,16 @@ describe('RunForm', () => {
       expect(toast.show).not.toHaveBeenCalled();
     });
   });
+
+  describe('hint under the hours', () => {
+    it('shows the note the opener asked for on a new run', () => {
+      setup({ mode: 'create', gameId: 3, navigateOnCreate: false, hintKey: 'runForm.importedHoursHint.steam' });
+      expect(document.body.textContent).toContain('runForm.importedHoursHint.steam');
+    });
+
+    it('shows nothing when no note was asked for', () => {
+      setup({ mode: 'create', gameId: 3, navigateOnCreate: false });
+      expect(document.body.textContent).not.toContain('runForm.importedHoursHint');
+    });
+  });
 });

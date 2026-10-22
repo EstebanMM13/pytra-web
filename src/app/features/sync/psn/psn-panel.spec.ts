@@ -231,7 +231,7 @@ describe('PsnPanel', () => {
 
     component.openConfirm(component.pending()[0], 'run');
     component.onConfirmed({ id: 8, name: 'Hybrid', category: 'HYBRID' } as Game);
-    expect(launcher.openNewRun).toHaveBeenCalledWith(8, { platform: 'PS4' });
+    expect(launcher.openNewRun).toHaveBeenCalledWith(8, { platform: 'PS4' }, 'runForm.importedHoursHint.psn');
     expect(component.status()?.pendingCount).toBe(0);
   });
 
@@ -249,7 +249,7 @@ describe('PsnPanel', () => {
     fixture.detectChanges();
 
     expect(psn.confirmPending).toHaveBeenCalledWith(7, expect.objectContaining({ name: 'Astro Bot', category: 'HYBRID' }));
-    expect(launcher.openNewRun).toHaveBeenCalledWith(7, { platform: 'PS4' });
+    expect(launcher.openNewRun).toHaveBeenCalledWith(7, { platform: 'PS4' }, 'runForm.importedHoursHint.psn');
     expect(component.confirmTarget()).toBeNull();
     expect(document.body.querySelector('app-modal-sheet')).toBeNull();
   });

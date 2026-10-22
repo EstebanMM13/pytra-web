@@ -66,6 +66,11 @@ export class RunForm implements OnInit {
   protected readonly icons = ICONS;
 
   readonly request = input.required<RunFormRequest>();
+  /** Note under the hours, set by whoever opened the form (new runs only). */
+  protected readonly hintKey = computed(() => {
+    const request = this.request();
+    return request.mode === 'create' ? (request.hintKey ?? null) : null;
+  });
 
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly router = inject(Router);

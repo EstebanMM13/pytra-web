@@ -19,6 +19,8 @@ export type RunFormRequest =
       prefill?: RunPrefill;
       /** Opened from a global entry point: navigate to the new run after saving. */
       navigateOnCreate: boolean;
+      /** Translation key of a note shown under the hours (e.g. how imported hours are counted). */
+      hintKey?: string;
     }
   | { mode: 'edit'; experience: Experience };
 
@@ -42,12 +44,13 @@ export class RunFormLauncher {
   readonly saved$: Observable<RunSaved> = this.savedSubject.asObservable();
 
   // The read-only demo opens the form too (to explore it); its save is stopped by ModalSheet.
-  openNewRun(gameId?: number, prefill?: RunPrefill): void {
+  openNewRun(gameId?: number, prefill?: RunPrefill, hintKey?: string): void {
     this.requestState.set({
       mode: 'create',
       gameId,
       prefill,
       navigateOnCreate: gameId === undefined,
+      hintKey,
     });
   }
 

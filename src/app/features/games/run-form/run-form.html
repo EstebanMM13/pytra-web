@@ -258,6 +258,9 @@
           />
         </label>
       </div>
+      @if (hintKey(); as hint) {
+        <p class="text-xs text-muted">{{ hint | translate }}</p>
+      }
       @if (endSuggested()) {
         <p class="text-xs text-muted">{{ 'runForm.endSuggested' | translate }}</p>
       }

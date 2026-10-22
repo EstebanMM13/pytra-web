@@ -277,7 +277,8 @@ export class PsnPanel {
   /**
    * Same rules as Steam: confirming a SINGLEPLAYER game makes the API create a run with the PSN
    * hours on the title's console, so that run is opened to complete it. HYBRID hours go to the
-   * game's online playtime: open a fresh run on that console. ONLINE games have no runs: show the game.
+   * game's online playtime: open a fresh run on that console, with a note that hours logged in it move
+   * out of the online playtime (the API takes them out). ONLINE games have no runs: show the game.
    */
   private openRunFor(game: Game, platform: PsnPlatform): void {
     if (game.category === 'ONLINE') {
@@ -286,7 +287,7 @@ export class PsnPanel {
       return;
     }
     if (game.category !== 'SINGLEPLAYER') {
-      this.runFormLauncher.openNewRun(game.id, { platform });
+      this.runFormLauncher.openNewRun(game.id, { platform }, 'runForm.importedHoursHint.psn');
       return;
     }
     this.experienceService.findAllByGame(game.id).subscribe({

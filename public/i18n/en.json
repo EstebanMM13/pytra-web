@@ -861,6 +861,10 @@
       "hundredths": "0–10 · e.g. 9.25"
     },
     "campaignHours": "Campaign hours",
+    "importedHoursHint": {
+      "steam": "Hours imported from Steam already count as online playtime. Hours you log in this run move from online playtime to the run; they are not added twice.",
+      "psn": "Hours imported from PlayStation already count as online playtime. Hours you log in this run move from online playtime to the run; they are not added twice."
+    },
     "platformLoading": "Loading platforms…",
     "platformPlaceholder": "Pick a platform",
     "addPlatform": "+ Add platform",

@@ -230,7 +230,8 @@ export class SteamPanel {
   /**
    * Confirming a SINGLEPLAYER game makes the API create a run with the Steam hours, so we open that
    * run to complete it (status, rating…) instead of a new one that would count the hours twice.
-   * HYBRID hours go to the game's online playtime: open a fresh PC run without hours. ONLINE games
+   * HYBRID hours go to the game's online playtime: open a fresh PC run without hours, with a note that
+   * hours logged in it move out of the online playtime (the API takes them out). ONLINE games
    * have no runs at all, so their page (with the online hours) is shown instead.
    */
   private openRunFor(game: Game): void {
@@ -240,7 +241,7 @@ export class SteamPanel {
       return;
     }
     if (game.category !== 'SINGLEPLAYER') {
-      this.runFormLauncher.openNewRun(game.id, { platform: 'PC' });
+      this.runFormLauncher.openNewRun(game.id, { platform: 'PC' }, 'runForm.importedHoursHint.steam');
       return;
     }
     this.experienceService.findAllByGame(game.id).subscribe({

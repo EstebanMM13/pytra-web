@@ -861,6 +861,10 @@
       "hundredths": "0–10 · ej. 9,25"
     },
     "campaignHours": "Horas de campaña",
+    "importedHoursHint": {
+      "steam": "Las horas importadas de Steam ya cuentan como tiempo online. Las horas que registres en esta partida pasan del tiempo online a la partida; no se suman dos veces.",
+      "psn": "Las horas importadas de PlayStation ya cuentan como tiempo online. Las horas que registres en esta partida pasan del tiempo online a la partida; no se suman dos veces."
+    },
     "platformLoading": "Cargando plataformas…",
     "platformPlaceholder": "Elige una plataforma",
     "addPlatform": "+ Añadir plataforma",
