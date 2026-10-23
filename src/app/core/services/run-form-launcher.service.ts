@@ -38,6 +38,8 @@ export interface RunSaved {
 export class RunFormLauncher {
   private readonly requestState = signal<RunFormRequest | null>(null);
   private readonly savedSubject = new Subject<RunSaved>();
+  /** Runs still to edit after the open one (see `openEditRuns`). */
+  private pendingEdits: Experience[] = [];
   private readonly cache = inject(UserDataCache);
 
   readonly request = this.requestState.asReadonly();
@@ -45,6 +47,7 @@ export class RunFormLauncher {
 
   // The read-only demo opens the form too (to explore it); its save is stopped by ModalSheet.
   openNewRun(gameId?: number, prefill?: RunPrefill, hintKey?: string): void {
+    this.pendingEdits = [];
     this.requestState.set({
       mode: 'create',
       gameId,
@@ -55,19 +58,37 @@ export class RunFormLauncher {
   }
 
   openEditRun(experience: Experience): void {
+    this.pendingEdits = [];
     this.requestState.set({ mode: 'edit', experience });
   }
 
+  /**
+   * Opens the edit form for each run in turn (e.g. every run a platform import created for a game):
+   * the next one opens when the current one is saved or closed. Any other open request drops the rest.
+   */
+  openEditRuns(experiences: readonly Experience[]): void {
+    const [first, ...rest] = experiences;
+    if (!first) return;
+    this.openEditRun(first);
+    this.pendingEdits = rest;
+  }
+
+  /** Closes the form, or moves on to the next run queued by `openEditRuns`. */
   close(): void {
-    this.requestState.set(null);
+    this.requestState.set(this.nextRequest());
   }
 
   /** Called by the form after a successful save; closes it and notifies listeners. */
   notifySaved(saved: RunSaved): void {
-    this.requestState.set(null);
+    this.requestState.set(this.nextRequest());
     // The run service already invalidated on the write; repeated so listeners reload fresh data
     // whatever path saved the run.
     this.cache.invalidateAll();
     this.savedSubject.next(saved);
+  }
+
+  private nextRequest(): RunFormRequest | null {
+    const next = this.pendingEdits.shift();
+    return next ? { mode: 'edit', experience: next } : null;
   }
 }
