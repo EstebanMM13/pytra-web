@@ -243,10 +243,11 @@
               >
                 {{ 'steam.createRun' | translate }}
               </button>
-              @if (game.category === 'ONLINE') {
-                <p class="w-full text-xs text-muted" data-online-hint>{{ 'game.onlineNoRuns' | translate }}</p>
-              }
             </div>
+            <!-- Own grid row: inside the actions cell its text width would widen the auto column and crush the title. -->
+            @if (game.category === 'ONLINE') {
+              <p class="text-xs text-muted md:col-span-full md:-mt-2" data-online-hint>{{ 'game.onlineNoRuns' | translate }}</p>
+            }
           </li>
         }
       </ul>
