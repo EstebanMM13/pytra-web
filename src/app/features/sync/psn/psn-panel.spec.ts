@@ -72,7 +72,7 @@ describe('PsnPanel', () => {
     if (firstStatusFails) {
       psn.getStatus.mockReturnValueOnce(throwError(() => apiError(500, 'BOOM')));
     }
-    const launcher = { openNewRun: vi.fn(), openEditRun: vi.fn() };
+    const launcher = { openNewRun: vi.fn(), openEditRun: vi.fn(), openEditRuns: vi.fn() };
     const toast = { success: vi.fn(), error: vi.fn(), show: vi.fn() };
     const blockWrite = vi.fn(() => demo);
     TestBed.configureTestingModule({
@@ -299,12 +299,28 @@ describe('PsnPanel', () => {
 
     component.openConfirm(component.pending()[0], 'run');
     component.onConfirmed({ id: 7, name: 'Astro Bot', category: 'SINGLEPLAYER' } as Game);
-    expect(launcher.openEditRun).toHaveBeenCalledWith(imported);
+    expect(launcher.openEditRuns).toHaveBeenCalledWith([imported]);
 
     component.openConfirm(component.pending()[0], 'run');
     component.onConfirmed({ id: 8, name: 'Hybrid', category: 'HYBRID' } as Game);
     expect(launcher.openNewRun).toHaveBeenCalledWith(8, { platform: 'PS4' }, 'runForm.importedHoursHint.psn');
     expect(component.status()?.pendingCount).toBe(0);
+  });
+
+  it('opens every PSN run of a game linked on both consoles, one after another', () => {
+    const ps4 = { id: 3, runLabel: PSN_RUN_LABEL, platform: 'PS4' } as Experience;
+    const ps5 = { id: 5, runLabel: PSN_RUN_LABEL, platform: 'PS5' } as Experience;
+    const { component, launcher } = setup({
+      psnStatus: status({ linked: true, pendingCount: 1 }),
+      pending: [pendingGame()],
+      runs: [ps4, { id: 4, runLabel: 'Other' } as Experience, ps5],
+    });
+
+    component.openConfirm(component.pending()[0], 'run');
+    component.onConfirmed({ id: 7, name: 'Astro Bot', category: 'SINGLEPLAYER' } as Game);
+
+    expect(launcher.openEditRuns).toHaveBeenCalledWith([ps4, ps5]);
+    expect(launcher.openNewRun).not.toHaveBeenCalled();
   });
 
   it('confirming in the review dialog in run mode opens the run for the confirmed game', () => {

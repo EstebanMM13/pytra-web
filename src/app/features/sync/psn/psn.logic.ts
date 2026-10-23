@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Experience } from '../../../core/models/experience.model';
-import { apiCode, findImportedRun, lookup, playtimeHours } from '../sync.logic';
+import { apiCode, findImportedRun, findImportedRuns, lookup, playtimeHours } from '../sync.logic';
 
 /** Run label the API gives the run it creates when a SINGLEPLAYER PSN game is confirmed. */
 export const PSN_RUN_LABEL = 'Importado de PlayStation';
@@ -55,6 +55,11 @@ export function isProfilePrivate(err: HttpErrorResponse): boolean {
 /** The run that already holds a just-confirmed PSN game's hours (see `findImportedRun`). */
 export function findPsnRun(runs: readonly Experience[]): Experience | null {
   return findImportedRun(runs, PSN_RUN_LABEL);
+}
+
+/** Every run that holds a just-confirmed PSN game's hours, one per console (see `findImportedRuns`). */
+export function findPsnRuns(runs: readonly Experience[]): Experience[] {
+  return findImportedRuns(runs, PSN_RUN_LABEL);
 }
 
 /** PSN playtime in hours (the API sends minutes). */

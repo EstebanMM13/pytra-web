@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Experience } from '../../../core/models/experience.model';
-import { apiCode, findImportedRun, playtimeHours } from '../sync.logic';
+import { apiCode, findImportedRun, findImportedRuns, playtimeHours } from '../sync.logic';
 
 /** Run label the API gives the run it creates when a SINGLEPLAYER Steam game is confirmed. */
 export const STEAM_RUN_LABEL = 'Importado de Steam';
@@ -44,6 +44,11 @@ export function maskSteamId(steamId: string | null | undefined): string {
 /** The run that already holds a just-confirmed Steam game's hours (see `findImportedRun`). */
 export function findSteamRun(runs: readonly Experience[]): Experience | null {
   return findImportedRun(runs, STEAM_RUN_LABEL);
+}
+
+/** Every run that holds a just-confirmed Steam game's hours, one per console (see `findImportedRuns`). */
+export function findSteamRuns(runs: readonly Experience[]): Experience[] {
+  return findImportedRuns(runs, STEAM_RUN_LABEL);
 }
 
 /** Steam playtime in hours (the API sends minutes). */

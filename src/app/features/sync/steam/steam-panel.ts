@@ -27,7 +27,7 @@ import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
 import { pollWhileEnriching } from '../shared/enrichment-poll';
 import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
 import { PendingChange, apiCode, applyPendingChange, enrichmentCount, lookup, mergePending, mergePolledStatus } from '../sync.logic';
-import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRun, maskSteamId, steamHours } from './steam.logic';
+import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRuns, maskSteamId, steamHours } from './steam.logic';
 
 @Component({
   selector: 'app-steam-panel',
@@ -269,9 +269,9 @@ export class SteamPanel {
     }
     this.experienceService.findAllByGame(game.id).subscribe({
       next: (runs) => {
-        const steamRun = findSteamRun(runs);
-        if (steamRun) {
-          this.runFormLauncher.openEditRun(steamRun);
+        const steamRuns = findSteamRuns(runs);
+        if (steamRuns.length > 0) {
+          this.runFormLauncher.openEditRuns(steamRuns);
         } else {
           this.runFormLauncher.openNewRun(game.id, { platform: 'PC' });
         }

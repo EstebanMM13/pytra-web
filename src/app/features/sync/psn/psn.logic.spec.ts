@@ -4,6 +4,7 @@ import {
   PSN_ERROR_KEYS,
   PSN_RUN_LABEL,
   findPsnRun,
+  findPsnRuns,
   isProfilePrivate,
   isValidOnlineId,
   psnConfirmErrorKey,
@@ -91,5 +92,12 @@ describe('psn logic', () => {
     expect(findPsnRun([run(1, 'Run 1'), run(2, PSN_RUN_LABEL)])?.id).toBe(2);
     expect(findPsnRun([run(3, 'Renamed')])?.id).toBe(3);
     expect(findPsnRun([run(1, 'Run 1'), run(4, 'Run 2')])).toBeNull();
+  });
+
+  it('finds every run the API created with the PSN hours (one per console)', () => {
+    expect(findPsnRuns([run(1, PSN_RUN_LABEL), run(2, 'Run 2'), run(3, PSN_RUN_LABEL)]).map((r) => r.id)).toEqual([1, 3]);
+    expect(findPsnRuns([run(3, 'Renamed')]).map((r) => r.id)).toEqual([3]);
+    expect(findPsnRuns([run(1, 'Run 1'), run(4, 'Run 2')])).toEqual([]);
+    expect(findPsnRuns([])).toEqual([]);
   });
 });

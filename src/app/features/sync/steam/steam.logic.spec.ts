@@ -5,6 +5,7 @@ import { applyPendingChange, lookup } from '../sync.logic';
 import {
   STEAM_RUN_LABEL,
   findSteamRun,
+  findSteamRuns,
   maskSteamId,
   steamConfirmErrorKey,
   steamHours,
@@ -23,6 +24,12 @@ describe('steam logic', () => {
     expect(findSteamRun([run(3, 'Renamed')])?.id).toBe(3);
     expect(findSteamRun([run(1, 'Run 1'), run(4, 'Run 2')])).toBeNull();
     expect(findSteamRun([])).toBeNull();
+  });
+
+  it('finds the Steam runs as a list (a single link gives at most one)', () => {
+    expect(findSteamRuns([run(1, 'Run 1'), run(2, STEAM_RUN_LABEL)]).map((r) => r.id)).toEqual([2]);
+    expect(findSteamRuns([run(3, 'Renamed')]).map((r) => r.id)).toEqual([3]);
+    expect(findSteamRuns([run(1, 'Run 1'), run(4, 'Run 2')])).toEqual([]);
   });
 
   it('maps confirm errors', () => {

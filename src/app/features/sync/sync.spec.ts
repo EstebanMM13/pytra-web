@@ -42,7 +42,7 @@ describe('Sync', () => {
         { provide: DemoModeService, useValue: { isDemo: signal(demo), blockWrite } },
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
         { provide: NativeOAuthService, useValue: { isNative: false, openExternalFlow: vi.fn(() => Promise.resolve()) } },
-        { provide: RunFormLauncher, useValue: { openNewRun: vi.fn(), openEditRun: vi.fn() } },
+        { provide: RunFormLauncher, useValue: { openNewRun: vi.fn(), openEditRun: vi.fn(), openEditRuns: vi.fn() } },
         { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
       ],
     });

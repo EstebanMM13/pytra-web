@@ -22,7 +22,18 @@ export function lookup(map: Record<string, string>, key: string): string | null 
  * the API labelled `runLabel`, or the game's only run. Creating another run would count the hours twice.
  */
 export function findImportedRun(runs: readonly Experience[], runLabel: string): Experience | null {
-  return runs.find((r) => r.runLabel === runLabel) ?? (runs.length === 1 ? runs[0] : null);
+  return findImportedRuns(runs, runLabel)[0] ?? null;
+}
+
+/**
+ * Every run that holds a just-confirmed game's imported hours (SINGLEPLAYER only): the API creates one
+ * per linked console, all labelled `runLabel` (a PS4 and a PS5 run share the PlayStation label), in the
+ * API's order. Falls back to the game's only run, like `findImportedRun`.
+ */
+export function findImportedRuns(runs: readonly Experience[], runLabel: string): Experience[] {
+  const labelled = runs.filter((r) => r.runLabel === runLabel);
+  if (labelled.length > 0) return labelled;
+  return runs.length === 1 ? [runs[0]] : [];
 }
 
 /** Local change to a pending game, mirrored in the status counters without refetching. */

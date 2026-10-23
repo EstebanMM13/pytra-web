@@ -32,7 +32,7 @@ import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
 import { pollWhileEnriching } from '../shared/enrichment-poll';
 import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
 import { PendingChange, applyPendingChange, enrichmentCount, mergePending, mergePolledStatus } from '../sync.logic';
-import { findPsnRun, isProfilePrivate, isValidOnlineId, normalizeOnlineId, psnErrorKey, psnHours } from './psn.logic';
+import { findPsnRuns, isProfilePrivate, isValidOnlineId, normalizeOnlineId, psnErrorKey, psnHours } from './psn.logic';
 
 /** Banner shown when GET /status fails. */
 const STATUS_ERROR_KEY = 'psn.errors.generic';
@@ -299,7 +299,7 @@ export class PsnPanel {
 
   /**
    * Same rules as Steam: confirming a SINGLEPLAYER game makes the API create a run with the PSN
-   * hours on the title's console, so that run is opened to complete it. HYBRID hours go to the
+   * hours on each linked console, so those runs are opened one after another to complete them. HYBRID hours go to the
    * game's online playtime: open a fresh run on that console, with a note that hours logged in it move
    * out of the online playtime (the API takes them out). ONLINE games have no runs: show the game.
    */
@@ -315,9 +315,10 @@ export class PsnPanel {
     }
     this.experienceService.findAllByGame(game.id).subscribe({
       next: (runs) => {
-        const psnRun = findPsnRun(runs);
-        if (psnRun) {
-          this.runFormLauncher.openEditRun(psnRun);
+        // One run per linked console (PS4 and PS5): each opens in turn as the previous one closes.
+        const psnRuns = findPsnRuns(runs);
+        if (psnRuns.length > 0) {
+          this.runFormLauncher.openEditRuns(psnRuns);
         } else {
           this.runFormLauncher.openNewRun(game.id, { platform });
         }
