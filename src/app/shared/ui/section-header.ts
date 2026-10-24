@@ -7,7 +7,7 @@ import { CollapseBreakpoint, CollapseStateService } from '../../core/services/co
 let nextRegionId = 0;
 
 /**
- * Uppercase section label followed by a rule; projects an optional right slot. Neutral by default;
+ * Uppercase section label followed by a rule; projects an optional right slot. Brand by default;
  * `tone="gold"` is reserved for achievement sections (gold label, fading gold rule).
  *
  * With `collapseKey` set it also renders a chevron toggle that collapses its parent card:
@@ -26,13 +26,13 @@ let nextRegionId = 0;
   template: `
     <h2
       class="shrink-0 text-xs font-semibold tracking-[0.08em] uppercase md:text-[13px]"
-      [class]="tone() === 'gold' ? 'text-gold' : 'text-text-3'"
+      [class]="tone() === 'gold' ? 'text-gold' : 'text-brand-light'"
     >
       {{ label() }}
     </h2>
     <span
       class="h-px flex-1"
-      [class]="tone() === 'gold' ? 'bg-linear-to-r from-gold-line to-transparent' : 'bg-divider'"
+      [class]="tone() === 'gold' ? 'bg-linear-to-r from-gold-line to-transparent' : 'bg-brand-line'"
       aria-hidden="true"
     ></span>
     <ng-content />
@@ -63,7 +63,7 @@ export class SectionHeader {
   protected readonly icons = ICONS;
 
   readonly label = input.required<string>();
-  /** Label colour: neutral (default) or gold (achievement sections). */
+  /** Label colour: brand-hi with a brand-line rule (default) or gold (achievement sections). */
   readonly tone = input<'neutral' | 'gold'>('neutral');
   /** Stable "screen.card" key; enables the collapse toggle when set. */
   readonly collapseKey = input<string>();
