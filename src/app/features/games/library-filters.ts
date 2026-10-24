@@ -43,7 +43,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
       type="button"
       (click)="toggle()"
       class="relative flex h-11 items-center gap-2 rounded-full border px-3.5 text-[13px] font-medium whitespace-nowrap sm:px-4 md:h-9 md:px-3.5"
-      [class]="count() ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border bg-surface text-text-2 hover:border-border-strong'"
+      [class]="count() ? 'border-brand-line bg-brand-tint text-text' : 'border-border bg-surface text-text-2 hover:border-border-strong'"
       aria-haspopup="dialog"
       [attr.aria-expanded]="open()"
       [attr.aria-label]="
@@ -102,7 +102,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
                 [attr.aria-checked]="sort() === option"
                 (click)="sortChange.emit(option)"
                 class="rounded-full border px-3 py-1.5 text-[13px]"
-                [class]="sort() === option ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-2 hover:border-border-strong'"
+                [class]="sort() === option ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
               >
                 {{ 'library.sort.' + option | translate }}
               </button>
@@ -122,7 +122,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
                 [attr.aria-checked]="category() === c"
                 (click)="categoryChange.emit(c)"
                 class="rounded-full border px-3 py-1.5 text-[13px]"
-                [class]="category() === c ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-2 hover:border-border-strong'"
+                [class]="category() === c ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
               >
                 {{ (c === 'ALL' ? 'library.categoryAllShort' : 'category.' + c) | translate }}
               </button>
@@ -142,7 +142,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
                   [attr.aria-pressed]="isPlatformPicked(p.id)"
                   (click)="togglePlatform(p.id)"
                   class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px]"
-                  [class]="isPlatformPicked(p.id) ? 'border-brand bg-brand-tint text-brand-lighter' : 'border-border text-text-2 hover:border-border-strong'"
+                  [class]="isPlatformPicked(p.id) ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
                 >
                   <span
                     class="size-1.5 shrink-0 rounded-full bg-platform-neutral"

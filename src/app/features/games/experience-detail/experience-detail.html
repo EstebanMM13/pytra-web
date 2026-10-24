@@ -103,14 +103,10 @@
 
     <!-- Run figures (every size): hero rating tile, hours and duration, then the start -> end dates -->
     <section class="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3" [attr.aria-label]="'run.data' | translate">
-      <div class="relative col-span-2 min-w-0 overflow-hidden rounded-xl border border-card-border card-glass lg:row-span-2" data-stat="rating">
-        <div
-          class="pointer-events-none absolute -top-16 -right-10 size-48 rounded-full bg-gold/20 blur-3xl light:bg-gold/10"
-          aria-hidden="true"
-        ></div>
+      <div class="relative col-span-2 min-w-0 overflow-hidden rounded-xl border border-gold-card-border bg-gold-tint lg:row-span-2" data-stat="rating">
         <div class="@container relative flex h-full flex-col p-4 [--fig-max:52px] md:px-5 md:[--fig-max:60px]">
-          <p class="flex items-center gap-1.5 text-xs leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
-            <svg [lucideIcon]="icons.star" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
+          <p class="flex items-center gap-1.5 text-xs leading-4 text-gold md:gap-2 md:text-[13px] md:leading-5">
+            <svg [lucideIcon]="icons.star" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
             {{ 'run.rating' | translate }}
           </p>
           @if (editing() === 'rating') {
@@ -151,7 +147,7 @@
                 (click)="startEdit('rating')"
               >
                 <span
-                  class="text-figure-tone font-mono leading-none font-bold tracking-[-0.03em]"
+                  class="font-mono leading-none font-bold tracking-[-0.03em]"
                   [class]="e.rating | ratingTone"
                   [style.font-size]="editableFigureSize(e.rating | rating)"
                 >
@@ -190,7 +186,7 @@
 
       <div class="min-w-0 rounded-xl border border-card-border card-glass" data-stat="hours">
         <div class="@container flex h-full flex-col justify-center p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]">
-          <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
+          <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
             <svg [lucideIcon]="icons.clock" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
             <span class="truncate">{{ 'run.hours' | translate }}</span>
           </p>
@@ -240,7 +236,7 @@
                 [attr.aria-label]="'run.inlineEditHours' | translate: { value: e.hours | hours }"
                 (click)="startEdit('hours')"
               >
-                <span class="text-figure font-mono">{{ e.hours | hours }}</span>
+                <span class="font-mono">{{ e.hours | hours }}</span>
                 <span class="run-inline-pencil" aria-hidden="true"><svg [lucideIcon]="icons.pencil" [size]="14"></svg></span>
               </button>
             </p>
@@ -250,15 +246,15 @@
 
       <div class="min-w-0 rounded-xl border border-card-border card-glass" data-stat="duration">
         <div class="@container flex h-full flex-col justify-center p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]">
-          <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
-            <svg [lucideIcon]="icons.hourglass" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
+          <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
+            <svg [lucideIcon]="icons.hourglass" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
             <span class="truncate">{{ 'run.duration' | translate }}</span>
           </p>
           <p
             class="mt-2 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap"
             [style.font-size]="figureSize(durationLabel(false))"
           >
-            <span class="text-figure">{{ durationLabel(false) }}</span>
+            <span>{{ durationLabel(false) }}</span>
           </p>
         </div>
       </div>
@@ -267,9 +263,9 @@
         class="col-span-2 flex min-w-0 flex-col justify-center gap-2 rounded-xl border border-card-border card-glass p-4 md:col-span-4 md:px-5 lg:col-span-2"
         data-stat="dates"
       >
-        <div class="flex items-center justify-between gap-3 text-xs text-muted md:text-[13px]">
+        <div class="flex items-center justify-between gap-3 text-xs text-text-3 md:text-[13px]">
           <span class="flex items-center gap-1.5 md:gap-2">
-            <svg [lucideIcon]="icons.calendar" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
+            <svg [lucideIcon]="icons.calendar" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
             {{ 'run.start' | translate }}
           </span>
           <span>{{ 'run.end' | translate }}</span>

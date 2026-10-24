@@ -193,7 +193,7 @@
       id="profile-achievements"
       class="scroll-mt-6 rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]"
     >
-      <app-section-header collapseKey="profile.achievements" class="mb-3.5" [label]="'achievements.title' | translate">
+      <app-section-header collapseKey="profile.achievements" tone="gold" class="mb-3.5" [label]="'achievements.title' | translate">
         @if (achievements()?.length) {
           <span class="shrink-0 font-mono text-xs text-muted">
             {{ 'achievements.count' | translate: { unlocked: unlockedCount(), total: achievements()!.length } }}

@@ -7,7 +7,7 @@
   >
     <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
       <div
-        class="absolute inset-0 bg-[radial-gradient(360px_260px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_30%,transparent),transparent_70%),radial-gradient(320px_240px_at_100%_100%,color-mix(in_srgb,var(--pt-gold)_14%,transparent),transparent_70%)] md:bg-[radial-gradient(620px_340px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_32%,transparent),transparent_70%),radial-gradient(520px_300px_at_100%_100%,color-mix(in_srgb,var(--pt-gold)_14%,transparent),transparent_70%)] light:opacity-70"
+        class="absolute inset-0 bg-[radial-gradient(360px_260px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_10%,transparent),transparent_70%)] md:bg-[radial-gradient(620px_340px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_12%,transparent),transparent_70%)] light:opacity-70"
       ></div>
       <app-pytra-mark
         class="absolute -top-10 -right-14 size-[180px] rotate-[-12deg] opacity-[0.06] md:-top-24 md:-right-16 md:size-[340px] light:opacity-[0.05]"
@@ -15,7 +15,7 @@
     </div>
     <div class="min-w-0">
       <p class="mb-2 flex items-center gap-2 font-mono text-[10px] tracking-[0.14em] text-muted uppercase md:text-[11px] md:tracking-[0.16em]">
-        <span class="size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span>
+        <span class="size-1.5 shrink-0 rounded-full bg-brand-light" aria-hidden="true"></span>
         {{ today() }}
       </p>
       @if (displayName(); as name) {
@@ -25,10 +25,10 @@
         </h1>
         @if (summary() || summaryFailed()) {
           <p
-            class="mt-2 inline-flex max-w-full items-center gap-2 rounded-full border border-brand/30 bg-brand-tint/60 px-3 py-1.5 text-sm font-medium text-text-2 md:mt-3"
+            class="mt-2 inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-hover/60 px-3 py-1.5 text-sm font-medium text-text-2 md:mt-3"
             [attr.title]="tagline().key | translatePlural: tagline().count : tagline().params"
           >
-            <svg [lucideIcon]="icons.sparkles" [size]="14" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+            <svg [lucideIcon]="icons.sparkles" [size]="14" class="shrink-0 text-text-2" aria-hidden="true"></svg>
             <span class="truncate">{{ tagline().key | translatePlural: tagline().count : tagline().params }}</span>
           </p>
         }
@@ -178,6 +178,7 @@
           [value]="s.averageRating | rating"
           [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
           [trend]="trends().rating"
+          tone="gold"
           [meter]="m?.rating ?? null"
         />
       } @else if (!summaryFailed()) {
@@ -192,7 +193,7 @@
     <!-- Top unlocked achievements (hidden when none) -->
     @if (topBadges().length) {
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:px-[22px] md:py-4">
-        <app-section-header collapseKey="dashboard.achievements" class="mb-3" [label]="'dashboard.achievements' | translate">
+        <app-section-header collapseKey="dashboard.achievements" tone="gold" class="mb-3" [label]="'dashboard.achievements' | translate">
           <a routerLink="/profile" [queryParams]="{ section: 'achievements' }" class="flex shrink-0 items-center gap-1 text-[13px] text-brand-light hover:underline">
             {{ 'dashboard.achievementsAll' | translate }}
             <svg [lucideIcon]="icons.arrowRight" [size]="14" aria-hidden="true"></svg>
@@ -236,7 +237,7 @@
                 <p class="mt-1 truncate text-[13px] text-text-3" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
               </div>
               @if (daysPlaying(hero); as days) {
-                <span class="shrink-0 rounded-full bg-brand-tint px-2.5 py-1 font-mono text-xs text-brand-lighter">
+                <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-border ring-inset">
                   {{ days }}
                 </span>
               }
@@ -258,7 +259,7 @@
                 [meta]="playingMeta(run)"
               >
                 @if (daysPlaying(run); as days) {
-                  <span class="shrink-0 rounded-full bg-brand-tint px-2.5 py-1 font-mono text-xs text-brand-lighter">
+                  <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-border ring-inset">
                     {{ days }}
                   </span>
                 }
@@ -321,7 +322,7 @@
               <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
               @if (item.online) {
                 <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
-                <span class="shrink-0 rounded-full bg-brand-tint px-2 py-0.5 text-[11px] text-brand-lighter">
+                <span class="shrink-0 rounded-full bg-hover px-2 py-0.5 text-[11px] text-text-3">
                   {{ 'dashboard.topRatedOnline' | translate }}
                 </span>
               } @else {

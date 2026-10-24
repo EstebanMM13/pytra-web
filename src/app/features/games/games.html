@@ -129,13 +129,16 @@
               [attr.aria-checked]="view() === v"
               (click)="setView(v)"
               class="flex h-full items-center gap-1.5 rounded-full px-3 font-medium"
-              [class]="view() === v ? 'bg-brand-tint text-brand-lighter' : 'text-muted hover:text-text-2'"
+              [class]="view() === v ? 'bg-border text-text' : 'text-muted hover:text-text-2'"
             >
-              @if (v === 'list') {
-                <svg [lucideIcon]="icons.list" [size]="15"></svg>
-              } @else {
-                <svg [lucideIcon]="icons.layoutGrid" [size]="15"></svg>
-              }
+              <!-- display: contents, so the wrapper only colours the icon (brand on the active view) -->
+              <span class="contents" [class.text-brand-light]="view() === v">
+                @if (v === 'list') {
+                  <svg [lucideIcon]="icons.list" [size]="15"></svg>
+                } @else {
+                  <svg [lucideIcon]="icons.layoutGrid" [size]="15"></svg>
+                }
+              </span>
               {{ 'library.view.' + v | translate }}
             </button>
           }
@@ -164,12 +167,12 @@
             class="flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-medium whitespace-nowrap"
             [class]="
               query().status === status
-                ? 'border-brand bg-brand-tint text-brand-lighter'
+                ? 'border-brand-line bg-brand-tint text-text'
                 : 'border-border bg-surface text-text-3 hover:border-border-strong hover:text-text-2'
             "
           >
             {{ 'library.status.' + status | translate }}
-            <span class="font-mono text-[11px] opacity-70">{{ statusCounts()[status] }}</span>
+            <span class="font-mono text-[11px] opacity-70" [class.text-brand-light]="query().status === status">{{ statusCounts()[status] }}</span>
           </button>
         }
       </div>
@@ -178,7 +181,7 @@
     @if (filterChips().length) {
       <div class="-mt-1 flex flex-wrap items-center gap-1.5 md:-mt-2" [attr.aria-label]="'library.filters.active' | translate" role="group">
         @for (chip of filterChips(); track chip.kind + chip.id) {
-          <span class="inline-flex h-8 items-center gap-1 rounded-full border border-brand/25 bg-brand-tint pr-1 pl-3 text-[13px] font-medium text-brand-lighter">
+          <span class="inline-flex h-8 items-center gap-1 rounded-full border border-brand-line bg-brand-tint pr-1 pl-3 text-[13px] font-medium text-text">
             {{ chip.label | translate }}
             <button
               type="button"

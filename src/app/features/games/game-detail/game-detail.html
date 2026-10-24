@@ -140,7 +140,7 @@
           <dl class="mt-5 hidden grid-cols-2 gap-x-8 gap-y-5 border-t border-divider pt-5 md:grid lg:grid-cols-4">
             <div class="min-w-0">
               <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                <svg [lucideIcon]="icons.building" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                <svg [lucideIcon]="icons.building" [size]="13" class="shrink-0 text-muted" aria-hidden="true"></svg>
                 {{ 'game.developer' | translate }}
               </dt>
               <dd class="mt-1.5 truncate text-[17px] font-semibold text-text" [title]="g.developer ?? ''">
@@ -149,7 +149,7 @@
             </div>
             <div class="min-w-0">
               <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                <svg [lucideIcon]="icons.calendar" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                <svg [lucideIcon]="icons.calendar" [size]="13" class="shrink-0 text-muted" aria-hidden="true"></svg>
                 {{ 'game.release' | translate }}
               </dt>
               <dd class="mt-1.5 flex flex-wrap items-center gap-2 text-[17px] font-semibold text-text">
@@ -161,7 +161,7 @@
             </div>
             <div class="min-w-0">
               <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                <svg [lucideIcon]="icons.gamepad2" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                <svg [lucideIcon]="icons.gamepad2" [size]="13" class="shrink-0 text-muted" aria-hidden="true"></svg>
                 {{ 'game.category' | translate }}
               </dt>
               <dd class="mt-1.5 truncate text-[17px] font-semibold text-text">
@@ -170,7 +170,7 @@
             </div>
             <div class="min-w-0">
               <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                <svg [lucideIcon]="icons.monitor" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                <svg [lucideIcon]="icons.monitor" [size]="13" class="shrink-0 text-muted" aria-hidden="true"></svg>
                 {{ 'game.platforms' | translate }}
               </dt>
               <dd class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[17px] font-semibold text-text" [title]="platformNames()">
@@ -183,7 +183,7 @@
             </div>
             <div class="col-span-2 min-w-0 lg:col-span-4">
               <dt class="flex items-center gap-1.5 text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
-                <svg [lucideIcon]="icons.sparkles" [size]="13" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+                <svg [lucideIcon]="icons.sparkles" [size]="13" class="shrink-0 text-muted" aria-hidden="true"></svg>
                 {{ 'game.genre' | translate }}
               </dt>
               <dd class="mt-2">
@@ -225,26 +225,22 @@
           [class]="online ? 'md:col-span-2' : 'col-span-2 md:col-span-4 lg:col-span-2'"
           data-stat="hours"
         >
-          <div
-            class="pointer-events-none absolute -top-16 -right-10 size-48 rounded-full bg-brand/25 blur-3xl light:bg-brand/15"
-            aria-hidden="true"
-          ></div>
           <div class="@container relative flex h-full flex-col p-4 [--fig-max:36px] md:px-5 md:[--fig-max:40px]">
-            <p class="flex items-center gap-1.5 text-[11px] leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
-              <svg [lucideIcon]="statIcons.hours" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
+            <p class="flex items-center gap-1.5 text-[11px] leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
+              <svg [lucideIcon]="statIcons.hours" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
               {{ 'game.stats.totalHours' | translate }}
             </p>
             <p
               class="mt-1.5 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap"
               [style.font-size]="figureSize(s.totalHours | hours)"
             >
-              <span class="text-figure">{{ s.totalHours | hours }}</span>
+              <span data-figure>{{ s.totalHours | hours }}</span>
             </p>
             @if (showHoursBreakdown()) {
               <div class="mt-auto pt-3">
                 <div class="flex h-1.5 overflow-hidden rounded-full bg-border" aria-hidden="true">
                   <span class="bg-brand-light" [style.width.%]="campaignShare()"></span>
-                  <span class="flex-1 bg-gold" [class.opacity-0]="!s.onlineHours"></span>
+                  <span class="flex-1 bg-chart" [class.opacity-0]="!s.onlineHours"></span>
                 </div>
                 <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
                   <span class="inline-flex items-center gap-1.5">
@@ -253,7 +249,7 @@
                     <span class="font-mono text-text-2">{{ s.runHours | hours }}</span>
                   </span>
                   <span class="inline-flex items-center gap-1.5">
-                    <span class="size-2 rounded-full bg-gold" aria-hidden="true"></span>
+                    <span class="size-2 rounded-full bg-chart" aria-hidden="true"></span>
                     {{ 'game.stats.online' | translate }}
                     <span class="font-mono text-text-2">{{ s.onlineHours | hours }}</span>
                   </span>
@@ -268,6 +264,7 @@
             [label]="'game.stats.rating' | translate"
             [value]="onlineRating() | rating"
             [valueClass]="'font-mono ' + (onlineRating() | ratingTone)"
+            tone="gold-tile"
           />
         } @else {
           <app-stat-card [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
@@ -276,12 +273,14 @@
             [label]="'game.stats.avgRating' | translate"
             [value]="s.avgRating | rating"
             [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
+            tone="gold-tile"
           />
           <app-stat-card
             [icon]="statIcons.best"
             [label]="'game.stats.bestRating' | translate"
             [value]="s.bestRating | rating"
             [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
+            tone="gold"
           />
           @if (platinum()) {
             <!-- Earned platinum: same box as a stat card, in icy silver with a diamond sheen and glow -->
