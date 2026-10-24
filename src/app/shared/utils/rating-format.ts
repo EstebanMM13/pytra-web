@@ -6,7 +6,7 @@ export function ratingDecimals(precision: RatingPrecision): 0 | 1 | 2 {
 }
 
 /** Rounds half up at `decimals` places, avoiding binary drift (9.995 -> 10.00, not 9.99). */
-function roundHalfUp(value: number, decimals: number): number {
+export function roundHalfUp(value: number, decimals: number): number {
   const shifted = Number(`${value}e${decimals}`);
   return Number.isFinite(shifted)
     ? Number(`${Math.round(shifted)}e-${decimals}`)
