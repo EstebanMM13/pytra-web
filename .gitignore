@@ -42,3 +42,9 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Android release signing (keystores and credentials live outside the repo)
+*.jks
+*.keystore
+*release.properties
+keystore.properties
