@@ -73,7 +73,7 @@ import { canAnimate } from '../utils/motion';
         [class.justify-center]="centered()"
       >
         @if (icon(); as i) {
-          <svg [lucideIcon]="i" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
+          <svg [lucideIcon]="i" [size]="15" class="size-3.5 shrink-0 md:size-[15px]" [style.color]="iconColor()"></svg>
         }
         @if (shortLabel(); as short) {
           <span class="truncate sm:hidden" [attr.title]="label()">{{ short }}</span>
@@ -131,16 +131,21 @@ export class StatCard {
   readonly centered = input(false, { transform: booleanAttribute });
   /**
    * Colour role: 'brand' (activity figures: purple sparkline / bar), 'gold' (ratings: gold
-   * sparkline / bar) or 'gold-tile' (the headline rating: gold visuals on a gold-tint tile).
+   * sparkline / bar), 'gold-tile' (the headline rating: gold visuals on a gold-tint tile) or
+   * 'platinum' (platinum icon, brand visuals).
    */
-  readonly tone = input<'brand' | 'gold' | 'gold-tile'>('brand');
+  readonly tone = input<'brand' | 'gold' | 'gold-tile' | 'platinum'>('brand');
   /** Makes the whole card a link (router commands), e.g. to the list behind the figure. */
   readonly link = input<string | readonly (string | number)[] | null>(null);
   /** Query params of `link`. */
   readonly queryParams = input<Params | null>(null);
 
   protected readonly visual = computed(() => statVisual(this.trend(), this.meter()));
-  protected readonly accent = computed(() => (this.tone() === 'brand' ? 'brand' : 'gold'));
+  protected readonly accent = computed(() => (this.tone() === 'gold' || this.tone() === 'gold-tile' ? 'gold' : 'brand'));
+  /** Header icon: brand-hi for activity figures, gold for ratings, platinum for the platinum tile. */
+  protected readonly iconColor = computed(() =>
+    this.tone() === 'platinum' ? 'var(--pt-platinum)' : this.accent() === 'gold' ? 'var(--pt-gold)' : 'var(--pt-brand-light)',
+  );
   /** Sized from the final value (not the count-up frame) so the figure never jumps while animating. */
   protected readonly figureSize = computed(() => figureFontSize(String(this.value())));
 
