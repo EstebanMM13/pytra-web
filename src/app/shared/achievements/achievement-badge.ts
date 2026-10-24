@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, booleanAttribute, computed, inject, input } from '@angular/core';
 import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
 import { ICONS } from '../ui/icons';
-import { TranslatePipe } from '@ngx-translate/core';
-import { Achievement, AchievementIcon, AchievementTier } from './achievements';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { PreferencesService } from '../../core/services/preferences.service';
+import { formatScaledPoint } from '../utils/rating-scale';
+import { Achievement, AchievementIcon, AchievementTier, RATING_BADGE_THRESHOLDS } from './achievements';
 
 const BADGE_ICONS: Record<AchievementIcon, LucideIconInput> = {
   trophy: ICONS.trophy,
@@ -72,7 +74,7 @@ const TIER_TONE: Record<AchievementTier, string> = {
       </span>
       @if (compact()) {
         <span class="mt-0.5 line-clamp-2 block text-[11px] leading-snug text-muted">
-          {{ 'achievements.items.' + a().id + '.desc' | translate: { target: a().target } }}
+          {{ 'achievements.items.' + a().id + '.desc' | translate: descParams() }}
         </span>
       }
       @if (compact() && !a().unlocked) {
@@ -82,7 +84,7 @@ const TIER_TONE: Record<AchievementTier, string> = {
       }
       @if (!compact()) {
         <span class="mt-0.5 block text-xs text-muted">
-          {{ 'achievements.items.' + a().id + '.desc' | translate: { target: a().target } }}
+          {{ 'achievements.items.' + a().id + '.desc' | translate: descParams() }}
         </span>
         @if (!a().unlocked) {
           <span class="mt-1.5 flex items-center gap-2">
@@ -113,5 +115,20 @@ export class AchievementBadge {
   protected readonly icon = computed(() => BADGE_ICONS[this.achievement().icon]);
   protected readonly tone = computed(() => TIER_TONE[this.achievement().tier]);
   protected readonly percent = computed(() => Math.round(this.achievement().progress * 100));
+  private readonly preferences = inject(PreferencesService);
+  private readonly translate = inject(TranslateService);
+
+  /** Description params: the target plus the rating thresholds on the user's scale ("a 10" -> "a 100"). */
+  protected descParams(): Record<string, string | number> {
+    const scale = this.preferences.ratingScale();
+    const lang = this.translate.currentLang() === 'en' ? 'en' : 'es';
+    return {
+      target: this.achievement().target,
+      max: formatScaledPoint(RATING_BADGE_THRESHOLDS.max, scale, lang),
+      high: formatScaledPoint(RATING_BADGE_THRESHOLDS.high, scale, lang),
+      low: formatScaledPoint(RATING_BADGE_THRESHOLDS.low, scale, lang),
+    };
+  }
+
   protected readonly shown = computed(() => Math.min(Math.floor(this.achievement().current), this.achievement().target));
 }

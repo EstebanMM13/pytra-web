@@ -26,6 +26,7 @@ import { translatePlural } from '../../../shared/utils/plural';
 import { formatDayMonthYear, runDuration, splitLines } from '../../../shared/utils/run-dates';
 import { toastApiError } from '../../../shared/utils/api-error';
 import { formatDecimalInput } from '../../../shared/utils/decimal-input';
+import { ratingInputParams } from '../../../shared/utils/rating-scale';
 import { HOUR_STEPS, InlineField, bumpHoursDraft, inlineDraft, parseInlineEdit } from './inline-edit.logic';
 
 /** `/stats/top-rated` caps `limit` at 50 server-side. */
@@ -184,6 +185,11 @@ export class ExperienceDetail {
     return translatePlural(this.translate, d.unit === 'months' ? 'run.months' : 'run.days', d.count);
   }
 
+  /** Scale bound and examples for the inline rating placeholder, labels and error. */
+  protected ratingParams(): ReturnType<typeof ratingInputParams> {
+    return ratingInputParams(this.preferences.ratingScale(), this.preferences.ratingPrecision(), this.lang());
+  }
+
   private lang(): string {
     return this.translate.currentLang() === 'en' ? 'en' : 'es';
   }
@@ -198,7 +204,7 @@ export class ExperienceDetail {
     if (!experience || this.inlineSaving()) {
       return;
     }
-    this.draft.set(inlineDraft(field, experience, this.lang()));
+    this.draft.set(inlineDraft(field, experience, this.lang(), this.preferences.ratingScale()));
     this.draftInvalid.set(false);
     this.inlineStatus.set('');
     this.editing.set(field);
@@ -248,7 +254,13 @@ export class ExperienceDetail {
     if (!field || !experience) {
       return;
     }
-    const result = parseInlineEdit(field, this.draft(), experience, this.preferences.ratingPrecision());
+    const result = parseInlineEdit(
+      field,
+      this.draft(),
+      experience,
+      this.preferences.ratingPrecision(),
+      this.preferences.ratingScale(),
+    );
     if (result.kind === 'invalid' && !fromBlur) {
       this.draftInvalid.set(true);
       return;

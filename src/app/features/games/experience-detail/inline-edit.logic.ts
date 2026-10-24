@@ -1,7 +1,12 @@
 import { Experience, ExperiencePatch } from '../../../core/models/experience.model';
 import { RatingPrecision } from '../../../core/services/preferences.service';
-import { formatDecimalInput, formatHoursInput, parseDecimal } from '../../../shared/utils/decimal-input';
-import { isValidRating } from '../run-form/run-form.logic';
+import { formatHoursInput, parseDecimal } from '../../../shared/utils/decimal-input';
+import {
+  RatingScale,
+  fromRatingScale,
+  isValidTypedRating,
+  scaledRatingDraft,
+} from '../../../shared/utils/rating-scale';
 
 /** Pure helpers behind the inline edit of a run's hours and rating on the run detail page. */
 
@@ -22,22 +27,31 @@ function roundHours(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-/** Text the inline input starts with: the same formatting as the run form's inputs. */
-export function inlineDraft(field: InlineField, experience: Pick<Experience, 'hours' | 'rating'>, lang: string): string {
-  return field === 'hours' ? formatHoursInput(experience.hours, lang) : formatDecimalInput(experience.rating, lang);
+/** Text the inline input starts with: the same formatting as the run form's inputs (rating on `scale`). */
+export function inlineDraft(
+  field: InlineField,
+  experience: Pick<Experience, 'hours' | 'rating'>,
+  lang: string,
+  scale: RatingScale = '10',
+): string {
+  return field === 'hours'
+    ? formatHoursInput(experience.hours, lang)
+    : scaledRatingDraft(experience.rating, scale, lang);
 }
 
 /**
  * What saving the typed `text` means, with the run form's rules: hours are a number ≥ 0 ("12,5"
- * accepted; empty keeps the stored hours), the rating is 0–10 following the rating precision (empty
- * clears it). Text that still shows the stored value (hours compared at the two decimals the input
- * shows) is `unchanged`, so an untouched field never sends a request.
+ * accepted; empty keeps the stored hours), the rating is typed on `scale` following the rating
+ * precision (empty clears it) and patched on the stored 0–10 scale. Text that still shows the
+ * stored value (hours compared at the two decimals the input shows) is `unchanged`, so an untouched
+ * field never sends a request.
  */
 export function parseInlineEdit(
   field: InlineField,
   text: string,
   experience: Pick<Experience, 'hours' | 'rating'>,
   precision: RatingPrecision,
+  scale: RatingScale = '10',
 ): InlineEditResult {
   const value = parseDecimal(text);
   if (field === 'hours') {
@@ -48,9 +62,9 @@ export function parseInlineEdit(
   if (value === null) {
     return experience.rating === null ? UNCHANGED : { kind: 'change', patch: { rating: null } };
   }
-  if (Number.isNaN(value)) return INVALID;
-  if (value === experience.rating) return UNCHANGED;
-  return isValidRating(value, precision) ? { kind: 'change', patch: { rating: value } } : INVALID;
+  if (Number.isNaN(value) || !isValidTypedRating(value, scale, precision, experience.rating)) return INVALID;
+  const rating = fromRatingScale(value, scale);
+  return rating === experience.rating ? UNCHANGED : { kind: 'change', patch: { rating } };
 }
 
 /**

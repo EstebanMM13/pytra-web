@@ -28,7 +28,8 @@ import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { RUN_DATE_MIN, runDateMax, todayIso } from '../../../shared/utils/run-dates';
-import { formatDecimalInput, formatHoursInput } from '../../../shared/utils/decimal-input';
+import { formatHoursInput } from '../../../shared/utils/decimal-input';
+import { ratingInputParams, scaledRatingDraft } from '../../../shared/utils/rating-scale';
 import { toastApiError } from '../../../shared/utils/api-error';
 import {
   RUN_STATUSES,
@@ -88,6 +89,11 @@ export class RunForm implements OnInit {
     return this.translate.currentLang() === 'en' ? 'en' : 'es';
   }
 
+  /** Scale bound and examples for the rating placeholder and error ("0–100 · e.g. 92,5"). */
+  protected ratingParams(): ReturnType<typeof ratingInputParams> {
+    return ratingInputParams(this.preferences.ratingScale(), this.preferences.ratingPrecision(), this.lang());
+  }
+
   /** Catalog grouped by family; null while loading. */
   protected readonly platformGroups = computed(() => {
     const platforms = this.platformService.platforms();
@@ -125,6 +131,7 @@ export class RunForm implements OnInit {
         ratingValidatorFor(
           () => this.preferences.ratingPrecision(),
           () => this.original?.rating ?? null,
+          () => this.preferences.ratingScale(),
         ),
       ),
       summary: this.fb.control(''),
@@ -235,7 +242,7 @@ export class RunForm implements OnInit {
       startDate: experience.startDate ?? '',
       endDate: experience.endDate ?? '',
       hours: formatHoursInput(experience.hours, this.lang()),
-      rating: formatDecimalInput(experience.rating, this.lang()),
+      rating: scaledRatingDraft(experience.rating, this.preferences.ratingScale(), this.lang()),
       summary: experience.summary ?? '',
       platinum: experience.platinum,
       replay: experience.replay,
@@ -448,7 +455,11 @@ export class RunForm implements OnInit {
     }
 
     const request = this.request();
-    const body = buildExperienceRequest(this.form.getRawValue() as RunFormValue, this.original);
+    const body = buildExperienceRequest(
+      this.form.getRawValue() as RunFormValue,
+      this.original,
+      this.preferences.ratingScale(),
+    );
     const call$ = this.original
       ? this.experienceService.update(this.original.id, body)
       : this.experienceService.create(gameId, body);

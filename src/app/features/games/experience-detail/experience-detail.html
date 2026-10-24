@@ -123,19 +123,19 @@
                   enterkeyhint="done"
                   autocomplete="off"
                   class="run-inline-input max-w-40 text-gold"
-                  [placeholder]="'runForm.ratingExample.' + preferences.ratingPrecision() | translate"
+                  [placeholder]="'runForm.ratingExample' | translate: ratingParams()"
                   [value]="draft()"
-                  [attr.aria-label]="'run.inlineRatingLabel' | translate"
+                  [attr.aria-label]="'run.inlineRatingLabel' | translate: ratingParams()"
                   [attr.aria-invalid]="draftInvalid()"
                   [attr.aria-describedby]="draftInvalid() ? 'run-inline-rating-error' : null"
                   (input)="onDraftInput($any($event.target).value)"
                   (keydown.enter)="commitEdit()"
                 />
-                <span class="text-sm text-faint md:text-base" aria-hidden="true">{{ 'run.outOf' | translate }}</span>
+                <span class="text-sm text-faint md:text-base" aria-hidden="true">{{ 'run.outOf' | translate: { max: preferences.ratingMax() } }}</span>
               </div>
               @if (draftInvalid()) {
                 <p id="run-inline-rating-error" class="text-xs text-danger">
-                  {{ 'runForm.errors.ratingPrecision.' + preferences.ratingPrecision() | translate }}
+                  {{ 'runForm.errors.ratingPrecision.' + preferences.ratingPrecision() | translate: ratingParams() }}
                 </p>
               }
             </div>
@@ -147,7 +147,7 @@
                 class="run-inline-trigger"
                 [disabled]="inlineSaving()"
                 [attr.aria-busy]="inlineSaving()"
-                [attr.aria-label]="'run.inlineEditRating' | translate: { value: e.rating | rating }"
+                [attr.aria-label]="'run.inlineEditRating' | translate: { value: e.rating | rating, max: preferences.ratingMax() }"
                 (click)="startEdit('rating')"
               >
                 <span
@@ -159,7 +159,7 @@
                 </span>
                 <span class="run-inline-pencil" aria-hidden="true"><svg [lucideIcon]="icons.pencil" [size]="14"></svg></span>
               </button>
-              <span class="text-sm text-faint md:text-base">{{ 'run.outOf' | translate }}</span>
+              <span class="text-sm text-faint md:text-base">{{ 'run.outOf' | translate: { max: preferences.ratingMax() } }}</span>
             </p>
             <div class="mt-auto pt-3">
               <div class="h-1.5 rounded-full bg-bg" aria-hidden="true">

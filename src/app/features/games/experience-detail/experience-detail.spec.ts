@@ -9,6 +9,7 @@ import { DemoModeService } from '../../../core/services/demo-mode.service';
 import { ExperienceService } from '../../../core/services/experience.service';
 import { GameService } from '../../../core/services/game.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
+import { RatingScale, ratingScaleMax } from '../../../shared/utils/rating-scale';
 import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
 import { StatsService } from '../../../core/services/stats.service';
 import { Navbar } from '../../../shared/navbar/navbar';
@@ -49,7 +50,7 @@ describe('ExperienceDetail inline edit', () => {
   let toastError: ReturnType<typeof vi.fn>;
   let blockWrite: ReturnType<typeof vi.fn>;
 
-  function setup(experience = run(), demo = false) {
+  function setup(experience = run(), demo = false, scale: RatingScale = '10') {
     patch = vi.fn();
     toastError = vi.fn();
     blockWrite = vi.fn(() => demo);
@@ -66,7 +67,14 @@ describe('ExperienceDetail inline edit', () => {
         { provide: GameService, useValue: { cachedById: () => null, findById: () => EMPTY } },
         { provide: StatsService, useValue: { getTopRated: () => of([]) } },
         { provide: RunFormLauncher, useValue: { saved$: EMPTY, openEditRun: vi.fn() } },
-        { provide: PreferencesService, useValue: { ratingPrecision: signal('hundredths') } },
+        {
+          provide: PreferencesService,
+          useValue: {
+            ratingPrecision: signal('hundredths'),
+            ratingScale: signal(scale),
+            ratingMax: signal(ratingScaleMax(scale)),
+          },
+        },
         { provide: DemoModeService, useValue: { isDemo: signal(demo), blockWrite } },
         { provide: ToastService, useValue: { success: vi.fn(), error: toastError } },
       ],
@@ -227,6 +235,29 @@ describe('ExperienceDetail inline edit', () => {
     t.type(again, '');
     t.key(again, 'Enter');
     expect(patch).toHaveBeenLastCalledWith(11, { rating: null });
+  });
+
+  it('shows and edits the rating on the scale preference, saving it on 0–10', () => {
+    const t = setup(run({ rating: 8.75 }), false, '100');
+    const trigger = t.byId<HTMLButtonElement>('run-inline-rating-trigger')!;
+    expect(trigger.textContent).toContain('87,5');
+    expect(t.el.querySelector('[data-stat="rating"]')!.textContent).toContain('run.outOf');
+    // The meter stays a percent of the max: 8.75 / 10.
+    expect(t.el.querySelector<HTMLElement>('[data-stat="rating"] .bar-fill')!.style.width).toBe('87.5%');
+
+    patch.mockReturnValue(of(run({ rating: 9.3 })));
+    trigger.click();
+    t.fixture.detectChanges();
+    const input = t.byId<HTMLInputElement>('run-inline-rating')!;
+    expect(input.value).toBe('87,5');
+
+    t.type(input, '101');
+    t.key(input, 'Enter');
+    expect(patch).not.toHaveBeenCalled();
+
+    t.type(input, '93');
+    t.key(input, 'Enter');
+    expect(patch).toHaveBeenCalledWith(11, { rating: 9.3 });
   });
 
   it('offers adding a rating to an unrated run', () => {

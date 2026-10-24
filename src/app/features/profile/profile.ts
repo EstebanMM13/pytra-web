@@ -25,6 +25,7 @@ import {
   applyLanguage,
 } from '../../core/services/preferences.service';
 import { ThemePreference, ThemeService } from '../../core/services/theme.service';
+import { RatingScale } from '../../shared/utils/rating-scale';
 import { UserService } from '../../core/services/user.service';
 import { usernameValidators } from '../../core/validators/username';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -138,6 +139,11 @@ export class Profile {
     { value: 'integer', label: '9' },
     { value: 'half', label: '9.5' },
     { value: 'hundredths', label: '9.25' },
+  ];
+  protected readonly scaleOptions: SegmentedOption<RatingScale>[] = [
+    { value: '10', label: '0–10' },
+    { value: '100', label: '0–100' },
+    { value: '5', label: '0–5' },
   ];
   protected readonly motionOptions: SegmentedOption<MotionPreference>[] = [
     { value: 'system', label: 'motion.system' },

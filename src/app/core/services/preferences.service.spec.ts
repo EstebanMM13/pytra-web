@@ -17,12 +17,14 @@ describe('parsePreferences', () => {
   it('keeps valid fields and replaces unknown ones', () => {
     expect(parsePreferences(JSON.stringify({ ratingPrecision: 'half', defaultPlatform: 42 }))).toEqual({
       ratingPrecision: 'half',
+      ratingScale: '10',
       defaultPlatform: 'PC',
       language: 'es',
       motion: 'system',
     });
     expect(parsePreferences(JSON.stringify({ ratingPrecision: 'x', defaultPlatform: 'SWITCH' }))).toEqual({
       ratingPrecision: 'hundredths',
+      ratingScale: '10',
       defaultPlatform: 'SWITCH',
       language: 'es',
       motion: 'system',
@@ -31,6 +33,14 @@ describe('parsePreferences', () => {
     expect(parsePreferences(JSON.stringify({ language: 'fr' })).language).toBe('es');
     expect(parsePreferences(JSON.stringify({ motion: 'reduce' })).motion).toBe('reduce');
     expect(parsePreferences(JSON.stringify({ motion: 'fast' })).motion).toBe('system');
+  });
+
+  it('reads the rating scale, defaulting to 0–10 for missing or unknown values', () => {
+    expect(parsePreferences(JSON.stringify({ ratingScale: '100' })).ratingScale).toBe('100');
+    expect(parsePreferences(JSON.stringify({ ratingScale: '5' })).ratingScale).toBe('5');
+    expect(parsePreferences(JSON.stringify({ ratingScale: 100 })).ratingScale).toBe('10');
+    expect(parsePreferences(JSON.stringify({ ratingScale: '20' })).ratingScale).toBe('10');
+    expect(parsePreferences(JSON.stringify({ ratingPrecision: 'half' })).ratingScale).toBe('10');
   });
 });
 
@@ -62,10 +72,25 @@ describe('PreferencesService', () => {
     expect(service.ratingStep()).toBe(0.5);
     expect(JSON.parse(localStorage.getItem(PREFERENCES_KEY)!)).toEqual({
       ratingPrecision: 'half',
+      ratingScale: '10',
       defaultPlatform: 'PS5',
       language: 'en',
       motion: 'system',
     });
+  });
+
+  it('stores the rating scale and exposes its max', () => {
+    const service = TestBed.inject(PreferencesService);
+    expect(service.ratingScale()).toBe('10');
+    expect(service.ratingMax()).toBe(10);
+
+    service.setRatingScale('100');
+    expect(service.ratingMax()).toBe(100);
+    expect(JSON.parse(localStorage.getItem(PREFERENCES_KEY)!).ratingScale).toBe('100');
+
+    service.setRatingScale('5');
+    expect(service.ratingMax()).toBe(5);
+    expect(TestBed.runInInjectionContext(() => new PreferencesService()).ratingScale()).toBe('5');
   });
 
   it('stores the motion preference and mirrors it on <html data-motion>', () => {

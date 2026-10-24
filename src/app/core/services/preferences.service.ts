@@ -1,6 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { MOTION_PREFERENCES, MotionPreference, setMotionPreference } from '../../shared/utils/motion';
+import { RATING_SCALES, RatingScale, ratingScaleMax } from '../../shared/utils/rating-scale';
 
 /** How finely ratings are typed in the run form: 9 / 9.5 / 9.25. */
 export type RatingPrecision = 'integer' | 'half' | 'hundredths';
@@ -10,6 +11,8 @@ export type Language = 'es' | 'en';
 
 export interface Preferences {
   ratingPrecision: RatingPrecision;
+  /** Scale ratings are shown and typed on (stored on 0–10 regardless; see shared/utils/rating-scale.ts). */
+  ratingScale: RatingScale;
   /**
    * Platform preselected for new runs: a catalog id ("14"), or an old enum value ("PC") saved before
    * the catalog existed. Resolved against the catalog with `findPlatformByKey`.
@@ -24,6 +27,7 @@ export const PREFERENCES_KEY = 'pytra_preferences';
 
 export const DEFAULT_PREFERENCES: Preferences = {
   ratingPrecision: 'hundredths',
+  ratingScale: '10',
   defaultPlatform: 'PC',
   language: 'es',
   motion: 'system',
@@ -57,6 +61,9 @@ export function parsePreferences(raw: string | null): Preferences {
     ratingPrecision: PRECISIONS.includes(value.ratingPrecision as RatingPrecision)
       ? (value.ratingPrecision as RatingPrecision)
       : DEFAULT_PREFERENCES.ratingPrecision,
+    ratingScale: RATING_SCALES.includes(value.ratingScale as RatingScale)
+      ? (value.ratingScale as RatingScale)
+      : DEFAULT_PREFERENCES.ratingScale,
     defaultPlatform: isPlatformKey(value.defaultPlatform) ? value.defaultPlatform : DEFAULT_PREFERENCES.defaultPlatform,
     language: LANGUAGES.includes(value.language as Language) ? (value.language as Language) : DEFAULT_PREFERENCES.language,
     motion: MOTION_PREFERENCES.includes(value.motion as MotionPreference)
@@ -91,12 +98,15 @@ export function applyLanguage(translate: TranslateService, language: Language): 
   }
 }
 
-/** Device-local UI preferences (rating precision, default platform for new runs, language, motion). */
+/** Device-local UI preferences (rating precision and scale, default platform for new runs, language, motion). */
 @Injectable({ providedIn: 'root' })
 export class PreferencesService {
   private readonly state = signal<Preferences>(readStored());
 
   readonly ratingPrecision = computed(() => this.state().ratingPrecision);
+  readonly ratingScale = computed(() => this.state().ratingScale);
+  /** Upper bound of the rating scale (10, 100 or 5), for "/ 10" style labels. */
+  readonly ratingMax = computed(() => ratingScaleMax(this.ratingScale()));
   readonly defaultPlatform = computed(() => this.state().defaultPlatform);
   readonly language = computed(() => this.state().language);
   readonly motion = computed(() => this.state().motion);
@@ -104,6 +114,10 @@ export class PreferencesService {
 
   setRatingPrecision(ratingPrecision: RatingPrecision): void {
     this.update({ ratingPrecision });
+  }
+
+  setRatingScale(ratingScale: RatingScale): void {
+    this.update({ ratingScale });
   }
 
   setDefaultPlatform(defaultPlatform: string): void {

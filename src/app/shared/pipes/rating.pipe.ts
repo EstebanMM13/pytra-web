@@ -1,12 +1,14 @@
 import { inject, Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { PreferencesService } from '../../core/services/preferences.service';
-import { formatRating, ratingDecimals, ratingLocale } from '../utils/rating-format';
+import { ratingLocale } from '../utils/rating-format';
+import { formatScaledRating } from '../utils/rating-scale';
 
 /**
- * Formats a 0–10 rating with the decimals of the user's precision preference and the decimal
- * separator of the UI language (see `formatRating`). Impure so a preference or language change
- * re-renders every rating on screen. Pair with `font-mono`.
+ * Formats a stored 0–10 rating on the user's rating scale (0–10, 0–100 or 0–5), with the decimals
+ * of the precision preference and the decimal separator of the UI language (see
+ * `formatScaledRating`). Impure so a preference or language change re-renders every rating on
+ * screen. Pair with `font-mono`.
  */
 @Pipe({ name: 'rating', pure: false })
 export class RatingPipe implements PipeTransform {
@@ -14,9 +16,10 @@ export class RatingPipe implements PipeTransform {
   private readonly translate = inject(TranslateService);
 
   transform(value: number | null | undefined): string {
-    return formatRating(
+    return formatScaledRating(
       value,
-      ratingDecimals(this.preferences.ratingPrecision()),
+      this.preferences.ratingScale(),
+      this.preferences.ratingPrecision(),
       ratingLocale(this.translate.currentLang()),
     );
   }

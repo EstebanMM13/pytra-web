@@ -16,6 +16,7 @@ import { StatsService } from '../../core/services/stats.service';
 import { UserService } from '../../core/services/user.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { ToastService } from '../../shared/toast/toast.service';
+import { PREFERENCES_KEY, PreferencesService } from '../../core/services/preferences.service';
 import { Profile } from './profile';
 
 @Component({ selector: 'app-navbar', template: '' })
@@ -120,6 +121,20 @@ describe('Profile', () => {
       expect(scrollIntoView).toHaveBeenCalledTimes(1);
       expect(scrollIntoView.mock.contexts[0]).toBe(target);
     }
+  });
+
+  it('sets the rating scale from the preferences section', () => {
+    localStorage.clear();
+    const { el, fixture } = setup();
+    const group = el.querySelector('app-segmented[aria-labelledby="pref-scale"]')!;
+    const labels = [...group.querySelectorAll('button')].map((b) => b.textContent?.trim());
+    expect(labels).toEqual(['0–10', '0–100', '0–5']);
+
+    group.querySelectorAll<HTMLButtonElement>('button')[1].click();
+    fixture.detectChanges();
+    expect(TestBed.inject(PreferencesService).ratingScale()).toBe('100');
+    expect(JSON.parse(localStorage.getItem(PREFERENCES_KEY)!).ratingScale).toBe('100');
+    localStorage.clear();
   });
 
   it('logs out from the last mobile row', () => {

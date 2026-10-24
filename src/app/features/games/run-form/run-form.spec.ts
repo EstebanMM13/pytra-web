@@ -13,6 +13,7 @@ import { PreferencesService } from '../../../core/services/preferences.service';
 import { RunFormLauncher, RunFormRequest } from '../../../core/services/run-form-launcher.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { todayIso } from '../../../shared/utils/run-dates';
+import { RatingScale, ratingScaleMax } from '../../../shared/utils/rating-scale';
 import { RunForm } from './run-form';
 
 const PC: Platform = { id: 1, name: 'PC', color: '#8A857C', family: 'PC', legacyCode: 'PC', sortOrder: 10 };
@@ -79,6 +80,9 @@ function dateInput(value: string, badInput = false): Pick<HTMLInputElement, 'val
 describe('RunForm', () => {
   const launcher = { close: vi.fn(), notifySaved: vi.fn(), request: signal(null) };
   const toast = { success: vi.fn(), error: vi.fn(), show: vi.fn() };
+  let ratingScale: RatingScale = '10';
+
+  afterEach(() => (ratingScale = '10'));
 
   /** `runCounts`: how many runs each game id already has (none by default). */
   function setup(request: RunFormRequest, runCounts: Record<number, number> = {}) {
@@ -95,7 +99,15 @@ describe('RunForm', () => {
           useValue: { findAllByGame: (id: number) => of(Array.from({ length: runCounts[id] ?? 0 }, (_, i) => ({ id: i }))) },
         },
         { provide: PlatformService, useValue: { platforms: signal([PC]), load: () => of([PC]) } },
-        { provide: PreferencesService, useValue: { defaultPlatform: () => 'PC', ratingPrecision: () => 'hundredths' } },
+        {
+          provide: PreferencesService,
+          useValue: {
+            defaultPlatform: () => 'PC',
+            ratingPrecision: () => 'hundredths',
+            ratingScale: () => ratingScale,
+            ratingMax: () => ratingScaleMax(ratingScale),
+          },
+        },
         { provide: RunFormLauncher, useValue: launcher },
         { provide: ToastService, useValue: toast },
       ],
@@ -248,6 +260,31 @@ describe('RunForm', () => {
     it('shows nothing when no note was asked for', () => {
       setup({ mode: 'create', gameId: 3, navigateOnCreate: false });
       expect(document.body.textContent).not.toContain('runForm.importedHoursHint');
+    });
+  });
+
+  describe('rating scale', () => {
+    it('shows the stored rating on the scale and validates on it', () => {
+      ratingScale = '100';
+      const { form } = setup({ mode: 'edit', experience: experience({ gameId: 1, rating: 8.75 }) });
+      const rating = form.form.controls.rating;
+      expect(rating.value).toBe('87,5');
+      expect(rating.valid).toBe(true);
+
+      rating.setValue('92');
+      expect(rating.valid).toBe(true);
+      rating.setValue('100,5');
+      expect(rating.valid).toBe(false);
+    });
+
+    it('accepts up to two decimals on 0–5', () => {
+      ratingScale = '5';
+      const { form } = setup({ mode: 'create', gameId: 1, navigateOnCreate: false });
+      const rating = form.form.controls.rating;
+      rating.setValue('4,25');
+      expect(rating.valid).toBe(true);
+      rating.setValue('6');
+      expect(rating.valid).toBe(false);
     });
   });
 });

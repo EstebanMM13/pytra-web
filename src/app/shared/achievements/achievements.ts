@@ -88,6 +88,9 @@ const TIER_WEIGHT: Record<AchievementTier, number> = { bronze: 0, silver: 1, gol
 /** Distinct platforms for the gold platform badge (the old fixed list had 6). */
 const MANY_PLATFORMS = 6;
 
+/** Stored 0–10 rating thresholds of the rating badges (shown on the user's scale in their copy). */
+export const RATING_BADGE_THRESHOLDS = { max: 10, high: 9, low: 4 } as const;
+
 type Def = [id: string, category: AchievementCategory, tier: AchievementTier, icon: AchievementIcon, current: number, target: number];
 
 /**
@@ -141,9 +144,9 @@ export function computeAchievements({ games: allGames, summary, sagas, years }: 
     ['marathon250', 'hours', 'gold', 'mountain', maxGameHours, 250],
 
     ['critic', 'ratings', 'silver', 'star', ratings.length, 20],
-    ['perfectTen', 'ratings', 'silver', 'sparkles', ratings.some((r) => r >= 10) ? 1 : 0, 1],
-    ['masterpieces', 'ratings', 'silver', 'heart', ratings.filter((r) => r >= 9).length, 5],
-    ['harshCritic', 'ratings', 'bronze', 'thumbsDown', ratings.some((r) => r <= 4) ? 1 : 0, 1],
+    ['perfectTen', 'ratings', 'silver', 'sparkles', ratings.some((r) => r >= RATING_BADGE_THRESHOLDS.max) ? 1 : 0, 1],
+    ['masterpieces', 'ratings', 'silver', 'heart', ratings.filter((r) => r >= RATING_BADGE_THRESHOLDS.high).length, 5],
+    ['harshCritic', 'ratings', 'bronze', 'thumbsDown', ratings.some((r) => r <= RATING_BADGE_THRESHOLDS.low) ? 1 : 0, 1],
 
     ['firstPlatinum', 'platinums', 'bronze', 'trophy', platinums, 1],
     ['platinum5', 'platinums', 'silver', 'trophy', platinums, 5],

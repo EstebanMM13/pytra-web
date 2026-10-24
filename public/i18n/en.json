@@ -169,6 +169,7 @@
     "noPassword": "You sign in with Google: no password set.",
     "createPassword": "Create password",
     "ratingPrecision": "Rating decimals",
+    "ratingScale": "Rating scale",
     "defaultPlatform": "Default platform",
     "preferencesHint": "Preferences are saved on this device.",
     "avatar": {
@@ -744,7 +745,7 @@
       "update": "Update",
       "saved": "Online hours saved.",
       "error": "Could not save the online hours.",
-      "invalid": "Hours ≥ 0 (e.g. 12.5) and a whole rating from 0 to 10.",
+      "invalid": "Hours ≥ 0 (e.g. 12.5) and a rating from 0 to {{max}} (per your preferences).",
       "explain": "Hours played online, separate from each run's hours: the game total adds both.",
       "platforms": "Platforms",
       "addPlatform": "Add platform…",
@@ -824,7 +825,7 @@
     "notes": "Notes",
     "noSummary": "No summary yet.",
     "rating": "Rating",
-    "outOf": "/ 10",
+    "outOf": "/ {{max}}",
     "noRating": "Not rated",
     "rank": "Your #{{rank}} best rating",
     "data": "Details",
@@ -843,10 +844,10 @@
     "deleted": "Run deleted.",
     "deleteError": "Could not delete the run.",
     "inlineEditHours": "Hours: {{value}}. Edit",
-    "inlineEditRating": "Rating: {{value}} out of 10. Edit",
+    "inlineEditRating": "Rating: {{value}} out of {{max}}. Edit",
     "inlineAddRating": "Not rated. Add a rating",
     "inlineHoursLabel": "Hours played",
-    "inlineRatingLabel": "Rating from 0 to 10",
+    "inlineRatingLabel": "Rating from 0 to {{max}}",
     "inlineAddHours": "Add {{hours}} h",
     "inlineSaved": "Saved.",
     "inlineSaveError": "Could not save the change."
@@ -890,18 +891,14 @@
       "dateLimits": "Dates go from 01/01/1970 to tomorrow.",
       "dates": "The end cannot be before the start.",
       "ratingPrecision": {
-        "integer": "Ratings go from 0 to 10, no decimals (per your preferences).",
-        "half": "Ratings go from 0 to 10 in half points: 9 or 9.5 (per your preferences).",
-        "hundredths": "Ratings go from 0 to 10, up to 2 decimals (e.g. 9.25)."
+        "integer": "Ratings go from 0 to {{max}}, no decimals (per your preferences).",
+        "half": "Ratings go from 0 to {{max}} in half points: {{whole}} or {{example}} (per your preferences).",
+        "hundredths": "Ratings go from 0 to {{max}}, with decimals (e.g. {{example}})."
       },
       "platform": "Pick a platform.",
       "platformName": "The name must be 1 to 40 characters long."
     },
-    "ratingExample": {
-      "integer": "0–10 · e.g. 9",
-      "half": "0–10 · e.g. 9.5",
-      "hundredths": "0–10 · e.g. 9.25"
-    },
+    "ratingExample": "0–{{max}} · e.g. {{example}}",
     "campaignHours": "Campaign hours",
     "importedHoursHint": {
       "steam": "Hours imported from Steam already count as online playtime. Hours you log in this run move from online playtime to the run; they are not added twice.",
@@ -1138,15 +1135,15 @@
       },
       "perfectTen": {
         "title": "Masterpiece",
-        "desc": "Give a game a 10"
+        "desc": "Give a game a {{max}}"
       },
       "masterpieces": {
         "title": "Good taste",
-        "desc": "Rate {{target}} games 9 or higher"
+        "desc": "Rate {{target}} games {{high}} or higher"
       },
       "harshCritic": {
         "title": "Harsh critic",
-        "desc": "Rate a game 4 or lower"
+        "desc": "Rate a game {{low}} or lower"
       },
       "firstPlatinum": {
         "title": "First platinum 🏆",
@@ -1280,7 +1277,7 @@
       "category": "Pick a category.",
       "runLabel": "The run needs a name.",
       "status": "Pick a status.",
-      "rating": "The rating must be 0 to 10, with at most 2 decimals.",
+      "rating": "The rating is out of range or has too many decimals.",
       "hours": "Hours can't be negative.",
       "runDates": "Run dates must be between 01/01/1970 and tomorrow, and the end can't be before the start.",
       "runYear": "The run year must be between 1970 and next year at the latest."

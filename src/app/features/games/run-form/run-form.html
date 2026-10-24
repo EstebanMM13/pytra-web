@@ -261,7 +261,7 @@
             inputmode="decimal"
             autocomplete="off"
             formControlName="rating"
-            [placeholder]="(status() === 'EN_CURSO' ? 'runForm.ratingPlaceholder' : 'runForm.ratingExample.' + preferences.ratingPrecision()) | translate"
+            [placeholder]="(status() === 'EN_CURSO' ? 'runForm.ratingPlaceholder' : 'runForm.ratingExample') | translate: ratingParams()"
             class="run-form-cell-input text-gold!"
             [attr.aria-invalid]="showError('rating')"
           />
@@ -283,7 +283,7 @@
         <p class="text-xs text-danger">{{ 'runForm.errors.hours' | translate }}</p>
       }
       @if (showError('rating')) {
-        <p class="text-xs text-danger">{{ 'runForm.errors.ratingPrecision.' + preferences.ratingPrecision() | translate }}</p>
+        <p class="text-xs text-danger">{{ 'runForm.errors.ratingPrecision.' + preferences.ratingPrecision() | translate: ratingParams() }}</p>
       }
     </div>
 

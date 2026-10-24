@@ -17,7 +17,8 @@ import { InstallPromptService } from '../../core/services/install-prompt.service
 import { Navbar } from '../../shared/navbar/navbar';
 import { HoursPipe, formatHours } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
-import { formatRating, ratingDecimals, ratingLocale } from '../../shared/utils/rating-format';
+import { ratingLocale } from '../../shared/utils/rating-format';
+import { formatScaledRating } from '../../shared/utils/rating-scale';
 import { PreferencesService } from '../../core/services/preferences.service';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
@@ -91,7 +92,6 @@ export class Dashboard {
   private readonly sagaService = inject(SagaService);
   protected readonly displayName = inject(UserService).displayName;
   private readonly preferences = inject(PreferencesService);
-  private readonly ratingDecimals = computed(() => ratingDecimals(this.preferences.ratingPrecision()));
 
   protected readonly statIcons = {
     games: ICONS.gamepad2,
@@ -151,7 +151,9 @@ export class Dashboard {
       today: new Date(),
     });
     const params: Record<string, string | number> = { ...t.params };
-    if (typeof params['rating'] === 'number') params['rating'] = formatRating(params['rating'], this.ratingDecimals(), locale);
+    if (typeof params['rating'] === 'number') {
+      params['rating'] = formatScaledRating(params['rating'], this.preferences.ratingScale(), this.preferences.ratingPrecision(), locale);
+    }
     if (typeof params['hours'] === 'number') params['hours'] = formatHours(params['hours'], locale);
     const count = typeof params['count'] === 'number' ? params['count'] : null;
     return { key: `dashboard.tagline.${t.key}`, params, count };

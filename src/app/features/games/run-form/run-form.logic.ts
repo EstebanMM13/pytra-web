@@ -4,6 +4,7 @@ import { Game } from '../../../core/models/game.model';
 import { RatingPrecision } from '../../../core/services/preferences.service';
 import { decimalValidator, parseDecimal } from '../../../shared/utils/decimal-input';
 import { isWithinRunDateLimits } from '../../../shared/utils/run-dates';
+import { RatingScale, fromRatingScale, isValidTypedRating } from '../../../shared/utils/rating-scale';
 
 /** Pure helpers behind the run form: validation, defaults and request building. */
 
@@ -30,15 +31,16 @@ export function isValidRating(value: number | null | undefined, precision: Ratin
 }
 
 /**
- * Rating validator for the text input ("9,25" or "9.25"). Unparsable text is an error.
- * `keep` is a value accepted regardless of the precision (the stored rating of a run being
- * edited, so changing the preference never blocks saving an untouched rating).
+ * Rating validator for the text input ("9,25" or "9.25"), typed on the rating scale. Unparsable
+ * text is an error. `keep` is the stored rating accepted regardless of the precision (see
+ * `isValidTypedRating`).
  */
 export function ratingValidatorFor(
   precision: () => RatingPrecision,
   keep: () => number | null = () => null,
+  scale: () => RatingScale = () => '10',
 ): ValidatorFn {
-  return decimalValidator('rating', (value) => value === keep() ? isValidRating(value) : isValidRating(value, precision()));
+  return decimalValidator('rating', (value) => isValidTypedRating(value, scale(), precision(), keep()));
 }
 
 /** Default rating validator (two decimals). */
@@ -141,18 +143,23 @@ function numberOrNull(text: string | number | null | undefined): number | null {
   return value === null || Number.isNaN(value) ? null : value;
 }
 
-/** Maps the form value to the API request (empty strings become null, year is derived). */
+/**
+ * Maps the form value to the API request (empty strings become null, year is derived). The rating
+ * is typed on `scale` and sent on the stored 0–10 scale.
+ */
 export function buildExperienceRequest(
   value: RunFormValue,
   original?: Pick<Experience, 'year' | 'startDate' | 'endDate'> | null,
+  scale: RatingScale = '10',
 ): ExperienceRequest {
+  const rating = numberOrNull(value.rating);
   const startDate = value.startDate || null;
   const endDate = value.endDate || null;
   return {
     runLabel: value.runLabel.trim(),
     year: deriveRunYear({ startDate, endDate }, original),
     status: value.status,
-    rating: numberOrNull(value.rating),
+    rating: rating === null ? null : fromRatingScale(rating, scale),
     hours: numberOrNull(value.hours),
     startDate,
     endDate,

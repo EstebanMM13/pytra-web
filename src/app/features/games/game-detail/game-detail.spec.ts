@@ -11,6 +11,7 @@ import { GameService } from '../../../core/services/game.service';
 import { UserDataCache } from '../../../core/services/user-data-cache';
 import { OnlinePlaytimeService } from '../../../core/services/online-playtime.service';
 import { PlatformService } from '../../../core/services/platform.service';
+import { PREFERENCES_KEY } from '../../../core/services/preferences.service';
 import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
 import { Navbar } from '../../../shared/navbar/navbar';
 import { ToastService } from '../../../shared/toast/toast.service';
@@ -182,6 +183,60 @@ describe('GameDetail stats', () => {
     expect(line.tagName).toBe('SPAN');
     expect(line.getAttribute('aria-hidden')).toBe('true');
     expect(line.nextElementSibling?.tagName).toBe('H1');
+  });
+});
+
+describe('GameDetail online rating', () => {
+  afterEach(() => localStorage.clear());
+
+  function render(scale: string, generalRating: number | null) {
+    localStorage.setItem(PREFERENCES_KEY, JSON.stringify({ ratingScale: scale }));
+    const upsert = vi.fn((_id: number, body: unknown) => of({ gameId: 7, platforms: [], ...(body as object) }));
+    TestBed.configureTestingModule({
+      imports: [GameDetail],
+      providers: [
+        provideRouter([]),
+        provideTranslateService(),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '7' })) } },
+        { provide: GameService, useValue: { cachedById: () => null, findById: () => of(game('HYBRID')), findAll: () => of([]) } },
+        { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        {
+          provide: OnlinePlaytimeService,
+          useValue: { findByGame: () => of({ gameId: 7, totalHours: 20, generalRating, platforms: [] }), upsert },
+        },
+        { provide: PlatformService, useValue: { platforms: signal([]), load: () => of([]) } },
+        { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },
+        { provide: DemoModeService, useValue: { isDemo: signal(false), blockWrite: () => false } },
+        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
+      ],
+    });
+    TestBed.overrideComponent(GameDetail, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const fixture = TestBed.createComponent(GameDetail);
+    fixture.detectChanges();
+    const detail = fixture.componentInstance;
+    return { detail, form: detail.onlinePlaytimeForm, upsert, submit: () => detail['submitOnlinePlaytime']() };
+  }
+
+  it('shows the stored rating on the scale and saves typed values on 0–10', () => {
+    const { form, upsert, submit } = render('100', 8.75);
+    const rating = form.controls.generalRating;
+    expect(rating.value).toBe('87,5');
+    expect(rating.valid).toBe(true);
+
+    rating.setValue('101');
+    expect(rating.valid).toBe(false);
+
+    rating.setValue('93');
+    submit();
+    expect(upsert).toHaveBeenCalledWith(7, expect.objectContaining({ generalRating: 9.3 }));
+  });
+
+  it('accepts decimals on 0–5 with the default precision', () => {
+    const { form, upsert, submit } = render('5', null);
+    form.controls.generalRating.setValue('4,25');
+    expect(form.controls.generalRating.valid).toBe(true);
+    submit();
+    expect(upsert).toHaveBeenCalledWith(7, expect.objectContaining({ generalRating: 8.5 }));
   });
 });
 

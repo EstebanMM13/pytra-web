@@ -34,7 +34,9 @@ import { RunRow } from '../../../shared/ui/run-row';
 import { GameCover } from '../../../shared/ui/game-cover';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
-import { decimalValidator, formatDecimalInput, formatHoursInput, parseDecimal } from '../../../shared/utils/decimal-input';
+import { decimalValidator, formatHoursInput, parseDecimal } from '../../../shared/utils/decimal-input';
+import { fromRatingScale, isValidTypedRating, scaledRatingDraft } from '../../../shared/utils/rating-scale';
+import { PreferencesService } from '../../../core/services/preferences.service';
 import { StatCard } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { formatDayMonthYear, formatRunPeriod } from '../../../shared/utils/run-dates';
@@ -106,6 +108,7 @@ export class GameDetail {
   private readonly runFormLauncher = inject(RunFormLauncher);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
+  protected readonly preferences = inject(PreferencesService);
 
   protected readonly statIcons = {
     runs: ICONS.play,
@@ -144,8 +147,18 @@ export class GameDetail {
   // Text inputs so "12,5" works on every keyboard/locale (number inputs drop it as empty).
   readonly onlinePlaytimeForm = this.fb.group({
     totalHours: this.fb.control('0', [Validators.required, decimalValidator('hours', (h) => h >= 0)]),
-    // The API stores the online rating as an integer 0–10.
-    generalRating: this.fb.control('', decimalValidator('rating', (r) => Number.isInteger(r) && r >= 0 && r <= 10)),
+    // Typed on the rating scale with the run form's rules; stored on 0–10 with two decimals.
+    generalRating: this.fb.control(
+      '',
+      decimalValidator('rating', (r) =>
+        isValidTypedRating(
+          r,
+          this.preferences.ratingScale(),
+          this.preferences.ratingPrecision(),
+          this.onlinePlaytime()?.generalRating ?? null,
+        ),
+      ),
+    ),
   });
 
   protected readonly runs = computed(() => [...(this.experiences() ?? [])].sort(byRecencyDesc));
@@ -372,7 +385,7 @@ export class GameDetail {
         this.onlineLoadState.set('loaded');
         this.onlinePlaytimeForm.setValue({
           totalHours: formatHoursInput(playtime.totalHours, lang),
-          generalRating: formatDecimalInput(playtime.generalRating, lang),
+          generalRating: scaledRatingDraft(playtime.generalRating, this.preferences.ratingScale(), lang),
         });
       },
       error: (error: unknown) => {
@@ -397,6 +410,12 @@ export class GameDetail {
       },
       error: () => {},
     });
+  }
+
+  /** The typed online rating on the stored 0–10 scale; empty (or invalid, blocked earlier) is null. */
+  private storedOnlineRating(text: string): number | null {
+    const value = parseDecimal(text);
+    return value === null || Number.isNaN(value) ? null : fromRatingScale(value, this.preferences.ratingScale());
   }
 
   private lang(): string {
@@ -524,7 +543,7 @@ export class GameDetail {
         id,
         buildOnlinePlaytimeRequest({
           totalHours: parseDecimal(raw.totalHours) ?? 0,
-          generalRating: parseDecimal(raw.generalRating),
+          generalRating: this.storedOnlineRating(raw.generalRating),
           existing: this.onlinePlaytime(),
           platformIds: this.onlinePlatforms().map((p) => p.id),
           platformsTouched: this.onlinePlatformsTouched(),

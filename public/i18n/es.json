@@ -169,6 +169,7 @@
     "noPassword": "Entras con Google: no tienes contraseña.",
     "createPassword": "Crear contraseña",
     "ratingPrecision": "Notas con decimales",
+    "ratingScale": "Escala de notas",
     "defaultPlatform": "Plataforma por defecto",
     "preferencesHint": "Las preferencias se guardan en este dispositivo.",
     "avatar": {
@@ -744,7 +745,7 @@
       "update": "Actualizar",
       "saved": "Horas online guardadas.",
       "error": "No se pudieron guardar las horas online.",
-      "invalid": "Horas ≥ 0 (p. ej. 12,5) y valoración entera de 0 a 10.",
+      "invalid": "Horas ≥ 0 (p. ej. 12,5) y valoración de 0 a {{max}} (según tus preferencias).",
       "explain": "Horas jugadas online, aparte de las horas de cada partida: el total del juego suma ambas.",
       "platforms": "Plataformas",
       "addPlatform": "Añadir plataforma…",
@@ -824,7 +825,7 @@
     "notes": "Notas",
     "noSummary": "Sin resumen todavía.",
     "rating": "Nota",
-    "outOf": "/ 10",
+    "outOf": "/ {{max}}",
     "noRating": "Sin nota",
     "rank": "Tu {{rank}}.ª mejor nota",
     "data": "Datos",
@@ -843,10 +844,10 @@
     "deleted": "Partida borrada.",
     "deleteError": "No se pudo borrar la partida.",
     "inlineEditHours": "Horas: {{value}}. Editar",
-    "inlineEditRating": "Nota: {{value}} sobre 10. Editar",
+    "inlineEditRating": "Nota: {{value}} sobre {{max}}. Editar",
     "inlineAddRating": "Sin nota. Añadir una nota",
     "inlineHoursLabel": "Horas jugadas",
-    "inlineRatingLabel": "Nota de 0 a 10",
+    "inlineRatingLabel": "Nota de 0 a {{max}}",
     "inlineAddHours": "Sumar {{hours}} h",
     "inlineSaved": "Guardado.",
     "inlineSaveError": "No se pudo guardar el cambio."
@@ -890,18 +891,14 @@
       "dateLimits": "Las fechas van del 01/01/1970 a mañana.",
       "dates": "El fin no puede ser anterior al inicio.",
       "ratingPrecision": {
-        "integer": "La nota va de 0 a 10, sin decimales (según tus preferencias).",
-        "half": "La nota va de 0 a 10, en medios puntos: 9 o 9,5 (según tus preferencias).",
-        "hundredths": "La nota va de 0 a 10, con hasta 2 decimales (p. ej. 9,25)."
+        "integer": "La nota va de 0 a {{max}}, sin decimales (según tus preferencias).",
+        "half": "La nota va de 0 a {{max}}, en medios puntos: {{whole}} o {{example}} (según tus preferencias).",
+        "hundredths": "La nota va de 0 a {{max}}, con decimales (p. ej. {{example}})."
       },
       "platform": "Elige una plataforma.",
       "platformName": "El nombre debe tener entre 1 y 40 caracteres."
     },
-    "ratingExample": {
-      "integer": "0–10 · ej. 9",
-      "half": "0–10 · ej. 9,5",
-      "hundredths": "0–10 · ej. 9,25"
-    },
+    "ratingExample": "0–{{max}} · ej. {{example}}",
     "campaignHours": "Horas de campaña",
     "importedHoursHint": {
       "steam": "Las horas importadas de Steam ya cuentan como tiempo online. Las horas que registres en esta partida pasan del tiempo online a la partida; no se suman dos veces.",
@@ -1138,15 +1135,15 @@
       },
       "perfectTen": {
         "title": "Obra maestra",
-        "desc": "Ponle un 10 a un juego"
+        "desc": "Ponle un {{max}} a un juego"
       },
       "masterpieces": {
         "title": "Buen gusto",
-        "desc": "Puntúa {{target}} juegos con 9 o más"
+        "desc": "Puntúa {{target}} juegos con {{high}} o más"
       },
       "harshCritic": {
         "title": "Crítico duro",
-        "desc": "Puntúa un juego con 4 o menos"
+        "desc": "Puntúa un juego con {{low}} o menos"
       },
       "firstPlatinum": {
         "title": "Primer platino 🏆",
@@ -1280,7 +1277,7 @@
       "category": "Elige una categoría.",
       "runLabel": "La partida necesita un nombre.",
       "status": "Elige un estado.",
-      "rating": "La nota debe ir de 0 a 10, con 2 decimales como mucho.",
+      "rating": "La nota está fuera de rango o tiene demasiados decimales.",
       "hours": "Las horas no pueden ser negativas.",
       "runDates": "Las fechas de la partida deben estar entre el 01/01/1970 y mañana, y el fin no puede ser anterior al inicio.",
       "runYear": "El año de la partida debe estar entre 1970 y, como mucho, el año que viene."

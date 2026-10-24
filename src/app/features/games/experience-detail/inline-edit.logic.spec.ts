@@ -50,6 +50,25 @@ describe('run inline edit logic', () => {
       // A stored rating stays accepted even if the precision preference changed since.
       expect(parseInlineEdit('rating', '8,5', run, 'integer')).toEqual({ kind: 'unchanged' });
     });
+
+    it('starts from the stored rating on the scale', () => {
+      expect(inlineDraft('rating', { hours: 0, rating: 8.75 }, 'es', '100')).toBe('87,5');
+      expect(inlineDraft('rating', { hours: 0, rating: 8.5 }, 'en', '5')).toBe('4.25');
+    });
+
+    it('takes the rating on the scale and patches it on 0–10', () => {
+      expect(parseInlineEdit('rating', '87', run, 'integer', '100')).toEqual({ kind: 'change', patch: { rating: 8.7 } });
+      expect(parseInlineEdit('rating', '4,3', run, 'hundredths', '5')).toEqual({ kind: 'change', patch: { rating: 8.6 } });
+      expect(parseInlineEdit('rating', '100', run, 'integer', '100')).toEqual({ kind: 'change', patch: { rating: 10 } });
+      expect(parseInlineEdit('rating', '87,5', run, 'integer', '100')).toEqual({ kind: 'invalid' });
+      expect(parseInlineEdit('rating', '5,5', run, 'hundredths', '5')).toEqual({ kind: 'invalid' });
+    });
+
+    it('treats the stored rating shown on the scale as unchanged', () => {
+      expect(parseInlineEdit('rating', '85', run, 'integer', '100')).toEqual({ kind: 'unchanged' });
+      expect(parseInlineEdit('rating', '4,25', run, 'integer', '5')).toEqual({ kind: 'unchanged' });
+      expect(parseInlineEdit('rating', '4.375', { hours: 1, rating: 8.75 }, 'half', '5')).toEqual({ kind: 'unchanged' });
+    });
   });
 
   it('bumps the typed hours, or the stored ones when the text is empty or invalid', () => {

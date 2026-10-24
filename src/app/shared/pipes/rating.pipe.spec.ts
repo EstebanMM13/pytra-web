@@ -32,6 +32,19 @@ describe('RatingPipe', () => {
     expect(pipe.transform(9.75)).toBe('9.75');
   });
 
+  it('shows ratings on the scale preference', () => {
+    preferences.setRatingPrecision('hundredths');
+    preferences.setRatingScale('100');
+    expect(pipe.transform(8.75)).toBe('87,5');
+    preferences.setRatingPrecision('integer');
+    expect(pipe.transform(8.7)).toBe('87');
+    preferences.setRatingScale('5');
+    preferences.setRatingPrecision('hundredths');
+    expect(pipe.transform(8.5)).toBe('4,25');
+    preferences.setRatingScale('10');
+    expect(pipe.transform(8.5)).toBe('8,50');
+  });
+
   it('renders missing values as an em dash', () => {
     expect(pipe.transform(null)).toBe('—');
     expect(pipe.transform(undefined)).toBe('—');

@@ -104,6 +104,27 @@ describe('run form logic', () => {
       expect(integer(new FormControl('9,25'))).toBeNull();
       expect(integer(new FormControl('9,5'))).toEqual({ rating: true });
     });
+
+    it('validates the typed text on the rating scale', () => {
+      const hundred = ratingValidatorFor(() => 'integer', () => null, () => '100');
+      expect(hundred(new FormControl('87'))).toBeNull();
+      expect(hundred(new FormControl('100'))).toBeNull();
+      expect(hundred(new FormControl('87,5'))).toEqual({ rating: true });
+      expect(hundred(new FormControl('101'))).toEqual({ rating: true });
+
+      const five = ratingValidatorFor(() => 'hundredths', () => null, () => '5');
+      expect(five(new FormControl('4,25'))).toBeNull();
+      expect(five(new FormControl('5'))).toBeNull();
+      expect(five(new FormControl('5,5'))).toEqual({ rating: true });
+      expect(five(new FormControl('4,255'))).toEqual({ rating: true });
+    });
+
+    it('keeps accepting the stored rating shown on another scale', () => {
+      // Stored 8.75 shows as 87.5 on 0–100: saving it untouched works with integer precision.
+      const hundred = ratingValidatorFor(() => 'integer', () => 8.75, () => '100');
+      expect(hundred(new FormControl('87,5'))).toBeNull();
+      expect(hundred(new FormControl('86,5'))).toEqual({ rating: true });
+    });
   });
 
   describe('hours', () => {
@@ -205,6 +226,15 @@ describe('run form logic', () => {
       const empty = buildExperienceRequest({ ...value, rating: '', hours: ' ' });
       expect(empty.rating).toBeNull();
       expect(empty.hours).toBeNull();
+    });
+
+    it('sends the rating on the stored 0–10 scale', () => {
+      expect(buildExperienceRequest({ ...value, rating: '87' }, null, '100').rating).toBe(8.7);
+      expect(buildExperienceRequest({ ...value, rating: '87,5' }, null, '100').rating).toBe(8.75);
+      expect(buildExperienceRequest({ ...value, rating: '4,3' }, null, '5').rating).toBe(8.6);
+      expect(buildExperienceRequest({ ...value, rating: '4.25' }, null, '5').rating).toBe(8.5);
+      expect(buildExperienceRequest({ ...value, rating: '9,25' }, null, '10').rating).toBe(9.25);
+      expect(buildExperienceRequest({ ...value, rating: '' }, null, '100').rating).toBeNull();
     });
 
     it('sends null dates when they are empty', () => {
