@@ -46,6 +46,8 @@
   --pt-brand-lighter: #a58bf0;
   --pt-brand-tint: #2a2633;
   --pt-brand-line: #3f3854;
+  /* Saturated purple for stat tile icons (reads as purple, not lavender). */
+  --pt-brand-vivid: #9d7cff;
 
   --pt-gold: #e2ae5f;
   --pt-gold-line: #e2ae5f66;
@@ -121,6 +123,7 @@
   --pt-brand-lighter: #5530b3;
   --pt-brand-tint: #ebe4fb;
   --pt-brand-line: #c9b9f0;
+  --pt-brand-vivid: #6a3fd1;
 
   /* Amber deep enough for text on paper; warm cream fills for GOTY cards. */
   --pt-gold: #8c5b0c;
@@ -290,6 +293,7 @@
   --color-brand-lighter: var(--pt-brand-lighter);
   --color-brand-tint: var(--pt-brand-tint);
   --color-brand-line: var(--pt-brand-line);
+  --color-brand-vivid: var(--pt-brand-vivid);
 
   --color-gold: var(--pt-gold);
   --color-gold-line: var(--pt-gold-line);

@@ -144,7 +144,7 @@ export class StatCard {
   protected readonly accent = computed(() => (this.tone() === 'gold' || this.tone() === 'gold-tile' ? 'gold' : 'brand'));
   /** Header icon: brand-hi for activity figures, gold for ratings, platinum for the platinum tile. */
   protected readonly iconColor = computed(() =>
-    this.tone() === 'platinum' ? 'var(--pt-platinum)' : this.accent() === 'gold' ? 'var(--pt-gold)' : 'var(--pt-brand-light)',
+    this.tone() === 'platinum' ? 'var(--pt-platinum)' : this.accent() === 'gold' ? 'var(--pt-gold)' : 'var(--pt-brand-vivid)',
   );
   /** Sized from the final value (not the count-up frame) so the figure never jumps while animating. */
   protected readonly figureSize = computed(() => figureFontSize(String(this.value())));

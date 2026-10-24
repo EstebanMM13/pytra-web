@@ -15,7 +15,7 @@
     </div>
     <div class="min-w-0">
       <p class="mb-2 flex items-center gap-2 font-mono text-[10px] tracking-[0.14em] text-muted uppercase md:text-[11px] md:tracking-[0.16em]">
-        <span class="size-1.5 shrink-0 rounded-full bg-brand-light" aria-hidden="true"></span>
+        <span class="size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span>
         {{ today() }}
       </p>
       @if (displayName(); as name) {
@@ -237,7 +237,7 @@
                 <p class="mt-1 truncate text-[13px] text-text-3" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
               </div>
               @if (daysPlaying(hero); as days) {
-                <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-border ring-inset">
+                <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-gold/70 ring-inset">
                   {{ days }}
                 </span>
               }
@@ -259,7 +259,7 @@
                 [meta]="playingMeta(run)"
               >
                 @if (daysPlaying(run); as days) {
-                  <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-border ring-inset">
+                  <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-gold/70 ring-inset">
                     {{ days }}
                   </span>
                 }
