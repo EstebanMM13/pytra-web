@@ -21,6 +21,10 @@ export interface Preferences {
   language: Language;
   /** Animations: follow the OS, always on, or reduced (see shared/utils/motion.ts). */
   motion: MotionPreference;
+  /** Daily diary reminder of the Android app (local notification), off by default. */
+  diaryReminder: boolean;
+  /** Its local time, `HH:MM` (24 h). */
+  diaryReminderTime: string;
 }
 
 export const PREFERENCES_KEY = 'pytra_preferences';
@@ -31,11 +35,14 @@ export const DEFAULT_PREFERENCES: Preferences = {
   defaultPlatform: 'PC',
   language: 'es',
   motion: 'system',
+  diaryReminder: false,
+  diaryReminderTime: '22:00',
 };
 
 const PRECISIONS: readonly RatingPrecision[] = ['integer', 'half', 'hundredths'];
 export const LANGUAGES: readonly Language[] = ['es', 'en'];
 const MAX_PLATFORM_KEY_LENGTH = 40;
+const REMINDER_TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 function isPlatformKey(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0 && value.length <= MAX_PLATFORM_KEY_LENGTH;
@@ -69,6 +76,11 @@ export function parsePreferences(raw: string | null): Preferences {
     motion: MOTION_PREFERENCES.includes(value.motion as MotionPreference)
       ? (value.motion as MotionPreference)
       : DEFAULT_PREFERENCES.motion,
+    diaryReminder: value.diaryReminder === true,
+    diaryReminderTime:
+      typeof value.diaryReminderTime === 'string' && REMINDER_TIME_PATTERN.test(value.diaryReminderTime)
+        ? value.diaryReminderTime
+        : DEFAULT_PREFERENCES.diaryReminderTime,
   };
 }
 
@@ -98,7 +110,10 @@ export function applyLanguage(translate: TranslateService, language: Language): 
   }
 }
 
-/** Device-local UI preferences (rating precision and scale, default platform for new runs, language, motion). */
+/**
+ * Device-local UI preferences (rating precision and scale, default platform for new runs, language, motion,
+ * the Android diary reminder).
+ */
 @Injectable({ providedIn: 'root' })
 export class PreferencesService {
   private readonly state = signal<Preferences>(readStored());
@@ -111,6 +126,8 @@ export class PreferencesService {
   readonly language = computed(() => this.state().language);
   readonly motion = computed(() => this.state().motion);
   readonly ratingStep = computed(() => ratingStep(this.ratingPrecision()));
+  readonly diaryReminder = computed(() => this.state().diaryReminder);
+  readonly diaryReminderTime = computed(() => this.state().diaryReminderTime);
 
   setRatingPrecision(ratingPrecision: RatingPrecision): void {
     this.update({ ratingPrecision });
@@ -131,6 +148,11 @@ export class PreferencesService {
   setMotion(motion: MotionPreference): void {
     this.update({ motion });
     setMotionPreference(motion);
+  }
+
+  /** Stores the diary reminder choice (scheduling it is DiaryReminderService's job). */
+  setDiaryReminder(diaryReminder: boolean, diaryReminderTime: string = this.diaryReminderTime()): void {
+    this.update({ diaryReminder, diaryReminderTime });
   }
 
   private update(change: Partial<Preferences>): void {

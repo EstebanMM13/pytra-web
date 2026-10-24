@@ -35,6 +35,14 @@ export const appConfig: ApplicationConfig = {
         .then(({ NativeOAuthService }) => injector.get(NativeOAuthService).init())
         .catch((error: unknown) => console.error('Native deep links unavailable', error));
     }),
+    // Android app: tapping the daily diary reminder opens today's diary day (loaded on demand too).
+    provideAppInitializer(() => {
+      if (!isNativePlatform()) return;
+      const injector = inject(Injector);
+      void import('./core/services/diary-reminder.service')
+        .then(({ DiaryReminderService }) => injector.get(DiaryReminderService).init())
+        .catch((error: unknown) => console.error('Diary reminder unavailable', error));
+    }),
     // The install prompt is caught by a tiny listener in main.ts; its service loads with the screens using it.
     provideAppInitializer(() => {
       inject(ThemeService);

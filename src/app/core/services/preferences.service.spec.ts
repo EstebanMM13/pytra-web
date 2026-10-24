@@ -21,6 +21,8 @@ describe('parsePreferences', () => {
       defaultPlatform: 'PC',
       language: 'es',
       motion: 'system',
+      diaryReminder: false,
+      diaryReminderTime: '22:00',
     });
     expect(parsePreferences(JSON.stringify({ ratingPrecision: 'x', defaultPlatform: 'SWITCH' }))).toEqual({
       ratingPrecision: 'hundredths',
@@ -28,6 +30,8 @@ describe('parsePreferences', () => {
       defaultPlatform: 'SWITCH',
       language: 'es',
       motion: 'system',
+      diaryReminder: false,
+      diaryReminderTime: '22:00',
     });
     expect(parsePreferences(JSON.stringify({ language: 'en' })).language).toBe('en');
     expect(parsePreferences(JSON.stringify({ language: 'fr' })).language).toBe('es');
@@ -41,6 +45,19 @@ describe('parsePreferences', () => {
     expect(parsePreferences(JSON.stringify({ ratingScale: 100 })).ratingScale).toBe('10');
     expect(parsePreferences(JSON.stringify({ ratingScale: '20' })).ratingScale).toBe('10');
     expect(parsePreferences(JSON.stringify({ ratingPrecision: 'half' })).ratingScale).toBe('10');
+  });
+});
+
+describe('parsePreferences (diary reminder)', () => {
+  it('is off at 22:00 by default and keeps only a valid HH:MM time', () => {
+    expect(parsePreferences(null).diaryReminder).toBe(false);
+    expect(parsePreferences(null).diaryReminderTime).toBe('22:00');
+    const stored = parsePreferences(JSON.stringify({ diaryReminder: true, diaryReminderTime: '07:30' }));
+    expect(stored.diaryReminder).toBe(true);
+    expect(stored.diaryReminderTime).toBe('07:30');
+    expect(parsePreferences(JSON.stringify({ diaryReminder: 'yes' })).diaryReminder).toBe(false);
+    expect(parsePreferences(JSON.stringify({ diaryReminderTime: '24:00' })).diaryReminderTime).toBe('22:00');
+    expect(parsePreferences(JSON.stringify({ diaryReminderTime: '7:30' })).diaryReminderTime).toBe('22:00');
   });
 });
 
@@ -76,6 +93,21 @@ describe('PreferencesService', () => {
       defaultPlatform: 'PS5',
       language: 'en',
       motion: 'system',
+      diaryReminder: false,
+      diaryReminderTime: '22:00',
+    });
+  });
+
+  it('stores the diary reminder choice and time', () => {
+    const service = TestBed.inject(PreferencesService);
+    service.setDiaryReminder(true, '07:45');
+    expect(service.diaryReminder()).toBe(true);
+    expect(service.diaryReminderTime()).toBe('07:45');
+    service.setDiaryReminder(false);
+    expect(service.diaryReminderTime()).toBe('07:45');
+    expect(JSON.parse(localStorage.getItem(PREFERENCES_KEY)!)).toMatchObject({
+      diaryReminder: false,
+      diaryReminderTime: '07:45',
     });
   });
 

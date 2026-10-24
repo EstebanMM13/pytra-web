@@ -18,6 +18,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { DemoModeService } from '../../core/services/demo-mode.service';
 import { InstallPromptService } from '../../core/services/install-prompt.service';
 import { AndroidAppService } from '../../core/services/android-app.service';
+import { DiaryReminderService, ReminderResult, parseReminderTime } from '../../core/services/diary-reminder.service';
 import { FileExportService, filenameFromContentDisposition } from '../../core/services/file-export.service';
 import {
   Language,
@@ -131,6 +132,9 @@ export class Profile {
   protected readonly preferences = inject(PreferencesService);
   protected readonly installPrompt = inject(InstallPromptService);
   protected readonly androidApp = inject(AndroidAppService);
+  /** Daily diary reminder: Android app only. */
+  protected readonly reminder = inject(DiaryReminderService);
+  protected readonly reminderBusy = signal(false);
 
   protected readonly themeOptions: SegmentedOption<ThemePreference>[] = [
     { value: 'dark', label: 'theme.dark' },
@@ -205,6 +209,44 @@ export class Profile {
   protected setLanguage(language: Language): void {
     this.preferences.setLanguage(language);
     applyLanguage(this.translate, language);
+    if (this.reminder.available && this.preferences.diaryReminder()) {
+      // Reschedule once the new language is loaded, so the notification text follows it.
+      this.translate.use(language).subscribe({
+        next: () => void this.reminder.apply(true, this.preferences.diaryReminderTime()),
+        error: () => {},
+      });
+    }
+  }
+
+  protected async toggleReminder(): Promise<void> {
+    if (this.reminderBusy()) return;
+    const enable = !this.preferences.diaryReminder();
+    this.reminderBusy.set(true);
+    const result = await this.reminder.apply(enable, this.preferences.diaryReminderTime());
+    this.reminderBusy.set(false);
+    this.afterReminderChange(result, enable);
+  }
+
+  protected async setReminderTime(time: string): Promise<void> {
+    if (!parseReminderTime(time) || time === this.preferences.diaryReminderTime()) return;
+    const enabled = this.preferences.diaryReminder();
+    this.preferences.setDiaryReminder(enabled, time);
+    if (!enabled) return;
+    this.reminderBusy.set(true);
+    const result = await this.reminder.apply(true, time);
+    this.reminderBusy.set(false);
+    this.afterReminderChange(result, true);
+  }
+
+  private afterReminderChange(result: ReminderResult, enable: boolean): void {
+    if (result === 'scheduled' || result === 'cancelled') {
+      this.preferences.setDiaryReminder(enable);
+      if (enable) this.toast.success(this.translate.instant('profile.reminder.scheduled', { time: this.preferences.diaryReminderTime() }));
+      return;
+    }
+    // Refused or failed: nothing is scheduled, so the switch shows off.
+    this.preferences.setDiaryReminder(false);
+    this.toast.error(this.translate.instant(result === 'denied' ? 'profile.reminder.denied' : 'profile.reminder.failed'));
   }
 
   readonly form = this.fb.group({

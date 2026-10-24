@@ -351,6 +351,41 @@
           }
         </select>
       </div>
+      @if (reminder.available) {
+        <div data-diary-reminder class="flex flex-col gap-2.5 border-t border-divider py-3 text-sm">
+          <div class="flex items-center justify-between gap-4">
+            <span id="pref-reminder" class="text-muted">{{ 'profile.reminder.label' | translate }}</span>
+            <button
+              type="button"
+              role="switch"
+              aria-labelledby="pref-reminder"
+              [attr.aria-checked]="preferences.diaryReminder()"
+              [disabled]="reminderBusy()"
+              (click)="toggleReminder()"
+              class="relative inline-flex h-[26px] w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-60"
+              [class]="preferences.diaryReminder() ? 'bg-brand' : 'bg-border'"
+            >
+              <span
+                class="absolute top-[3px] left-[3px] size-5 rounded-full transition-transform"
+                [class]="preferences.diaryReminder() ? 'translate-x-[18px] bg-white' : 'bg-muted'"
+              ></span>
+            </button>
+          </div>
+          @if (preferences.diaryReminder()) {
+            <label class="flex items-center justify-between gap-4">
+              <span class="text-muted">{{ 'profile.reminder.time' | translate }}</span>
+              <input
+                type="time"
+                class="rounded-lg border border-border bg-bg px-3 py-[7px] font-mono text-[13px] text-text"
+                [value]="preferences.diaryReminderTime()"
+                [disabled]="reminderBusy()"
+                (change)="setReminderTime($any($event.target).value)"
+              />
+            </label>
+          }
+          <p class="text-xs text-faint">{{ 'profile.reminder.hint' | translate }}</p>
+        </div>
+      }
       @if (installPrompt.canInstall() || installPrompt.showIosHint() || installPrompt.installed()) {
         <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-divider py-3 text-sm">
           <span class="text-muted">{{ 'profile.app' | translate }}</span>
