@@ -112,16 +112,53 @@
           <p class="flex items-center gap-1.5 text-xs leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
             <svg [lucideIcon]="icons.star" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
             {{ 'run.rating' | translate }}
+            <svg [lucideIcon]="icons.pencil" [size]="12" class="ml-auto shrink-0 text-faint" aria-hidden="true"></svg>
           </p>
-          @if (e.rating !== null) {
+          @if (editing() === 'rating') {
+            <div class="mt-2 flex min-w-0 flex-col gap-1.5" (focusout)="onEditorFocusOut($event)" (keydown.escape)="cancelEdit()">
+              <div class="flex min-w-0 items-baseline gap-2">
+                <input
+                  id="run-inline-rating"
+                  type="text"
+                  inputmode="decimal"
+                  enterkeyhint="done"
+                  autocomplete="off"
+                  class="run-inline-input max-w-40 text-gold"
+                  [placeholder]="'runForm.ratingExample.' + preferences.ratingPrecision() | translate"
+                  [value]="draft()"
+                  [attr.aria-label]="'run.inlineRatingLabel' | translate"
+                  [attr.aria-invalid]="draftInvalid()"
+                  [attr.aria-describedby]="draftInvalid() ? 'run-inline-rating-error' : null"
+                  (input)="onDraftInput($any($event.target).value)"
+                  (keydown.enter)="commitEdit()"
+                />
+                <span class="text-sm text-faint md:text-base" aria-hidden="true">{{ 'run.outOf' | translate }}</span>
+              </div>
+              @if (draftInvalid()) {
+                <p id="run-inline-rating-error" class="text-xs text-danger">
+                  {{ 'runForm.errors.ratingPrecision.' + preferences.ratingPrecision() | translate }}
+                </p>
+              }
+            </div>
+          } @else if (e.rating !== null) {
             <p class="mt-2 flex items-baseline gap-2 whitespace-nowrap">
-              <span
-                class="text-figure-tone font-mono leading-none font-bold tracking-[-0.03em]"
-                [class]="e.rating | ratingTone"
-                [style.font-size]="figureSize(e.rating | rating)"
+              <button
+                id="run-inline-rating-trigger"
+                type="button"
+                class="run-inline-trigger"
+                [disabled]="inlineSaving()"
+                [attr.aria-busy]="inlineSaving()"
+                [attr.aria-label]="'run.inlineEditRating' | translate: { value: e.rating | rating }"
+                (click)="startEdit('rating')"
               >
-                {{ e.rating | rating }}
-              </span>
+                <span
+                  class="text-figure-tone font-mono leading-none font-bold tracking-[-0.03em]"
+                  [class]="e.rating | ratingTone"
+                  [style.font-size]="figureSize(e.rating | rating)"
+                >
+                  {{ e.rating | rating }}
+                </span>
+              </button>
               <span class="text-sm text-faint md:text-base">{{ 'run.outOf' | translate }}</span>
             </p>
             <div class="mt-auto pt-3">
@@ -133,7 +170,19 @@
               }
             </div>
           } @else {
-            <p class="mt-2 text-2xl font-semibold text-faint">{{ 'run.noRating' | translate }}</p>
+            <p class="mt-2">
+              <button
+                id="run-inline-rating-trigger"
+                type="button"
+                class="run-inline-trigger text-2xl font-semibold text-faint"
+                [disabled]="inlineSaving()"
+                [attr.aria-busy]="inlineSaving()"
+                [attr.aria-label]="'run.inlineAddRating' | translate"
+                (click)="startEdit('rating')"
+              >
+                {{ 'run.noRating' | translate }}
+              </button>
+            </p>
           }
         </div>
       </div>
@@ -143,10 +192,58 @@
           <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
             <svg [lucideIcon]="icons.clock" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
             <span class="truncate">{{ 'run.hours' | translate }}</span>
+            <svg [lucideIcon]="icons.pencil" [size]="12" class="ml-auto shrink-0 text-faint" aria-hidden="true"></svg>
           </p>
-          <p class="mt-2 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(e.hours | hours)">
-            <span class="text-figure font-mono">{{ e.hours | hours }}</span>
-          </p>
+          @if (editing() === 'hours') {
+            <div class="mt-2 flex min-w-0 flex-col gap-1.5" (focusout)="onEditorFocusOut($event)" (keydown.escape)="cancelEdit()">
+              <input
+                id="run-inline-hours"
+                type="text"
+                inputmode="decimal"
+                enterkeyhint="done"
+                autocomplete="off"
+                class="run-inline-input"
+                placeholder="0"
+                [value]="draft()"
+                [attr.aria-label]="'run.inlineHoursLabel' | translate"
+                [attr.aria-invalid]="draftInvalid()"
+                [attr.aria-describedby]="draftInvalid() ? 'run-inline-hours-error' : null"
+                (input)="onDraftInput($any($event.target).value)"
+                (keydown.enter)="commitEdit()"
+              />
+              <div class="flex gap-1.5">
+                @for (step of hourSteps; track step) {
+                  <!-- mousedown is cancelled so the input keeps the focus (and the mobile keyboard stays open) -->
+                  <button
+                    type="button"
+                    class="run-inline-step"
+                    [attr.aria-label]="'run.inlineAddHours' | translate: { hours: stepLabel(step) }"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="bumpHours(step)"
+                  >
+                    +{{ stepLabel(step) }}
+                  </button>
+                }
+              </div>
+              @if (draftInvalid()) {
+                <p id="run-inline-hours-error" class="text-xs text-danger">{{ 'runForm.errors.hours' | translate }}</p>
+              }
+            </div>
+          } @else {
+            <p class="mt-2 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(e.hours | hours)">
+              <button
+                id="run-inline-hours-trigger"
+                type="button"
+                class="run-inline-trigger"
+                [disabled]="inlineSaving()"
+                [attr.aria-busy]="inlineSaving()"
+                [attr.aria-label]="'run.inlineEditHours' | translate: { value: e.hours | hours }"
+                (click)="startEdit('hours')"
+              >
+                <span class="text-figure font-mono">{{ e.hours | hours }}</span>
+              </button>
+            </p>
+          }
         </div>
       </div>
 
@@ -182,6 +279,7 @@
           <span class="whitespace-nowrap">{{ date(e.endDate) }}</span>
         </div>
       </div>
+      <p class="sr-only" aria-live="polite">{{ inlineStatus() }}</p>
     </section>
 
     <!-- Review -->

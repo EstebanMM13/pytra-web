@@ -841,7 +841,15 @@
     "daysShort": "{{count}} d",
     "loadError": "No se pudo cargar la partida.",
     "deleted": "Partida borrada.",
-    "deleteError": "No se pudo borrar la partida."
+    "deleteError": "No se pudo borrar la partida.",
+    "inlineEditHours": "Horas: {{value}}. Editar",
+    "inlineEditRating": "Nota: {{value}} sobre 10. Editar",
+    "inlineAddRating": "Sin nota. Añadir una nota",
+    "inlineHoursLabel": "Horas jugadas",
+    "inlineRatingLabel": "Nota de 0 a 10",
+    "inlineAddHours": "Sumar {{hours}} h",
+    "inlineSaved": "Guardado.",
+    "inlineSaveError": "No se pudo guardar el cambio."
   },
   "runForm": {
     "newTitle": "Nueva partida",

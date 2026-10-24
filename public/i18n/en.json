@@ -841,7 +841,15 @@
     "daysShort": "{{count}} d",
     "loadError": "Could not load the run.",
     "deleted": "Run deleted.",
-    "deleteError": "Could not delete the run."
+    "deleteError": "Could not delete the run.",
+    "inlineEditHours": "Hours: {{value}}. Edit",
+    "inlineEditRating": "Rating: {{value}} out of 10. Edit",
+    "inlineAddRating": "Not rated. Add a rating",
+    "inlineHoursLabel": "Hours played",
+    "inlineRatingLabel": "Rating from 0 to 10",
+    "inlineAddHours": "Add {{hours}} h",
+    "inlineSaved": "Saved.",
+    "inlineSaveError": "Could not save the change."
   },
   "runForm": {
     "newTitle": "New run",
