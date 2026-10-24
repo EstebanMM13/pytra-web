@@ -41,9 +41,11 @@
 
   --pt-brand: #724dce;
   --pt-brand-dark: #5d3dab;
-  --pt-brand-light: #9d7cff;
-  --pt-brand-lighter: #b9a2ff;
-  --pt-brand-tint: #2f2b3d;
+  /* Purple is reserved for action, selection and activity. brand-light is the "brand-hi" tone. */
+  --pt-brand-light: #a58bf0;
+  --pt-brand-lighter: #a58bf0;
+  --pt-brand-tint: #2a2633;
+  --pt-brand-line: #3f3854;
 
   --pt-gold: #e2ae5f;
   --pt-gold-line: #e2ae5f66;
@@ -60,8 +62,8 @@
   --pt-platinum-tint: #222b35;
   --pt-platinum-tint-fg: #d6e6f5;
 
-  /* Rating tones (>=9 high, 6-<7 mid, <6 danger, 7-<9 gold) and platform brand dots. */
-  --pt-rating-high: #8fd6a5;
+  /* Rating tones (>=7 gold, 6-<7 mid, <6 danger; >=9 shares the gold) and platform brand dots. */
+  --pt-rating-high: var(--pt-gold);
   --pt-rating-mid: #d9a05b;
   --pt-platform-playstation: #6b93f5;
   --pt-platform-xbox: #6cc06c;
@@ -75,6 +77,9 @@
   --pt-danger-solid: #c24545;
   --pt-neutral: #b0aba1;
   --pt-neutral-bg: #2c2a27;
+
+  /* Neutral (non-highlighted) chart marks. */
+  --pt-chart: #3d3a35;
 
   --pt-overlay: #0d0c0bcc;
 
@@ -115,6 +120,7 @@
   --pt-brand-light: #6a3fd1;
   --pt-brand-lighter: #5530b3;
   --pt-brand-tint: #ebe4fb;
+  --pt-brand-line: #c9b9f0;
 
   /* Amber deep enough for text on paper; warm cream fills for GOTY cards. */
   --pt-gold: #8c5b0c;
@@ -132,7 +138,7 @@
   --pt-platinum-tint: #e4edf6;
   --pt-platinum-tint-fg: #33475c;
 
-  --pt-rating-high: #1f6f3c;
+  --pt-rating-high: var(--pt-gold);
   --pt-rating-mid: #8a5a10;
   --pt-platform-playstation: #2e5bd0;
   --pt-platform-xbox: #2d7a31;
@@ -146,6 +152,8 @@
   --pt-danger-solid: #b02a2a;
   --pt-neutral: #514a5d;
   --pt-neutral-bg: #ebe6f0;
+
+  --pt-chart: #d3ccdb;
 
   --pt-overlay: #1c192499;
 
@@ -281,6 +289,7 @@
   --color-brand-light: var(--pt-brand-light);
   --color-brand-lighter: var(--pt-brand-lighter);
   --color-brand-tint: var(--pt-brand-tint);
+  --color-brand-line: var(--pt-brand-line);
 
   --color-gold: var(--pt-gold);
   --color-gold-line: var(--pt-gold-line);
@@ -307,6 +316,7 @@
   --color-danger-solid: var(--pt-danger-solid);
   --color-neutral: var(--pt-neutral);
   --color-neutral-bg: var(--pt-neutral-bg);
+  --color-chart: var(--pt-chart);
 
   --color-overlay: var(--pt-overlay);
 
@@ -716,27 +726,11 @@ select optgroup {
 }
 
 /*
- * Key figures (stat values, big ratings): subtle brand gradient text in dark mode, solid in light
- * mode for contrast. Uses text-fill so `currentColor` (e.g. a rating tone) stays usable.
+ * Brand-coloured display words (greeting name, auth hero): brand gradient text in dark mode, solid
+ * in light mode for contrast. Stat figures stay plain text (no brand fill).
  */
 @utility text-figure {
   background-image: linear-gradient(120deg, var(--pt-brand-lighter) 10%, var(--pt-brand-light) 90%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  &:where([data-theme='light'] *, [data-theme='light']) {
-    background-image: none;
-    -webkit-text-fill-color: currentColor;
-  }
-}
-
-/* Same treatment for toned figures (ratings): keeps the tone, blends a hint of brand-light. */
-@utility text-figure-tone {
-  background-image: linear-gradient(
-    120deg,
-    currentColor 35%,
-    color-mix(in srgb, currentColor 60%, var(--pt-brand-light)) 100%
-  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
