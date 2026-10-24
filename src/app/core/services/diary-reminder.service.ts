@@ -62,7 +62,11 @@ export function reminderNotification(
 export interface DiaryReminderPlatform {
   /** Only the Android app shows the reminder (no web push). */
   available: boolean;
-  load: () => Promise<LocalNotificationsPort>;
+  /**
+   * Wrapped in an object on purpose: a Capacitor plugin proxy answers any property, including
+   * `then`, so resolving a promise with the bare plugin awaits a native `then` that never settles.
+   */
+  load: () => Promise<{ notifications: LocalNotificationsPort }>;
 }
 
 export const DIARY_REMINDER_PLATFORM = new InjectionToken<DiaryReminderPlatform>(
@@ -72,9 +76,9 @@ export const DIARY_REMINDER_PLATFORM = new InjectionToken<DiaryReminderPlatform>
     factory: () => ({
       available: detectAppPlatform() === 'android',
       load: () =>
-        import('@capacitor/local-notifications').then(
-          ({ LocalNotifications }) => LocalNotifications as unknown as LocalNotificationsPort,
-        ),
+        import('@capacitor/local-notifications').then(({ LocalNotifications }) => ({
+          notifications: LocalNotifications as unknown as LocalNotificationsPort,
+        })),
     }),
   },
 );
@@ -99,7 +103,7 @@ export class DiaryReminderService {
   async init(): Promise<void> {
     if (!this.available) return;
     try {
-      const notifications = await this.plugin();
+      const { notifications } = await this.plugin();
       await notifications.addListener('localNotificationActionPerformed', ({ notification }) => {
         if (notification.id !== DIARY_REMINDER_ID) return;
         this.zone.run(() => this.openToday());
@@ -116,7 +120,7 @@ export class DiaryReminderService {
   async apply(enabled: boolean, time: string): Promise<ReminderResult> {
     if (!this.available) return 'unavailable';
     try {
-      const notifications = await this.plugin();
+      const { notifications } = await this.plugin();
       await notifications.cancel({ notifications: [{ id: DIARY_REMINDER_ID }] });
       if (!enabled) return 'cancelled';
 
@@ -158,7 +162,7 @@ export class DiaryReminderService {
       .subscribe(go);
   }
 
-  private plugin(): Promise<LocalNotificationsPort> {
+  private plugin(): Promise<{ notifications: LocalNotificationsPort }> {
     return importWithRetry(this.platform.load, '@capacitor/local-notifications');
   }
 }

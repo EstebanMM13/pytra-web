@@ -30,7 +30,7 @@ function setup(available: boolean, plugin: Partial<LocalNotificationsPort>) {
     providers: [
       provideRouter([]),
       provideTranslateService(),
-      { provide: DIARY_REMINDER_PLATFORM, useValue: { available, load: async () => plugin } },
+      { provide: DIARY_REMINDER_PLATFORM, useValue: { available, load: async () => ({ notifications: plugin }) } },
     ],
   });
   const translate = TestBed.inject(TranslateService);
@@ -138,5 +138,15 @@ describe('DiaryReminderService', () => {
     expect(navigate).toHaveBeenCalledWith(['/diary'], {
       queryParams: { date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) },
     });
+  });
+});
+
+describe('DiaryReminderService with a Capacitor-like plugin proxy', () => {
+  it('still schedules when the plugin answers `then` (a proxy never resolves it)', async () => {
+    const { plugin } = fakePlugin();
+    // Capacitor plugin proxies expose every property; awaiting one directly would hang forever.
+    const proxy = Object.assign(plugin, { then: () => new Promise(() => undefined) });
+    const service = setup(true, proxy);
+    await expect(service.apply(true, '22:00')).resolves.toBe('scheduled');
   });
 });
