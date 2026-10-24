@@ -233,7 +233,7 @@
               <div class="min-w-0 flex-1">
                 <p class="text-[15px] font-semibold break-words">
                   {{ game.name }}
-                  <span class="ml-1 inline-block rounded-full bg-brand-tint px-2 py-px align-middle font-mono text-[11px] font-medium text-brand-lighter">{{ game.psnPlatform }}</span>
+                  <span class="ml-1 inline-block rounded-full bg-hover px-2 py-px align-middle font-mono text-[11px] font-medium text-text-3">{{ game.psnPlatform }}</span>
                 </p>
                 @if (lastSession(game); as when) {
                   <p class="mt-1 text-xs text-muted">{{ 'steam.lastSession' | translate: { when } }}</p>

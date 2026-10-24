@@ -333,10 +333,10 @@
             <button
               type="button"
               (click)="newRun()"
-              class="-my-1 flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[13px] font-semibold text-brand-light hover:bg-hover hover:text-brand-lighter"
+              class="-my-1 flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[13px] font-semibold text-text-2 hover:bg-hover hover:text-text"
               data-new-run
             >
-              <svg [lucideIcon]="icons.plus" [size]="15" aria-hidden="true"></svg>
+              <svg [lucideIcon]="icons.plus" [size]="15" class="text-brand-light" aria-hidden="true"></svg>
               {{ 'game.newRun' | translate }}
             </button>
           }

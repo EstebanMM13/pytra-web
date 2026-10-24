@@ -80,7 +80,7 @@ export function fitChipCount(widths: readonly number[], available: number, gap: 
   template: `
     @for (genre of visible(); track genre; let i = $index) {
       <span
-        class="shrink-0 rounded-full border border-brand/25 bg-brand-tint font-medium whitespace-nowrap text-brand-lighter"
+        class="shrink-0 rounded-full border border-border bg-hover font-medium whitespace-nowrap text-text-2"
         [class]="chipClass()"
         [class.genre-reveal]="i >= split().shown.length"
         [style.--i]="i - split().shown.length"
@@ -126,7 +126,7 @@ export function fitChipCount(widths: readonly number[], available: number, gap: 
       >
         <ul class="flex flex-wrap gap-1.5">
           @for (genre of genres(); track genre) {
-            <li class="rounded-full border border-brand/25 bg-brand-tint px-2.5 py-0.5 text-xs font-medium text-brand-lighter">
+            <li class="rounded-full border border-border bg-hover px-2.5 py-0.5 text-xs font-medium text-text-2">
               {{ genre }}
             </li>
           }

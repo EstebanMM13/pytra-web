@@ -225,7 +225,7 @@
                 <app-status-pill [status]="st.status" />
               } @else if (st.kind === 'online') {
                 <!-- Played through online playtime only: same pill as the library -->
-                <span class="rounded-full bg-brand-tint px-2 py-0.5 text-xs text-brand-lighter">{{ 'library.online' | translate }}</span>
+                <span class="rounded-full bg-hover px-2 py-0.5 text-xs text-text-3">{{ 'library.online' | translate }}</span>
               } @else {
                 <span class="text-xs text-muted">{{ 'game.notPlayed' | translate }}</span>
               }
