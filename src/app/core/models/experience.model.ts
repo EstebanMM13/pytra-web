@@ -26,6 +26,15 @@ export interface Experience {
   updatedAt: string;
 }
 
+/**
+ * Partial update of a run's figures (PATCH): only the sent fields change. A missing `hours` keeps the
+ * stored hours; `rating: null` clears the rating, a missing `rating` keeps it.
+ */
+export interface ExperiencePatch {
+  hours?: number;
+  rating?: number | null;
+}
+
 export interface ExperienceRequest {
   runLabel: string;
   year?: number | null;
