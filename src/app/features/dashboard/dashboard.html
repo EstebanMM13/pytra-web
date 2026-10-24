@@ -237,7 +237,7 @@
                 <p class="mt-1 truncate text-[13px] text-text-3" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
               </div>
               @if (daysPlaying(hero); as days) {
-                <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-border ring-inset">
+                <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-brand-light ring-1 ring-brand/65 ring-inset">
                   {{ days }}
                 </span>
               }
@@ -259,7 +259,7 @@
                 [meta]="playingMeta(run)"
               >
                 @if (daysPlaying(run); as days) {
-                  <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-border ring-inset">
+                  <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-brand-light ring-1 ring-brand/65 ring-inset">
                     {{ days }}
                   </span>
                 }
