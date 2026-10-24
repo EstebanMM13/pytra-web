@@ -331,12 +331,20 @@ export class Dashboard {
     return translatePlural(this.translate, 'dashboard.playingDays', days);
   }
 
+  protected readonly topSagasMax = computed(() => Math.max(0, ...(this.topSagas() ?? []).map((s) => s.totalHours)));
+
   protected newRun(): void {
     this.runFormLauncher.openNewRun();
   }
 
   protected barWidth(hours: number): number {
     const max = this.mostPlayedMax();
+    return max > 0 ? (hours / max) * 100 : 0;
+  }
+
+  /** Share of the top saga's hours, for the "By saga" bars. */
+  protected sagaBarWidth(hours: number): number {
+    const max = this.topSagasMax();
     return max > 0 ? (hours / max) * 100 : 0;
   }
 }

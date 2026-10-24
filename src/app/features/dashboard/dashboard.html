@@ -194,9 +194,9 @@
     @if (topBadges().length) {
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:px-[22px] md:py-4">
         <app-section-header collapseKey="dashboard.achievements" tone="gold" class="mb-3" [label]="'dashboard.achievements' | translate">
-          <a routerLink="/profile" [queryParams]="{ section: 'achievements' }" class="flex shrink-0 items-center gap-1 text-[13px] text-brand-light hover:underline">
+          <a routerLink="/profile" [queryParams]="{ section: 'achievements' }" class="flex shrink-0 items-center gap-1 text-[13px] text-text-2 hover:text-text hover:underline">
             {{ 'dashboard.achievementsAll' | translate }}
-            <svg [lucideIcon]="icons.arrowRight" [size]="14" aria-hidden="true"></svg>
+            <svg [lucideIcon]="icons.arrowRight" [size]="14" class="text-brand-light" aria-hidden="true"></svg>
           </a>
         </app-section-header>
         <ul class="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -237,7 +237,7 @@
                 <p class="mt-1 truncate text-[13px] text-text-3" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
               </div>
               @if (daysPlaying(hero); as days) {
-                <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-brand-light ring-1 ring-brand/65 ring-inset">
+                <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-border ring-inset">
                   {{ days }}
                 </span>
               }
@@ -259,7 +259,7 @@
                 [meta]="playingMeta(run)"
               >
                 @if (daysPlaying(run); as days) {
-                  <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-brand-light ring-1 ring-brand/65 ring-inset">
+                  <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-border ring-inset">
                     {{ days }}
                   </span>
                 }
@@ -377,12 +377,18 @@
           @for (item of items; track item.sagaId) {
             <a
               [routerLink]="['/sagas', item.sagaId]"
-              class="flex items-center gap-3 hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
+              class="flex flex-col justify-center hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover"
               [class.flex-1]="spreadRows"
             >
-              <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
-              <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translatePlural: item.gameCount }}</span>
-              <span class="w-16 shrink-0 text-right font-mono">{{ item.totalHours | hours }}</span>
+              <span class="flex items-center gap-3">
+                <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
+                <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translatePlural: item.gameCount }}</span>
+                <span class="w-16 shrink-0 text-right font-mono">{{ item.totalHours | hours }}</span>
+              </span>
+              <!-- Hours relative to the top saga, same bar as "Most played" -->
+              <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
+                <span class="bar-fill block h-[3px] rounded-sm bg-brand-light" [style.width.%]="sagaBarWidth(item.totalHours)"></span>
+              </span>
             </a>
           } @empty {
             @if (failed('bySaga')) {
