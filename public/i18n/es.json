@@ -302,6 +302,35 @@
       "rateLimited": "Has exportado hace muy poco. Espera unos minutos y vuelve a intentarlo.",
       "shareTitle": "Exportación de Pytra"
     },
+    "tokens": {
+      "label": "Sincronización con Obsidian",
+      "hint": "Los tokens de acceso permiten que el plugin de Pytra para Obsidian lea tu biblioteca. Son de solo lectura y no pueden cambiar nada.",
+      "new": "Nuevo token",
+      "nameLabel": "Nombre del token",
+      "create": "Crear",
+      "creating": "Creando…",
+      "copyWarning": "Copia este token ahora y pégalo en los ajustes del plugin de Obsidian. No podrás volver a verlo.",
+      "tokenLabel": "Token de acceso {{name}}",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "copiedToast": "Token copiado.",
+      "done": "Hecho",
+      "createdOn": "creado el {{date}}",
+      "lastUsed": "último uso el {{date}}",
+      "neverUsed": "sin usar",
+      "revoke": "Revocar",
+      "revokeConfirm": "¿Revocar el token «{{name}}»? Lo que lo use dejará de sincronizar.",
+      "revoked": "Token revocado.",
+      "empty": "Aún no tienes tokens.",
+      "limitReached": "Tienes el máximo de {{max}} tokens. Revoca uno para crear otro.",
+      "errors": {
+        "limit": "Ya tienes el número máximo de tokens. Revoca uno primero.",
+        "name": "Escribe un nombre de hasta 50 caracteres.",
+        "copy": "No se pudo copiar. Selecciona el token y cópialo a mano.",
+        "load": "No se pudieron cargar tus tokens.",
+        "generic": "Algo salió mal. Inténtalo de nuevo."
+      }
+    },
     "delete": {
       "label": "Borrar cuenta",
       "open": "Borrar…",

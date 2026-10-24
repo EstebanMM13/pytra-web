@@ -5,6 +5,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { CurrentUser } from '../../core/models/user.model';
+import { AccessTokenService } from '../../core/services/access-token.service';
 import { AuthService } from '../../core/services/auth.service';
 import { DemoModeService } from '../../core/services/demo-mode.service';
 import { FileExportService } from '../../core/services/file-export.service';
@@ -53,6 +54,7 @@ describe('Profile', () => {
         { provide: PlatformService, useValue: { platforms: signal([]), load: () => of([]) } },
         { provide: FileExportService, useValue: { save: vi.fn() } },
         { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: AccessTokenService, useValue: { list: () => of([]), create: vi.fn(), revoke: vi.fn() } },
       ],
     });
     TestBed.overrideComponent(Profile, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });

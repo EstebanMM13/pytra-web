@@ -34,6 +34,7 @@ import { Avatar } from '../../shared/ui/avatar';
 import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { MotionPreference } from '../../shared/utils/motion';
 import { Skeleton } from '../../shared/ui/skeleton';
+import { AccessTokens } from './access-tokens';
 import { AvatarPicker } from './avatar-picker';
 import { DeleteAccountDialog } from './delete-account-dialog';
 import { ModalSheet } from '../../shared/ui/modal-sheet';
@@ -100,6 +101,7 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
     ModalSheet,
     AchievementBadge,
     LucideDynamicIcon,
+    AccessTokens,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile.html',
