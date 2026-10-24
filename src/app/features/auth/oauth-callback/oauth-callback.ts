@@ -17,6 +17,13 @@ export const STEAM_LINK_ROUTE = '/sync';
  */
 const NEXT_ROUTES = new Map<string, string>([['steam', STEAM_LINK_ROUTE]]);
 
+/**
+ * One-time codes already sent to /exchange-code in this app session. The callback can be
+ * reached twice for the same Google sign-in (re-navigation, deep link delivered again); the
+ * second exchange fails because the code is consumed, and used to flash the error screen.
+ */
+const exchangedCodes = new Set<string>();
+
 @Component({
   selector: 'app-oauth-callback',
   imports: [AuthShell, RouterLink, TranslatePipe],
@@ -55,18 +62,27 @@ export class OauthCallback {
       return;
     }
 
+    // Duplicate visit for a code already in flight or exchanged: the first visit navigates.
+    if (exchangedCodes.has(code)) {
+      return;
+    }
+    exchangedCodes.add(code);
+
+    const land = () => {
+      if (resume) {
+        this.router.navigateByUrl(resume, { replaceUrl: true });
+        return;
+      }
+      this.router.navigate([nextRoute ?? '/dashboard'], {
+        queryParams: nextRoute === STEAM_LINK_ROUTE ? { linked: '1' } : {},
+        replaceUrl: true,
+      });
+    };
+
     this.authService.exchangeCode({ code }).subscribe({
-      next: () => {
-        if (resume) {
-          this.router.navigateByUrl(resume, { replaceUrl: true });
-          return;
-        }
-        this.router.navigate([nextRoute ?? '/dashboard'], {
-          queryParams: nextRoute === STEAM_LINK_ROUTE ? { linked: '1' } : {},
-          replaceUrl: true,
-        });
-      },
-      error: () => this.failed.set(true),
+      next: land,
+      // A rejected exchange while a session already exists is a duplicate, not a failed sign-in.
+      error: () => (this.authService.isAuthenticated() ? land() : this.failed.set(true)),
     });
   }
 }

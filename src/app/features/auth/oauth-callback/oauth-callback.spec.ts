@@ -1,19 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { OauthCallback } from './oauth-callback';
 
 describe('OauthCallback (Steam link flow)', () => {
-  function setup(params: Record<string, string>) {
-    const exchangeCode = vi.fn(() => of(undefined));
+  function setup(params: Record<string, string>, authenticated = false, exchangeFails = false) {
+    const exchangeCode = vi.fn(() => (exchangeFails ? throwError(() => new Error('consumed')) : of(undefined)));
     TestBed.configureTestingModule({
       imports: [OauthCallback],
       providers: [
         provideRouter([]),
         provideTranslateService(),
-        { provide: AuthService, useValue: { exchangeCode } },
+        { provide: AuthService, useValue: { exchangeCode, isAuthenticated: () => authenticated } },
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap(params) } } },
       ],
     });
@@ -37,5 +37,25 @@ describe('OauthCallback (Steam link flow)', () => {
       queryParams: { linkError: 'steam_already_linked' },
       replaceUrl: true,
     });
+  });
+
+  it('exchanges a code only once when the callback is reached twice', () => {
+    const first = setup({ code: 'dup-1' });
+    expect(first.exchangeCode).toHaveBeenCalledTimes(1);
+    TestBed.resetTestingModule();
+
+    const second = setup({ code: 'dup-1' });
+    expect(second.exchangeCode).not.toHaveBeenCalled();
+    expect(second.navigate).not.toHaveBeenCalled();
+  });
+
+  it('lands on the dashboard instead of failing when the exchange is rejected but a session exists', () => {
+    const { navigate } = setup({ code: 'dup-2' }, true, true);
+    expect(navigate).toHaveBeenCalledWith(['/dashboard'], { queryParams: {}, replaceUrl: true });
+  });
+
+  it('still shows the error when the exchange fails without a session', () => {
+    const { navigate } = setup({ code: 'bad-1' }, false, true);
+    expect(navigate).not.toHaveBeenCalled();
   });
 });
