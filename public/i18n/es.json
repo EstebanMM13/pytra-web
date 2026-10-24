@@ -355,7 +355,11 @@
     "app": "Aplicación",
     "installApp": "Instalar app",
     "installIosHint": "En Safari: Compartir → Añadir a pantalla de inicio",
-    "appInstalled": "Instalada"
+    "appInstalled": "Instalada",
+    "androidApp": "App de Android",
+    "downloadAndroidApp": "Descargar app de Android",
+    "updateAndroidApp": "Actualizar app de Android",
+    "androidAppHint": "Última versión desde GitHub. Android puede pedirte que permitas instalar desde el navegador."
   },
   "sync": {
     "title": "Sincronizar",

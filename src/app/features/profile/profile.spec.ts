@@ -137,6 +137,14 @@ describe('Profile', () => {
     localStorage.clear();
   });
 
+  it('links to the latest Android APK from the preferences section', () => {
+    const { el } = setup();
+    const link = el.querySelector<HTMLAnchorElement>('#profile-preferences [data-android-app] a');
+    expect(link?.getAttribute('href')).toBe('https://github.com/EstebanMM13/pytra-web/releases/latest/download/pytra.apk');
+    expect(link?.textContent?.trim()).toBe('profile.downloadAndroidApp');
+    expect(el.querySelector('[data-android-app]')?.textContent).toContain('profile.androidAppHint');
+  });
+
   it('logs out from the last mobile row', () => {
     const { rows } = setup();
     const auth = TestBed.inject(AuthService) as unknown as { logout: ReturnType<typeof vi.fn> };

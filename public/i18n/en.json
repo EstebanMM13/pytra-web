@@ -355,7 +355,11 @@
     "app": "App",
     "installApp": "Install app",
     "installIosHint": "In Safari: Share → Add to Home Screen",
-    "appInstalled": "Installed"
+    "appInstalled": "Installed",
+    "androidApp": "Android app",
+    "downloadAndroidApp": "Download Android app",
+    "updateAndroidApp": "Update Android app",
+    "androidAppHint": "Latest version from GitHub. Android may ask you to allow installing from your browser."
   },
   "sync": {
     "title": "Sync",

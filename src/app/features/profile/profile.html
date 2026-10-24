@@ -370,6 +370,24 @@
           }
         </div>
       }
+      @if (androidApp.available) {
+        <div data-android-app class="flex items-center justify-between gap-4 border-t border-divider py-3 text-sm">
+          <div class="min-w-0">
+            <span class="text-muted">{{ 'profile.androidApp' | translate }}</span>
+            <p class="mt-0.5 text-xs text-faint">{{ 'profile.androidAppHint' | translate }}</p>
+          </div>
+          <a
+            [href]="androidApp.url"
+            target="_blank"
+            rel="noopener"
+            (click)="androidApp.open($event)"
+            class="press flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-[7px] text-[13px] font-semibold text-text hover:bg-hover"
+          >
+            <svg [lucideIcon]="icons.download" [size]="14"></svg>
+            {{ androidApp.labelKey | translate }}
+          </a>
+        </div>
+      }
       <p class="border-t border-divider pt-3 text-xs text-faint">{{ 'profile.preferencesHint' | translate }}</p>
     </section>
 
