@@ -13,12 +13,24 @@ export const SERVICE_WORKER_URL = 'ngsw-worker.js?v=2';
 /** Longest wait for an idle moment after `load` before registering anyway. */
 const REGISTER_IDLE_TIMEOUT_MS = 5000;
 
+/**
+ * A new version found within this window after start-up, before the user has touched anything, is
+ * applied with a silent reload instead of a toast, so nobody starts working on a stale build.
+ */
+export const SILENT_RELOAD_WINDOW_MS = 15000;
+
 /** What the service needs from the browser; a parameter so tests can fake it. */
 export interface AppUpdateEnv {
   serviceWorker: ServiceWorkerContainer | undefined;
   /** Runs `task` once the page has loaded and the main thread is idle. */
   whenIdle: (task: () => void) => void;
   reload: () => void;
+  /** Milliseconds clock; optional so simple fakes keep working. */
+  now?: () => number;
+  /** Calls `listener` once on the first user interaction (pointer or key). */
+  onFirstInteraction?: (listener: () => void) => void;
+  /** Calls `listener` every time the page becomes visible again. */
+  onVisible?: (listener: () => void) => void;
 }
 
 function browserEnv(): AppUpdateEnv {
@@ -36,6 +48,20 @@ function browserEnv(): AppUpdateEnv {
       else window.addEventListener('load', idle, { once: true });
     },
     reload: () => document.location.reload(),
+    now: () => Date.now(),
+    onFirstInteraction: (listener) => {
+      const handler = (): void => {
+        window.removeEventListener('pointerdown', handler, true);
+        window.removeEventListener('keydown', handler, true);
+        listener();
+      };
+      window.addEventListener('pointerdown', handler, true);
+      window.addEventListener('keydown', handler, true);
+    },
+    onVisible: (listener) =>
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') listener();
+      }),
   };
 }
 
@@ -43,8 +69,9 @@ function browserEnv(): AppUpdateEnv {
  * PWA service worker (production web only; inside the Capacitor shell the assets are already
  * local). Registers Angular's ngsw-worker with the plain Service Worker API after load / idle,
  * instead of `provideServiceWorker` + `SwUpdate`, which kept @angular/service-worker in the initial
- * bundle. The worker still checks for updates by itself (on navigation and start-up); when it has
- * downloaded a new version it posts VERSION_READY, which offers a reload.
+ * bundle. Updates are checked explicitly at start-up and whenever the page becomes visible again
+ * (the worker's own checks could take ~20 s to surface one). A version ready right after start-up,
+ * before any interaction, reloads silently; later ones offer a reload so work is not interrupted.
  */
 @Injectable({ providedIn: 'root' })
 export class AppUpdateService {
@@ -57,14 +84,30 @@ export class AppUpdateService {
     if (!enabled || !sw) {
       return;
     }
+    const startedAt = env.now?.() ?? 0;
+    let interacted = false;
+    env.onFirstInteraction?.(() => (interacted = true));
+
     sw.addEventListener('message', (event: MessageEvent) => {
-      if ((event.data as { type?: unknown } | null)?.type === 'VERSION_READY') {
-        this.zone.run(() => this.offerReload(env));
+      if ((event.data as { type?: unknown } | null)?.type !== 'VERSION_READY') {
+        return;
       }
+      const early = env.now !== undefined && env.now() - startedAt <= SILENT_RELOAD_WINDOW_MS;
+      if (early && !interacted) {
+        env.reload();
+        return;
+      }
+      this.zone.run(() => this.offerReload(env));
     });
     // Like Angular's registration: a newly controlling worker is told to initialise right away.
     sw.addEventListener('controllerchange', () => sw.controller?.postMessage({ action: 'INITIALIZE' }));
     sw.startMessages?.();
+    // ngsw answers this message by fetching ngsw.json now, instead of waiting for its own schedule.
+    const checkForUpdates = (): void =>
+      sw.controller?.postMessage({ action: 'CHECK_FOR_UPDATES', nonce: Math.floor(Math.random() * 1e9) });
+    // Already controlled (returning visitor): check before the idle registration even runs.
+    checkForUpdates();
+    env.onVisible?.(checkForUpdates);
     env.whenIdle(() => {
       sw.register(SERVICE_WORKER_URL).catch((error: unknown) =>
         console.error('Service worker registration failed', error),
