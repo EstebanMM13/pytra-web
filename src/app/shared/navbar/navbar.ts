@@ -11,11 +11,16 @@ import { GlobalSearch } from '../global-search/global-search';
 import { Avatar } from '../ui/avatar';
 import { PytraMark } from '../ui/pytra-mark';
 import { PytraWordmark } from '../ui/pytra-wordmark';
+import { todayIso } from '../utils/run-dates';
+
+type AddKind = 'diary' | 'run' | 'game' | 'saga';
 
 interface NavTab {
   path: string;
   labelKey: string;
   icon: LucideIconInput;
+  /** Web tab shown from lg only (at md the row has no room); the "+" menu still reaches it. */
+  fromLg?: boolean;
 }
 
 const WEB_TABS: NavTab[] = [
@@ -23,12 +28,13 @@ const WEB_TABS: NavTab[] = [
   { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
   { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.layers },
   { path: '/years', labelKey: 'nav.years', icon: ICONS.chartColumn },
+  { path: '/diary', labelKey: 'nav.diary', icon: ICONS.calendarDays, fromLg: true },
   { path: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw },
 ];
 
 /**
  * App chrome for authenticated pages: top navbar on web (md+), and below md a
- * compact header (logo, search button and avatar menu: Profile, Sync, Log out) plus a fixed bottom
+ * compact header (logo, search button and avatar menu: Profile, Diary, Sync, Log out) plus a fixed bottom
  * tab bar. Also owns the global Ctrl/⌘+K search.
  */
 @Component({
@@ -64,7 +70,7 @@ export class Navbar {
   protected readonly isDemo = this.authService.isDemo;
 
   protected readonly webTabs = WEB_TABS;
-  /** Mobile tab bar: two tabs on each side of the central "+" button. */
+  /** Mobile tab bar: two tabs on each side of the central "+" button (Diary and Sync live in the avatar menu). */
   protected readonly mobileTabsLeft = WEB_TABS.slice(0, 2);
   protected readonly mobileTabsRight = WEB_TABS.slice(2, 4);
 
@@ -75,7 +81,8 @@ export class Navbar {
   protected readonly searchOpen = signal(false);
   protected readonly menuOpen = signal(false);
   protected readonly addOpen = signal(false);
-  protected readonly addItems: { kind: 'run' | 'game' | 'saga'; labelKey: string; icon: LucideIconInput }[] = [
+  protected readonly addItems: { kind: AddKind; labelKey: string; icon: LucideIconInput }[] = [
+    { kind: 'diary', labelKey: 'nav.addDiary', icon: ICONS.notebookPen },
     { kind: 'run', labelKey: 'nav.addRun', icon: ICONS.play },
     { kind: 'game', labelKey: 'nav.addGame', icon: ICONS.gamepad2 },
     { kind: 'saga', labelKey: 'nav.addSaga', icon: ICONS.layers },
@@ -95,10 +102,13 @@ export class Navbar {
     this.runFormLauncher.openNewRun();
   }
 
-  protected add(kind: 'run' | 'game' | 'saga'): void {
+  protected add(kind: AddKind): void {
     this.addOpen.set(false);
     if (kind === 'run') {
       this.newRun();
+    } else if (kind === 'diary') {
+      // Today's diary day; the page opens its editor from the query param.
+      void this.router.navigate(['/diary'], { queryParams: { date: todayIso() } });
     } else {
       const target = kind === 'game' ? '/games' : '/sagas';
       // Keep the current filters only when already on the target page.

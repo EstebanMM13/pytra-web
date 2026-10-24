@@ -42,6 +42,7 @@ import { StatusPill } from '../../../shared/ui/status-pill';
 import { formatDayMonthYear, formatRunPeriod } from '../../../shared/utils/run-dates';
 import { GameEditDialog } from '../game-edit-dialog/game-edit-dialog';
 import { GenreChips } from './genre-chips';
+import { GameDiaryDays } from './game-diary-days';
 import { ScrollParallax } from '../../../shared/ui/scroll-parallax';
 import {
   OnlinePlaytimeLoadState,
@@ -88,6 +89,7 @@ function byRelease(a: Game, b: Game): number {
     UpcomingBadge,
     CategoryBadge,
     GenreChips,
+    GameDiaryDays,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,3 +1,4 @@
+import { DiaryService } from '../../../core/services/diary.service';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
@@ -52,6 +53,7 @@ describe('GameDetail', () => {
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: String(g.id) })) } },
         { provide: GameService, useValue: { cachedById: () => null, findById: () => of(g), findAll: () => of([g]) } },
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        { provide: DiaryService, useValue: { findByGame: () => of([]) } },
         {
           provide: OnlinePlaytimeService,
           useValue: { findByGame: () => throwError(() => new HttpErrorResponse({ status: 404 })) },
@@ -135,6 +137,7 @@ describe('GameDetail stats', () => {
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '7' })) } },
         { provide: GameService, useValue: { cachedById: () => null, findById: () => of(game(category)), findAll: () => of([]) } },
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        { provide: DiaryService, useValue: { findByGame: () => of([]) } },
         {
           provide: OnlinePlaytimeService,
           useValue: { findByGame: () => of({ gameId: 7, totalHours: 20, generalRating, platforms: [] }) },
@@ -200,6 +203,7 @@ describe('GameDetail online rating', () => {
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '7' })) } },
         { provide: GameService, useValue: { cachedById: () => null, findById: () => of(game('HYBRID')), findAll: () => of([]) } },
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        { provide: DiaryService, useValue: { findByGame: () => of([]) } },
         {
           provide: OnlinePlaytimeService,
           useValue: { findByGame: () => of({ gameId: 7, totalHours: 20, generalRating, platforms: [] }), upsert },
@@ -253,6 +257,7 @@ describe('GameDetail loading', () => {
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '7' })) } },
         { provide: GameService, useValue: { cachedById: () => cached, findById: () => game$, findAll: () => of([]) } },
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        { provide: DiaryService, useValue: { findByGame: () => of([]) } },
         { provide: OnlinePlaytimeService, useValue: { findByGame } },
         { provide: PlatformService, useValue: { platforms: signal([]), load: loadPlatforms } },
         { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },

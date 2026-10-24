@@ -526,6 +526,9 @@
           </dl>
         </section>
 
+        <!-- Diary days of the game (hidden without any) -->
+        <app-game-diary-days [gameId]="g.id" />
+
         <!-- Other games of the saga -->
         @if (sagaGames().length > 1) {
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">

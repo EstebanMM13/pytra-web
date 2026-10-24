@@ -32,7 +32,7 @@ import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { PytraMark } from '../../shared/ui/pytra-mark';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
-import { formatDayMonthYear } from '../../shared/utils/run-dates';
+import { formatDayMonthYear, todayIso } from '../../shared/utils/run-dates';
 import { Game } from '../../core/models/game.model';
 import { platformDisplayName } from '../../shared/ui/platform-label';
 import { Saga } from '../../core/models/saga.model';
@@ -81,6 +81,8 @@ export class Dashboard {
   protected readonly topRatedLink = topRatedLink;
   protected readonly statLinks = STAT_LINKS;
   protected readonly topRatedKey = topRatedKey;
+  /** Today's diary day, opened by the "What did you play today?" card. */
+  protected readonly diaryToday = { date: todayIso() };
 
   protected readonly installPrompt = inject(InstallPromptService);
   private readonly statsService = inject(StatsService);

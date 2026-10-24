@@ -74,6 +74,25 @@
     </div>
   }
 
+  @if (!isEmptyLibrary()) {
+    <!-- Diary quick entry: today's day editor -->
+    <a
+      routerLink="/diary"
+      [queryParams]="diaryToday"
+      data-diary-card
+      class="hover-lift flex items-center gap-3 rounded-xl border border-card-border card-glass px-4 py-3.5 md:px-5"
+    >
+      <span class="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-tint text-brand-light" aria-hidden="true">
+        <svg [lucideIcon]="icons.notebookPen" [size]="20"></svg>
+      </span>
+      <span class="min-w-0 flex-1">
+        <span class="block truncate text-[15px] font-semibold">{{ 'dashboard.diary.title' | translate }}</span>
+        <span class="block truncate text-[13px] text-text-3">{{ 'dashboard.diary.text' | translate }}</span>
+      </span>
+      <svg [lucideIcon]="icons.arrowRight" [size]="18" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+    </a>
+  }
+
   @if (isEmptyLibrary()) {
     <!-- Onboarding: account without games -->
     <section

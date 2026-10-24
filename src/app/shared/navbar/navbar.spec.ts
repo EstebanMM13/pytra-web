@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
@@ -41,12 +41,12 @@ describe('Navbar', () => {
     expect(el.querySelector('header button[aria-label="nav.menu"]')).not.toBeNull();
   });
 
-  it('orders the mobile avatar menu: Profile, Sync, Log out', () => {
+  it('orders the mobile avatar menu: Profile, Diary, Sync, Log out', () => {
     const { fixture, el } = setup();
     el.querySelector<HTMLButtonElement>('button[aria-label="nav.menu"]')!.click();
     fixture.detectChanges();
     const items = [...el.querySelectorAll('header [role="menu"] [role="menuitem"]')].map((i) => i.textContent!.trim());
-    expect(items).toEqual(['nav.profile', 'nav.sync', 'nav.logout']);
+    expect(items).toEqual(['nav.profile', 'nav.diary', 'nav.sync', 'nav.logout']);
   });
 
   it('keeps the "+" entry points in the demo, and they open the run form', () => {
@@ -61,5 +61,19 @@ describe('Navbar', () => {
     );
     runItem!.click();
     expect(launcher.openNewRun).toHaveBeenCalled();
+  });
+
+  it('links the diary from the web tabs and opens today from the "+" menu', async () => {
+    const { fixture, el } = setup();
+    expect(el.querySelector('nav a[href="/diary"]')).not.toBeNull();
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    el.querySelectorAll<HTMLButtonElement>('[data-add-menu] > button')[1].click();
+    fixture.detectChanges();
+    const diaryItem = [...el.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].find(
+      (b) => b.textContent!.trim() === 'nav.addDiary',
+    );
+    diaryItem!.click();
+    expect(navigate).toHaveBeenCalledWith(['/diary'], { queryParams: { date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) } });
   });
 });

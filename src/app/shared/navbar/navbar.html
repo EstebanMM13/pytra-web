@@ -23,6 +23,7 @@
         routerLinkActive="bg-brand-tint ring-1 ring-brand-line ring-inset !text-text"
         ariaCurrentWhenActive="page"
         class="rounded-lg px-3 py-2 text-text-3 hover:text-text lg:px-3.5"
+        [class]="tab.fromLg ? 'hidden lg:block' : ''"
       >
         {{ tab.labelKey | translate }}
       </a>
@@ -140,6 +141,15 @@
           >
             <svg [lucideIcon]="icons.user" [size]="16" class="text-brand-light"></svg>
             {{ 'nav.profile' | translate }}
+          </a>
+          <a
+            role="menuitem"
+            routerLink="/diary"
+            (click)="menuOpen.set(false)"
+            class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
+          >
+            <svg [lucideIcon]="icons.calendarDays" [size]="16" class="text-brand-light"></svg>
+            {{ 'nav.diary' | translate }}
           </a>
           <a
             role="menuitem"
