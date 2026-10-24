@@ -220,7 +220,14 @@
       >
         <label class="run-form-cell">
           <span>{{ 'runForm.start' | translate }}</span>
-          <input type="date" formControlName="startDate" class="run-form-cell-input" [attr.aria-invalid]="dateRangeError()" />
+          <input
+            type="date"
+            formControlName="startDate"
+            class="run-form-cell-input"
+            [min]="dateMin"
+            [max]="dateMax()"
+            [attr.aria-invalid]="dateRangeError() || dateLimitsError('startDate')"
+          />
         </label>
         <label class="run-form-cell">
           <span>{{ 'runForm.end' | translate }}</span>
@@ -228,7 +235,9 @@
             type="date"
             formControlName="endDate"
             class="run-form-cell-input"
-            [attr.aria-invalid]="dateRangeError()"
+            [min]="dateMin"
+            [max]="dateMax()"
+            [attr.aria-invalid]="dateRangeError() || dateLimitsError('endDate')"
             (input)="endSuggested.set(false)"
             (change)="onEndDateChange($any($event.target))"
           />
@@ -263,6 +272,9 @@
       }
       @if (endSuggested()) {
         <p class="text-xs text-muted">{{ 'runForm.endSuggested' | translate }}</p>
+      }
+      @if (dateLimitsError('startDate') || dateLimitsError('endDate')) {
+        <p class="text-xs text-danger">{{ 'runForm.errors.dateLimits' | translate }}</p>
       }
       @if (dateRangeError()) {
         <p class="text-xs text-danger">{{ 'runForm.errors.dates' | translate }}</p>

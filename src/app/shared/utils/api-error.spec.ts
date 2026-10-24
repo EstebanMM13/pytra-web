@@ -40,6 +40,13 @@ describe('describeApiError', () => {
     });
   });
 
+  it('explains run date and year validation errors', () => {
+    const dates = (field: string) => httpError(400, { message: 'Validation failed', fieldErrors: { [field]: 'x' } });
+    expect(describeApiError(dates('startDate'), fallback)).toEqual({ key: 'errors.fields.runDates' });
+    expect(describeApiError(dates('endDate'), fallback)).toEqual({ key: 'errors.fields.runDates' });
+    expect(describeApiError(dates('year'), fallback)).toEqual({ key: 'errors.fields.runYear' });
+  });
+
   it('reports network and server failures', () => {
     expect(describeApiError(httpError(0), fallback)?.key).toBe('errors.network');
     expect(describeApiError(httpError(503), fallback)?.key).toBe('errors.server');

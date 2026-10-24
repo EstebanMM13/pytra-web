@@ -879,6 +879,7 @@
       "runLabel": "Ponle nombre a la partida.",
       "rating": "La nota va de 0 a 10, con hasta 2 decimales.",
       "hours": "Introduce unas horas válidas: 0 o más (p. ej. 12,5).",
+      "dateLimits": "Las fechas van del 01/01/1970 a mañana.",
       "dates": "El fin no puede ser anterior al inicio.",
       "ratingPrecision": {
         "integer": "La nota va de 0 a 10, sin decimales (según tus preferencias).",
@@ -1272,7 +1273,9 @@
       "runLabel": "La partida necesita un nombre.",
       "status": "Elige un estado.",
       "rating": "La nota debe ir de 0 a 10, con 2 decimales como mucho.",
-      "hours": "Las horas no pueden ser negativas."
+      "hours": "Las horas no pueden ser negativas.",
+      "runDates": "Las fechas de la partida deben estar entre el 01/01/1970 y mañana, y el fin no puede ser anterior al inicio.",
+      "runYear": "El año de la partida debe estar entre 1970 y, como mucho, el año que viene."
     }
   }
 }

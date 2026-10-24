@@ -11,6 +11,7 @@ import {
   ratingValidator,
   canStartRun,
   ratingValidatorFor,
+  runDateValidator,
   statusForEndDate,
 } from './run-form.logic';
 
@@ -122,6 +123,13 @@ describe('run form logic', () => {
       expect(isValidDateRange('2024-01-10', '2023-12-31')).toBe(false);
       expect(isValidDateRange('', '2023-12-31')).toBe(true);
       expect(isValidDateRange('2024-01-10', null)).toBe(true);
+    });
+
+    it('rejects dates before 1970 or after tomorrow on each date input', () => {
+      expect(runDateValidator(new FormControl(''))).toBeNull();
+      expect(runDateValidator(new FormControl('2024-05-01'))).toBeNull();
+      expect(runDateValidator(new FormControl('1969-12-31'))).toEqual({ runDate: true });
+      expect(runDateValidator(new FormControl('9999-01-01'))).toEqual({ runDate: true });
     });
 
     it('is exposed as a group validator', () => {

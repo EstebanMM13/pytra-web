@@ -27,7 +27,7 @@ import { DemoModeService } from '../../../core/services/demo-mode.service';
 import { ModalSheet } from '../../../shared/ui/modal-sheet';
 import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { Skeleton } from '../../../shared/ui/skeleton';
-import { todayIso } from '../../../shared/utils/run-dates';
+import { RUN_DATE_MIN, runDateMax, todayIso } from '../../../shared/utils/run-dates';
 import { formatDecimalInput, formatHoursInput } from '../../../shared/utils/decimal-input';
 import { toastApiError } from '../../../shared/utils/api-error';
 import {
@@ -39,6 +39,7 @@ import {
   nextRunLabel,
   canStartRun,
   ratingValidatorFor,
+  runDateValidator,
   statusForEndDate,
 } from './run-form.logic';
 
@@ -115,8 +116,8 @@ export class RunForm implements OnInit {
       runLabel: this.fb.control('', [Validators.required, Validators.pattern(/\S/)]),
       status: this.fb.control<ExperienceStatus>('EN_CURSO'),
       platformId: this.fb.control<number | null>(null, Validators.required),
-      startDate: this.fb.control(''),
-      endDate: this.fb.control(''),
+      startDate: this.fb.control('', runDateValidator),
+      endDate: this.fb.control('', runDateValidator),
       // Text inputs so "9,25" works on every keyboard/locale (number inputs drop it as empty).
       hours: this.fb.control('', hoursValidator),
       rating: this.fb.control(
@@ -415,6 +416,17 @@ export class RunForm implements OnInit {
 
   protected dateRangeError(): boolean {
     return this.form.hasError('dateRange');
+  }
+
+  /** Bounds of the date inputs (the API accepts 1970-01-01 to tomorrow). */
+  protected readonly dateMin = RUN_DATE_MIN;
+  /** Recomputed on change detection, so a form left open past midnight still allows tomorrow. */
+  protected dateMax(): string {
+    return runDateMax();
+  }
+
+  protected dateLimitsError(name: 'startDate' | 'endDate'): boolean {
+    return this.form.controls[name].hasError('runDate');
   }
 
   // --- Save / close --------------------------------------------------------------------------

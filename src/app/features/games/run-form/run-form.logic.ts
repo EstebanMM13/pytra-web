@@ -3,6 +3,7 @@ import { Experience, ExperienceRequest, ExperienceStatus } from '../../../core/m
 import { Game } from '../../../core/models/game.model';
 import { RatingPrecision } from '../../../core/services/preferences.service';
 import { decimalValidator, parseDecimal } from '../../../shared/utils/decimal-input';
+import { isWithinRunDateLimits } from '../../../shared/utils/run-dates';
 
 /** Pure helpers behind the run form: validation, defaults and request building. */
 
@@ -45,6 +46,10 @@ export const ratingValidator: ValidatorFn = ratingValidatorFor(() => 'hundredths
 
 /** Hours are optional; when present they must be a number ≥ 0 ("12,5" accepted). */
 export const hoursValidator: ValidatorFn = decimalValidator('hours', (value) => value >= 0);
+
+/** Date input validator: empty, or from 1970-01-01 to tomorrow (the API's bounds). */
+export const runDateValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null =>
+  isWithinRunDateLimits(control.value as string | null) ? null : { runDate: true };
 
 /** ISO `yyyy-mm-dd` strings compare correctly as text. */
 export function isValidDateRange(start: string | null | undefined, end: string | null | undefined): boolean {

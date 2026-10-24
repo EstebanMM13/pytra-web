@@ -879,6 +879,7 @@
       "runLabel": "Give the run a name.",
       "rating": "The rating goes from 0 to 10, with up to 2 decimals.",
       "hours": "Enter valid hours: 0 or more (e.g. 12.5).",
+      "dateLimits": "Dates go from 01/01/1970 to tomorrow.",
       "dates": "The end cannot be before the start.",
       "ratingPrecision": {
         "integer": "Ratings go from 0 to 10, no decimals (per your preferences).",
@@ -1272,7 +1273,9 @@
       "runLabel": "The run needs a name.",
       "status": "Pick a status.",
       "rating": "The rating must be 0 to 10, with at most 2 decimals.",
-      "hours": "Hours can't be negative."
+      "hours": "Hours can't be negative.",
+      "runDates": "Run dates must be between 01/01/1970 and tomorrow, and the end can't be before the start.",
+      "runYear": "The run year must be between 1970 and next year at the latest."
     }
   }
 }

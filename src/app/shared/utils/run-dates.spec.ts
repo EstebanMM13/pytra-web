@@ -1,4 +1,14 @@
-import { formatDayMonthYear, formatRunPeriod, runDuration, runYear, splitLines, todayIso } from './run-dates';
+import {
+  RUN_DATE_MIN,
+  formatDayMonthYear,
+  formatRunPeriod,
+  isWithinRunDateLimits,
+  runDateMax,
+  runDuration,
+  runYear,
+  splitLines,
+  todayIso,
+} from './run-dates';
 import { ratingRank } from '../../features/games/experience-detail/experience-detail';
 
 describe('run dates', () => {
@@ -9,6 +19,17 @@ describe('run dates', () => {
 
   it('builds today in local time', () => {
     expect(todayIso(new Date(2026, 9, 9))).toBe('2026-10-09');
+  });
+
+  it('bounds run dates from 1970-01-01 to tomorrow', () => {
+    expect(RUN_DATE_MIN).toBe('1970-01-01');
+    expect(runDateMax(new Date(2026, 11, 31))).toBe('2027-01-01');
+    expect(isWithinRunDateLimits('', '2026-10-25')).toBe(true);
+    expect(isWithinRunDateLimits(null, '2026-10-25')).toBe(true);
+    expect(isWithinRunDateLimits('1970-01-01', '2026-10-25')).toBe(true);
+    expect(isWithinRunDateLimits('2026-10-25', '2026-10-25')).toBe(true);
+    expect(isWithinRunDateLimits('1969-12-31', '2026-10-25')).toBe(false);
+    expect(isWithinRunDateLimits('2026-10-26', '2026-10-25')).toBe(false);
   });
 
   it('counts whole months between dates, falling back to days', () => {

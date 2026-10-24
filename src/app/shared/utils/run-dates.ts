@@ -17,6 +17,21 @@ export function todayIso(now: Date = new Date()): string {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
+/** Earliest run date the API accepts. */
+export const RUN_DATE_MIN = '1970-01-01';
+
+/** Latest run date the API accepts: tomorrow (one day of slack for time zones), as `yyyy-mm-dd`. */
+export function runDateMax(now: Date = new Date()): string {
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return todayIso(tomorrow);
+}
+
+/** Empty, or an ISO date from `RUN_DATE_MIN` to `max` (ISO dates compare correctly as text). */
+export function isWithinRunDateLimits(value: string | null | undefined, max: string = runDateMax()): boolean {
+  return !value || (value >= RUN_DATE_MIN && value <= max);
+}
+
 /** `2023-02-25` -> `25/02/2023`; empty values render as an em dash. */
 export function formatDayMonthYear(value: string | null | undefined): string {
   const d = parseIsoDate(value);

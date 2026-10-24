@@ -33,6 +33,9 @@ const FIELD_KEYS: Record<string, string> = {
   hours: 'errors.fields.hours',
   totalHours: 'errors.fields.hours',
   generalRating: 'errors.fields.rating',
+  startDate: 'errors.fields.runDates',
+  endDate: 'errors.fields.runDates',
+  year: 'errors.fields.runYear',
 };
 
 function own(map: Record<string, string>, key: string): string | null {
