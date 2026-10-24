@@ -7,7 +7,7 @@ import { CollapseBreakpoint, CollapseStateService } from '../../core/services/co
 let nextRegionId = 0;
 
 /**
- * Uppercase section label followed by a rule; projects an optional right slot. Warm neutral by default;
+ * Uppercase section label followed by a rule; projects an optional right slot. Gold -> brand gradient text by default;
  * `tone="gold"` is reserved for achievement sections (gold label, fading gold rule).
  *
  * With `collapseKey` set it also renders a chevron toggle that collapses its parent card:
@@ -26,7 +26,7 @@ let nextRegionId = 0;
   template: `
     <h2
       class="shrink-0 text-xs font-semibold tracking-[0.08em] uppercase md:text-[13px]"
-      [class]="tone() === 'gold' ? 'text-gold' : 'text-text-2'"
+      [class]="tone() === 'gold' ? 'text-gold' : 'text-section-gradient'"
     >
       {{ label() }}
     </h2>
@@ -63,7 +63,7 @@ export class SectionHeader {
   protected readonly icons = ICONS;
 
   readonly label = input.required<string>();
-  /** Label colour: warm neutral with a divider rule (default) or gold (achievement sections). */
+  /** Label colour: gold -> brand gradient with a divider rule (default) or solid gold (achievement sections). */
   readonly tone = input<'neutral' | 'gold'>('neutral');
   /** Stable "screen.card" key; enables the collapse toggle when set. */
   readonly collapseKey = input<string>();

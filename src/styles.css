@@ -740,6 +740,29 @@ select optgroup {
   }
 }
 
+/*
+ * Section titles: the gold -> brand blend formerly used on the rating figures (gold 35%, then
+ * 60% gold + 40% brand-light at 100%). Solid brand-light where text clipping is unsupported or in
+ * forced-colors mode. Light theme uses the same stops with its darker gold / brand (AA on paper).
+ */
+@utility text-section-gradient {
+  color: var(--pt-brand-light);
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    background-image: linear-gradient(
+      120deg,
+      var(--pt-gold) 35%,
+      color-mix(in srgb, var(--pt-gold) 60%, var(--pt-brand-light)) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  @media (forced-colors: active) {
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
 /* Expressive display titles (page, game and run names); pair with a tight tracking-* class. */
 @utility font-display {
   font-optical-sizing: auto;
