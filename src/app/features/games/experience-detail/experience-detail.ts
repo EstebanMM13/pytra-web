@@ -64,6 +64,8 @@ export class ExperienceDetail {
   protected readonly icons = ICONS;
   /** Figure font size that fits its tile (see `figureFontSize`). */
   protected readonly figureSize = (value: string | number): string => figureFontSize(String(value));
+  /** Inline-editable figures share their row with the pencil chip (26px + 8px gap + 14px padding/border). */
+  protected readonly editableFigureSize = (value: string | number): string => figureFontSize(String(value), 48);
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

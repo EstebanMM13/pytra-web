@@ -188,10 +188,11 @@ const FIGURE_EM_PER_CHAR = 0.62;
  * CSS font-size for a figure: the card's `--fig-max`, shrunk so the whole text fits the
  * card's content width (`cqi` of the `@container` wrapper) instead of being cut with "…".
  */
-export function figureFontSize(text: string): string {
+export function figureFontSize(text: string, reservePx = 0): string {
   const chars = Math.max(1, Array.from(text).length);
   const ems = Math.round(chars * FIGURE_EM_PER_CHAR * 100) / 100;
-  return `min(var(--fig-max), calc(100cqi / ${ems}))`;
+  const width = reservePx > 0 ? `(100cqi - ${reservePx}px)` : '100cqi';
+  return `min(var(--fig-max), calc(${width} / ${ems}))`;
 }
 
 function cancelFrame(id: number): void {

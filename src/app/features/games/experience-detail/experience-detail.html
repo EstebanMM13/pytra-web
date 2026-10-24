@@ -112,7 +112,6 @@
           <p class="flex items-center gap-1.5 text-xs leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
             <svg [lucideIcon]="icons.star" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
             {{ 'run.rating' | translate }}
-            <svg [lucideIcon]="icons.pencil" [size]="12" class="ml-auto shrink-0 text-faint" aria-hidden="true"></svg>
           </p>
           @if (editing() === 'rating') {
             <div class="mt-2 flex min-w-0 flex-col gap-1.5" (focusout)="onEditorFocusOut($event)" (keydown.escape)="cancelEdit()">
@@ -154,10 +153,11 @@
                 <span
                   class="text-figure-tone font-mono leading-none font-bold tracking-[-0.03em]"
                   [class]="e.rating | ratingTone"
-                  [style.font-size]="figureSize(e.rating | rating)"
+                  [style.font-size]="editableFigureSize(e.rating | rating)"
                 >
                   {{ e.rating | rating }}
                 </span>
+                <span class="run-inline-pencil" aria-hidden="true"><svg [lucideIcon]="icons.pencil" [size]="14"></svg></span>
               </button>
               <span class="text-sm text-faint md:text-base">{{ 'run.outOf' | translate }}</span>
             </p>
@@ -181,6 +181,7 @@
                 (click)="startEdit('rating')"
               >
                 {{ 'run.noRating' | translate }}
+                <span class="run-inline-pencil" aria-hidden="true"><svg [lucideIcon]="icons.pencil" [size]="14"></svg></span>
               </button>
             </p>
           }
@@ -192,7 +193,6 @@
           <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5">
             <svg [lucideIcon]="icons.clock" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
             <span class="truncate">{{ 'run.hours' | translate }}</span>
-            <svg [lucideIcon]="icons.pencil" [size]="12" class="ml-auto shrink-0 text-faint" aria-hidden="true"></svg>
           </p>
           @if (editing() === 'hours') {
             <div class="mt-2 flex min-w-0 flex-col gap-1.5" (focusout)="onEditorFocusOut($event)" (keydown.escape)="cancelEdit()">
@@ -230,7 +230,7 @@
               }
             </div>
           } @else {
-            <p class="mt-2 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(e.hours | hours)">
+            <p class="mt-2 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="editableFigureSize(e.hours | hours)">
               <button
                 id="run-inline-hours-trigger"
                 type="button"
@@ -241,6 +241,7 @@
                 (click)="startEdit('hours')"
               >
                 <span class="text-figure font-mono">{{ e.hours | hours }}</span>
+                <span class="run-inline-pencil" aria-hidden="true"><svg [lucideIcon]="icons.pencil" [size]="14"></svg></span>
               </button>
             </p>
           }

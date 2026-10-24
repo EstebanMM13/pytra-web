@@ -118,6 +118,7 @@ describe('figureFontSize', () => {
   it('caps at the card maximum and shrinks with the text length', () => {
     expect(figureFontSize('27')).toBe('min(var(--fig-max), calc(100cqi / 1.24))');
     expect(figureFontSize('2.088 h')).toBe('min(var(--fig-max), calc(100cqi / 4.34))');
+    expect(figureFontSize('27', 48)).toBe('min(var(--fig-max), calc((100cqi - 48px) / 1.24))');
   });
 
   it('counts emoji as one glyph and never divides by zero', () => {
