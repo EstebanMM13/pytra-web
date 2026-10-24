@@ -95,6 +95,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/years/years').then((m) => m.Years),
   },
   {
+    // `/diary?date=yyyy-mm-dd` opens that day's editor (dashboard card, daily reminder).
+    path: 'diary',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/diary/diary').then((m) => m.Diary),
+  },
+  {
     path: 'sync',
     canActivate: [authGuard],
     loadComponent: () => import('./features/sync/sync').then((m) => m.Sync),

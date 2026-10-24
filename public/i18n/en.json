@@ -143,7 +143,11 @@
     },
     "achievements": "Achievements",
     "achievementsAll": "See all",
-    "topRatedOnline": "Online"
+    "topRatedOnline": "Online",
+    "diary": {
+      "title": "What did you play today?",
+      "text": "Log your hours in the diary"
+    }
   },
   "profile": {
     "title": "Profile",
@@ -360,7 +364,15 @@
     "androidApp": "Android app",
     "downloadAndroidApp": "Download Android app",
     "updateAndroidApp": "Update Android app",
-    "androidAppHint": "Latest version from GitHub. Android may ask you to allow installing from your browser."
+    "androidAppHint": "Latest version from GitHub. Android may ask you to allow installing from your browser.",
+    "reminder": {
+      "label": "Daily reminder",
+      "time": "Time",
+      "hint": "A notification every day to log what you played. Android app only.",
+      "scheduled": "Reminder set for {{time}}",
+      "denied": "Notifications are blocked. Allow them in Android settings to use the reminder.",
+      "failed": "The reminder could not be scheduled."
+    }
   },
   "sync": {
     "title": "Sync",
@@ -556,7 +568,9 @@
     "add": "Add",
     "addRun": "Run",
     "addGame": "Game",
-    "addSaga": "Saga"
+    "addSaga": "Saga",
+    "diary": "Diary",
+    "addDiary": "Play day"
   },
   "search": {
     "title": "Search",
@@ -815,7 +829,8 @@
     "upcoming": "Coming soon",
     "onlineNoRuns": "This game is online only: its hours are tracked as online time, not as runs.",
     "allGenres": "See all {{count}} genres",
-    "showLessGenres": "Show less"
+    "showLessGenres": "Show less",
+    "diaryDays": "Days played"
   },
   "run": {
     "platinum": "🏆 Platinum",
@@ -1286,6 +1301,70 @@
       "hours": "Hours can't be negative.",
       "runDates": "Run dates must be between 01/01/1970 and tomorrow, and the end can't be before the start.",
       "runYear": "The run year must be between 1970 and next year at the latest."
+    },
+    "invalidDiaryDate": "The date must be between 1970 and tomorrow.",
+    "duplicateDiaryGame": "That game is already in the day."
+  },
+  "diary": {
+    "title": "Diary",
+    "subtitle": "What you played each day. Hours are added to your runs.",
+    "logToday": "Log today",
+    "monthDays": "Days this month",
+    "emptyMonth": "No days logged this month yet.",
+    "syncedTag": "Hours counted by Steam/PSN",
+    "calendar": {
+      "previous": "Previous month",
+      "next": "Next month",
+      "today": "Today",
+      "monthTotal": "Month total",
+      "less": "Less",
+      "more": "More",
+      "loadError": "The diary could not be loaded.",
+      "retry": "Retry",
+      "dayWithHours": "{{day}}: {{hours}}"
+    },
+    "editor": {
+      "save": "Save day",
+      "date": "Date",
+      "loading": "Loading…",
+      "playingNow": "Playing now",
+      "searchLabel": "Search a game in your library",
+      "searchPlaceholder": "Search your library…",
+      "noResults": "No results",
+      "empty": "Add the games you played on this day.",
+      "remove": "Remove {{name}}",
+      "toOnline": "Added to the online hours",
+      "toRun": "Added to “{{run}}”",
+      "changeRun": "Change",
+      "runRequired": "Which run do these hours go to?",
+      "runRequiredToast": "Choose the run the hours of the highlighted games go to.",
+      "loadingRuns": "Loading runs…",
+      "runsError": "The runs could not be loaded.",
+      "whichRun": "Run",
+      "pickRun": "Choose a run",
+      "noRuns": "This game has no runs yet.",
+      "newRun": "New run",
+      "hoursPlaceholder": "Hours",
+      "hoursLabel": "Hours played of {{name}}",
+      "hoursError": "Enter between 0.01 and 24 hours, with at most two decimals.",
+      "gameNote": "Note (optional)",
+      "gameNoteLabel": "Note for {{name}}",
+      "total": "Total",
+      "dayNote": "Day note",
+      "dayNotePlaceholder": "Anything to remember about today?",
+      "delete": "Delete day",
+      "confirmDelete": "Tap again to delete"
+    },
+    "toast": {
+      "saved": "Day saved",
+      "deleted": "Day deleted",
+      "saveError": "The day could not be saved.",
+      "deleteError": "The day could not be deleted.",
+      "loadError": "The day could not be loaded."
+    },
+    "reminder": {
+      "title": "What did you play today?",
+      "body": "Log it in your Pytra diary."
     }
   }
 }

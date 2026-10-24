@@ -1,0 +1,180 @@
+<app-navbar />
+
+<main
+  class="mx-auto flex max-w-5xl flex-col gap-5 px-4 pt-4 pb-8 md:gap-7 md:px-6 md:pt-8 md:pb-12 lg:px-10"
+>
+  <header class="flex flex-wrap items-end justify-between gap-3">
+    <div class="min-w-0">
+      <h1
+        class="font-display text-[28px] leading-tight font-bold tracking-[-0.035em] md:text-[36px]"
+      >
+        {{ 'diary.title' | translate }}
+      </h1>
+      <p class="mt-1 text-sm text-text-3">{{ 'diary.subtitle' | translate }}</p>
+    </div>
+    <button
+      type="button"
+      (click)="openToday()"
+      data-log-today
+      class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
+    >
+      <svg [lucideIcon]="icons.notebookPen" [size]="16" aria-hidden="true"></svg>
+      {{ 'diary.logToday' | translate }}
+    </button>
+  </header>
+
+  <section
+    class="rounded-[14px] border border-card-border card-glass p-3 sm:p-[18px] md:p-[22px]"
+    [attr.aria-label]="title()"
+  >
+    <div class="mb-3 flex items-center gap-1.5 md:mb-4">
+      <button
+        type="button"
+        (click)="shift(-1)"
+        class="grid size-10 shrink-0 place-items-center rounded-lg text-text-2 hover:bg-hover hover:text-text"
+        [attr.aria-label]="'diary.calendar.previous' | translate"
+      >
+        <svg [lucideIcon]="icons.chevronLeft" [size]="20"></svg>
+      </button>
+      <h2
+        class="min-w-0 flex-1 truncate text-center text-base font-semibold capitalize md:text-lg"
+        aria-live="polite"
+      >
+        {{ title() }}
+      </h2>
+      <button
+        type="button"
+        (click)="shift(1)"
+        class="grid size-10 shrink-0 place-items-center rounded-lg text-text-2 hover:bg-hover hover:text-text"
+        [attr.aria-label]="'diary.calendar.next' | translate"
+      >
+        <svg [lucideIcon]="icons.chevronRight" [size]="20"></svg>
+      </button>
+    </div>
+
+    <div class="mb-3 flex items-center justify-between gap-3 text-xs text-text-3">
+      <span>
+        {{ 'diary.calendar.monthTotal' | translate }}
+        <span class="font-mono font-semibold text-text">{{ total() }}</span>
+      </span>
+      @if (!isCurrentMonth()) {
+        <button
+          type="button"
+          (click)="goToToday()"
+          class="rounded-md px-2 py-1 font-semibold text-brand-light hover:bg-hover"
+        >
+          {{ 'diary.calendar.today' | translate }}
+        </button>
+      }
+    </div>
+
+    @if (loadError()) {
+      <p class="mb-3 flex flex-wrap items-center gap-2 text-sm text-danger" role="alert">
+        {{ 'diary.calendar.loadError' | translate }}
+        <button type="button" (click)="retry()" class="font-semibold underline">
+          {{ 'diary.calendar.retry' | translate }}
+        </button>
+      </p>
+    }
+
+    <div
+      class="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-muted uppercase md:gap-1.5 md:text-xs"
+      aria-hidden="true"
+    >
+      @for (weekday of weekdays(); track $index) {
+        <span class="truncate py-1">{{ weekday }}</span>
+      }
+    </div>
+    <div
+      class="mt-1 flex flex-col gap-1 md:gap-1.5"
+      [attr.aria-busy]="days() === null"
+      data-calendar
+    >
+      @for (week of weeks(); track $index) {
+        <div class="grid grid-cols-7 gap-1 md:gap-1.5">
+          @for (cell of week; track cell.date) {
+            @if (days() === null) {
+              <app-skeleton class="aspect-square rounded-lg md:aspect-[4/3]" />
+            } @else {
+              <button
+                type="button"
+                (click)="open(cell.date)"
+                [disabled]="cell.disabled"
+                [attr.data-date]="cell.date"
+                [attr.data-level]="cell.level"
+                [attr.aria-current]="cell.isToday ? 'date' : null"
+                [attr.aria-label]="cellLabel(cell)"
+                class="relative flex aspect-square min-w-0 flex-col items-start justify-between rounded-lg p-1 text-left text-xs transition-colors hover:outline-2 hover:outline-brand disabled:cursor-default disabled:opacity-25 disabled:hover:outline-none md:aspect-[4/3] md:p-2 md:text-sm"
+                [class]="cellClass(cell)"
+              >
+                <span class="leading-none">{{ cell.day }}</span>
+                @if (cell.hours > 0) {
+                  <span
+                    class="w-full truncate text-right font-mono text-[10px] leading-none font-semibold md:text-xs"
+                    >{{ shortHours(cell.hours) }}</span
+                  >
+                } @else if (cell.hasEntry) {
+                  <span
+                    class="size-1.5 self-end rounded-full bg-brand-light"
+                    aria-hidden="true"
+                  ></span>
+                }
+              </button>
+            }
+          }
+        </div>
+      }
+    </div>
+
+    <div
+      class="mt-3 flex items-center justify-end gap-1.5 text-[11px] text-muted"
+      aria-hidden="true"
+    >
+      {{ 'diary.calendar.less' | translate }}
+      @for (level of levels; track level) {
+        <span class="size-3 rounded-[3px]" [class]="legendClass(level)"></span>
+      }
+      {{ 'diary.calendar.more' | translate }}
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-2.5" [attr.aria-label]="'diary.monthDays' | translate">
+    <h2
+      class="text-xs font-semibold tracking-[0.08em] text-section-gradient uppercase md:text-[13px]"
+    >
+      {{ 'diary.monthDays' | translate }}
+    </h2>
+    @if (days() !== null) {
+      @for (day of monthDays(); track day.date) {
+        <button
+          type="button"
+          (click)="open(day.date)"
+          class="hover-lift flex items-center gap-3 rounded-xl border border-card-border bg-surface px-3.5 py-3 text-left"
+          data-month-day
+        >
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold capitalize">{{ dayTitle(day.date) }}</p>
+            <p class="truncate text-xs text-text-3">{{ gameNames(day) || day.note }}</p>
+          </div>
+          <span class="shrink-0 font-mono text-sm font-semibold">{{ hours(day.totalHours) }}</span>
+          <svg
+            [lucideIcon]="icons.chevronRight"
+            [size]="16"
+            class="shrink-0 text-faint"
+            aria-hidden="true"
+          ></svg>
+        </button>
+      } @empty {
+        <p
+          class="rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted"
+        >
+          {{ 'diary.emptyMonth' | translate }}
+        </p>
+      }
+    }
+  </section>
+</main>
+
+@if (editing(); as date) {
+  <app-diary-day-editor [date]="date" (saved)="onSaved($event.date)" (closed)="closeEditor()" />
+}

@@ -20,6 +20,10 @@ const MESSAGE_KEYS: Record<string, string> = {
   INVALID_PLATFORM: 'errors.invalidPlatform',
   INVALID_YEAR: 'errors.invalidYear',
   ONLINE_GAME_RUN: 'game.onlineNoRuns',
+  INVALID_DIARY_DATE: 'errors.invalidDiaryDate',
+  DUPLICATE_DIARY_GAME: 'errors.duplicateDiaryGame',
+  DIARY_RUN_REQUIRED: 'diary.editor.runRequiredToast',
+  INVALID_DIARY_RUN: 'diary.editor.runRequiredToast',
 };
 
 /** Request fields whose validation error has a full translated sentence. */

@@ -143,7 +143,11 @@
     },
     "achievements": "Logros",
     "achievementsAll": "Ver todos",
-    "topRatedOnline": "Online"
+    "topRatedOnline": "Online",
+    "diary": {
+      "title": "¿A qué has jugado hoy?",
+      "text": "Apunta tus horas en el diario"
+    }
   },
   "profile": {
     "title": "Perfil",
@@ -360,7 +364,15 @@
     "androidApp": "App de Android",
     "downloadAndroidApp": "Descargar app de Android",
     "updateAndroidApp": "Actualizar app de Android",
-    "androidAppHint": "Última versión desde GitHub. Android puede pedirte que permitas instalar desde el navegador."
+    "androidAppHint": "Última versión desde GitHub. Android puede pedirte que permitas instalar desde el navegador.",
+    "reminder": {
+      "label": "Recordatorio diario",
+      "time": "Hora",
+      "hint": "Una notificación cada día para apuntar a qué has jugado. Solo en la app de Android.",
+      "scheduled": "Recordatorio activado a las {{time}}",
+      "denied": "Las notificaciones están bloqueadas. Actívalas en los ajustes de Android para usar el recordatorio.",
+      "failed": "No se pudo programar el recordatorio."
+    }
   },
   "sync": {
     "title": "Sincronizar",
@@ -556,7 +568,9 @@
     "add": "Añadir",
     "addRun": "Partida",
     "addGame": "Juego",
-    "addSaga": "Saga"
+    "addSaga": "Saga",
+    "diary": "Diario",
+    "addDiary": "Día de juego"
   },
   "search": {
     "title": "Buscar",
@@ -815,7 +829,8 @@
     "upcoming": "Próximamente",
     "onlineNoRuns": "Este juego es solo online: sus horas se registran como tiempo online, no como partidas.",
     "allGenres": "Ver los {{count}} géneros",
-    "showLessGenres": "Ver menos"
+    "showLessGenres": "Ver menos",
+    "diaryDays": "Días jugados"
   },
   "run": {
     "platinum": "🏆 Platino",
@@ -1286,6 +1301,70 @@
       "hours": "Las horas no pueden ser negativas.",
       "runDates": "Las fechas de la partida deben estar entre el 01/01/1970 y mañana, y el fin no puede ser anterior al inicio.",
       "runYear": "El año de la partida debe estar entre 1970 y, como mucho, el año que viene."
+    },
+    "invalidDiaryDate": "La fecha debe estar entre 1970 y mañana.",
+    "duplicateDiaryGame": "Ese juego ya está en el día."
+  },
+  "diary": {
+    "title": "Diario",
+    "subtitle": "Lo que has jugado cada día. Las horas se suman a tus partidas.",
+    "logToday": "Apuntar hoy",
+    "monthDays": "Días de este mes",
+    "emptyMonth": "Aún no hay días apuntados este mes.",
+    "syncedTag": "Horas contadas por Steam/PSN",
+    "calendar": {
+      "previous": "Mes anterior",
+      "next": "Mes siguiente",
+      "today": "Hoy",
+      "monthTotal": "Total del mes",
+      "less": "Menos",
+      "more": "Más",
+      "loadError": "No se pudo cargar el diario.",
+      "retry": "Reintentar",
+      "dayWithHours": "{{day}}: {{hours}}"
+    },
+    "editor": {
+      "save": "Guardar día",
+      "date": "Fecha",
+      "loading": "Cargando…",
+      "playingNow": "Jugando ahora",
+      "searchLabel": "Buscar un juego de tu biblioteca",
+      "searchPlaceholder": "Buscar en tu biblioteca…",
+      "noResults": "Sin resultados",
+      "empty": "Añade los juegos a los que has jugado este día.",
+      "remove": "Quitar {{name}}",
+      "toOnline": "Se suma a las horas online",
+      "toRun": "Se suma a «{{run}}»",
+      "changeRun": "Cambiar",
+      "runRequired": "¿A qué partida van estas horas?",
+      "runRequiredToast": "Elige a qué partida van las horas de los juegos marcados.",
+      "loadingRuns": "Cargando partidas…",
+      "runsError": "No se pudieron cargar las partidas.",
+      "whichRun": "Partida",
+      "pickRun": "Elige una partida",
+      "noRuns": "Este juego aún no tiene partidas.",
+      "newRun": "Nueva partida",
+      "hoursPlaceholder": "Horas",
+      "hoursLabel": "Horas jugadas a {{name}}",
+      "hoursError": "Indica entre 0,01 y 24 horas, con dos decimales como mucho.",
+      "gameNote": "Nota (opcional)",
+      "gameNoteLabel": "Nota de {{name}}",
+      "total": "Total",
+      "dayNote": "Nota del día",
+      "dayNotePlaceholder": "¿Algo que recordar de hoy?",
+      "delete": "Borrar día",
+      "confirmDelete": "Toca otra vez para borrar"
+    },
+    "toast": {
+      "saved": "Día guardado",
+      "deleted": "Día borrado",
+      "saveError": "No se pudo guardar el día.",
+      "deleteError": "No se pudo borrar el día.",
+      "loadError": "No se pudo cargar el día."
+    },
+    "reminder": {
+      "title": "¿A qué has jugado hoy?",
+      "body": "Apúntalo en tu diario de Pytra."
     }
   }
 }
