@@ -69,12 +69,17 @@ function round(n: number): number {
         preserveAspectRatio="none"
         class="block size-full overflow-visible"
       >
-        <path [attr.d]="l.area" class="spark-area fill-brand-light/15 stroke-none" />
+        <path
+          [attr.d]="l.area"
+          class="spark-area stroke-none"
+          [class]="tone() === 'gold' ? 'fill-gold/15' : 'fill-brand-light/15'"
+        />
         <path
           [attr.d]="l.stroke"
           fill="none"
           pathLength="1"
-          class="spark-line stroke-brand-light"
+          class="spark-line"
+          [class]="tone() === 'gold' ? 'stroke-gold' : 'stroke-brand-light'"
           stroke-width="1.5"
           vector-effect="non-scaling-stroke"
           stroke-linecap="round"
@@ -86,6 +91,8 @@ function round(n: number): number {
 })
 export class Sparkline {
   readonly values = input.required<readonly number[]>();
+  /** Line colour: brand (activity series) or gold (rating series). */
+  readonly tone = input<'brand' | 'gold'>('brand');
   protected readonly width = WIDTH;
   protected readonly height = HEIGHT;
 

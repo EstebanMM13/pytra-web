@@ -28,11 +28,11 @@ describe('Navbar', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('shows the slogan next to the phone wordmark, with brand initials, only from 360px', () => {
+  it('shows the slogan next to the phone wordmark, with emphasised initials, only from 360px', () => {
     const { el } = setup();
     const slogan = el.querySelector('header [data-slogan-mobile]')!;
     expect(slogan.textContent!.replace(/\s+/g, ' ').trim()).toBe('Play · Track · Remember');
-    expect([...slogan.querySelectorAll('.text-brand-light')].map((s) => s.textContent)).toEqual(['P', 'T', 'R']);
+    expect([...slogan.querySelectorAll('.font-semibold')].map((s) => s.textContent)).toEqual(['P', 'T', 'R']);
     expect(slogan.classList).toContain('hidden');
     expect(slogan.classList).toContain('min-[360px]:inline');
     expect(slogan.getAttribute('aria-hidden')).toBe('true');

@@ -53,7 +53,12 @@ export type BarOrientation = 'vertical' | 'horizontal';
         <div class="flex items-center gap-3 text-[13px]" role="listitem" [attr.aria-label]="bar.title ?? bar.label" data-row>
           <span class="w-10 shrink-0 text-muted tabular-nums">{{ bar.label }}</span>
           <div class="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-hover">
-            <div class="bar-fill h-full rounded-full bg-brand" [style.width.%]="bar.ratio * 100" [attr.data-ratio]="bar.ratio"></div>
+            <div
+              class="bar-fill h-full rounded-full"
+              [class]="bar.top ? 'bg-brand-light' : 'bg-brand'"
+              [style.width.%]="bar.ratio * 100"
+              [attr.data-ratio]="bar.ratio"
+            ></div>
           </div>
           <span class="w-[92px] shrink-0 text-right font-mono text-xs whitespace-nowrap">
             @if (bar.subLabel) {
@@ -82,14 +87,17 @@ export type BarOrientation = 'vertical' | 'horizontal';
             }
             <!-- The bar fills its share of the plot left after the top labels' row. -->
             <div
-              class="bar-grow w-full shrink-0 bg-brand"
-              [class]="dense() ? 'rounded-t-[3px]' : 'rounded-t'"
+              class="bar-grow w-full shrink-0"
+              [class]="(dense() ? 'rounded-t-[3px] ' : 'rounded-t ') + (bar.top ? 'bg-brand-light' : 'bg-brand')"
               [style.height]="'calc((100% - ' + topReserve() + 'px) * ' + bar.ratio + ')'"
               [style.animation-delay.ms]="i * 40"
               [attr.data-ratio]="bar.ratio"
             ></div>
           </div>
-          <span class="shrink-0 whitespace-nowrap text-muted" [class]="dense() ? 'text-[10px]' : large() ? 'text-sm' : 'text-xs'">
+          <span
+            class="shrink-0 whitespace-nowrap"
+            [class]="(bar.top ? 'text-text ' : 'text-muted ') + (dense() ? 'text-[10px]' : large() ? 'text-sm' : 'text-xs')"
+          >
             {{ bar.label }}
           </span>
           @if (bar.subLabel) {
@@ -130,6 +138,8 @@ export class MiniBarChart {
   protected readonly normalized = computed(() => {
     const bars = this.bars();
     const ratios = barRatios(bars.map((b) => b.value));
-    return bars.map((bar, i) => ({ ...bar, ratio: ratios[i] }));
+    // The highest bar (the best year / month) takes the lighter brand tone when there is a series.
+    const highlight = bars.length > 1;
+    return bars.map((bar, i) => ({ ...bar, ratio: ratios[i], top: highlight && ratios[i] === 1 }));
   });
 }

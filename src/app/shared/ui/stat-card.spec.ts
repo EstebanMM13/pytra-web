@@ -45,7 +45,7 @@ describe('StatCard', () => {
   it('renders label and the full figure, sized to fit instead of truncated', () => {
     const card = setup();
     expect(card.textContent).toContain('Hours');
-    const figure = card.querySelector('span.text-figure') as HTMLElement;
+    const figure = card.querySelector('span[data-figure]') as HTMLElement;
     expect(figure.textContent?.trim()).toBe('2.088 h');
     expect(figure.parentElement?.classList).toContain('whitespace-nowrap');
     expect(figure.parentElement?.classList).not.toContain('truncate');
@@ -98,7 +98,7 @@ describe('StatCard', () => {
 
   it('keeps toned figures on their own color', () => {
     const card = setup({ value: '8.08', valueClass: 'font-mono text-gold' });
-    const figure = card.querySelector('span.text-figure-tone') as HTMLElement;
+    const figure = card.querySelector('span[data-figure]') as HTMLElement;
     expect(figure.classList).toContain('text-gold');
   });
 });

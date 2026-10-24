@@ -7,7 +7,8 @@ import { CollapseBreakpoint, CollapseStateService } from '../../core/services/co
 let nextRegionId = 0;
 
 /**
- * Gold uppercase section label followed by a fading rule; projects an optional right slot.
+ * Uppercase section label followed by a rule; projects an optional right slot. Neutral by default;
+ * `tone="gold"` is reserved for achievement sections (gold label, fading gold rule).
  *
  * With `collapseKey` set it also renders a chevron toggle that collapses its parent card:
  * the parent gets `data-collapsed` and global CSS hides every sibling after the header
@@ -23,10 +24,17 @@ let nextRegionId = 0;
   imports: [TranslatePipe, LucideDynamicIcon],
   host: { class: 'flex items-center gap-3' },
   template: `
-    <h2 class="shrink-0 text-xs font-semibold tracking-[0.08em] text-gold uppercase md:text-[13px]">
+    <h2
+      class="shrink-0 text-xs font-semibold tracking-[0.08em] uppercase md:text-[13px]"
+      [class]="tone() === 'gold' ? 'text-gold' : 'text-text-3'"
+    >
       {{ label() }}
     </h2>
-    <span class="h-px flex-1 bg-linear-to-r from-gold-line to-transparent" aria-hidden="true"></span>
+    <span
+      class="h-px flex-1"
+      [class]="tone() === 'gold' ? 'bg-linear-to-r from-gold-line to-transparent' : 'bg-divider'"
+      aria-hidden="true"
+    ></span>
     <ng-content />
     @if (collapseKey()) {
       <button
@@ -55,6 +63,8 @@ export class SectionHeader {
   protected readonly icons = ICONS;
 
   readonly label = input.required<string>();
+  /** Label colour: neutral (default) or gold (achievement sections). */
+  readonly tone = input<'neutral' | 'gold'>('neutral');
   /** Stable "screen.card" key; enables the collapse toggle when set. */
   readonly collapseKey = input<string>();
   /** Stable "screen.row" key shared by the cards of one multi-column grid row. */

@@ -29,7 +29,12 @@ import { canAnimate } from '../utils/motion';
   imports: [LucideDynamicIcon, NgTemplateOutlet, RouterLink, Sparkline],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'block min-w-0 rounded-xl border border-card-border card-glass',
+    class: 'block min-w-0 rounded-xl border',
+    // Neutral glass tile by default; the rating tile (tone 'gold-tile') sits on a gold tint.
+    '[class.border-card-border]': "tone() !== 'gold-tile'",
+    '[class.card-glass]': "tone() !== 'gold-tile'",
+    '[class.border-gold-card-border]': "tone() === 'gold-tile'",
+    '[class.bg-gold-tint]': "tone() === 'gold-tile'",
     // Linked cards lift on hover and shrink while pressed, like the other clickable cards.
     '[class.hover-lift]': 'link() !== null',
   },
@@ -64,11 +69,11 @@ import { canAnimate } from '../utils/motion';
       class="@container flex h-full flex-col p-3 [--fig-max:22px] md:px-[18px] md:py-4 md:[--fig-max:26px] lg:[--fig-max:28px]"
     >
       <p
-        class="flex min-w-0 items-center gap-1.5 text-[11px] leading-4 text-muted md:gap-2 md:text-[13px] md:leading-5"
+        class="flex min-w-0 items-center gap-1.5 text-[11px] leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5"
         [class.justify-center]="centered()"
       >
         @if (icon(); as i) {
-          <svg [lucideIcon]="i" [size]="15" class="size-3.5 shrink-0 text-brand-light md:size-[15px]"></svg>
+          <svg [lucideIcon]="i" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
         }
         @if (shortLabel(); as short) {
           <span class="truncate sm:hidden" [attr.title]="label()">{{ short }}</span>
@@ -82,20 +87,24 @@ import { canAnimate } from '../utils/motion';
         [class.text-center]="centered()"
         [style.font-size]="figureSize()"
       >
-        <span [class]="figureClass()">{{ display() }}</span>
+        <span data-figure [class]="valueClass()">{{ display() }}</span>
       </p>
       @if (hint()) {
         <p class="mt-1.5 line-clamp-2 text-[11px] leading-snug text-muted md:text-xs" [attr.title]="hint()">{{ hint() }}</p>
       }
       @switch (visual()) {
         @case ('trend') {
-          <app-sparkline class="mt-auto h-5 w-full pt-2.5 md:h-7 md:pt-3" [values]="trend()!" data-visual="trend" />
+          <app-sparkline class="mt-auto h-5 w-full pt-2.5 md:h-7 md:pt-3" [values]="trend()!" [tone]="accent()" data-visual="trend" />
         }
         @case ('meter') {
           <!-- Same strip height as the sparkline, so cards with either visual line up. -->
           <div class="mt-auto flex h-5 w-full items-end pt-2.5 md:h-7 md:pt-3" aria-hidden="true" data-visual="meter">
             <div class="h-1.5 w-full overflow-hidden rounded-full bg-hover">
-              <div class="bar-fill h-full rounded-full bg-brand-light" [style.width.%]="meter()! * 100"></div>
+              <div
+                class="bar-fill h-full rounded-full"
+                [class]="accent() === 'gold' ? 'bg-gold' : 'bg-brand-light'"
+                [style.width.%]="meter()! * 100"
+              ></div>
             </div>
           </div>
         }
@@ -120,17 +129,18 @@ export class StatCard {
   readonly meter = input<number | null>(null);
   /** Centres the label and figure (cards of a row that should read as one set). */
   readonly centered = input(false, { transform: booleanAttribute });
+  /**
+   * Colour role: 'brand' (activity figures: purple sparkline / bar), 'gold' (ratings: gold
+   * sparkline / bar) or 'gold-tile' (the headline rating: gold visuals on a gold-tint tile).
+   */
+  readonly tone = input<'brand' | 'gold' | 'gold-tile'>('brand');
   /** Makes the whole card a link (router commands), e.g. to the list behind the figure. */
   readonly link = input<string | readonly (string | number)[] | null>(null);
   /** Query params of `link`. */
   readonly queryParams = input<Params | null>(null);
 
   protected readonly visual = computed(() => statVisual(this.trend(), this.meter()));
-  /** Toned figures (ratings) keep their color with a brand hint; plain ones get the brand gradient. */
-  protected readonly figureClass = computed(() => {
-    const extra = this.valueClass();
-    return extra ? `${extra} text-figure-tone` : 'text-figure';
-  });
+  protected readonly accent = computed(() => (this.tone() === 'brand' ? 'brand' : 'gold'));
   /** Sized from the final value (not the count-up frame) so the figure never jumps while animating. */
   protected readonly figureSize = computed(() => figureFontSize(String(this.value())));
 

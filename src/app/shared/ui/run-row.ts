@@ -6,11 +6,12 @@ import { RatingTonePipe } from '../pipes/rating-tone.pipe';
 import { GameCover } from './game-cover';
 
 /**
- * Run (experience) row: brand accent bar, title + meta, mono hours and rating coloured by value.
+ * Run (experience) row: accent bar (brand on the best run, neutral otherwise), title + meta, mono
+ * hours and rating coloured by value.
  * Projects extra content (e.g. a StatusPill) before the figures.
  * `onSurface` is for rows placed directly on the page (mobile) instead of inside a card.
  * Binding `coverUrl` (even to null, which shows the initials fallback) swaps the accent bar for a cover thumbnail.
- * `platinum` adds an icy platinum pill beside the title and turns the accent bar silver.
+ * `platinum` adds an icy platinum pill beside the title and turns the accent bar silver (unless best).
  */
 @Component({
   selector: 'app-run-row',
@@ -30,7 +31,7 @@ import { GameCover } from './game-cover';
     } @else {
       <span
         class="w-1 self-stretch rounded-sm"
-        [class]="platinum() ? 'bg-platinum' : 'bg-brand-light'"
+        [class]="best() ? 'bg-brand-light' : platinum() ? 'bg-platinum' : 'bg-border-strong'"
         aria-hidden="true"
       ></span>
     }
@@ -39,7 +40,7 @@ import { GameCover } from './game-cover';
         <span class="truncate" [attr.title]="title()">{{ title() }}</span>
         @if (best()) {
           <span
-            class="shrink-0 rounded-full bg-brand-tint px-2 py-0.5 text-[11px] font-medium text-brand-lighter"
+            class="shrink-0 rounded-full bg-gold-tint px-2 py-0.5 text-[11px] font-medium text-gold-tint-fg"
           >
             {{ 'common.best' | translate }}
           </span>
