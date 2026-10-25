@@ -147,7 +147,7 @@
                 [routerLink]="['/games', g.gameId]"
                 class="flex items-baseline justify-between gap-3 rounded hover:underline"
               >
-                <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
+                <span class="min-w-0 text-[15px] font-semibold wrap-break-word max-sm:line-clamp-2 sm:truncate md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="shrink-0 font-mono text-xs md:text-sm" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
@@ -171,7 +171,7 @@
                 [routerLink]="['/games', g.gameId]"
                 class="flex items-baseline justify-between gap-3 rounded hover:underline"
               >
-                <span class="min-w-0 truncate text-[15px] font-semibold md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
+                <span class="min-w-0 text-[15px] font-semibold wrap-break-word max-sm:line-clamp-2 sm:truncate md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="shrink-0 font-mono text-xs md:text-sm" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
@@ -215,11 +215,13 @@
               @for (run of visibleRuns(); track run.experienceId) {
                 <div
                   [class.flex-1]="spreadRuns"
-                  class="grid grid-cols-[minmax(0,1fr)_auto_auto_40px] items-center gap-3 border-t border-divider py-1.5 text-sm md:grid-cols-[minmax(0,1fr)_110px_64px_56px] md:gap-3.5"
+                  class="grid grid-cols-[minmax(0,1fr)_auto_44px] items-center gap-3 border-t border-divider py-1.5 text-sm sm:grid-cols-[minmax(0,1fr)_auto_auto_40px] md:grid-cols-[minmax(0,1fr)_110px_64px_56px] md:gap-3.5"
                 >
                   <span class="flex min-w-0 items-center gap-2.5">
                   <app-game-cover decorative size="xs" [url]="run.coverImageUrl" [name]="run.gameName" />
-                  <span class="min-w-0 truncate" [title]="run.gameName + ' · ' + run.runLabel">
+                  <!-- Phones: the status moves under the name so the name keeps the row's width -->
+                  <span class="flex min-w-0 flex-col">
+                  <span class="min-w-0 wrap-break-word max-sm:line-clamp-2 sm:truncate" [title]="run.gameName + ' · ' + run.runLabel">
                     <a
                       [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]"
                       class="text-text-2 hover:underline"
@@ -230,8 +232,12 @@
                     }
                     <span class="hidden text-xs text-faint md:inline"> · {{ run.runLabel }}</span>
                   </span>
+                  <span class="text-xs sm:hidden" [class]="statusText[run.status]">
+                    {{ 'status.' + run.status | translate }}
                   </span>
-                  <span class="text-xs whitespace-nowrap" [class]="statusText[run.status]">
+                  </span>
+                  </span>
+                  <span class="hidden text-xs whitespace-nowrap sm:inline" [class]="statusText[run.status]">
                     {{ 'status.' + run.status | translate }}
                   </span>
                   <span class="text-right font-mono text-xs whitespace-nowrap text-text-3 md:text-sm">
