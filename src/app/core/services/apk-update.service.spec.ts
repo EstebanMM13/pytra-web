@@ -45,7 +45,7 @@ describe('ApkUpdateService', () => {
         Promise.resolve({ App: { getInfo: () => Promise.resolve({ version: installedVersion }) } } as never),
       ),
       loadFilesystem: vi.fn(() => Promise.resolve({ Filesystem, Directory: { Cache: 'CACHE' } } as never)),
-      loadInstaller: vi.fn(() => Promise.resolve(installer)),
+      loadInstaller: vi.fn(() => Promise.resolve({ plugin: installer })),
       readSnooze: () => snooze,
       writeSnooze: vi.fn((value: string) => {
         snooze = value;
@@ -136,6 +136,23 @@ describe('ApkUpdateService', () => {
     expect(installer.install).toHaveBeenCalledWith({ path: APK_PATH });
     expect(service.state()).toEqual({ step: 'installing', release: RELEASE, path: APK_PATH });
     expect(remove).toHaveBeenCalled();
+  });
+
+  it('still installs when the plugin answers `then` (a Capacitor proxy never resolves it)', async () => {
+    const proxy = {
+      canInstall: vi.fn(() => Promise.resolve({ value: true })),
+      openInstallSettings: vi.fn(() => Promise.resolve()),
+      install: vi.fn(() => Promise.resolve()),
+      then: () => new Promise(() => undefined),
+    };
+    const { service } = setup({ loadInstaller: vi.fn(() => Promise.resolve({ plugin: proxy })) });
+    await service.checkOnLaunch();
+
+    expect(await service.update()).toBe(true);
+    await flush();
+
+    expect(proxy.install).toHaveBeenCalledWith({ path: APK_PATH });
+    expect(service.state()).toEqual({ step: 'installing', release: RELEASE, path: APK_PATH });
   });
 
   it('reports download progress as a percentage', async () => {

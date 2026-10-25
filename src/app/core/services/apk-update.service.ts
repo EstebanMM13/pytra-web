@@ -37,14 +37,23 @@ export interface ApkUpdateEnv {
   fetchLatestRelease: () => Promise<unknown>;
   loadApp: () => Promise<typeof import('@capacitor/app')>;
   loadFilesystem: () => Promise<typeof import('@capacitor/filesystem')>;
-  /** The native installer plugin, or null when this APK does not ship it. */
-  loadInstaller: () => Promise<ApkInstallerPlugin | null>;
+  /**
+   * The native installer plugin, or null when this APK does not ship it. Wrapped in an object on
+   * purpose: a Capacitor plugin proxy answers any property, including `then`, so resolving a promise
+   * with the bare plugin awaits a native `then` that never settles (the update would hang).
+   */
+  loadInstaller: () => Promise<InstallerRef | null>;
   readSnooze: () => string | null;
   writeSnooze: (value: string) => void;
   now: () => Date;
 }
 
-let installer: Promise<ApkInstallerPlugin | null> | undefined;
+/** Holder for the installer plugin proxy, so it is never the resolved value of a promise. */
+export interface InstallerRef {
+  plugin: ApkInstallerPlugin;
+}
+
+let installer: Promise<InstallerRef | null> | undefined;
 
 export const APK_UPDATE_ENV = new InjectionToken<ApkUpdateEnv>('APK_UPDATE_ENV', {
   providedIn: 'root',
@@ -63,7 +72,9 @@ export const APK_UPDATE_ENV = new InjectionToken<ApkUpdateEnv>('APK_UPDATE_ENV',
     loadInstaller: () =>
       (installer ??= import('@capacitor/core').then(
         ({ Capacitor, registerPlugin }) =>
-          Capacitor.isPluginAvailable('ApkInstaller') ? registerPlugin<ApkInstallerPlugin>('ApkInstaller') : null,
+          Capacitor.isPluginAvailable('ApkInstaller')
+            ? { plugin: registerPlugin<ApkInstallerPlugin>('ApkInstaller') }
+            : null,
         (error: unknown) => {
           installer = undefined;
           throw error;
@@ -160,7 +171,7 @@ export class ApkUpdateService {
   /** Opens Android's "Install unknown apps" screen for Pytra. */
   async openInstallSettings(): Promise<void> {
     try {
-      await (await this.installer())?.openInstallSettings();
+      await (await this.installer())?.plugin.openInstallSettings();
     } catch (error) {
       console.error('Opening the install settings failed', error);
     }
@@ -219,7 +230,7 @@ export class ApkUpdateService {
 
   /** Hands the APK to the system installer, or asks for the "unknown apps" permission first. */
   private async install(release: LatestRelease, path: string): Promise<void> {
-    const plugin = await this.installer();
+    const plugin = (await this.installer())?.plugin;
     if (!plugin) {
       this.current.set({ step: 'error', release });
       return;
@@ -237,7 +248,8 @@ export class ApkUpdateService {
     }
   }
 
-  private async installer(): Promise<ApkInstallerPlugin | null> {
+  /** Resolves the wrapper, never the bare proxy (see `loadInstaller`). */
+  private async installer(): Promise<InstallerRef | null> {
     try {
       return await this.env.loadInstaller();
     } catch {
