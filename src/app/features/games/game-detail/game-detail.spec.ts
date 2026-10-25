@@ -102,6 +102,9 @@ describe('GameDetail', () => {
     const both = setup({ ...game('SINGLEPLAYER'), hasPlatinum: true, hasFullCompletion: true }).el;
     expect(both.querySelector('[data-stat="platinum"]')).not.toBeNull();
     expect(both.querySelector('[data-stat="fullCompletion"]')).not.toBeNull();
+    // The 100% tile comes before the platinum one (left of it in the phone grid)
+    const order = both.querySelector('[data-stat="fullCompletion"]')!.compareDocumentPosition(both.querySelector('[data-stat="platinum"]')!);
+    expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('offers edit, new run and the first-run link to a signed-in user', () => {

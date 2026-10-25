@@ -235,7 +235,7 @@
       </a>
     }
 
-    <!-- Stats: six equal cards (total hours, runs, average, best, platinum, 100%): three rows of
+    <!-- Stats: six equal cards (total hours, runs, average, best, 100%, platinum): three rows of
          two on phones, two rows of three on tablets, one row on desktop. Hybrid games add the campaign /
          online split under the hours.
          ONLINE games have no runs: just total hours (double width from tablets) and their online rating. -->
@@ -310,6 +310,34 @@
             [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
             tone="gold"
           />
+          @if (fullCompletion()) {
+            <!-- Earned 100%: same box as a stat card, in mint teal with a soft glow on the badge -->
+            <div class="completion-tile relative min-w-0 rounded-xl border card-glass" data-stat="fullCompletion">
+              <div class="relative flex h-full flex-col justify-center p-4 md:px-5">
+                <p class="completion-tile-label flex min-w-0 items-center gap-1.5 text-xs leading-4 md:gap-2 md:text-[13px] md:leading-5">
+                  <svg [lucideIcon]="statIcons.fullCompletion" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
+                  <span class="truncate">{{ 'game.stats.fullCompletion' | translate }}</span>
+                </p>
+                <p class="mt-2 flex h-[30px] items-center md:h-9">
+                  <svg
+                    [lucideIcon]="statIcons.fullCompletion"
+                    [size]="30"
+                    class="completion-badge md:size-9"
+                    role="img"
+                    [attr.aria-label]="'run.fullCompletionAria' | translate"
+                  ></svg>
+                </p>
+              </div>
+            </div>
+          } @else {
+            <app-stat-card
+              size="large"
+              [icon]="statIcons.fullCompletion"
+              [label]="'game.stats.fullCompletion' | translate"
+              value="—"
+              tone="completion"
+            />
+          }
           @if (platinum()) {
             <!-- Earned platinum: same box as a stat card, in icy silver with a diamond sheen and glow -->
             <div class="platinum-tile platinum-glow relative min-w-0 rounded-xl border card-glass" data-stat="platinum">
@@ -340,34 +368,6 @@
             </div>
           } @else {
             <app-stat-card size="large" [icon]="statIcons.platinum" [label]="'game.stats.platinum' | translate" value="—" tone="platinum" />
-          }
-          @if (fullCompletion()) {
-            <!-- Earned 100%: same box as a stat card, in mint teal with a soft glow on the badge -->
-            <div class="completion-tile relative min-w-0 rounded-xl border card-glass" data-stat="fullCompletion">
-              <div class="relative flex h-full flex-col justify-center p-4 md:px-5">
-                <p class="completion-tile-label flex min-w-0 items-center gap-1.5 text-xs leading-4 md:gap-2 md:text-[13px] md:leading-5">
-                  <svg [lucideIcon]="statIcons.fullCompletion" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
-                  <span class="truncate">{{ 'game.stats.fullCompletion' | translate }}</span>
-                </p>
-                <p class="mt-2 flex h-[30px] items-center md:h-9">
-                  <svg
-                    [lucideIcon]="statIcons.fullCompletion"
-                    [size]="30"
-                    class="completion-badge md:size-9"
-                    role="img"
-                    [attr.aria-label]="'run.fullCompletionAria' | translate"
-                  ></svg>
-                </p>
-              </div>
-            </div>
-          } @else {
-            <app-stat-card
-              size="large"
-              [icon]="statIcons.fullCompletion"
-              [label]="'game.stats.fullCompletion' | translate"
-              value="—"
-              tone="completion"
-            />
           }
         }
       </section>
