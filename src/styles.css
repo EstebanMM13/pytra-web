@@ -97,69 +97,74 @@
 
 :root[data-theme='light'] {
   /*
-   * Light: warm paper, the mirror of the dark palette. The page sits a step darker than the cards
-   * (bg < surface) and cards get a faint warm shadow, so layers read without dark lines.
+   * Light: soft lavender-tinted paper. The page sits a step darker than the cards (bg < surface),
+   * borders carry a hint of plum and cards get a faint shadow, so layers read without dark lines.
+   * Text, muted text, brand, gold and status tones all clear WCAG AA (4.5:1) on bg / surface / their
+   * tinted pills (see the contrast check in the light-theme commit).
    */
-  --pt-bg: #f6f3ec;
-  --pt-nav: #efebe3;
-  --pt-surface: #fffdf8;
-  --pt-border: #ddd7ca;
-  --pt-border-strong: #c9c2b3;
-  --pt-divider: #e9e4d9;
-  --pt-hover: #f0ece3;
+  --pt-bg: #eeeaf2;
+  --pt-nav: #f7f5f9;
+  --pt-surface: #fcfbfd;
+  --pt-border: #ddd6e4;
+  --pt-border-strong: #c3b9cf;
+  --pt-divider: #e9e4ee;
+  --pt-hover: #f2eef6;
 
-  --pt-text: #1c1a17;
-  --pt-text-2: #34302a;
-  --pt-text-3: #5f5a51;
-  --pt-muted: #726d63;
-  --pt-faint: #9a958a;
+  --pt-text: #1c1924;
+  --pt-text-2: #2c2836;
+  --pt-text-3: #4b4557;
+  --pt-muted: #5c5568;
+  --pt-faint: #7a7386;
 
-  --pt-brand: #6a43c7;
-  --pt-brand-dark: #5634a8;
-  --pt-brand-light: #5b3bb8;
-  --pt-brand-lighter: #7a5ad6;
-  --pt-brand-tint: #efeafb;
-  --pt-brand-line: #d9cef5;
-  --pt-brand-vivid: #7c55e6;
+  /* Richer, slightly bluer violet; links / icons / focus use the solid brand for contrast. */
+  --pt-brand: #6a3fd1;
+  --pt-brand-dark: #5530b3;
+  --pt-brand-light: #6a3fd1;
+  --pt-brand-lighter: #5530b3;
+  --pt-brand-tint: #ebe4fb;
+  --pt-brand-line: #c9b9f0;
+  --pt-brand-vivid: #6a3fd1;
 
-  --pt-gold: #b07a22;
-  --pt-gold-line: #c8933f66;
-  --pt-gold-tint: #f8eedb;
-  --pt-gold-tint-fg: #87590f;
-  --pt-gold-card: #fcf6ea;
-  --pt-gold-card-border: #ecdbb6;
+  /* Amber deep enough for text on paper; warm cream fills for GOTY cards. */
+  --pt-gold: #8c5b0c;
+  --pt-gold-line: #c08a2e80;
+  --pt-gold-tint: #f8ead0;
+  --pt-gold-tint-fg: #774c08;
+  --pt-gold-card: #fcf4e3;
+  --pt-gold-card-border: #e9cf9a;
 
-  --pt-platinum: #5d7287;
-  --pt-platinum-sheen: #2f86d0;
-  --pt-platinum-glint: #e3edf6;
-  --pt-platinum-line: #7f9bb866;
-  --pt-platinum-tint: #eaf1f8;
-  --pt-platinum-tint-fg: #3c5266;
+  /* Cool steel for platinum text on paper (AA on bg / surface / the tinted pill), icy blue fills. */
+  --pt-platinum: #4a6178;
+  --pt-platinum-sheen: #7fb8e8;
+  --pt-platinum-glint: #d0e2f3;
+  --pt-platinum-line: #8fa9c280;
+  --pt-platinum-tint: #e4edf6;
+  --pt-platinum-tint-fg: #33475c;
 
-  --pt-rating-high: #a8741f;
-  --pt-rating-mid: #b8692a;
-  --pt-platform-playstation: #3463d4;
-  --pt-platform-xbox: #2f8a34;
-  --pt-platform-switch: #d23c35;
-  --pt-platform-neutral: #7d786e;
+  --pt-rating-high: var(--pt-gold);
+  --pt-rating-mid: #8a5a10;
+  --pt-platform-playstation: #2e5bd0;
+  --pt-platform-xbox: #2d7a31;
+  --pt-platform-switch: #c4302a;
+  --pt-platform-neutral: #7a7386;
 
-  --pt-success: #2c8550;
-  --pt-success-bg: #e3f3e8;
-  --pt-danger: #c23a3a;
-  --pt-danger-bg: #fbe7e5;
-  --pt-danger-solid: #c24545;
-  --pt-neutral: #5f5a51;
-  --pt-neutral-bg: #ece8df;
+  --pt-success: #1f6f3c;
+  --pt-success-bg: #dff0e3;
+  --pt-danger: #b02a2a;
+  --pt-danger-bg: #fbe2df;
+  --pt-danger-solid: #b02a2a;
+  --pt-neutral: #514a5d;
+  --pt-neutral-bg: #ebe6f0;
 
-  --pt-chart: #ddd7ca;
+  --pt-chart: #d3ccdb;
 
-  --pt-overlay: #1c1a1773;
+  --pt-overlay: #1c192499;
 
-  --pt-aura: 12%;
-  --pt-grid: #1c1a170a;
-  --pt-card: #fffdf8d9;
-  --pt-card-border: #1c1a1714;
-  --pt-card-shadow: 0 1px 2px #1c1a170d, 0 6px 18px -8px #1c1a1724;
+  --pt-aura: 16%;
+  --pt-grid: #2a1f4512;
+  --pt-card: color-mix(in srgb, var(--pt-surface) 88%, transparent);
+  --pt-card-border: var(--pt-border);
+  --pt-card-shadow: 0 1px 2px #2a1f450d, 0 6px 18px -8px #2a1f4524;
 
   color-scheme: light;
 }
