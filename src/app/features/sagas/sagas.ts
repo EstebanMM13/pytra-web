@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -26,6 +26,7 @@ import {
   SAGA_SORTS,
   SagaSort,
   SagaSummary,
+  filterSagas,
   isPlayed,
   parseSagaSort,
   playedPercent,
@@ -36,11 +37,15 @@ import {
   summarizeSagas,
 } from './saga.logic';
 
+/** Pause in typing after which the saga search text is written to the URL (as in the library). */
+const SEARCH_URL_DELAY_MS = 300;
+
 /**
  * Sagas master-detail. `/sagas` and `/sagas/:id` render this same view: on web the list and the
  * selected saga sit side by side (first saga when none is in the URL); on mobile `/sagas` is the
  * list and `/sagas/:id` the detail screen. The list order lives in the `sort` query param
- * (whitelisted; the default A–Z stays out of the URL) and survives moving between sagas.
+ * (whitelisted; the default A–Z stays out of the URL) and survives moving between sagas, like the
+ * search text in `q` (saga or game name).
  */
 @Component({
   selector: 'app-sagas',
@@ -107,14 +112,32 @@ export class Sagas {
   }));
 
   protected readonly loading = computed(() => this.sagas() === null);
+  /** Every saga, sorted: the count next to the title (like the library's) ignores the search. */
   protected readonly summaries = computed(() =>
     sortSagas(summarizeSagas(this.sagas() ?? [], this.games()), this.sort()),
   );
 
+  /**
+   * Search box text. It filters on every keystroke; the URL (`q`) follows once typing pauses, so a
+   * fast typist does not trigger a router navigation per key.
+   */
+  protected readonly searchText = signal(this.route.snapshot.queryParamMap.get('q') ?? '');
+  private searchTimer: ReturnType<typeof setTimeout> | undefined;
+  /** Last `q` seen in the URL: sort changes re-emit the params without touching the search box. */
+  private urlText = this.searchText();
+  /** `q` this component wrote and whose URL echo has not arrived yet (it must not overwrite newer typing). */
+  private echoText: string | null = null;
+
+  /** The listed sagas: the sorted ones matching the search. */
+  protected readonly visible = computed(() => filterSagas(this.summaries(), this.searchText()));
+
+  /** The saga in the URL; without one (web), the first listed saga, else the first of all. */
   protected readonly selected = computed<SagaSummary | null>(() => {
-    const list = this.summaries();
     const id = this.routeId();
-    return (id === null ? list[0] : list.find((s) => s.saga.id === id)) ?? null;
+    if (id !== null) {
+      return this.summaries().find((s) => s.saga.id === id) ?? null;
+    }
+    return this.visible()[0] ?? this.summaries()[0] ?? null;
   });
 
   constructor() {
@@ -125,6 +148,22 @@ export class Sagas {
         void this.router.navigate([], { queryParams: { create: null }, queryParamsHandling: 'merge', replaceUrl: true });
       }
     });
+    // External `q` changes (back / forward, links) reach the search box; the echo of our own write is skipped.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const text = params.get('q') ?? '';
+      if (text === this.urlText) {
+        return;
+      }
+      this.urlText = text;
+      if (text === this.echoText) {
+        this.echoText = null;
+        return;
+      }
+      this.echoText = null;
+      clearTimeout(this.searchTimer);
+      this.searchText.set(text);
+    });
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.searchTimer));
     // combineLatest, not forkJoin: cached lists render at once and a fresher emission replaces them.
     combineLatest([this.sagaService.findAll(), this.gameService.findAll()]).subscribe({
       next: ([sagas, games]) => {
@@ -136,6 +175,38 @@ export class Sagas {
         this.sagas.set([]);
       },
     });
+  }
+
+  protected setText(text: string): void {
+    this.searchText.set(text);
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.writeSearchToUrl(), SEARCH_URL_DELAY_MS);
+  }
+
+  protected clearSearch(): void {
+    this.searchText.set('');
+    clearTimeout(this.searchTimer);
+    this.writeSearchToUrl();
+  }
+
+  private writeSearchToUrl(): void {
+    this.searchTimer = undefined;
+    const q = this.searchText();
+    if (q === this.urlText) {
+      return;
+    }
+    this.echoText = q;
+    void this.router
+      .navigate([], { queryParams: { q: q || null }, queryParamsHandling: 'merge', replaceUrl: true })
+      .then(
+        (done) => {
+          // A cancelled navigation never echoes: drop the expectation so it cannot swallow a later one.
+          if (!done && this.echoText === q) this.echoText = null;
+        },
+        () => {
+          if (this.echoText === q) this.echoText = null;
+        },
+      );
   }
 
   protected setSort(sort: SagaSort): void {

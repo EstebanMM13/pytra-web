@@ -25,6 +25,21 @@
     </div>
 
     @if (!loading() && summaries().length > 1) {
+      <!-- Search: the library's pill input, full width above the sort (the column is too narrow for both in a row) -->
+      <label
+        class="flex h-11 min-w-0 items-center gap-2 rounded-full border border-border bg-surface px-4 text-faint focus-within:border-brand-light md:mx-2 md:h-9 md:px-3.5"
+      >
+        <svg [lucideIcon]="icons.search" [size]="15" class="shrink-0" aria-hidden="true"></svg>
+        <input
+          type="search"
+          class="min-w-0 flex-1 bg-transparent text-[16px] text-text outline-none focus:shadow-none md:text-[13px]"
+          [value]="searchText()"
+          (input)="setText($any($event.target).value)"
+          [placeholder]="'sagas.searchPlaceholder' | translate"
+          [attr.aria-label]="'sagas.searchPlaceholder' | translate"
+          data-saga-search
+        />
+      </label>
       <app-dropdown
         class="-mt-1 mb-1 self-start md:mx-2"
         [options]="sortOptions"
@@ -58,8 +73,15 @@
             {{ 'sagas.new' | translate }}
           </button>
         </div>
+      } @else if (visible().length === 0) {
+        <div class="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface px-5 py-8 text-center" data-saga-no-matches>
+          <p class="text-sm text-muted">{{ 'sagas.noMatches' | translate }}</p>
+          <button type="button" (click)="clearSearch()" class="text-[13px] font-medium text-brand-light hover:underline">
+            {{ 'sagas.clearSearch' | translate }}
+          </button>
+        </div>
       } @else {
-        @for (s of summaries(); track s.saga.id; let idx = $index) {
+        @for (s of visible(); track s.saga.id; let idx = $index) {
           <a
             [routerLink]="['/sagas', s.saga.id]"
             queryParamsHandling="preserve"

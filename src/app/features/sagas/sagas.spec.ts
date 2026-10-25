@@ -1,0 +1,129 @@
+import { Component } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
+import { provideTranslateService } from '@ngx-translate/core';
+import { BehaviorSubject, of } from 'rxjs';
+import { Game } from '../../core/models/game.model';
+import { Saga } from '../../core/models/saga.model';
+import { GameService } from '../../core/services/game.service';
+import { SagaService } from '../../core/services/saga.service';
+import { Navbar } from '../../shared/navbar/navbar';
+import { Sagas } from './sagas';
+
+@Component({ selector: 'app-navbar', template: '' })
+class NavbarStub {}
+
+function game(id: number, name: string, sagaId: number): Game {
+  return {
+    id,
+    name,
+    developer: null,
+    publisher: null,
+    releaseDate: null,
+    category: 'SINGLEPLAYER',
+    sagaId,
+    sagaName: null,
+    coverImageUrl: null,
+    reviewStatus: 'CONFIRMED',
+    genres: [],
+    updatedAt: '2025-01-01T00:00:00',
+  };
+}
+
+const sagas: Saga[] = [
+  { id: 1, name: 'God of War', updatedAt: '' },
+  { id: 2, name: 'Pokémon', updatedAt: '' },
+  { id: 3, name: 'Zelda', updatedAt: '' },
+];
+const games: Game[] = [game(10, 'Ascension', 1), game(20, 'Pokémon Rojo', 2), game(30, 'Breath of the Wild', 3)];
+
+describe('Sagas search', () => {
+  afterEach(() => vi.useRealTimers());
+
+  function setup(q: string | null = null) {
+    const query$ = new BehaviorSubject(convertToParamMap(q === null ? {} : { q }));
+    TestBed.configureTestingModule({
+      imports: [Sagas],
+      providers: [
+        provideRouter([]),
+        provideTranslateService(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(convertToParamMap({})),
+            queryParamMap: query$,
+            snapshot: { queryParamMap: query$.value },
+          },
+        },
+        { provide: SagaService, useValue: { findAll: () => of(sagas) } },
+        { provide: GameService, useValue: { findAll: () => of(games) } },
+      ],
+    });
+    TestBed.overrideComponent(Sagas, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const fixture = TestBed.createComponent(Sagas);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const listed = () => [...el.querySelectorAll('a.saga-card span.truncate[title]')].map((s) => s.textContent!.trim());
+    const type = (text: string) => {
+      const input = el.querySelector('[data-saga-search]') as HTMLInputElement;
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    };
+    return { fixture, el, listed, type, navigate, query$ };
+  }
+
+  it('filters by saga or game name, accent- and case-insensitive, keeping the total count', () => {
+    const { el, listed, type } = setup();
+    expect(listed()).toEqual(['God of War', 'Pokémon', 'Zelda']);
+
+    type('POKEMON');
+    expect(listed()).toEqual(['Pokémon']);
+    type('wild');
+    expect(listed()).toEqual(['Zelda']);
+    // The count next to the title is the number of sagas, like the library's.
+    expect(el.querySelector('h1')!.nextElementSibling!.textContent!.trim()).toBe('3');
+  });
+
+  it('starts from the q query param', () => {
+    const { el, listed } = setup('ascension');
+    expect((el.querySelector('[data-saga-search]') as HTMLInputElement).value).toBe('ascension');
+    expect(listed()).toEqual(['God of War']);
+  });
+
+  it('writes the text to the URL once typing pauses', () => {
+    vi.useFakeTimers();
+    const { type, navigate } = setup();
+    type('zel');
+    expect(navigate).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(300);
+    expect(navigate).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({ queryParams: { q: 'zel' }, queryParamsHandling: 'merge', replaceUrl: true }),
+    );
+  });
+
+  it('shows an empty state that clears the search', () => {
+    const { fixture, el, listed, type, navigate } = setup('halo');
+    expect(listed()).toEqual([]);
+    const empty = el.querySelector('[data-saga-no-matches]')!;
+    expect(empty.textContent).toContain('sagas.noMatches');
+    type('halo 2');
+
+    (empty.querySelector('button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(listed()).toEqual(['God of War', 'Pokémon', 'Zelda']);
+    expect((el.querySelector('[data-saga-search]') as HTMLInputElement).value).toBe('');
+    // The pending write of "halo 2" is dropped: the URL goes straight to no search.
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenLastCalledWith([], expect.objectContaining({ queryParams: { q: null } }));
+  });
+
+  it('follows external q changes (back / forward)', () => {
+    const { fixture, listed, query$ } = setup();
+    query$.next(convertToParamMap({ q: 'god' }));
+    fixture.detectChanges();
+    expect(listed()).toEqual(['God of War']);
+  });
+});

@@ -1,5 +1,6 @@
 import { Game } from '../../core/models/game.model';
 import { Saga } from '../../core/models/saga.model';
+import { normalizeText } from '../games/library.logic';
 
 /** Saga figures computed on the client from the games list (one request, no N+1). */
 export interface SagaSummary {
@@ -165,4 +166,18 @@ const SAGA_COMPARATORS: Record<SagaSort, (a: SagaSummary, b: SagaSummary) => num
 
 export function sortSagas(summaries: readonly SagaSummary[], sort: SagaSort): SagaSummary[] {
   return [...summaries].sort(SAGA_COMPARATORS[sort]);
+}
+
+/**
+ * Sagas whose name or any of their (confirmed) games' names contain the search text, accent- and
+ * case-insensitive like the library search ("pokemon" finds "Pokémon"). Blank text keeps them all.
+ */
+export function filterSagas(summaries: readonly SagaSummary[], text: string): SagaSummary[] {
+  const needle = normalizeText(text);
+  if (!needle) {
+    return [...summaries];
+  }
+  return summaries.filter(
+    (s) => normalizeText(s.saga.name).includes(needle) || s.games.some((g) => normalizeText(g.name).includes(needle)),
+  );
 }

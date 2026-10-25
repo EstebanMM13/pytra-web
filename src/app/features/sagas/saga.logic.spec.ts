@@ -3,6 +3,7 @@ import { Saga } from '../../core/models/saga.model';
 import {
   SAGA_SORTS,
   SagaSummary,
+  filterSagas,
   isPlayed,
   lastActivityKey,
   parseSagaSort,
@@ -187,5 +188,31 @@ describe('saga sorting', () => {
     expect(parseSagaSort('')).toBe('name');
     expect(parseSagaSort('HOURS')).toBe('name');
     expect(parseSagaSort('constructor')).toBe('name');
+  });
+});
+
+describe('saga search', () => {
+  const list = summarizeSagas([gow, zelda, empty], games);
+  const names = (text: string) => filterSagas(list, text).map((s) => s.saga.name);
+
+  it('keeps every saga for blank text', () => {
+    expect(names('')).toEqual(['Alan Wake', 'God of War', 'Zelda']);
+    expect(names('   ')).toEqual(['Alan Wake', 'God of War', 'Zelda']);
+  });
+
+  it('matches the saga name, ignoring case and accents', () => {
+    expect(names('zeLDA')).toEqual(['Zelda']);
+    expect(names('wake')).toEqual(['Alan Wake']);
+  });
+
+  it("matches any of the saga's confirmed games", () => {
+    expect(names('ascension')).toEqual(['God of War']);
+    expect(names('botw')).toEqual(['Zelda']);
+    // Ragnarök is pending review: not in the saga, so not searchable through it.
+    expect(names('ragnarok')).toEqual([]);
+  });
+
+  it('finds nothing for unknown text', () => {
+    expect(names('halo')).toEqual([]);
   });
 });
