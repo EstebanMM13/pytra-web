@@ -33,6 +33,14 @@ describe('Navbar', () => {
     const slogan = el.querySelector('header [data-slogan-mobile]')!;
     expect(slogan.textContent!.replace(/\s+/g, ' ').trim()).toBe('Play · Track · Remember');
     expect([...slogan.querySelectorAll('.font-semibold')].map((s) => s.textContent)).toEqual(['P', 'T', 'R']);
+    // Initials in the brand purple, the rest of each word in the text colour, the dots muted.
+    expect([...slogan.querySelectorAll('.text-brand-light')].map((s) => s.textContent)).toEqual(['P', 'T', 'R']);
+    expect([...slogan.querySelectorAll(':scope > .text-text')].map((s) => s.textContent)).toEqual([
+      'Play',
+      'Track',
+      'Remember',
+    ]);
+    expect(slogan.classList).toContain('text-text-3');
     expect(slogan.classList).toContain('hidden');
     expect(slogan.classList).toContain('min-[360px]:inline');
     expect(slogan.getAttribute('aria-hidden')).toBe('true');
