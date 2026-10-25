@@ -35,9 +35,9 @@ import { GameCover } from './game-cover';
           loading="lazy"
           decoding="async"
           referrerpolicy="no-referrer"
-          class="size-full scale-125 object-cover opacity-45 blur-2xl saturate-150 light:opacity-35 light:saturate-125"
+          class="size-full scale-125 object-cover opacity-45 blur-2xl saturate-150 light:opacity-55 light:brightness-125 light:saturate-200"
         />
-        <div class="absolute inset-0 bg-linear-to-r from-bg/45 via-bg/70 to-bg/85 light:from-bg/45 light:via-bg/65 light:to-bg/80"></div>
+        <div class="absolute inset-0 bg-linear-to-r from-bg/45 via-bg/70 to-bg/85 light:from-bg/40 light:via-bg/55 light:to-bg/75"></div>
       </div>
     }
     @if (coverUrl() !== undefined) {
