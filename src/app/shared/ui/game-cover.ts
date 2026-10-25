@@ -29,7 +29,7 @@ const SIZE_CLASS: Record<GameCoverSize, string> = {
   sm: 'h-12 w-9 rounded',
   md: 'h-[84px] w-[63px] rounded-md',
   lg: 'h-[148px] w-[111px] rounded-lg md:h-[216px] md:w-[162px] md:rounded-xl',
-  hero: 'aspect-[3/4] w-20 rounded-lg sm:w-32 md:w-40 md:rounded-xl lg:w-44',
+  hero: 'aspect-[3/4] w-28 rounded-lg sm:w-32 md:w-40 md:rounded-xl lg:w-44',
   fill: 'aspect-[3/4] w-full rounded-lg',
 };
 
