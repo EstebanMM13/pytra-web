@@ -305,8 +305,9 @@
         {{ 'steam.ignoredCount' | translatePlural: ignoredTotal() }}
       </button>
       @if (linkedGamesCount(); as linked) {
-        <span aria-hidden="true">·</span>
-        <span>{{ 'steam.linkedCount' | translatePlural: linked }}</span>
+        <!-- Phones: own line instead of a separator left dangling at the end of the first one -->
+        <span aria-hidden="true" class="max-sm:hidden">·</span>
+        <span class="max-sm:basis-full">{{ 'steam.linkedCount' | translatePlural: linked }}</span>
       }
     </div>
 
