@@ -85,9 +85,10 @@
 
   --pt-overlay: #0d0c0bcc;
 
-  /* Background layers (aura + grain) and the translucent chrome/cards above them. */
+  /* Background aura (brand glow + colour blobs) and the translucent chrome/cards above it. */
   --pt-aura: 28%;
-  --pt-grain: 0.08;
+  --pt-blob: 14%;
+  --pt-blob-gold: 12%;
   --pt-card: color-mix(in srgb, var(--pt-surface) 85%, transparent);
   --pt-card-border: #ffffff14;
   --pt-card-shadow: none;
@@ -161,7 +162,8 @@
   --pt-overlay: #1c192499;
 
   --pt-aura: 16%;
-  --pt-grain: 0.07;
+  --pt-blob: 12%;
+  --pt-blob-gold: 14%;
   --pt-card: color-mix(in srgb, var(--pt-surface) 88%, transparent);
   --pt-card-border: var(--pt-border);
   --pt-card-shadow: 0 1px 2px #2a1f450d, 0 6px 18px -8px #2a1f4524;
@@ -330,7 +332,7 @@
 @layer base {
   /*
    * The page colour lives on <html> only (it paints the canvas). <body> stays transparent so the
-   * fixed `.bg-aura` / `.bg-grain` layers (z-index -1) show between the canvas and the content.
+   * fixed `.bg-aura` layer (z-index -1) shows between the canvas and the content.
    */
   html {
     background-color: var(--pt-bg);
@@ -566,25 +568,14 @@
 }
 
 /*
- * Background aura + grain: fixed layers behind everything (rendered once in the app root).
- * Lighter on phones: narrower aura.
+ * Background aura: a fixed layer behind everything (rendered once in the app root).
+ * Lighter on phones: smaller blobs.
  */
-.bg-aura,
-.bg-grain {
+.bg-aura {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-}
-
-/*
- * Static film grain over the aura: fractal noise turned into opaque, contrast-stretched grey
- * (raw turbulence is near-uniform mid grey with a noisy alpha), tiled; strength per theme (--pt-grain).
- */
-.bg-grain {
-  opacity: var(--pt-grain);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.6 0.6 0.6 0 -0.4 0.6 0.6 0.6 0 -0.4 0.6 0.6 0.6 0 -0.4 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 160px 160px;
 }
 
 /*
@@ -596,6 +587,7 @@
  */
 .bg-aura {
   animation: pt-aura-drift 28s cubic-bezier(0.45, 0, 0.55, 1) 4 alternate both;
+  /* Colour blobs: brand behind the headers, violet on the left, a brand-gold blend top right, gold low right. */
   background-image:
     radial-gradient(
       800px 380px at 50% -60px,
@@ -603,8 +595,18 @@
       transparent 72%
     ),
     radial-gradient(
-      600px 360px at 100% 105%,
-      color-mix(in srgb, var(--pt-gold) 8%, transparent),
+      700px 560px at -8% 45%,
+      color-mix(in srgb, var(--pt-brand-vivid) var(--pt-blob), transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      560px 420px at 105% 18%,
+      color-mix(in srgb, color-mix(in oklab, var(--pt-brand-vivid), var(--pt-gold)) var(--pt-blob), transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      760px 520px at 100% 105%,
+      color-mix(in srgb, var(--pt-gold) var(--pt-blob-gold), transparent),
       transparent 70%
     );
 }
@@ -629,8 +631,13 @@
         transparent 72%
       ),
       radial-gradient(
-        600px 360px at 100% 105%,
-        color-mix(in srgb, var(--pt-gold) 8%, transparent),
+        420px 420px at -20% 50%,
+        color-mix(in srgb, var(--pt-brand-vivid) var(--pt-blob), transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        520px 420px at 110% 105%,
+        color-mix(in srgb, var(--pt-gold) var(--pt-blob-gold), transparent),
         transparent 70%
       );
   }
