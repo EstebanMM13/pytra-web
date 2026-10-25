@@ -126,6 +126,7 @@ export interface RunFormValue {
   rating: string;
   summary: string;
   platinum: boolean;
+  fullCompletion: boolean;
   replay: boolean;
   pros: string;
   cons: string;
@@ -165,6 +166,7 @@ export function buildExperienceRequest(
     endDate,
     platformId: value.platformId as number,
     platinum: value.platinum,
+    fullCompletion: value.fullCompletion,
     replay: value.replay,
     summary: textOrNull(value.summary),
     pros: textOrNull(value.pros),

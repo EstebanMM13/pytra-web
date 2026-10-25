@@ -138,6 +138,7 @@ export class RunForm implements OnInit {
       ),
       summary: this.fb.control(''),
       platinum: this.fb.control(false),
+      fullCompletion: this.fb.control(false),
       replay: this.fb.control(false),
       pros: this.fb.control(''),
       cons: this.fb.control(''),
@@ -160,6 +161,10 @@ export class RunForm implements OnInit {
     return this.platformService.platforms()?.find((p) => p.id === id)?.color ?? null;
   });
   protected readonly platinum = this.controlSignal(this.form.controls.platinum.valueChanges, () => this.form.controls.platinum.value);
+  protected readonly fullCompletion = this.controlSignal(
+    this.form.controls.fullCompletion.valueChanges,
+    () => this.form.controls.fullCompletion.value,
+  );
   protected readonly replay = this.controlSignal(this.form.controls.replay.valueChanges, () => this.form.controls.replay.value);
 
   protected readonly isEdit = computed(() => this.request().mode === 'edit');
@@ -247,6 +252,7 @@ export class RunForm implements OnInit {
       rating: scaledRatingDraft(experience.rating, this.preferences.ratingScale(), this.lang()),
       summary: experience.summary ?? '',
       platinum: experience.platinum,
+      fullCompletion: experience.fullCompletion ?? false,
       replay: experience.replay,
       pros: experience.pros ?? '',
       cons: experience.cons ?? '',
@@ -411,7 +417,7 @@ export class RunForm implements OnInit {
     });
   }
 
-  protected toggle(control: 'platinum' | 'replay'): void {
+  protected toggle(control: 'platinum' | 'fullCompletion' | 'replay'): void {
     const c = this.form.controls[control];
     c.setValue(!c.value);
     // A user choice: later defaults (e.g. Replay from the game's runs) must not override it.

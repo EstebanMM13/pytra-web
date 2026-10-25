@@ -194,6 +194,7 @@ describe('run form logic', () => {
       rating: '9,5',
       summary: '  ',
       platinum: true,
+      fullCompletion: false,
       replay: true,
       pros: 'Combate\nArte',
       cons: '',
@@ -211,11 +212,19 @@ describe('run form logic', () => {
         endDate: '2025-04-02',
         platformId: 14,
         platinum: true,
+        fullCompletion: false,
         replay: true,
         summary: null,
         pros: 'Combate\nArte',
         cons: null,
         notes: null,
+      });
+    });
+
+    it('sends the 100% flag independently of the platinum', () => {
+      expect(buildExperienceRequest({ ...value, platinum: false, fullCompletion: true })).toMatchObject({
+        platinum: false,
+        fullCompletion: true,
       });
     });
 

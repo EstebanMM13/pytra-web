@@ -18,6 +18,8 @@ export interface Experience {
   platformName: string;
   platformColor: string | null;
   platinum: boolean;
+  /** "100%": every trophy/achievement of the game obtained. Independent of `platinum`. */
+  fullCompletion: boolean;
   replay: boolean;
   summary: string | null;
   pros: string | null;
@@ -46,6 +48,7 @@ export interface ExperienceRequest {
   /** Catalog platform id. */
   platformId: number;
   platinum?: boolean;
+  fullCompletion?: boolean;
   replay?: boolean;
   summary?: string | null;
   pros?: string | null;

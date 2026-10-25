@@ -30,6 +30,8 @@ export interface Game {
   lastExperienceStatus?: ExperienceStatus | null;
   lastPlayedYear?: number | null;
   hasPlatinum?: boolean | null;
+  /** Some run is flagged 100% (every trophy/achievement obtained). */
+  hasFullCompletion?: boolean | null;
   /** Legacy enum codes of the game's platforms (kept by the API for old clients); use platformRefs. */
   platforms?: LegacyPlatformCode[] | null;
   /** Catalog platforms of the game's runs and online playtime, distinct, in catalog order. */

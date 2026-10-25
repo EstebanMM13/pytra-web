@@ -5,12 +5,13 @@ import { canAnimate } from './motion';
 export interface CelebratedRun {
   status: ExperienceStatus;
   platinum: boolean;
+  fullCompletion?: boolean;
 }
 
 /**
  * Confetti after a successful save that *reaches* a milestone: the run becomes COMPLETADO or gains
- * its platinum (a new run, or an edit that changes it). Re-saving an already completed / platinum
- * run stays quiet, and the read-only demo never celebrates.
+ * its platinum or its 100% (a new run, or an edit that changes it). Re-saving an already completed /
+ * platinum / 100% run stays quiet, and the read-only demo never celebrates.
  */
 export function shouldCelebrate(saved: CelebratedRun, previous: CelebratedRun | null, demo: boolean): boolean {
   if (demo) {
@@ -18,7 +19,8 @@ export function shouldCelebrate(saved: CelebratedRun, previous: CelebratedRun | 
   }
   const completedNow = saved.status === 'COMPLETADO' && previous?.status !== 'COMPLETADO';
   const platinumNow = saved.platinum && !previous?.platinum;
-  return completedNow || platinumNow;
+  const fullCompletionNow = !!saved.fullCompletion && !previous?.fullCompletion;
+  return completedNow || platinumNow || fullCompletionNow;
 }
 
 export interface ConfettiParticle {

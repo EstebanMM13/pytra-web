@@ -20,6 +20,7 @@ function summary(partial: Partial<YearSummary>): YearSummary {
     abandonedCount: 0,
     averageRating: null,
     platinumCount: 0,
+    fullCompletionCount: 0,
     hoursWithoutMonth: 0,
     months: [],
     experiences: [],

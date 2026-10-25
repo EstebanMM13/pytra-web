@@ -8,6 +8,7 @@ export interface StatsSummary {
   totalSingleplayerHours: number;
   totalOnlineHours: number;
   totalPlatinums: number;
+  totalFullCompletions: number;
   /** Mean of the run ratings and online ratings (null when nothing is rated). */
   averageRating: number | null;
   replayCount: number;
@@ -89,6 +90,7 @@ export interface YearExperience {
   hours: number | null;
   rating: number | null;
   platinum: boolean;
+  fullCompletion: boolean;
   /** Legacy enum code (old clients); use platformName/platformColor. */
   platform: LegacyPlatformCode;
   platformId: number;
@@ -153,6 +155,7 @@ export interface YearSummary {
   abandonedCount: number;
   averageRating: number | null;
   platinumCount: number;
+  fullCompletionCount: number;
   /** Hours of runs in the year without a date inside it (no month bucket). */
   hoursWithoutMonth: number;
   /** Always 12 entries, January first. */

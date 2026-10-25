@@ -29,6 +29,7 @@ const summary = (partial: Partial<StatsSummary> = {}): StatsSummary => ({
   totalSingleplayerHours: 0,
   totalOnlineHours: 0,
   totalPlatinums: 0,
+  totalFullCompletions: 0,
   averageRating: null,
   replayCount: 0,
   completedCount: 0,

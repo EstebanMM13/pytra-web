@@ -45,7 +45,7 @@ interface RunFormHarness {
   onEndDateChange(input: Pick<HTMLInputElement, 'value' | 'validity'>): void;
   games(): Game[] | null;
   selectGame(game: Game): void;
-  toggle(control: 'platinum' | 'replay'): void;
+  toggle(control: 'platinum' | 'fullCompletion' | 'replay'): void;
   submit(): void;
 }
 
@@ -65,6 +65,7 @@ function experience(overrides: Partial<Experience> = {}): Experience {
     platformName: 'PC',
     platformColor: '#8A857C',
     platinum: false,
+    fullCompletion: false,
     replay: false,
     summary: null,
     pros: null,
@@ -218,6 +219,29 @@ describe('RunForm', () => {
     it('keeps the stored value when editing a run', () => {
       const { form } = setup({ mode: 'edit', experience: experience({ gameId: 1, replay: false }) }, { 1: 3 });
       expect(form.form.controls.replay.value).toBe(false);
+    });
+  });
+
+  describe('100% toggle', () => {
+    it('flips on its own as a switch, leaving the platinum alone', () => {
+      const { form, fixture } = setup({ mode: 'edit', experience: experience() });
+      // ModalSheet moves itself to <body>.
+      const button = document.querySelector<HTMLButtonElement>('button[aria-label="run.fullCompletionAria"]')!;
+      expect(button.getAttribute('role')).toBe('switch');
+      expect(button.getAttribute('aria-checked')).toBe('false');
+
+      button.click();
+      fixture.detectChanges();
+
+      expect(form.form.controls.fullCompletion.value).toBe(true);
+      expect(form.form.controls.platinum.value).toBe(false);
+      expect(button.getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('keeps the stored value when editing a run', () => {
+      const { form } = setup({ mode: 'edit', experience: experience({ fullCompletion: true }) });
+      expect(form.form.controls.fullCompletion.value).toBe(true);
+      expect(form.form.controls.platinum.value).toBe(false);
     });
   });
 

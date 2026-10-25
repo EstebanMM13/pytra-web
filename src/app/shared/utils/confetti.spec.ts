@@ -19,6 +19,13 @@ describe('shouldCelebrate', () => {
     expect(shouldCelebrate(run('EN_CURSO'), run('COMPLETADO'), false)).toBe(false);
   });
 
+  it('celebrates reaching 100% once, like the platinum', () => {
+    const hundred = { status: 'EN_CURSO' as const, platinum: false, fullCompletion: true };
+    expect(shouldCelebrate(hundred, null, false)).toBe(true);
+    expect(shouldCelebrate(hundred, run('EN_CURSO'), false)).toBe(true);
+    expect(shouldCelebrate(hundred, hundred, false)).toBe(false);
+  });
+
   it('never celebrates in the demo', () => {
     expect(shouldCelebrate(run('COMPLETADO', true), null, true)).toBe(false);
   });

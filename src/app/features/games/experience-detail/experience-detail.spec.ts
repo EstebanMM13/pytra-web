@@ -35,6 +35,7 @@ function run(overrides: Partial<Experience> = {}): Experience {
     platformName: 'PC',
     platformColor: null,
     platinum: false,
+    fullCompletion: false,
     replay: false,
     summary: null,
     pros: null,
