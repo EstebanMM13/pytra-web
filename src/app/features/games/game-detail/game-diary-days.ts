@@ -61,7 +61,7 @@ const VISIBLE_DAYS = 8;
           <button
             type="button"
             (click)="expanded.set(true)"
-            class="mt-2 text-[13px] font-semibold text-brand-light hover:underline"
+            class="tap-area mt-2 text-[13px] font-semibold text-brand-light hover:underline"
           >
             {{ 'common.showAll' | translate }} ({{ days()!.length }})
           </button>

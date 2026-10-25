@@ -537,6 +537,28 @@
   }
 }
 
+/*
+ * Small links and buttons on touch screens: an invisible ::after grows the hit area to at least
+ * 44px around the element without changing its look or the layout. Touch (coarse pointer) only,
+ * so mouse targets never overlap their neighbours. Not for elements that clip their overflow or
+ * already use ::after.
+ */
+@utility tap-area {
+  @media (pointer: coarse) {
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: max(100%, 44px);
+      height: max(100%, 44px);
+      translate: -50% -50%;
+    }
+  }
+}
+
 /* GOTY card: gold card fill with a gold gradient 1px border. */
 @utility gold-border {
   border: 1px solid transparent;

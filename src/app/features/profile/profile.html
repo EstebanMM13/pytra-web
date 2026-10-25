@@ -129,7 +129,7 @@
               <span class="text-muted">{{ 'profile.username' | translate }}</span>
               <span class="flex min-w-0 items-center gap-4">
                 <span class="truncate" [attr.title]="displayName()">{{ displayName() }}</span>
-                <button type="button" (click)="startEditName()" class="shrink-0 text-brand-light hover:underline">
+                <button type="button" (click)="startEditName()" class="tap-area shrink-0 text-brand-light hover:underline">
                   {{ 'common.edit' | translate }}
                 </button>
               </span>
@@ -165,7 +165,7 @@
               [routerLink]="isDemo() ? null : '/forgot-password'"
               [queryParams]="{ email: u.email }"
               (click)="onPasswordLink()"
-              class="cursor-pointer text-brand-light hover:underline"
+              class="tap-area cursor-pointer text-brand-light hover:underline"
             >
               {{ 'profile.changePassword' | translate }}
             </a>
@@ -176,7 +176,7 @@
                 [routerLink]="isDemo() ? null : '/forgot-password'"
                 [queryParams]="{ email: u.email }"
                 (click)="onPasswordLink()"
-                class="cursor-pointer text-brand-light hover:underline"
+                class="tap-area cursor-pointer text-brand-light hover:underline"
               >
                 {{ 'profile.createPassword' | translate }}
               </a>
@@ -457,7 +457,7 @@
           type="button"
           (click)="deleteOpen.set(true)"
           [disabled]="!user()"
-          class="text-danger hover:underline disabled:opacity-50"
+          class="tap-area text-danger hover:underline disabled:opacity-50"
         >
           {{ 'profile.delete.open' | translate }}
         </button>

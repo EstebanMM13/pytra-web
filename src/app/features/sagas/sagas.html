@@ -16,7 +16,7 @@
       <button
         type="button"
         (click)="dialog.set(null)"
-        class="flex items-center gap-1 rounded-lg p-2 text-[13px] font-medium text-brand-light hover:text-brand-lighter md:border md:border-border md:px-2.5 md:py-1.5 md:text-text-2 md:hover:border-border-strong md:hover:text-text"
+        class="tap-area flex items-center gap-1 rounded-lg p-2 text-[13px] font-medium text-brand-light hover:text-brand-lighter md:border md:border-border md:px-2.5 md:py-1.5 md:text-text-2 md:hover:border-border-strong md:hover:text-text"
         [attr.aria-label]="'sagas.new' | translate"
       >
         <svg [lucideIcon]="icons.plus" [size]="18" class="md:size-[15px]"></svg>
@@ -147,7 +147,7 @@
     } @else if (selected(); as s) {
       <!-- Mobile top bar -->
       <div class="flex items-center justify-between text-text-3 md:hidden">
-        <a routerLink="/sagas" queryParamsHandling="preserve" class="-ml-1 rounded-lg p-1 hover:text-text" [attr.aria-label]="'sagas.back' | translate">
+        <a routerLink="/sagas" queryParamsHandling="preserve" class="tap-area -ml-1 rounded-lg p-1 hover:text-text" [attr.aria-label]="'sagas.back' | translate">
           <svg [lucideIcon]="icons.chevronLeft" [size]="24"></svg>
         </a>
         <button

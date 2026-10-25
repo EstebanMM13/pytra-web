@@ -53,7 +53,7 @@ import { ApkUpdateService } from '../../core/services/apk-update.service';
             <button
               type="button"
               (click)="updates.dismiss()"
-              class="shrink-0 rounded-md p-1 text-faint hover:bg-hover hover:text-text"
+              class="tap-area shrink-0 rounded-md p-1 text-faint hover:bg-hover hover:text-text"
               [attr.aria-label]="'toast.close' | translate"
             >
               <svg [lucideIcon]="icons.x" [size]="14"></svg>

@@ -299,7 +299,7 @@
         (click)="showIgnored.set(!showIgnored())"
         [disabled]="ignoredTitles().length === 0"
         [attr.aria-expanded]="showIgnored()"
-        class="flex w-fit items-center gap-2 rounded-md text-[13px] text-muted hover:text-text-2"
+        class="tap-area flex w-fit items-center gap-2 rounded-md text-[13px] text-muted hover:text-text-2"
       >
         <svg [lucideIcon]="icons.eyeOff" [size]="15"></svg>
         {{ 'steam.ignoredCount' | translatePlural: ignoredTotal() }}

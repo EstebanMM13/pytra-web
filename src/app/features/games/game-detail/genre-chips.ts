@@ -92,7 +92,7 @@ export function fitChipCount(widths: readonly number[], available: number, gap: 
       <button
         type="button"
         (click)="openAll()"
-        class="shrink-0 rounded-full border border-border bg-surface/60 font-medium whitespace-nowrap text-text-2 hover:border-border-strong hover:text-text"
+        class="tap-area shrink-0 rounded-full border border-border bg-surface/60 font-medium whitespace-nowrap text-text-2 hover:border-border-strong hover:text-text"
         [class]="chipClass()"
         [class.genre-reveal]="expanded()"
         [style.--i]="split().hidden"

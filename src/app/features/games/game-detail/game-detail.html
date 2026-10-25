@@ -5,7 +5,7 @@
 >
   <!-- Breadcrumb + mobile actions -->
   <div class="flex items-center justify-between">
-    <a routerLink="/games" class="flex items-center gap-1.5 rounded-md text-[13px] text-muted hover:text-text">
+    <a routerLink="/games" class="tap-area flex items-center gap-1.5 rounded-md text-[13px] text-muted hover:text-text">
       <svg [lucideIcon]="icons.chevronLeft" [size]="16"></svg>
       {{ 'game.breadcrumb' | translate }}
     </a>
@@ -65,7 +65,7 @@
                 <a
                   [routerLink]="['/sagas', g.sagaId]"
                   data-saga-line
-                  class="mb-1 flex h-5 w-fit max-w-full items-center gap-1.5 rounded-md text-[13px] font-medium text-brand-light hover:underline md:mb-2 md:h-6 md:text-sm"
+                  class="tap-area mb-1 flex h-5 w-fit max-w-full items-center gap-1.5 rounded-md text-[13px] font-medium text-brand-light hover:underline md:mb-2 md:h-6 md:text-sm"
                 >
                   <svg [lucideIcon]="icons.layers" [size]="14" class="shrink-0" aria-hidden="true"></svg>
                   <span class="truncate">
@@ -334,7 +334,7 @@
             <button
               type="button"
               (click)="newRun()"
-              class="-my-1 flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[13px] font-semibold text-text-2 hover:bg-hover hover:text-text"
+              class="tap-area -my-1 flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[13px] font-semibold text-text-2 hover:bg-hover hover:text-text"
               data-new-run
             >
               <svg [lucideIcon]="icons.plus" [size]="15" class="text-brand-light" aria-hidden="true"></svg>

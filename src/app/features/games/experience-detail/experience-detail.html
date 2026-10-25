@@ -7,7 +7,7 @@
   <div class="flex items-center justify-between gap-4">
     <a
       [routerLink]="['/games', gameId()]"
-      class="flex min-w-0 items-center gap-1.5 rounded-md text-[13px] text-muted hover:text-text"
+      class="tap-area flex min-w-0 items-center gap-1.5 rounded-md text-[13px] text-muted hover:text-text"
     >
       <svg [lucideIcon]="icons.chevronLeft" [size]="16" class="shrink-0"></svg>
       <span class="truncate">{{ game()?.name ?? ('game.breadcrumb' | translate) }}</span>

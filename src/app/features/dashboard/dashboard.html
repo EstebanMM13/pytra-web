@@ -66,7 +66,7 @@
       <button
         type="button"
         (click)="installPrompt.dismissBanner()"
-        class="shrink-0 rounded-md p-1 text-faint hover:bg-hover hover:text-text"
+        class="tap-area shrink-0 rounded-md p-1 text-faint hover:bg-hover hover:text-text"
         [attr.aria-label]="'dashboard.install.dismiss' | translate"
       >
         <svg [lucideIcon]="icons.x" [size]="16"></svg>
@@ -213,7 +213,7 @@
     @if (topBadges().length) {
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:px-[22px] md:py-4">
         <app-section-header collapseKey="dashboard.achievements" tone="gold" class="mb-3" [label]="'dashboard.achievements' | translate">
-          <a routerLink="/profile" [queryParams]="{ section: 'achievements' }" class="flex shrink-0 items-center gap-1 text-[13px] text-text-2 hover:text-text hover:underline">
+          <a routerLink="/profile" [queryParams]="{ section: 'achievements' }" class="tap-area flex shrink-0 items-center gap-1 text-[13px] text-text-2 hover:text-text hover:underline">
             {{ 'dashboard.achievementsAll' | translate }}
             <svg [lucideIcon]="icons.arrowRight" [size]="14" class="text-brand-light" aria-hidden="true"></svg>
           </a>
