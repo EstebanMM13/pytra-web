@@ -93,10 +93,10 @@
 
         <!-- GOTY · surprises · disappointments -->
         <div
-          class="grid grid-cols-2 gap-2 md:gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]"
+          class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]"
         >
           <section
-            class="gold-border relative isolate col-span-2 flex min-w-0 flex-col gap-2 rounded-[14px] p-[18px] md:gap-2.5 md:p-6 lg:col-span-1"
+            class="gold-border relative isolate flex min-w-0 sm:col-span-2 flex-col gap-2 rounded-[14px] p-[18px] md:gap-2.5 md:p-6 lg:col-span-1"
           >
             <span class="goty-aura" aria-hidden="true"></span>
             <h2 class="text-xs font-semibold tracking-[0.08em] text-gold md:text-[13px]">
@@ -301,10 +301,11 @@
             @for (saga of s.topSagas; track saga.sagaId) {
               <a
                 [routerLink]="['/sagas', saga.sagaId]"
-                class="flex items-center gap-3 border-t border-divider py-[9px] text-sm hover:bg-hover"
+                class="flex flex-wrap items-center gap-x-3 border-t border-divider py-[9px] text-sm hover:bg-hover sm:flex-nowrap"
               >
+                <!-- Below sm the counts drop to a second line so the saga name keeps the row -->
                 <span class="min-w-0 flex-1 truncate text-text-2" [title]="saga.sagaName">{{ saga.sagaName }}</span>
-                <span class="shrink-0 text-xs text-faint">
+                <span class="order-last w-full text-xs text-faint sm:order-none sm:w-auto sm:shrink-0">
                   {{ 'common.games' | translatePlural: saga.gameCount }} ·
                   {{ 'years.runsCount' | translatePlural: saga.experienceCount }}
                 </span>
