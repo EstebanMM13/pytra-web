@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { MOTION_PREFERENCES, MotionPreference, setMotionPreference } from '../../shared/utils/motion';
-import { RATING_SCALES, RatingScale, ratingScaleMax } from '../../shared/utils/rating-scale';
+import { RATING_SCALES, RatingScale, ratingScaleMax } from '../../shared/utils/rating-scale-options';
 
 /** How finely ratings are typed in the run form: 9 / 9.5 / 9.25. */
 export type RatingPrecision = 'integer' | 'half' | 'hundredths';

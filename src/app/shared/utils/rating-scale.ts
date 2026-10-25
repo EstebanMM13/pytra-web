@@ -1,22 +1,13 @@
 import type { RatingPrecision } from '../../core/services/preferences.service';
 import { formatDecimalInput } from './decimal-input';
 import { formatRating, roundHalfUp } from './rating-format';
+import { RatingScale, ratingScaleMax } from './rating-scale-options';
 
-/**
- * Scale ratings are shown and typed on. Ratings are always stored (and sent to the API) on 0–10
- * with up to two decimals; the scale only converts at the UI boundary.
- */
-export type RatingScale = '10' | '100' | '5';
-
-export const RATING_SCALES: readonly RatingScale[] = ['10', '100', '5'];
+export { RATING_SCALES, ratingScaleMax } from './rating-scale-options';
+export type { RatingScale } from './rating-scale-options';
 
 /** Decimals the API stores a rating with (NUMERIC(4,2), `@Digits(fraction = 2)`). */
 const STORED_DECIMALS = 2;
-
-/** Upper bound of a scale: 10, 100 or 5. */
-export function ratingScaleMax(scale: RatingScale): number {
-  return scale === '100' ? 100 : scale === '5' ? 5 : 10;
-}
 
 /** Stored 0–10 rating -> value on `scale` (8.7 -> 87 on 0–100, 4.35 on 0–5). Drift-free, unrounded otherwise. */
 export function toRatingScale(stored: number, scale: RatingScale): number {
