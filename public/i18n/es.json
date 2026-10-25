@@ -1071,7 +1071,19 @@
   },
   "update": {
     "available": "Nueva versión disponible",
-    "reload": "Recargar"
+    "reload": "Recargar",
+    "apk": {
+      "available": "Hay una nueva versión de Pytra ({{version}}) disponible.",
+      "update": "Actualizar",
+      "later": "Más tarde",
+      "downloading": "Descargando actualización…",
+      "permission": "Para instalar la actualización, permite que Pytra instale aplicaciones desconocidas en los ajustes de Android y vuelve a intentarlo.",
+      "openSettings": "Abrir ajustes",
+      "install": "Instalar",
+      "installing": "Sigue los pasos del instalador de Android para completar la actualización.",
+      "error": "No se pudo descargar la actualización. Comprueba tu conexión.",
+      "retry": "Reintentar"
+    }
   },
   "achievements": {
     "title": "Logros",

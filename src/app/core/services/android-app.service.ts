@@ -1,4 +1,4 @@
-import { Injectable, InjectionToken, inject } from '@angular/core';
+import { Injectable, InjectionToken, Injector, inject } from '@angular/core';
 import { isNativePlatform } from '../native-platform';
 import { importWithRetry } from './native-oauth.service';
 
@@ -30,19 +30,28 @@ export interface AndroidAppPlatform {
   iosBrowser: boolean;
   loadBrowser: () => Promise<typeof import('@capacitor/browser')>;
   openWindow: (url: string) => void;
+  /** In-app download + install (lazy ApkUpdateService); false when the native installer is missing. */
+  startInAppUpdate: () => Promise<boolean>;
 }
 
 export const ANDROID_APP_PLATFORM = new InjectionToken<AndroidAppPlatform>('ANDROID_APP_PLATFORM', {
   providedIn: 'root',
-  factory: () => ({
-    platform: detectAppPlatform(),
-    iosBrowser:
-      typeof navigator !== 'undefined' && isIosUserAgent(navigator.userAgent, navigator.maxTouchPoints ?? 0),
-    loadBrowser: () => import('@capacitor/browser'),
-    openWindow: (url) => {
-      window.open(url, '_system');
-    },
-  }),
+  factory: () => {
+    const injector = inject(Injector);
+    return {
+      platform: detectAppPlatform(),
+      iosBrowser:
+        typeof navigator !== 'undefined' && isIosUserAgent(navigator.userAgent, navigator.maxTouchPoints ?? 0),
+      loadBrowser: () => import('@capacitor/browser'),
+      openWindow: (url) => {
+        window.open(url, '_system');
+      },
+      startInAppUpdate: () =>
+        importWithRetry(() => import('./apk-update.service'), 'apk-update').then(({ ApkUpdateService }) =>
+          injector.get(ApkUpdateService).update(),
+        ),
+    };
+  },
 });
 
 /**
@@ -59,15 +68,22 @@ export class AndroidAppService {
   readonly labelKey = this.platform.platform === 'android' ? 'profile.updateAndroidApp' : 'profile.downloadAndroidApp';
 
   /**
-   * Click handler for the APK link. On the web the anchor navigates by itself; in the native shell
-   * the WebView cannot download, so the link opens in the system browser (Custom Tab), which handles
-   * the download and the install prompt.
+   * Click handler for the APK link. On the web the anchor navigates by itself. In the Android shell
+   * the APK is downloaded and installed in-app (ApkUpdateService); the system browser (Custom Tab)
+   * is only the last resort, when this build lacks the native installer plugin.
    */
   async open(event?: Event): Promise<void> {
     if (this.platform.platform === 'web') {
       return;
     }
     event?.preventDefault();
+    try {
+      if (this.platform.platform === 'android' && (await this.platform.startInAppUpdate())) {
+        return;
+      }
+    } catch (error) {
+      console.error('In-app update unavailable', error);
+    }
     try {
       const { Browser } = await importWithRetry(this.platform.loadBrowser, '@capacitor/browser');
       await Browser.open({ url: this.url });

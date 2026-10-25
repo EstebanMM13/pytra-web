@@ -35,6 +35,7 @@ describe('AndroidAppService', () => {
       iosBrowser: false,
       loadBrowser: vi.fn(() => Promise.resolve({ Browser: { open: browserOpen } } as never)),
       openWindow: vi.fn(),
+      startInAppUpdate: vi.fn(() => Promise.resolve(true)),
       ...overrides,
     };
     TestBed.configureTestingModule({ providers: [{ provide: ANDROID_APP_PLATFORM, useValue: platform }] });
@@ -58,20 +59,39 @@ describe('AndroidAppService', () => {
     expect(platform.loadBrowser).not.toHaveBeenCalled();
   });
 
-  it('offers an update in the Android app and opens the system browser', async () => {
-    const { service, browserOpen } = setup({ platform: 'android' });
+  it('offers an update in the Android app and runs it in-app', async () => {
+    const { service, platform, browserOpen } = setup({ platform: 'android' });
     const event = new Event('click', { cancelable: true });
 
     expect(service.available).toBe(true);
     expect(service.labelKey).toBe('profile.updateAndroidApp');
     await service.open(event);
     expect(event.defaultPrevented).toBe(true);
-    expect(browserOpen).toHaveBeenCalledWith({ url: ANDROID_APK_URL });
+    expect(platform.startInAppUpdate).toHaveBeenCalled();
+    expect(browserOpen).not.toHaveBeenCalled();
+  });
+
+  it('opens the system browser when the in-app installer is missing or fails to load', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    for (const startInAppUpdate of [
+      vi.fn(() => Promise.resolve(false)),
+      vi.fn(() => Promise.reject(new Error('chunk'))),
+    ]) {
+      const { service, browserOpen } = setup({ platform: 'android', startInAppUpdate });
+      await service.open(new Event('click', { cancelable: true }));
+      expect(browserOpen).toHaveBeenCalledWith({ url: ANDROID_APK_URL });
+      TestBed.resetTestingModule();
+    }
+    error.mockRestore();
   });
 
   it('falls back to a system window when the Browser plugin cannot load', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const { service, platform } = setup({ platform: 'android', loadBrowser: vi.fn(() => Promise.reject(new Error('chunk'))) });
+    const { service, platform } = setup({
+      platform: 'android',
+      startInAppUpdate: vi.fn(() => Promise.resolve(false)),
+      loadBrowser: vi.fn(() => Promise.reject(new Error('chunk'))),
+    });
 
     await service.open(new Event('click', { cancelable: true }));
     expect(platform.openWindow).toHaveBeenCalledWith(ANDROID_APK_URL);

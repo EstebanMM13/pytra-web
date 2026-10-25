@@ -3,11 +3,16 @@ import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ToastService } from './toast.service';
+import { isNativePlatform } from '../../core/native-platform';
+import { ApkUpdateBanner } from '../apk-update/apk-update-banner';
 
-/** Renders the toast stack: bottom-centre above the mobile tab bar, bottom-right on web. */
+/**
+ * Renders the toast stack: bottom-centre above the mobile tab bar, bottom-right on web. In the
+ * native shell it also hosts the Android update prompt (its own chunk, never loaded on the web).
+ */
 @Component({
   selector: 'app-toast-host',
-  imports: [TranslatePipe, LucideDynamicIcon],
+  imports: [TranslatePipe, LucideDynamicIcon, ApkUpdateBanner],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
@@ -47,10 +52,16 @@ import { ToastService } from './toast.service';
         </button>
       </div>
     }
+    @if (nativeShell) {
+      @defer (on immediate) {
+        <app-apk-update-banner />
+      }
+    }
   `,
 })
 export class ToastHost {
   protected readonly icons = ICONS;
+  protected readonly nativeShell = isNativePlatform();
 
   private readonly toastService = inject(ToastService);
   protected readonly toasts = this.toastService.toasts;
