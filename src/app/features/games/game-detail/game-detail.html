@@ -46,7 +46,8 @@
         </div>
       }
 
-      <div class="flex items-center gap-4 sm:gap-5 md:gap-7">
+      <!-- Below sm the identity column dissolves (contents): cover + title share a row, the meta wraps full width under it -->
+      <div class="flex flex-wrap items-center gap-3 sm:flex-nowrap sm:gap-5 md:gap-7">
         <app-game-cover
           decorative
           priority
@@ -56,8 +57,8 @@
           [name]="g.name"
         />
 
-        <div class="flex min-w-0 flex-1 flex-col">
-          <div class="flex items-start justify-between gap-4">
+        <div class="contents min-w-0 flex-1 flex-col sm:flex">
+          <div class="flex min-w-0 flex-1 items-start justify-between gap-4 sm:flex-none">
             <div class="min-w-0">
               <!-- The saga line always takes its room, so the title sits at the same height with or without one -->
               @if (g.sagaId !== null && g.sagaName) {
@@ -82,7 +83,7 @@
                 <span data-saga-line class="mb-1 block h-5 md:mb-2 md:h-6" aria-hidden="true"></span>
               }
               <h1
-                class="font-display line-clamp-3 text-[22px] leading-tight font-bold tracking-[-0.025em] wrap-break-word sm:text-[26px] md:line-clamp-2 md:text-[40px] md:tracking-[-0.035em] lg:text-[48px]"
+                class="font-display line-clamp-4 text-[20px] leading-tight font-bold tracking-[-0.025em] wrap-break-word sm:line-clamp-3 sm:text-[26px] md:line-clamp-2 md:text-[40px] md:tracking-[-0.035em] lg:text-[48px]"
                 [title]="g.name"
               >
                 {{ g.name }}
@@ -100,8 +101,8 @@
             </div>
           </div>
 
-          <!-- Phones: compact meta lines beside the cover -->
-          <div class="mt-2 flex flex-col gap-1.5 text-[13px] text-text-2 md:hidden">
+          <!-- Phones: compact meta lines, full width under the cover row; beside the cover from sm -->
+          <div class="flex w-full flex-col gap-1.5 sm:mt-2 text-[13px] text-text-2 md:hidden">
             @if (g.developer) {
               <span class="inline-flex min-w-0 items-center gap-1.5">
                 <svg [lucideIcon]="icons.building" [size]="14" class="shrink-0 text-muted" aria-hidden="true"></svg>
@@ -538,12 +539,12 @@
               @for (sg of sagaGames(); track sg.id) {
                 <li class="flex items-center justify-between gap-4 border-t border-divider py-[9px]">
                   @if (sg.id === g.id) {
-                    <span class="truncate text-brand-lighter" aria-current="page" [title]="sg.name">{{ sg.name }}</span>
+                    <span class="wrap-break-word text-brand-lighter max-sm:line-clamp-2 sm:truncate" aria-current="page" [title]="sg.name">{{ sg.name }}</span>
                     @if (stats().bestRating !== null) {
                       <span class="shrink-0 font-mono" [class]="stats().bestRating | ratingTone">{{ stats().bestRating | rating }}</span>
                     }
                   } @else {
-                    <a [routerLink]="['/games', sg.id]" class="truncate hover:underline" [title]="sg.name">{{ sg.name }}</a>
+                    <a [routerLink]="['/games', sg.id]" class="wrap-break-word hover:underline max-sm:line-clamp-2 sm:truncate" [title]="sg.name">{{ sg.name }}</a>
                     @if (sg.bestRating != null) {
                       <span class="shrink-0 font-mono" [class]="sg.bestRating | ratingTone">{{ sg.bestRating | rating }}</span>
                     } @else if (sg.lastExperienceStatus) {
