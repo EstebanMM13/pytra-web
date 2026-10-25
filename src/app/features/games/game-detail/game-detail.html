@@ -40,9 +40,9 @@
             alt=""
             decoding="async"
             referrerpolicy="no-referrer"
-            class="size-full scale-110 object-cover opacity-40 blur-2xl light:opacity-45 light:saturate-125"
+            class="size-full scale-110 object-cover opacity-60 blur-2xl saturate-150 light:opacity-45 light:saturate-125"
           />
-          <div class="absolute inset-0 bg-linear-to-b from-bg/40 via-bg/70 to-bg light:from-bg/35 light:via-bg/60 light:to-bg/85"></div>
+          <div class="absolute inset-0 bg-linear-to-b from-bg/20 via-bg/50 to-bg/85 light:from-bg/35 light:via-bg/60 light:to-bg/85"></div>
         </div>
       }
 
@@ -357,6 +357,7 @@
                   [rating]="run.rating"
                   [best]="run.id === bestRunId()"
                   [platinum]="run.platinum"
+                  [backdropUrl]="g.coverImageUrl"
                 >
                   <span runRowBelow class="mt-1.5 block sm:hidden"><app-status-pill [status]="run.status" /></span>
                   <span class="hidden shrink-0 sm:block"><app-status-pill [status]="run.status" /></span>

@@ -12,6 +12,7 @@ import { GameCover } from './game-cover';
  * `onSurface` is for rows placed directly on the page (mobile) instead of inside a card.
  * Binding `coverUrl` (even to null, which shows the initials fallback) swaps the accent bar for a cover thumbnail.
  * `platinum` adds an icy platinum pill beside the title and turns the accent bar silver (unless best).
+ * `backdropUrl` lays a soft blurred cover behind the row (lighter than the game hero's, so text stays first).
  */
 @Component({
   selector: 'app-run-row',
@@ -19,13 +20,26 @@ import { GameCover } from './game-cover';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './platinum-glow.css',
   host: {
-    class: 'flex items-center gap-3.5 rounded-[10px] border p-3.5',
+    class: 'relative isolate flex items-center gap-3.5 overflow-hidden rounded-[10px] border p-3.5',
     '[class.bg-bg]': '!onSurface()',
     '[class.bg-surface]': 'onSurface()',
     '[class.border-border]': '!best()',
     '[class.border-brand]': 'best()',
   },
   template: `
+    @if (backdropUrl(); as backdrop) {
+      <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+        <img
+          [src]="backdrop"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          referrerpolicy="no-referrer"
+          class="size-full scale-125 object-cover opacity-45 blur-2xl saturate-150 light:opacity-35 light:saturate-125"
+        />
+        <div class="absolute inset-0 bg-linear-to-r from-bg/45 via-bg/70 to-bg/85 light:from-bg/45 light:via-bg/65 light:to-bg/80"></div>
+      </div>
+    }
     @if (coverUrl() !== undefined) {
       <app-game-cover decorative size="sm" [url]="coverUrl()" [name]="coverName() ?? title()" />
     } @else {
@@ -88,4 +102,6 @@ export class RunRow {
   readonly best = input(false, { transform: booleanAttribute });
   readonly platinum = input(false, { transform: booleanAttribute });
   readonly onSurface = input(false, { transform: booleanAttribute });
+  /** Cover shown blurred behind the row; null / undefined keeps the plain background. */
+  readonly backdropUrl = input<string | null | undefined>(undefined);
 }
