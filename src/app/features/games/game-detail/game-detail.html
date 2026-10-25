@@ -262,7 +262,7 @@
               <div class="mt-auto pt-3">
                 <div class="flex h-1.5 overflow-hidden rounded-full bg-border" aria-hidden="true">
                   <span class="bg-brand-light" [style.width.%]="campaignShare()"></span>
-                  <span class="flex-1 bg-chart" [class.opacity-0]="!s.onlineHours"></span>
+                  <span class="flex-1 bg-text-2" [class.opacity-0]="!s.onlineHours"></span>
                 </div>
                 <p class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted md:gap-x-4">
                   <span class="inline-flex items-center gap-1.5">
@@ -271,7 +271,7 @@
                     <span class="font-mono text-text-2">{{ s.runHours | hours }}</span>
                   </span>
                   <span class="inline-flex items-center gap-1.5">
-                    <span class="size-2 rounded-full bg-chart" aria-hidden="true"></span>
+                    <span class="size-2 rounded-full bg-text-2" aria-hidden="true"></span>
                     {{ 'game.stats.online' | translate }}
                     <span class="font-mono text-text-2">{{ s.onlineHours | hours }}</span>
                   </span>
