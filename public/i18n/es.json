@@ -112,6 +112,7 @@
     "single": "Single",
     "online": "Online",
     "sectionError": "No se pudo cargar esta sección.",
+    "sectionLoading": "Cargando…",
     "retry": "Reintentar",
     "playingToday": "Hoy",
     "playingDays": "{{count}} días",

@@ -112,6 +112,7 @@
     "single": "Single",
     "online": "Online",
     "sectionError": "Couldn't load this section.",
+    "sectionLoading": "Loading…",
     "retry": "Retry",
     "playingToday": "Today",
     "playingDays": "{{count}} days",

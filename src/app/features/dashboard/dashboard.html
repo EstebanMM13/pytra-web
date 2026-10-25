@@ -425,10 +425,13 @@
 </main>
 
 <ng-template #listSkeleton>
-  <div class="flex flex-col gap-2.5">
+  <div class="relative flex flex-col gap-2.5" role="status" [attr.aria-label]="'dashboard.sectionLoading' | translate">
     @for (i of [1, 2, 3, 4, 5]; track i) {
       <app-skeleton class="h-6 rounded-md" />
     }
+    <div class="absolute inset-0 grid place-items-center">
+      <app-pytra-mark class="size-8 animate-spin [animation-duration:1.4s]" />
+    </div>
   </div>
 </ng-template>
 
