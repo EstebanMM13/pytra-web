@@ -35,7 +35,7 @@ import { GameCover } from './game-cover';
           loading="lazy"
           decoding="async"
           referrerpolicy="no-referrer"
-          class="size-full scale-125 object-cover opacity-45 blur-2xl saturate-150 light:opacity-55 light:brightness-125 light:saturate-200"
+          class="size-full scale-110 object-cover opacity-50 blur-lg saturate-150 light:opacity-55 light:brightness-125 light:saturate-200"
         />
         <div class="absolute inset-0 bg-linear-to-r from-bg/45 via-bg/70 to-bg/85 light:from-bg/40 light:via-bg/55 light:to-bg/75"></div>
       </div>
