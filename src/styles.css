@@ -87,7 +87,6 @@
 
   /* Background layers (grid + aura) and the translucent chrome/cards above them. */
   --pt-aura: 28%;
-  --pt-grid: #ffffff0a;
   --pt-card: color-mix(in srgb, var(--pt-surface) 85%, transparent);
   --pt-card-border: #ffffff14;
   --pt-card-shadow: none;
@@ -161,7 +160,6 @@
   --pt-overlay: #1c192499;
 
   --pt-aura: 16%;
-  --pt-grid: #2a1f4512;
   --pt-card: color-mix(in srgb, var(--pt-surface) 88%, transparent);
   --pt-card-border: var(--pt-border);
   --pt-card-shadow: 0 1px 2px #2a1f450d, 0 6px 18px -8px #2a1f4524;
@@ -330,7 +328,7 @@
 @layer base {
   /*
    * The page colour lives on <html> only (it paints the canvas). <body> stays transparent so the
-   * fixed `.bg-aura` / `.bg-grid` layers (z-index -1) show between the canvas and the content.
+   * fixed `.bg-aura` layer (z-index -1) shows between the canvas and the content.
    */
   html {
     background-color: var(--pt-bg);
@@ -566,11 +564,10 @@
 }
 
 /*
- * Background "grid + aura": two fixed layers behind everything (rendered once in the app root).
- * Lighter on phones: narrower aura, 32px grid.
+ * Background aura: a fixed layer behind everything (rendered once in the app root).
+ * Lighter on phones: narrower aura.
  */
-.bg-aura,
-.bg-grid {
+.bg-aura {
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -610,15 +607,6 @@
   }
 }
 
-.bg-grid {
-  background-image:
-    linear-gradient(var(--pt-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--pt-grid) 1px, transparent 1px);
-  background-size: 40px 40px;
-  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 0%, #000 30%, transparent 100%);
-  mask-image: radial-gradient(ellipse 85% 70% at 50% 0%, #000 30%, transparent 100%);
-}
-
 @media (width < 48rem) {
   .bg-aura {
     background-image:
@@ -632,10 +620,6 @@
         color-mix(in srgb, var(--pt-gold) 8%, transparent),
         transparent 70%
       );
-  }
-
-  .bg-grid {
-    background-size: 32px 32px;
   }
 }
 
