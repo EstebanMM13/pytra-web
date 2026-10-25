@@ -19,19 +19,22 @@ let nextTitleId = 0;
       [attr.aria-labelledby]="titleId"
       [attr.aria-disabled]="disabled() ? 'true' : null"
     >
-      <header class="flex items-center gap-3 p-4 md:p-[22px]">
+      <!-- Phones: the badge drops under the title so the subtitle keeps the row's width. -->
+      <header
+        class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:gap-3 md:p-[22px]"
+      >
         <span
-          class="flex size-10 shrink-0 items-center justify-center rounded-xl"
+          class="row-span-2 flex size-10 shrink-0 items-center justify-center self-start rounded-xl sm:row-span-1 sm:self-center"
           [class]="disabled() ? 'bg-hover text-muted' : 'bg-hover text-text'"
           aria-hidden="true"
         >
           <ng-content select="[platformIcon]" />
         </span>
-        <div class="min-w-0 flex-1">
+        <div class="min-w-0">
           <h2 [id]="titleId" class="text-lg font-semibold tracking-[-0.01em]">{{ name() }}</h2>
           <p class="text-[13px] text-muted">{{ subtitle() }}</p>
         </div>
-        <div class="shrink-0 empty:hidden"><ng-content select="[platformBadge]" /></div>
+        <div class="col-start-2 justify-self-start empty:hidden sm:col-start-3 sm:justify-self-auto"><ng-content select="[platformBadge]" /></div>
       </header>
       <div class="border-t border-divider p-4 empty:hidden md:p-[22px]"><ng-content /></div>
     </section>

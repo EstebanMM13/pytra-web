@@ -47,10 +47,11 @@
             <p class="truncate text-[17px] font-semibold" [title]="s.personaName || s.steamId || ('steam.accountFallback' | translate)">
               {{ s.personaName || s.steamId || ('steam.accountFallback' | translate) }}
             </p>
-            <!-- Separators come from CSS so none is left dangling when the Steam id is hidden (demo). -->
-            <p
-              class="mt-[5px] font-mono text-xs text-muted md:text-[13px] [&>span+span]:before:content-['_·_']"
-            >
+            <!-- Separators come from CSS so none is left dangling when the Steam id is hidden (demo) or a line wraps. -->
+            <div class="mt-[5px] overflow-hidden font-mono text-xs text-muted md:text-[13px]">
+              <!-- Each part carries a leading " · "; the row is shifted left by one separator and clipped,
+                   so the separator that starts any wrapped line is hidden instead of dangling. -->
+              <p class="-ml-[3ch] flex flex-wrap [&>span]:flex [&>span]:before:shrink-0 [&>span]:before:w-[3ch] [&>span]:before:text-center [&>span]:before:content-['·']">
               @if (maskedSteamId()) {
                 <span>{{ maskedSteamId() }}</span>
               }
@@ -67,6 +68,7 @@
                 }
               </span>
             </p>
+            </div>
           </div>
         </div>
 
