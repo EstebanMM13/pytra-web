@@ -11,6 +11,7 @@ import { GameService } from '../../../core/services/game.service';
 import { PlatformService } from '../../../core/services/platform.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { RunFormLauncher, RunFormRequest } from '../../../core/services/run-form-launcher.service';
+import { UserDataCache } from '../../../core/services/user-data-cache';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { todayIso } from '../../../shared/utils/run-dates';
 import { RatingScale, ratingScaleMax } from '../../../shared/utils/rating-scale';
@@ -45,6 +46,7 @@ interface RunFormHarness {
   games(): Game[] | null;
   selectGame(game: Game): void;
   toggle(control: 'platinum' | 'replay'): void;
+  submit(): void;
 }
 
 function experience(overrides: Partial<Experience> = {}): Experience {
@@ -80,6 +82,7 @@ function dateInput(value: string, badInput = false): Pick<HTMLInputElement, 'val
 describe('RunForm', () => {
   const launcher = { close: vi.fn(), notifySaved: vi.fn(), request: signal(null) };
   const toast = { success: vi.fn(), error: vi.fn(), show: vi.fn() };
+  const cache = { invalidateAll: vi.fn() };
   let ratingScale: RatingScale = '10';
 
   afterEach(() => (ratingScale = '10'));
@@ -96,7 +99,10 @@ describe('RunForm', () => {
         { provide: GameService, useValue: { findAll: () => of(GAMES), findById: (id: number) => of(GAMES.find((g) => g.id === id)) } },
         {
           provide: ExperienceService,
-          useValue: { findAllByGame: (id: number) => of(Array.from({ length: runCounts[id] ?? 0 }, (_, i) => ({ id: i }))) },
+          useValue: {
+            findAllByGame: (id: number) => of(Array.from({ length: runCounts[id] ?? 0 }, (_, i) => ({ id: i }))),
+            update: (id: number) => of(experience({ id })),
+          },
         },
         { provide: PlatformService, useValue: { platforms: signal([PC]), load: () => of([PC]) } },
         {
@@ -110,6 +116,7 @@ describe('RunForm', () => {
         },
         { provide: RunFormLauncher, useValue: launcher },
         { provide: ToastService, useValue: toast },
+        { provide: UserDataCache, useValue: cache },
       ],
     });
     const router = TestBed.inject(Router);
@@ -119,6 +126,20 @@ describe('RunForm', () => {
     fixture.detectChanges();
     return { form: fixture.componentInstance as unknown as RunFormHarness, navigate, fixture };
   }
+
+  it('saving invalidates the cached user data before notifying the launcher', () => {
+    launcher.notifySaved.mockClear();
+    cache.invalidateAll.mockClear();
+    const { form } = setup({ mode: 'edit', experience: experience() });
+
+    form.submit();
+
+    expect(cache.invalidateAll).toHaveBeenCalledTimes(1);
+    expect(launcher.notifySaved).toHaveBeenCalledWith({ experience: experience(), created: false });
+    expect(cache.invalidateAll.mock.invocationCallOrder[0]).toBeLessThan(
+      launcher.notifySaved.mock.invocationCallOrder[0],
+    );
+  });
 
   describe('status and end date', () => {
     const create: RunFormRequest = { mode: 'create', gameId: 1, navigateOnCreate: false };

@@ -21,6 +21,7 @@ import {
 import { PlatformService } from '../../../core/services/platform.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { RunFormLauncher, RunFormRequest } from '../../../core/services/run-form-launcher.service';
+import { UserDataCache } from '../../../core/services/user-data-cache';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { burstConfetti, shouldCelebrate } from '../../../shared/utils/confetti';
 import { DemoModeService } from '../../../core/services/demo-mode.service';
@@ -80,6 +81,7 @@ export class RunForm implements OnInit {
   private readonly experienceService = inject(ExperienceService);
   private readonly platformService = inject(PlatformService);
   private readonly launcher = inject(RunFormLauncher);
+  private readonly cache = inject(UserDataCache);
   private readonly toast = inject(ToastService);
   private readonly demo = inject(DemoModeService);
   private readonly translate = inject(TranslateService);
@@ -472,6 +474,8 @@ export class RunForm implements OnInit {
         if (shouldCelebrate(experience, this.original, this.demo.isDemo())) {
           burstConfetti();
         }
+        // The run service already invalidated on the write; repeated so listeners reload fresh data.
+        this.cache.invalidateAll();
         this.launcher.notifySaved({ experience, created });
         if (created && request.mode === 'create' && request.navigateOnCreate) {
           this.router.navigate(['/games', experience.gameId, 'experiences', experience.id]);

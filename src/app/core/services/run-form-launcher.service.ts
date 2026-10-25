@@ -1,7 +1,6 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Experience } from '../models/experience.model';
-import { UserDataCache } from './user-data-cache';
 
 /** Optional values to prefill a new run with (e.g. hours and platform from a Steam import). */
 export interface RunPrefill {
@@ -40,7 +39,6 @@ export class RunFormLauncher {
   private readonly savedSubject = new Subject<RunSaved>();
   /** Runs still to edit after the open one (see `openEditRuns`). */
   private pendingEdits: Experience[] = [];
-  private readonly cache = inject(UserDataCache);
 
   readonly request = this.requestState.asReadonly();
   readonly saved$: Observable<RunSaved> = this.savedSubject.asObservable();
@@ -78,12 +76,13 @@ export class RunFormLauncher {
     this.requestState.set(this.nextRequest());
   }
 
-  /** Called by the form after a successful save; closes it and notifies listeners. */
+  /**
+   * Called by the form after a successful save (and after it invalidated `UserDataCache`, kept out
+   * of this service so the app root does not pull the cache into the initial bundle); closes the
+   * form and notifies listeners.
+   */
   notifySaved(saved: RunSaved): void {
     this.requestState.set(this.nextRequest());
-    // The run service already invalidated on the write; repeated so listeners reload fresh data
-    // whatever path saved the run.
-    this.cache.invalidateAll();
     this.savedSubject.next(saved);
   }
 

@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Experience } from '../models/experience.model';
 import { RunFormLauncher } from './run-form-launcher.service';
-import { UserDataCache } from './user-data-cache';
 
 const run = (id: number) => ({ id, runLabel: 'Importado de PlayStation' }) as Experience;
 
@@ -9,9 +8,6 @@ describe('RunFormLauncher', () => {
   let launcher: RunFormLauncher;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [{ provide: UserDataCache, useValue: { invalidateAll: vi.fn() } }],
-    });
     launcher = TestBed.inject(RunFormLauncher);
   });
 

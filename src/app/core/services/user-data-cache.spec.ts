@@ -6,9 +6,9 @@ import { Game, GameRequest } from '../models/game.model';
 import { AuthService } from './auth.service';
 import { ExperienceService } from './experience.service';
 import { GameService } from './game.service';
-import { RunFormLauncher } from './run-form-launcher.service';
 import { StatsService } from './stats.service';
 import { TokenStorageService } from './token-storage.service';
+import { UserDataCache } from './user-data-cache';
 
 const gamesUrl = `${API_BASE_URL}/games`;
 
@@ -128,14 +128,14 @@ describe('UserDataCache (through the cached services)', () => {
     expect(revisit).toEqual([games('Hades')]);
   });
 
-  it('invalidates every cached resource, including when a run is saved from the form', () => {
+  it('invalidates every cached resource at once', () => {
     const stats = TestBed.inject(StatsService);
     stats.getSummary().subscribe();
     http.expectOne(`${API_BASE_URL}/stats/summary`).flush({});
     read();
     http.expectOne(gamesUrl).flush(games('Hades'));
 
-    TestBed.inject(RunFormLauncher).notifySaved({ experience: { id: 1 } as never, created: true });
+    TestBed.inject(UserDataCache).invalidateAll();
 
     const summaries: unknown[] = [];
     stats.getSummary().subscribe((s) => summaries.push(s));
