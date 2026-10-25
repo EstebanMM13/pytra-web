@@ -40,8 +40,20 @@
       {{ 'run.loadError' | translate }}
     </p>
   } @else if (experience(); as e) {
-    <!-- Title block -->
-    <div class="flex flex-col gap-4">
+    <!-- Title block: a card over the game's blurred cover, like the game hero -->
+    <div class="relative isolate flex flex-col gap-4 overflow-hidden rounded-2xl border border-card-border p-4 md:p-6">
+      @if (game()?.coverImageUrl; as cover) {
+        <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+          <img
+            [src]="cover"
+            alt=""
+            decoding="async"
+            referrerpolicy="no-referrer"
+            class="size-full scale-110 object-cover opacity-60 blur-2xl saturate-150 light:opacity-45 light:saturate-125"
+          />
+          <div class="absolute inset-0 bg-linear-to-b from-bg/20 via-bg/50 to-bg/85 light:from-bg/35 light:via-bg/60 light:to-bg/85"></div>
+        </div>
+      }
       <div class="min-w-0">
         <p class="mb-1 text-[13px] font-medium wrap-break-word text-brand-light md:mb-2 md:text-sm">
           @if (game()?.sagaName; as saga) {
