@@ -696,7 +696,9 @@
   "theme": {
     "dark": "Oscuro",
     "light": "Claro",
-    "system": "Sistema"
+    "system": "Sistema",
+    "switchToDark": "Cambiar a tema oscuro",
+    "switchToLight": "Cambiar a tema claro"
   },
   "motion": {
     "system": "Sistema",
