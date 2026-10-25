@@ -458,6 +458,6 @@ function readLibraryView(): LibraryView {
   try {
     return parseLibraryView(localStorage.getItem(LIBRARY_VIEW_KEY));
   } catch {
-    return 'list';
+    return 'grid';
   }
 }

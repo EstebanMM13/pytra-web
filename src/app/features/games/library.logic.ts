@@ -313,14 +313,14 @@ export function parseSort(value: string | null): LibrarySort {
   return (LIBRARY_SORTS as readonly string[]).includes(value ?? '') ? (value as LibrarySort) : 'recent';
 }
 
-/** How the library lays out its games: rows, or a grid of box-art posters. */
+/** How the library lays out its games: rows, or a grid of box-art posters (the default). */
 export type LibraryView = 'list' | 'grid';
 
 /** localStorage key of the library view (per device). */
 export const LIBRARY_VIEW_KEY = 'pytra_library_view';
 
 export function parseLibraryView(value: string | null): LibraryView {
-  return value === 'grid' ? 'grid' : 'list';
+  return value === 'list' ? 'list' : 'grid';
 }
 
 /** Most ids a list filter keeps from the URL (anything longer is not a hand-made link). */

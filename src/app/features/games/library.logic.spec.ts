@@ -276,8 +276,8 @@ describe('online-only games', () => {
   it('parses the library view, defaulting to the list', () => {
     expect(parseLibraryView('grid')).toBe('grid');
     expect(parseLibraryView('list')).toBe('list');
-    expect(parseLibraryView(null)).toBe('list');
-    expect(parseLibraryView('poster')).toBe('list');
+    expect(parseLibraryView(null)).toBe('grid');
+    expect(parseLibraryView('poster')).toBe('grid');
   });
 });
 

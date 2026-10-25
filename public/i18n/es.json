@@ -91,14 +91,14 @@
       "games": "Juegos",
       "sagas": "Sagas",
       "runs": "Partidas",
-      "singleHours": "Horas single",
+      "singleHours": "Horas un jugador",
       "onlineHours": "Horas online",
       "avgRating": "Nota media",
       "hours": "Horas",
       "avg": "Media",
       "platinums": "Platinos",
       "replays": "Replays",
-      "singleHoursShort": "Single",
+      "singleHoursShort": "Un jugador",
       "onlineHoursShort": "Online",
       "avgRatingShort": "Media"
     },
@@ -109,7 +109,7 @@
     "topRated": "Mejor valorados",
     "mostPlayed": "Más jugados",
     "bySaga": "Por saga",
-    "single": "Single",
+    "single": "Un jugador",
     "online": "Online",
     "sectionError": "No se pudo cargar esta sección.",
     "sectionLoading": "Cargando…",
@@ -477,7 +477,7 @@
       "saveAndRun": "Confirmar y crear partida",
       "intro": "Elige la categoría para añadirlo a tu biblioteca. Sus horas de Steam se importan al confirmar.",
       "introRun": "Primero se añade a tu biblioteca; después se abre la partida para completarla.",
-      "categoryHint": "Singleplayer: las horas van a una partida. Online/Híbrido: a las horas online del juego."
+      "categoryHint": "Un jugador: las horas van a una partida. Online/Híbrido: a las horas online del juego."
     },
     "lastSession": "Última sesión {{when}}",
     "linkedCount": "{{count}} ya vinculados a un juego de Pytra",
@@ -531,7 +531,7 @@
       "saveAndRun": "Confirmar y crear partida",
       "intro": "Elige la categoría para añadirlo a tu biblioteca. Sus horas de PSN se importan al confirmar.",
       "introRun": "Primero se añade a tu biblioteca; después se abre la partida para completarla.",
-      "categoryHint": "Singleplayer: las horas van a una partida. Online/Híbrido: a las horas online del juego."
+      "categoryHint": "Un jugador: las horas van a una partida. Online/Híbrido: a las horas online del juego."
     },
     "errors": {
       "generic": "Algo salió mal. Inténtalo de nuevo.",
@@ -714,7 +714,7 @@
     "RETRO": "Retro / Emulador"
   },
   "category": {
-    "SINGLEPLAYER": "Singleplayer",
+    "SINGLEPLAYER": "Un jugador",
     "ONLINE": "Online",
     "HYBRID": "Híbrido",
     "short": {
