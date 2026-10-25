@@ -8,6 +8,7 @@ import {
   monthValueLabel,
   parseYearParam,
   yearHighlight,
+  yearMostPlayed,
   yearTabs,
 } from './years.logic';
 
@@ -175,5 +176,51 @@ describe('adjacentYears', () => {
     expect(adjacentYears(tabs, null)).toEqual({ older: null, newer: null });
     expect(adjacentYears(tabs, 1999)).toEqual({ older: null, newer: null });
     expect(adjacentYears([], 2026)).toEqual({ older: null, newer: null });
+  });
+});
+
+describe('yearMostPlayed', () => {
+  const online = (gameId: number, gameName: string, hours: number) => ({
+    gameId,
+    gameName,
+    coverImageUrl: null,
+    hours,
+    dayCount: 1,
+  });
+
+  it('merges online diary hours into the run ranking, most hours first', () => {
+    const rows = yearMostPlayed(
+      summary({
+        mostPlayed: [
+          { gameId: 1, gameName: 'Story', totalHours: 30 },
+          { gameId: 2, gameName: 'Short', totalHours: 4 },
+        ],
+        onlineGames: [online(3, 'Arena', 12)],
+      }),
+    );
+
+    expect(rows.map((r) => r.gameName)).toEqual(['Story', 'Arena', 'Short']);
+    expect(rows[1]).toEqual({ gameId: 3, gameName: 'Arena', totalHours: 12, online: true });
+    expect(rows[0].online).toBe(false);
+  });
+
+  it('sums a game present in both lists and keeps the top 5', () => {
+    const rows = yearMostPlayed(
+      summary({
+        mostPlayed: [1, 2, 3, 4, 5].map((id) => ({ gameId: id, gameName: `Run ${id}`, totalHours: 10 - id })),
+        onlineGames: [online(5, 'Run 5', 20), online(6, 'Arena', 1)],
+      }),
+    );
+
+    expect(rows).toHaveLength(5);
+    expect(rows[0]).toEqual({ gameId: 5, gameName: 'Run 5', totalHours: 25, online: true });
+    expect(rows.some((r) => r.gameId === 6)).toBe(false);
+  });
+
+  it('works with older APIs without online games and without a summary', () => {
+    expect(yearMostPlayed(summary({ mostPlayed: [{ gameId: 1, gameName: 'Story', totalHours: 3 }] }))).toEqual([
+      { gameId: 1, gameName: 'Story', totalHours: 3, online: false },
+    ]);
+    expect(yearMostPlayed(null)).toEqual([]);
   });
 });

@@ -667,6 +667,8 @@
     "hoursByMonth": "Hours per month",
     "noMonthHours": "No dated hours this year.",
     "hoursWithoutMonth": "{{hours}} without a month (runs without dates inside the year).",
+    "onlineHours": "Includes {{hours}} of online play logged in the diary.",
+    "onlineTag": "Online",
     "runsOfYear": "Runs of the year",
     "byRating": "by rating",
     "showAll": "Show all {{count}} runs",

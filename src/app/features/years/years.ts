@@ -31,6 +31,7 @@ import {
   monthLabels,
   parseYearParam,
   yearHighlight,
+  yearMostPlayed,
   yearTabs,
 } from './years.logic';
 
@@ -127,9 +128,8 @@ export class Years {
     Math.max(0, (this.summary()?.experiences.length ?? 0) - RUNS_PREVIEW),
   );
 
-  protected readonly mostPlayedMax = computed(() =>
-    Math.max(0, ...(this.summary()?.mostPlayed ?? []).map((g) => g.totalHours)),
-  );
+  protected readonly mostPlayed = computed(() => yearMostPlayed(this.summary()));
+  protected readonly mostPlayedMax = computed(() => Math.max(0, ...this.mostPlayed().map((g) => g.totalHours)));
 
   // Yearly note editor.
   protected readonly noteSummary = signal('');

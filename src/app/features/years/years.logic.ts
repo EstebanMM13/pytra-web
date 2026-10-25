@@ -4,6 +4,43 @@ import { MiniBar } from '../../shared/ui/mini-bar-chart';
 
 /** Pure helpers behind the yearly summary page. */
 
+/** Rows of the "Más jugados" ranking (the API's top 5 by run hours). */
+export const MOST_PLAYED_LIMIT = 5;
+
+/** A "Más jugados" row: run hours of the year plus, for online games, their diary hours of the year. */
+export interface YearPlayedGame {
+  gameId: number;
+  gameName: string;
+  totalHours: number;
+  /** Has online diary hours in the year. */
+  online: boolean;
+}
+
+/**
+ * "Más jugados": the API's run-based ranking merged with the year's online games (diary hours), so a
+ * year of online play shows what was played. A game in both lists sums its hours. Top
+ * {@link MOST_PLAYED_LIMIT} by hours; ties keep runs first.
+ */
+export function yearMostPlayed(
+  summary: Pick<YearSummary, 'mostPlayed' | 'onlineGames'> | null,
+): YearPlayedGame[] {
+  if (!summary) return [];
+  const byGame = new Map<number, YearPlayedGame>();
+  for (const g of summary.mostPlayed) {
+    byGame.set(g.gameId, { gameId: g.gameId, gameName: g.gameName, totalHours: g.totalHours, online: false });
+  }
+  for (const g of summary.onlineGames ?? []) {
+    const row = byGame.get(g.gameId);
+    if (row) {
+      row.totalHours += g.hours;
+      row.online = true;
+    } else {
+      byGame.set(g.gameId, { gameId: g.gameId, gameName: g.gameName, totalHours: g.hours, online: true });
+    }
+  }
+  return [...byGame.values()].sort((a, b) => b.totalHours - a.totalHours).slice(0, MOST_PLAYED_LIMIT);
+}
+
 const MONTHS: Record<'es' | 'en', readonly string[]> = {
   es: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
   en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],

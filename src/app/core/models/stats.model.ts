@@ -23,6 +23,8 @@ export interface YearStat {
   experienceCount: number;
   /** Mean rating of the year's rated runs (null when nothing is rated). */
   averageRating: number | null;
+  /** Diary hours of the year counted into online playtime, included in `totalHours` (absent from older APIs). */
+  onlineHours?: number;
 }
 
 export interface SagaStat {
@@ -146,6 +148,16 @@ export interface YearNoteRequest {
   highlights: string | null;
 }
 
+/** An online game played in the year: its diary hours of that year counted into its online playtime. */
+export interface YearOnlineGame {
+  gameId: number;
+  gameName: string;
+  coverImageUrl: string | null;
+  hours: number;
+  /** Diary days of the year with hours counted for the game. */
+  dayCount: number;
+}
+
 /** `GET /stats/years/{year}`: the year in review. */
 export interface YearSummary {
   year: number;
@@ -169,4 +181,11 @@ export interface YearSummary {
   surprises: RatedGameBrief[];
   disappointments: RatedGameBrief[];
   note: YearNote;
+  /**
+   * Diary hours of the year counted into online playtime: included in `totalHours` and `months`, never
+   * in the run counts (absent from older APIs).
+   */
+  onlineHours?: number;
+  /** Online games with diary hours in the year, most hours first (absent from older APIs). */
+  onlineGames?: YearOnlineGame[];
 }

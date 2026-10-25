@@ -66,7 +66,7 @@
     }
 
     @if (summary(); as s) {
-      @if (s.experienceCount === 0 && !noteSummary() && !noteHighlights()) {
+      @if (s.experienceCount === 0 && !s.onlineHours && !noteSummary() && !noteHighlights()) {
         <div
           class="flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border px-6 py-12 text-center"
         >
@@ -204,6 +204,11 @@
                 {{ 'years.hoursWithoutMonth' | translate: { hours: (s.hoursWithoutMonth | hours) } }}
               </p>
             }
+            @if (s.onlineHours; as onlineHours) {
+              <p class="mt-3 text-xs text-faint">
+                {{ 'years.onlineHours' | translate: { hours: (onlineHours | hours) } }}
+              </p>
+            }
           </section>
 
           <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
@@ -269,7 +274,7 @@
 
         <!-- Rankings (Obsidian sections): cards that share a row always share its height. Same-length
              lists spread their rows to end flush; lists of different lengths keep natural rows. -->
-        @let spreadRankings = s.topRated.length === s.mostPlayed.length;
+        @let spreadRankings = s.topRated.length === mostPlayed().length;
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
           <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="years.topRated" collapseGroup="years.rankings" class="mb-3.5" [label]="'years.topRated' | translate" />
@@ -293,10 +298,15 @@
 
           <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="years.mostPlayed" collapseGroup="years.rankings" class="mb-3.5" [label]="'years.mostPlayed' | translate" />
-            @for (g of s.mostPlayed; track g.gameId) {
+            @for (g of mostPlayed(); track g.gameId) {
               <a [routerLink]="['/games', g.gameId]" [class.flex-1]="spreadRankings" class="flex flex-col justify-center border-t border-divider py-[9px] text-sm hover:bg-hover">
                 <span class="flex justify-between gap-3">
-                  <span class="min-w-0 truncate text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
+                  <span class="flex min-w-0 items-baseline gap-2">
+                    <span class="min-w-0 truncate text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
+                    @if (g.online) {
+                      <span class="shrink-0 text-[11px] text-faint">{{ 'years.onlineTag' | translate }}</span>
+                    }
+                  </span>
                   <span class="shrink-0 font-mono">{{ g.totalHours | hours }}</span>
                 </span>
                 <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">

@@ -667,6 +667,8 @@
     "hoursByMonth": "Horas por mes",
     "noMonthHours": "Sin horas con fecha este año.",
     "hoursWithoutMonth": "{{hours}} sin mes asignado (partidas sin fechas dentro del año).",
+    "onlineHours": "Incluye {{hours}} online registradas en el diario.",
+    "onlineTag": "Online",
     "runsOfYear": "Partidas del año",
     "byRating": "por nota",
     "showAll": "Ver las {{count}} partidas",
