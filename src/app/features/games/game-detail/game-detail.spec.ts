@@ -150,7 +150,7 @@ describe('GameDetail', () => {
 });
 
 describe('GameDetail stats', () => {
-  function render(category: GameCategory, generalRating: number | null = null) {
+  function render(category: GameCategory, generalRating: number | null = null, flags: object = {}) {
     TestBed.configureTestingModule({
       imports: [GameDetail],
       providers: [
@@ -162,7 +162,7 @@ describe('GameDetail stats', () => {
         { provide: DiaryService, useValue: { findByGame: () => of([]) } },
         {
           provide: OnlinePlaytimeService,
-          useValue: { findByGame: () => of({ gameId: 7, totalHours: 20, generalRating, platforms: [] }) },
+          useValue: { findByGame: () => of({ gameId: 7, totalHours: 20, generalRating, platforms: [], ...flags }) },
         },
         { provide: PlatformService, useValue: { platforms: signal([]), load: () => of([]) } },
         { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },
@@ -193,19 +193,44 @@ describe('GameDetail stats', () => {
     expect(hours.parentElement!.className).toContain('lg:grid-cols-6');
   });
 
-  it('shows only total hours and the online rating for ONLINE games', () => {
+  it('shows total hours, the online rating, 100% and platinum for ONLINE games, two by two on phones', () => {
     const el = render('ONLINE', 8);
-    const cards = [...el.querySelectorAll('app-stat-card')];
-    expect(cards.length).toBe(1);
-    expect(cards[0].textContent).toContain('game.stats.rating');
-    expect(cards[0].textContent).toContain('8');
     const hours = el.querySelector('[data-stat="hours"]')!;
+    const grid = hours.parentElement!;
+    expect(grid.children.length).toBe(4);
+    expect(grid.className).toContain('grid-cols-2');
+    expect(grid.className).toContain('md:grid-cols-4');
+    expect(hours.className).not.toContain('col-span');
+    const labels = [...grid.children].map((c) => c.textContent);
+    expect(labels[1]).toContain('game.stats.rating');
+    expect(labels[1]).toContain('8');
+    expect(labels[2]).toContain('game.stats.fullCompletion');
+    expect(labels[3]).toContain('game.stats.platinum');
+    // Not earned: plain cards, not the lit tiles.
+    expect(el.querySelector('[data-stat="platinum"]')).toBeNull();
+    expect(el.querySelector('[data-stat="fullCompletion"]')).toBeNull();
     expect(hours.textContent).toContain('20 h');
     // No runs: no campaign / online split.
     expect(hours.textContent).not.toContain('game.stats.campaign');
-    expect(el.textContent).not.toContain('game.stats.platinum');
-    expect(el.textContent).not.toContain('game.stats.fullCompletion');
     expect(el.textContent).not.toContain('game.stats.bestRating');
+    expect(el.textContent).not.toContain('game.stats.runs');
+  });
+
+  it('lights the 100% and platinum tiles from the online playtime of an ONLINE game', () => {
+    const el = render('ONLINE', null, { platinum: true, fullCompletion: true });
+    expect(el.querySelector('[data-stat="platinum"]')!.classList).toContain('platinum-tile');
+    expect(el.querySelector('[data-stat="fullCompletion"]')!.classList).toContain('completion-tile');
+    // And the badges by the online card's hours.
+    expect(el.querySelector('[data-online-platinum]')).not.toBeNull();
+    expect(el.querySelector('[data-online-full-completion]')).not.toBeNull();
+  });
+
+  it('lights a hybrid game tile when only the online playtime has the flag', () => {
+    const el = render('HYBRID', null, { fullCompletion: true });
+    expect(el.querySelector('[data-stat="fullCompletion"]')).not.toBeNull();
+    expect(el.querySelector('[data-stat="platinum"]')).toBeNull();
+    expect(el.querySelector('[data-stat="hours"]')!.parentElement!.children.length).toBe(6);
+    expect(el.querySelector('[data-online-platinum]')).toBeNull();
   });
 
   it('reserves the saga line so the title does not move without a saga', () => {
@@ -474,5 +499,79 @@ describe('GameDetail hero', () => {
     document.querySelector<HTMLElement>('[data-cover-viewer] img')!.click();
     fixture.detectChanges();
     expect(document.querySelector('[data-cover-viewer]')).toBeNull();
+  });
+});
+
+describe('GameDetail online platinum / 100%', () => {
+  function render(stored: object | null, demo = false) {
+    const upsert = vi.fn((_id: number, body: unknown) => of({ id: 1, gameId: 7, platforms: [], ...(body as object) }));
+    const findByGame = stored
+      ? () => of({ id: 1, gameId: 7, totalHours: 20, generalRating: null, platforms: [], ...stored })
+      : () => throwError(() => new HttpErrorResponse({ status: 404 }));
+    TestBed.configureTestingModule({
+      imports: [GameDetail],
+      providers: [
+        provideRouter([]),
+        provideTranslateService(),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '7' })) } },
+        { provide: GameService, useValue: { cachedById: () => null, findById: () => of(game('ONLINE')), findAll: () => of([]) } },
+        { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        { provide: DiaryService, useValue: { findByGame: () => of([]) } },
+        { provide: OnlinePlaytimeService, useValue: { findByGame, upsert } },
+        { provide: PlatformService, useValue: { platforms: signal([]), load: () => of([]) } },
+        { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },
+        { provide: DemoModeService, useValue: { isDemo: signal(demo), blockWrite: () => false } },
+        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
+      ],
+    });
+    TestBed.overrideComponent(GameDetail, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const fixture = TestBed.createComponent(GameDetail);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const toggle = (flag: string) => {
+      (el.querySelector(`[data-online-switch="${flag}"]`) as HTMLButtonElement).click();
+      fixture.detectChanges();
+    };
+    return { fixture, el, upsert, toggle, detail: fixture.componentInstance };
+  }
+
+  it('shows the stored flags on the switches', () => {
+    const { el } = render({ fullCompletion: true });
+    expect(el.querySelector('[data-online-switch="fullCompletion"]')!.getAttribute('aria-checked')).toBe('true');
+    expect(el.querySelector('[data-online-switch="platinum"]')!.getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('saves a switch right away with the stored hours, and lights the tile', () => {
+    const { el, upsert, toggle } = render({ totalHours: 120, platforms: [{ id: 2, name: 'PC', color: null }] });
+    toggle('fullCompletion');
+    expect(upsert).toHaveBeenCalledTimes(1);
+    expect(upsert).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({ totalHours: 120, platformIds: [2], platinum: false, fullCompletion: true }),
+    );
+    expect(el.querySelector('[data-stat="fullCompletion"]')).not.toBeNull();
+    expect(el.querySelector('[data-online-full-completion]')).not.toBeNull();
+
+    toggle('fullCompletion');
+    expect(upsert).toHaveBeenLastCalledWith(7, expect.objectContaining({ fullCompletion: false }));
+    // The game's aggregate is refreshed too, so the tile goes dark again.
+    expect(el.querySelector('[data-stat="fullCompletion"]')).toBeNull();
+  });
+
+  it('keeps switches pending without a record and sends them with the first save', () => {
+    const { el, upsert, toggle, detail } = render(null);
+    toggle('platinum');
+    expect(upsert).not.toHaveBeenCalled();
+    expect(el.textContent).toContain('game.online.platformsPending');
+
+    detail['submitOnlinePlaytime']();
+    expect(upsert).toHaveBeenCalledWith(7, expect.objectContaining({ platinum: true, fullCompletion: false }));
+  });
+
+  it('reverts a switch whose save fails', () => {
+    const { el, upsert, toggle } = render({});
+    upsert.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 500 })));
+    toggle('platinum');
+    expect(el.querySelector('[data-online-switch="platinum"]')!.getAttribute('aria-checked')).toBe('false');
   });
 });

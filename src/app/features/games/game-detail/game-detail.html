@@ -238,20 +238,17 @@
     <!-- Stats: six equal cards (total hours, runs, average, best, 100%, platinum): three rows of
          two on phones, two rows of three on tablets, one row on desktop. Hybrid games add the campaign /
          online split under the hours.
-         ONLINE games have no runs: just total hours (double width from tablets) and their online rating. -->
+         ONLINE games have no runs: total hours, their online rating, 100% and platinum (from the online
+         playtime), two by two on phones and in one row from tablets. -->
     @if (experiences() !== null) {
       @let s = stats();
       @let online = isOnlineGame();
       <section
         class="grid grid-cols-2 gap-2.5 md:gap-3"
-        [class]="online ? 'md:grid-cols-3' : 'md:grid-cols-3 lg:grid-cols-6'"
+        [class]="online ? 'md:grid-cols-4' : 'md:grid-cols-3 lg:grid-cols-6'"
         [attr.aria-label]="'game.stats.label' | translate"
       >
-        <div
-          class="relative min-w-0 overflow-hidden rounded-xl border border-card-border card-glass"
-          [class]="online ? 'md:col-span-2' : ''"
-          data-stat="hours"
-        >
+        <div class="relative min-w-0 overflow-hidden rounded-xl border border-card-border card-glass" data-stat="hours">
           <!-- Same inner layout as a large stat card -->
           <div class="@container relative flex h-full flex-col justify-center p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]">
             <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
@@ -310,65 +307,65 @@
             [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
             tone="gold"
           />
-          @if (fullCompletion()) {
-            <!-- Earned 100%: same box as a stat card, in mint teal with a soft glow on the badge -->
-            <div class="completion-tile relative min-w-0 rounded-xl border card-glass" data-stat="fullCompletion">
-              <div class="relative flex h-full flex-col justify-center p-4 md:px-5">
-                <p class="completion-tile-label flex min-w-0 items-center gap-1.5 text-xs leading-4 md:gap-2 md:text-[13px] md:leading-5">
-                  <svg [lucideIcon]="statIcons.fullCompletion" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
-                  <span class="truncate">{{ 'game.stats.fullCompletion' | translate }}</span>
-                </p>
-                <p class="mt-2 flex h-[30px] items-center md:h-9">
-                  <svg
-                    [lucideIcon]="statIcons.fullCompletion"
-                    [size]="30"
-                    class="completion-badge md:size-9"
-                    role="img"
-                    [attr.aria-label]="'run.fullCompletionAria' | translate"
-                  ></svg>
-                </p>
-              </div>
+        }
+        @if (fullCompletion()) {
+          <!-- Earned 100%: same box as a stat card, in mint teal with a soft glow on the badge -->
+          <div class="completion-tile relative min-w-0 rounded-xl border card-glass" data-stat="fullCompletion">
+            <div class="relative flex h-full flex-col justify-center p-4 md:px-5">
+              <p class="completion-tile-label flex min-w-0 items-center gap-1.5 text-xs leading-4 md:gap-2 md:text-[13px] md:leading-5">
+                <svg [lucideIcon]="statIcons.fullCompletion" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
+                <span class="truncate">{{ 'game.stats.fullCompletion' | translate }}</span>
+              </p>
+              <p class="mt-2 flex h-[30px] items-center md:h-9">
+                <svg
+                  [lucideIcon]="statIcons.fullCompletion"
+                  [size]="30"
+                  class="completion-badge md:size-9"
+                  role="img"
+                  [attr.aria-label]="'run.fullCompletionAria' | translate"
+                ></svg>
+              </p>
             </div>
-          } @else {
-            <app-stat-card
-              size="large"
-              [icon]="statIcons.fullCompletion"
-              [label]="'game.stats.fullCompletion' | translate"
-              value="—"
-              tone="completion"
-            />
-          }
-          @if (platinum()) {
-            <!-- Earned platinum: same box as a stat card, in icy silver with a diamond sheen and glow -->
-            <div class="platinum-tile platinum-glow relative min-w-0 rounded-xl border card-glass" data-stat="platinum">
-              <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
-                <defs>
-                  <linearGradient id="platinum-trophy-sheen" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" style="stop-color: var(--pt-platinum)" />
-                    <stop offset="0.5" style="stop-color: var(--pt-platinum-sheen)" />
-                    <stop offset="1" style="stop-color: var(--pt-platinum)" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div class="relative flex h-full flex-col justify-center p-4 md:px-5">
-                <p class="platinum-tile-label flex min-w-0 items-center gap-1.5 text-xs leading-4 md:gap-2 md:text-[13px] md:leading-5">
-                  <svg [lucideIcon]="statIcons.platinum" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
-                  <span class="truncate">{{ 'game.stats.platinum' | translate }}</span>
-                </p>
-                <p class="mt-2 flex h-[30px] items-center md:h-9">
-                  <svg
-                    [lucideIcon]="statIcons.platinum"
-                    [size]="30"
-                    class="platinum-trophy md:size-9"
-                    role="img"
-                    [attr.aria-label]="'run.platinum' | translate"
-                  ></svg>
-                </p>
-              </div>
+          </div>
+        } @else {
+          <app-stat-card
+            size="large"
+            [icon]="statIcons.fullCompletion"
+            [label]="'game.stats.fullCompletion' | translate"
+            value="—"
+            tone="completion"
+          />
+        }
+        @if (platinum()) {
+          <!-- Earned platinum: same box as a stat card, in icy silver with a diamond sheen and glow -->
+          <div class="platinum-tile platinum-glow relative min-w-0 rounded-xl border card-glass" data-stat="platinum">
+            <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id="platinum-trophy-sheen" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" style="stop-color: var(--pt-platinum)" />
+                  <stop offset="0.5" style="stop-color: var(--pt-platinum-sheen)" />
+                  <stop offset="1" style="stop-color: var(--pt-platinum)" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="relative flex h-full flex-col justify-center p-4 md:px-5">
+              <p class="platinum-tile-label flex min-w-0 items-center gap-1.5 text-xs leading-4 md:gap-2 md:text-[13px] md:leading-5">
+                <svg [lucideIcon]="statIcons.platinum" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
+                <span class="truncate">{{ 'game.stats.platinum' | translate }}</span>
+              </p>
+              <p class="mt-2 flex h-[30px] items-center md:h-9">
+                <svg
+                  [lucideIcon]="statIcons.platinum"
+                  [size]="30"
+                  class="platinum-trophy md:size-9"
+                  role="img"
+                  [attr.aria-label]="'run.platinum' | translate"
+                ></svg>
+              </p>
             </div>
-          } @else {
-            <app-stat-card size="large" [icon]="statIcons.platinum" [label]="'game.stats.platinum' | translate" value="—" tone="platinum" />
-          }
+          </div>
+        } @else {
+          <app-stat-card size="large" [icon]="statIcons.platinum" [label]="'game.stats.platinum' | translate" value="—" tone="platinum" />
         }
       </section>
     } @else {
@@ -441,6 +438,28 @@
         @if (g.category && g.category !== 'SINGLEPLAYER') {
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="game.online" class="mb-3" [label]="'game.online.title' | translate">
+              @if (onlinePlaytime()?.platinum) {
+                <span
+                  class="platinum-glow platinum-pill relative inline-flex h-6 shrink-0 items-center rounded-full px-1.5"
+                  role="img"
+                  [attr.aria-label]="'game.stats.platinum' | translate"
+                  [attr.title]="'game.stats.platinum' | translate"
+                  data-online-platinum
+                >
+                  <svg [lucideIcon]="statIcons.platinum" [size]="13" aria-hidden="true"></svg>
+                </span>
+              }
+              @if (onlinePlaytime()?.fullCompletion) {
+                <span
+                  class="completion-pill inline-flex h-6 shrink-0 items-center rounded-full px-1.5"
+                  role="img"
+                  [attr.aria-label]="'run.fullCompletionAria' | translate"
+                  [attr.title]="'run.fullCompletionAria' | translate"
+                  data-online-full-completion
+                >
+                  <svg [lucideIcon]="statIcons.fullCompletion" [size]="13" aria-hidden="true"></svg>
+                </span>
+              }
               <span class="font-mono text-[15px]">{{ onlinePlaytime()?.totalHours | hours }}</span>
             </app-section-header>
             <p class="-mt-1 mb-3 text-xs text-muted">{{ 'game.online.explain' | translate }}</p>
@@ -491,10 +510,44 @@
                   <span class="text-faint">—</span>
                 }
               </div>
-              @if (onlineLoadState() === 'missing' && onlinePlatforms().length) {
-                <p class="text-faint">{{ 'game.online.platformsPending' | translate }}</p>
-              }
             </div>
+            <!-- Platinum / 100% switches, like the run form's (saved right away once a record exists) -->
+            @let flags = onlineFlags();
+            @let flagsLocked = savingOnlineFlags() || onlineLoadState() === 'error' || onlineLoadState() === 'loading';
+            <div class="mb-3 flex flex-wrap items-center gap-x-6 gap-y-3" data-online-flags>
+              <button
+                type="button"
+                role="switch"
+                [attr.aria-checked]="flags.platinum"
+                [disabled]="flagsLocked"
+                (click)="toggleOnlineFlag('platinum')"
+                class="online-switch"
+                data-online-switch="platinum"
+              >
+                <span class="online-switch-track" [class]="flags.platinum ? 'bg-brand' : 'bg-border'">
+                  <span class="online-switch-thumb" [class]="flags.platinum ? 'translate-x-4 bg-white' : 'bg-muted'"></span>
+                </span>
+                <span>{{ 'runForm.platinum' | translate }}</span>
+              </button>
+              <button
+                type="button"
+                role="switch"
+                [attr.aria-checked]="flags.fullCompletion"
+                [attr.aria-label]="'run.fullCompletionAria' | translate"
+                [disabled]="flagsLocked"
+                (click)="toggleOnlineFlag('fullCompletion')"
+                class="online-switch"
+                data-online-switch="fullCompletion"
+              >
+                <span class="online-switch-track" [class]="flags.fullCompletion ? 'bg-brand' : 'bg-border'">
+                  <span class="online-switch-thumb" [class]="flags.fullCompletion ? 'translate-x-4 bg-white' : 'bg-muted'"></span>
+                </span>
+                <span>{{ 'runForm.fullCompletion' | translate }}</span>
+              </button>
+            </div>
+            @if (onlineLoadState() === 'missing' && (onlinePlatforms().length || flags.platinum || flags.fullCompletion)) {
+              <p class="-mt-1 mb-3 text-xs text-faint">{{ 'game.online.platformsPending' | translate }}</p>
+            }
             <form
               [formGroup]="onlinePlaytimeForm"
               (ngSubmit)="submitOnlinePlaytime()"

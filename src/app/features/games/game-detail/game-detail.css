@@ -60,3 +60,43 @@
   color: var(--pt-completion);
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pt-completion) 45%, transparent));
 }
+
+/*
+ * Online card platinum / 100% switches: the run form's web (md+) switch at every width, since the
+ * card is already a compact panel. Track 38x22, thumb 16, same brand / border colours.
+ */
+.online-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  font-size: 14px;
+  color: var(--pt-text-2);
+}
+
+.online-switch:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.online-switch-track {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 38px;
+  height: 22px;
+  border-radius: 99px;
+  transition: background-color 150ms ease-out;
+}
+
+.online-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transition:
+    transform 150ms ease-out,
+    background-color 150ms ease-out;
+}
