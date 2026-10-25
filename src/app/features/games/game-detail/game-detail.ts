@@ -47,14 +47,19 @@ import { ScrollParallax } from '../../../shared/ui/scroll-parallax';
 import { CoverViewer } from './cover-viewer';
 import { TitleClamp } from './title-clamp';
 import {
+  OnlineFlags,
   OnlinePlaytimeLoadState,
   buildOnlinePlaytimeRequest,
+  onlineFlagsOf,
   onlinePlaytimeErrorState,
+  shouldCelebrateOnline,
 } from './online-playtime.logic';
 import { CategoryBadge, UpcomingBadge } from '../../../shared/ui/game-badges';
 import { figureFontSize } from '../../../shared/ui/stat-card';
 import { isUpcoming } from '../library.logic';
 import { toastApiError } from '../../../shared/utils/api-error';
+import { burstConfetti } from '../../../shared/utils/confetti';
+import { DemoModeService } from '../../../core/services/demo-mode.service';
 
 /** Newest run first: end date, else start date, else stored year; ties by id. */
 function byRecencyDesc(a: Experience, b: Experience): number {
@@ -115,6 +120,7 @@ export class GameDetail {
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
   protected readonly preferences = inject(PreferencesService);
+  private readonly demo = inject(DemoModeService);
 
   protected readonly statIcons = {
     runs: ICONS.play,
@@ -144,6 +150,9 @@ export class GameDetail {
   /** Whether the picker changed since the card loaded (decides if the PUT sends platformIds). */
   private readonly onlinePlatformsTouched = signal(false);
   readonly savingOnlinePlatforms = signal(false);
+  /** The online card's platinum / 100% switches: the stored flags, or pending ones before the first save. */
+  readonly onlineFlags = signal<OnlineFlags>({ platinum: false, fullCompletion: false });
+  readonly savingOnlineFlags = signal(false);
   readonly onlineLoadState = signal<OnlinePlaytimeLoadState>('loading');
   /** Online playtime requested alongside the game (by route id), consumed by the first `loadOnlinePlaytime`. */
   private onlinePrefetch: { id: number; playtime$: Observable<OnlinePlaytime> } | null = null;
@@ -196,15 +205,19 @@ export class GameDetail {
       totalHours: runHours + onlineHours,
       avgRating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
       bestRating: ratings.length ? Math.max(...ratings) : null,
-      platinum: runs.some((r) => r.platinum),
-      fullCompletion: runs.some((r) => r.fullCompletion),
+      // Hybrid games light the tiles from either source: a run or the online playtime.
+      platinum: runs.some((r) => r.platinum) || !!this.onlinePlaytime()?.platinum,
+      fullCompletion: runs.some((r) => r.fullCompletion) || !!this.onlinePlaytime()?.fullCompletion,
     };
   });
 
-  /** Any run earned the platinum (or the API says the game has one): the Platinum tile lights up. */
+  /**
+   * Any run or the online playtime earned the platinum (or the API says the game has one): the
+   * Platinum tile lights up.
+   */
   protected readonly platinum = computed(() => this.stats().platinum || !!this.game()?.hasPlatinum);
 
-  /** Any run is 100% (or the API says the game has one): the 100% tile lights up. Independent of platinum. */
+  /** Same sources as `platinum`, for the 100% tile. Independent of platinum. */
   protected readonly fullCompletion = computed(() => this.stats().fullCompletion || !!this.game()?.hasFullCompletion);
 
   /** Highlighted only when there is something to compare against. */
@@ -236,7 +249,10 @@ export class GameDetail {
   /** ONLINE games are tracked through online playtime only: no "new run" entry points. */
   protected readonly canAddRun = computed(() => this.game()?.category !== 'ONLINE');
 
-  /** ONLINE games are tracked through online playtime only: their stats skip runs, best rating, platinum and 100%. */
+  /**
+   * ONLINE games are tracked through online playtime only: their stats skip runs and best rating, and
+   * show the online platinum / 100% next to the hours and rating.
+   */
   protected readonly isOnlineGame = computed(() => this.game()?.category === 'ONLINE');
 
   /** The online general rating, the "Nota" of an ONLINE game. */
@@ -382,6 +398,7 @@ export class GameDetail {
     this.onlinePlaytime.set(null);
     this.onlinePlatforms.set([]);
     this.onlinePlatformsTouched.set(false);
+    this.onlineFlags.set(onlineFlagsOf(null));
     this.onlineLoadState.set('loading');
     if (game.category === 'SINGLEPLAYER') {
       return;
@@ -396,6 +413,7 @@ export class GameDetail {
         const lang = this.lang();
         this.onlinePlaytime.set(playtime);
         this.onlinePlatforms.set(playtime.platforms ?? []);
+        this.onlineFlags.set(onlineFlagsOf(playtime));
         this.onlineLoadState.set('loaded');
         this.onlinePlaytimeForm.setValue({
           totalHours: formatHoursInput(playtime.totalHours, lang),
@@ -506,6 +524,8 @@ export class GameDetail {
           existing,
           platformIds: next.map((p) => p.id),
           platformsTouched: true,
+          // The switches, not the stored flags: a flag save may still be in flight.
+          ...this.onlineFlags(),
         }),
       )
       .subscribe({
@@ -523,6 +543,77 @@ export class GameDetail {
           toastApiError(this.toast, this.translate, err, 'game.online.error');
         },
       });
+  }
+
+  /**
+   * Flips a platinum / 100% switch of the online card. With a stored record the change is saved right
+   * away, like the platforms (reverted if that fails); without one it stays pending and is sent with
+   * the first save of the hours.
+   */
+  protected toggleOnlineFlag(flag: keyof OnlineFlags): void {
+    if (this.savingOnlineFlags() || this.onlineLoadState() === 'error' || this.onlineLoadState() === 'loading') {
+      return;
+    }
+    const previous = this.onlineFlags();
+    const next: OnlineFlags = { ...previous, [flag]: !previous[flag] };
+    this.onlineFlags.set(next);
+    const existing = this.onlinePlaytime();
+    if (!existing) {
+      return;
+    }
+    const id = this.gameId();
+    this.savingOnlineFlags.set(true);
+    this.onlinePlaytimeService
+      .upsert(
+        id,
+        // The stored hours and rating, not the form's possibly unsaved edits; the picked platforms,
+        // which a record saves right away (one of those saves may still be in flight).
+        buildOnlinePlaytimeRequest({
+          totalHours: existing.totalHours,
+          generalRating: existing.generalRating,
+          existing,
+          platformIds: this.onlinePlatforms().map((p) => p.id),
+          platformsTouched: false,
+          ...next,
+        }),
+      )
+      .subscribe({
+        next: (playtime) => {
+          this.savingOnlineFlags.set(false);
+          if (id !== this.gameId()) return;
+          this.onOnlineFlagsSaved(playtime, onlineFlagsOf(existing));
+          this.onlinePlaytime.set(playtime);
+          this.toast.success(this.translate.instant('game.online.saved'));
+        },
+        error: (err: unknown) => {
+          this.savingOnlineFlags.set(false);
+          if (id === this.gameId()) this.onlineFlags.set(previous);
+          toastApiError(this.toast, this.translate, err, 'game.online.error');
+        },
+      });
+  }
+
+  /**
+   * After an online save: syncs the switches, celebrates a newly reached flag and refreshes the game's
+   * hasPlatinum / hasFullCompletion (they also come from the runs), which would otherwise keep the
+   * tiles lit after a flag is cleared.
+   */
+  private onOnlineFlagsSaved(playtime: OnlinePlaytime, previous: OnlineFlags): void {
+    this.localWrites++;
+    const saved = onlineFlagsOf(playtime);
+    this.onlineFlags.set(saved);
+    if (shouldCelebrateOnline(saved, previous, this.demo.isDemo())) {
+      burstConfetti();
+    }
+    const runs = this.runs();
+    this.game.update(
+      (game) =>
+        game && {
+          ...game,
+          hasPlatinum: saved.platinum || runs.some((r) => r.platinum),
+          hasFullCompletion: saved.fullCompletion || runs.some((r) => r.fullCompletion),
+        },
+    );
   }
 
   protected onGameSaved(game: Game): void {
@@ -551,6 +642,8 @@ export class GameDetail {
     }
     const raw = this.onlinePlaytimeForm.getRawValue();
     const id = this.gameId();
+    // Pending switches (no record yet) are saved here: the stored flags are the baseline.
+    const previousFlags = onlineFlagsOf(this.onlinePlaytime());
     this.savingOnline.set(true);
     this.onlinePlaytimeService
       .upsert(
@@ -561,13 +654,14 @@ export class GameDetail {
           existing: this.onlinePlaytime(),
           platformIds: this.onlinePlatforms().map((p) => p.id),
           platformsTouched: this.onlinePlatformsTouched(),
+          ...this.onlineFlags(),
         }),
       )
       .subscribe({
         next: (playtime) => {
           this.savingOnline.set(false);
           if (id !== this.gameId()) return;
-          this.localWrites++;
+          this.onOnlineFlagsSaved(playtime, previousFlags);
           this.onlinePlaytime.set(playtime);
           this.onlinePlatforms.set(playtime.platforms ?? []);
           this.onlineLoadState.set('loaded');

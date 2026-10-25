@@ -16,6 +16,9 @@ export interface OnlinePlaytimeDraft {
   platformIds: number[];
   /** Whether the user changed the platform picker since the card loaded. */
   platformsTouched: boolean;
+  /** The card's platinum / 100% switches (the stored flags, or pending ones before the first save). */
+  platinum: boolean;
+  fullCompletion: boolean;
 }
 
 /**
@@ -28,9 +31,32 @@ export function buildOnlinePlaytimeRequest(draft: OnlinePlaytimeDraft): OnlinePl
     generalRating: draft.generalRating,
     lastSessionAt: draft.existing?.lastSessionAt ?? null,
     notes: draft.existing?.notes ?? null,
+    platinum: draft.platinum,
+    fullCompletion: draft.fullCompletion,
   };
   if (draft.existing || draft.platformsTouched) {
     request.platformIds = [...draft.platformIds];
   }
   return request;
+}
+
+/** The online playtime's flags, as the card shows them (absent from older API versions means false). */
+export interface OnlineFlags {
+  platinum: boolean;
+  fullCompletion: boolean;
+}
+
+export function onlineFlagsOf(playtime: OnlinePlaytime | null): OnlineFlags {
+  return { platinum: !!playtime?.platinum, fullCompletion: !!playtime?.fullCompletion };
+}
+
+/**
+ * Confetti after a save that *reaches* the platinum or the 100% (like a run's): re-saving an already
+ * flagged playtime stays quiet, and the read-only demo never celebrates.
+ */
+export function shouldCelebrateOnline(saved: OnlineFlags, previous: OnlineFlags, demo: boolean): boolean {
+  if (demo) {
+    return false;
+  }
+  return (saved.platinum && !previous.platinum) || (saved.fullCompletion && !previous.fullCompletion);
 }
