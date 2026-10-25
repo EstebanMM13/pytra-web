@@ -104,6 +104,11 @@ export function pendingCoverUrl(url: string | null): string {
 })
 export class GameEditDialog implements OnInit {
   protected readonly icons = ICONS;
+  /**
+   * Focus the name on open only with a fine pointer: on touch screens it would pop the keyboard
+   * and scroll the sheet to the caret before the user has seen the form.
+   */
+  protected readonly autofocusName = !(typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches);
 
   /** Game to edit (or, with `pendingReview`, to confirm); `null` opens the dialog in create mode. */
   readonly game = input<Game | null>(null);

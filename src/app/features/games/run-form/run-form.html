@@ -7,7 +7,8 @@
 >
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4 md:gap-[18px]">
     <!-- Game + run label -->
-    <div class="grid grid-cols-[minmax(0,1fr)_96px] gap-3 md:grid-cols-[minmax(0,1fr)_120px] md:gap-3.5">
+    <!-- Phones: the game takes the full row so its name is not cut by the run field -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_96px] sm:gap-3 md:grid-cols-[minmax(0,1fr)_120px] md:gap-3.5">
       <div class="relative flex min-w-0 flex-col gap-2">
         <label for="run-form-game" class="text-[13px] text-text-3">{{ 'runForm.game' | translate }}</label>
         @if (locked()) {

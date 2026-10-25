@@ -33,7 +33,7 @@
       <label for="game-edit-name" class="text-[13px] text-text-3">{{ 'game.form.name' | translate }}</label>
       <input
         id="game-edit-name"
-        data-autofocus
+        [attr.data-autofocus]="autofocusName ? '' : null"
         type="text"
         formControlName="name"
         class="game-edit-input"
