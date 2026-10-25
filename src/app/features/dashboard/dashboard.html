@@ -253,7 +253,8 @@
               <app-game-cover decorative size="md" class="shadow-md shadow-black/20" [url]="hero.coverImageUrl" [name]="hero.gameName" />
               <div class="min-w-0 flex-1">
                 <p class="truncate text-base font-semibold" [attr.title]="hero.gameName">{{ hero.gameName }}</p>
-                <p class="mt-1 truncate text-[13px] text-text-3" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
+                <!-- The meta wraps on phones instead of cutting the start date -->
+                <p class="mt-1 text-[13px] text-text-3 wrap-break-word sm:truncate" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
                 <!-- Days pill under the meta on phones, where the title needs the width -->
                 @if (daysPlaying(hero); as days) {
                   <span class="mt-2 inline-block rounded-full bg-hover px-2 py-0.5 font-mono text-[11px] text-text-3 ring-1 ring-gold/70 ring-inset sm:hidden">
