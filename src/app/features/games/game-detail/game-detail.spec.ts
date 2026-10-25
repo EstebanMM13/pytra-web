@@ -330,3 +330,81 @@ describe('GameDetail loading', () => {
     expect(fixture.componentInstance.onlinePlaytime()).toBeNull();
   });
 });
+
+describe('GameDetail hero', () => {
+  function render(g: Game) {
+    TestBed.configureTestingModule({
+      imports: [GameDetail],
+      providers: [
+        provideRouter([]),
+        provideTranslateService(),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: String(g.id) })) } },
+        { provide: GameService, useValue: { cachedById: () => null, findById: () => of(g), findAll: () => of([g]) } },
+        { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
+        { provide: DiaryService, useValue: { findByGame: () => of([]) } },
+        {
+          provide: OnlinePlaytimeService,
+          useValue: { findByGame: () => throwError(() => new HttpErrorResponse({ status: 404 })) },
+        },
+        { provide: PlatformService, useValue: { platforms: signal([]), load: () => of([]) } },
+        { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },
+        { provide: DemoModeService, useValue: { isDemo: signal(false), blockWrite: () => false } },
+        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
+      ],
+    });
+    TestBed.overrideComponent(GameDetail, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const fixture = TestBed.createComponent(GameDetail);
+    fixture.detectChanges();
+    return { fixture, el: fixture.nativeElement as HTMLElement };
+  }
+
+  /** Lays the h1 out as clamped (content taller than its box) or not; jsdom has no layout. */
+  function clampTitle(cut: boolean) {
+    const proto = HTMLHeadingElement.prototype;
+    vi.spyOn(proto, 'scrollHeight', 'get').mockReturnValue(cut ? 120 : 80);
+    vi.spyOn(proto, 'clientHeight', 'get').mockReturnValue(80);
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('keeps a title that fits as plain text: no button semantics and nothing to toggle', async () => {
+    clampTitle(false);
+    const { fixture, el } = render(game('SINGLEPLAYER'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const h1 = el.querySelector('h1')!;
+    const text = h1.querySelector('[data-title-text]')!;
+    expect(text.getAttribute('role')).toBeNull();
+    expect(text.getAttribute('tabindex')).toBeNull();
+    expect(text.getAttribute('aria-expanded')).toBeNull();
+    expect(h1.classList).not.toContain('cursor-pointer');
+    h1.click();
+    fixture.detectChanges();
+    expect(h1.classList).not.toContain('line-clamp-none!');
+  });
+
+  it('lets a clamped title expand to its full text and fold back, by tap or keyboard', async () => {
+    clampTitle(true);
+    const { fixture, el } = render(game('SINGLEPLAYER'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const h1 = el.querySelector('h1')!;
+    const text = h1.querySelector<HTMLElement>('[data-title-text]')!;
+    expect(text.getAttribute('role')).toBe('button');
+    expect(text.getAttribute('tabindex')).toBe('0');
+    expect(text.getAttribute('aria-expanded')).toBe('false');
+    expect(h1.classList).toContain('cursor-pointer');
+
+    text.click();
+    fixture.detectChanges();
+    expect(h1.classList).toContain('line-clamp-none!');
+    expect(text.getAttribute('aria-expanded')).toBe('true');
+
+    text.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    fixture.detectChanges();
+    expect(h1.classList).not.toContain('line-clamp-none!');
+    expect(text.getAttribute('aria-expanded')).toBe('false');
+  });
+});

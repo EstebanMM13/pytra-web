@@ -44,6 +44,7 @@ import { GameEditDialog } from '../game-edit-dialog/game-edit-dialog';
 import { GenreChips } from './genre-chips';
 import { GameDiaryDays } from './game-diary-days';
 import { ScrollParallax } from '../../../shared/ui/scroll-parallax';
+import { TitleClamp } from './title-clamp';
 import {
   OnlinePlaytimeLoadState,
   buildOnlinePlaytimeRequest,
@@ -90,6 +91,7 @@ function byRelease(a: Game, b: Game): number {
     CategoryBadge,
     GenreChips,
     GameDiaryDays,
+    TitleClamp,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

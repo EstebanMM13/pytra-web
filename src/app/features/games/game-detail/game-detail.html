@@ -81,11 +81,20 @@
               } @else {
                 <span data-saga-line class="mb-1 block h-5 md:mb-2 md:h-6" aria-hidden="true"></span>
               }
+              <!-- A title cut by the clamp expands on tap (button semantics only while it is cut) -->
               <h1
+                #title="titleClamp"
+                [appTitleClamp]="g.name"
                 class="font-display line-clamp-3 text-[22px] leading-tight font-bold tracking-[-0.025em] wrap-break-word sm:text-[26px] md:line-clamp-2 md:text-[40px] md:tracking-[-0.035em] lg:text-[48px]"
                 [title]="g.name"
               >
-                {{ g.name }}
+                <span
+                  [attr.role]="title.truncated() ? 'button' : null"
+                  [attr.tabindex]="title.truncated() ? 0 : null"
+                  [attr.aria-expanded]="title.truncated() ? title.expanded() : null"
+                  data-title-text
+                  >{{ g.name }}</span
+                >
               </h1>
             </div>
             <div class="hidden shrink-0 gap-2.5 md:flex">
