@@ -14,6 +14,7 @@ import { figureFontSize, StatCard, statVisual } from './stat-card';
     [meter]="meter()"
     [link]="link()"
     [queryParams]="queryParams()"
+    [size]="size()"
   />`,
 })
 class Host {
@@ -24,10 +25,11 @@ class Host {
   readonly meter = signal<number | null>(null);
   readonly link = signal<string | null>(null);
   readonly queryParams = signal<Record<string, string> | null>(null);
+  readonly size = signal<'default' | 'large'>('default');
 }
 
 describe('StatCard', () => {
-  function setup(patch: Partial<{ value: string; hint: string; trend: number[]; valueClass: string; meter: number; link: string; queryParams: Record<string, string> }> = {}) {
+  function setup(patch: Partial<{ value: string; hint: string; trend: number[]; valueClass: string; meter: number; link: string; queryParams: Record<string, string>; size: 'default' | 'large' }> = {}) {
     TestBed.configureTestingModule({ imports: [Host], providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(Host);
     const host = fixture.componentInstance;
@@ -38,6 +40,7 @@ describe('StatCard', () => {
     if (patch.meter !== undefined) host.meter.set(patch.meter);
     if (patch.link !== undefined) host.link.set(patch.link);
     if (patch.queryParams !== undefined) host.queryParams.set(patch.queryParams);
+    if (patch.size !== undefined) host.size.set(patch.size);
     fixture.detectChanges();
     return (fixture.nativeElement as HTMLElement).querySelector('app-stat-card') as HTMLElement;
   }
@@ -94,6 +97,30 @@ describe('StatCard', () => {
     expect(link.getAttribute('href')).toBe('/games?sort=hours&category=SINGLEPLAYER');
     expect(link.textContent).toContain('Hours');
     expect(card.classList).toContain('hover-lift');
+  });
+
+  it('uses the compact scale by default', () => {
+    const card = setup();
+    const body = card.querySelector('.\\@container') as HTMLElement;
+    expect(body.classList).toContain('p-3');
+    expect(body.classList).toContain('[--fig-max:22px]');
+    expect(body.classList).not.toContain('justify-center');
+    expect((card.querySelector('span[data-figure]') as HTMLElement).parentElement?.classList).toContain('mt-1.5');
+  });
+
+  it('switches to a roomier, vertically centred scale with a bigger figure when large', () => {
+    const card = setup({ size: 'large' });
+    const body = card.querySelector('.\\@container') as HTMLElement;
+    expect(body.classList).toContain('p-4');
+    expect(body.classList).toContain('justify-center');
+    expect(body.classList).toContain('[--fig-max:30px]');
+    expect(body.classList).toContain('md:[--fig-max:36px]');
+    expect(body.classList).not.toContain('p-3');
+    expect(body.querySelector('p')?.classList).toContain('text-xs');
+    const figureRow = (card.querySelector('span[data-figure]') as HTMLElement).parentElement as HTMLElement;
+    expect(figureRow.classList).toContain('mt-2');
+    expect(figureRow.classList).toContain('whitespace-nowrap');
+    expect(figureRow.style.fontSize).toContain('var(--fig-max)');
   });
 
   it('keeps toned figures on their own color', () => {

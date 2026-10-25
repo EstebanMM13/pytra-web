@@ -236,7 +236,7 @@
     }
 
     <!-- Stats: featured total hours (full row on phones/tablets, double width on desktop) + 4 equal cards.
-         Phones lay the hours card out as one compact row: label on the left, figure on the right.
+         Phones lay the full-width hours card out as one compact row: label and figure centred side by side.
          ONLINE games have no runs: just total hours and their online rating. -->
     @if (experiences() !== null) {
       @let s = stats();
@@ -252,14 +252,15 @@
           data-stat="hours"
         >
           <div
-            class="@container relative flex h-full flex-col p-4 [--fig-max:36px] max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:justify-between max-sm:gap-x-4 max-sm:py-3 max-sm:[--fig-max:30px] md:px-5 md:[--fig-max:40px]"
+            class="@container relative flex h-full flex-col p-4 [--fig-max:36px] max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:gap-x-5 max-sm:py-3 max-sm:[--fig-max:30px] sm:justify-center md:px-5 md:[--fig-max:40px]"
+            [class.max-sm:justify-center]="!online"
           >
-            <p class="flex items-center gap-1.5 text-[11px] leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
+            <p class="flex items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
               <svg [lucideIcon]="statIcons.hours" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
               {{ 'game.stats.totalHours' | translate }}
             </p>
             <p
-              class="mt-1.5 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap max-sm:mt-0"
+              class="mt-1.5 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap max-sm:mt-0 sm:leading-none"
               [style.font-size]="figureSize(s.totalHours | hours)"
             >
               <span data-figure>{{ s.totalHours | hours }}</span>
@@ -288,6 +289,7 @@
         </div>
         @if (online) {
           <app-stat-card
+            size="large"
             [icon]="statIcons.rating"
             [label]="'game.stats.rating' | translate"
             [value]="onlineRating() | rating"
@@ -295,8 +297,9 @@
             tone="gold-tile"
           />
         } @else {
-          <app-stat-card [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
+          <app-stat-card size="large" [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
           <app-stat-card
+            size="large"
             [icon]="statIcons.rating"
             [label]="'game.stats.avgRating' | translate"
             [value]="s.avgRating | rating"
@@ -304,6 +307,7 @@
             tone="gold-tile"
           />
           <app-stat-card
+            size="large"
             [icon]="statIcons.best"
             [label]="'game.stats.bestRating' | translate"
             [value]="s.bestRating | rating"
@@ -322,16 +326,16 @@
                   </linearGradient>
                 </defs>
               </svg>
-              <div class="relative flex h-full flex-col p-3 md:px-[18px] md:py-4">
-                <p class="platinum-tile-label flex min-w-0 items-center gap-1.5 text-[11px] leading-4 md:gap-2 md:text-[13px] md:leading-5">
+              <div class="relative flex h-full flex-col justify-center p-4 md:px-5">
+                <p class="platinum-tile-label flex min-w-0 items-center gap-1.5 text-xs leading-4 md:gap-2 md:text-[13px] md:leading-5">
                   <svg [lucideIcon]="statIcons.platinum" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
                   <span class="truncate">{{ 'game.stats.platinum' | translate }}</span>
                 </p>
-                <p class="mt-1.5 flex h-7 items-center md:mt-2 md:h-9">
+                <p class="mt-2 flex h-[30px] items-center md:h-9">
                   <svg
                     [lucideIcon]="statIcons.platinum"
-                    [size]="28"
-                    class="platinum-trophy"
+                    [size]="30"
+                    class="platinum-trophy md:size-9"
                     role="img"
                     [attr.aria-label]="'run.platinum' | translate"
                   ></svg>
@@ -339,7 +343,7 @@
               </div>
             </div>
           } @else {
-            <app-stat-card [icon]="statIcons.platinum" [label]="'game.stats.platinum' | translate" value="—" tone="platinum" />
+            <app-stat-card size="large" [icon]="statIcons.platinum" [label]="'game.stats.platinum' | translate" value="—" tone="platinum" />
           }
         }
       </section>

@@ -65,11 +65,10 @@ import { canAnimate } from '../utils/motion';
       <ng-container *ngTemplateOutlet="body" />
     }
     <ng-template #body>
-    <div
-      class="@container flex h-full flex-col p-3 [--fig-max:22px] md:px-[18px] md:py-4 md:[--fig-max:26px] lg:[--fig-max:28px]"
-    >
+    <div class="@container flex h-full flex-col" [class]="layout().body">
       <p
-        class="flex min-w-0 items-center gap-1.5 text-[11px] leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5"
+        class="flex min-w-0 items-center gap-1.5 leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5"
+        [class]="layout().label"
         [class.justify-center]="centered()"
       >
         @if (icon(); as i) {
@@ -83,7 +82,8 @@ import { canAnimate } from '../utils/motion';
         }
       </p>
       <p
-        class="mt-1.5 text-[22px] leading-[28px] font-bold tracking-[-0.03em] whitespace-nowrap md:mt-2 md:leading-[34px]"
+        class="font-bold tracking-[-0.03em] whitespace-nowrap"
+        [class]="layout().figure"
         [class.text-center]="centered()"
         [style.font-size]="figureSize()"
       >
@@ -135,11 +135,17 @@ export class StatCard {
    * 'platinum' (platinum icon, brand visuals).
    */
   readonly tone = input<'brand' | 'gold' | 'gold-tile' | 'platinum'>('brand');
+  /**
+   * Inner scale: 'default' (compact tiles of the dashboard / years / profile rows) or 'large'
+   * (roomier padding, a bigger figure and vertically centred content, as the run detail stat cards).
+   */
+  readonly size = input<'default' | 'large'>('default');
   /** Makes the whole card a link (router commands), e.g. to the list behind the figure. */
   readonly link = input<string | readonly (string | number)[] | null>(null);
   /** Query params of `link`. */
   readonly queryParams = input<Params | null>(null);
 
+  protected readonly layout = computed(() => STAT_CARD_LAYOUT[this.size()]);
   protected readonly visual = computed(() => statVisual(this.trend(), this.meter()));
   protected readonly accent = computed(() => (this.tone() === 'gold' || this.tone() === 'gold-tile' ? 'gold' : 'brand'));
   /** Header icon: brand-hi for activity figures, gold for ratings, platinum for the platinum tile. */
@@ -187,6 +193,20 @@ export class StatCard {
 }
 
 const COUNT_UP_MS = 600;
+
+/** Size-dependent classes of the card body, label row and figure (`--fig-max` caps the figure). */
+const STAT_CARD_LAYOUT = {
+  default: {
+    body: 'p-3 [--fig-max:22px] md:px-[18px] md:py-4 md:[--fig-max:26px] lg:[--fig-max:28px]',
+    label: 'text-[11px]',
+    figure: 'mt-1.5 text-[22px] leading-[28px] md:mt-2 md:leading-[34px]',
+  },
+  large: {
+    body: 'justify-center p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]',
+    label: 'text-xs',
+    figure: 'mt-2 leading-none',
+  },
+} as const;
 
 /** The small visual at the bottom of a stat card: a per-year sparkline, else a proportion bar, else none. */
 export type StatVisual = 'trend' | 'meter' | 'none';
