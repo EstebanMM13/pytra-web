@@ -104,82 +104,82 @@
 
 :root[data-theme='light'] {
   /*
-   * Light: soft lavender-tinted paper. The page sits a step darker than the cards (bg < surface),
-   * borders carry a hint of plum and cards get a faint shadow, so layers read without dark lines.
-   * Text, muted text, brand, gold and status tones all clear WCAG AA (4.5:1) on bg / surface / their
-   * tinted pills (see the contrast check in the light-theme commit).
+   * Light: neutral grey. An achromatic grey page under soft off-white grey cards (no pure white,
+   * no blue or warm cast); firm grey borders and a gentle shadow keep the layers apart, ink is a
+   * softened charcoal. Text, muted text, brand, gold and status tones all clear WCAG AA (4.5:1)
+   * on bg / surface / nav / hover and their tinted pills.
    */
-  --pt-bg: #eeeaf2;
-  --pt-nav: #f7f5f9;
-  --pt-surface: #fcfbfd;
-  --pt-border: #ddd6e4;
-  --pt-border-strong: #c3b9cf;
-  --pt-divider: #e9e4ee;
-  --pt-hover: #f2eef6;
+  --pt-bg: #e8e8e9;
+  --pt-nav: #efefef;
+  --pt-surface: #f3f3f3;
+  --pt-border: #d5d5d7;
+  --pt-border-strong: #b8b8bb;
+  --pt-divider: #dfdfe0;
+  --pt-hover: #ebebec;
 
-  --pt-text: #1c1924;
-  --pt-text-2: #2c2836;
-  --pt-text-3: #4b4557;
-  --pt-muted: #5c5568;
-  --pt-faint: #7a7386;
+  --pt-text: #1f1f22;
+  --pt-text-2: #2d2d31;
+  --pt-text-3: #45454a;
+  --pt-muted: #535357;
+  --pt-faint: #5c5c60;
 
-  /* Richer, slightly bluer violet; links / icons / focus use the solid brand for contrast. */
-  --pt-brand: #6a3fd1;
-  --pt-brand-dark: #5530b3;
-  --pt-brand-light: #6a3fd1;
-  --pt-brand-lighter: #5530b3;
-  --pt-brand-tint: #ebe4fb;
-  --pt-brand-line: #c9b9f0;
-  --pt-brand-vivid: #6a3fd1;
+  /* Crisp violet that holds contrast on the grey cards; links / icons / focus use the solid brand. */
+  --pt-brand: #6743e0;
+  --pt-brand-dark: #5331c0;
+  --pt-brand-light: #6743e0;
+  --pt-brand-lighter: #5331c0;
+  --pt-brand-tint: #e5e1f5;
+  --pt-brand-line: #c3b9ec;
+  --pt-brand-vivid: #6743e0;
 
-  /* Amber deep enough for text on paper; warm cream fills for GOTY cards. */
-  --pt-gold: #8c5b0c;
-  --pt-gold-line: #c08a2e80;
-  --pt-gold-tint: #f8ead0;
-  --pt-gold-tint-fg: #774c08;
-  --pt-gold-card: #fcf4e3;
-  --pt-gold-card-border: #e9cf9a;
+  /* Amber deep enough for text on the grey page; muted honey fills for GOTY cards. */
+  --pt-gold: #85580b;
+  --pt-gold-line: #b8892c80;
+  --pt-gold-tint: #efe5cf;
+  --pt-gold-tint-fg: #6c4805;
+  --pt-gold-card: #f3eddf;
+  --pt-gold-card-border: #dcc590;
 
-  /* Cool steel for platinum text on paper (AA on bg / surface / the tinted pill), icy blue fills. */
-  --pt-platinum: #4a6178;
-  --pt-platinum-sheen: #7fb8e8;
-  --pt-platinum-glint: #d0e2f3;
-  --pt-platinum-line: #8fa9c280;
-  --pt-platinum-tint: #e4edf6;
-  --pt-platinum-tint-fg: #33475c;
+  /* Silver-slate for platinum text (AA on bg / surface / the tinted pill), pale steel fills. */
+  --pt-platinum: #47515d;
+  --pt-platinum-sheen: #a9b6c4;
+  --pt-platinum-glint: #d3d8de;
+  --pt-platinum-line: #949ca680;
+  --pt-platinum-tint: #dfe2e6;
+  --pt-platinum-tint-fg: #323b46;
 
-  /* Deep teal for 100% text on paper (AA on bg / surface / the tinted pill), mint fills. */
-  --pt-completion: #0f6b5b;
-  --pt-completion-line: #2f9a8580;
-  --pt-completion-tint: #daf1eb;
-  --pt-completion-tint-fg: #0b5446;
+  /* Deep teal for 100% text (AA on bg / surface / the tinted pill), mint fills. */
+  --pt-completion: #0b6656;
+  --pt-completion-line: #2c937f80;
+  --pt-completion-tint: #d3eae3;
+  --pt-completion-tint-fg: #08503f;
 
   --pt-rating-high: var(--pt-gold);
-  --pt-rating-mid: #8a5a10;
+  --pt-rating-mid: #825509;
   --pt-platform-playstation: #2e5bd0;
   --pt-platform-xbox: #2d7a31;
   --pt-platform-switch: #c4302a;
-  --pt-platform-neutral: #7a7386;
+  --pt-platform-neutral: #6a6a6f;
 
-  --pt-success: #1f6f3c;
-  --pt-success-bg: #dff0e3;
-  --pt-danger: #b02a2a;
-  --pt-danger-bg: #fbe2df;
-  --pt-danger-solid: #b02a2a;
-  --pt-neutral: #514a5d;
-  --pt-neutral-bg: #ebe6f0;
+  --pt-success: #1a6837;
+  --pt-success-bg: #d7eadd;
+  --pt-danger: #ab231c;
+  --pt-danger-bg: #f3dcda;
+  --pt-danger-solid: #ab231c;
+  --pt-neutral: #4a4a4f;
+  --pt-neutral-bg: #dfdfe1;
 
-  --pt-chart: #d3ccdb;
+  --pt-chart: #cfcfd2;
 
-  --pt-overlay: #1c192499;
+  --pt-overlay: #1f1f2299;
 
-  --pt-aura: 18%;
-  /* Tints read weaker on paper than on the dark canvas, so light needs a higher mix. */
-  --pt-blob: 18%;
-  --pt-blob-gold: 20%;
-  --pt-card: color-mix(in srgb, var(--pt-surface) 88%, transparent);
+  /* A calm page: only a hint of brand glow and barely-there colour blobs (no warm cast), near-opaque soft grey cards. */
+  --pt-aura: 8%;
+  --pt-blob: 6%;
+  --pt-blob-gold: 5%;
+  --pt-card: color-mix(in srgb, var(--pt-surface) 94%, transparent);
   --pt-card-border: var(--pt-border);
-  --pt-card-shadow: 0 1px 2px #2a1f450d, 0 6px 18px -8px #2a1f4524;
+  --pt-card-shadow: 0 1px 2px #1c1c1f12, 0 6px 18px -8px #1c1c1f29;
 
   color-scheme: light;
 }
