@@ -231,10 +231,10 @@
       <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
         <app-section-header collapseKey="dashboard.playingNow" collapseGroup="dashboard.activity" collapseGroupFrom="lg" class="mb-3 md:mb-[18px]" [label]="'dashboard.playingNow' | translate" />
         @if (playing()?.[0]; as hero) {
-          <!-- Web hero for the most recent run: blurred cover backdrop + crisp cover -->
+          <!-- Hero for the most recent run: blurred cover backdrop + crisp cover -->
           <a
             [routerLink]="['/games', hero.gameId, 'experiences', hero.experienceId]"
-            class="hover-lift relative isolate mb-2.5 hidden overflow-hidden rounded-xl border border-border bg-bg md:block"
+            class="hover-lift relative isolate mb-2.5 block overflow-hidden rounded-xl border border-border bg-bg"
           >
             @if (hero.coverImageUrl) {
               <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
@@ -270,7 +270,7 @@
             }
           } @else {
           @for (run of playing(); track run.experienceId; let first = $first) {
-            <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl" [class]="first ? 'md:hidden' : ''">
+            <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl" [class]="first ? 'hidden' : ''">
               <app-run-row
                 class="hover-lift max-md:bg-surface!"
                 [title]="run.gameName"

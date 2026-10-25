@@ -161,10 +161,10 @@
 
   --pt-overlay: #1c192499;
 
-  --pt-aura: 20%;
-  /* Tints read about half as strong on paper as on the dark canvas, so light needs ~2x. */
-  --pt-blob: 26%;
-  --pt-blob-gold: 26%;
+  --pt-aura: 18%;
+  /* Tints read weaker on paper than on the dark canvas, so light needs a higher mix. */
+  --pt-blob: 18%;
+  --pt-blob-gold: 20%;
   --pt-card: color-mix(in srgb, var(--pt-surface) 88%, transparent);
   --pt-card-border: var(--pt-border);
   --pt-card-shadow: 0 1px 2px #2a1f450d, 0 6px 18px -8px #2a1f4524;
@@ -574,7 +574,8 @@
  */
 .bg-aura {
   position: fixed;
-  inset: 0;
+  /* Bleeds past the viewport so the drift (±4% shift) never reveals the layer's edge as a strip. */
+  inset: -6%;
   z-index: -1;
   pointer-events: none;
 }
