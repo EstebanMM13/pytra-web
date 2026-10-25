@@ -37,9 +37,9 @@ const RPG = { id: 20, name: 'RPG' };
 const PUZZLE = { id: 30, name: 'Puzzle' };
 
 const GAMES = [
-  game(1, [ACTION, RPG, PUZZLE], 'Capcom'),
-  game(2, [ACTION, RPG], 'FromSoftware'),
-  game(3, [ACTION], 'Nintendo'),
+  { ...game(1, [ACTION, RPG, PUZZLE], 'Capcom'), hasPlatinum: true },
+  { ...game(2, [ACTION, RPG], 'FromSoftware'), hasPlatinum: true, hasFullCompletion: true },
+  { ...game(3, [ACTION], 'Nintendo'), hasFullCompletion: true },
   game(4, [{ id: 40, name: 'Shooter' }], 'Valve'),
 ];
 
@@ -157,6 +157,53 @@ describe('Games library filters', () => {
     expect(listed()).toEqual(['/games/1', '/games/4']);
     expect(transitions.length).toBe(2);
     expect(transitions.every((t) => t.skipped)).toBe(true);
+  });
+
+  it('narrows to games with a platinum and / or a 100%, in the URL, the count and the chips', async () => {
+    const { harness, router, el, pick, listed } = await setup();
+    const toggle = async (selector: string) => {
+      el.querySelector<HTMLButtonElement>(selector)!.click();
+      await harness.fixture.whenStable();
+    };
+    const chipLabels = () =>
+      [...el.querySelectorAll('[aria-label="library.filters.active"] > span')].map((c) => c.textContent?.trim());
+    const count = () => el.querySelector('app-library-filters button[aria-haspopup="dialog"] .font-mono')?.textContent?.trim();
+
+    await toggle('[data-filter-platinum]');
+    expect(router.url).toBe('/games?platinum=1');
+    expect(listed()).toEqual(['/games/1', '/games/2']);
+    await toggle('[data-filter-full-completion]');
+    expect(router.url).toBe('/games?platinum=1&full=1');
+    expect(listed()).toEqual(['/games/2']);
+    expect(count()).toBe('2');
+    expect(chipLabels()).toEqual(['library.filters.platinum', 'library.filters.fullCompletion']);
+
+    // AND with the other panel filters
+    await pick('library-filter-developers', 'Nintendo');
+    expect(listed()).toEqual([]);
+
+    // Removing a chip drops just that flag
+    const platinumChip = [...el.querySelectorAll('[aria-label="library.filters.active"] > span')][0];
+    platinumChip.querySelector('button')!.click();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/games?full=1&dev=Nintendo');
+    expect(listed()).toEqual(['/games/3']);
+  });
+
+  it('restores the platinum and 100% filters from the URL and clears them with the panel', async () => {
+    const { harness, router, el, listed } = await setup();
+    await harness.navigateByUrl('/games?full=1');
+    expect(listed()).toEqual(['/games/2', '/games/3']);
+    expect(el.querySelector('[data-filter-full-completion]')?.getAttribute('aria-pressed')).toBe('true');
+    expect(el.querySelector('[data-filter-platinum]')?.getAttribute('aria-pressed')).toBe('false');
+
+    const clear = [...el.querySelectorAll<HTMLButtonElement>('[aria-label="library.filters.active"] button')].find(
+      (b) => b.textContent?.trim() === 'library.filters.clear',
+    )!;
+    clear.click();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/games');
+    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3', '/games/4']);
   });
 });
 

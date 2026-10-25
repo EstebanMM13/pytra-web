@@ -52,6 +52,10 @@ export interface LibraryQuery {
   developers?: readonly string[];
   /** Publisher names; same rules as `developers`. */
   publishers?: readonly string[];
+  /** Only games with a platinum run. */
+  platinum?: boolean;
+  /** Only games with a run completed at 100%. */
+  fullCompletion?: boolean;
 }
 
 /** Steam imports waiting for review live on /steam until confirmed; the library only lists confirmed games. */
@@ -144,10 +148,16 @@ export function matchesName(value: string | null | undefined, names: readonly st
   return !!key && names.some((name) => normalizeText(name) === key);
 }
 
-/** Text, platform, genre, category, developer and publisher filters: everything except the status tab. */
+/** Platinum / 100% filters: when set, the game must have that achievement (both set: both). */
+export function matchesAchievements(game: Game, query: Pick<LibraryQuery, 'platinum' | 'fullCompletion'>): boolean {
+  return (!query.platinum || !!game.hasPlatinum) && (!query.fullCompletion || !!game.hasFullCompletion);
+}
+
+/** Text, platform, genre, category, developer, publisher and achievement filters: everything except the status tab. */
 export function matchesPanelFilters(game: Game, query: LibraryQuery): boolean {
   return (
     matchesText(game, query.text) &&
+    matchesAchievements(game, query) &&
     matchesPlatforms(game, query.platforms) &&
     matchesGenres(game, query.genres) &&
     matchesCategory(game, query.category) &&
@@ -156,12 +166,20 @@ export function matchesPanelFilters(game: Game, query: LibraryQuery): boolean {
   );
 }
 
-/** Number of filters set in the filter panel (category, each platform, genre, developer and publisher). */
+/**
+ * Number of filters set in the filter panel (category, each platform, genre, developer and
+ * publisher, platinum, 100%).
+ */
 export function panelFilterCount(
-  query: Pick<LibraryQuery, 'category' | 'platforms' | 'genres' | 'developers' | 'publishers'>,
+  query: Pick<
+    LibraryQuery,
+    'category' | 'platforms' | 'genres' | 'developers' | 'publishers' | 'platinum' | 'fullCompletion'
+  >,
 ): number {
   return (
     (query.category && query.category !== 'ALL' ? 1 : 0) +
+    (query.platinum ? 1 : 0) +
+    (query.fullCompletion ? 1 : 0) +
     (query.platforms?.length ?? 0) +
     (query.genres?.length ?? 0) +
     (query.developers?.length ?? 0) +
@@ -407,6 +425,16 @@ export function serializeNameList(names: readonly string[]): string[] | null {
 
 export function parseCategoryFilter(value: string | null): LibraryCategoryFilter {
   return (LIBRARY_CATEGORY_FILTERS as readonly string[]).includes(value ?? '') ? (value as LibraryCategoryFilter) : 'ALL';
+}
+
+/** On/off URL flag (`platinum=1`): only `1` turns it on. */
+export function parseFlag(value: string | null): boolean {
+  return value === '1';
+}
+
+/** URL form of an on/off flag; null (param removed) when off. */
+export function serializeFlag(on: boolean): string | null {
+  return on ? '1' : null;
 }
 
 export function parsePage(value: string | null): number {

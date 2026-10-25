@@ -1021,7 +1021,10 @@
       "developersPlaceholder": "Search developers…",
       "publishers": "Publisher",
       "publishersPlaceholder": "Search publishers…",
-      "allHint": "Only games that have all the chosen genres are shown."
+      "allHint": "Only games that have all the chosen genres are shown.",
+      "achievements": "Achievements",
+      "platinum": "With platinum",
+      "fullCompletion": "At 100%"
     },
     "statusShort": "Status"
   },

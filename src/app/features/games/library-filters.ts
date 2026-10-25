@@ -23,8 +23,8 @@ import { ICONS } from '../../shared/ui/icons';
 import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } from './library.logic';
 
 /**
- * "Filtrar y ordenar" button of the library toolbar with its panel: sort, type (category), platforms, genres,
- * developers and publishers.
+ * "Filtrar y ordenar" button of the library toolbar with its panel: sort, type (category), achievements
+ * (platinum, 100%), platforms, genres, developers and publishers.
  * A bottom sheet on phones, a popover under the button from md. Changes apply right away; the
  * parent keeps them in the URL.
  */
@@ -127,6 +127,36 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
                 {{ (c === 'ALL' ? 'library.categoryAllShort' : 'category.' + c) | translate }}
               </button>
             }
+          </div>
+        </section>
+
+        <section class="flex flex-col gap-2 border-t border-divider py-3.5">
+          <h3 id="library-filter-achievements" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+            {{ 'library.filters.achievements' | translate }}
+          </h3>
+          <div class="flex flex-wrap gap-1.5" role="group" aria-labelledby="library-filter-achievements">
+            <button
+              type="button"
+              [attr.aria-pressed]="platinum()"
+              (click)="platinumChange.emit(!platinum())"
+              class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px]"
+              [class]="platinum() ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
+              data-filter-platinum
+            >
+              <svg [lucideIcon]="icons.trophy" [size]="14" class="shrink-0 text-platinum" aria-hidden="true"></svg>
+              {{ 'library.filters.platinum' | translate }}
+            </button>
+            <button
+              type="button"
+              [attr.aria-pressed]="fullCompletion()"
+              (click)="fullCompletionChange.emit(!fullCompletion())"
+              class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px]"
+              [class]="fullCompletion() ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
+              data-filter-full-completion
+            >
+              <svg [lucideIcon]="icons.badgeCheck" [size]="14" class="shrink-0 text-completion" aria-hidden="true"></svg>
+              {{ 'library.filters.fullCompletion' | translate }}
+            </button>
           </div>
         </section>
 
@@ -257,6 +287,9 @@ export class LibraryFilters {
   /** Developers / publishers present in the library, sorted. */
   readonly developers = input<readonly string[]>([]);
   readonly publishers = input<readonly string[]>([]);
+  /** Only games with a platinum / a 100% run. */
+  readonly platinum = input(false);
+  readonly fullCompletion = input(false);
 
   readonly categoryChange = output<LibraryCategoryFilter>();
   readonly platformsChange = output<string[]>();
@@ -264,7 +297,9 @@ export class LibraryFilters {
   readonly developersChange = output<string[]>();
   readonly publishersChange = output<string[]>();
   readonly sortChange = output<LibrarySort>();
-  /** Clears the filters (type, platforms, genres, developers, publishers); the sort stays. */
+  readonly platinumChange = output<boolean>();
+  readonly fullCompletionChange = output<boolean>();
+  /** Clears the filters (type, achievements, platforms, genres, developers, publishers); the sort stays. */
   readonly cleared = output<void>();
 
   protected readonly categoryChoices: readonly LibraryCategoryFilter[] = ['ALL', ...GAME_CATEGORIES];
@@ -275,6 +310,8 @@ export class LibraryFilters {
   protected readonly count = computed(
     () =>
       (this.category() !== 'ALL' ? 1 : 0) +
+      (this.platinum() ? 1 : 0) +
+      (this.fullCompletion() ? 1 : 0) +
       this.platformIds().length +
       this.genreIds().length +
       this.developerNames().length +

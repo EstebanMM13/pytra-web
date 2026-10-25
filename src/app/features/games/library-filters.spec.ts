@@ -23,6 +23,10 @@ import { LibraryFilters, idsOf, namesOf } from './library-filters';
     [publishers]="publishers"
     (developersChange)="developerNames.set($event)"
     (publishersChange)="publisherNames.set($event)"
+    [platinum]="platinum()"
+    [fullCompletion]="fullCompletion()"
+    (platinumChange)="platinum.set($event)"
+    (fullCompletionChange)="fullCompletion.set($event)"
     (cleared)="cleared = cleared + 1"
   />`,
 })
@@ -40,6 +44,8 @@ class Host {
   readonly publisherNames = signal<readonly string[]>([]);
   readonly developers = ['Capcom', 'FromSoftware', 'Nintendo EPD'];
   readonly publishers = ['Bandai Namco', 'Nintendo'];
+  readonly platinum = signal(false);
+  readonly fullCompletion = signal(false);
   cleared = 0;
 }
 
@@ -162,6 +168,39 @@ describe('LibraryFilters', () => {
     expect(fixture.componentInstance.publisherNames()).toEqual(['Nintendo']);
     // Count badge: 1 developer + 1 publisher.
     expect(trigger.querySelector('.font-mono')?.textContent?.trim()).toBe('2');
+  });
+});
+
+describe('LibraryFilters achievements', () => {
+  it('toggles the platinum and 100% filters, each counting as one filter', () => {
+    TestBed.configureTestingModule({ imports: [Host], providers: [provideTranslateService()] });
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const trigger = el.querySelector('button[aria-haspopup="dialog"]') as HTMLButtonElement;
+    trigger.click();
+    fixture.detectChanges();
+
+    expect(el.querySelector('#library-filter-achievements')?.textContent).toContain('library.filters.achievements');
+    const platinum = el.querySelector<HTMLButtonElement>('[data-filter-platinum]')!;
+    const full = el.querySelector<HTMLButtonElement>('[data-filter-full-completion]')!;
+    expect(platinum.textContent?.trim()).toBe('library.filters.platinum');
+    expect(full.textContent?.trim()).toBe('library.filters.fullCompletion');
+    expect(platinum.getAttribute('aria-pressed')).toBe('false');
+
+    platinum.click();
+    fixture.detectChanges();
+    full.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.platinum()).toBe(true);
+    expect(fixture.componentInstance.fullCompletion()).toBe(true);
+    expect(platinum.getAttribute('aria-pressed')).toBe('true');
+    expect(trigger.querySelector('.font-mono')?.textContent?.trim()).toBe('2');
+
+    platinum.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.platinum()).toBe(false);
+    expect(trigger.querySelector('.font-mono')?.textContent?.trim()).toBe('1');
   });
 });
 

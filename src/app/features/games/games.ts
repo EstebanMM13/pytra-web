@@ -49,12 +49,14 @@ import {
   parseCategoryFilter,
   parseIdList,
   parseLibraryView,
+  parseFlag,
   parseNameList,
   parsePage,
   parseSort,
   parseStatusFilter,
   pruneIds,
   pruneNames,
+  serializeFlag,
   serializeIdList,
   serializeNameList,
 } from './library.logic';
@@ -67,7 +69,7 @@ const SEARCH_URL_DELAY_MS = 300;
 
 /** Removable chip of an active panel filter; `id` is the platform / genre id or the developer / publisher name. */
 interface FilterChip {
-  kind: 'category' | 'platform' | 'genre' | 'developer' | 'publisher';
+  kind: 'category' | 'platform' | 'genre' | 'developer' | 'publisher' | 'platinum' | 'fullCompletion';
   id: string;
   label: string;
 }
@@ -75,7 +77,8 @@ interface FilterChip {
 /**
  * Library (/games): confirmed games with their run aggregates, filtered, sorted and paged on the
  * client. Filters live in the URL (`q`, `status`, `platform` and `genre` as comma-separated ids, `dev` and
- * `pub` as repeated names, `category`, `sort`, `page`) so back navigation restores them.
+ * `pub` as repeated names, `category`, `platinum=1` and `full=1` (100%), `sort`, `page`) so back
+ * navigation restores them.
  * The list / grid view is a per-device preference (localStorage); the grid shows every result, unpaged.
  */
 @Component({
@@ -146,6 +149,8 @@ export class Games {
             category: parseCategoryFilter(params.get('category')),
             developers: parseNameList(params.getAll('dev')),
             publishers: parseNameList(params.getAll('pub')),
+            platinum: parseFlag(params.get('platinum')),
+            fullCompletion: parseFlag(params.get('full')),
             page: parsePage(params.get('page')),
           }) satisfies LibraryQuery & { page: number },
       ),
@@ -224,6 +229,10 @@ export class Games {
     const chips: FilterChip[] = [];
     if (query.category !== 'ALL') {
       chips.push({ kind: 'category', id: query.category, label: `category.${query.category}` });
+    }
+    if (query.platinum) chips.push({ kind: 'platinum', id: 'platinum', label: 'library.filters.platinum' });
+    if (query.fullCompletion) {
+      chips.push({ kind: 'fullCompletion', id: 'fullCompletion', label: 'library.filters.fullCompletion' });
     }
     const platforms = new Map(this.platforms().map((p) => [String(p.id), p.name]));
     for (const id of query.platforms) {
@@ -370,18 +379,37 @@ export class Games {
     this.updateQuery({ pub: serializeNameList(parseNameList(publishers)), page: null });
   }
 
+  protected setPlatinum(on: boolean): void {
+    this.updateQuery({ platinum: serializeFlag(on), page: null });
+  }
+
+  protected setFullCompletion(on: boolean): void {
+    this.updateQuery({ full: serializeFlag(on), page: null });
+  }
+
   protected removeChip(chip: Pick<FilterChip, 'kind' | 'id'>): void {
     const query = this.query();
     if (chip.kind === 'category') this.setCategory('ALL');
+    else if (chip.kind === 'platinum') this.setPlatinum(false);
+    else if (chip.kind === 'fullCompletion') this.setFullCompletion(false);
     else if (chip.kind === 'platform') this.setPlatforms(query.platforms.filter((p) => p !== chip.id));
     else if (chip.kind === 'developer') this.setDevelopers(query.developers.filter((d) => d !== chip.id));
     else if (chip.kind === 'publisher') this.setPublishers(query.publishers.filter((p) => p !== chip.id));
     else this.setGenres(query.genres.filter((g) => String(g) !== chip.id));
   }
 
-  /** Clears the filter panel only (type, platforms, genres, developers, publishers); search and status tab stay. */
+  /** Clears the filter panel only (type, platforms, genres, developers, publishers, platinum, 100%); search and status tab stay. */
   protected clearPanelFilters(): void {
-    this.updateQuery({ platform: null, genre: null, category: null, dev: null, pub: null, page: null });
+    this.updateQuery({
+      platform: null,
+      genre: null,
+      category: null,
+      dev: null,
+      pub: null,
+      platinum: null,
+      full: null,
+      page: null,
+    });
   }
 
   protected setCategory(category: string): void {
@@ -411,6 +439,8 @@ export class Games {
       category: null,
       dev: null,
       pub: null,
+      platinum: null,
+      full: null,
       page: null,
     });
   }

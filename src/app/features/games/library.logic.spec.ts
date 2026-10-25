@@ -7,8 +7,11 @@ import {
   isUpcoming,
   pendingSource,
   pendingSummary,
+  matchesAchievements,
   matchesCategory,
   parseCategoryFilter,
+  parseFlag,
+  serializeFlag,
   lastPlayedKey,
   libraryPlatforms,
   matchesPlatforms,
@@ -409,6 +412,45 @@ describe('developer and publisher filters', () => {
       'FromSoftware',
       'Bandai Namco',
     ]);
+  });
+});
+
+describe('platinum and 100% filters', () => {
+  const games = [
+    game({ id: 1, name: 'Bloodborne', hasPlatinum: true, hasFullCompletion: true, lastExperienceStatus: 'COMPLETADO' }),
+    game({ id: 2, name: 'Celeste', hasPlatinum: true, hasFullCompletion: false, lastExperienceStatus: 'COMPLETADO' }),
+    game({ id: 3, name: 'Hades', hasPlatinum: false, hasFullCompletion: true, lastExperienceStatus: 'EN_CURSO' }),
+    game({ id: 4, name: 'Inside', hasPlatinum: null, hasFullCompletion: undefined }),
+  ];
+  const ids = (list: Game[]) => list.map((g) => g.id).sort();
+  const query = { text: '', status: 'ALL', sort: 'name' } as const;
+
+  it('keeps every game while off and only the flagged ones while on', () => {
+    expect(matchesAchievements(games[3], {})).toBe(true);
+    expect(ids(filterGames(games, query))).toEqual([1, 2, 3, 4]);
+    expect(ids(filterGames(games, { ...query, platinum: true }))).toEqual([1, 2]);
+    expect(ids(filterGames(games, { ...query, fullCompletion: true }))).toEqual([1, 3]);
+  });
+
+  it('combines with each other and with the other filters (AND)', () => {
+    expect(ids(filterGames(games, { ...query, platinum: true, fullCompletion: true }))).toEqual([1]);
+    expect(ids(filterGames(games, { ...query, fullCompletion: true, status: 'EN_CURSO' }))).toEqual([3]);
+    expect(ids(filterGames(games, { ...query, platinum: true, text: 'cel' }))).toEqual([2]);
+  });
+
+  it('counts each one as a panel filter', () => {
+    expect(panelFilterCount({ category: 'ALL', platinum: true })).toBe(1);
+    expect(panelFilterCount({ category: 'HYBRID', platinum: true, fullCompletion: true })).toBe(3);
+    expect(panelFilterCount({ category: 'ALL', platinum: false, fullCompletion: false })).toBe(0);
+  });
+
+  it('reads and writes them as `1` URL flags', () => {
+    expect(parseFlag('1')).toBe(true);
+    expect(parseFlag(null)).toBe(false);
+    expect(parseFlag('true')).toBe(false);
+    expect(parseFlag('0')).toBe(false);
+    expect(serializeFlag(true)).toBe('1');
+    expect(serializeFlag(false)).toBeNull();
   });
 });
 
