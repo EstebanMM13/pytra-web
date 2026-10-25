@@ -236,53 +236,71 @@
     }
 
     <!-- Stats: six equal cards (total hours, runs, average, best, 100%, platinum): three rows of
-         two on phones, two rows of three on tablets, one row on desktop. Hybrid games add the campaign /
-         online split under the hours.
+         two on phones, two rows of three on tablets, one row on desktop.
          ONLINE games have no runs: total hours, their online rating, 100% and platinum (from the online
-         playtime), two by two on phones and in one row from tablets. -->
+         playtime), two by two on phones and in one row from tablets.
+         With the campaign / online split (hybrid games) the hours card goes wide, figure on the left and
+         a thin bar + two-line legend on the right, so it is as tall as the other cards; `statsGrid`
+         keeps the remaining cards in even rows. -->
     @if (experiences() !== null) {
       @let s = stats();
       @let online = isOnlineGame();
+      @let grid = statsGrid();
       <section
-        class="grid grid-cols-2 gap-2.5 md:gap-3"
-        [class]="online ? 'md:grid-cols-4' : 'md:grid-cols-3 lg:grid-cols-6'"
+        class="grid gap-2.5 md:gap-3"
+        [class]="grid.section"
         [attr.aria-label]="'game.stats.label' | translate"
       >
-        <div class="relative min-w-0 overflow-hidden rounded-xl border border-card-border card-glass" data-stat="hours">
+        <div
+          class="relative min-w-0 overflow-hidden rounded-xl border border-card-border card-glass"
+          [class]="grid.hours"
+          data-stat="hours"
+        >
           <!-- Same inner layout as a large stat card -->
           <div class="@container relative flex h-full flex-col justify-center p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]">
             <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
               <svg [lucideIcon]="statIcons.hours" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
               <span class="truncate">{{ 'game.stats.totalHours' | translate }}</span>
             </p>
-            <p class="mt-2 leading-none font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.totalHours | hours)">
-              <span data-figure>{{ s.totalHours | hours }}</span>
-            </p>
-            @if (showHoursBreakdown()) {
-              <div class="mt-auto pt-3">
-                <div class="flex h-1.5 overflow-hidden rounded-full bg-border" aria-hidden="true">
-                  <span class="bg-brand-light" [style.width.%]="campaignShare()"></span>
-                  <span class="flex-1 bg-text-2" [class.opacity-0]="!s.onlineHours"></span>
-                </div>
-                <p class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted md:gap-x-4">
-                  <span class="inline-flex items-center gap-1.5">
-                    <span class="size-2 rounded-full bg-brand-light" aria-hidden="true"></span>
-                    {{ 'game.stats.campaign' | translate }}
-                    <span class="font-mono text-text-2">{{ s.runHours | hours }}</span>
-                  </span>
-                  <span class="inline-flex items-center gap-1.5">
-                    <span class="size-2 rounded-full bg-text-2" aria-hidden="true"></span>
-                    {{ 'game.stats.online' | translate }}
-                    <span class="font-mono text-text-2">{{ s.onlineHours | hours }}</span>
-                  </span>
+            @if (grid.wideHours) {
+              <div class="mt-2 flex items-center gap-4">
+                <p
+                  class="shrink-0 leading-none font-bold tracking-[-0.03em] whitespace-nowrap"
+                  [style.font-size]="figureSize(s.totalHours | hours, hoursLegendPx)"
+                >
+                  <span data-figure>{{ s.totalHours | hours }}</span>
                 </p>
+                <!-- Bar + legend: 4 px bar, 4 px gap and two 14 px lines, the height of the 36 px figure -->
+                <div class="ml-auto min-w-0 max-w-52 flex-1" data-hours-breakdown>
+                  <div class="flex h-1 overflow-hidden rounded-full bg-border" aria-hidden="true">
+                    <span class="bg-brand-light" [style.width.%]="campaignShare()"></span>
+                    <span class="flex-1 bg-text-2" [class.opacity-0]="!s.onlineHours"></span>
+                  </div>
+                  <ul class="mt-1 text-[11px] leading-[14px] whitespace-nowrap text-muted">
+                    <li class="flex items-center gap-1.5">
+                      <span class="size-1.5 shrink-0 rounded-full bg-brand-light" aria-hidden="true"></span>
+                      <span class="min-w-0 truncate">{{ 'game.stats.campaign' | translate }}</span>
+                      <span class="ml-auto pl-2 font-mono text-text-2">{{ s.runHours | hours }}</span>
+                    </li>
+                    <li class="flex items-center gap-1.5">
+                      <span class="size-1.5 shrink-0 rounded-full bg-text-2" aria-hidden="true"></span>
+                      <span class="min-w-0 truncate">{{ 'game.stats.online' | translate }}</span>
+                      <span class="ml-auto pl-2 font-mono text-text-2">{{ s.onlineHours | hours }}</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
+            } @else {
+              <p class="mt-2 leading-none font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.totalHours | hours)">
+                <span data-figure>{{ s.totalHours | hours }}</span>
+              </p>
             }
           </div>
         </div>
         @if (online) {
           <app-stat-card
             size="large"
+            [class]="grid.rating"
             [icon]="statIcons.rating"
             [label]="'game.stats.rating' | translate"
             [value]="onlineRating() | rating"
@@ -290,19 +308,29 @@
             tone="gold-tile"
           />
         } @else {
-          <app-stat-card size="large" [icon]="statIcons.runs" [label]="'game.stats.runs' | translate" [value]="s.runs" />
           <app-stat-card
             size="large"
+            [class]="grid.runs"
+            [icon]="statIcons.runs"
+            [label]="'game.stats.runs' | translate"
+            [value]="s.runs"
+          />
+          <app-stat-card
+            size="large"
+            [class]="grid.avg"
             [icon]="statIcons.rating"
             [label]="'game.stats.avgRating' | translate"
+            [shortLabel]="grid.wideHours ? ('game.stats.avgRatingShort' | translate) : null"
             [value]="s.avgRating | rating"
             [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
             tone="gold-tile"
           />
           <app-stat-card
             size="large"
+            [class]="grid.best"
             [icon]="statIcons.best"
             [label]="'game.stats.bestRating' | translate"
+            [shortLabel]="grid.wideHours ? ('game.stats.bestRatingShort' | translate) : null"
             [value]="s.bestRating | rating"
             [valueClass]="'font-mono ' + (s.bestRating | ratingTone)"
             tone="gold"
@@ -310,7 +338,7 @@
         }
         @if (fullCompletion()) {
           <!-- Earned 100%: same box as a stat card, in mint teal with a soft glow on the badge -->
-          <div class="completion-tile relative min-w-0 rounded-xl border card-glass" data-stat="fullCompletion">
+          <div class="completion-tile relative min-w-0 rounded-xl border card-glass" [class]="grid.trophies" data-stat="fullCompletion">
             <div class="relative flex h-full flex-col justify-center p-4 md:px-5">
               <p class="completion-tile-label flex min-w-0 items-center gap-1.5 text-xs leading-4 md:gap-2 md:text-[13px] md:leading-5">
                 <svg [lucideIcon]="statIcons.fullCompletion" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
@@ -330,6 +358,7 @@
         } @else {
           <app-stat-card
             size="large"
+            [class]="grid.trophies"
             [icon]="statIcons.fullCompletion"
             [label]="'game.stats.fullCompletion' | translate"
             value="—"
@@ -338,7 +367,7 @@
         }
         @if (platinum()) {
           <!-- Earned platinum: same box as a stat card, in icy silver with a diamond sheen and glow -->
-          <div class="platinum-tile platinum-glow relative min-w-0 rounded-xl border card-glass" data-stat="platinum">
+          <div class="platinum-tile platinum-glow relative min-w-0 rounded-xl border card-glass" [class]="grid.trophies" data-stat="platinum">
             <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
               <defs>
                 <linearGradient id="platinum-trophy-sheen" x1="0" y1="0" x2="1" y2="1">
@@ -365,7 +394,14 @@
             </div>
           </div>
         } @else {
-          <app-stat-card size="large" [icon]="statIcons.platinum" [label]="'game.stats.platinum' | translate" value="—" tone="platinum" />
+          <app-stat-card
+            size="large"
+            [class]="grid.trophies"
+            [icon]="statIcons.platinum"
+            [label]="'game.stats.platinum' | translate"
+            value="—"
+            tone="platinum"
+          />
         }
       </section>
     } @else {

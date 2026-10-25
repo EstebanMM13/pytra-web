@@ -748,7 +748,9 @@
       "label": "Game figures",
       "campaign": "Campaign",
       "online": "Online",
-      "rating": "Rating"
+      "rating": "Rating",
+      "avgRatingShort": "Avg",
+      "bestRatingShort": "Best"
     },
     "runs": "Runs",
     "noRuns": "No runs yet.",

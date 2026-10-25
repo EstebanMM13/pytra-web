@@ -748,7 +748,9 @@
       "label": "Cifras del juego",
       "campaign": "Campaña",
       "online": "Online",
-      "rating": "Nota"
+      "rating": "Nota",
+      "avgRatingShort": "Media",
+      "bestRatingShort": "Mejor"
     },
     "runs": "Partidas",
     "noRuns": "Todavía no hay partidas.",

@@ -179,8 +179,28 @@ describe('GameDetail stats', () => {
   it('features total hours with the campaign / online split for games with online hours', () => {
     const hours = render('HYBRID').querySelector('[data-stat="hours"]')!;
     expect(hours.textContent).toContain('20 h');
-    expect(hours.textContent).toContain('game.stats.campaign');
-    expect(hours.textContent).toContain('game.stats.online');
+    const breakdown = hours.querySelector('[data-hours-breakdown]')!;
+    expect(breakdown.textContent).toContain('game.stats.campaign');
+    expect(breakdown.textContent).toContain('game.stats.online');
+    // Compact: one thin bar and a two-line legend beside the figure.
+    expect(breakdown.querySelectorAll('li').length).toBe(2);
+  });
+
+  it('widens the hybrid hours card and keeps the other cards in even rows', () => {
+    const el = render('HYBRID');
+    const hours = el.querySelector('[data-stat="hours"]')!;
+    const grid = hours.parentElement!;
+    expect(grid.className).toContain('grid-cols-6');
+    expect(grid.className).toContain('md:grid-cols-12');
+    expect(grid.className).toContain('xl:grid-cols-7');
+    // Phones: hours alone (6 of 6), runs / average / best three across (2 each), 100% / platinum two across (3 each).
+    const spans = [...grid.children].map((c) => c.className.match(/(?:^| )col-span-(\d+)/)?.[1]);
+    expect(spans).toEqual(['6', '2', '2', '2', '3', '3']);
+    // Tablets: hours + runs + average (6 + 3 + 3 of 12), then best / 100% / platinum (4 each).
+    const mdSpans = [...grid.children].map((c) => c.className.match(/md:col-span-(\d+)/)?.[1] ?? null);
+    expect(mdSpans).toEqual([null, '3', '3', '4', '4', '4']);
+    // Wide screens: one row of seven cells, hours two wide.
+    expect(hours.className).toContain('xl:col-span-2');
   });
 
   it('shows six equal cards (hours as a regular card) and no split for single-player games', () => {

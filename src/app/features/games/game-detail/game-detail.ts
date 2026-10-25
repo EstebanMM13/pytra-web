@@ -74,6 +74,59 @@ function byRelease(a: Game, b: Game): number {
   return ra.localeCompare(rb) || a.name.localeCompare(b.name);
 }
 
+/** Grid classes of the stats section (`section`) and of each card of it (empty: one cell). */
+interface StatsGrid {
+  section: string;
+  /** Hours card shows the figure beside the campaign / online bar and legend. */
+  wideHours: boolean;
+  hours: string;
+  runs: string;
+  avg: string;
+  best: string;
+  /** Online rating card of ONLINE games. */
+  rating: string;
+  /** The 100% and platinum cards. */
+  trophies: string;
+}
+
+const PLAIN_GRID: StatsGrid = {
+  section: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-6',
+  wideHours: false,
+  hours: '',
+  runs: '',
+  avg: '',
+  best: '',
+  rating: '',
+  trophies: '',
+};
+
+const PLAIN_ONLINE_GRID: StatsGrid = { ...PLAIN_GRID, section: 'grid-cols-2 md:grid-cols-4' };
+
+const WIDE_HOURS_HYBRID_GRID: StatsGrid = {
+  section: 'grid-cols-6 md:grid-cols-12 xl:grid-cols-7',
+  wideHours: true,
+  hours: 'col-span-6 xl:col-span-2',
+  runs: 'col-span-2 md:col-span-3 xl:col-span-1',
+  avg: 'col-span-2 md:col-span-3 xl:col-span-1',
+  best: 'col-span-2 md:col-span-4 xl:col-span-1',
+  rating: '',
+  trophies: 'col-span-3 md:col-span-4 xl:col-span-1',
+};
+
+const WIDE_HOURS_ONLINE_GRID: StatsGrid = {
+  section: 'grid-cols-6 md:grid-cols-2 lg:grid-cols-5',
+  wideHours: true,
+  hours: 'col-span-6 md:col-span-1 lg:col-span-2',
+  runs: '',
+  avg: '',
+  best: '',
+  rating: 'col-span-2 md:col-span-1',
+  trophies: 'col-span-2 md:col-span-1',
+};
+
+/** Legend column of the wide hours card (dot, label and hours of the longer line) plus its gap. */
+const HOURS_LEGEND_PX = 128;
+
 @Component({
   selector: 'app-game-detail',
   imports: [
@@ -132,7 +185,11 @@ export class GameDetail {
   };
 
   /** Hero figure size: shrinks long values to the cell width instead of cutting them. */
-  protected readonly figureSize = (value: string | number): string => figureFontSize(String(value));
+  protected readonly figureSize = (value: string | number, reservePx = 0): string =>
+    figureFontSize(String(value), reservePx);
+
+  /** Room kept beside the hours figure for the campaign / online legend of the wide hours card. */
+  protected readonly hoursLegendPx = HOURS_LEGEND_PX;
 
   readonly gameId = signal(0);
   readonly game = signal<Game | null>(null);
@@ -265,6 +322,24 @@ export class GameDetail {
   protected readonly showHoursBreakdown = computed(() => {
     const category = this.game()?.category;
     return category === 'HYBRID' || (category === 'ONLINE' && this.stats().runHours > 0);
+  });
+
+  /**
+   * Grid classes of the stats section and of each card. Without the campaign / online split every
+   * card takes one cell. With it, the hours card goes wide (figure left, bar + legend right) so it is
+   * as tall as its neighbours, and the other cards still form even rows:
+   * - HYBRID: phones hours alone, then runs / average / best three across and 100% / platinum two
+   *   across; tablets hours + runs + average, then best / 100% / platinum; wide screens one row with
+   *   the hours card two cells wide.
+   * - ONLINE with runs: phones hours alone, then rating / 100% / platinum three across; tablets two by
+   *   two; desktops one row with the hours card two cells wide.
+   */
+  protected readonly statsGrid = computed<StatsGrid>(() => {
+    const online = this.isOnlineGame();
+    if (!this.showHoursBreakdown()) {
+      return online ? PLAIN_ONLINE_GRID : PLAIN_GRID;
+    }
+    return online ? WIDE_HOURS_ONLINE_GRID : WIDE_HOURS_HYBRID_GRID;
   });
 
   /** Campaign (runs) share of the total hours, for the breakdown bar; 100 without hours. */
