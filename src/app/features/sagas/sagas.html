@@ -72,8 +72,13 @@
             "
             [style.--i]="idx"
           >
-            <!-- Up to four of the saga's games as an overlapping, slightly fanned collage of box art -->
-            <span class="saga-collage relative h-12 w-[calc(42px+2.25rem)] shrink-0" aria-hidden="true">
+            <!-- Up to four of the saga's games as an overlapping, slightly fanned collage of box art.
+                 On phones a lone cover sizes to itself instead of leaving the fan's empty room. -->
+            <span
+              class="saga-collage relative h-12 w-[calc(42px+2.25rem)] shrink-0 max-sm:data-single:w-[42px]"
+              [attr.data-single]="s.games.length <= 1 ? '' : null"
+              aria-hidden="true"
+            >
               @for (g of s.games.slice(0, 4); track g.id; let i = $index) {
                 <!-- The wrapper is positioned: GameCover owns its host classes and would drop `absolute`. -->
                 <span
