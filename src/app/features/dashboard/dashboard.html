@@ -218,7 +218,7 @@
             <svg [lucideIcon]="icons.arrowRight" [size]="14" class="text-brand-light" aria-hidden="true"></svg>
           </a>
         </app-section-header>
-        <ul class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           @for (badge of topBadges(); track badge.id) {
             <li><app-achievement-badge compact [achievement]="badge" /></li>
           }
@@ -249,14 +249,20 @@
                 <div class="absolute inset-0 bg-linear-to-r from-bg/30 via-bg/55 to-bg/80 light:from-bg/30 light:via-bg/50 light:to-bg/75"></div>
               </div>
             }
-            <div class="flex items-center gap-4 p-4">
+            <div class="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
               <app-game-cover decorative size="md" class="shadow-md shadow-black/20" [url]="hero.coverImageUrl" [name]="hero.gameName" />
               <div class="min-w-0 flex-1">
                 <p class="truncate text-base font-semibold" [attr.title]="hero.gameName">{{ hero.gameName }}</p>
                 <p class="mt-1 truncate text-[13px] text-text-3" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
+                <!-- Days pill under the meta on phones, where the title needs the width -->
+                @if (daysPlaying(hero); as days) {
+                  <span class="mt-2 inline-block rounded-full bg-hover px-2 py-0.5 font-mono text-[11px] text-text-3 ring-1 ring-gold/70 ring-inset sm:hidden">
+                    {{ days }}
+                  </span>
+                }
               </div>
               @if (daysPlaying(hero); as days) {
-                <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-gold/70 ring-inset">
+                <span class="hidden shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-gold/70 ring-inset sm:block">
                   {{ days }}
                 </span>
               }
@@ -272,13 +278,19 @@
           @for (run of playing(); track run.experienceId; let first = $first) {
             <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="rounded-xl" [class]="first ? 'hidden' : ''">
               <app-run-row
-                class="hover-lift max-md:bg-surface!"
+                class="hover-lift max-md:bg-surface! max-sm:gap-3 max-sm:p-3"
                 [title]="run.gameName"
                 [coverUrl]="run.coverImageUrl"
                 [meta]="playingMeta(run)"
               >
                 @if (daysPlaying(run); as days) {
-                  <span class="shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-gold/70 ring-inset">
+                  <span runRowBelow class="mt-1.5 inline-block rounded-full bg-hover px-2 py-0.5 font-mono text-[11px] text-text-3 ring-1 ring-gold/70 ring-inset sm:hidden">
+                    {{ days }}
+                  </span>
+                }
+                <!-- Separate block: a control-flow block is only routed to a named slot when it has one root -->
+                @if (daysPlaying(run); as days) {
+                  <span class="hidden shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-xs text-text-3 ring-1 ring-gold/70 ring-inset sm:block">
                     {{ days }}
                   </span>
                 }
