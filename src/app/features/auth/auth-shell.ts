@@ -3,6 +3,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { PytraMark } from '../../shared/ui/pytra-mark';
 import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
+import { ThemeToggle } from './theme-toggle';
 
 /**
  * Layout for the signed-out screens. Web (md+): 50/50 split with the brand panel on the left
@@ -13,9 +14,9 @@ import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
  */
 @Component({
   selector: 'app-auth-shell',
-  imports: [NgTemplateOutlet, TranslatePipe, PytraMark, PytraWordmark],
+  imports: [NgTemplateOutlet, TranslatePipe, PytraMark, PytraWordmark, ThemeToggle],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'block' },
+  host: { class: 'relative block' },
   template: `
     <!-- Mobile: the brand panel's glows + watermark become a fixed backdrop behind the form -->
     <div class="pointer-events-none fixed inset-0 overflow-hidden md:hidden" aria-hidden="true">
@@ -24,6 +25,11 @@ import { PytraWordmark } from '../../shared/ui/pytra-wordmark';
       ></div>
       <app-pytra-mark class="absolute -right-28 -bottom-20 size-[360px] rotate-[-12deg] opacity-[0.06] light:opacity-[0.05]" />
     </div>
+
+    <!-- Theme switch: top-right on every signed-out screen (over the form column on md+) -->
+    <app-theme-toggle
+      class="absolute top-[calc(env(safe-area-inset-top)+12px)] right-4 z-10 md:top-6 md:right-6"
+    />
 
     <div class="relative grid min-h-dvh grid-cols-1 md:grid-cols-2">
       <aside
