@@ -31,6 +31,8 @@ export interface AppUpdateEnv {
   onFirstInteraction?: (listener: () => void) => void;
   /** Calls `listener` every time the page becomes visible again. */
   onVisible?: (listener: () => void) => void;
+  /** True while a reload would lose work: the OAuth callback exchanging its one-time code. */
+  holdReload?: () => boolean;
 }
 
 function browserEnv(): AppUpdateEnv {
@@ -62,6 +64,7 @@ function browserEnv(): AppUpdateEnv {
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') listener();
       }),
+    holdReload: () => location.pathname === '/oauth-callback',
   };
 }
 
@@ -93,7 +96,8 @@ export class AppUpdateService {
         return;
       }
       const early = env.now !== undefined && env.now() - startedAt <= SILENT_RELOAD_WINDOW_MS;
-      if (early && !interacted) {
+      // Never mid sign-in: reloading the callback drops the exchanged token and burns the code.
+      if (early && !interacted && !env.holdReload?.()) {
         env.reload();
         return;
       }

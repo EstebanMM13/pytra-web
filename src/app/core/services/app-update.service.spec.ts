@@ -112,6 +112,14 @@ describe('AppUpdateService', () => {
       expect(toast.action).not.toHaveBeenCalled();
     });
 
+    it('offers a reload instead while a sign-in callback is exchanging its code', () => {
+      const { container, env } = setupTimed();
+      env.holdReload = () => true;
+      container.dispatchEvent(ready());
+      expect(env.reload).not.toHaveBeenCalled();
+      expect(toast.action).toHaveBeenCalledTimes(1);
+    });
+
     it('offers a reload instead once the user has interacted', () => {
       const { container, env, interact } = setupTimed();
       interact();
