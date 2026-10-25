@@ -47,14 +47,30 @@
       }
 
       <div class="flex items-center gap-4 sm:gap-5 md:gap-7">
-        <app-game-cover
-          decorative
-          priority
-          size="hero"
-          class="shadow-lg ring-1 shadow-black/25 ring-border"
-          [url]="g.coverImageUrl"
-          [name]="g.name"
-        />
+        <!-- A real cover opens fullscreen on tap; the initials fallback has nothing to enlarge -->
+        @if (g.coverImageUrl) {
+          <button
+            type="button"
+            class="shrink-0 cursor-zoom-in rounded-lg md:rounded-xl"
+            [attr.aria-label]="'game.viewCover' | translate"
+            (click)="coverOpen.set(true)"
+            data-cover-open
+          >
+            <app-game-cover
+              decorative
+              priority
+              size="hero"
+              class="shadow-lg ring-1 shadow-black/25 ring-border"
+              [url]="g.coverImageUrl"
+              [name]="g.name"
+            />
+          </button>
+          @if (coverOpen()) {
+            <app-cover-viewer [url]="g.coverImageUrl" [name]="g.name" (closed)="coverOpen.set(false)" />
+          }
+        } @else {
+          <app-game-cover decorative priority size="hero" class="shadow-lg ring-1 shadow-black/25 ring-border" [name]="g.name" />
+        }
 
         <div class="flex min-w-0 flex-1 flex-col">
           <div class="flex items-start justify-between gap-4">

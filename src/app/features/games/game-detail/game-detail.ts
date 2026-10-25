@@ -44,6 +44,7 @@ import { GameEditDialog } from '../game-edit-dialog/game-edit-dialog';
 import { GenreChips } from './genre-chips';
 import { GameDiaryDays } from './game-diary-days';
 import { ScrollParallax } from '../../../shared/ui/scroll-parallax';
+import { CoverViewer } from './cover-viewer';
 import { TitleClamp } from './title-clamp';
 import {
   OnlinePlaytimeLoadState,
@@ -91,6 +92,7 @@ function byRelease(a: Game, b: Game): number {
     CategoryBadge,
     GenreChips,
     GameDiaryDays,
+    CoverViewer,
     TitleClamp,
     LucideDynamicIcon,
   ],
@@ -133,6 +135,8 @@ export class GameDetail {
   readonly sagaGames = signal<Game[]>([]);
   readonly loadError = signal(false);
   readonly editing = signal(false);
+  /** The hero cover is open in the fullscreen viewer. */
+  readonly coverOpen = signal(false);
   readonly savingOnline = signal(false);
   /** Platforms picked in the online card, in catalog order. */
   readonly onlinePlatforms = signal<PlatformRef[]>([]);
@@ -302,6 +306,7 @@ export class GameDetail {
     this.sagaGames.set([]);
     this.loadError.set(false);
     this.editing.set(false);
+    this.coverOpen.set(false);
 
     // Requests that only need the id start alongside the game instead of after it: the platform
     // catalog (cached after the first load) and the online playtime (ignored for SINGLEPLAYER games).

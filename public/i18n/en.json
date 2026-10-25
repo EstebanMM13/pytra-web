@@ -727,6 +727,8 @@
     "breadcrumb": "Games",
     "saga": "{{saga}} saga",
     "sagaPosition": "{{saga}} saga · {{index}} of {{total}}",
+    "viewCover": "View larger cover",
+    "coverOf": "{{name}} cover",
     "edit": "Edit",
     "editAria": "Edit game",
     "newRun": "New run",

@@ -332,6 +332,8 @@ describe('GameDetail loading', () => {
 });
 
 describe('GameDetail hero', () => {
+  const IGDB_COVER = 'https://images.igdb.com/igdb/image/upload/t_cover_big/co1abc.jpg';
+
   function render(g: Game) {
     TestBed.configureTestingModule({
       imports: [GameDetail],
@@ -367,6 +369,7 @@ describe('GameDetail hero', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    document.querySelectorAll('app-cover-viewer').forEach((v) => v.remove());
   });
 
   it('keeps a title that fits as plain text: no button semantics and nothing to toggle', async () => {
@@ -406,5 +409,43 @@ describe('GameDetail hero', () => {
     fixture.detectChanges();
     expect(h1.classList).not.toContain('line-clamp-none!');
     expect(text.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('has no cover viewer for a game without a cover', () => {
+    const { el } = render(game('SINGLEPLAYER'));
+    expect(el.querySelector('[data-cover-open]')).toBeNull();
+    expect(el.querySelector('app-game-cover')).not.toBeNull();
+  });
+
+  it('opens the cover fullscreen at a larger size and closes it on Escape, restoring focus', async () => {
+    const { fixture, el } = render({ ...game('SINGLEPLAYER'), coverImageUrl: IGDB_COVER });
+    const opener = el.querySelector<HTMLButtonElement>('[data-cover-open]')!;
+    expect(opener.getAttribute('aria-label')).toBe('game.viewCover');
+    opener.focus();
+    opener.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const dialog = document.querySelector<HTMLElement>('[data-cover-viewer]')!;
+    expect(dialog.getAttribute('role')).toBe('dialog');
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    const sources = [...dialog.querySelectorAll('img')].map((img) => img.getAttribute('src'));
+    expect(sources).toEqual([IGDB_COVER, 'https://images.igdb.com/igdb/image/upload/t_1080p/co1abc.jpg']);
+    expect(document.activeElement?.getAttribute('aria-label')).toBe('common.close');
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.querySelector('[data-cover-viewer]')).toBeNull();
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it('closes the cover viewer on a tap anywhere', async () => {
+    const { fixture, el } = render({ ...game('SINGLEPLAYER'), coverImageUrl: IGDB_COVER });
+    el.querySelector<HTMLButtonElement>('[data-cover-open]')!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    document.querySelector<HTMLElement>('[data-cover-viewer] img')!.click();
+    fixture.detectChanges();
+    expect(document.querySelector('[data-cover-viewer]')).toBeNull();
   });
 });

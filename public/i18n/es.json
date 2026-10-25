@@ -727,6 +727,8 @@
     "breadcrumb": "Juegos",
     "saga": "Saga {{saga}}",
     "sagaPosition": "Saga {{saga}} · {{index}} de {{total}}",
+    "viewCover": "Ver portada ampliada",
+    "coverOf": "Portada de {{name}}",
     "edit": "Editar",
     "editAria": "Editar juego",
     "newRun": "Nueva partida",
