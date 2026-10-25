@@ -85,8 +85,9 @@
 
   --pt-overlay: #0d0c0bcc;
 
-  /* Background layers (grid + aura) and the translucent chrome/cards above them. */
+  /* Background layers (aura + grain) and the translucent chrome/cards above them. */
   --pt-aura: 28%;
+  --pt-grain: 0.06;
   --pt-card: color-mix(in srgb, var(--pt-surface) 85%, transparent);
   --pt-card-border: #ffffff14;
   --pt-card-shadow: none;
@@ -160,6 +161,7 @@
   --pt-overlay: #1c192499;
 
   --pt-aura: 16%;
+  --pt-grain: 0.05;
   --pt-card: color-mix(in srgb, var(--pt-surface) 88%, transparent);
   --pt-card-border: var(--pt-border);
   --pt-card-shadow: 0 1px 2px #2a1f450d, 0 6px 18px -8px #2a1f4524;
@@ -328,7 +330,7 @@
 @layer base {
   /*
    * The page colour lives on <html> only (it paints the canvas). <body> stays transparent so the
-   * fixed `.bg-aura` layer (z-index -1) shows between the canvas and the content.
+   * fixed `.bg-aura` / `.bg-grain` layers (z-index -1) show between the canvas and the content.
    */
   html {
     background-color: var(--pt-bg);
@@ -564,14 +566,22 @@
 }
 
 /*
- * Background aura: a fixed layer behind everything (rendered once in the app root).
+ * Background aura + grain: fixed layers behind everything (rendered once in the app root).
  * Lighter on phones: narrower aura.
  */
-.bg-aura {
+.bg-aura,
+.bg-grain {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
+}
+
+/* Static film grain over the aura: grey fractal noise, tiled; strength per theme (--pt-grain). */
+.bg-grain {
+  opacity: var(--pt-grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
 }
 
 /*
