@@ -248,7 +248,12 @@
                 }
               </div>
               <div class="min-w-0 px-0.5">
-                <p class="line-clamp-2 text-[13px] leading-snug font-medium group-hover:text-brand-lighter md:text-sm" [title]="game.name">
+                <!-- Always two lines tall (2 × leading-snug), so the meta lines up across a row -->
+                <p
+                  class="line-clamp-2 min-h-[2.75em] text-[13px] leading-snug font-medium group-hover:text-brand-lighter md:text-sm"
+                  [title]="game.name"
+                  data-poster-title
+                >
                   {{ game.name }}
                 </p>
                 @if (game.category || isUpcoming(game)) {
