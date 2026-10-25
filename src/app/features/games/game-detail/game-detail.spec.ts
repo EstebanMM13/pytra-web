@@ -85,6 +85,25 @@ describe('GameDetail', () => {
     expect(el.querySelector('h1')!.parentElement!.querySelector('.platinum-pill')).toBeNull();
   });
 
+  it('lights up the 100% tile on its own, independent of the platinum', () => {
+    const none = setup(game('SINGLEPLAYER')).el;
+    expect(none.querySelector('[data-stat="fullCompletion"]')).toBeNull();
+    expect(none.textContent).toContain('game.stats.fullCompletion');
+    TestBed.resetTestingModule();
+
+    const { el } = setup({ ...game('SINGLEPLAYER'), hasFullCompletion: true });
+    const tile = el.querySelector('[data-stat="fullCompletion"]')!;
+    expect(tile.classList).toContain('completion-tile');
+    expect(tile.textContent).toContain('game.stats.fullCompletion');
+    expect(tile.querySelector('[role="img"]')!.getAttribute('aria-label')).toBe('run.fullCompletionAria');
+    expect(el.querySelector('[data-stat="platinum"]')).toBeNull();
+    TestBed.resetTestingModule();
+
+    const both = setup({ ...game('SINGLEPLAYER'), hasPlatinum: true, hasFullCompletion: true }).el;
+    expect(both.querySelector('[data-stat="platinum"]')).not.toBeNull();
+    expect(both.querySelector('[data-stat="fullCompletion"]')).not.toBeNull();
+  });
+
   it('offers edit, new run and the first-run link to a signed-in user', () => {
     const { buttons } = setup(game('SINGLEPLAYER'));
     expect(buttons('game.editAria').length).toBe(1);
@@ -161,10 +180,14 @@ describe('GameDetail stats', () => {
     expect(hours.textContent).toContain('game.stats.online');
   });
 
-  it('shows the four equal cards and no split for single-player games', () => {
+  it('shows six equal cards (hours as a regular card) and no split for single-player games', () => {
     const el = render('SINGLEPLAYER');
-    expect(el.querySelector('[data-stat="hours"]')!.textContent).not.toContain('game.stats.online');
-    expect(el.querySelectorAll('app-stat-card').length).toBe(4);
+    const hours = el.querySelector('[data-stat="hours"]')!;
+    expect(hours.textContent).not.toContain('game.stats.online');
+    expect(hours.className).not.toContain('col-span');
+    expect(el.querySelectorAll('app-stat-card').length).toBe(5);
+    expect(hours.parentElement!.children.length).toBe(6);
+    expect(hours.parentElement!.className).toContain('lg:grid-cols-6');
   });
 
   it('shows only total hours and the online rating for ONLINE games', () => {
@@ -178,6 +201,7 @@ describe('GameDetail stats', () => {
     // No runs: no campaign / online split.
     expect(hours.textContent).not.toContain('game.stats.campaign');
     expect(el.textContent).not.toContain('game.stats.platinum');
+    expect(el.textContent).not.toContain('game.stats.fullCompletion');
     expect(el.textContent).not.toContain('game.stats.bestRating');
   });
 

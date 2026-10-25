@@ -230,6 +230,12 @@
                     @if (run.platinum) {
                       <span class="text-xs" [attr.aria-label]="'run.platinum' | translate"> 🏆</span>
                     }
+                    @if (run.fullCompletion) {
+                      <span class="text-[11px] font-semibold text-completion">
+                        <span aria-hidden="true"> {{ 'run.fullCompletion' | translate }}</span>
+                        <span class="sr-only">{{ 'run.fullCompletionAria' | translate }}</span>
+                      </span>
+                    }
                     <span class="hidden text-xs text-faint md:inline"> · {{ run.runLabel }}</span>
                   </span>
                   <span class="text-xs sm:hidden" [class]="statusText[run.status]">

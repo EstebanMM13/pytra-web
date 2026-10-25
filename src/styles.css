@@ -64,6 +64,12 @@
   --pt-platinum-tint: #222b35;
   --pt-platinum-tint-fg: #d6e6f5;
 
+  /* 100% markers (every trophy/achievement): fresh mint teal, apart from platinum silver and GOTY gold. */
+  --pt-completion: #6fdcc2;
+  --pt-completion-line: #6fdcc266;
+  --pt-completion-tint: #17302b;
+  --pt-completion-tint-fg: #9ae8d5;
+
   /* Rating tones (>=7 gold, 6-<7 mid, <6 danger; >=9 shares the gold) and platform brand dots. */
   --pt-rating-high: var(--pt-gold);
   --pt-rating-mid: #d9a05b;
@@ -141,6 +147,12 @@
   --pt-platinum-line: #8fa9c280;
   --pt-platinum-tint: #e4edf6;
   --pt-platinum-tint-fg: #33475c;
+
+  /* Deep teal for 100% text on paper (AA on bg / surface / the tinted pill), mint fills. */
+  --pt-completion: #0f6b5b;
+  --pt-completion-line: #2f9a8580;
+  --pt-completion-tint: #daf1eb;
+  --pt-completion-tint-fg: #0b5446;
 
   --pt-rating-high: var(--pt-gold);
   --pt-rating-mid: #8a5a10;
@@ -308,6 +320,10 @@
   --color-platinum: var(--pt-platinum);
   --color-platinum-tint: var(--pt-platinum-tint);
   --color-platinum-tint-fg: var(--pt-platinum-tint-fg);
+
+  --color-completion: var(--pt-completion);
+  --color-completion-tint: var(--pt-completion-tint);
+  --color-completion-tint-fg: var(--pt-completion-tint-fg);
 
   --color-rating-high: var(--pt-rating-high);
   --color-rating-mid: var(--pt-rating-mid);
@@ -588,6 +604,13 @@
     var(--pt-platinum-glint) 48%,
     var(--pt-platinum-tint) 100%
   );
+}
+
+/* 100% pill: mint tint with a teal hairline; the text clears AA on the tint in both themes. */
+@utility completion-pill {
+  border: 1px solid var(--pt-completion-line);
+  color: var(--pt-completion-tint-fg);
+  background: var(--pt-completion-tint);
 }
 
 /*

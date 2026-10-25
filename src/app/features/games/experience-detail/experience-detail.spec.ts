@@ -270,6 +270,16 @@ describe('ExperienceDetail inline edit', () => {
     expect(t.byId<HTMLInputElement>('run-inline-rating')!.value).toBe('');
   });
 
+  it('shows the 100% pill only on a run flagged 100%, independent of the platinum', () => {
+    expect(setup(run({ platinum: true })).el.querySelector('[data-full-completion]')).toBeNull();
+    TestBed.resetTestingModule();
+
+    const pill = setup(run({ fullCompletion: true })).el.querySelector('[data-full-completion]')!;
+    expect(pill.classList).toContain('completion-pill');
+    expect(pill.textContent).toContain('run.fullCompletion');
+    expect(pill.querySelector('.sr-only')!.textContent).toContain('run.fullCompletionAria');
+  });
+
   it('never sends the change in the read-only demo', () => {
     const t = setup(run(), true);
     const input = openHours(t);

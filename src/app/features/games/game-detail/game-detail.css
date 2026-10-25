@@ -30,3 +30,33 @@
   stroke: url(#platinum-trophy-sheen);
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pt-platinum-sheen) 55%, transparent));
 }
+
+/*
+ * Earned "100%" stat tile: the same box in mint teal (--pt-completion* tokens): teal hairline, a faint
+ * tint over the card fill, teal label and a badge with a soft glow. Light theme gets the deep teal.
+ */
+.completion-tile {
+  border-color: var(--pt-completion-line);
+}
+
+.completion-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--pt-completion) 10%, transparent) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.completion-tile-label {
+  color: var(--pt-completion);
+}
+
+.completion-badge {
+  color: var(--pt-completion);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--pt-completion) 45%, transparent));
+}

@@ -122,6 +122,7 @@ export class GameDetail {
     rating: ICONS.star,
     best: ICONS.award,
     platinum: ICONS.trophy,
+    fullCompletion: ICONS.badgeCheck,
   };
 
   /** Hero figure size: shrinks long values to the cell width instead of cutting them. */
@@ -196,11 +197,15 @@ export class GameDetail {
       avgRating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
       bestRating: ratings.length ? Math.max(...ratings) : null,
       platinum: runs.some((r) => r.platinum),
+      fullCompletion: runs.some((r) => r.fullCompletion),
     };
   });
 
   /** Any run earned the platinum (or the API says the game has one): the Platinum tile lights up. */
   protected readonly platinum = computed(() => this.stats().platinum || !!this.game()?.hasPlatinum);
+
+  /** Any run is 100% (or the API says the game has one): the 100% tile lights up. Independent of platinum. */
+  protected readonly fullCompletion = computed(() => this.stats().fullCompletion || !!this.game()?.hasFullCompletion);
 
   /** Highlighted only when there is something to compare against. */
   protected readonly bestRunId = computed(() => {
@@ -231,7 +236,7 @@ export class GameDetail {
   /** ONLINE games are tracked through online playtime only: no "new run" entry points. */
   protected readonly canAddRun = computed(() => this.game()?.category !== 'ONLINE');
 
-  /** ONLINE games are tracked through online playtime only: their stats skip runs, best rating and platinum. */
+  /** ONLINE games are tracked through online playtime only: their stats skip runs, best rating, platinum and 100%. */
   protected readonly isOnlineGame = computed(() => this.game()?.category === 'ONLINE');
 
   /** The online general rating, the "Nota" of an ONLINE game. */

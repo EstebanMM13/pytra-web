@@ -100,6 +100,13 @@
               {{ 'run.platinum' | translate }}
             </span>
           }
+          @if (e.fullCompletion) {
+            <span class="completion-pill inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium" data-full-completion>
+              <svg [lucideIcon]="icons.badgeCheck" [size]="13" class="shrink-0" aria-hidden="true"></svg>
+              <span aria-hidden="true">{{ 'run.fullCompletion' | translate }}</span>
+              <span class="sr-only">{{ 'run.fullCompletionAria' | translate }}</span>
+            </span>
+          }
           <app-platform-label
             class="rounded-full border border-border px-2.5 py-[3px] text-xs text-text-3"
             [platform]="{ name: e.platformName, color: e.platformColor }"

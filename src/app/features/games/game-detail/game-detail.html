@@ -235,43 +235,39 @@
       </a>
     }
 
-    <!-- Stats: featured total hours (full row on phones/tablets, double width on desktop) + 4 equal cards.
-         Phones lay the full-width hours card out as one compact row: label and figure centred side by side.
-         ONLINE games have no runs: just total hours and their online rating. -->
+    <!-- Stats: six equal cards (total hours, runs, average, best, platinum, 100%): three rows of
+         two on phones, two rows of three on tablets, one row on desktop. Hybrid games add the campaign /
+         online split under the hours.
+         ONLINE games have no runs: just total hours (double width from tablets) and their online rating. -->
     @if (experiences() !== null) {
       @let s = stats();
       @let online = isOnlineGame();
       <section
         class="grid grid-cols-2 gap-2.5 md:gap-3"
-        [class]="online ? 'md:grid-cols-3' : 'md:grid-cols-4 lg:grid-cols-6'"
+        [class]="online ? 'md:grid-cols-3' : 'md:grid-cols-3 lg:grid-cols-6'"
         [attr.aria-label]="'game.stats.label' | translate"
       >
         <div
           class="relative min-w-0 overflow-hidden rounded-xl border border-card-border card-glass"
-          [class]="online ? 'md:col-span-2' : 'col-span-2 md:col-span-4 lg:col-span-2'"
+          [class]="online ? 'md:col-span-2' : ''"
           data-stat="hours"
         >
-          <div
-            class="@container relative flex h-full flex-col p-4 [--fig-max:36px] max-sm:flex-row max-sm:flex-wrap max-sm:items-center max-sm:gap-x-5 max-sm:py-3 max-sm:[--fig-max:30px] sm:justify-center md:px-5 md:[--fig-max:40px]"
-            [class.max-sm:justify-center]="!online"
-          >
-            <p class="flex items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
+          <!-- Same inner layout as a large stat card -->
+          <div class="@container relative flex h-full flex-col justify-center p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]">
+            <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
               <svg [lucideIcon]="statIcons.hours" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
-              {{ 'game.stats.totalHours' | translate }}
+              <span class="truncate">{{ 'game.stats.totalHours' | translate }}</span>
             </p>
-            <p
-              class="mt-1.5 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap max-sm:mt-0 sm:leading-none"
-              [style.font-size]="figureSize(s.totalHours | hours)"
-            >
+            <p class="mt-2 leading-none font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.totalHours | hours)">
               <span data-figure>{{ s.totalHours | hours }}</span>
             </p>
             @if (showHoursBreakdown()) {
-              <div class="mt-auto pt-3 max-sm:basis-full max-sm:pt-2.5">
+              <div class="mt-auto pt-3">
                 <div class="flex h-1.5 overflow-hidden rounded-full bg-border" aria-hidden="true">
                   <span class="bg-brand-light" [style.width.%]="campaignShare()"></span>
                   <span class="flex-1 bg-chart" [class.opacity-0]="!s.onlineHours"></span>
                 </div>
-                <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                <p class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted md:gap-x-4">
                   <span class="inline-flex items-center gap-1.5">
                     <span class="size-2 rounded-full bg-brand-light" aria-hidden="true"></span>
                     {{ 'game.stats.campaign' | translate }}
@@ -345,12 +341,39 @@
           } @else {
             <app-stat-card size="large" [icon]="statIcons.platinum" [label]="'game.stats.platinum' | translate" value="—" tone="platinum" />
           }
+          @if (fullCompletion()) {
+            <!-- Earned 100%: same box as a stat card, in mint teal with a soft glow on the badge -->
+            <div class="completion-tile relative min-w-0 rounded-xl border card-glass" data-stat="fullCompletion">
+              <div class="relative flex h-full flex-col justify-center p-4 md:px-5">
+                <p class="completion-tile-label flex min-w-0 items-center gap-1.5 text-xs leading-4 md:gap-2 md:text-[13px] md:leading-5">
+                  <svg [lucideIcon]="statIcons.fullCompletion" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
+                  <span class="truncate">{{ 'game.stats.fullCompletion' | translate }}</span>
+                </p>
+                <p class="mt-2 flex h-[30px] items-center md:h-9">
+                  <svg
+                    [lucideIcon]="statIcons.fullCompletion"
+                    [size]="30"
+                    class="completion-badge md:size-9"
+                    role="img"
+                    [attr.aria-label]="'run.fullCompletionAria' | translate"
+                  ></svg>
+                </p>
+              </div>
+            </div>
+          } @else {
+            <app-stat-card
+              size="large"
+              [icon]="statIcons.fullCompletion"
+              [label]="'game.stats.fullCompletion' | translate"
+              value="—"
+              tone="completion"
+            />
+          }
         }
       </section>
     } @else {
-      <section class="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3 lg:grid-cols-6">
-        <app-skeleton class="col-span-2 h-[112px] rounded-xl max-sm:h-16 md:col-span-4 lg:col-span-2" />
-        @for (i of [1, 2, 3, 4]; track i) {
+      <section class="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-3 lg:grid-cols-6">
+        @for (i of [1, 2, 3, 4, 5, 6]; track i) {
           <app-skeleton class="h-[86px] rounded-xl md:h-[112px]" />
         }
       </section>
@@ -389,6 +412,7 @@
                   [rating]="run.rating"
                   [best]="run.id === bestRunId()"
                   [platinum]="run.platinum"
+                  [fullCompletion]="run.fullCompletion"
                   [backdropUrl]="g.coverImageUrl"
                 >
                   <span runRowBelow class="mt-1.5 block sm:hidden"><app-status-pill [status]="run.status" /></span>

@@ -12,6 +12,7 @@ import { GameCover } from './game-cover';
  * `onSurface` is for rows placed directly on the page (mobile) instead of inside a card.
  * Binding `coverUrl` (even to null, which shows the initials fallback) swaps the accent bar for a cover thumbnail.
  * `platinum` adds an icy platinum pill beside the title and turns the accent bar silver (unless best).
+ * `fullCompletion` adds a teal "100%" pill beside the title.
  * `backdropUrl` lays a soft blurred cover behind the row (lighter than the game hero's, so text stays first).
  */
 @Component({
@@ -69,6 +70,12 @@ import { GameCover } from './game-cover';
             <span class="hidden sm:inline" aria-hidden="true">{{ 'run.platinum' | translate }}</span>
           </span>
         }
+        @if (fullCompletion()) {
+          <span class="completion-pill shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium" data-full-completion>
+            <span aria-hidden="true">{{ 'run.fullCompletion' | translate }}</span>
+            <span class="sr-only">{{ 'run.fullCompletionAria' | translate }}</span>
+          </span>
+        }
       </p>
       @if (meta()) {
         <p class="mt-1 truncate text-xs text-muted md:text-[13px]" [attr.title]="meta()">{{ meta() }}</p>
@@ -101,6 +108,7 @@ export class RunRow {
   readonly rating = input<number | null>(null);
   readonly best = input(false, { transform: booleanAttribute });
   readonly platinum = input(false, { transform: booleanAttribute });
+  readonly fullCompletion = input(false, { transform: booleanAttribute });
   readonly onSurface = input(false, { transform: booleanAttribute });
   /** Cover shown blurred behind the row; null / undefined keeps the plain background. */
   readonly backdropUrl = input<string | null | undefined>(undefined);
