@@ -470,7 +470,7 @@
         </div>
       </section>
 
-        <!-- Online hours (ONLINE / HYBRID games) -->
+        <!-- Online data (ONLINE / HYBRID games): hours, rating, platforms, platinum / 100% -->
         @if (g.category && g.category !== 'SINGLEPLAYER') {
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="game.online" class="mb-3" [label]="'game.online.title' | translate">
@@ -616,7 +616,7 @@
                 [disabled]="savingOnline() || onlineLoadState() === 'error' || onlineLoadState() === 'loading'"
                 class="press h-10 rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
               >
-                {{ (onlinePlaytime() ? 'game.online.update' : 'game.online.save') | translate }}
+                {{ 'game.online.save' | translate }}
               </button>
             </form>
             @if (onlinePlaytimeForm.invalid && onlinePlaytimeForm.touched) {

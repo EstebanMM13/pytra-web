@@ -186,6 +186,14 @@ describe('GameDetail stats', () => {
     expect(breakdown.querySelectorAll('li').length).toBe(2);
   });
 
+  it('labels the online card as the online data, saved with one "save" button', () => {
+    const el = render('HYBRID');
+    expect(el.textContent).toContain('game.online.title');
+    const submit = el.querySelector<HTMLButtonElement>('form button[type="submit"]')!;
+    // An existing record keeps the same "save" label (no separate "update").
+    expect(submit.textContent!.trim()).toBe('game.online.save');
+  });
+
   it('widens the hybrid hours card and keeps the other cards in even rows', () => {
     const el = render('HYBRID');
     const hours = el.querySelector('[data-stat="hours"]')!;
