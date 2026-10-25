@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthShell } from '../auth-shell';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Observable, ReplaySubject, share } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { consumePostLoginRedirect } from '../../../shared/utils/post-login-redirect';
 
@@ -18,11 +19,29 @@ export const STEAM_LINK_ROUTE = '/sync';
 const NEXT_ROUTES = new Map<string, string>([['steam', STEAM_LINK_ROUTE]]);
 
 /**
- * One-time codes already sent to /exchange-code in this app session. The callback can be
- * reached twice for the same Google sign-in (re-navigation, deep link delivered again); the
- * second exchange fails because the code is consumed, and used to flash the error screen.
+ * Exchanges of one-time codes in this app session, replayed to later visits. The callback can be
+ * reached twice for the same Google sign-in (re-navigation, deep link delivered again); a second
+ * /exchange-code call fails because the code is consumed (it used to flash the error screen), and
+ * a visit that just waited for the first one stayed on "processing" for good when that first
+ * page was gone or had failed. Every visit now reacts to the one shared result.
  */
-const exchangedCodes = new Set<string>();
+const exchanges = new Map<string, Observable<unknown>>();
+
+function sharedExchange(code: string, exchange: () => Observable<unknown>): Observable<unknown> {
+  let shared = exchanges.get(code);
+  if (!shared) {
+    shared = exchange().pipe(
+      share({
+        connector: () => new ReplaySubject(1),
+        resetOnError: false,
+        resetOnComplete: false,
+        resetOnRefCountZero: false,
+      }),
+    );
+    exchanges.set(code, shared);
+  }
+  return shared;
+}
 
 @Component({
   selector: 'app-oauth-callback',
@@ -62,12 +81,6 @@ export class OauthCallback {
       return;
     }
 
-    // Duplicate visit for a code already in flight or exchanged: the first visit navigates.
-    if (exchangedCodes.has(code)) {
-      return;
-    }
-    exchangedCodes.add(code);
-
     const land = () => {
       if (resume) {
         this.router.navigateByUrl(resume, { replaceUrl: true });
@@ -79,7 +92,8 @@ export class OauthCallback {
       });
     };
 
-    this.authService.exchangeCode({ code }).subscribe({
+    // A duplicate visit for a code already in flight or exchanged replays that result.
+    sharedExchange(code, () => this.authService.exchangeCode({ code })).subscribe({
       next: land,
       // A rejected exchange while a session already exists is a duplicate, not a failed sign-in.
       error: () => (this.authService.isAuthenticated() ? land() : this.failed.set(true)),
