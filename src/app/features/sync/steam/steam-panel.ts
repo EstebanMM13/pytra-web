@@ -45,6 +45,7 @@ import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRuns, maskSteamId, steamHour
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './steam-panel.html',
+  styleUrl: '../shared/account-meta.css',
   host: { class: 'flex flex-col gap-4 md:gap-6' },
 })
 /** Steam platform on the Sync page: link, sync, pending review and ignored apps. */

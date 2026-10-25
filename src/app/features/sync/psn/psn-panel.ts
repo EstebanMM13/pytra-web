@@ -57,6 +57,7 @@ const STATUS_ERROR_KEY = 'psn.errors.generic';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './psn-panel.html',
+  styleUrl: '../shared/account-meta.css',
   host: { class: 'flex flex-col gap-4 md:gap-6' },
 })
 export class PsnPanel {

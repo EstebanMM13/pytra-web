@@ -1,0 +1,23 @@
+/*
+ * Linked account meta ("<id> · N games · synced …"). Each part carries a leading " · "; the row is
+ * shifted left by one separator and its wrapper clips it, so the separator that starts any line
+ * (the first one or one a narrow screen wrapped) is hidden instead of dangling. Lives here, not in
+ * template utilities, so the rules ship with the lazy Sync chunk.
+ */
+.account-meta {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -3ch;
+}
+
+/* Flex parts trim the template's whitespace around their text. */
+.account-meta > span {
+  display: flex;
+}
+
+.account-meta > span::before {
+  content: '\00b7';
+  flex-shrink: 0;
+  width: 3ch;
+  text-align: center;
+}

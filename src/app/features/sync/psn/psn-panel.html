@@ -55,9 +55,7 @@
             </p>
             <!-- Separators come from CSS so none is left dangling when a part is missing or a line wraps. -->
             <div class="mt-[5px] overflow-hidden font-mono text-xs text-muted md:text-[13px]">
-              <!-- Each part carries a leading " · "; the row is shifted left by one separator and clipped,
-                   so the separator that starts any wrapped line is hidden instead of dangling. -->
-              <p class="-ml-[3ch] flex flex-wrap [&>span]:flex [&>span]:before:shrink-0 [&>span]:before:w-[3ch] [&>span]:before:text-center [&>span]:before:content-['·']">
+              <p class="account-meta">
               @if (linkedGamesCount(); as linked) {
                 <span>{{ 'common.games' | translatePlural: linked }}</span>
               } @else if (syncResult(); as r) {
