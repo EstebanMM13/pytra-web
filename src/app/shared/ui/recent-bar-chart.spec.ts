@@ -52,7 +52,7 @@ class Host {
 
 @Component({
   imports: [RecentBarChart],
-  template: `<app-recent-bar-chart [bars]="bars" title="Horas por año" expressive [accentKey]="2024" />`,
+  template: `<app-recent-bar-chart [bars]="bars" title="Horas por año" expressive />`,
 })
 class LinkedHost {
   readonly bars: MiniBar[] = years(2014, 2024).map((bar) => ({ ...bar, link: `/years/${bar.key}`, title: `${bar.key}: 1 h` }));
@@ -149,7 +149,7 @@ describe('RecentBarChart', () => {
     expect(barLabels(dialog)[0]).toBe("'14");
   });
 
-  it('passes links and the gold accent to the recent chart and the full sheet', () => {
+  it('passes links and the expressive look to the recent chart and the full sheet', () => {
     TestBed.configureTestingModule({
       imports: [LinkedHost],
       providers: [
@@ -163,12 +163,12 @@ describe('RecentBarChart', () => {
     const el = fixture.nativeElement as HTMLElement;
     const hrefs = [...el.querySelectorAll('a[data-bar-link]')].map((a) => a.getAttribute('href'));
     expect(hrefs).toEqual(['/years/2020', '/years/2021', '/years/2022', '/years/2023', '/years/2024']);
-    expect(el.querySelector('.is-accent a')?.getAttribute('aria-label')).toBe('2024: 1 h');
+    expect(el.querySelectorAll('a[data-bar-link]')[4].getAttribute('aria-label')).toBe('2024: 1 h');
 
     el.querySelector<HTMLButtonElement>('[data-show-all]')!.click();
     fixture.detectChanges();
     const dialog = document.body.querySelector('[role="dialog"]')!;
     expect(dialog.querySelectorAll('a[data-bar-link]')).toHaveLength(11);
-    expect(dialog.querySelectorAll('.mbc-col.is-accent')).toHaveLength(1);
+    expect(dialog.querySelectorAll('.mbc-col')).toHaveLength(11);
   });
 });

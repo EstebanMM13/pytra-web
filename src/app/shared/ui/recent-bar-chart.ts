@@ -71,7 +71,6 @@ export function fitLabels(bars: readonly MiniBar[], maxFull = FULL_LABELS_MAX): 
       [large]="large()"
       [topTone]="topTone()"
       [expressive]="expressive()"
-      [accentKey]="accentKey()"
     />
     @if (hasMore()) {
       <button
@@ -99,7 +98,6 @@ export function fitLabels(bars: readonly MiniBar[], maxFull = FULL_LABELS_MAX): 
                 [dense]="all().length > fullLabelsMax"
                 [topTone]="topTone()"
                 [expressive]="expressive()"
-                [accentKey]="accentKey()"
               />
             </div>
           </div>
@@ -120,10 +118,8 @@ export class RecentBarChart {
   /** Bigger labels in the recent chart (wide layouts with room to spare). */
   readonly large = input(false, { transform: booleanAttribute });
   readonly topTone = input<'gold' | 'muted'>('gold');
-  /** Gradient columns with a gold accent bar; see MiniBarChart. */
+  /** Gradient columns; see MiniBarChart. */
   readonly expressive = input(false, { transform: booleanAttribute });
-  /** Key of the bar drawn in gold (e.g. the current year) when `expressive`. */
-  readonly accentKey = input<string | number | null>(null);
 
   protected readonly fullLabelsMax = FULL_LABELS_MAX;
   protected readonly expanded = signal(false);

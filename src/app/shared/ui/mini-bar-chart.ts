@@ -42,7 +42,7 @@ export type BarOrientation = 'vertical' | 'horizontal';
  * does not apply.
  * Bars with a `link` get a stretched link over their column (or row). Vertical linked bars light up
  * (and the others dim) on mouse hover, keyboard focus and press, showing their `hint`.
- * `expressive` opts into the gradient look: gold `accentKey` bar, marked top bar, springier grow-in.
+ * `expressive` opts into the gradient look with a springier grow-in.
  */
 @Component({
   selector: 'app-mini-bar-chart',
@@ -97,8 +97,6 @@ export type BarOrientation = 'vertical' | 'horizontal';
           [class.relative]="!!bar.link"
           [class.mbc-col]="expressive()"
           [class.is-active]="activeKey() === bar.key"
-          [class.is-top]="bar.top"
-          [class.is-accent]="bar.accent"
           role="listitem"
           [attr.aria-label]="bar.title ?? bar.label"
         >
@@ -118,11 +116,17 @@ export type BarOrientation = 'vertical' | 'horizontal';
               [attr.data-ratio]="bar.ratio"
             ></div>
             @if (bar.link && bar.hint) {
-              <!-- Floats over the bar top while highlighted; out of the flow, so nothing shifts. -->
+              <!-- Floats over the bar top while highlighted; out of the flow, so nothing shifts.
+                   Never above the plot (a tall bar takes it over its own top) nor past the chart's
+                   sides (the end bars align it to their outer edge), so nothing clips or scrolls. -->
               <span
-                class="mbc-hint rounded-md border border-card-border bg-surface px-1.5 py-0.5 font-mono leading-none whitespace-nowrap text-text"
-                [class]="large() ? 'text-xs' : 'text-[11px]'"
-                [style.bottom]="'calc((100% - ' + topReserve() + 'px) * ' + bar.ratio + ' + 4px)'"
+                class="mbc-hint inline-flex items-center rounded-md border border-card-border bg-surface px-1.5 font-mono leading-none whitespace-nowrap text-text"
+                [class]="large() ? 'h-[18px] text-xs' : 'h-[17px] text-[11px]'"
+                [class.mbc-hint-start]="$first && !$last"
+                [class.mbc-hint-end]="$last && !$first"
+                [style.bottom]="
+                  'min(calc((100% - ' + topReserve() + 'px) * ' + bar.ratio + ' + 4px), calc(100% - ' + (large() ? 18 : 17) + 'px))'
+                "
                 aria-hidden="true"
                 data-hint
               >{{ bar.hint }}</span>
@@ -130,7 +134,7 @@ export type BarOrientation = 'vertical' | 'horizontal';
           </div>
           <span
             class="shrink-0 whitespace-nowrap"
-            [class]="(bar.accent ? 'text-gold ' : bar.top ? 'text-text ' : 'text-muted ') + (dense() ? 'text-[10px]' : large() ? 'text-sm' : 'text-xs')"
+            [class]="(bar.top ? 'text-text ' : 'text-muted ') +(dense() ? 'text-[10px]' : large() ? 'text-sm' : 'text-xs')"
           >
             {{ bar.label }}
           </span>
@@ -159,10 +163,13 @@ export type BarOrientation = 'vertical' | 'horizontal';
     }
   `,
   styles: `
-    /* Stretched link over its row / column, with the focus ring around it. */
+    /*
+     * Stretched link over its row / column, with the focus ring around it. Within its box: one
+     * reaching past the chart would make a scrolling parent (the "Ver todos" sheet) scroll sideways.
+     */
     .mbc-link {
       position: absolute;
-      inset: -2px;
+      inset: 0;
       z-index: 1;
       border-radius: 8px;
       -webkit-tap-highlight-color: transparent;
@@ -172,32 +179,17 @@ export type BarOrientation = 'vertical' | 'horizontal';
       outline-offset: 2px;
     }
 
-    /* Expressive bars: brand gradient, deeper at the base; the accent bar blends into gold. */
+    /* Expressive bars: the same brand gradient on every bar, deeper at the base. */
     .mbc-col {
       --mbc-base: var(--pt-brand-dark);
       --mbc-tip: var(--pt-brand-light);
-      --mbc-glow: var(--pt-brand-vivid);
-      --mbc-cap: inset 0 0 0 0 transparent;
       transition: opacity calc(180ms * var(--pt-motion, 1)) ease-out;
     }
     :host-context([data-theme='light']) .mbc-col {
       --mbc-tip: color-mix(in oklab, var(--pt-brand) 68%, white);
     }
-    .mbc-col.is-accent {
-      --mbc-base: color-mix(in oklab, var(--pt-gold) 50%, var(--pt-brand-dark));
-      --mbc-tip: var(--pt-gold);
-      --mbc-glow: var(--pt-gold);
-    }
-    :host-context([data-theme='light']) .mbc-col.is-accent {
-      --mbc-tip: color-mix(in oklab, var(--pt-gold) 62%, white);
-    }
-    /* The tallest bar: a thin light cap along its top edge. */
-    .mbc-col.is-top {
-      --mbc-cap: inset 0 2px 0 0 color-mix(in srgb, white 45%, transparent);
-    }
     .mbc-bar {
       background-image: linear-gradient(to top, var(--mbc-base), var(--mbc-tip));
-      box-shadow: var(--mbc-cap);
       animation-duration: 600ms;
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
       transition-property: filter, box-shadow;
@@ -212,9 +204,8 @@ export type BarOrientation = 'vertical' | 'horizontal';
     .mbc-col.is-active .mbc-bar {
       filter: brightness(1.15) saturate(1.1);
       box-shadow:
-        var(--mbc-cap),
-        0 0 0 1px color-mix(in srgb, var(--mbc-glow) 45%, transparent),
-        0 0 18px -2px color-mix(in srgb, var(--mbc-glow) 60%, transparent);
+        0 0 0 1px color-mix(in srgb, var(--pt-brand-vivid) 45%, transparent),
+        0 0 18px -2px color-mix(in srgb, var(--pt-brand-vivid) 60%, transparent);
     }
 
     .mbc-hint {
@@ -232,6 +223,22 @@ export type BarOrientation = 'vertical' | 'horizontal';
       opacity: 1;
       translate: -50% 0;
     }
+    /* End bars: the hint hugs the chart's outer edge instead of centring past it. */
+    .mbc-hint-start {
+      left: 0;
+      translate: 0 3px;
+    }
+    .is-active .mbc-hint-start {
+      translate: 0 0;
+    }
+    .mbc-hint-end {
+      left: auto;
+      right: 0;
+      translate: 0 3px;
+    }
+    .is-active .mbc-hint-end {
+      translate: 0 0;
+    }
   `,
 })
 export class MiniBarChart {
@@ -246,10 +253,8 @@ export class MiniBarChart {
   /** Colour of the labels above the bars: gold (ratings) or muted (plain values). */
   readonly topTone = input<'gold' | 'muted'>('gold');
   readonly orientation = input<BarOrientation>('vertical');
-  /** Gradient bars, a marked top bar, the `accentKey` bar in gold and a springier grow-in. */
+  /** Gradient bars (all alike) and a springier grow-in. */
   readonly expressive = input(false, { transform: booleanAttribute });
-  /** Key of the bar drawn with the gold accent (e.g. the current year); only with `expressive`. */
-  readonly accentKey = input<string | number | null>(null);
 
   /** Linked bar lit by hover, keyboard focus or press; the others dim while one is. */
   protected readonly activeKey = signal<string | number | null>(null);
@@ -271,13 +276,7 @@ export class MiniBarChart {
     const ratios = barRatios(bars.map((b) => b.value));
     // The highest bar (the best year / month) takes the lighter brand tone when there is a series.
     const highlight = bars.length > 1;
-    const accent = this.expressive() ? this.accentKey() : null;
-    return bars.map((bar, i) => ({
-      ...bar,
-      ratio: ratios[i],
-      top: highlight && ratios[i] === 1,
-      accent: accent !== null && bar.key === accent,
-    }));
+    return bars.map((bar, i) => ({ ...bar, ratio: ratios[i], top: highlight && ratios[i] === 1 }));
   });
 
   /** Classes of a vertical bar: the expressive gradient, or flat brand tones (lighter for the top bar). */

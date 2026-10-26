@@ -46,12 +46,11 @@ describe('MiniBarChart linked, expressive bars', () => {
     link: `/years/${year}`,
   }));
 
-  function render(options: { expressive?: boolean; accentKey?: number | null; items?: MiniBar[] } = {}) {
+  function render(options: { expressive?: boolean; items?: MiniBar[] } = {}) {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(MiniBarChart);
     fixture.componentRef.setInput('bars', options.items ?? bars);
     fixture.componentRef.setInput('expressive', options.expressive ?? true);
-    fixture.componentRef.setInput('accentKey', options.accentKey ?? null);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const links = () => [...el.querySelectorAll<HTMLAnchorElement>('a[data-bar-link]')];
@@ -108,17 +107,25 @@ describe('MiniBarChart linked, expressive bars', () => {
     expect(items().map((i) => i.classList.contains('is-active'))).toEqual([false, false, true]);
   });
 
-  it('accents the given bar in gold and marks the tallest one', () => {
-    const { items } = render({ accentKey: 2024 });
-    expect(items().map((i) => i.classList.contains('is-accent'))).toEqual([false, false, true]);
-    expect(items().map((i) => i.classList.contains('is-top'))).toEqual([false, true, false]);
-    expect(items()[2].querySelector(':scope > span')?.className).toContain('text-gold');
-    expect(items()[0].querySelector('[data-ratio]')?.className).toContain('mbc-bar');
+  it('draws every bar with the same gradient, with no accent or top-bar marks', () => {
+    const { items } = render();
+    expect(items().every((i) => i.querySelector('[data-ratio]')?.className.includes('mbc-bar'))).toBe(true);
+    expect(items().some((i) => i.classList.contains('is-accent') || i.classList.contains('is-top'))).toBe(false);
+    expect(items().some((i) => i.querySelector(':scope > span')?.className.includes('text-gold'))).toBe(false);
   });
 
-  it('keeps the flat look without expressive, even with an accent key', () => {
-    const { items } = render({ expressive: false, accentKey: 2024 });
-    expect(items().some((i) => i.classList.contains('is-accent') || i.classList.contains('mbc-col'))).toBe(false);
+  it('keeps the hint inside the plot: capped under its top and hugging the outer edge at the ends', () => {
+    const { items } = render();
+    const hints = items().map((i) => i.querySelector<HTMLElement>('[data-hint]')!);
+    // Above the bar top, but never higher than its own height under the plot's top edge.
+    expect(hints[1].style.bottom).toBe('min(1 * (100% - 0px) + 4px, 100% - 17px)');
+    expect(hints.map((h) => h.classList.contains('mbc-hint-start'))).toEqual([true, false, false]);
+    expect(hints.map((h) => h.classList.contains('mbc-hint-end'))).toEqual([false, false, true]);
+  });
+
+  it('keeps the flat look without expressive', () => {
+    const { items } = render({ expressive: false });
+    expect(items().some((i) => i.classList.contains('mbc-col'))).toBe(false);
     expect(items()[1].querySelector('[data-ratio]')?.className).toContain('bg-brand-light');
   });
 });

@@ -220,16 +220,6 @@ export class Dashboard {
       });
   });
 
-  /** Year bar drawn in gold: the current calendar year, else the most recent one charted. */
-  protected readonly accentYear = computed(() => {
-    const bars = this.yearBars();
-    if (!bars?.length) {
-      return null;
-    }
-    const current = new Date().getFullYear();
-    return bars.some((b) => b.key === current) ? current : bars[bars.length - 1].key;
-  });
-
   protected readonly mostPlayed = computed(() =>
     this.playMode() === 'single' ? this.mostPlayedSingleplayer() : this.mostPlayedOnline(),
   );
