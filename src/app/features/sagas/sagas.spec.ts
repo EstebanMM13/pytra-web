@@ -193,4 +193,16 @@ describe('Sagas detail', () => {
     expect(el.querySelector('a.saga-card [data-saga-tint]')!.classList).toContain('overflow-hidden');
   });
 
+  it('lists every developer with the year range kept whole', () => {
+    const el = setup([
+      { ...game(10, 'Ascension', 1), developer: 'Santa Monica Studio', releaseDate: '2013-03-12' },
+      { ...game(11, 'Ragnarök', 1), developer: 'Santa Monica Studio', releaseDate: '2022-11-09' },
+      { ...game(12, 'Chains of Olympus', 1), developer: 'Ready at Dawn', releaseDate: '2008-03-04' },
+    ]);
+    const meta = el.querySelector('[data-saga-hero] [data-saga-meta]') as HTMLElement;
+    expect(meta.querySelector('[data-saga-studios]')!.textContent!.trim()).toBe('Santa Monica Studio, Ready at Dawn');
+    expect(meta.querySelector('[data-saga-studios]')!.classList).toContain('line-clamp-2');
+    expect(meta.querySelector('[data-saga-years]')!.textContent!.trim()).toBe('2008–2022');
+    expect(meta.getAttribute('title')).toBe('Santa Monica Studio, Ready at Dawn · 2008–2022');
+  });
 });

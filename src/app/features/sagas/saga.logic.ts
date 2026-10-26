@@ -14,8 +14,8 @@ export interface SagaSummary {
   /** Mean of each played game's best rating; null when nothing is rated. */
   avgRating: number | null;
   platinums: number;
-  /** Most common developer among the saga's games, if any. */
-  studio: string | null;
+  /** Distinct developers of the saga's games, most games first, ties by name; empty when none. */
+  studios: string[];
   firstYear: number | null;
   lastYear: number | null;
   /** Sortable `yyyy-MM-dd` of the saga's most recent run / online activity; null when unknown. */
@@ -53,20 +53,21 @@ export function byRelease(a: Game, b: Game): number {
   return ra.localeCompare(rb) || a.name.localeCompare(b.name);
 }
 
-function mostCommon(values: readonly string[]): string | null {
+/**
+ * Distinct developers of the given games (trimmed, blanks ignored), most games first, ties by
+ * name (accent- and case-insensitive).
+ */
+export function sagaDevelopers(games: readonly Game[]): string[] {
   const counts = new Map<string, number>();
-  for (const v of values) {
-    counts.set(v, (counts.get(v) ?? 0) + 1);
-  }
-  let best: string | null = null;
-  let bestCount = 0;
-  for (const [value, count] of counts) {
-    if (count > bestCount) {
-      best = value;
-      bestCount = count;
+  for (const g of games) {
+    const developer = g.developer?.trim();
+    if (developer) {
+      counts.set(developer, (counts.get(developer) ?? 0) + 1);
     }
   }
-  return best;
+  return [...counts]
+    .sort(([a, ca], [b, cb]) => cb - ca || a.localeCompare(b, 'es', { sensitivity: 'base' }))
+    .map(([developer]) => developer);
 }
 
 /**
@@ -99,7 +100,7 @@ export function summarizeSaga(saga: Saga, allGames: readonly Game[]): SagaSummar
     hours: games.reduce((sum, g) => sum + (g.totalHours ?? 0), 0),
     avgRating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
     platinums: games.filter((g) => g.hasPlatinum).length,
-    studio: mostCommon(games.map((g) => g.developer?.trim() ?? '').filter((d) => !!d)),
+    studios: sagaDevelopers(games),
     firstYear: years.length ? Math.min(...years) : null,
     lastYear: years.length ? Math.max(...years) : null,
     lastActivity: latest(games.map(lastActivityKey)),
@@ -113,12 +114,21 @@ export function summarizeSagas(sagas: readonly Saga[], games: readonly Game[]): 
     .sort((a, b) => a.saga.name.localeCompare(b.saga.name, 'es', { sensitivity: 'base' }));
 }
 
-/** "Studio · 2005–2022" (parts omitted when unknown). */
-export function sagaMetaLine(summary: SagaSummary): string {
+/** "2005–2022", or the single year when both ends match; null when no game has a release year. */
+export function sagaYearRange(summary: SagaSummary): string | null {
   const { firstYear, lastYear } = summary;
-  const years =
-    firstYear === null ? null : firstYear === lastYear ? String(firstYear) : `${firstYear}–${lastYear}`;
-  return [summary.studio, years].filter((part) => !!part).join(' · ');
+  if (firstYear === null) return null;
+  return firstYear === lastYear ? String(firstYear) : `${firstYear}–${lastYear}`;
+}
+
+/** Every developer joined: "Studio A, Studio B"; empty when none is known. */
+export function sagaStudiosLine(summary: SagaSummary): string {
+  return summary.studios.join(', ');
+}
+
+/** "Studio A, Studio B · 2005–2022" (parts omitted when unknown). */
+export function sagaMetaLine(summary: SagaSummary): string {
+  return [sagaStudiosLine(summary), sagaYearRange(summary)].filter((part) => !!part).join(' · ');
 }
 
 /** Share of played games, 0–100. */

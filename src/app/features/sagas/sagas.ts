@@ -36,6 +36,8 @@ import {
   sagaBackdropCover,
   sagaGameStatus,
   sagaMetaLine,
+  sagaStudiosLine,
+  sagaYearRange,
   sortSagas,
   summarizeSagas,
 } from './saga.logic';
@@ -89,6 +91,8 @@ export class Sagas {
   protected readonly releaseYear = releaseYear;
   protected readonly playedPercent = playedPercent;
   protected readonly metaLine = sagaMetaLine;
+  protected readonly studiosLine = sagaStudiosLine;
+  protected readonly yearRange = sagaYearRange;
   protected readonly backdropCover = sagaBackdropCover;
   /** Covers in the detail hero's collage (up to four). */
   protected readonly collageCount = (games: number): number => Math.min(Math.max(games, 1), 4);

@@ -9,8 +9,11 @@ import {
   parseSagaSort,
   playedPercent,
   sagaBackdropCover,
+  sagaDevelopers,
   sagaGameStatus,
   sagaMetaLine,
+  sagaStudiosLine,
+  sagaYearRange,
   sortSagas,
   summarizeSaga,
   summarizeSagas,
@@ -61,23 +64,44 @@ describe('saga logic', () => {
       hours: 52.5,
       avgRating: 8.5,
       platinums: 1,
-      studio: 'Santa Monica Studio',
+      studios: ['Santa Monica Studio', 'Other'],
       firstYear: 2005,
       lastYear: 2018,
     });
     expect(playedPercent(summary)).toBe(67);
-    expect(sagaMetaLine(summary)).toBe('Santa Monica Studio · 2005–2018');
+    expect(sagaMetaLine(summary)).toBe('Santa Monica Studio, Other · 2005–2018');
   });
 
   it('handles sagas without games', () => {
     const summary = summarizeSaga(empty, games);
-    expect(summary).toMatchObject({ total: 0, played: 0, hours: 0, avgRating: null, platinums: 0, studio: null });
+    expect(summary).toMatchObject({ total: 0, played: 0, hours: 0, avgRating: null, platinums: 0, studios: [] });
     expect(playedPercent(summary)).toBe(0);
     expect(sagaMetaLine(summary)).toBe('');
   });
 
   it('shows a single year once', () => {
     expect(sagaMetaLine(summarizeSaga(zelda, games))).toBe('2017');
+  });
+
+  it('lists every developer, most games first, ties by name, blanks and duplicates folded', () => {
+    const devs = [
+      game({ id: 1, name: 'A', developer: 'Ubisoft Quebec' }),
+      game({ id: 2, name: 'B', developer: ' Ubisoft Montreal ' }),
+      game({ id: 3, name: 'C', developer: 'Ubisoft Montreal' }),
+      game({ id: 4, name: 'D', developer: 'Ubisoft Annecy' }),
+      game({ id: 5, name: 'E', developer: '   ' }),
+      game({ id: 6, name: 'F', developer: null }),
+    ];
+    expect(sagaDevelopers(devs)).toEqual(['Ubisoft Montreal', 'Ubisoft Annecy', 'Ubisoft Quebec']);
+    expect(sagaDevelopers([])).toEqual([]);
+  });
+
+  it('splits the meta line into developers and year range', () => {
+    const summary = summarizeSaga(gow, games);
+    expect(sagaStudiosLine(summary)).toBe('Santa Monica Studio, Other');
+    expect(sagaYearRange(summary)).toBe('2005–2018');
+    expect(sagaYearRange(summarizeSaga(empty, games))).toBeNull();
+    expect(sagaStudiosLine(summarizeSaga(empty, games))).toBe('');
   });
 
   it('lists sagas alphabetically', () => {
@@ -140,7 +164,7 @@ describe('saga sorting', () => {
       hours: 0,
       avgRating: null,
       platinums: 0,
-      studio: null,
+      studios: [],
       firstYear: null,
       lastYear: null,
       lastActivity: null,

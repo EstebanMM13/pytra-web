@@ -245,7 +245,20 @@
               {{ s.saga.name }}
             </h2>
             @if (metaLine(s)) {
-              <p class="mt-1.5 text-[13px] text-text-3 md:mt-2 md:text-[15px]">{{ metaLine(s) }}</p>
+              <!-- Every developer (clamped to two lines, full list on hover) and the year range, kept whole -->
+              @let studios = studiosLine(s);
+              @let years = yearRange(s);
+              <p class="mt-1.5 flex items-baseline gap-1.5 text-[13px] text-text-3 md:mt-2 md:text-[15px]" [title]="metaLine(s)" data-saga-meta>
+                @if (studios) {
+                  <span class="line-clamp-2 min-w-0 wrap-break-word" data-saga-studios>{{ studios }}</span>
+                }
+                @if (studios && years) {
+                  <span class="shrink-0" aria-hidden="true">·</span>
+                }
+                @if (years) {
+                  <span class="shrink-0 whitespace-nowrap" data-saga-years>{{ years }}</span>
+                }
+              </p>
             }
           </div>
           <button
