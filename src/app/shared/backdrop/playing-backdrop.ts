@@ -24,11 +24,11 @@ export interface BackdropStrip {
 
 /**
  * Background made of the covers of the games in progress (see `backdropGames`): one strip per game,
- * columns side by side from md up, stacked rows on phones, very blurred under a theme veil and
- * blended into each other through soft mask gradients. Fixed to the viewport behind everything,
- * over the app's aura, which shows again when no game is in progress. Reads the cached library
- * (no request when a screen already loaded it) and follows its updates, so a saved run changes the
- * strips without a reload.
+ * columns side by side from md up, stacked rows on phones, blurred into plain colour fields (the
+ * covers' colours, not their pictures) under a theme veil and blended into each other through
+ * soft mask gradients. Fixed to the viewport behind everything, over the app's aura, which shows
+ * again when no game is in progress. Reads the cached library (no request when a screen already
+ * loaded it) and follows its updates, so a saved run changes the strips without a reload.
  */
 @Component({
   selector: 'app-playing-backdrop',
@@ -74,8 +74,9 @@ export interface BackdropStrip {
       pointer-events: none;
       contain: strict;
       transform: translateZ(0);
-      --o: 3lvh;
-      --blur: 14px;
+      /* Strip overlap (half the cross-fade) and blur: wide enough that the covers read as colour fields. */
+      --o: 5lvh;
+      --blur: 48px;
     }
 
     /* Phones: rows. Each strip after the first fades in over the previous one's overlap. */
@@ -112,8 +113,8 @@ export interface BackdropStrip {
 
     @media (width >= 48rem) {
       :host {
-        --o: 3vw;
-        --blur: 22px;
+        --o: 5vw;
+        --blur: 88px;
       }
 
       .strip,
@@ -133,7 +134,7 @@ export interface BackdropStrip {
         left: 0;
         width: calc(100% / var(--n) + var(--o));
         -webkit-mask-image: none;
-      mask-image: none;
+        mask-image: none;
       }
 
       .strip:last-child {
@@ -147,7 +148,10 @@ export interface BackdropStrip {
       animation: pt-backdrop-in 900ms ease-out both;
     }
 
-    /* Bleeds past the strip so the blur's soft edge is clipped away. */
+    /*
+     * Bleeds 3 blur radii past the strip (and so past the viewport) so the blur's soft, see-through
+     * edge is clipped away. The saturation boost keeps the blended colours vivid under the veil.
+     */
     img {
       position: absolute;
       top: calc(-3 * var(--blur));
@@ -156,10 +160,10 @@ export interface BackdropStrip {
       height: calc(100% + 6 * var(--blur));
       object-fit: cover;
       object-position: center;
-      filter: blur(var(--blur));
+      filter: blur(var(--blur)) saturate(1.35);
     }
 
-    /* Theme veil: keeps the covers a faint tint, as subtle as the aura. */
+    /* Theme veil: tones the colour fields down so cards and text stay readable over them. */
     .strip.cover::after {
       content: '';
       position: absolute;
