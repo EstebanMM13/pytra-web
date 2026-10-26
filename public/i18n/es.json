@@ -1291,10 +1291,6 @@
         "title": "Multitarea",
         "desc": "Ten {{target}} partidas en curso a la vez"
       },
-      "completionist": {
-        "title": "Nada a medias",
-        "desc": "Completa {{target}} partidas seguidas sin abandonar ninguna entre medias (un abandono reinicia la racha)"
-      },
       "perfectionist": {
         "title": "Perfeccionista",
         "desc": "Consigue el platino y el 100% de un mismo juego"

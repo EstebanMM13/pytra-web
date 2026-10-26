@@ -1,5 +1,5 @@
 import { Game } from '../../core/models/game.model';
-import { DatedRun, StatsSummary, YearStat } from '../../core/models/stats.model';
+import { StatsSummary, YearStat } from '../../core/models/stats.model';
 import { ACHIEVEMENT_CATEGORIES, computeAchievements, groupByCategory, sortAchievements, topUnlocked } from './achievements';
 
 const PC = { id: 1, name: 'PC', color: '#8A857C' };
@@ -40,25 +40,12 @@ const summary = (partial: Partial<StatsSummary> = {}): StatsSummary => ({
 
 const year = (y: number, experienceCount: number): YearStat => ({ year: y, totalHours: 1, experienceCount, averageRating: null });
 
-let runSeq = 0;
-const run = (status: DatedRun['status'], dates: Partial<DatedRun> = {}): DatedRun => ({
-  experienceId: ++runSeq,
-  status,
-  year: 2024,
-  startDate: null,
-  endDate: null,
-  ...dates,
-});
-/** `count` completed runs ending on consecutive days of January 2024 from `fromDay`. */
-const completedRuns = (count: number, fromDay = 1): DatedRun[] =>
-  Array.from({ length: count }, (_, i) => run('COMPLETADO', { endDate: `2024-01-${String(fromDay + i).padStart(2, '0')}` }));
-
 const byId = (list: ReturnType<typeof computeAchievements>) => Object.fromEntries(list.map((a) => [a.id, a]));
 
 describe('computeAchievements', () => {
   it('locks everything for an empty library', () => {
     const list = computeAchievements({ games: [], summary: summary(), sagas: [] });
-    expect(list.length).toBe(49);
+    expect(list.length).toBe(48);
     expect(new Set(list.map((a) => a.id)).size).toBe(list.length);
     expect(list.every((a) => !a.unlocked && a.progress === 0)).toBe(true);
     expect(list.every((a) => ACHIEVEMENT_CATEGORIES.includes(a.category))).toBe(true);
@@ -67,7 +54,7 @@ describe('computeAchievements', () => {
   it('groups by category in display order', () => {
     const groups = groupByCategory(computeAchievements({ games: [], summary: summary(), sagas: [] }));
     expect(groups.map((g) => g.category)).toEqual([...ACHIEVEMENT_CATEGORIES]);
-    expect(groups.reduce((n, g) => n + g.items.length, 0)).toBe(49);
+    expect(groups.reduce((n, g) => n + g.items.length, 0)).toBe(48);
   });
 
   it('derives hours, completion, replay and online tiers from the summary', () => {
@@ -85,55 +72,6 @@ describe('computeAchievements', () => {
     expect(a['completed10'].unlocked).toBe(true);
     expect(a['firstReplay'].unlocked && !a['replays5'].unlocked).toBe(true);
     expect(a['multitasker'].unlocked).toBe(true);
-  });
-
-  describe('completionist streak', () => {
-    const streak = (runs: DatedRun[]) => byId(computeAchievements({ games: [], summary: summary(), sagas: [], runs }))['completionist'];
-
-    it('counts no streak without runs data', () => {
-      const a = byId(computeAchievements({ games: [], summary: summary({ completedCount: 30 }), sagas: [] }));
-      expect(a['completionist'].current).toBe(0);
-    });
-
-    it('unlocks with 10 completed runs in a row', () => {
-      expect(streak(completedRuns(9)).unlocked).toBe(false);
-      expect(streak(completedRuns(10)).unlocked).toBe(true);
-    });
-
-    it('resets on an abandoned run in between, keeping the best streak', () => {
-      const runs = [...completedRuns(4, 1), run('ABANDONADO', { endDate: '2024-01-05' }), ...completedRuns(6, 6)];
-      expect(streak(runs).current).toBe(6);
-    });
-
-    it('stays unlocked after a later abandoned run', () => {
-      const a = streak([...completedRuns(10, 1), run('ABANDONADO', { endDate: '2024-01-20' }), ...completedRuns(1, 21)]);
-      expect(a.current).toBe(10);
-      expect(a.unlocked).toBe(true);
-    });
-
-    it('ignores runs in progress or pending (neither break nor count)', () => {
-      const runs = [
-        ...completedRuns(5, 1),
-        run('EN_CURSO', { startDate: '2024-01-06' }),
-        run('PENDIENTE', { endDate: '2024-01-07' }),
-        ...completedRuns(5, 8),
-      ];
-      expect(streak(runs).current).toBe(10);
-    });
-
-    it('orders chronologically (end date, else start date, else the year), not by input order', () => {
-      const runs = [
-        run('COMPLETADO', { year: 2023 }),
-        run('COMPLETADO', { endDate: '2024-03-01' }),
-        run('ABANDONADO', { startDate: '2024-02-01' }),
-        run('COMPLETADO', { year: 2022 }),
-        run('COMPLETADO', { startDate: '2024-01-01', endDate: '2024-04-01' }),
-      ];
-      // 2022, 2023 | abandoned Feb 2024 | Mar, Apr 2024.
-      expect(streak(runs).current).toBe(2);
-      expect(streak([...runs].reverse()).current).toBe(2);
-      expect(streak([...runs, run('ABANDONADO', { endDate: '2024-06-01' })]).current).toBe(2);
-    });
   });
 
   it('counts online playtime as playing (online games have no runs)', () => {
@@ -314,7 +252,6 @@ describe('computeAchievements', () => {
           inProgressCount: 3,
         }),
         years: Array.from({ length: 10 }, (_, i) => year(2015 + i, 1)),
-        runs: completedRuns(10),
       };
     };
 
@@ -336,7 +273,8 @@ describe('computeAchievements', () => {
     });
 
     it('stays locked while a single badge is missing', () => {
-      const legend = byId(computeAchievements({ ...everything(), runs: completedRuns(9) }))['legend'];
+      const input = everything();
+      const legend = byId(computeAchievements({ ...input, summary: { ...input.summary, inProgressCount: 2 } }))['legend'];
       expect(legend.unlocked).toBe(false);
       expect(legend.current).toBe(legend.target - 1);
     });

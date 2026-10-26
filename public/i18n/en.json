@@ -1291,10 +1291,6 @@
         "title": "Multitasker",
         "desc": "Have {{target}} runs in progress at once"
       },
-      "completionist": {
-        "title": "No half measures",
-        "desc": "Complete {{target}} runs in a row without abandoning any in between (an abandoned run resets the streak)"
-      },
       "perfectionist": {
         "title": "Perfectionist",
         "desc": "Earn both the platinum and 100% in the same game"

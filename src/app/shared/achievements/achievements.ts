@@ -1,6 +1,6 @@
 import { Game } from '../../core/models/game.model';
 import { Saga } from '../../core/models/saga.model';
-import { DatedRun, StatsSummary, YearStat } from '../../core/models/stats.model';
+import { StatsSummary, YearStat } from '../../core/models/stats.model';
 
 /** Icon keys mapped to lucide icons by the badge component (keeps this helper framework-free). */
 export type AchievementIcon =
@@ -85,8 +85,6 @@ export interface AchievementInput {
   summary: StatsSummary | null;
   sagas: readonly Saga[];
   years?: readonly YearStat[] | null;
-  /** Every dated run (status and dates), for the completion streak; absent counts as none. */
-  runs?: readonly DatedRun[] | null;
 }
 
 const TIER_WEIGHT: Record<AchievementTier, number> = { bronze: 0, silver: 1, gold: 2 };
@@ -102,10 +100,10 @@ type Def = [id: string, category: AchievementCategory, tier: AchievementTier, ic
 
 /**
  * Derives the badge list from data the app already loads (games list aggregates, stats
- * summary, by-year stats, sagas and the dated runs). Ordered by category, easier first, with the
+ * summary, by-year stats and sagas). Ordered by category, easier first, with the
  * `legend` meta badge last; callers sort unlocked-first for display.
  */
-export function computeAchievements({ games: allGames, summary, sagas, years, runs: datedRuns }: AchievementInput): Achievement[] {
+export function computeAchievements({ games: allGames, summary, sagas, years }: AchievementInput): Achievement[] {
   // Games pending review (imported, not confirmed yet) are not in the library.
   const games = allGames.filter((g) => g.reviewStatus !== 'PENDING_REVIEW');
   const played = games.filter(isPlayed);
@@ -186,8 +184,6 @@ export function computeAchievements({ games: allGames, summary, sagas, years, ru
     ['online500', 'online', 'gold', 'users', onlineHours, 500],
 
     ['multitasker', 'special', 'bronze', 'target', inProgress, 3],
-    // Best streak ever, so the badge stays unlocked after a later abandoned run.
-    ['completionist', 'special', 'gold', 'award', longestCompletionStreak(datedRuns ?? []), 10],
     ['perfectionist', 'special', 'gold', 'sparkles', perfectGame, 1],
   ];
 
@@ -239,27 +235,6 @@ function hasOnlineSide(game: Game): boolean {
  */
 function isPlayed(game: Game): boolean {
   return (game.experienceCount ?? 0) > 0 || (hasOnlineSide(game) && (game.totalHours ?? 0) > 0);
-}
-
-/**
- * Longest streak of COMPLETADO runs with no ABANDONADO run in between, in chronological order:
- * end date, else start date, else January 1st of the run's year, ties by id (the API's recency
- * rule). An abandoned run resets the streak; runs in progress or pending neither break nor extend
- * it (they are not finished yet).
- */
-function longestCompletionStreak(runs: readonly DatedRun[]): number {
-  const when = (r: DatedRun) => r.endDate ?? r.startDate ?? `${r.year}-01-01`;
-  const sorted = [...runs].sort((a, b) => when(a).localeCompare(when(b)) || a.experienceId - b.experienceId);
-  let best = 0;
-  let streak = 0;
-  for (const run of sorted) {
-    if (run.status === 'COMPLETADO') {
-      best = Math.max(best, ++streak);
-    } else if (run.status === 'ABANDONADO') {
-      streak = 0;
-    }
-  }
-  return best;
 }
 
 /** Played games of each saga (only sagas that exist in the list). */

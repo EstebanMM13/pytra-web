@@ -6,15 +6,7 @@ import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, catchError, of } from 'rxjs';
-import {
-  DatedRun,
-  InProgressExperience,
-  MostPlayedGame,
-  SagaStat,
-  StatsSummary,
-  TopRatedExperience,
-  YearStat,
-} from '../../core/models/stats.model';
+import { InProgressExperience, MostPlayedGame, SagaStat, StatsSummary, TopRatedExperience, YearStat } from '../../core/models/stats.model';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { PsnService } from '../../core/services/psn.service';
@@ -130,8 +122,6 @@ export class Dashboard {
   /** Library and sagas, only for achievements; `null` while loading (badges stay hidden). */
   readonly games = signal<Game[] | null>(null);
   readonly sagas = signal<Saga[] | null>(null);
-  /** Dated runs for the completion streak badge; `null` while loading (empty on failure). */
-  readonly datedRuns = signal<DatedRun[] | null>(null);
 
   /** Runs with status EN_CURSO (`/stats/in-progress`); `null` while loading. */
   readonly playing = signal<InProgressExperience[] | null>(null);
@@ -187,14 +177,13 @@ export class Dashboard {
     };
   });
 
-  /** Most impressive unlocked badges (max 4); empty until games, sagas, summary and runs load. */
+  /** Most impressive unlocked badges (max 4); empty until games, sagas and summary load. */
   protected readonly topBadges = computed(() => {
     const games = this.games();
     const sagas = this.sagas();
     const summary = this.summary();
-    const runs = this.datedRuns();
-    if (!games || !sagas || !summary || !runs) return [];
-    return topUnlocked(computeAchievements({ games, sagas, summary, years: this.byYear(), runs }), 4);
+    if (!games || !sagas || !summary) return [];
+    return topUnlocked(computeAchievements({ games, sagas, summary, years: this.byYear() }), 4);
   });
 
   /** New account (no games yet): show the onboarding card instead of empty stats. */
@@ -278,10 +267,6 @@ export class Dashboard {
       .findAll()
       .pipe(catchError(() => of(null)))
       .subscribe((sagas) => this.sagas.set(sagas));
-    this.statsService
-      .getDatedRuns()
-      .pipe(catchError(() => of([])))
-      .subscribe((runs) => this.datedRuns.set(runs));
     // Not linked / not configured answers with an error: simply hide the notice (no inline error).
     this.steamService
       .getPending()
