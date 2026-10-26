@@ -98,6 +98,8 @@
   --pt-aura: 28%;
   --pt-blob: 14%;
   --pt-blob-gold: 12%;
+  /* Share of the page colour veiling the in-progress covers background (PlayingBackdrop). */
+  --pt-backdrop-veil: 82%;
   --pt-card: color-mix(in srgb, var(--pt-surface) 85%, transparent);
   --pt-card-border: #ffffff14;
   --pt-card-shadow: none;
@@ -183,6 +185,7 @@
   --pt-aura: 8%;
   --pt-blob: 6%;
   --pt-blob-gold: 5%;
+  --pt-backdrop-veil: 88%;
   --pt-card: color-mix(in srgb, var(--pt-surface) 94%, transparent);
   --pt-card-border: var(--pt-border);
   --pt-card-shadow: 0 1px 2px #1c1c1f12, 0 6px 18px -8px #1c1c1f29;

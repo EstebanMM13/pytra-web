@@ -92,6 +92,27 @@ export function sizedCoverUrl(url: string | null | undefined, variant: CoverImag
   );
 }
 
+/** IGDB sizes no bigger than `t_cover_small` (90x128): kept as they are for a backdrop. */
+const IGDB_TINY_SIZES = new Set(['t_cover_small', 't_thumb', 't_micro', 't_micro_2x']);
+
+/** Smallest width the API thumbnails Steam capsules to. */
+const STEAM_TINY_THUMB_WIDTH = 120;
+
+/**
+ * The smallest usable image for a heavily blurred background (upscaled, a tiny image is already
+ * soft): IGDB covers as `t_cover_small` (90x128), Steam library capsules through the API's 120px
+ * thumbnail, any other url unchanged.
+ */
+export function backdropCoverUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (STEAM_LIBRARY_CAPSULE.test(url)) {
+    return `${API_ORIGIN}/api/v1/covers/thumb?url=${encodeURIComponent(url)}&w=${STEAM_TINY_THUMB_WIDTH}`;
+  }
+  return url.replace(IGDB_IMAGE_SIZE, (segment, base: string, size: string) =>
+    IGDB_TINY_SIZES.has(size.toLowerCase()) ? segment : `${base}t_cover_small/`,
+  );
+}
+
 const STEAM_APPS_BASE = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/';
 
 /** Steam's portrait library capsule (600x900) for an appid: the cover Pytra stores for Steam games. */

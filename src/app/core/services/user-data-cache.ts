@@ -1,4 +1,4 @@
-import { Injectable, effect, inject, untracked } from '@angular/core';
+import { Injectable, Signal, computed, effect, inject, signal, untracked } from '@angular/core';
 import {
   EMPTY,
   MonoTypeOperatorFunction,
@@ -27,6 +27,23 @@ export class CachedResource<T> {
   private inFlight: { token: string | null; request$: Observable<T> } | null = null;
   /** Bumped on invalidation so a request started before a mutation never fills the cache. */
   private generation = 0;
+  /** Last value fetched, kept through invalidation (unlike `entry`) until a fresher one lands. */
+  private readonly lastFetched = signal<{ token: string | null; value: T } | null>(null, {
+    equal: (a, b) => a?.token === b?.token && sameData(a?.value, b?.value),
+  });
+  private readonly invalidations = signal(0);
+
+  /**
+   * The current session's last fetched value, reactive and without any request: still the old
+   * value right after an invalidation, until the reload answers. Null before the first fetch.
+   */
+  readonly latest: Signal<T | null> = computed(() => {
+    const last = this.lastFetched();
+    return last && last.token === this.currentToken() ? last.value : null;
+  });
+
+  /** Number of invalidations so far (the data changed on the server); reactive. */
+  readonly invalidationCount: Signal<number> = this.invalidations.asReadonly();
 
   constructor(
     private readonly fetcher: () => Observable<T>,
@@ -67,6 +84,7 @@ export class CachedResource<T> {
     this.generation++;
     this.entry = null;
     this.inFlight = null;
+    this.invalidations.update((count) => count + 1);
   }
 
   /** Forgets data fetched by a session other than the current one. */
@@ -74,6 +92,9 @@ export class CachedResource<T> {
     const token = this.currentToken();
     if (this.entry && this.entry.token !== token) {
       this.entry = null;
+    }
+    if (untracked(this.lastFetched)?.token !== token) {
+      this.lastFetched.set(null);
     }
     if (this.inFlight && this.inFlight.token !== token) {
       this.invalidate();
@@ -87,6 +108,7 @@ export class CachedResource<T> {
         tap((value) => {
           if (generation === this.generation && token === this.currentToken()) {
             this.entry = { token, value };
+            this.lastFetched.set({ token, value });
           }
         }),
         finalize(() => {

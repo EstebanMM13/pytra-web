@@ -220,4 +220,23 @@ describe('UserDataCache (through the cached services)', () => {
     http.expectOne(yearsUrl).flush([2025]);
     expect(afterWrite).toEqual([[2025]]);
   });
+
+  it('exposes the last fetched list reactively, kept through invalidation, never across sessions', () => {
+    expect(gameService.latestAll()).toBeNull();
+    read();
+    http.expectOne(gamesUrl).flush(games('Hades'));
+    expect(gameService.latestAll()).toEqual(games('Hades'));
+
+    const before = gameService.invalidationCount();
+    TestBed.inject(UserDataCache).invalidateAll();
+    expect(gameService.invalidationCount()).toBe(before + 1);
+    expect(gameService.latestAll()).toEqual(games('Hades'));
+
+    read();
+    http.expectOne(gamesUrl).flush(games('Hades', 'Celeste'));
+    expect(gameService.latestAll()).toEqual(games('Hades', 'Celeste'));
+
+    tokens.setToken(tokenFor('bob'));
+    expect(gameService.latestAll()).toBeNull();
+  });
 });
