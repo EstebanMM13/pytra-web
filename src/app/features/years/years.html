@@ -252,7 +252,7 @@
               <span class="text-xs text-muted">{{ 'years.byRating' | translate }}</span>
             </app-section-header>
             <!-- Web: about six rows, then internal scroll (the list holds the 10-run preview, or all of them). -->
-            <div class="flex flex-1 flex-col gap-2 md:scroll-list md:max-h-[494px]">
+            <div class="flex flex-1 flex-col gap-2 md:scroll-list md:max-h-[496px]">
               @for (run of visibleRuns(); track run.experienceId) {
                 <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="block rounded-[10px]" data-year-run>
                   <app-run-row

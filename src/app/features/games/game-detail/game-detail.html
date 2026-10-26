@@ -429,7 +429,7 @@
             </button>
           }
         </app-section-header>
-        <div class="flex flex-col gap-2.5 md:scroll-list md:max-h-[494px]">
+        <div class="flex flex-col gap-2.5 md:scroll-list md:max-h-[496px]">
           @if (experiences() === null) {
             @for (i of [1, 2]; track i) {
               <app-skeleton class="h-[74px] rounded-[10px]" />
@@ -679,7 +679,7 @@
         @if (sagaGames().length > 1) {
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="game.inSaga" class="mb-3" [label]="'game.inSaga' | translate" />
-            <ul class="scroll-list max-h-[312px] text-sm">
+            <ul class="scroll-list max-h-[314px] text-sm">
               @for (sg of sagaGames(); track sg.id) {
                 <li class="flex items-center justify-between gap-4 border-t border-divider py-[9px]">
                   @if (sg.id === g.id) {

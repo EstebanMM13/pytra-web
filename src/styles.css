@@ -520,8 +520,10 @@
 
 /*
  * Bounded lists inside cards. `scroll-list` gives a capped list its internal scroll with a thin,
- * theme-aware scrollbar; pair it with a max-height sized to N rows + gaps
- * (e.g. max-h-[326px] = 4 x 74px rows + 3 x 10px gaps). Prefix both with md: when the list is
+ * theme-aware scrollbar; pair it with a max-height sized to N rows + gaps + its 2px top padding
+ * (e.g. max-h-[328px] = 4 x 74px rows + 3 x 10px gaps + 2px). The padding (pulled back by a matching
+ * negative margin, so the list does not move) keeps the top row's hover-lift border from being
+ * clipped by the scroll box. Prefix both with md: when the list is
  * primary content, so phones keep natural page scroll. `scroll-thin` only styles the scrollbar,
  * for containers that already manage their own overflow and padding (dropdowns, popovers).
  */
@@ -814,6 +816,9 @@
 
 @utility scroll-list {
   overflow-y: auto;
+  /* Room for the top row's 1px hover-lift (a scroll box clips at its padding edge). */
+  margin-top: -2px;
+  padding-top: 2px;
   padding-right: 4px;
   scrollbar-width: thin;
   scrollbar-color: var(--pt-border-strong) transparent;

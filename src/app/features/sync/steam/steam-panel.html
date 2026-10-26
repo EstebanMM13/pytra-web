@@ -195,7 +195,7 @@
       <p class="border-t border-divider pt-4 pb-1 text-sm text-muted">{{ 'steam.noPending' | translate }}</p>
     } @else {
       <!-- Web: ~8 rows then internal scroll; phones keep page scroll (it is the page's main list). -->
-      <ul class="md:scroll-list md:max-h-[560px]">
+      <ul class="md:scroll-list md:max-h-[562px]">
         @for (game of pending(); track game.id) {
           <li
             class="flex flex-col gap-3 border-t border-divider py-3.5 text-sm md:grid md:grid-cols-[minmax(0,1fr)_110px_72px_auto] md:items-center md:gap-4"
@@ -280,7 +280,7 @@
       <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
         <p class="mb-2 text-[13px] text-muted">{{ 'steam.ignoredHint' | translate }}</p>
         <!-- Secondary list: ~6 rows then internal scroll on every size. -->
-        <ul class="scroll-list max-h-[344px]">
+        <ul class="scroll-list max-h-[346px]">
           @for (app of ignoredApps(); track app.appId) {
             <li class="flex items-center justify-between gap-3 border-t border-divider py-3">
               <span class="min-w-0 text-sm break-words text-text-3">{{ app.name }}</span>
