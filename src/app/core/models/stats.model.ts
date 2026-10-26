@@ -103,6 +103,15 @@ export interface YearExperience {
   endDate: string | null;
 }
 
+/** A run's status and dates with the year it counts in (gathered from the year summaries). */
+export interface DatedRun {
+  experienceId: number;
+  status: ExperienceStatus;
+  year: number;
+  startDate: string | null;
+  endDate: string | null;
+}
+
 /** A game ranked by its average rating over the year's completed runs. */
 export interface RatedGame {
   gameId: number;

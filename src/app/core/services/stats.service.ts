@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
 import {
+  DatedRun,
   GenreStat,
   InProgressExperience,
   MostPlayedGame,
@@ -30,6 +31,22 @@ export class StatsService {
   private readonly years = this.cache.resource(() => this.http.get<number[]>(`${this.baseUrl}/years`));
   private readonly inProgress = this.cache.resource(() =>
     this.http.get<InProgressExperience[]>(`${this.baseUrl}/in-progress`),
+  );
+  private readonly datedRuns = this.cache.resource(() =>
+    this.http.get<number[]>(`${this.baseUrl}/years`).pipe(
+      switchMap((years) => (years.length ? forkJoin(years.map((year) => this.getYearSummary(year))) : of([]))),
+      map((summaries) =>
+        summaries.flatMap((summary) =>
+          summary.experiences.map(({ experienceId, status, startDate, endDate }) => ({
+            experienceId,
+            status,
+            year: summary.year,
+            startDate,
+            endDate,
+          })),
+        ),
+      ),
+    ),
   );
   private readonly bySaga = this.cache.resource(() => this.http.get<SagaStat[]>(`${this.baseUrl}/by-saga`));
   /** One cached resource per limit (callers use a few fixed limits: the dashboard, the run rank). */
@@ -60,6 +77,15 @@ export class StatsService {
     return this.http
       .put<YearNote>(`${this.baseUrl}/years/${year}/note`, request)
       .pipe(this.cache.invalidateOnWrite());
+  }
+
+  /**
+   * Every run that counts in some year, with its status and dates, gathered from the year summaries
+   * (one request per year: there is no endpoint listing every run). Runs without a year nor dates
+   * are in no summary, so they are left out. Cached (see `UserDataCache`).
+   */
+  getDatedRuns(): Observable<DatedRun[]> {
+    return this.datedRuns.get();
   }
 
   /** EN_CURSO runs across all games, most recently started first. Cached (see `UserDataCache`). */
