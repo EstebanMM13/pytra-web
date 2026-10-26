@@ -30,3 +30,57 @@
     translate: calc(var(--n, 0) * 3px * var(--pt-motion, 1)) calc(-1px * var(--pt-motion, 1));
   }
 }
+
+@media (hover: hover) and (pointer: fine) {
+  .saga-hero:hover .saga-collage-cover {
+    translate: calc(var(--n, 0) * 4px * var(--pt-motion, 1)) calc(-2px * var(--pt-motion, 1));
+  }
+}
+
+/* Detail hero collage: md covers (larger from md), fanned by a step per cover. */
+.saga-hero-collage {
+  --cover-w: 63px;
+  --step: 22px;
+  height: 84px;
+  width: calc(var(--cover-w) + (var(--count, 1) - 1) * var(--step));
+}
+
+.saga-hero-collage .saga-collage-cover {
+  left: calc(var(--n, 0) * var(--step));
+}
+
+@media (min-width: 48rem) {
+  .saga-hero-collage {
+    --cover-w: 84px;
+    --step: 28px;
+    height: 112px;
+  }
+}
+
+/*
+ * Release-order timeline: each row draws its own segment of the connector through its dot, reaching
+ * across the row's vertical padding (--row-pad) and divider so the segments join; it starts at the
+ * first dot and ends at the last one.
+ */
+.timeline-line {
+  position: absolute;
+  top: calc(-1 * var(--row-pad, 0px) - 1px);
+  bottom: calc(-1 * var(--row-pad, 0px) - 1px);
+  left: 50%;
+  width: 2px;
+  translate: -50% 0;
+  border-radius: 1px;
+  background: var(--pt-border-strong);
+}
+
+.timeline-row:first-child .timeline-line {
+  top: 50%;
+}
+
+.timeline-row:last-child .timeline-line {
+  bottom: 50%;
+}
+
+.timeline-row:only-child .timeline-line {
+  display: none;
+}

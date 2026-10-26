@@ -181,3 +181,18 @@ export function filterSagas(summaries: readonly SagaSummary[], text: string): Sa
     (s) => normalizeText(s.saga.name).includes(needle) || s.games.some((g) => normalizeText(g.name).includes(needle)),
   );
 }
+
+/**
+ * Cover shown blurred behind a saga (detail hero, selected list card): the most played game's,
+ * else the first played one's in release order, else the first game's. Only games with a cover
+ * compete, so a coverless favourite never leaves the saga without a backdrop.
+ */
+export function sagaBackdropCover(games: readonly Game[]): string | null {
+  const covered = games.filter((g) => !!g.coverImageUrl);
+  const mostPlayed = covered.reduce<Game | null>(
+    (best, g) => ((g.totalHours ?? 0) > (best?.totalHours ?? 0) ? g : best),
+    null,
+  );
+  const pick = mostPlayed ?? covered.find(isPlayed) ?? covered[0];
+  return pick?.coverImageUrl ?? null;
+}

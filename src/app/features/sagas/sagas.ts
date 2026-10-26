@@ -21,6 +21,8 @@ import { StatCard } from '../../shared/ui/stat-card';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { SagaDialog } from './saga-dialog';
 import { Dropdown, DropdownOption } from '../../shared/ui/dropdown';
+import { CoverTilt } from '../../shared/ui/cover-tilt';
+import { ScrollParallax } from '../../shared/ui/scroll-parallax';
 import {
   DEFAULT_SAGA_SORT,
   SAGA_SORTS,
@@ -31,6 +33,7 @@ import {
   parseSagaSort,
   playedPercent,
   releaseYear,
+  sagaBackdropCover,
   sagaGameStatus,
   sagaMetaLine,
   sortSagas,
@@ -64,11 +67,13 @@ const SEARCH_URL_DELAY_MS = 300;
     SagaDialog,
     GameCover,
     Dropdown,
+    CoverTilt,
+    ScrollParallax,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sagas.html',
-  styleUrl: './sagas.css',
+  styleUrls: ['./sagas.css', '../../shared/ui/cover-tilt.css'],
 })
 export class Sagas {
   protected readonly icons = ICONS;
@@ -84,6 +89,9 @@ export class Sagas {
   protected readonly releaseYear = releaseYear;
   protected readonly playedPercent = playedPercent;
   protected readonly metaLine = sagaMetaLine;
+  protected readonly backdropCover = sagaBackdropCover;
+  /** Covers in the detail hero's collage (up to four). */
+  protected readonly collageCount = (games: number): number => Math.min(Math.max(games, 1), 4);
 
   private readonly sagas = signal<Saga[] | null>(null);
   private readonly games = signal<Game[]>([]);

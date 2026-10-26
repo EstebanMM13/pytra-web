@@ -1,0 +1,32 @@
+/*
+ * CoverTilt (cover-tilt.ts) easing, for every component that uses the directive (add this file to
+ * its styleUrls). Transform only; the directive does nothing with reduced motion.
+ */
+
+/* Mouse tilt: eases between frames and back to flat on leave. */
+.cover-tilt {
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The layer hint is only set while the cover is hovered or pressed, not on every cover at rest. */
+.cover-tilt.cover-pressed {
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cover-tilt:hover,
+  .cover-card:hover .cover-tilt {
+    will-change: transform;
+  }
+}
+
+/* Touch / pen press: eases in fast and springs back with a small overshoot. */
+@media (hover: none) {
+  .cover-tilt {
+    transition: transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .cover-tilt.cover-pressed {
+    transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}

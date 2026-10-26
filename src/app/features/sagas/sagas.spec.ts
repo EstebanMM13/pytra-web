@@ -127,3 +127,57 @@ describe('Sagas search', () => {
     expect(listed()).toEqual(['God of War']);
   });
 });
+
+describe('Sagas detail', () => {
+  function setup(list: Game[]) {
+    TestBed.configureTestingModule({
+      imports: [Sagas],
+      providers: [
+        provideRouter([]),
+        provideTranslateService(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(convertToParamMap({ id: '1' })),
+            queryParamMap: of(convertToParamMap({})),
+            snapshot: { queryParamMap: convertToParamMap({}) },
+          },
+        },
+        { provide: SagaService, useValue: { findAll: () => of(sagas) } },
+        { provide: GameService, useValue: { findAll: () => of(list) } },
+      ],
+    });
+    TestBed.overrideComponent(Sagas, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const fixture = TestBed.createComponent(Sagas);
+    fixture.detectChanges();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  const played = (g: Game, hours: number): Game => ({ ...g, experienceCount: 1, totalHours: hours });
+
+  it("blurs the most played game's cover behind the hero", () => {
+    const el = setup([
+      played({ ...game(10, 'Ascension', 1), coverImageUrl: 'asc.jpg' }, 8),
+      played({ ...game(11, 'Ragnarök', 1), coverImageUrl: 'rag.jpg' }, 50),
+    ]);
+    const backdrop = el.querySelector('[data-saga-hero] [data-saga-backdrop]') as HTMLImageElement;
+    expect(backdrop.getAttribute('src')).toBe('rag.jpg');
+  });
+
+  it('keeps the brand glow when no game has a cover', () => {
+    const el = setup([game(10, 'Ascension', 1)]);
+    expect(el.querySelector('[data-saga-hero]')).not.toBeNull();
+    expect(el.querySelector('[data-saga-backdrop]')).toBeNull();
+  });
+
+  it('dims the cover and text of unplayed games instead of the whole row', () => {
+    const el = setup([played(game(10, 'Ascension', 1), 8), game(11, 'Ragnarök', 1)]);
+    const rows = [...el.querySelectorAll('[data-saga-timeline] a')] as HTMLElement[];
+    expect(rows).toHaveLength(2);
+    expect(rows[0].hasAttribute('data-unplayed')).toBe(false);
+    expect(rows[1].hasAttribute('data-unplayed')).toBe(true);
+    expect(rows[1].style.opacity).toBe('');
+    expect(rows[1].querySelector('[data-saga-cover]')!.classList).toContain('grayscale');
+    expect(rows[0].querySelector('[data-saga-cover]')!.classList).not.toContain('grayscale');
+  });
+});

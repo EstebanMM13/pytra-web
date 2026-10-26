@@ -59,11 +59,13 @@
           <app-skeleton class="h-[86px] rounded-[10px]" />
         }
       } @else if (loadError()) {
-        <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
-          {{ 'sagas.loadError' | translate }}
-        </p>
+        <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-5 py-8 text-center" data-saga-error>
+          <svg [lucideIcon]="icons.circleAlert" [size]="26" class="text-danger" aria-hidden="true"></svg>
+          <p class="text-sm text-muted">{{ 'sagas.loadError' | translate }}</p>
+        </div>
       } @else if (summaries().length === 0) {
-        <div class="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface px-5 py-8 text-center">
+        <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-5 py-10 text-center" data-saga-empty>
+          <svg [lucideIcon]="icons.layers" [size]="28" class="text-brand-light" aria-hidden="true"></svg>
           <p class="text-sm text-muted">{{ 'sagas.empty' | translate }}</p>
           <button
             type="button"
@@ -74,7 +76,8 @@
           </button>
         </div>
       } @else if (visible().length === 0) {
-        <div class="flex flex-col items-center gap-3 rounded-xl border border-border bg-surface px-5 py-8 text-center" data-saga-no-matches>
+        <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-5 py-8 text-center" data-saga-no-matches>
+          <svg [lucideIcon]="icons.search" [size]="26" class="text-brand-light" aria-hidden="true"></svg>
           <p class="text-sm text-muted">{{ 'sagas.noMatches' | translate }}</p>
           <button type="button" (click)="clearSearch()" class="text-[13px] font-medium text-brand-light hover:underline">
             {{ 'sagas.clearSearch' | translate }}
@@ -82,18 +85,34 @@
         </div>
       } @else {
         @for (s of visible(); track s.saga.id; let idx = $index) {
+          @let isSelected = selected()?.saga?.id === s.saga.id;
+          @let tint = isSelected ? backdropCover(s.games) : null;
           <a
             [routerLink]="['/sagas', s.saga.id]"
             queryParamsHandling="preserve"
-            [attr.aria-current]="selected()?.saga?.id === s.saga.id ? 'true' : null"
-            class="saga-card saga-in press flex items-center gap-3.5 rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
+            [attr.aria-current]="isSelected ? 'true' : null"
+            class="saga-card saga-in press relative isolate flex items-center gap-3.5 overflow-hidden rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
             [class]="
-              selected()?.saga?.id === s.saga.id
-                ? 'border-border md:border-brand md:bg-brand-tint'
+              isSelected
+                ? 'border-border md:border-brand ' + (tint ? 'md:bg-bg' : 'md:bg-brand-tint')
                 : 'hover-lift border-border md:border-transparent md:bg-transparent md:hover:bg-hover'
             "
             [style.--i]="idx"
           >
+            @if (tint) {
+              <!-- Web only (phones never show a selected card): the run-row soft cover backdrop -->
+              <span class="pointer-events-none absolute inset-0 -z-10 hidden md:block" aria-hidden="true" data-saga-tint>
+                <img
+                  [src]="tint"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
+                  class="size-full scale-110 object-cover opacity-50 blur-lg saturate-150 light:opacity-55 light:brightness-125 light:saturate-200"
+                />
+                <span class="absolute inset-0 bg-linear-to-r from-bg/45 via-bg/70 to-bg/85 light:from-bg/40 light:via-bg/55 light:to-bg/75"></span>
+              </span>
+            }
             <!-- Up to four of the saga's games as an overlapping, slightly fanned collage of box art.
                  On phones a lone cover sizes to itself instead of leaving the fan's empty room. -->
             <span
@@ -182,37 +201,84 @@
         </button>
       </div>
 
-      <div class="flex items-end justify-between gap-4">
-        <div class="min-w-0">
-          <h2 class="font-display text-[30px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:text-[40px] md:tracking-[-0.035em]">
-            {{ s.saga.name }}
-          </h2>
-          @if (metaLine(s)) {
-            <p class="mt-1.5 text-[13px] text-muted md:mt-2 md:text-[15px]">{{ metaLine(s) }}</p>
+      <!-- Hero: title + meta over the saga's blurred cover, with the fanned collage beside it -->
+      @let backdrop = backdropCover(s.games);
+      <div class="saga-hero relative isolate overflow-hidden rounded-[18px] border border-card-border card-glass p-4 md:p-6" data-saga-hero>
+        <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+          @if (backdrop) {
+            <div class="absolute inset-0" appScrollParallax>
+              <img
+                [src]="backdrop"
+                alt=""
+                decoding="async"
+                referrerpolicy="no-referrer"
+                class="size-full scale-110 object-cover opacity-75 blur-lg saturate-150 md:opacity-60 md:blur-2xl light:opacity-70 light:brightness-125 light:saturate-200"
+                data-saga-backdrop
+              />
+              <div class="absolute inset-0 bg-linear-to-r from-bg/30 via-bg/55 to-bg/85 light:from-bg/30 light:via-bg/50 light:to-bg/80"></div>
+            </div>
+          } @else {
+            <!-- No cover to blur: the dashboard header's brand glow -->
+            <div
+              class="absolute inset-0 bg-[radial-gradient(360px_260px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_12%,transparent),transparent_70%)] md:bg-[radial-gradient(620px_340px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_14%,transparent),transparent_70%)] light:opacity-70"
+            ></div>
           }
         </div>
-        <button
-          type="button"
-          (click)="dialog.set(s.saga)"
-          class="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong md:flex"
-        >
-          <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
-          {{ 'sagas.edit' | translate }}
-        </button>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+          @if (s.games.length) {
+            <!-- The list card's collage, larger: up to four fanned covers -->
+            <span class="saga-collage saga-hero-collage relative shrink-0" [style.--count]="collageCount(s.games.length)" aria-hidden="true">
+              @for (g of s.games.slice(0, 4); track g.id; let i = $index) {
+                <span
+                  class="saga-collage-cover absolute top-0 block rounded-md shadow-lg ring-2 shadow-black/30 ring-bg"
+                  [style.--n]="i"
+                  [style.z-index]="4 - i"
+                >
+                  <app-game-cover decorative size="md" class="md:h-[112px]! md:w-[84px]!" [url]="g.coverImageUrl" [name]="g.name" />
+                </span>
+              }
+            </span>
+          }
+          <div class="min-w-0 flex-1">
+            <h2 class="font-display text-[30px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:text-[40px] md:tracking-[-0.035em]">
+              {{ s.saga.name }}
+            </h2>
+            @if (metaLine(s)) {
+              <p class="mt-1.5 text-[13px] text-text-3 md:mt-2 md:text-[15px]">{{ metaLine(s) }}</p>
+            }
+          </div>
+          <button
+            type="button"
+            (click)="dialog.set(s.saga)"
+            class="press hidden shrink-0 items-center gap-1.5 self-start rounded-lg border border-border bg-bg/60 px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong hover:text-text md:flex"
+          >
+            <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
+            {{ 'sagas.edit' | translate }}
+          </button>
+        </div>
       </div>
 
       <!-- Stats: 2 x 2 on mobile, one row on web -->
       <div class="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-        <app-stat-card [label]="'sagas.stats.played' | translate" [value]="s.played + ' / ' + s.total" />
-        <app-stat-card [label]="'sagas.stats.hours' | translate" [value]="s.hours | hours" />
         <app-stat-card
+          [icon]="icons.gamepad2"
+          [label]="'sagas.stats.played' | translate"
+          [value]="s.played + ' / ' + s.total"
+          [meter]="s.total ? s.played / s.total : null"
+        />
+        <app-stat-card [icon]="icons.clock" [label]="'sagas.stats.hours' | translate" [value]="s.hours | hours" />
+        <app-stat-card
+          [icon]="icons.star"
+          tone="gold"
           [label]="'sagas.stats.avgRating' | translate"
           [value]="s.avgRating | rating"
           [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
         <app-stat-card
+          [icon]="icons.trophy"
+          tone="platinum"
           [label]="'sagas.stats.platinums' | translate"
-          [value]="s.platinums ? '🏆 ' + s.platinums : '—'"
+          [value]="s.platinums || '—'"
         />
       </div>
 
@@ -221,55 +287,72 @@
         @if (s.games.length === 0) {
           <p class="py-6 text-center text-sm text-muted">{{ 'sagas.noGames' | translate }}</p>
         }
-        @for (g of s.games; track g.id) {
-          <a
-            [routerLink]="['/games', g.id]"
-            class="flex items-center gap-3 border-b border-divider py-2.5 hover:bg-hover md:grid md:grid-cols-[56px_18px_2.25rem_minmax(0,1fr)_120px_70px_70px] md:gap-4 md:border-t md:border-b-0 md:py-2 md:text-sm"
-            [style.opacity]="isPlayed(g) ? 1 : 0.55"
-          >
-            <span class="hidden font-mono text-muted md:block">{{ releaseYear(g) ?? '—' }}</span>
-            <span
-              class="size-3 shrink-0 rounded-full border-2"
-              [class]="isPlayed(g) ? 'border-brand-light bg-brand-light' : 'border-dashed border-faint'"
-              aria-hidden="true"
-            ></span>
-            <app-game-cover decorative size="sm" [url]="g.coverImageUrl" [name]="g.name" />
-            <div class="min-w-0 flex-1">
-              <p class="truncate text-[15px] font-medium md:text-sm" [title]="g.name">
-                {{ g.name }}
-                @if (g.hasPlatinum) {
-                  <span class="text-xs">🏆</span>
-                }
-              </p>
+        <!-- Timeline: a connector line runs through the dots, from the first game to the last -->
+        <div class="saga-timeline flex flex-col" data-saga-timeline>
+          @for (g of s.games; track g.id) {
+            @let played = isPlayed(g);
+            <a
+              [routerLink]="['/games', g.id]"
+              class="timeline-row hover-lift flex items-center gap-3 border-b border-divider py-2.5 [--row-pad:0.625rem] hover:bg-hover md:grid md:grid-cols-[56px_18px_2.25rem_minmax(0,1fr)_120px_70px_70px] md:gap-4 md:border-t md:border-b-0 md:py-2 md:text-sm md:[--row-pad:0.5rem]"
+              [attr.data-unplayed]="played ? null : ''"
+            >
+              <span class="hidden font-mono md:block" [class]="played ? 'text-muted' : 'text-faint'">{{ releaseYear(g) ?? '—' }}</span>
+              <span class="relative flex w-3 shrink-0 items-center justify-center self-stretch md:w-auto" aria-hidden="true">
+                <span class="timeline-line"></span>
+                <span
+                  class="relative size-3 rounded-full border-2"
+                  [class]="played ? 'border-brand-light bg-brand-light' : 'border-dashed border-faint bg-bg'"
+                ></span>
+              </span>
+              <span class="shrink-0" appCoverTilt>
+                <app-game-cover
+                  decorative
+                  size="sm"
+                  class="shadow-sm shadow-black/20"
+                  [class]="played ? '' : 'opacity-60 grayscale'"
+                  [url]="g.coverImageUrl"
+                  [name]="g.name"
+                  data-saga-cover
+                />
+              </span>
               @let st = gameStatus(g);
-              <p class="mt-0.5 truncate text-xs text-muted md:hidden">
-                {{ releaseYear(g) ?? '—' }} ·
-                {{ (st.kind === 'run' ? 'status.' + st.status : st.kind === 'online' ? 'library.online' : 'game.notPlayed') | translate }}
-              </p>
-            </div>
-            <span class="hidden md:block" data-saga-status>
-              @if (st.kind === 'run') {
-                <app-status-pill [status]="st.status" />
-              } @else if (st.kind === 'online') {
-                <!-- Played through online playtime only: same pill as the library -->
-                <span class="rounded-full bg-hover px-2 py-0.5 text-xs text-text-3">{{ 'library.online' | translate }}</span>
-              } @else {
-                <span class="text-xs text-muted">{{ 'game.notPlayed' | translate }}</span>
-              }
-            </span>
-            <span class="hidden text-right font-mono md:block">{{ g.totalHours ? (g.totalHours | hours) : '—' }}</span>
-            <span class="shrink-0 text-right font-mono" [class]="g.bestRating | ratingTone">{{ g.bestRating | rating }}</span>
-          </a>
-        }
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-[15px] font-medium md:text-sm" [class]="played ? '' : 'text-text-3'" [title]="g.name">
+                  {{ g.name }}
+                  @if (g.hasPlatinum) {
+                    <span class="text-xs">🏆</span>
+                  }
+                </p>
+                <p class="mt-0.5 truncate text-xs md:hidden" [class]="played ? 'text-muted' : 'text-faint'">
+                  {{ releaseYear(g) ?? '—' }} ·
+                  {{ (st.kind === 'run' ? 'status.' + st.status : st.kind === 'online' ? 'library.online' : 'game.notPlayed') | translate }}
+                </p>
+              </div>
+              <span class="hidden md:block" data-saga-status>
+                @if (st.kind === 'run') {
+                  <app-status-pill [status]="st.status" />
+                } @else if (st.kind === 'online') {
+                  <!-- Played through online playtime only: same pill as the library -->
+                  <span class="rounded-full bg-hover px-2 py-0.5 text-xs text-text-3">{{ 'library.online' | translate }}</span>
+                } @else {
+                  <span class="text-xs text-faint">{{ 'game.notPlayed' | translate }}</span>
+                }
+              </span>
+              <span class="hidden text-right font-mono md:block" [class]="played ? '' : 'text-faint'">{{ g.totalHours ? (g.totalHours | hours) : '—' }}</span>
+              <span class="shrink-0 text-right font-mono" [class]="g.bestRating | ratingTone">{{ g.bestRating | rating }}</span>
+            </a>
+          }
+        </div>
       </section>
     } @else if (routeId() !== null) {
       <a routerLink="/sagas" queryParamsHandling="preserve" class="flex w-fit items-center gap-1.5 text-[13px] text-muted hover:text-text md:hidden">
         <svg [lucideIcon]="icons.chevronLeft" [size]="16"></svg>
         {{ 'sagas.back' | translate }}
       </a>
-      <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
-        {{ 'sagas.notFound' | translate }}
-      </p>
+      <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-12 text-center" data-saga-not-found>
+        <svg [lucideIcon]="icons.layers" [size]="28" class="text-brand-light" aria-hidden="true"></svg>
+        <p class="text-sm text-muted">{{ 'sagas.notFound' | translate }}</p>
+      </div>
     }
   </section>
 </main>

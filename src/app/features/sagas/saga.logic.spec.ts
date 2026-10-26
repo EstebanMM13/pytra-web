@@ -8,6 +8,7 @@ import {
   lastActivityKey,
   parseSagaSort,
   playedPercent,
+  sagaBackdropCover,
   sagaGameStatus,
   sagaMetaLine,
   sortSagas,
@@ -214,5 +215,30 @@ describe('saga search', () => {
 
   it('finds nothing for unknown text', () => {
     expect(names('halo')).toEqual([]);
+  });
+});
+
+describe('saga backdrop cover', () => {
+  it('uses the most played game with a cover', () => {
+    const games = [
+      game({ id: 1, name: 'A', coverImageUrl: 'a.jpg', totalHours: 5, experienceCount: 1 }),
+      game({ id: 2, name: 'B', coverImageUrl: 'b.jpg', totalHours: 40, experienceCount: 1 }),
+      game({ id: 3, name: 'C', coverImageUrl: null, totalHours: 90, experienceCount: 1 }),
+    ];
+    expect(sagaBackdropCover(games)).toBe('b.jpg');
+  });
+
+  it('falls back to the first played game, then the first game', () => {
+    const played = [
+      game({ id: 1, name: 'A', coverImageUrl: 'a.jpg' }),
+      game({ id: 2, name: 'B', coverImageUrl: 'b.jpg', experienceCount: 1 }),
+    ];
+    expect(sagaBackdropCover(played)).toBe('b.jpg');
+    expect(sagaBackdropCover([game({ id: 1, name: 'A', coverImageUrl: 'a.jpg' }), game({ id: 2, name: 'B' })])).toBe('a.jpg');
+  });
+
+  it('is null without covers', () => {
+    expect(sagaBackdropCover([])).toBeNull();
+    expect(sagaBackdropCover([game({ id: 1, name: 'A', totalHours: 3 })])).toBeNull();
   });
 });
