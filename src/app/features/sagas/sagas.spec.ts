@@ -180,4 +180,17 @@ describe('Sagas detail', () => {
     expect(rows[1].querySelector('[data-saga-cover]')!.classList).toContain('saga-unplayed-cover');
     expect(rows[0].querySelector('[data-saga-cover]')!.classList).not.toContain('saga-unplayed-cover');
   });
+
+  it('keeps list cards at their natural height inside the scrolling list', () => {
+    const el = setup([{ ...game(10, 'Ascension', 1), coverImageUrl: 'asc.jpg' }]);
+    const cards = [...el.querySelectorAll('a.saga-card')];
+    expect(cards.length).toBeGreaterThan(0);
+    for (const card of cards) {
+      // An overflow other than visible would drop the flex item's min-height to 0 and let it squash.
+      expect(card.classList).toContain('shrink-0');
+      expect(card.classList).not.toContain('overflow-hidden');
+    }
+    expect(el.querySelector('a.saga-card [data-saga-tint]')!.classList).toContain('overflow-hidden');
+  });
+
 });

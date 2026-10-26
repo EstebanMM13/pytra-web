@@ -91,7 +91,7 @@
             [routerLink]="['/sagas', s.saga.id]"
             queryParamsHandling="preserve"
             [attr.aria-current]="isSelected ? 'true' : null"
-            class="saga-card saga-in press relative isolate flex items-center gap-3.5 overflow-hidden rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
+            class="saga-card saga-in press relative isolate flex shrink-0 items-center gap-3.5 rounded-xl border bg-surface p-3.5 md:rounded-[10px]"
             [class]="
               isSelected
                 ? 'border-border md:border-brand ' + (tint ? 'md:bg-bg' : 'md:bg-brand-tint')
@@ -100,8 +100,9 @@
             [style.--i]="idx"
           >
             @if (tint) {
-              <!-- Web only (phones never show a selected card): the run-row soft cover backdrop -->
-              <span class="pointer-events-none absolute inset-0 -z-10 hidden md:block" aria-hidden="true" data-saga-tint>
+              <!-- Web only (phones never show a selected card): the run-row soft cover backdrop. It clips itself:
+                   overflow on the card would let the scrolling list squash it (min-height: auto -> 0). -->
+              <span class="pointer-events-none absolute inset-0 -z-10 hidden overflow-hidden rounded-[inherit] md:block" aria-hidden="true" data-saga-tint>
                 <img
                   [src]="tint"
                   alt=""
