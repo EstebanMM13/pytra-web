@@ -88,7 +88,8 @@ describe('Years page', () => {
       }),
     );
     expect(el.querySelector('[data-year-hero] [data-year-backdrop]')!.getAttribute('src')).toBe('goty.jpg');
-    expect(el.querySelector('[data-goty-backdrop]')!.getAttribute('src')).toBe('goty.jpg');
+    // The GOTY card itself keeps the plain gold card: no blurred cover inside it.
+    expect(el.querySelector('[data-goty-backdrop]')).toBeNull();
   });
 
   it('falls back to the brand glow without a GOTY cover', () => {
