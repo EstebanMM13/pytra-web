@@ -220,7 +220,7 @@
           } @else {
             <!-- No cover to blur: the dashboard header's brand glow -->
             <div
-              class="absolute inset-0 bg-[radial-gradient(360px_260px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_12%,transparent),transparent_70%)] md:bg-[radial-gradient(620px_340px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_14%,transparent),transparent_70%)] light:opacity-70"
+              class="absolute inset-0 bg-[radial-gradient(360px_260px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_10%,transparent),transparent_70%)] md:bg-[radial-gradient(620px_340px_at_0%_0%,color-mix(in_srgb,var(--pt-brand)_12%,transparent),transparent_70%)] light:opacity-70"
             ></div>
           }
         </div>
@@ -234,7 +234,7 @@
                   [style.--n]="i"
                   [style.z-index]="4 - i"
                 >
-                  <app-game-cover decorative size="md" class="md:h-[112px]! md:w-[84px]!" [url]="g.coverImageUrl" [name]="g.name" />
+                  <app-game-cover decorative size="md" [url]="g.coverImageUrl" [name]="g.name" />
                 </span>
               }
             </span>
@@ -293,11 +293,11 @@
             @let played = isPlayed(g);
             <a
               [routerLink]="['/games', g.id]"
-              class="timeline-row hover-lift flex items-center gap-3 border-b border-divider py-2.5 [--row-pad:0.625rem] hover:bg-hover md:grid md:grid-cols-[56px_18px_2.25rem_minmax(0,1fr)_120px_70px_70px] md:gap-4 md:border-t md:border-b-0 md:py-2 md:text-sm md:[--row-pad:0.5rem]"
+              class="timeline-row hover-lift flex items-center gap-3 border-b border-divider py-2.5 hover:bg-hover md:grid md:grid-cols-[56px_18px_2.25rem_minmax(0,1fr)_120px_70px_70px] md:gap-4 md:border-t md:border-b-0 md:py-2 md:text-sm"
               [attr.data-unplayed]="played ? null : ''"
             >
               <span class="hidden font-mono md:block" [class]="played ? 'text-muted' : 'text-faint'">{{ releaseYear(g) ?? '—' }}</span>
-              <span class="relative flex w-3 shrink-0 items-center justify-center self-stretch md:w-auto" aria-hidden="true">
+              <span class="relative flex shrink-0 items-center justify-center self-stretch" aria-hidden="true">
                 <span class="timeline-line"></span>
                 <span
                   class="relative size-3 rounded-full border-2"
@@ -308,8 +308,7 @@
                 <app-game-cover
                   decorative
                   size="sm"
-                  class="shadow-sm shadow-black/20"
-                  [class]="played ? '' : 'opacity-60 grayscale'"
+                  [class.saga-unplayed-cover]="!played"
                   [url]="g.coverImageUrl"
                   [name]="g.name"
                   data-saga-cover

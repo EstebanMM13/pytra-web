@@ -29,9 +29,8 @@
   .saga-card:hover .saga-collage-cover {
     translate: calc(var(--n, 0) * 3px * var(--pt-motion, 1)) calc(-1px * var(--pt-motion, 1));
   }
-}
 
-@media (hover: hover) and (pointer: fine) {
+  /* The detail hero's larger fan spreads a little further. */
   .saga-hero:hover .saga-collage-cover {
     translate: calc(var(--n, 0) * 4px * var(--pt-motion, 1)) calc(-2px * var(--pt-motion, 1));
   }
@@ -49,10 +48,15 @@
   left: calc(var(--n, 0) * var(--step));
 }
 
-@media (min-width: 48rem) {
+@media (width >= 48rem) {
   .saga-hero-collage {
     --cover-w: 84px;
     --step: 28px;
+    height: 112px;
+  }
+
+  .saga-hero-collage app-game-cover {
+    width: var(--cover-w);
     height: 112px;
   }
 }
@@ -62,6 +66,16 @@
  * across the row's vertical padding (--row-pad) and divider so the segments join; it starts at the
  * first dot and ends at the last one.
  */
+.timeline-row {
+  --row-pad: 0.625rem; /* py-2.5 */
+}
+
+@media (width >= 48rem) {
+  .timeline-row {
+    --row-pad: 0.5rem; /* md:py-2 */
+  }
+}
+
 .timeline-line {
   position: absolute;
   top: calc(-1 * var(--row-pad, 0px) - 1px);
@@ -83,4 +97,10 @@
 
 .timeline-row:only-child .timeline-line {
   display: none;
+}
+
+/* Unplayed games: a dimmed, desaturated cover (the row itself stays fully readable). */
+.saga-unplayed-cover {
+  opacity: 0.6;
+  filter: grayscale(1);
 }

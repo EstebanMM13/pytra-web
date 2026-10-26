@@ -177,7 +177,7 @@ describe('Sagas detail', () => {
     expect(rows[0].hasAttribute('data-unplayed')).toBe(false);
     expect(rows[1].hasAttribute('data-unplayed')).toBe(true);
     expect(rows[1].style.opacity).toBe('');
-    expect(rows[1].querySelector('[data-saga-cover]')!.classList).toContain('grayscale');
-    expect(rows[0].querySelector('[data-saga-cover]')!.classList).not.toContain('grayscale');
+    expect(rows[1].querySelector('[data-saga-cover]')!.classList).toContain('saga-unplayed-cover');
+    expect(rows[0].querySelector('[data-saga-cover]')!.classList).not.toContain('saga-unplayed-cover');
   });
 });
