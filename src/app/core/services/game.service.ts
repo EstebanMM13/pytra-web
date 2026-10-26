@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Signal, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
 import { Game, GameRequest } from '../models/game.model';
@@ -16,15 +16,6 @@ export class GameService {
   findAll(): Observable<Game[]> {
     return this.all.get();
   }
-
-  /**
-   * The library as last fetched this session, reactive and never requesting (see
-   * `CachedResource.latest`); null until some screen has loaded it.
-   */
-  readonly latestAll: Signal<Game[] | null> = this.all.latest;
-
-  /** Bumped whenever the cached user data is invalidated (a write changed it); reactive. */
-  readonly invalidationCount: Signal<number> = this.all.invalidationCount;
 
   /**
    * The game as the cached library list has it (same payload as `findById`), or null when the list

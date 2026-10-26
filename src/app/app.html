@@ -1,14 +1,6 @@
 <!-- Fixed background aura behind every screen. -->
 <div class="bg-aura" aria-hidden="true"></div>
 
-<!-- Signed in: the covers of the games in progress over the aura (it renders nothing without
-     any). Deferred to idle so its chunk and the cover requests come after the first paint. -->
-@if (signedIn()) {
-  @defer (on idle) {
-    <app-playing-backdrop />
-  }
-}
-
 <router-outlet />
 
 <!-- Native cold-start intro (never on the web or with reduced motion). Deferred so its chunk
