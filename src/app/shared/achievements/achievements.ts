@@ -1,6 +1,6 @@
 import { Game } from '../../core/models/game.model';
 import { Saga } from '../../core/models/saga.model';
-import { StatsSummary, YearStat } from '../../core/models/stats.model';
+import { DatedRun, StatsSummary, YearStat } from '../../core/models/stats.model';
 
 /** Icon keys mapped to lucide icons by the badge component (keeps this helper framework-free). */
 export type AchievementIcon =
@@ -32,7 +32,8 @@ export type AchievementIcon =
   | 'wifi'
   | 'shuffle'
   | 'target'
-  | 'bookOpen';
+  | 'bookOpen'
+  | 'badgeCheck';
 
 export type AchievementCategory =
   | 'collection'
@@ -40,6 +41,7 @@ export type AchievementCategory =
   | 'hours'
   | 'ratings'
   | 'platinums'
+  | 'fullCompletions'
   | 'sagas'
   | 'platforms'
   | 'years'
@@ -53,6 +55,7 @@ export const ACHIEVEMENT_CATEGORIES: readonly AchievementCategory[] = [
   'hours',
   'ratings',
   'platinums',
+  'fullCompletions',
   'sagas',
   'platforms',
   'years',
@@ -82,9 +85,13 @@ export interface AchievementInput {
   summary: StatsSummary | null;
   sagas: readonly Saga[];
   years?: readonly YearStat[] | null;
+  /** Every dated run (status and dates), for the completion streak; absent counts as none. */
+  runs?: readonly DatedRun[] | null;
 }
 
 const TIER_WEIGHT: Record<AchievementTier, number> = { bronze: 0, silver: 1, gold: 2 };
+/** The meta badge unlocked by unlocking every other one (styled apart by the badge component). */
+export const LEGEND_ID = 'legend';
 /** Distinct platforms for the gold platform badge (the old fixed list had 6). */
 const MANY_PLATFORMS = 6;
 
@@ -95,19 +102,19 @@ type Def = [id: string, category: AchievementCategory, tier: AchievementTier, ic
 
 /**
  * Derives the badge list from data the app already loads (games list aggregates, stats
- * summary, by-year stats and sagas). Ordered by category, easier first; callers sort
- * unlocked-first for display.
+ * summary, by-year stats, sagas and the dated runs). Ordered by category, easier first, with the
+ * `legend` meta badge last; callers sort unlocked-first for display.
  */
-export function computeAchievements({ games: allGames, summary, sagas, years }: AchievementInput): Achievement[] {
+export function computeAchievements({ games: allGames, summary, sagas, years, runs: datedRuns }: AchievementInput): Achievement[] {
   // Games pending review (imported, not confirmed yet) are not in the library.
   const games = allGames.filter((g) => g.reviewStatus !== 'PENDING_REVIEW');
-  const played = games.filter((g) => (g.experienceCount ?? 0) > 0);
+  const played = games.filter(isPlayed);
   const platinums = summary?.totalPlatinums ?? games.filter((g) => g.hasPlatinum).length;
+  const fullCompletions = summary?.totalFullCompletions ?? games.filter((g) => g.hasFullCompletion).length;
   const runs = summary?.totalExperiences ?? games.reduce((n, g) => n + (g.experienceCount ?? 0), 0);
   const gameCount = summary?.totalGames ?? games.length;
   const completed = summary?.completedCount ?? games.filter((g) => g.lastExperienceStatus === 'COMPLETADO').length;
   const replays = summary?.replayCount ?? games.reduce((n, g) => n + Math.max(0, (g.experienceCount ?? 0) - 1), 0);
-  const abandoned = summary?.abandonedCount ?? games.filter((g) => g.lastExperienceStatus === 'ABANDONADO').length;
   const inProgress = summary?.inProgressCount ?? games.filter((g) => g.lastExperienceStatus === 'EN_CURSO').length;
   const gameHours = games.reduce((n, g) => n + (g.totalHours ?? 0), 0);
   const totalHours = summary ? summary.totalSingleplayerHours + summary.totalOnlineHours : gameHours;
@@ -119,7 +126,8 @@ export function computeAchievements({ games: allGames, summary, sagas, years }: 
   const platforms = new Set(games.flatMap((g) => (g.platformRefs ?? []).map((p) => p.id))).size;
   const activeYears = (years ?? []).filter((y) => y.experienceCount > 0).map((y) => y.year);
   const playedCategories = new Set(played.map((g) => g.category).filter((c) => c != null));
-  const playedOnline = played.some((g) => g.category === 'ONLINE' || g.category === 'HYBRID') ? 1 : 0;
+  const playedOnline = played.some(hasOnlineSide) ? 1 : 0;
+  const perfectGame = games.some((g) => g.hasPlatinum && g.hasFullCompletion) ? 1 : 0;
 
   const defs: Def[] = [
     ['collector25', 'collection', 'bronze', 'library', gameCount, 25],
@@ -129,11 +137,13 @@ export function computeAchievements({ games: allGames, summary, sagas, years }: 
     ['runs10', 'runs', 'bronze', 'play', runs, 10],
     ['runs50', 'runs', 'silver', 'flame', runs, 50],
     ['runs100', 'runs', 'gold', 'medal', runs, 100],
+    ['runs250', 'runs', 'gold', 'gem', runs, 250],
     ['completed10', 'runs', 'bronze', 'check', completed, 10],
     ['completed25', 'runs', 'silver', 'check', completed, 25],
     ['completed100', 'runs', 'gold', 'award', completed, 100],
     ['firstReplay', 'runs', 'bronze', 'repeat', replays, 1],
     ['replays5', 'runs', 'silver', 'repeat', replays, 5],
+    ['replays10', 'runs', 'gold', 'repeat', replays, 10],
 
     ['hours100', 'hours', 'bronze', 'clock', totalHours, 100],
     ['hours500', 'hours', 'silver', 'clock', totalHours, 500],
@@ -153,6 +163,11 @@ export function computeAchievements({ games: allGames, summary, sagas, years }: 
     ['platinumHunter', 'platinums', 'gold', 'crown', platinums, 10],
     ['platinum25', 'platinums', 'gold', 'crown', platinums, 25],
 
+    ['firstFullCompletion', 'fullCompletions', 'bronze', 'badgeCheck', fullCompletions, 1],
+    ['fullCompletion5', 'fullCompletions', 'silver', 'badgeCheck', fullCompletions, 5],
+    ['fullCompletion10', 'fullCompletions', 'gold', 'gem', fullCompletions, 10],
+    ['fullCompletion25', 'fullCompletions', 'gold', 'gem', fullCompletions, 25],
+
     ['sagaComplete', 'sagas', 'bronze', 'layers', bestSagaProgress(games, sagas), 1],
     ['sagaTrilogy', 'sagas', 'silver', 'bookOpen', bestSagaCompleted(games, sagas), 3],
 
@@ -163,6 +178,7 @@ export function computeAchievements({ games: allGames, summary, sagas, years }: 
     ['veteran', 'years', 'silver', 'calendar', activeYears.length, 5],
     ['years10', 'years', 'gold', 'calendar', activeYears.length, 10],
     ['streak3', 'years', 'bronze', 'zap', longestStreak(activeYears), 3],
+    ['streak5', 'years', 'silver', 'flame', longestStreak(activeYears), 5],
 
     ['onlineDebut', 'online', 'bronze', 'wifi', playedOnline, 1],
     ['variety', 'online', 'bronze', 'shuffle', playedCategories.size, 3],
@@ -170,11 +186,37 @@ export function computeAchievements({ games: allGames, summary, sagas, years }: 
     ['online500', 'online', 'gold', 'users', onlineHours, 500],
 
     ['multitasker', 'special', 'bronze', 'target', inProgress, 3],
-    // Ten completed runs and nothing ever abandoned: progress resets while any run is abandoned.
-    ['completionist', 'special', 'gold', 'award', abandoned > 0 ? 0 : completed, 10],
+    // Best streak ever, so the badge stays unlocked after a later abandoned run.
+    ['completionist', 'special', 'gold', 'award', longestCompletionStreak(datedRuns ?? []), 10],
+    ['perfectionist', 'special', 'gold', 'sparkles', perfectGame, 1],
   ];
 
-  return defs.map(([id, category, tier, icon, current, target], index) => ({
+  const list = defs.map(([id, category, tier, icon, current, target], index) =>
+    achievement(id, category, tier, icon, current, target, TIER_WEIGHT[tier] * 100 + index),
+  );
+  // Computed after the rest; ranked above every other badge so it always leads the unlocked ones.
+  const legend = achievement(
+    LEGEND_ID,
+    'special',
+    'gold',
+    'gem',
+    list.filter((a) => a.unlocked).length,
+    list.length,
+    Math.max(...list.map((a) => a.rank)) + 1,
+  );
+  return [...list, legend];
+}
+
+function achievement(
+  id: string,
+  category: AchievementCategory,
+  tier: AchievementTier,
+  icon: AchievementIcon,
+  current: number,
+  target: number,
+  rank: number,
+): Achievement {
+  return {
     id,
     category,
     tier,
@@ -183,8 +225,41 @@ export function computeAchievements({ games: allGames, summary, sagas, years }: 
     target,
     unlocked: current >= target,
     progress: target > 0 ? Math.min(1, Math.max(0, current / target)) : 0,
-    rank: TIER_WEIGHT[tier] * 100 + index,
-  }));
+    rank,
+  };
+}
+
+function hasOnlineSide(game: Game): boolean {
+  return game.category === 'ONLINE' || game.category === 'HYBRID';
+}
+
+/**
+ * Has runs, or online playtime: online playtime is not a run (`experienceCount` misses it) but
+ * counts in `totalHours`, and a game with an online side and hours but no runs only has that.
+ */
+function isPlayed(game: Game): boolean {
+  return (game.experienceCount ?? 0) > 0 || (hasOnlineSide(game) && (game.totalHours ?? 0) > 0);
+}
+
+/**
+ * Longest streak of COMPLETADO runs with no ABANDONADO run in between, in chronological order:
+ * end date, else start date, else January 1st of the run's year, ties by id (the API's recency
+ * rule). An abandoned run resets the streak; runs in progress or pending neither break nor extend
+ * it (they are not finished yet).
+ */
+function longestCompletionStreak(runs: readonly DatedRun[]): number {
+  const when = (r: DatedRun) => r.endDate ?? r.startDate ?? `${r.year}-01-01`;
+  const sorted = [...runs].sort((a, b) => when(a).localeCompare(when(b)) || a.experienceId - b.experienceId);
+  let best = 0;
+  let streak = 0;
+  for (const run of sorted) {
+    if (run.status === 'COMPLETADO') {
+      best = Math.max(best, ++streak);
+    } else if (run.status === 'ABANDONADO') {
+      streak = 0;
+    }
+  }
+  return best;
 }
 
 /** Played games of each saga (only sagas that exist in the list). */
@@ -200,7 +275,7 @@ function bestSagaProgress(games: readonly Game[], sagas: readonly Saga[]): numbe
   let best = 0;
   for (const members of sagaMembers(games, sagas)) {
     if (members.length < 2) continue;
-    const played = members.filter((g) => (g.experienceCount ?? 0) > 0).length;
+    const played = members.filter(isPlayed).length;
     best = Math.max(best, played / members.length);
   }
   return best;

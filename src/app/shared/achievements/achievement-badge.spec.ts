@@ -45,4 +45,21 @@ describe('AchievementBadge', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Puntúa 5 juegos con 90 o más (máx. 100, mín. 40)');
   });
+
+  it('blends the unlocked legend badge (ring and icon gradient), not a tier tone', () => {
+    const legend: Achievement = { ...MASTERPIECES, id: 'legend', category: 'special', tier: 'gold', icon: 'gem' };
+    const fixture = render();
+    const chip = () => fixture.nativeElement.querySelector('span[aria-hidden="true"]') as HTMLElement;
+
+    fixture.componentRef.setInput('achievement', legend);
+    fixture.detectChanges();
+    expect(chip().classList.contains('legend-badge')).toBe(false);
+
+    fixture.componentRef.setInput('achievement', { ...legend, current: 5, unlocked: true, progress: 1 });
+    fixture.detectChanges();
+    expect(chip().classList.contains('legend-badge')).toBe(true);
+    const gradientId = chip().querySelector('linearGradient')!.getAttribute('id');
+    expect(gradientId).toMatch(/^pt-legend-stroke-\d+$/);
+    expect((chip().querySelector('svg') as SVGElement).style.stroke).toContain(gradientId!);
+  });
 });

@@ -296,6 +296,7 @@ export class Profile {
       sagas: inject(SagaService).findAll(),
       summary: inject(StatsService).getSummary(),
       years: inject(StatsService).getByYear().pipe(catchError(() => of([]))),
+      runs: inject(StatsService).getDatedRuns().pipe(catchError(() => of([]))),
     })
       .pipe(catchError(() => of(null)))
       .subscribe((data) => {

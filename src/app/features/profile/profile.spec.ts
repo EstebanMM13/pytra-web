@@ -51,7 +51,7 @@ describe('Profile', () => {
         { provide: DemoModeService, useValue: { isDemo: signal(demo), blockWrite } },
         { provide: GameService, useValue: { findAll: () => of([]) } },
         { provide: SagaService, useValue: { findAll: () => of([]) } },
-        { provide: StatsService, useValue: { getSummary: () => of(null), getByYear: () => of([]) } },
+        { provide: StatsService, useValue: { getSummary: () => of(null), getByYear: () => of([]), getDatedRuns: () => of([]) } },
         { provide: PlatformService, useValue: { platforms: signal([]), load: () => of([]) } },
         { provide: FileExportService, useValue: { save: vi.fn() } },
         { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },

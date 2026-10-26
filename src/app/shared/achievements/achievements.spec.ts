@@ -1,5 +1,5 @@
 import { Game } from '../../core/models/game.model';
-import { StatsSummary, YearStat } from '../../core/models/stats.model';
+import { DatedRun, StatsSummary, YearStat } from '../../core/models/stats.model';
 import { ACHIEVEMENT_CATEGORIES, computeAchievements, groupByCategory, sortAchievements, topUnlocked } from './achievements';
 
 const PC = { id: 1, name: 'PC', color: '#8A857C' };
@@ -40,12 +40,25 @@ const summary = (partial: Partial<StatsSummary> = {}): StatsSummary => ({
 
 const year = (y: number, experienceCount: number): YearStat => ({ year: y, totalHours: 1, experienceCount, averageRating: null });
 
+let runSeq = 0;
+const run = (status: DatedRun['status'], dates: Partial<DatedRun> = {}): DatedRun => ({
+  experienceId: ++runSeq,
+  status,
+  year: 2024,
+  startDate: null,
+  endDate: null,
+  ...dates,
+});
+/** `count` completed runs ending on consecutive days of January 2024 from `fromDay`. */
+const completedRuns = (count: number, fromDay = 1): DatedRun[] =>
+  Array.from({ length: count }, (_, i) => run('COMPLETADO', { endDate: `2024-01-${String(fromDay + i).padStart(2, '0')}` }));
+
 const byId = (list: ReturnType<typeof computeAchievements>) => Object.fromEntries(list.map((a) => [a.id, a]));
 
 describe('computeAchievements', () => {
   it('locks everything for an empty library', () => {
     const list = computeAchievements({ games: [], summary: summary(), sagas: [] });
-    expect(list.length).toBe(40);
+    expect(list.length).toBe(49);
     expect(new Set(list.map((a) => a.id)).size).toBe(list.length);
     expect(list.every((a) => !a.unlocked && a.progress === 0)).toBe(true);
     expect(list.every((a) => ACHIEVEMENT_CATEGORIES.includes(a.category))).toBe(true);
@@ -54,7 +67,7 @@ describe('computeAchievements', () => {
   it('groups by category in display order', () => {
     const groups = groupByCategory(computeAchievements({ games: [], summary: summary(), sagas: [] }));
     expect(groups.map((g) => g.category)).toEqual([...ACHIEVEMENT_CATEGORIES]);
-    expect(groups.reduce((n, g) => n + g.items.length, 0)).toBe(40);
+    expect(groups.reduce((n, g) => n + g.items.length, 0)).toBe(49);
   });
 
   it('derives hours, completion, replay and online tiers from the summary', () => {
@@ -70,14 +83,112 @@ describe('computeAchievements', () => {
     expect(a['online100'].unlocked).toBe(true);
     expect(a['online500'].unlocked).toBe(false);
     expect(a['completed10'].unlocked).toBe(true);
-    expect(a['completionist'].unlocked).toBe(true);
     expect(a['firstReplay'].unlocked && !a['replays5'].unlocked).toBe(true);
     expect(a['multitasker'].unlocked).toBe(true);
   });
 
-  it('resets the completionist badge when a run was abandoned', () => {
-    const a = byId(computeAchievements({ games: [], summary: summary({ completedCount: 30, abandonedCount: 1 }), sagas: [] }));
-    expect(a['completionist'].current).toBe(0);
+  describe('completionist streak', () => {
+    const streak = (runs: DatedRun[]) => byId(computeAchievements({ games: [], summary: summary(), sagas: [], runs }))['completionist'];
+
+    it('counts no streak without runs data', () => {
+      const a = byId(computeAchievements({ games: [], summary: summary({ completedCount: 30 }), sagas: [] }));
+      expect(a['completionist'].current).toBe(0);
+    });
+
+    it('unlocks with 10 completed runs in a row', () => {
+      expect(streak(completedRuns(9)).unlocked).toBe(false);
+      expect(streak(completedRuns(10)).unlocked).toBe(true);
+    });
+
+    it('resets on an abandoned run in between, keeping the best streak', () => {
+      const runs = [...completedRuns(4, 1), run('ABANDONADO', { endDate: '2024-01-05' }), ...completedRuns(6, 6)];
+      expect(streak(runs).current).toBe(6);
+    });
+
+    it('stays unlocked after a later abandoned run', () => {
+      const a = streak([...completedRuns(10, 1), run('ABANDONADO', { endDate: '2024-01-20' }), ...completedRuns(1, 21)]);
+      expect(a.current).toBe(10);
+      expect(a.unlocked).toBe(true);
+    });
+
+    it('ignores runs in progress or pending (neither break nor count)', () => {
+      const runs = [
+        ...completedRuns(5, 1),
+        run('EN_CURSO', { startDate: '2024-01-06' }),
+        run('PENDIENTE', { endDate: '2024-01-07' }),
+        ...completedRuns(5, 8),
+      ];
+      expect(streak(runs).current).toBe(10);
+    });
+
+    it('orders chronologically (end date, else start date, else the year), not by input order', () => {
+      const runs = [
+        run('COMPLETADO', { year: 2023 }),
+        run('COMPLETADO', { endDate: '2024-03-01' }),
+        run('ABANDONADO', { startDate: '2024-02-01' }),
+        run('COMPLETADO', { year: 2022 }),
+        run('COMPLETADO', { startDate: '2024-01-01', endDate: '2024-04-01' }),
+      ];
+      // 2022, 2023 | abandoned Feb 2024 | Mar, Apr 2024.
+      expect(streak(runs).current).toBe(2);
+      expect(streak([...runs].reverse()).current).toBe(2);
+      expect(streak([...runs, run('ABANDONADO', { endDate: '2024-06-01' })]).current).toBe(2);
+    });
+  });
+
+  it('counts online playtime as playing (online games have no runs)', () => {
+    const games = [
+      game(1, { category: 'SINGLEPLAYER', experienceCount: 2, totalHours: 30 }),
+      game(2, { category: 'ONLINE', experienceCount: 0, totalHours: 120 }),
+      game(3, { category: 'HYBRID', experienceCount: 0, totalHours: 5 }),
+    ];
+    const a = byId(computeAchievements({ games, summary: null, sagas: [] }));
+    expect(a['onlineDebut'].unlocked).toBe(true);
+    expect(a['variety'].current).toBe(3);
+    expect(a['variety'].unlocked).toBe(true);
+
+    const onlineOnly = byId(computeAchievements({ games: [games[1]], summary: summary(), sagas: [] }));
+    expect(onlineOnly['onlineDebut'].unlocked).toBe(true);
+  });
+
+  it('does not count an online game without hours, nor single-player hours without runs', () => {
+    const games = [
+      game(1, { category: 'ONLINE', experienceCount: 0, totalHours: 0 }),
+      game(2, { category: 'SINGLEPLAYER', experienceCount: 0, totalHours: 10 }),
+    ];
+    const a = byId(computeAchievements({ games, summary: null, sagas: [] }));
+    expect(a['onlineDebut'].unlocked).toBe(false);
+    expect(a['variety'].current).toBe(0);
+  });
+
+  it('derives the 100% tiers from the summary, else from the games', () => {
+    let a = byId(computeAchievements({ games: [], summary: summary({ totalFullCompletions: 6 }), sagas: [] }));
+    expect(a['firstFullCompletion'].unlocked && a['fullCompletion5'].unlocked).toBe(true);
+    expect(a['fullCompletion10'].progress).toBeCloseTo(0.6);
+    expect(a['fullCompletion25'].unlocked).toBe(false);
+
+    const games = [game(1, { hasFullCompletion: true }), game(2, { hasFullCompletion: false }), game(3)];
+    a = byId(computeAchievements({ games, summary: null, sagas: [] }));
+    expect(a['firstFullCompletion'].current).toBe(1);
+    expect(a['firstFullCompletion'].unlocked).toBe(true);
+  });
+
+  it('places the 100% category right after platinums', () => {
+    expect(ACHIEVEMENT_CATEGORIES[ACHIEVEMENT_CATEGORIES.indexOf('platinums') + 1]).toBe('fullCompletions');
+  });
+
+  it('unlocks the perfectionist with platinum and 100% on the same game only', () => {
+    const split = [game(1, { hasPlatinum: true }), game(2, { hasFullCompletion: true })];
+    expect(byId(computeAchievements({ games: split, summary: null, sagas: [] }))['perfectionist'].unlocked).toBe(false);
+    const both = [game(1, { hasPlatinum: true, hasFullCompletion: true })];
+    expect(byId(computeAchievements({ games: both, summary: null, sagas: [] }))['perfectionist'].unlocked).toBe(true);
+  });
+
+  it('derives the higher run and replay tiers', () => {
+    const a = byId(computeAchievements({ games: [], summary: summary({ totalExperiences: 250, replayCount: 9 }), sagas: [] }));
+    expect(a['runs250'].unlocked).toBe(true);
+    expect(a['replays10'].unlocked).toBe(false);
+    expect(a['replays10'].progress).toBeCloseTo(0.9);
   });
 
   it('derives rating badges from best ratings', () => {
@@ -164,6 +275,71 @@ describe('computeAchievements', () => {
     expect(a['years10'].current).toBe(5);
     expect(a['streak3'].current).toBe(3);
     expect(a['streak3'].unlocked).toBe(true);
+    expect(a['streak5'].current).toBe(3);
+    expect(a['streak5'].unlocked).toBe(false);
+    const fiveYears = [2019, 2020, 2021, 2022, 2023].map((y) => year(y, 1));
+    expect(byId(computeAchievements({ games: [], summary: null, sagas: [], years: fiveYears }))['streak5'].unlocked).toBe(true);
+  });
+
+  describe('legend', () => {
+    /** An input that unlocks every badge but the legend. */
+    const everything = () => {
+      const platforms = [1, 2, 3, 4, 5, 6].map((id) => ({ id, name: `P${id}`, color: null }));
+      const ratings = [10, 9, 9, 9, 9, 3, ...Array.from({ length: 14 }, () => 7)];
+      const games = ratings.map((bestRating, i) =>
+        game(i + 1, {
+          bestRating,
+          experienceCount: 1,
+          category: (['SINGLEPLAYER', 'ONLINE', 'HYBRID'] as const)[i % 3],
+          totalHours: i === 0 ? 300 : 1,
+          platformRefs: [platforms[i % 6]],
+          sagaId: i < 3 ? 1 : null,
+          lastExperienceStatus: 'COMPLETADO',
+          hasPlatinum: i === 0,
+          hasFullCompletion: i === 0,
+        }),
+      );
+      return {
+        games,
+        sagas: [{ id: 1, name: 'Trilogy', updatedAt: '' }],
+        summary: summary({
+          totalGames: 100,
+          totalExperiences: 250,
+          completedCount: 100,
+          replayCount: 10,
+          totalSingleplayerHours: 2000,
+          totalOnlineHours: 500,
+          totalPlatinums: 25,
+          totalFullCompletions: 25,
+          inProgressCount: 3,
+        }),
+        years: Array.from({ length: 10 }, (_, i) => year(2015 + i, 1)),
+        runs: completedRuns(10),
+      };
+    };
+
+    it('counts the other unlocked badges towards all of them', () => {
+      const list = computeAchievements({ games: [], summary: summary({ totalPlatinums: 1, totalExperiences: 12 }), sagas: [] });
+      const legend = byId(list)['legend'];
+      expect(list[list.length - 1]).toBe(legend);
+      expect(legend.category).toBe('special');
+      expect(legend.target).toBe(list.length - 1);
+      expect(legend.current).toBe(2);
+      expect(legend.unlocked).toBe(false);
+    });
+
+    it('unlocks when every other badge is unlocked and ranks above all of them', () => {
+      const list = computeAchievements(everything());
+      expect(list.filter((a) => !a.unlocked).map((a) => a.id)).toEqual([]);
+      expect(topUnlocked(list, 1)[0].id).toBe('legend');
+      expect(sortAchievements(list)[0].id).toBe('legend');
+    });
+
+    it('stays locked while a single badge is missing', () => {
+      const legend = byId(computeAchievements({ ...everything(), runs: completedRuns(9) }))['legend'];
+      expect(legend.unlocked).toBe(false);
+      expect(legend.current).toBe(legend.target - 1);
+    });
   });
 
   it('sorts unlocked first and picks the hardest unlocked', () => {

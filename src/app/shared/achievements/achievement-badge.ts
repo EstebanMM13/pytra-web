@@ -4,7 +4,7 @@ import { ICONS } from '../ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PreferencesService } from '../../core/services/preferences.service';
 import { formatScaledPoint } from '../utils/rating-scale';
-import { Achievement, AchievementIcon, AchievementTier, RATING_BADGE_THRESHOLDS } from './achievements';
+import { Achievement, AchievementIcon, AchievementTier, LEGEND_ID, RATING_BADGE_THRESHOLDS } from './achievements';
 
 const BADGE_ICONS: Record<AchievementIcon, LucideIconInput> = {
   trophy: ICONS.trophy,
@@ -36,7 +36,11 @@ const BADGE_ICONS: Record<AchievementIcon, LucideIconInput> = {
   shuffle: ICONS.shuffle,
   target: ICONS.target,
   bookOpen: ICONS.bookOpen,
+  badgeCheck: ICONS.badgeCheck,
 };
+
+/** Per-instance ids of the legend icon gradient (a page can show the badge more than once). */
+let legendGradientSeq = 0;
 
 /** Unlocked chip tone per tier (bronze = copper, silver = slate, gold = the app's gold). */
 const TIER_TONE: Record<AchievementTier, string> = {
@@ -62,7 +66,23 @@ const TIER_TONE: Record<AchievementTier, string> = {
       "
       aria-hidden="true"
     >
-      <svg [lucideIcon]="icon()" [size]="compact() ? 16 : 20"></svg>
+      <svg
+        [lucideIcon]="icon()"
+        [size]="compact() ? 16 : 20"
+        [style.stroke]="legendUnlocked() ? 'url(#' + legendGradientId + ')' : null"
+      ></svg>
+      @if (legendUnlocked()) {
+        <!-- Purple -> gold -> diamond blue icon stroke, in the 24-unit lucide viewBox. -->
+        <svg class="absolute size-0" focusable="false">
+          <defs>
+            <linearGradient [attr.id]="legendGradientId" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22">
+              <stop offset="0" style="stop-color: var(--pt-brand-vivid)" />
+              <stop offset="0.5" style="stop-color: var(--pt-gold)" />
+              <stop offset="1" style="stop-color: var(--pt-diamond)" />
+            </linearGradient>
+          </defs>
+        </svg>
+      }
     </span>
     <span class="min-w-0 flex-1">
       <span
@@ -113,7 +133,10 @@ export class AchievementBadge {
 
   protected readonly a = this.achievement;
   protected readonly icon = computed(() => BADGE_ICONS[this.achievement().icon]);
-  protected readonly tone = computed(() => TIER_TONE[this.achievement().tier]);
+  /** The legend meta badge blends purple, gold and diamond blue instead of a tier tone. */
+  protected readonly legendUnlocked = computed(() => this.achievement().id === LEGEND_ID && this.achievement().unlocked);
+  protected readonly legendGradientId = `pt-legend-stroke-${++legendGradientSeq}`;
+  protected readonly tone = computed(() => (this.legendUnlocked() ? 'legend-badge' : TIER_TONE[this.achievement().tier]));
   protected readonly percent = computed(() => Math.round(this.achievement().progress * 100));
   private readonly preferences = inject(PreferencesService);
   private readonly translate = inject(TranslateService);

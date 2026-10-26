@@ -1131,6 +1131,10 @@
         "title": "Centurion",
         "desc": "Log {{target}} runs"
       },
+      "runs250": {
+        "title": "Relentless",
+        "desc": "Log {{target}} runs"
+      },
       "completed10": {
         "title": "Finisher",
         "desc": "Complete {{target}} runs"
@@ -1149,6 +1153,10 @@
       },
       "replays5": {
         "title": "Nostalgic",
+        "desc": "Log {{target}} replays"
+      },
+      "replays10": {
+        "title": "Old favorites",
         "desc": "Log {{target}} replays"
       },
       "hours100": {
@@ -1211,6 +1219,22 @@
         "title": "Full trophy case",
         "desc": "Earn {{target}} platinums"
       },
+      "firstFullCompletion": {
+        "title": "First 100%",
+        "desc": "Earn your first 100%"
+      },
+      "fullCompletion5": {
+        "title": "Nothing left behind",
+        "desc": "Earn 100% {{target}} times"
+      },
+      "fullCompletion10": {
+        "title": "Achievement hunter",
+        "desc": "Earn 100% {{target}} times"
+      },
+      "fullCompletion25": {
+        "title": "True completionist",
+        "desc": "Earn 100% {{target}} times"
+      },
       "sagaComplete": {
         "title": "Saga complete",
         "desc": "Play every game in a saga (2+ games)"
@@ -1243,6 +1267,10 @@
         "title": "On a roll",
         "desc": "Play {{target}} years in a row"
       },
+      "streak5": {
+        "title": "Unstoppable",
+        "desc": "Play {{target}} years in a row"
+      },
       "onlineDebut": {
         "title": "Connected",
         "desc": "Play an online or hybrid game"
@@ -1265,7 +1293,15 @@
       },
       "completionist": {
         "title": "No half measures",
-        "desc": "Complete {{target}} runs without abandoning any"
+        "desc": "Complete {{target}} runs in a row without abandoning any in between (an abandoned run resets the streak)"
+      },
+      "perfectionist": {
+        "title": "Perfectionist",
+        "desc": "Earn both the platinum and 100% in the same game"
+      },
+      "legend": {
+        "title": "Pytriarch",
+        "desc": "Play · Track · Remember: unlock every other achievement"
       }
     },
     "categories": {
@@ -1274,6 +1310,7 @@
       "hours": "Hours",
       "ratings": "Ratings",
       "platinums": "Platinums",
+      "fullCompletions": "100%",
       "sagas": "Sagas",
       "platforms": "Platforms",
       "years": "Consistency",

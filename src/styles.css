@@ -70,6 +70,9 @@
   --pt-completion-tint: #17302b;
   --pt-completion-tint-fg: #9ae8d5;
 
+  /* Bright diamond blue: blended with the brand purple and the gold on the legend badge only. */
+  --pt-diamond: #5cc8ff;
+
   /* Rating tones (>=7 gold, 6-<7 mid, <6 danger; >=9 shares the gold) and platform brand dots. */
   --pt-rating-high: var(--pt-gold);
   --pt-rating-mid: #d9a05b;
@@ -153,6 +156,9 @@
   --pt-completion-line: #2c937f80;
   --pt-completion-tint: #d3eae3;
   --pt-completion-tint-fg: #08503f;
+
+  /* Deeper diamond blue that still reads on the light grey surfaces. */
+  --pt-diamond: #0a7fc2;
 
   --pt-rating-high: var(--pt-gold);
   --pt-rating-mid: #825509;
@@ -611,6 +617,46 @@
   border: 1px solid var(--pt-completion-line);
   color: var(--pt-completion-tint-fg);
   background: var(--pt-completion-tint);
+}
+
+/*
+ * Legend achievement chip: a soft purple / gold / diamond tint inside a ring blending the three
+ * (padding-box over border-box), plus a diagonal shine that sweeps a few times when it appears
+ * (finite; off with reduced motion, motion.css). The icon stroke uses the same blend (badge SVG).
+ */
+.legend-badge {
+  position: relative;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--pt-brand) 24%, var(--pt-surface)) 0%,
+        color-mix(in srgb, var(--pt-gold) 16%, var(--pt-surface)) 50%,
+        color-mix(in srgb, var(--pt-diamond) 22%, var(--pt-surface)) 100%
+      )
+      padding-box,
+    linear-gradient(135deg, var(--pt-brand-vivid) 0%, var(--pt-gold) 50%, var(--pt-diamond) 100%) border-box;
+}
+
+.legend-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.4) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: pt-legend-shine 3.2s ease-in-out 600ms 3 both;
+}
+
+@keyframes pt-legend-shine {
+  0% {
+    transform: translateX(-120%);
+  }
+  45%,
+  100% {
+    transform: translateX(120%);
+  }
 }
 
 /*

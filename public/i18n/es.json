@@ -1131,6 +1131,10 @@
         "title": "Centenario",
         "desc": "Registra {{target}} partidas"
       },
+      "runs250": {
+        "title": "Incansable",
+        "desc": "Registra {{target}} partidas"
+      },
       "completed10": {
         "title": "Finalizador",
         "desc": "Completa {{target}} partidas"
@@ -1149,6 +1153,10 @@
       },
       "replays5": {
         "title": "Nostálgico",
+        "desc": "Registra {{target}} rejugadas"
+      },
+      "replays10": {
+        "title": "Viejos favoritos",
         "desc": "Registra {{target}} rejugadas"
       },
       "hours100": {
@@ -1211,6 +1219,22 @@
         "title": "Vitrina llena",
         "desc": "Consigue {{target}} platinos"
       },
+      "firstFullCompletion": {
+        "title": "Primer 100%",
+        "desc": "Consigue tu primer 100%"
+      },
+      "fullCompletion5": {
+        "title": "Sin dejarte nada",
+        "desc": "Consigue el 100% {{target}} veces"
+      },
+      "fullCompletion10": {
+        "title": "Cazalogros",
+        "desc": "Consigue el 100% {{target}} veces"
+      },
+      "fullCompletion25": {
+        "title": "Completista total",
+        "desc": "Consigue el 100% {{target}} veces"
+      },
       "sagaComplete": {
         "title": "Saga completada",
         "desc": "Juega todos los juegos de una saga (mín. 2)"
@@ -1243,6 +1267,10 @@
         "title": "En racha",
         "desc": "Juega {{target}} años seguidos"
       },
+      "streak5": {
+        "title": "Sin pausa",
+        "desc": "Juega {{target}} años seguidos"
+      },
       "onlineDebut": {
         "title": "Conectado",
         "desc": "Juega un juego online o híbrido"
@@ -1265,7 +1293,15 @@
       },
       "completionist": {
         "title": "Nada a medias",
-        "desc": "Completa {{target}} partidas sin abandonar ninguna"
+        "desc": "Completa {{target}} partidas seguidas sin abandonar ninguna entre medias (un abandono reinicia la racha)"
+      },
+      "perfectionist": {
+        "title": "Perfeccionista",
+        "desc": "Consigue el platino y el 100% de un mismo juego"
+      },
+      "legend": {
+        "title": "Pytriarca",
+        "desc": "Play · Track · Remember: desbloquea todos los demás logros"
       }
     },
     "categories": {
@@ -1274,6 +1310,7 @@
       "hours": "Horas",
       "ratings": "Notas",
       "platinums": "Platinos",
+      "fullCompletions": "100%",
       "sagas": "Sagas",
       "platforms": "Plataformas",
       "years": "Constancia",
