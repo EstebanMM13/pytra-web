@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { MiniBar } from './mini-bar-chart';
 import { CollapseStateService } from '../../core/services/collapse-state.service';
@@ -47,6 +48,14 @@ describe('recentBars', () => {
 class Host {
   readonly bars = signal<MiniBar[]>(years(2020, 2024));
   readonly height = signal<number | null>(96);
+}
+
+@Component({
+  imports: [RecentBarChart],
+  template: `<app-recent-bar-chart [bars]="bars" title="Horas por año" expressive [accentKey]="2024" />`,
+})
+class LinkedHost {
+  readonly bars: MiniBar[] = years(2014, 2024).map((bar) => ({ ...bar, link: `/years/${bar.key}`, title: `${bar.key}: 1 h` }));
 }
 
 describe('fitLabels', () => {
@@ -138,5 +147,28 @@ describe('RecentBarChart', () => {
     expect((dialog.querySelector('[data-full-plot]') as HTMLElement).className).toContain('h-[260px]');
     expect(dialog.querySelectorAll('[role="listitem"]')).toHaveLength(11);
     expect(barLabels(dialog)[0]).toBe("'14");
+  });
+
+  it('passes links and the gold accent to the recent chart and the full sheet', () => {
+    TestBed.configureTestingModule({
+      imports: [LinkedHost],
+      providers: [
+        provideTranslateService(),
+        provideRouter([]),
+        { provide: CollapseStateService, useValue: { atLeast: () => signal(true).asReadonly() } },
+      ],
+    });
+    const fixture = TestBed.createComponent(LinkedHost);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    const hrefs = [...el.querySelectorAll('a[data-bar-link]')].map((a) => a.getAttribute('href'));
+    expect(hrefs).toEqual(['/years/2020', '/years/2021', '/years/2022', '/years/2023', '/years/2024']);
+    expect(el.querySelector('.is-accent a')?.getAttribute('aria-label')).toBe('2024: 1 h');
+
+    el.querySelector<HTMLButtonElement>('[data-show-all]')!.click();
+    fixture.detectChanges();
+    const dialog = document.body.querySelector('[role="dialog"]')!;
+    expect(dialog.querySelectorAll('a[data-bar-link]')).toHaveLength(11);
+    expect(dialog.querySelectorAll('.mbc-col.is-accent')).toHaveLength(1);
   });
 });

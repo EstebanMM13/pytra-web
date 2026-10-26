@@ -201,17 +201,33 @@ export class Dashboard {
     if (years === null) {
       return null;
     }
+    const locale = ratingLocale(this.translate.currentLang());
     return [...years]
       .sort((a, b) => a.year - b.year)
-      .map((y) => ({
-        key: y.year,
-        value: y.totalHours,
-        label: `'${String(y.year).slice(-2)}`,
-        fullLabel: String(y.year),
-        // Whole hours keep the per-year label on one line under narrow bars.
-        subLabel: `${Math.round(y.totalHours)}h`,
-        title: `${y.year}: ${Math.round(y.totalHours)} h`,
-      }));
+      .map((y) => {
+        const hours = formatHours(y.totalHours, locale);
+        return {
+          key: y.year,
+          value: y.totalHours,
+          label: `'${String(y.year).slice(-2)}`,
+          fullLabel: String(y.year),
+          // Whole hours keep the per-year label on one line under narrow bars.
+          subLabel: `${Math.round(y.totalHours)}h`,
+          title: `${y.year}: ${hours}`,
+          hint: hours,
+          link: `/years/${y.year}`,
+        };
+      });
+  });
+
+  /** Year bar drawn in gold: the current calendar year, else the most recent one charted. */
+  protected readonly accentYear = computed(() => {
+    const bars = this.yearBars();
+    if (!bars?.length) {
+      return null;
+    }
+    const current = new Date().getFullYear();
+    return bars.some((b) => b.key === current) ? current : bars[bars.length - 1].key;
   });
 
   protected readonly mostPlayed = computed(() =>

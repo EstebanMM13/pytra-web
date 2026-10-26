@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, booleanAttribute, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, booleanAttribute, Component, computed, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 export interface MiniBar {
   key: string | number;
@@ -12,8 +13,12 @@ export interface MiniBar {
   topLabel?: string | null;
   /** Optional second line under the label, e.g. the bar's hours. */
   subLabel?: string | null;
-  /** Accessible description of the bar. */
+  /** Accessible description of the bar (also the name of its link). */
   title?: string;
+  /** Route the bar links to (e.g. `/years/2024`); the whole column (or row) becomes the link. */
+  link?: string;
+  /** Short value shown over the bar top while it is highlighted (hover, focus or press), e.g. "120,5 h". */
+  hint?: string;
 }
 
 /** Smallest share of the plot a non-zero bar takes, so it stays visible. */
@@ -35,9 +40,13 @@ export type BarOrientation = 'vertical' | 'horizontal';
  * null to fill a parent that has one.
  * Horizontal: one row per bar (label, bar, then sub and top labels), as tall as its rows; `height`
  * does not apply.
+ * Bars with a `link` get a stretched link over their column (or row). Vertical linked bars light up
+ * (and the others dim) on mouse hover, keyboard focus and press, showing their `hint`.
+ * `expressive` opts into the gradient look: gold `accentKey` bar, marked top bar, springier grow-in.
  */
 @Component({
   selector: 'app-mini-bar-chart',
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'list',
@@ -46,11 +55,18 @@ export type BarOrientation = 'vertical' | 'horizontal';
     // Filling a parent whose height turns out indefinite would collapse the bars: keep a floor.
     '[style.min-height.px]': 'vertical() && height() === null ? minHeight() : null',
     '[class]': 'hostClass()',
+    '[class.mbc-has-active]': 'activeKey() !== null',
   },
   template: `
     @if (!vertical()) {
       @for (bar of normalized(); track bar.key) {
-        <div class="flex items-center gap-3 text-[13px]" role="listitem" [attr.aria-label]="bar.title ?? bar.label" data-row>
+        <div
+          class="flex items-center gap-3 text-[13px]"
+          [class.relative]="!!bar.link"
+          role="listitem"
+          [attr.aria-label]="bar.title ?? bar.label"
+          data-row
+        >
           <span class="w-10 shrink-0 text-muted tabular-nums">{{ bar.label }}</span>
           <div class="h-2.5 min-w-0 flex-1 overflow-hidden rounded-full bg-hover">
             <div
@@ -68,6 +84,9 @@ export type BarOrientation = 'vertical' | 'horizontal';
               <span class="ml-2" [class]="topTone() === 'gold' ? 'text-gold' : 'text-muted'">{{ bar.topLabel }}</span>
             }
           </span>
+          @if (bar.link) {
+            <a class="mbc-link" [routerLink]="bar.link" [attr.aria-label]="bar.title ?? bar.label" data-bar-link></a>
+          }
         </div>
       }
     } @else {
@@ -75,10 +94,15 @@ export type BarOrientation = 'vertical' | 'horizontal';
         <div
           class="flex min-w-0 flex-1 flex-col items-center"
           [class]="dense() ? 'gap-[5px]' : 'gap-1.5'"
+          [class.relative]="!!bar.link"
+          [class.mbc-col]="expressive()"
+          [class.is-active]="activeKey() === bar.key"
+          [class.is-top]="bar.top"
+          [class.is-accent]="bar.accent"
           role="listitem"
           [attr.aria-label]="bar.title ?? bar.label"
         >
-          <div class="flex min-h-0 w-full flex-1 flex-col items-center justify-end" [class]="dense() ? 'gap-[3px]' : 'gap-1'" data-plot>
+          <div class="relative flex min-h-0 w-full flex-1 flex-col items-center justify-end" [class]="dense() ? 'gap-[3px]' : 'gap-1'" data-plot>
             @if (bar.topLabel) {
               <span
                 class="shrink-0 font-mono leading-none"
@@ -88,15 +112,25 @@ export type BarOrientation = 'vertical' | 'horizontal';
             <!-- The bar fills its share of the plot left after the top labels' row. -->
             <div
               class="bar-grow w-full shrink-0"
-              [class]="(dense() ? 'rounded-t-[3px] ' : 'rounded-t ') + (bar.top ? 'bg-brand-light' : 'bg-brand')"
+              [class]="barClass(bar.top)"
               [style.height]="'calc((100% - ' + topReserve() + 'px) * ' + bar.ratio + ')'"
-              [style.animation-delay.ms]="i * 40"
+              [style.animation-delay.ms]="i * (expressive() ? 70 : 40)"
               [attr.data-ratio]="bar.ratio"
             ></div>
+            @if (bar.link && bar.hint) {
+              <!-- Floats over the bar top while highlighted; out of the flow, so nothing shifts. -->
+              <span
+                class="mbc-hint rounded-md border border-card-border bg-surface px-1.5 py-0.5 font-mono leading-none whitespace-nowrap text-text"
+                [class]="large() ? 'text-xs' : 'text-[11px]'"
+                [style.bottom]="'calc((100% - ' + topReserve() + 'px) * ' + bar.ratio + ' + 4px)'"
+                aria-hidden="true"
+                data-hint
+              >{{ bar.hint }}</span>
+            }
           </div>
           <span
             class="shrink-0 whitespace-nowrap"
-            [class]="(bar.top ? 'text-text ' : 'text-muted ') + (dense() ? 'text-[10px]' : large() ? 'text-sm' : 'text-xs')"
+            [class]="(bar.accent ? 'text-gold ' : bar.top ? 'text-text ' : 'text-muted ') + (dense() ? 'text-[10px]' : large() ? 'text-sm' : 'text-xs')"
           >
             {{ bar.label }}
           </span>
@@ -105,8 +139,98 @@ export type BarOrientation = 'vertical' | 'horizontal';
               bar.subLabel
             }}</span>
           }
+          @if (bar.link) {
+            <!-- Stretched over the column: one keyboard stop per bar, the whole column is the target. -->
+            <a
+              class="mbc-link"
+              [routerLink]="bar.link"
+              [attr.aria-label]="bar.title ?? bar.label"
+              (focus)="activeKey.set(bar.key)"
+              (blur)="release(bar.key)"
+              (pointerenter)="hover($event, bar.key)"
+              (pointerdown)="activeKey.set(bar.key)"
+              (pointerleave)="release(bar.key)"
+              (pointercancel)="release(bar.key)"
+              data-bar-link
+            ></a>
+          }
         </div>
       }
+    }
+  `,
+  styles: `
+    /* Stretched link over its row / column, with the focus ring around it. */
+    .mbc-link {
+      position: absolute;
+      inset: -2px;
+      z-index: 1;
+      border-radius: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mbc-link:focus-visible {
+      outline: 2px solid var(--pt-brand);
+      outline-offset: 2px;
+    }
+
+    /* Expressive bars: brand gradient, deeper at the base; the accent bar blends into gold. */
+    .mbc-col {
+      --mbc-base: var(--pt-brand-dark);
+      --mbc-tip: var(--pt-brand-light);
+      --mbc-glow: var(--pt-brand-vivid);
+      --mbc-cap: inset 0 0 0 0 transparent;
+      transition: opacity calc(180ms * var(--pt-motion, 1)) ease-out;
+    }
+    :host-context([data-theme='light']) .mbc-col {
+      --mbc-tip: color-mix(in oklab, var(--pt-brand) 68%, white);
+    }
+    .mbc-col.is-accent {
+      --mbc-base: color-mix(in oklab, var(--pt-gold) 50%, var(--pt-brand-dark));
+      --mbc-tip: var(--pt-gold);
+      --mbc-glow: var(--pt-gold);
+    }
+    :host-context([data-theme='light']) .mbc-col.is-accent {
+      --mbc-tip: color-mix(in oklab, var(--pt-gold) 62%, white);
+    }
+    /* The tallest bar: a thin light cap along its top edge. */
+    .mbc-col.is-top {
+      --mbc-cap: inset 0 2px 0 0 color-mix(in srgb, white 45%, transparent);
+    }
+    .mbc-bar {
+      background-image: linear-gradient(to top, var(--mbc-base), var(--mbc-tip));
+      box-shadow: var(--mbc-cap);
+      animation-duration: 600ms;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      transition-property: filter, box-shadow;
+      transition-duration: calc(180ms * var(--pt-motion, 1));
+      transition-timing-function: ease-out;
+    }
+
+    /* Highlight: the active bar brightens and glows, the others step back. */
+    :host(.mbc-has-active) [role='listitem']:not(.is-active) {
+      opacity: 0.5;
+    }
+    .mbc-col.is-active .mbc-bar {
+      filter: brightness(1.15) saturate(1.1);
+      box-shadow:
+        var(--mbc-cap),
+        0 0 0 1px color-mix(in srgb, var(--mbc-glow) 45%, transparent),
+        0 0 18px -2px color-mix(in srgb, var(--mbc-glow) 60%, transparent);
+    }
+
+    .mbc-hint {
+      position: absolute;
+      left: 50%;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0;
+      translate: -50% 3px;
+      transition-property: opacity, translate;
+      transition-duration: calc(150ms * var(--pt-motion, 1));
+      transition-timing-function: ease-out;
+    }
+    .is-active .mbc-hint {
+      opacity: 1;
+      translate: -50% 0;
     }
   `,
 })
@@ -122,6 +246,13 @@ export class MiniBarChart {
   /** Colour of the labels above the bars: gold (ratings) or muted (plain values). */
   readonly topTone = input<'gold' | 'muted'>('gold');
   readonly orientation = input<BarOrientation>('vertical');
+  /** Gradient bars, a marked top bar, the `accentKey` bar in gold and a springier grow-in. */
+  readonly expressive = input(false, { transform: booleanAttribute });
+  /** Key of the bar drawn with the gold accent (e.g. the current year); only with `expressive`. */
+  readonly accentKey = input<string | number | null>(null);
+
+  /** Linked bar lit by hover, keyboard focus or press; the others dim while one is. */
+  protected readonly activeKey = signal<string | number | null>(null);
 
   protected readonly vertical = computed(() => this.orientation() === 'vertical');
   protected readonly hostClass = computed(() =>
@@ -140,6 +271,34 @@ export class MiniBarChart {
     const ratios = barRatios(bars.map((b) => b.value));
     // The highest bar (the best year / month) takes the lighter brand tone when there is a series.
     const highlight = bars.length > 1;
-    return bars.map((bar, i) => ({ ...bar, ratio: ratios[i], top: highlight && ratios[i] === 1 }));
+    const accent = this.expressive() ? this.accentKey() : null;
+    return bars.map((bar, i) => ({
+      ...bar,
+      ratio: ratios[i],
+      top: highlight && ratios[i] === 1,
+      accent: accent !== null && bar.key === accent,
+    }));
   });
+
+  /** Classes of a vertical bar: the expressive gradient, or flat brand tones (lighter for the top bar). */
+  protected barClass(top: boolean): string {
+    if (this.expressive()) {
+      return (this.dense() ? 'rounded-t-[4px] ' : 'rounded-t-md ') + 'mbc-bar';
+    }
+    return (this.dense() ? 'rounded-t-[3px] ' : 'rounded-t ') + (top ? 'bg-brand-light' : 'bg-brand');
+  }
+
+  /** Mouse hover lights the bar; touch lights it on press instead (pointerdown). */
+  protected hover(event: PointerEvent, key: string | number): void {
+    if (event.pointerType === 'mouse') {
+      this.activeKey.set(key);
+    }
+  }
+
+  /** Clears the highlight if this bar still holds it (another bar may have taken it already). */
+  protected release(key: string | number): void {
+    if (this.activeKey() === key) {
+      this.activeKey.set(null);
+    }
+  }
 }
