@@ -208,7 +208,9 @@ export class Years {
   /** `/years` lands on the most recent year with data. */
   private redirectToLatest(): void {
     const latest = latestYear(this.years() ?? []);
-    if (this.year() === null && latest !== null) {
+    // The URL, not `year()`: a cached years list answers synchronously, before the paramMap
+    // subscription below has set `year()`, and would send `/years/2024` to the latest year.
+    if (this.route.snapshot.paramMap.get('year') === null && latest !== null) {
       this.router.navigate(['/years', latest], { replaceUrl: true });
     }
   }

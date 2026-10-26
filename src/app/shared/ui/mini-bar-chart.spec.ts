@@ -70,6 +70,12 @@ describe('MiniBarChart linked, expressive bars', () => {
     expect(links().map((a) => a.getAttribute('aria-label'))).toEqual(['2022: 40 h', '2023: 120 h', '2024: 60 h']);
   });
 
+  it('keeps each stretched link inside its own column', () => {
+    const { links } = render();
+    // Without a positioned column the absolute link covers the whole chart and the last bar wins every tap.
+    expect(links().every((a) => a.parentElement!.classList.contains('relative'))).toBe(true);
+  });
+
   it('renders no links or hints for bars without a link', () => {
     const { el } = render({ items: bars.map(({ link: _link, ...bar }) => bar), expressive: false });
     expect(el.querySelector('a')).toBeNull();
