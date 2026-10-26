@@ -132,9 +132,10 @@ export class StatCard {
   /**
    * Colour role: 'brand' (activity figures: purple sparkline / bar), 'gold' (ratings: gold
    * sparkline / bar), 'gold-tile' (the headline rating: gold visuals on a gold-tint tile) or
-   * 'platinum' (platinum icon, brand visuals) or 'completion' (100% icon, brand visuals).
+   * 'platinum' (platinum icon, brand visuals), 'completion' (100% icon, brand visuals) or
+   * 'abandoned' (the abandoned status red icon, brand visuals).
    */
-  readonly tone = input<'brand' | 'gold' | 'gold-tile' | 'platinum' | 'completion'>('brand');
+  readonly tone = input<'brand' | 'gold' | 'gold-tile' | 'platinum' | 'completion' | 'abandoned'>('brand');
   /**
    * Inner scale: 'default' (compact tiles of the dashboard / years / profile rows) or 'large'
    * (roomier padding, a bigger figure and vertically centred content, as the run detail stat cards).
@@ -148,11 +149,15 @@ export class StatCard {
   protected readonly layout = computed(() => STAT_CARD_LAYOUT[this.size()]);
   protected readonly visual = computed(() => statVisual(this.trend(), this.meter()));
   protected readonly accent = computed(() => (this.tone() === 'gold' || this.tone() === 'gold-tile' ? 'gold' : 'brand'));
-  /** Header icon: brand-hi for activity figures, gold for ratings, platinum / teal for the platinum / 100% tiles. */
+  /**
+   * Header icon: brand-hi for activity figures, gold for ratings, platinum / teal for the platinum /
+   * 100% tiles, the abandoned status red (danger) for abandoned counts.
+   */
   protected readonly iconColor = computed(() => {
     const tone = this.tone();
     if (tone === 'platinum') return 'var(--pt-platinum)';
     if (tone === 'completion') return 'var(--pt-completion)';
+    if (tone === 'abandoned') return 'var(--pt-danger)';
     return this.accent() === 'gold' ? 'var(--pt-gold)' : 'var(--pt-brand-vivid)';
   });
   /** Sized from the final value (not the count-up frame) so the figure never jumps while animating. */

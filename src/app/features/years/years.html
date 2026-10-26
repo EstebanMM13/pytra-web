@@ -114,7 +114,7 @@
           <app-stat-card [icon]="icons.clock" [label]="'years.stats.hours' | translate" [value]="s.totalHours | hours" [trend]="hoursTrend()" />
           <app-stat-card [icon]="icons.play" [label]="'years.stats.runs' | translate" [value]="s.experienceCount" />
           <app-stat-card [icon]="icons.circleCheck" tone="completion" [label]="'years.stats.completed' | translate" [value]="s.completedCount" />
-          <app-stat-card [icon]="icons.x" [label]="'years.stats.abandoned' | translate" [value]="s.abandonedCount" />
+          <app-stat-card [icon]="icons.x" tone="abandoned" [label]="'years.stats.abandoned' | translate" [value]="s.abandonedCount" />
           <app-stat-card
             [icon]="icons.star"
             tone="gold"

@@ -92,6 +92,12 @@ describe('Years page', () => {
     expect(el.querySelector('[data-goty-backdrop]')).toBeNull();
   });
 
+  it('paints the abandoned stat icon in the abandoned status red', () => {
+    const el = setup(summary({}));
+    const card = [...el.querySelectorAll('app-stat-card')].find((c) => c.textContent!.includes('years.stats.abandoned'))!;
+    expect((card.querySelector('svg') as SVGElement).style.color).toBe('var(--pt-danger)');
+  });
+
   it('falls back to the brand glow without a GOTY cover', () => {
     const el = setup(summary({}));
     expect(el.querySelector('[data-year-hero]')).not.toBeNull();
