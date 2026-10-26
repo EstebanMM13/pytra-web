@@ -67,6 +67,32 @@ export function gotyCoverUrl(summary: Pick<YearSummary, 'goty' | 'experiences'> 
   );
 }
 
+/**
+ * Covers of the games the year mentions, by game id, for the lists whose rows carry none ("Más
+ * jugados", surprises, disappointments): the GOTY and top-rated covers the API sends, the year's
+ * runs, then its online games. The first cover found for a game wins.
+ */
+export function yearCoverMap(
+  summary: Pick<YearSummary, 'goty' | 'topRated' | 'experiences' | 'onlineGames'> | null,
+): Map<number, string> {
+  const covers = new Map<number, string>();
+  if (!summary) return covers;
+  const add = (gameId: number, url: string | null | undefined): void => {
+    if (url && !covers.has(gameId)) covers.set(gameId, url);
+  };
+  if (summary.goty) add(summary.goty.gameId, summary.goty.coverImageUrl);
+  for (const g of summary.topRated) add(g.gameId, g.coverImageUrl);
+  for (const e of summary.experiences) add(e.gameId, e.coverImageUrl);
+  for (const g of summary.onlineGames ?? []) add(g.gameId, g.coverImageUrl);
+  return covers;
+}
+
+/** Monthly hours (January first) for the hours card's sparkline; null when no month has hours. */
+export function monthHoursTrend(months: readonly { month: number; hours: number }[]): number[] | null {
+  const values = [...months].sort((a, b) => a.month - b.month).map((m) => m.hours);
+  return values.some((h) => h > 0) ? values : null;
+}
+
 /** Bars of the "Horas por mes" chart: one per month, hours under each label (none for empty months). */
 export function monthHourBars(
   months: readonly { month: number; hours: number }[],

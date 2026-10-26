@@ -627,7 +627,7 @@
     "pickYear": "Elegir año",
     "prevYear": "Año anterior",
     "nextYear": "Año siguiente",
-    "yearTitle": "Año {{year}}",
+    "yearLabel": "Año",
     "statsLabel": "Cifras del año",
     "empty": {
       "title": "Aún no hay años con partidas",

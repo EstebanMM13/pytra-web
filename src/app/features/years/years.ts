@@ -15,8 +15,12 @@ import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
 import { ToastService } from '../../shared/toast/toast.service';
+import { CoverTilt } from '../../shared/ui/cover-tilt';
 import { GameCover } from '../../shared/ui/game-cover';
 import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
+import { PytraMark } from '../../shared/ui/pytra-mark';
+import { RunRow } from '../../shared/ui/run-row';
+import { ScrollParallax } from '../../shared/ui/scroll-parallax';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
@@ -28,8 +32,10 @@ import {
   latestYear,
   gotyCoverUrl,
   monthHourBars,
+  monthHoursTrend,
   monthLabels,
   parseYearParam,
+  yearCoverMap,
   yearHighlight,
   yearMostPlayed,
   yearTabs,
@@ -49,6 +55,7 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
 @Component({
   selector: 'app-years',
   imports: [
+    CoverTilt,
     GameCover,
     Navbar,
     RouterLink,
@@ -61,13 +68,16 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
     StatCard,
     SectionHeader,
     MiniBarChart,
+    PytraMark,
+    RunRow,
+    ScrollParallax,
     Skeleton,
     LucideDynamicIcon,
     YearSelector,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './years.html',
-  styleUrl: './years.css',
+  styleUrls: ['./years.css', '../../shared/ui/cover-tilt.css'],
 })
 export class Years {
   protected readonly icons = ICONS;
@@ -99,6 +109,10 @@ export class Years {
     return !!state && state.year === this.year() && state.failed;
   });
   protected readonly gotyCover = computed(() => gotyCoverUrl(this.summary()));
+  /** Covers by game id, for the rankings whose rows carry none. */
+  private readonly covers = computed(() => yearCoverMap(this.summary()));
+  /** Monthly hours for the hours card's sparkline. */
+  protected readonly hoursTrend = computed(() => monthHoursTrend(this.summary()?.months ?? []));
   protected readonly noYears = computed(() => this.year() === null && this.years()?.length === 0);
 
   protected readonly tabs = computed(() => yearTabs(this.years() ?? [], this.year()));
@@ -224,6 +238,10 @@ export class Years {
 
   protected newRun(): void {
     this.runFormLauncher.openNewRun();
+  }
+
+  protected coverOf(gameId: number): string | null {
+    return this.covers().get(gameId) ?? null;
   }
 
   protected barWidth(hours: number): number {

@@ -4,9 +4,11 @@ import {
   latestYear,
   gotyCoverUrl,
   monthHourBars,
+  monthHoursTrend,
   monthLabels,
   monthValueLabel,
   parseYearParam,
+  yearCoverMap,
   yearHighlight,
   yearMostPlayed,
   yearTabs,
@@ -222,5 +224,44 @@ describe('yearMostPlayed', () => {
       { gameId: 1, gameName: 'Story', totalHours: 3, online: false },
     ]);
     expect(yearMostPlayed(null)).toEqual([]);
+  });
+});
+
+describe('yearCoverMap', () => {
+  const run = (gameId: number, coverImageUrl: string | null) =>
+    ({ gameId, coverImageUrl }) as YearSummary['experiences'][number];
+
+  it('finds covers for games whose rows carry none, from the GOTY, top rated, runs and online games', () => {
+    const covers = yearCoverMap(
+      summary({
+        goty: { gameId: 1, gameName: 'Goty', avgRating: 10, experienceCount: 1, totalHours: 40, coverImageUrl: 'goty.jpg' },
+        topRated: [{ gameId: 2, gameName: 'Top', avgRating: 9, experienceCount: 1, totalHours: 10, coverImageUrl: 'top.jpg' }],
+        experiences: [run(1, 'run-1.jpg'), run(3, null), run(3, 'run-3.jpg')],
+        onlineGames: [{ gameId: 4, gameName: 'Arena', coverImageUrl: 'arena.jpg', hours: 5, dayCount: 2 }],
+      }),
+    );
+
+    expect(covers.get(1)).toBe('goty.jpg');
+    expect(covers.get(2)).toBe('top.jpg');
+    expect(covers.get(3)).toBe('run-3.jpg');
+    expect(covers.get(4)).toBe('arena.jpg');
+    expect(covers.has(5)).toBe(false);
+  });
+
+  it('works with older APIs (no covers on rankings, no online games) and without a summary', () => {
+    const covers = yearCoverMap(summary({ topRated: [{ gameId: 2, gameName: 'Top', avgRating: 9, experienceCount: 1, totalHours: 1 }] }));
+    expect(covers.size).toBe(0);
+    expect(yearCoverMap(null).size).toBe(0);
+  });
+});
+
+describe('monthHoursTrend', () => {
+  it('lists the hours January first', () => {
+    expect(monthHoursTrend([{ month: 2, hours: 5 }, { month: 1, hours: 0 }, { month: 3, hours: 2.5 }])).toEqual([0, 5, 2.5]);
+  });
+
+  it('is null when no month has hours', () => {
+    expect(monthHoursTrend([{ month: 1, hours: 0 }, { month: 2, hours: 0 }])).toBeNull();
+    expect(monthHoursTrend([])).toBeNull();
   });
 });

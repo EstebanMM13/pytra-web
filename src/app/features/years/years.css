@@ -58,3 +58,90 @@
     transform: translateX(110%);
   }
 }
+
+/*
+ * GOTY card: its cover blurred into a faint colour field under the gold aura (16px on phones, where
+ * a wider blur washes the small card's colour out; 40px from md).
+ */
+.goty-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.goty-backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  scale: 1.1;
+  opacity: 0.3;
+  filter: blur(16px) saturate(1.5);
+}
+
+:host-context([data-theme='light']) .goty-backdrop img {
+  opacity: 0.35;
+  filter: blur(16px) brightness(1.25) saturate(2);
+}
+
+@media (width >= 48rem) {
+  .goty-backdrop img {
+    opacity: 0.25;
+    filter: blur(40px) saturate(1.5);
+  }
+
+  :host-context([data-theme='light']) .goty-backdrop img {
+    opacity: 0.3;
+    filter: blur(40px) brightness(1.25) saturate(2);
+  }
+}
+
+/* Surprises / disappointments: a faint green / red edge and wash on the glass card. */
+.tone-edge {
+  border-color: color-mix(in srgb, var(--tone) 30%, var(--pt-card-border));
+  background-image: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--tone) 9%, transparent),
+    transparent 55%
+  );
+}
+
+.tone-edge-success {
+  --tone: var(--pt-success);
+}
+
+.tone-edge-danger {
+  --tone: var(--pt-danger);
+}
+
+/* Top rated: the first place gets a gold chip (gold means rating here). */
+.rank-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background: var(--pt-gold-tint);
+  color: var(--pt-gold-tint-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pt-gold) 45%, transparent);
+}
+
+/* Most played: the dashboard's expressive bar gradient, laid sideways. */
+.played-bar {
+  background-image: linear-gradient(to right, var(--pt-brand-dark), var(--pt-brand-light));
+}
+
+:host-context([data-theme='light']) .played-bar {
+  background-image: linear-gradient(to right, var(--pt-brand-dark), color-mix(in oklab, var(--pt-brand) 68%, white));
+}
+
+/* Runs of the year on phones: a tighter run row, so the name keeps room at 360px. */
+@media (width < 40rem) {
+  .year-run {
+    gap: 0.625rem;
+    padding: 0.625rem 0.75rem;
+  }
+}

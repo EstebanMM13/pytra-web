@@ -627,7 +627,7 @@
     "pickYear": "Choose year",
     "prevYear": "Previous year",
     "nextYear": "Next year",
-    "yearTitle": "Year {{year}}",
+    "yearLabel": "Year",
     "statsLabel": "Year figures",
     "empty": {
       "title": "No years with runs yet",
