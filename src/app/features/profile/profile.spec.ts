@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Router, provideRouter } from '@angular/router';
+import { Event as RouterEvent, NavigationEnd, Router, Scroll, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { Subject, of } from 'rxjs';
 import { CurrentUser } from '../../core/models/user.model';
 import { AccessTokenService } from '../../core/services/access-token.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -17,6 +17,7 @@ import { UserService } from '../../core/services/user.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { ToastService } from '../../shared/toast/toast.service';
 import { PREFERENCES_KEY, PreferencesService } from '../../core/services/preferences.service';
+import { CollapseStateService } from '../../core/services/collapse-state.service';
 import { Profile } from './profile';
 
 @Component({ selector: 'app-navbar', template: '' })
@@ -71,11 +72,31 @@ describe('Profile', () => {
     return { fixture, el, rows, ...mocks };
   }
 
+  /**
+   * Stands in for app.config's `withInMemoryScrolling` (its scroller only starts on a real bootstrap):
+   * a task after each NavigationEnd it scrolls the window to the top and emits `Scroll`, like the router.
+   */
+  function fakeRouterScrolling() {
+    const events = TestBed.inject(Router).events as Subject<RouterEvent>;
+    events.subscribe((e) => {
+      if (e instanceof NavigationEnd) {
+        setTimeout(() => {
+          if (events.closed) return; // the test (and its router) is already torn down
+          window.scrollTo(0, 0);
+          events.next(new Scroll(e, null, null));
+        });
+      }
+    });
+  }
+
   /** Opens the page through the router at `url`; returns the highlighted sidebar entry. */
   async function openAt(url: string) {
     configure();
+    fakeRouterScrolling();
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl(url, Profile);
+    // The router scrolls a task after NavigationEnd; the arrival jump runs a task after that.
+    await new Promise((resolve) => setTimeout(resolve));
     await new Promise((resolve) => setTimeout(resolve));
     harness.detectChanges();
     const active = () =>
@@ -86,9 +107,12 @@ describe('Profile', () => {
   }
 
   const scrollIntoView = vi.fn();
+  const windowScrollTo = vi.fn();
   beforeEach(() => {
     scrollIntoView.mockClear();
+    windowScrollTo.mockClear();
     Element.prototype.scrollIntoView = scrollIntoView;
+    window.scrollTo = windowScrollTo as unknown as typeof window.scrollTo;
   });
   afterEach(() => TestBed.resetTestingModule());
 
@@ -184,6 +208,22 @@ describe('Profile', () => {
     expect(active()).toBe('profile.sections.achievements');
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
     expect(scrollIntoView.mock.contexts[0]).toBe(document.getElementById('profile-achievements'));
+  });
+
+  it('jumps to the target only after the router has scrolled to the top (cached data loads at once)', async () => {
+    await openAt('/profile?section=achievements');
+    expect(windowScrollTo).toHaveBeenCalled();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.invocationCallOrder[0]).toBeGreaterThan(windowScrollTo.mock.invocationCallOrder.at(-1)!);
+    expect(scrollIntoView.mock.calls[0][0]).toEqual({ behavior: 'instant', block: 'start' });
+  });
+
+  it('opens the targeted section when the user had collapsed it', async () => {
+    localStorage.setItem('pytra.collapsed.profile.achievements', '1');
+    const { harness } = await openAt('/profile?section=achievements');
+    expect(TestBed.inject(CollapseStateService).collapsed('profile.achievements')()).toBe(false);
+    expect(harness.routeNativeElement!.querySelector('#profile-achievements')!.getAttribute('data-collapsed')).toBe('false');
+    expect(localStorage.getItem('pytra.collapsed.profile.achievements')).toBeNull();
   });
 
   it('returns to "Cuenta" when the reused page is opened again without a target', async () => {

@@ -43,6 +43,11 @@ export class CollapseStateService {
     }
   }
 
+  /** Opens a card the user had collapsed, e.g. when a link targets it (no-op when already open). */
+  expand(key: string): void {
+    if (this.state(key)()) this.toggle(key);
+  }
+
   toggleRow(group: string): void {
     this.toggle(ROW_PREFIX + group);
   }

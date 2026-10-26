@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, Scroll } from '@angular/router';
 import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -18,6 +18,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { DemoModeService } from '../../core/services/demo-mode.service';
 import { InstallPromptService } from '../../core/services/install-prompt.service';
 import { AndroidAppService } from '../../core/services/android-app.service';
+import { CollapseStateService } from '../../core/services/collapse-state.service';
 import { DiaryReminderService, ReminderResult, parseReminderTime } from '../../core/services/diary-reminder.service';
 import { FileExportService, filenameFromContentDisposition } from '../../core/services/file-export.service';
 import {
@@ -180,6 +181,13 @@ export class Profile {
   protected readonly activeSection = signal<ProfileSection>('account');
   /** Section the URL targets (`?section=`), scrolled to once the achievements are in (they set the page height). */
   private targetSection: ProfileSection = 'account';
+  /**
+   * True from a navigation's activation until the router's own scroll for it (`Scroll` event, after
+   * `NavigationEnd`): that scroll goes to the top, so an arrival scroll made before it is undone
+   * (cached data loads synchronously, so on the device the jump used to run first and get reset).
+   */
+  private awaitingRouterScroll = false;
+  private readonly collapseState = inject(CollapseStateService);
 
   /** All badges in definition order (category, easier first); `null` while loading, `[]` when the data could not load. */
   protected readonly achievements = signal<Achievement[] | null>(null);
@@ -285,7 +293,13 @@ export class Profile {
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       this.targetSection = this.deleteOpen() ? 'data' : initialProfileSection(params.get(PROFILE_SECTION_PARAM));
       this.activeSection.set(this.targetSection);
-      if (this.achievements() !== null) {
+      this.awaitingRouterScroll = true;
+    });
+    this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
+      if (event instanceof Scroll) {
+        this.awaitingRouterScroll = false;
+        // Back/forward restores the remembered position instead of jumping to the target again.
+        if (event.position) this.targetSection = 'account';
         this.scrollToTarget();
       }
     });
@@ -314,22 +328,25 @@ export class Profile {
   }
 
   /**
-   * Scrolls to the targeted section once, if any; the top needs no scroll (the router already lands
-   * there). The target is consumed so a later data load cannot pull the user back to it.
+   * Jumps to the targeted section once, if any, when both the achievements (they set the page height)
+   * and the router's own scroll are in; the top needs no scroll (the router already lands there). The
+   * target is consumed so a later data load cannot pull the user back to it. A collapsed target card
+   * is opened first: the link promised its content.
    */
   private scrollToTarget(): void {
     const section = this.targetSection;
+    if (section === 'account' || this.awaitingRouterScroll || this.achievements() === null) return;
     this.targetSection = 'account';
-    if (section !== 'account') {
-      setTimeout(() => this.scrollTo(section));
-    }
+    this.collapseState.expand(`profile.${section}`);
+    // Next task: lets the expanded card and the loaded badges render before measuring.
+    setTimeout(() => this.scrollTo(section, 'instant'));
   }
 
-  protected scrollTo(section: ProfileSection): void {
+  protected scrollTo(section: ProfileSection, behavior: ScrollBehavior = 'smooth'): void {
     // A section the user picks wins over a pending arrival target.
     this.targetSection = 'account';
     this.activeSection.set(section);
-    document.getElementById(`profile-${section}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById(`profile-${section}`)?.scrollIntoView({ behavior, block: 'start' });
   }
 
   /** The password page sends a reset email: not something a demo visitor may trigger. */
