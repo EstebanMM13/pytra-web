@@ -633,12 +633,12 @@
           <dl class="text-sm">
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
               <dt class="shrink-0 text-muted">{{ 'game.developer' | translate }}</dt>
-              <dd class="truncate text-right" [title]="g.developer ?? ''">{{ g.developer ?? '—' }}</dd>
+              <dd class="min-w-0 text-right wrap-break-word" [title]="g.developer ?? ''">{{ g.developer ?? '—' }}</dd>
             </div>
             @if (g.publisher) {
               <div class="flex justify-between gap-4 border-t border-divider py-[9px]">
                 <dt class="shrink-0 text-muted">{{ 'game.publisher' | translate }}</dt>
-                <dd class="truncate text-right" [title]="g.publisher">{{ g.publisher }}</dd>
+                <dd class="min-w-0 text-right wrap-break-word" [title]="g.publisher">{{ g.publisher }}</dd>
               </div>
             }
             <div class="flex justify-between gap-4 border-t border-divider py-[9px]">

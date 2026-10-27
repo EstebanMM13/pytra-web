@@ -372,7 +372,8 @@
               }
               <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
               <div class="min-w-0 flex-1">
-                <p class="truncate text-[15px] font-medium" [title]="game.name">
+                <!-- Name and status line wrap to two lines (narrow rows, large system font sizes) -->
+                <p class="line-clamp-2 text-[15px] font-medium wrap-break-word" [title]="game.name">
                   {{ game.name }}
                   @if (game.hasPlatinum) {
                     <span class="text-xs">🏆</span>
@@ -385,14 +386,14 @@
                   @if (isUpcoming(game)) {
                     <app-upcoming-badge />
                   }
-                  <span class="truncate">
+                  <span class="line-clamp-2">
                     @if (statusLine(game) === 'played') {
                       {{ game.totalHours ? ('library.hoursPlayed' | translate: { hours: (game.totalHours | hours) }) : ('library.noHours' | translate) }}
                     } @else {
                       {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
                       · {{ 'library.runsCount' | translatePlural: game.experienceCount ?? 0 }}
                       @if (game.totalHours) {
-                        · {{ game.totalHours | hours }}
+                        · <span class="whitespace-nowrap">{{ game.totalHours | hours }}</span>
                       }
                     }
                   </span>
