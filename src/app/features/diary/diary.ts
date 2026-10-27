@@ -13,6 +13,7 @@ import { todayIso } from '../../shared/utils/run-dates';
 import { DiaryDayEditor } from './diary-day-editor';
 import {
   CalendarCell,
+  DIARY_LEVEL_CLASS,
   DiaryLevel,
   buildMonthGrid,
   dayLabel,
@@ -25,15 +26,6 @@ import {
   shiftMonth,
   weekdayLabels,
 } from './diary.logic';
-
-/** Cell background per heat level (brand purple: activity). */
-const LEVEL_CLASS: Record<DiaryLevel, string> = {
-  0: 'bg-hover/50',
-  1: 'bg-[color-mix(in_srgb,var(--pt-brand)_22%,transparent)]',
-  2: 'bg-[color-mix(in_srgb,var(--pt-brand)_42%,transparent)]',
-  3: 'bg-[color-mix(in_srgb,var(--pt-brand)_66%,transparent)] text-white',
-  4: 'bg-brand text-white',
-};
 
 /**
  * The play diary: a month calendar coloured by the hours played each day. Tapping a day opens its
@@ -137,14 +129,14 @@ export class Diary {
   }
 
   protected cellClass(cell: CalendarCell): string {
-    const base = LEVEL_CLASS[cell.level];
+    const base = DIARY_LEVEL_CLASS[cell.level];
     const muted = cell.inMonth ? '' : ' opacity-40';
     const today = cell.isToday ? ' ring-2 ring-inset ring-text-2 font-bold' : '';
     return `${base}${muted}${today}`;
   }
 
   protected legendClass(level: DiaryLevel): string {
-    return LEVEL_CLASS[level];
+    return DIARY_LEVEL_CLASS[level];
   }
 
   protected cellLabel(cell: CalendarCell): string {

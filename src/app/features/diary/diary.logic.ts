@@ -21,6 +21,15 @@ export type DiaryLevel = 0 | 1 | 2 | 3 | 4;
 /** Upper bounds (exclusive) of levels 1, 2 and 3; anything above is level 4. */
 const LEVEL_BOUNDS: readonly number[] = [1, 3, 6];
 
+/** Cell background per heat level, brand purple for activity (the diary calendar and the stats activity heatmap share them). */
+export const DIARY_LEVEL_CLASS: Record<DiaryLevel, string> = {
+  0: 'bg-hover/50',
+  1: 'bg-[color-mix(in_srgb,var(--pt-brand)_22%,transparent)]',
+  2: 'bg-[color-mix(in_srgb,var(--pt-brand)_42%,transparent)]',
+  3: 'bg-[color-mix(in_srgb,var(--pt-brand)_66%,transparent)] text-white',
+  4: 'bg-brand text-white',
+};
+
 /** Heat level for a day's total hours. */
 export function intensityLevel(hours: number | null | undefined): DiaryLevel {
   const h = hours ?? 0;
