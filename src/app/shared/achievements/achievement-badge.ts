@@ -87,7 +87,7 @@ const TIER_TONE: Record<AchievementTier, string> = {
     <span class="min-w-0 flex-1">
       <span
         class="block font-medium"
-        [class]="(compact() ? 'line-clamp-2 text-[13px] leading-tight ' : 'truncate text-sm ') + (a().unlocked ? 'text-text' : 'text-text-3')"
+        [class]="(compact() ? 'line-clamp-2 text-[13px] leading-tight wrap-break-word ' : 'truncate text-sm ') + (a().unlocked ? 'text-text' : 'text-text-3')"
         [attr.title]="'achievements.items.' + a().id + '.title' | translate"
       >
         {{ 'achievements.items.' + a().id + '.title' | translate }}

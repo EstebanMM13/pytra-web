@@ -56,9 +56,10 @@ export class Segmented<T extends string = string> {
   protected optionClass(active: boolean): string {
     return [
       'font-medium whitespace-nowrap',
-      // Touch hit area: stretched options clip their overflow (truncate), so they grow to 40px on
-      // coarse pointers instead of taking the invisible tap-area overlay.
-      this.stretch() ? 'min-w-0 flex-1 truncate pointer-coarse:min-h-10' : 'tap-area',
+      // Stretched options share the width equally but never shrink below their label (no truncation:
+      // a longer label takes the room it needs at a large system font size). Touch hit area: they
+      // grow to 40px on coarse pointers instead of taking the invisible tap-area overlay.
+      this.stretch() ? 'flex-1 pointer-coarse:min-h-10' : 'tap-area',
       this.size() === 'sm' ? 'rounded-[5px] px-2 py-[3px] text-xs' : 'rounded-md py-1.5 text-[13px]',
       // Stretched options share narrow widths (4 statuses on a phone): tighter padding keeps labels whole.
       this.size() === 'sm' ? '' : this.stretch() ? 'px-2' : 'px-3',

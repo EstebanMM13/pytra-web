@@ -64,7 +64,7 @@ describe('Sagas search', () => {
     const fixture = TestBed.createComponent(Sagas);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    const listed = () => [...el.querySelectorAll('a.saga-card span.truncate[title]')].map((s) => s.textContent!.trim());
+    const listed = () => [...el.querySelectorAll('a.saga-card [data-saga-name]')].map((s) => s.textContent!.trim());
     const type = (text: string) => {
       const input = el.querySelector('[data-saga-search]') as HTMLInputElement;
       input.value = text;

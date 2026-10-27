@@ -139,7 +139,7 @@
             </span>
             <div class="min-w-0 flex-1">
               <div class="flex items-baseline justify-between gap-3 text-[15px] font-semibold">
-                <span class="truncate" [title]="s.saga.name">{{ s.saga.name }}</span>
+                <span class="line-clamp-2 wrap-break-word" [title]="s.saga.name" data-saga-name>{{ s.saga.name }}</span>
                 <span
                   class="flex shrink-0 items-center gap-1 font-mono text-[13px] font-medium"
                   [class]="s.avgRating | ratingTone"
