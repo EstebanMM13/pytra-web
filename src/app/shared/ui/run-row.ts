@@ -10,7 +10,8 @@ import { ICONS } from './icons';
 
 /**
  * Run (experience) row: accent bar (brand on the best run, neutral otherwise), title + meta, mono
- * hours and rating coloured by value.
+ * hours and rating coloured by value. On phones the title and meta wrap to two lines and the hours
+ * sit above the rating, so a narrow row (or a large system font size) keeps the name readable.
  * Projects extra content (e.g. a StatusPill) before the figures.
  * `onSurface` is for rows placed directly on the page (mobile) instead of inside a card.
  * Binding `coverUrl` (even to null, which shows the initials fallback) swaps the accent bar for a cover thumbnail.
@@ -89,14 +90,15 @@ import { ICONS } from './icons';
     </ng-template>
     <div class="min-w-0 flex-1">
       <p class="flex items-center gap-2 text-[15px] font-semibold">
-        <span class="truncate" [attr.title]="title()">{{ title() }}</span>
+        <!-- Phones: up to two lines (narrow rows, large system font sizes); one line from sm up -->
+        <span class="min-w-0 wrap-break-word max-sm:line-clamp-2 sm:truncate" [attr.title]="title()">{{ title() }}</span>
         @if (best()) {
           <!-- From sm up only: on phones it moves to the status line so the title keeps the room -->
           <ng-container [ngTemplateOutlet]="bestPill" [ngTemplateOutletContext]="{ $implicit: 'hidden py-0.5 sm:inline-flex' }" />
         }
       </p>
       @if (meta()) {
-        <p class="mt-1 truncate text-xs text-muted md:text-[13px]" [attr.title]="meta()">{{ meta() }}</p>
+        <p class="mt-1 text-xs text-muted wrap-break-word max-sm:line-clamp-2 sm:truncate md:text-[13px]" [attr.title]="meta()">{{ meta() }}</p>
       }
       <!-- Status line under the meta: optional projected content (e.g. the status pill on narrow
            screens), then on phones the best pill and the platinum / 100% badges. Each item carries
@@ -120,15 +122,21 @@ import { ICONS } from './icons';
       </span>
     }
     <ng-content />
-    @if (hours() !== null) {
-      <span class="shrink-0 font-mono text-sm md:text-[15px]">{{ hours() | hours }}</span>
-    }
-    @if (rating() !== null) {
-      <span
-        class="w-10 shrink-0 text-right font-mono text-[15px] font-medium"
-        [class]="rating() | ratingTone"
-      >
-        {{ rating() | rating }}
+    @if (hours() !== null || rating() !== null) {
+      <!-- Figures: hours over rating on phones (the title keeps the width), side by side from sm up -->
+      <span class="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3.5" data-figures>
+        @if (hours() !== null) {
+          <span class="font-mono text-sm whitespace-nowrap md:text-[15px]">{{ hours() | hours }}</span>
+        }
+        @if (rating() !== null) {
+          <!-- A minimum width keeps ratings aligned across rows; wider values (10,00) still fit -->
+          <span
+            class="min-w-10 text-right font-mono text-[15px] font-medium"
+            [class]="rating() | ratingTone"
+          >
+            {{ rating() | rating }}
+          </span>
+        }
       </span>
     }
   `,
