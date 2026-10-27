@@ -220,4 +220,20 @@ describe('UserDataCache (through the cached services)', () => {
     http.expectOne(yearsUrl).flush([2025]);
     expect(afterWrite).toEqual([[2025]]);
   });
+  it('caches the stats hub sections per year, the no-year request apart', () => {
+    const stats = TestBed.inject(StatsService);
+    const ratingsUrl = `${API_BASE_URL}/stats/ratings`;
+    stats.getRatings().subscribe();
+    http.expectOne(ratingsUrl).flush({ ratedCount: 3 });
+    stats.getRatings(2024).subscribe();
+    http.expectOne(`${ratingsUrl}?year=2024`).flush({ ratedCount: 1 });
+
+    const revisit: unknown[] = [];
+    stats.getRatings().subscribe((value) => revisit.push(value));
+    expect(revisit).toEqual([{ ratedCount: 3 }]);
+    http.expectOne(ratingsUrl).flush({ ratedCount: 3 });
+
+    stats.getByDeveloper(10, 2).subscribe();
+    http.expectOne(`${API_BASE_URL}/stats/by-developer?limit=10&minRatedGames=2`).flush({});
+  });
 });

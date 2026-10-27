@@ -3,9 +3,15 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
 import {
+  ActivityStats,
+  CompletionStats,
+  DeveloperStats,
   GenreStat,
   InProgressExperience,
   MostPlayedGame,
+  PlatformStats,
+  RatingStats,
+  ReleaseEraStats,
   SagaStat,
   StatsSummary,
   TopRatedExperience,
@@ -15,6 +21,8 @@ import {
   YearSummary,
 } from '../models/stats.model';
 import { CachedResource, UserDataCache } from './user-data-cache';
+
+type YearKey = number | 'all';
 
 @Injectable({ providedIn: 'root' })
 export class StatsService {
@@ -36,6 +44,15 @@ export class StatsService {
   private readonly topRated = new Map<number, CachedResource<TopRatedExperience[]>>();
   private readonly mostPlayedSingleplayer = new Map<number, CachedResource<MostPlayedGame[]>>();
   private readonly mostPlayedOnline = new Map<number, CachedResource<MostPlayedGame[]>>();
+  /** Per-year resources of the stats hub sections; the key `all` is the request without a year. */
+  private readonly activity = new Map<YearKey, CachedResource<ActivityStats>>();
+  private readonly byPlatform = new Map<YearKey, CachedResource<PlatformStats>>();
+  private readonly completion = new Map<YearKey, CachedResource<CompletionStats>>();
+  private readonly ratings = new Map<YearKey, CachedResource<RatingStats>>();
+  private readonly byDeveloper = new Map<string, CachedResource<DeveloperStats>>();
+  private readonly byReleaseEra = this.cache.resource(() =>
+    this.http.get<ReleaseEraStats>(`${this.baseUrl}/by-release-era`),
+  );
 
   /** Cached (see `UserDataCache`): may emit the cached summary, then a fresher one. */
   getSummary(): Observable<StatsSummary> {
@@ -89,6 +106,59 @@ export class StatsService {
   /** Cached per limit (see `UserDataCache`). */
   getMostPlayedOnline(limit = 5): Observable<MostPlayedGame[]> {
     return this.perLimit(this.mostPlayedOnline, limit, 'most-played/online').get();
+  }
+
+  /**
+   * Diary activity of a year (null: the current year, as the API defaults). Streaks are all-time
+   * whatever the year. Cached per year (see `UserDataCache`).
+   */
+  getActivity(year: number | null = null): Observable<ActivityStats> {
+    return this.perYear(this.activity, year, 'activity').get();
+  }
+
+  /** Hours, runs and ratings per platform of a year (null: all time). Cached per year. */
+  getByPlatform(year: number | null = null): Observable<PlatformStats> {
+    return this.perYear(this.byPlatform, year, 'by-platform').get();
+  }
+
+  /** Top developers by hours and by rating (all time). Cached per parameters. */
+  getByDeveloper(limit = 10, minRatedGames = 2): Observable<DeveloperStats> {
+    const key = `${limit}:${minRatedGames}`;
+    let resource = this.byDeveloper.get(key);
+    if (!resource) {
+      resource = this.cache.resource(() =>
+        this.http.get<DeveloperStats>(`${this.baseUrl}/by-developer`, { params: { limit, minRatedGames } }),
+      );
+      this.byDeveloper.set(key, resource);
+    }
+    return resource.get();
+  }
+
+  /** Games per release decade and year (all time). Cached (see `UserDataCache`). */
+  getByReleaseEra(): Observable<ReleaseEraStats> {
+    return this.byReleaseEra.get();
+  }
+
+  /** Completion habits of a year (null: all time). Cached per year. */
+  getCompletion(year: number | null = null): Observable<CompletionStats> {
+    return this.perYear(this.completion, year, 'completion').get();
+  }
+
+  /** Rating distribution of a year (null: all time). Cached per year. */
+  getRatings(year: number | null = null): Observable<RatingStats> {
+    return this.perYear(this.ratings, year, 'ratings').get();
+  }
+
+  /** The cached resource of `path?year=<year>` (no param for null), created on first use. */
+  private perYear<T>(resources: Map<YearKey, CachedResource<T>>, year: number | null, path: string): CachedResource<T> {
+    const key: YearKey = year ?? 'all';
+    let resource = resources.get(key);
+    if (!resource) {
+      const options = year === null ? {} : { params: { year } };
+      resource = this.cache.resource(() => this.http.get<T>(`${this.baseUrl}/${path}`, options));
+      resources.set(key, resource);
+    }
+    return resource;
   }
 
   /** The cached resource of `path?limit=<limit>`, created on first use. */

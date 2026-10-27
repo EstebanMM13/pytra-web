@@ -189,3 +189,212 @@ export interface YearSummary {
   /** Online games with diary hours in the year, most hours first (absent from older APIs). */
   onlineGames?: YearOnlineGame[];
 }
+
+/** A diary day with hours, from `/stats/activity` (`date` is YYYY-MM-DD). */
+export interface ActivityDay {
+  date: string;
+  hours: number;
+  gameCount: number;
+}
+
+/** A run of consecutive play days; dates are null when there is none. */
+export interface Streak {
+  length: number;
+  startDate: string | null;
+  endDate: string | null;
+}
+
+/** Diary activity on one weekday (`dayOfWeek` 1..7, Monday = 1). */
+export interface WeekdayActivity {
+  dayOfWeek: number;
+  name: string;
+  daysPlayed: number;
+  hours: number;
+}
+
+/**
+ * `GET /stats/activity?year=`: the year's diary days (play days only, oldest first). Streaks are
+ * all-time; the current one is alive while its last day is today or yesterday.
+ */
+export interface ActivityStats {
+  year: number;
+  totalHours: number;
+  activeDays: number;
+  days: ActivityDay[];
+  currentStreak: Streak;
+  longestStreak: Streak;
+  /** Always 7 entries, Monday first. */
+  weekdays: WeekdayActivity[];
+}
+
+export interface PlatformStat {
+  platformId: number;
+  name: string;
+  color: string | null;
+  family: string | null;
+  /** Run hours plus online (diary) hours. */
+  hours: number;
+  runHours: number;
+  onlineHours: number;
+  gameCount: number;
+  runCount: number;
+  completedRunCount: number;
+  ratedRunCount: number;
+  averageRating: number | null;
+}
+
+export interface PlatformYearSlice {
+  platformId: number;
+  name: string;
+  color: string | null;
+  hours: number;
+}
+
+export interface PlatformYear {
+  year: number;
+  totalHours: number;
+  unassignedOnlineHours: number;
+  platforms: PlatformYearSlice[];
+}
+
+/** `GET /stats/by-platform?year=` (`year` null: all time). `byYear` always spans every year, oldest first. */
+export interface PlatformStats {
+  year: number | null;
+  /** Online hours of games without a platform assigned. */
+  unassignedOnlineHours: number;
+  /** Most hours first. */
+  platforms: PlatformStat[];
+  byYear: PlatformYear[];
+}
+
+export interface DeveloperStat {
+  developer: string;
+  gameCount: number;
+  hours: number;
+  ratedGameCount: number;
+  averageRating: number | null;
+}
+
+/** `GET /stats/by-developer` (all time). `topByRating` only ranks developers with `minRatedGames` rated games. */
+export interface DeveloperStats {
+  minRatedGames: number;
+  topByHours: DeveloperStat[];
+  topByRating: DeveloperStat[];
+}
+
+export interface ReleaseBucketStat {
+  gameCount: number;
+  hours: number;
+  ratedGameCount: number;
+  averageRating: number | null;
+}
+
+/** `decade` is the first year: 1990 covers 1990-1999. */
+export interface ReleaseDecadeStat extends ReleaseBucketStat {
+  decade: number;
+}
+
+export interface ReleaseYearStat extends ReleaseBucketStat {
+  year: number;
+}
+
+/** `GET /stats/by-release-era` (all time). */
+export interface ReleaseEraStats {
+  byDecade: ReleaseDecadeStat[];
+  byYear: ReleaseYearStat[];
+  /** Games without a release date. */
+  undatedGameCount: number;
+}
+
+export interface FinishedRun {
+  experienceId: number;
+  gameId: number;
+  gameName: string;
+  runLabel: string;
+  days: number;
+}
+
+/** `maxDays` null: open-ended (366+). */
+export interface DaysBucket {
+  label: string;
+  minDays: number;
+  maxDays: number | null;
+  count: number;
+}
+
+export interface TimeToFinish {
+  sampleSize: number;
+  averageDays: number | null;
+  medianDays: number | null;
+  fastest: FinishedRun | null;
+  slowest: FinishedRun | null;
+  /** Always 6: 0-7, 8-30, 31-90, 91-180, 181-365, 366+. */
+  buckets: DaysBucket[];
+}
+
+export interface GenreAbandonment {
+  genreId: number;
+  genreName: string;
+  completedCount: number;
+  abandonedCount: number;
+  /** 0..1 */
+  abandonmentRate: number;
+}
+
+/** `maxHours` null: open-ended (60+). */
+export interface HoursBucket {
+  label: string;
+  minHours: number;
+  maxHours: number | null;
+  runCount: number;
+  ratedCount: number;
+  averageRating: number | null;
+}
+
+/** `GET /stats/completion?year=` (`year` null: all time). */
+export interface CompletionStats {
+  year: number | null;
+  completedCount: number;
+  abandonedCount: number;
+  replayCount: number;
+  timeToFinish: TimeToFinish;
+  abandonmentByGenre: GenreAbandonment[];
+  /** Always 4: <10, 10-30, 30-60, 60+. */
+  hoursBuckets: HoursBucket[];
+}
+
+/** Ratings in [from, to); the last bucket is [10, 10]. */
+export interface RatingBucket {
+  from: number;
+  to: number;
+  count: number;
+}
+
+export interface GenreRating {
+  genreId: number;
+  genreName: string;
+  ratedCount: number;
+  averageRating: number;
+}
+
+export interface PlatformRating {
+  platformId: number;
+  name: string;
+  color: string | null;
+  ratedCount: number;
+  averageRating: number;
+}
+
+/** `GET /stats/ratings?year=` (`year` null: all time). */
+export interface RatingStats {
+  year: number | null;
+  bucketSize: number;
+  ratedCount: number;
+  mean: number | null;
+  median: number | null;
+  standardDeviation: number | null;
+  /** Always 21 buckets: [0, 0.5) .. [9.5, 10), then [10, 10]. */
+  histogram: RatingBucket[];
+  byGenre: GenreRating[];
+  byPlatform: PlatformRating[];
+}
