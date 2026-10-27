@@ -95,6 +95,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/years/years').then((m) => m.Years),
   },
   {
+    // Stats hub. Years and sagas stay at `/years` and `/sagas` (deep links, dashboard bars) and are
+    // linked from it; the bottom-nav Stats tab stays lit on them.
+    path: 'stats',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/stats/stats-hub').then((m) => m.StatsHub),
+  },
+  {
     // `/diary?date=yyyy-mm-dd` opens that day's editor (dashboard card, daily reminder).
     path: 'diary',
     canActivate: [authGuard],

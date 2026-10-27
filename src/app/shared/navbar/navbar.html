@@ -21,10 +21,9 @@
     @for (tab of webTabs; track tab.path) {
       <a
         [routerLink]="tab.path"
-        routerLinkActive="bg-brand-tint ring-1 ring-brand-line ring-inset !text-text"
-        ariaCurrentWhenActive="page"
+        [attr.aria-current]="activeTab() === tab.path ? 'page' : null"
         class="rounded-lg px-3 py-2 text-text-3 hover:text-text lg:px-3.5"
-        [class]="tab.fromLg ? 'hidden lg:block' : ''"
+        [class]="(tab.fromLg ? 'hidden lg:block ' : '') + (activeTab() === tab.path ? 'bg-brand-tint ring-1 ring-brand-line ring-inset !text-text' : '')"
       >
         {{ tab.labelKey | translate }}
       </a>
@@ -146,15 +145,6 @@
           </a>
           <a
             role="menuitem"
-            routerLink="/diary"
-            (click)="menuOpen.set(false)"
-            class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
-          >
-            <svg [lucideIcon]="icons.calendarDays" [size]="16" class="text-brand-light"></svg>
-            {{ 'nav.diary' | translate }}
-          </a>
-          <a
-            role="menuitem"
             routerLink="/sync"
             (click)="menuOpen.set(false)"
             class="flex items-center gap-3 px-4 py-2.5 text-text-2 hover:bg-hover"
@@ -242,13 +232,14 @@
 </nav>
 
 <ng-template #tabItem let-tab>
+  <!-- Labels may wrap (hyphenated) instead of overflowing their column at a large system font size. -->
   <a
     [routerLink]="tab.path"
-    routerLinkActive="!text-brand-light"
-    ariaCurrentWhenActive="page"
-    class="flex flex-col items-center gap-1 rounded-md"
+    [attr.aria-current]="activeTab() === tab.path ? 'page' : null"
+    class="flex min-w-0 flex-col items-center gap-1 rounded-md px-0.5 text-center leading-tight hyphens-auto wrap-break-word"
+    [class]="activeTab() === tab.path ? '!text-brand-light' : ''"
   >
-    <svg [lucideIcon]="tab.icon" [size]="22"></svg>
+    <svg [lucideIcon]="tab.icon" [size]="22" class="shrink-0"></svg>
     {{ tab.labelKey | translate }}
   </a>
 </ng-template>

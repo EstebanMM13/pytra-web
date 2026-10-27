@@ -1,0 +1,91 @@
+<app-navbar />
+
+<main class="mx-auto flex max-w-5xl flex-col gap-5 px-4 pt-4 pb-8 md:gap-7 md:px-6 md:pt-8 md:pb-12 lg:px-10">
+  <header class="min-w-0">
+    <h1 class="font-display text-[28px] leading-tight font-bold tracking-[-0.035em] md:text-[36px]">
+      {{ 'stats.title' | translate }}
+    </h1>
+    <p class="mt-1 text-sm text-text-3">{{ 'stats.subtitle' | translate }}</p>
+  </header>
+
+  <!-- Two columns on phones (whole labels at a large font size), four on desktop; Activity spans two. -->
+  <nav class="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4" [attr.aria-label]="'stats.hub.sectionsLabel' | translate">
+    @let a = activity();
+    <app-stats-hub-card
+      class="col-span-2"
+      link="/stats/activity"
+      [icon]="icons.flame"
+      [title]="'stats.hub.activity' | translate"
+      [loading]="a === undefined"
+      [figure]="a ? ('stats.days' | translatePlural: a.currentStreak.length) : null"
+      [hint]="
+        a
+          ? a.longestStreak.length > 0
+            ? ('stats.hub.activityHint' | translate: { best: ('stats.days' | translatePlural: a.longestStreak.length) })
+            : ('stats.hub.activityEmpty' | translate)
+          : null
+      "
+    />
+
+    @let y = latestYear();
+    <app-stats-hub-card
+      link="/years"
+      [icon]="icons.calendar"
+      [title]="'stats.hub.years' | translate"
+      [loading]="y === undefined"
+      [figure]="y ? (y.totalHours | hours) : null"
+      [hint]="y ? ('stats.hub.yearsHint' | translate: { year: y.year }) : ('stats.noData' | translate)"
+    />
+
+    @let s = sagas();
+    <app-stats-hub-card
+      link="/sagas"
+      [icon]="icons.layers"
+      [title]="'stats.hub.sagas' | translate"
+      [loading]="s === undefined"
+      [figure]="s ? ('stats.hub.sagasFigure' | translatePlural: s.count) : null"
+      [hint]="s?.top ? ('stats.hub.sagasHint' | translate: { name: s!.top!.sagaName }) : null"
+    />
+
+    @let p = topPlatform();
+    <app-stats-hub-card
+      link="/stats/platforms"
+      [icon]="icons.monitor"
+      [title]="'stats.hub.platforms' | translate"
+      [loading]="p === undefined"
+      [figure]="p ? platformName(p.name) : null"
+      [hint]="p ? ('stats.hub.platformsHint' | translate: { hours: (p.hours | hours) }) : ('stats.noData' | translate)"
+    />
+
+    @let d = topDeveloper();
+    <app-stats-hub-card
+      link="/stats/studios"
+      [icon]="icons.building"
+      [title]="'stats.hub.studios' | translate"
+      [loading]="d === undefined"
+      [figure]="d ? d.developer : null"
+      [hint]="d ? ('stats.hub.studiosHint' | translate: { hours: (d.hours | hours) }) : ('stats.noData' | translate)"
+    />
+
+    @let median = medianDays();
+    <app-stats-hub-card
+      link="/stats/habits"
+      [icon]="icons.hourglass"
+      [title]="'stats.hub.habits' | translate"
+      [loading]="completion() === undefined"
+      [figure]="median !== null ? ('stats.days' | translatePlural: median) : null"
+      [hint]="median !== null ? ('stats.hub.habitsHint' | translate) : ('stats.noData' | translate)"
+    />
+
+    @let r = ratings();
+    <app-stats-hub-card
+      link="/stats/ratings"
+      [icon]="icons.star"
+      [title]="'stats.hub.ratings' | translate"
+      [loading]="r === undefined"
+      [figure]="r?.mean != null ? (r!.mean | rating) : null"
+      [figureClass]="r?.mean != null ? 'font-mono ' + (r!.mean | ratingTone) : ''"
+      [hint]="r?.mean != null ? ('stats.hub.ratingsHint' | translatePlural: r!.ratedCount) : ('stats.noData' | translate)"
+    />
+  </nav>
+</main>

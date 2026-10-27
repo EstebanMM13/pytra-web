@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
 import { ICONS } from '../ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -19,22 +21,30 @@ interface NavTab {
   path: string;
   labelKey: string;
   icon: LucideIconInput;
-  /** Web tab shown from lg only (at md the row has no room); the "+" menu still reaches it. */
+  /** Web tab shown from lg only (at md the row has no room); the search palette still reaches it. */
   fromLg?: boolean;
+  /** Other top-level paths the tab stays active on (the sections it groups). */
+  also?: readonly string[];
 }
 
 const WEB_TABS: NavTab[] = [
   { path: '/dashboard', labelKey: 'nav.home', icon: ICONS.house },
   { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
-  { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.layers },
-  { path: '/years', labelKey: 'nav.years', icon: ICONS.chartColumn },
-  { path: '/diary', labelKey: 'nav.diary', icon: ICONS.calendarDays, fromLg: true },
-  { path: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw },
+  // Years and sagas are sections of the stats hub: the tab stays lit on them.
+  { path: '/stats', labelKey: 'nav.stats', icon: ICONS.chartColumn, also: ['/years', '/sagas'] },
+  { path: '/diary', labelKey: 'nav.diary', icon: ICONS.calendarDays },
+  { path: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw, fromLg: true },
 ];
+
+/** Whether `url` is the tab's page, one below it, or one of the sections it groups. */
+export function isTabActive(tab: Pick<NavTab, 'path' | 'also'>, url: string): boolean {
+  const path = url.split(/[?#]/)[0];
+  return [tab.path, ...(tab.also ?? [])].some((base) => path === base || path.startsWith(base + '/'));
+}
 
 /**
  * App chrome for authenticated pages: top navbar on web (md+), and below md a
- * compact header (logo, search button and avatar menu: Profile, Diary, Sync, Log out) plus a fixed bottom
+ * compact header (logo, search button and avatar menu: Profile, Sync, Log out) plus a fixed bottom
  * tab bar. Also owns the global Ctrl/⌘+K search.
  */
 @Component({
@@ -42,7 +52,6 @@ const WEB_TABS: NavTab[] = [
   imports: [
     NgTemplateOutlet,
     RouterLink,
-    RouterLinkActive,
     TranslatePipe,
     GlobalSearch,
     PytraMark,
@@ -70,9 +79,19 @@ export class Navbar {
   protected readonly isDemo = this.authService.isDemo;
 
   protected readonly webTabs = WEB_TABS;
-  /** Mobile tab bar: two tabs on each side of the central "+" button (Diary and Sync live in the avatar menu). */
+  /** Mobile tab bar: two tabs on each side of the central "+" button (Sync lives in the avatar menu). */
   protected readonly mobileTabsLeft = WEB_TABS.slice(0, 2);
   protected readonly mobileTabsRight = WEB_TABS.slice(2, 4);
+
+  /** Current URL, for the active tab (a tab can group several top-level pages). */
+  private readonly url = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map(() => this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+  protected readonly activeTab = computed(() => WEB_TABS.find((tab) => isTabActive(tab, this.url()))?.path ?? null);
 
   protected readonly shortcutLabel = /Mac|iPhone|iPad/i.test(globalThis.navigator?.userAgent ?? '')
     ? '⌘K'
