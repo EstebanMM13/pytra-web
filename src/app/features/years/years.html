@@ -109,8 +109,8 @@
           </button>
         </div>
       } @else {
-        <!-- Stats: 3 x 2 on mobile and tablet, one row on desktop -->
-        <section class="grid grid-cols-3 gap-2 md:gap-3 lg:grid-cols-6" [attr.aria-label]="'years.statsLabel' | translate">
+        <!-- Stats: 2 x 3 on phones (whole labels at a large font size), 3 x 2 on tablet, one row on desktop -->
+        <section class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-3 lg:grid-cols-6" [attr.aria-label]="'years.statsLabel' | translate">
           <app-stat-card [icon]="icons.clock" [label]="'years.stats.hours' | translate" [value]="s.totalHours | hours" [trend]="hoursTrend()" />
           <app-stat-card [icon]="icons.play" [label]="'years.stats.runs' | translate" [value]="s.experienceCount" />
           <app-stat-card [icon]="icons.circleCheck" tone="completion" [label]="'years.stats.completed' | translate" [value]="s.completedCount" />
@@ -311,7 +311,7 @@
                 <span class="hidden shrink-0 text-xs text-faint sm:inline">
                   {{ 'years.runsCount' | translatePlural: g.experienceCount }} · {{ g.totalHours | hours }}
                 </span>
-                <span class="w-10 shrink-0 text-right font-mono font-medium" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
+                <span class="min-w-10 shrink-0 text-right font-mono font-medium" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
               <p class="text-sm text-muted">{{ 'years.noCompleted' | translate }}</p>
@@ -370,9 +370,10 @@
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="years.topGenres" collapseGroup="years.breakdown" class="mb-3.5" [label]="'years.topGenres' | translate" />
             @for (genre of s.topGenres; track genre.genreId) {
-              <div class="flex items-center gap-3 border-t border-divider py-[9px] text-sm">
+              <div class="flex flex-wrap items-center gap-x-3 border-t border-divider py-[9px] text-sm sm:flex-nowrap">
+                <!-- Below sm the counts drop to a second line so the genre name keeps the row (as top sagas) -->
                 <span class="min-w-0 flex-1 truncate text-text-2" [title]="genre.genreName | genreName">{{ genre.genreName | genreName }}</span>
-                <span class="shrink-0 text-xs text-faint">
+                <span class="order-last w-full text-xs text-faint sm:order-none sm:w-auto sm:shrink-0">
                   {{ 'common.games' | translatePlural: genre.gameCount }} ·
                   {{ 'years.runsCount' | translatePlural: genre.experienceCount }}
                 </span>
@@ -453,7 +454,7 @@
         </button>
       </div>
     } @else {
-      <div class="grid grid-cols-3 gap-2 md:gap-3 lg:grid-cols-6">
+      <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-3 lg:grid-cols-6">
         @for (i of [1, 2, 3, 4, 5, 6]; track i) {
           <app-skeleton class="h-[72px] rounded-xl md:h-[90px]" />
         }

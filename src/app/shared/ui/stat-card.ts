@@ -18,7 +18,8 @@ import { countUpValue, parseCountUp } from '../utils/count-up';
 import { canAnimate } from '../utils/motion';
 
 /**
- * Label + big figure tile, one design for every screen size: label row on top, the figure on
+ * Label + big figure tile, one design for every screen size: label row on top (on phones it wraps to
+ * two lines instead of truncating, so a large system font size keeps it readable), the figure on
  * its own line (never truncated: it shrinks with the card width instead) and, when there is a
  * trend, a full-width sparkline strip pinned to the bottom (or, with a `meter` and no trend, a thin
  * proportion bar of the same height). Cards stretched to a grid row keep
@@ -75,10 +76,10 @@ import { canAnimate } from '../utils/motion';
           <svg [lucideIcon]="i" [size]="15" class="size-3.5 shrink-0 md:size-[15px]" [style.color]="iconColor()"></svg>
         }
         @if (shortLabel(); as short) {
-          <span class="truncate sm:hidden" [attr.title]="label()">{{ short }}</span>
+          <span class="line-clamp-2 wrap-break-word sm:hidden" [attr.title]="label()">{{ short }}</span>
           <span class="hidden truncate sm:inline">{{ label() }}</span>
         } @else {
-          <span class="truncate" [attr.title]="label()">{{ label() }}</span>
+          <span class="wrap-break-word max-sm:line-clamp-2 sm:truncate" [attr.title]="label()">{{ label() }}</span>
         }
       </p>
       <p
