@@ -236,4 +236,31 @@ describe('UserDataCache (through the cached services)', () => {
     stats.getByDeveloper(10, 2).subscribe();
     http.expectOne(`${API_BASE_URL}/stats/by-developer?limit=10&minRatedGames=2`).flush({});
   });
+  it('drops every stats hub section on a write so the next read waits for fresh data', () => {
+    const stats = TestBed.inject(StatsService);
+    const base = `${API_BASE_URL}/stats`;
+    const reads: [() => { subscribe: (next: (value: unknown) => void) => unknown }, string][] = [
+      [() => stats.getActivity(2026), `${base}/activity?year=2026`],
+      [() => stats.getByPlatform(), `${base}/by-platform`],
+      [() => stats.getByDeveloper(), `${base}/by-developer?limit=10&minRatedGames=2`],
+      [() => stats.getByReleaseEra(), `${base}/by-release-era`],
+      [() => stats.getCompletion(2025), `${base}/completion?year=2025`],
+      [() => stats.getRatings(), `${base}/ratings`],
+    ];
+    for (const [read, url] of reads) {
+      read().subscribe(() => undefined);
+      http.expectOne(url).flush({ stale: true });
+    }
+
+    gameService.delete(1).subscribe();
+    http.expectOne(`${gamesUrl}/1`).flush(null);
+
+    for (const [read, url] of reads) {
+      const values: unknown[] = [];
+      read().subscribe((value) => values.push(value));
+      expect(values).toEqual([]);
+      http.expectOne(url).flush({ fresh: true });
+      expect(values).toEqual([{ fresh: true }]);
+    }
+  });
 });
