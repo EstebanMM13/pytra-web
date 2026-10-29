@@ -115,18 +115,25 @@ export function shadeLightnesses(base: number, count: number): number[] {
 }
 
 /**
+ * Grey the shades of colourless platforms derive from: the neutral platform colour of the dark
+ * theme. A lone colourless platform keeps the theme's own neutral (`NEUTRAL_PLATFORM_COLOR`).
+ */
+const NEUTRAL_SHADE_BASE = '#8a857c';
+const NEUTRAL_GROUP = 'neutral';
+
+/**
  * One distinct, deterministic colour per catalog platform: platforms sharing a colour (every
  * PlayStation gets the family blue) get shades of it, in catalog order (sortOrder, then id), with
  * the hue and saturation kept and the lightness varied (see `shadeLightnesses`). Platforms with a
- * colour of their own keep it.
+ * colour of their own keep it; platforms without a (valid) colour share the neutral grey, shaded
+ * the same way when there are several.
  */
 export function platformShades(
   catalog: readonly { id: number; color: string | null; sortOrder?: number | null }[],
 ): Map<number, string> {
   const groups = new Map<string, { id: number; sortOrder: number }[]>();
   for (const p of catalog) {
-    if (!p.color || !HEX_COLOR.test(p.color)) continue;
-    const key = p.color.toLowerCase();
+    const key = p.color && HEX_COLOR.test(p.color) ? p.color.toLowerCase() : NEUTRAL_GROUP;
     const group = groups.get(key) ?? [];
     group.push({ id: p.id, sortOrder: p.sortOrder ?? Number.MAX_SAFE_INTEGER });
     groups.set(key, group);
@@ -135,10 +142,10 @@ export function platformShades(
   for (const [color, group] of groups) {
     group.sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id);
     if (group.length === 1) {
-      shades.set(group[0].id, color);
+      shades.set(group[0].id, color === NEUTRAL_GROUP ? NEUTRAL_PLATFORM_COLOR : color);
       continue;
     }
-    const [h, s, l] = hexToHsl(color);
+    const [h, s, l] = hexToHsl(color === NEUTRAL_GROUP ? NEUTRAL_SHADE_BASE : color);
     const lightness = shadeLightnesses(l, group.length);
     group.forEach((p, i) => shades.set(p.id, hslToHex(h, s, lightness[i])));
   }

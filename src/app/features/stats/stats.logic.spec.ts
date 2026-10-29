@@ -225,13 +225,28 @@ describe('platformShades', () => {
     }
   });
 
-  it('leaves platforms with a colour of their own (and without one) alone', () => {
+  it('leaves a platform with a colour of their own alone, and a lone colourless one neutral', () => {
     const shades = platformShades([
       { id: 1, color: '#E60012', sortOrder: 1 },
       { id: 2, color: null, sortOrder: 2 },
     ]);
     expect(shades.get(1)).toBe('#e60012');
-    expect(shades.has(2)).toBe(false);
+    expect(shades.get(2)).toBe(NEUTRAL_PLATFORM_COLOR);
+  });
+
+  it('gives several colourless (or invalid-colour) platforms distinct grey shades', () => {
+    const shades = platformShades([
+      { id: 1, color: null, sortOrder: 1 },
+      { id: 2, color: 'red', sortOrder: 2 },
+      { id: 3, color: null, sortOrder: null },
+    ]);
+    const greys = [1, 2, 3].map((id) => shades.get(id)!);
+    expect(new Set(greys).size).toBe(3);
+    for (const grey of greys) {
+      expect(grey).toMatch(/^#[0-9a-f]{6}$/);
+      expect(lightness(grey)).toBeGreaterThanOrEqual(0.29);
+      expect(lightness(grey)).toBeLessThanOrEqual(0.77);
+    }
   });
 
   it('spreads lightness slots around the base, the first one closest to it', () => {
