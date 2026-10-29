@@ -72,10 +72,17 @@ describe('Stats activity page', () => {
     expect(el.querySelector('[data-heat-cell]')).toBeNull();
   });
 
-  it('opens the tapped day in the diary', () => {
-    const { el } = setup(activity());
+  it('reads a tapped day out with a diary link, and opens it on a second tap', () => {
+    const { fixture, el } = setup(activity());
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const cell = el.querySelector<HTMLElement>('[data-heat-cell]')!;
+    cell.click();
+    fixture.detectChanges();
+    // Phones have no hover title: the readout and the link are the cue.
+    expect(el.querySelector('[data-picked-day]')!.textContent).toContain('stats.activity.dayTitle');
+    expect(el.querySelector('[data-picked-open]')!.getAttribute('href')).toMatch(/^\/diary\?date=\d{4}-01-01$/);
+    expect(navigate).not.toHaveBeenCalled();
+
     cell.click();
     expect(navigate).toHaveBeenCalledWith(['/diary'], { queryParams: { date: expect.stringMatching(/^\d{4}-01-01$/) } });
   });

@@ -1495,7 +1495,8 @@
       "emptyTitle": "Aún no hay días apuntados en {{year}}",
       "emptyText": "El diario guarda lo que juegas cada día: con él verás aquí tu calendario y tus rachas.",
       "emptyCta": "Ir al diario",
-      "heatmapHint": "Toca un día para abrirlo en el diario."
+      "heatmapHint": "Toca un día para ver sus horas y abrirlo en el diario.",
+      "openDay": "Ver en el diario"
     },
     "platforms": {
       "title": "Plataformas",

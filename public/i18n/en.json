@@ -1495,7 +1495,8 @@
       "emptyTitle": "No days logged in {{year}} yet",
       "emptyText": "The diary keeps what you play each day: with it you will see your calendar and streaks here.",
       "emptyCta": "Go to the diary",
-      "heatmapHint": "Tap a day to open it in the diary."
+      "heatmapHint": "Tap a day to see its hours and open it in the diary.",
+      "openDay": "Open in the diary"
     },
     "platforms": {
       "title": "Platforms",

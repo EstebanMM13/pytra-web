@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -32,8 +32,9 @@ import {
 
 /**
  * Activity section (`/stats/activity?year=`): the year's diary days as a GitHub-style heatmap
- * (two half-year strips on phones so the cells stay tappable, one strip from md; a tap opens that
- * day in the diary), streaks and hours per weekday. Without `year` the API answers for the current year.
+ * (two half-year strips on phones so the cells stay tappable, one strip from md), streaks and
+ * hours per weekday. A tap picks a day and reads its date and hours out (phones have no hover
+ * title) with a "Ver en el diario" link; tapping the picked day again opens it too. Without `year` the API answers for the current year.
  */
 @Component({
   selector: 'app-stats-activity',
@@ -132,15 +133,22 @@ export class StatsActivity {
     return this.cellTitles().get(cell.date) ?? cell.date;
   }
 
+  /** Day picked on the heatmap: its readout and diary link show under the map. */
+  protected readonly picked = signal<HeatCell | null>(null);
+
   protected cellClass(cell: HeatCell): string {
-    return DIARY_LEVEL_CLASS[cell.level];
+    return DIARY_LEVEL_CLASS[cell.level] + (this.picked()?.date === cell.date ? ' ring-1 ring-text' : '');
   }
 
   private readonly router = inject(Router);
 
-  /** Opens the day in the diary (its editor: the entry, or a new one for an empty day). */
-  protected open(cell: HeatCell): void {
-    void this.router.navigate(['/diary'], { queryParams: { date: cell.date } });
+  /** First tap picks the day (readout + link); a tap on the picked day opens it in the diary. */
+  protected tap(cell: HeatCell): void {
+    if (this.picked()?.date === cell.date) {
+      void this.router.navigate(['/diary'], { queryParams: { date: cell.date } });
+    } else {
+      this.picked.set(cell);
+    }
   }
 
   /** "12 oct – 20 oct" (with the year when the streak is outside the viewed year). */
