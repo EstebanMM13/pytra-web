@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Params, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -115,7 +115,10 @@ export class StatsBarList {
   /** Rows shown before the "Ver todos" toggle; null shows every row. */
   readonly limit = input<number | null>(null);
   protected readonly toneColor = computed(() => TONE_COLOR[this.tone()]);
-  protected readonly expanded = signal(false);
+  /** Which rows are listed (keys and labels): a new list, e.g. another ranking, starts collapsed again. */
+  private readonly identity = computed(() => this.bars().map((bar) => `${bar.key}|${bar.label}`).join('\n'));
+  /** Collapsed again whenever the listed rows change; a refresh of the same rows keeps it open. */
+  protected readonly expanded = linkedSignal({ source: this.identity, computation: () => false });
 
   /** A list that only exceeds the limit by one row shows it whole (a toggle for one row is noise). */
   protected readonly cut = computed(() => {
