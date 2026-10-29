@@ -72,7 +72,7 @@ describe('Navbar', () => {
   it('lights the Stats tab on the years and sagas pages it groups', async () => {
     const { fixture, el } = setup();
     const router = TestBed.inject(Router);
-    for (const url of ['/stats', '/stats/activity?year=2025', '/years/2024', '/sagas/3']) {
+    for (const url of ['/stats', '/stats/activity?year=2025', '/years', '/years/2024', '/sagas/3']) {
       await router.navigateByUrl(url);
       fixture.detectChanges();
       const current = [...el.querySelectorAll('a[aria-current="page"]')].map((a) => a.getAttribute('href'));
@@ -87,9 +87,21 @@ describe('Navbar', () => {
     ]);
   });
 
+  it('keeps Sync reachable on tablets: its web tab shows its icon below lg, named for screen readers', () => {
+    const { el } = setup();
+    const sync = el.querySelector('[data-web-tab="/sync"]')!;
+    expect(sync.classList).not.toContain('hidden');
+    expect(sync.getAttribute('aria-label')).toBe('nav.sync');
+    expect(sync.querySelector('svg')!.getAttribute('class')).toContain('lg:hidden');
+  });
+
   it('matches a tab on its own path and below it only', () => {
-    const stats = { path: '/stats', also: ['/years'] };
+    const stats = { path: '/stats', also: ['/years', '/sagas'] };
     expect(isTabActive(stats, '/stats')).toBe(true);
+    expect(isTabActive(stats, '/years')).toBe(true);
+    expect(isTabActive(stats, '/years/')).toBe(true);
+    expect(isTabActive(stats, '/stats/')).toBe(true);
+    expect(isTabActive(stats, '/sagas?create=1')).toBe(true);
     expect(isTabActive(stats, '/years?x=1')).toBe(true);
     expect(isTabActive(stats, '/statsx')).toBe(false);
     expect(isTabActive({ path: '/games' }, '/games#top')).toBe(true);

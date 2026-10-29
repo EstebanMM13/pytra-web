@@ -21,8 +21,8 @@ interface NavTab {
   path: string;
   labelKey: string;
   icon: LucideIconInput;
-  /** Web tab shown from lg only (at md the row has no room); the search palette still reaches it. */
-  fromLg?: boolean;
+  /** Web tab shown as its icon alone below lg (at md the row has no room for its label). */
+  iconBelowLg?: boolean;
   /** Other top-level paths the tab stays active on (the sections it groups). */
   also?: readonly string[];
 }
@@ -33,7 +33,7 @@ const WEB_TABS: NavTab[] = [
   // Years and sagas are sections of the stats hub: the tab stays lit on them.
   { path: '/stats', labelKey: 'nav.stats', icon: ICONS.chartColumn, also: ['/years', '/sagas'] },
   { path: '/diary', labelKey: 'nav.diary', icon: ICONS.calendarDays },
-  { path: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw, fromLg: true },
+  { path: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw, iconBelowLg: true },
 ];
 
 /** Whether `url` is the tab's page, one below it, or one of the sections it groups. */

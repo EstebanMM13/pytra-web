@@ -22,10 +22,19 @@
       <a
         [routerLink]="tab.path"
         [attr.aria-current]="activeTab() === tab.path ? 'page' : null"
-        class="rounded-lg px-3 py-2 text-text-3 hover:text-text lg:px-3.5"
-        [class]="(tab.fromLg ? 'hidden lg:block ' : '') + (activeTab() === tab.path ? 'bg-brand-tint ring-1 ring-brand-line ring-inset !text-text' : '')"
+        class="flex items-center rounded-lg px-3 py-2 text-text-3 hover:text-text lg:px-3.5"
+        [class]="activeTab() === tab.path ? 'bg-brand-tint ring-1 ring-brand-line ring-inset !text-text' : ''"
+        [attr.aria-label]="tab.iconBelowLg ? (tab.labelKey | translate) : null"
+        [attr.title]="tab.iconBelowLg ? (tab.labelKey | translate) : null"
+        [attr.data-web-tab]="tab.path"
       >
-        {{ tab.labelKey | translate }}
+        @if (tab.iconBelowLg) {
+          <!-- md: icon only (the row has no room for the label); lg+: the label. -->
+          <svg [lucideIcon]="tab.icon" [size]="18" class="lg:hidden" aria-hidden="true"></svg>
+          <span class="hidden lg:inline">{{ tab.labelKey | translate }}</span>
+        } @else {
+          {{ tab.labelKey | translate }}
+        }
       </a>
     }
   </div>
