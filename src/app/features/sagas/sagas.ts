@@ -18,10 +18,10 @@ import { GameCover } from '../../shared/ui/game-cover';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
-import { StatusPill } from '../../shared/ui/status-pill';
+import { StatsBackLink } from '../stats/stats-back-link';
+import { GameTimeline } from './game-timeline';
 import { SagaDialog } from './saga-dialog';
 import { Dropdown, DropdownOption } from '../../shared/ui/dropdown';
-import { CoverTilt } from '../../shared/ui/cover-tilt';
 import { ScrollParallax } from '../../shared/ui/scroll-parallax';
 import {
   DEFAULT_SAGA_SORT,
@@ -29,12 +29,9 @@ import {
   SagaSort,
   SagaSummary,
   filterSagas,
-  isPlayed,
   parseSagaSort,
   playedPercent,
-  releaseYear,
   sagaBackdropCover,
-  sagaGameStatus,
   sagaMetaLine,
   sagaStudiosLine,
   sagaYearRange,
@@ -65,17 +62,17 @@ const SEARCH_URL_DELAY_MS = 300;
     SectionHeader,
     Skeleton,
     StatCard,
-    StatusPill,
     SagaDialog,
     GameCover,
     Dropdown,
-    CoverTilt,
+    GameTimeline,
+    StatsBackLink,
     ScrollParallax,
     LucideDynamicIcon,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sagas.html',
-  styleUrls: ['./sagas.css', '../../shared/ui/cover-tilt.css'],
+  styleUrl: './sagas.css',
 })
 export class Sagas {
   protected readonly icons = ICONS;
@@ -86,9 +83,6 @@ export class Sagas {
   private readonly gameService = inject(GameService);
 
   protected readonly skeletons = [0, 1, 2, 3, 4];
-  protected readonly isPlayed = isPlayed;
-  protected readonly gameStatus = sagaGameStatus;
-  protected readonly releaseYear = releaseYear;
   protected readonly playedPercent = playedPercent;
   protected readonly metaLine = sagaMetaLine;
   protected readonly studiosLine = sagaStudiosLine;

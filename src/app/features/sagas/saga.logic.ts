@@ -86,25 +86,52 @@ function latest(keys: readonly (string | null)[]): string | null {
   return keys.reduce<string | null>((a, b) => (b !== null && (a === null || b > a) ? b : a), null);
 }
 
-export function summarizeSaga(saga: Saga, allGames: readonly Game[]): SagaSummary {
-  const games = allGames
-    .filter((g) => g.sagaId === saga.id && g.reviewStatus !== 'PENDING_REVIEW')
-    .sort(byRelease);
+/** Figures of a group of games (a saga's, a studio's), shown by the same stat cards. */
+export type GameGroupFigures = Omit<SagaSummary, 'saga' | 'studios' | 'lastActivity'>;
+
+/**
+ * Release-ordered confirmed games of a group with their figures: how many were played, hours,
+ * mean of the best ratings, platinums and release year range.
+ */
+export function gameGroupFigures(group: readonly Game[]): GameGroupFigures {
+  const games = group.filter((g) => g.reviewStatus !== 'PENDING_REVIEW').sort(byRelease);
   const ratings = games.map((g) => g.bestRating).filter((r): r is number => r !== null && r !== undefined);
   const years = games.map(releaseYear).filter((y): y is number => y !== null);
   return {
-    saga,
     games,
     total: games.length,
     played: games.filter(isPlayed).length,
     hours: games.reduce((sum, g) => sum + (g.totalHours ?? 0), 0),
     avgRating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
     platinums: games.filter((g) => g.hasPlatinum).length,
-    studios: sagaDevelopers(games),
     firstYear: years.length ? Math.min(...years) : null,
     lastYear: years.length ? Math.max(...years) : null,
-    lastActivity: latest(games.map(lastActivityKey)),
   };
+}
+
+export function summarizeSaga(saga: Saga, allGames: readonly Game[]): SagaSummary {
+  const figures = gameGroupFigures(allGames.filter((g) => g.sagaId === saga.id));
+  return {
+    saga,
+    ...figures,
+    studios: sagaDevelopers(figures.games),
+    lastActivity: latest(figures.games.map(lastActivityKey)),
+  };
+}
+
+/**
+ * Grouping key of a developer name, as the API's developer stats group them: trimmed and
+ * lower-cased (no accent folding), blank names have none.
+ */
+export function developerKey(name: string | null | undefined): string | null {
+  const key = (name ?? '').trim().toLowerCase();
+  return key || null;
+}
+
+/** The games whose developer groups with `name` (see `developerKey`). */
+export function developerGames(games: readonly Game[], name: string): Game[] {
+  const key = developerKey(name);
+  return key === null ? [] : games.filter((g) => developerKey(g.developer) === key);
 }
 
 /** All sagas with their figures, alphabetically. */
@@ -115,7 +142,7 @@ export function summarizeSagas(sagas: readonly Saga[], games: readonly Game[]): 
 }
 
 /** "2005–2022", or the single year when both ends match; null when no game has a release year. */
-export function sagaYearRange(summary: SagaSummary): string | null {
+export function sagaYearRange(summary: Pick<SagaSummary, 'firstYear' | 'lastYear'>): string | null {
   const { firstYear, lastYear } = summary;
   if (firstYear === null) return null;
   return firstYear === lastYear ? String(firstYear) : `${firstYear}–${lastYear}`;
@@ -132,7 +159,7 @@ export function sagaMetaLine(summary: SagaSummary): string {
 }
 
 /** Share of played games, 0–100. */
-export function playedPercent(summary: SagaSummary): number {
+export function playedPercent(summary: Pick<SagaSummary, 'played' | 'total'>): number {
   return summary.total ? Math.round((summary.played / summary.total) * 100) : 0;
 }
 
