@@ -53,7 +53,7 @@ export class StatsPlatforms {
       color: platformColor(p.color),
       dot: true,
       sub: [
-        f.plural('stats.runs', p.runCount),
+        p.runCount > 0 ? f.plural('stats.runs', p.runCount) : null,
         p.completedRunCount > 0 ? f.plural('stats.platforms.completed', p.completedRunCount) : null,
         p.onlineHours > 0 ? f.text('stats.platforms.online', { hours: f.hours(p.onlineHours) }) : null,
         p.averageRating !== null ? f.text('stats.platforms.average', { rating: f.rating(p.averageRating) }) : null,

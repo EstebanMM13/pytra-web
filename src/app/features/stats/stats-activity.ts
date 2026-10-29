@@ -15,7 +15,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { translatePlural } from '../../shared/utils/plural';
 import { ratingLocale } from '../../shared/utils/rating-format';
-import { DIARY_LEVEL_CLASS, DiaryLevel, dayLabel } from '../diary/diary.logic';
+import { DIARY_LEVEL_CLASS, DiaryLevel } from '../diary/diary.logic';
 import { monthLabels, monthValueLabel } from '../years/years.logic';
 import { StatsPageHeader } from './stats-page-header';
 import { StatsScope } from './stats-scope';
@@ -139,14 +139,17 @@ export class StatsActivity {
     this.picked.set(this.picked()?.date === cell.date ? null : cell);
   }
 
-  /** "12 oct – 20 oct" (with years when the streak is not in the viewed year). */
+  /** "12 oct – 20 oct" (with the year when the streak is outside the viewed year). */
   protected streakRange(streak: Streak): string | null {
     if (!streak.startDate || !streak.endDate || streak.length === 0) return null;
     const year = this.viewYear();
-    return this.translate.instant('stats.activity.streakRange', {
-      from: dayLabel(streak.startDate, this.locale(), year),
-      to: dayLabel(streak.endDate, this.locale(), year),
-    });
+    const short = (iso: string): string => {
+      const [y, m, d] = iso.split('-').map(Number);
+      const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', timeZone: 'UTC' };
+      if (y !== year) options.year = 'numeric';
+      return new Intl.DateTimeFormat(this.locale(), options).format(new Date(Date.UTC(y, m - 1, d)));
+    };
+    return this.translate.instant('stats.activity.streakRange', { from: short(streak.startDate), to: short(streak.endDate) });
   }
 
   protected columnsStyle(columns: number): string {

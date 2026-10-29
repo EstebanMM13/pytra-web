@@ -109,8 +109,9 @@
 <ng-template #heat let-map>
   <div class="flex gap-1.5">
     <div class="grid shrink-0 grid-rows-7 gap-[2px] pt-4 text-[10px] leading-none text-faint" aria-hidden="true">
+      <!-- Zero-height labels centred on their row: the cell squares alone set the strip height. -->
       @for (label of rowLabels(); track $index) {
-        <span class="flex items-center">{{ label }}</span>
+        <span class="flex h-0 items-center self-center">{{ label }}</span>
       }
     </div>
     <div class="min-w-0 flex-1">

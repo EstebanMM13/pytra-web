@@ -22,8 +22,9 @@ import { Skeleton } from '../../shared/ui/skeleton';
     >
       <span class="flex min-w-0 items-start gap-2 text-[13px] leading-5 font-semibold text-text-2 md:text-sm">
         <svg [lucideIcon]="icon()" [size]="16" class="mt-0.5 shrink-0 text-brand-light" aria-hidden="true"></svg>
-        <span class="line-clamp-2 min-w-0 flex-1 wrap-break-word">{{ title() }}</span>
-        <svg [lucideIcon]="icons.chevronRight" [size]="16" class="mt-0.5 shrink-0 text-faint" aria-hidden="true"></svg>
+        <span class="line-clamp-2 min-w-0 flex-1 hyphens-auto wrap-break-word">{{ title() }}</span>
+        <!-- Phones: no chevron, the half-width cards need the room for the section name. -->
+        <svg [lucideIcon]="icons.chevronRight" [size]="16" class="mt-0.5 hidden shrink-0 text-faint sm:block" aria-hidden="true"></svg>
       </span>
       @if (loading()) {
         <app-skeleton class="mt-0.5 h-7 w-20 rounded-md" />
@@ -36,7 +37,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
           >{{ figure() ?? '—' }}</span
         >
         @if (hint(); as text) {
-          <span class="line-clamp-2 text-xs leading-snug text-muted">{{ text }}</span>
+          <span class="text-xs leading-snug wrap-break-word text-muted">{{ text }}</span>
         }
       }
     </a>
