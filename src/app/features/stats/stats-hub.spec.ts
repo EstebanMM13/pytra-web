@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
+import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { StatsHub } from './stats-hub';
@@ -12,11 +13,13 @@ class NavbarStub {}
 
 describe('Stats hub', () => {
   function setup(overrides: Record<string, () => Observable<unknown>> = {}) {
+    const saved$ = new Subject<void>();
     TestBed.configureTestingModule({
       imports: [StatsHub],
       providers: [
         provideRouter([]),
         provideTranslateService(),
+        { provide: RunFormLauncher, useValue: { saved$ } },
         {
           provide: StatsService,
           useValue: {
@@ -36,7 +39,7 @@ describe('Stats hub', () => {
     TestBed.overrideComponent(StatsHub, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
     const fixture = TestBed.createComponent(StatsHub);
     fixture.detectChanges();
-    return fixture.nativeElement as HTMLElement;
+    return Object.assign(fixture.nativeElement as HTMLElement, { fixture, saved$ });
   }
 
   afterEach(() => TestBed.resetTestingModule());
@@ -66,5 +69,15 @@ describe('Stats hub', () => {
     const figures = [...el.querySelectorAll('[data-hub-figure]')].map((f) => f.textContent!.trim());
     expect(figures[6]).toBe('—');
     expect(figures[4]).toBe('FromSoftware');
+  });
+
+  it('reloads the teasers when a run is saved from the "+" menu', () => {
+    let mean = 7;
+    const el = setup({ getRatings: () => of({ mean, ratedCount: 1 }) });
+    mean = 9;
+    el.saved$.next();
+    el.fixture.detectChanges();
+    const figures = [...el.querySelectorAll('[data-hub-figure]')].map((f) => f.textContent!.trim());
+    expect(figures[6]).toBe('9,00');
   });
 });

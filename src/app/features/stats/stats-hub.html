@@ -34,7 +34,7 @@
       [title]="'stats.hub.years' | translate"
       [loading]="y === undefined"
       [figure]="y ? (y.totalHours | hours) : null"
-      [hint]="y ? ('stats.hub.yearsHint' | translate: { year: y.year }) : ('stats.noData' | translate)"
+      [hint]="y ? ('stats.hub.yearsHint' | translate: { year: y.year }) : ('common.noData' | translate)"
     />
 
     @let s = sagas();
@@ -44,7 +44,7 @@
       [title]="'stats.hub.sagas' | translate"
       [loading]="s === undefined"
       [figure]="s ? ('stats.hub.sagasFigure' | translatePlural: s.count) : null"
-      [hint]="s?.top ? ('stats.hub.sagasHint' | translate: { name: s!.top!.sagaName }) : null"
+      [hint]="s && s.top ? ('stats.hub.sagasHint' | translate: { name: s.top.sagaName }) : null"
     />
 
     @let p = topPlatform();
@@ -54,7 +54,7 @@
       [title]="'stats.hub.platforms' | translate"
       [loading]="p === undefined"
       [figure]="p ? platformName(p.name) : null"
-      [hint]="p ? ('stats.hub.platformsHint' | translate: { hours: (p.hours | hours) }) : ('stats.noData' | translate)"
+      [hint]="p ? ('stats.hub.platformsHint' | translate: { hours: (p.hours | hours) }) : ('common.noData' | translate)"
     />
 
     @let d = topDeveloper();
@@ -64,7 +64,7 @@
       [title]="'stats.hub.studios' | translate"
       [loading]="d === undefined"
       [figure]="d ? d.developer : null"
-      [hint]="d ? ('stats.hub.studiosHint' | translate: { hours: (d.hours | hours) }) : ('stats.noData' | translate)"
+      [hint]="d ? ('stats.hub.studiosHint' | translate: { hours: (d.hours | hours) }) : ('common.noData' | translate)"
     />
 
     @let median = medianDays();
@@ -74,18 +74,18 @@
       [title]="'stats.hub.habits' | translate"
       [loading]="completion() === undefined"
       [figure]="median !== null ? ('stats.days' | translatePlural: median) : null"
-      [hint]="median !== null ? ('stats.hub.habitsHint' | translate) : ('stats.noData' | translate)"
+      [hint]="median !== null ? ('stats.hub.habitsHint' | translate) : ('common.noData' | translate)"
     />
 
-    @let r = ratings();
+    @let r = ratingsTeaser();
     <app-stats-hub-card
       link="/stats/ratings"
       [icon]="icons.star"
       [title]="'stats.hub.ratings' | translate"
       [loading]="r === undefined"
-      [figure]="r?.mean != null ? (r!.mean | rating) : null"
-      [figureClass]="r?.mean != null ? 'font-mono ' + (r!.mean | ratingTone) : ''"
-      [hint]="r?.mean != null ? ('stats.hub.ratingsHint' | translatePlural: r!.ratedCount) : ('stats.noData' | translate)"
+      [figure]="r ? (r.mean | rating) : null"
+      [figureClass]="r ? 'font-mono ' + (r.mean | ratingTone) : ''"
+      [hint]="r ? ('stats.hub.ratingsHint' | translatePlural: r.count) : ('common.noData' | translate)"
     />
   </nav>
 </main>

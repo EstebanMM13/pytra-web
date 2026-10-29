@@ -24,6 +24,13 @@ import { CachedResource, UserDataCache } from './user-data-cache';
 
 type YearKey = number | 'all';
 
+/**
+ * Developer ranking request shared by the stats hub teaser and the studios section, so both read
+ * the same cached entry.
+ */
+export const DEVELOPER_RANKING_LIMIT = 10;
+export const DEVELOPER_MIN_RATED_GAMES = 2;
+
 @Injectable({ providedIn: 'root' })
 export class StatsService {
   private readonly http = inject(HttpClient);
@@ -122,7 +129,7 @@ export class StatsService {
   }
 
   /** Top developers by hours and by rating (all time). Cached per parameters. */
-  getByDeveloper(limit = 10, minRatedGames = 2): Observable<DeveloperStats> {
+  getByDeveloper(limit = DEVELOPER_RANKING_LIMIT, minRatedGames = DEVELOPER_MIN_RATED_GAMES): Observable<DeveloperStats> {
     const key = `${limit}:${minRatedGames}`;
     let resource = this.byDeveloper.get(key);
     if (!resource) {
