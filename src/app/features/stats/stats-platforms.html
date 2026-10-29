@@ -1,0 +1,75 @@
+<app-navbar />
+
+<main class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-4 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
+  <app-stats-page-header [title]="'stats.platforms.title' | translate" [subtitle]="'stats.platforms.subtitle' | translate">
+    <app-stats-scope [years]="section.years()" [year]="section.year()" (yearChange)="section.setYear($event)" />
+  </app-stats-page-header>
+
+  @let s = state();
+  @if (s.data; as data) {
+    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3" [label]="'stats.platforms.list' | translate" />
+        @if (rows().length) {
+          <app-stats-bar-list [bars]="rows()" data-platform-list />
+        } @else {
+          <p class="py-6 text-center text-sm text-muted">{{ 'stats.platforms.empty' | translate }}</p>
+        }
+        @if (data.unassignedOnlineHours > 0) {
+          <p class="mt-3 text-xs text-faint">
+            {{ 'stats.platforms.unassignedNote' | translate: { hours: (data.unassignedOnlineHours | hours) } }}
+          </p>
+        }
+      </section>
+
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3" [label]="'stats.platforms.byYear' | translate" />
+        @if (years().length) {
+          <ul class="flex flex-col" data-platform-years>
+            @for (y of years(); track y.year) {
+              <li class="border-t border-divider first:border-t-0">
+                <a
+                  [routerLink]="['/years', y.year]"
+                  class="hover-lift -mx-2 block rounded-lg px-2 py-2 hover:bg-hover"
+                  [attr.aria-label]="'stats.platforms.yearTitle' | translate: { year: y.year, hours: (y.totalHours | hours) }"
+                >
+                  <span class="flex items-baseline justify-between gap-3 text-sm">
+                    <span class="font-mono" [class]="y.year === s.year ? 'font-semibold text-brand-lighter' : 'text-text-2'">{{ y.year }}</span>
+                    <span class="font-mono">{{ y.totalHours | hours }}</span>
+                  </span>
+                  <span class="mt-1.5 flex h-2.5 gap-px overflow-hidden rounded-full bg-hover" aria-hidden="true">
+                    @for (seg of y.segments; track seg.key) {
+                      <span
+                        class="bar-fill h-full shrink-0"
+                        [style.width.%]="seg.width"
+                        [style.background-color]="seg.color"
+                        [attr.title]="seg.name + ': ' + (seg.hours | hours)"
+                      ></span>
+                    }
+                  </span>
+                </a>
+              </li>
+            }
+          </ul>
+          <ul class="mt-3 flex flex-wrap gap-x-3 gap-y-1.5 text-xs text-text-3" data-platform-legend>
+            @for (p of legend(); track p.platformId) {
+              <li class="flex items-center gap-1.5">
+                <span class="size-2 shrink-0 rounded-full" [style.background-color]="p.color" aria-hidden="true"></span>
+                {{ p.name }}
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="py-6 text-center text-sm text-muted">{{ 'stats.platforms.empty' | translate }}</p>
+        }
+      </section>
+    </div>
+  } @else if (s.failed) {
+    <app-stats-load-error (retry)="section.retry()" />
+  } @else {
+    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
+      <app-skeleton class="h-[320px] rounded-[14px]" />
+      <app-skeleton class="h-[320px] rounded-[14px]" />
+    </div>
+  }
+</main>

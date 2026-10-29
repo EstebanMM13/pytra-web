@@ -107,6 +107,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/stats/stats-activity').then((m) => m.StatsActivity),
   },
   {
+    path: 'stats/platforms',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/stats/stats-platforms').then((m) => m.StatsPlatforms),
+  },
+  {
     // `/diary?date=yyyy-mm-dd` opens that day's editor (dashboard card, daily reminder).
     path: 'diary',
     canActivate: [authGuard],
