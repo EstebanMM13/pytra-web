@@ -2,39 +2,6 @@ import { Game } from '../../core/models/game.model';
 import { Saga } from '../../core/models/saga.model';
 import { StatsSummary, YearStat } from '../../core/models/stats.model';
 
-/** Icon keys mapped to lucide icons by the badge component (keeps this helper framework-free). */
-export type AchievementIcon =
-  | 'trophy'
-  | 'crown'
-  | 'timer'
-  | 'play'
-  | 'flame'
-  | 'medal'
-  | 'library'
-  | 'archive'
-  | 'gem'
-  | 'layers'
-  | 'star'
-  | 'monitor'
-  | 'calendar'
-  | 'check'
-  | 'repeat'
-  | 'hourglass'
-  | 'clock'
-  | 'mountain'
-  | 'sparkles'
-  | 'heart'
-  | 'thumbsDown'
-  | 'award'
-  | 'globe'
-  | 'zap'
-  | 'users'
-  | 'wifi'
-  | 'shuffle'
-  | 'target'
-  | 'bookOpen'
-  | 'badgeCheck';
-
 export type AchievementCategory =
   | 'collection'
   | 'runs'
@@ -70,7 +37,6 @@ export interface Achievement {
   id: string;
   category: AchievementCategory;
   tier: AchievementTier;
-  icon: AchievementIcon;
   current: number;
   target: number;
   unlocked: boolean;
@@ -96,7 +62,7 @@ const MANY_PLATFORMS = 6;
 /** Stored 0–10 rating thresholds of the rating badges (shown on the user's scale in their copy). */
 export const RATING_BADGE_THRESHOLDS = { max: 10, high: 9, low: 4 } as const;
 
-type Def = [id: string, category: AchievementCategory, tier: AchievementTier, icon: AchievementIcon, current: number, target: number];
+type Def = [id: string, category: AchievementCategory, tier: AchievementTier, current: number, target: number];
 
 /**
  * Derives the badge list from data the app already loads (games list aggregates, stats
@@ -128,74 +94,73 @@ export function computeAchievements({ games: allGames, summary, sagas, years }: 
   const perfectGame = games.some((g) => g.hasPlatinum && g.hasFullCompletion) ? 1 : 0;
 
   const defs: Def[] = [
-    ['collector25', 'collection', 'bronze', 'library', gameCount, 25],
-    ['collector50', 'collection', 'silver', 'archive', gameCount, 50],
-    ['collector100', 'collection', 'gold', 'gem', gameCount, 100],
+    ['collector25', 'collection', 'bronze', gameCount, 25],
+    ['collector50', 'collection', 'silver', gameCount, 50],
+    ['collector100', 'collection', 'gold', gameCount, 100],
 
-    ['runs10', 'runs', 'bronze', 'play', runs, 10],
-    ['runs50', 'runs', 'silver', 'flame', runs, 50],
-    ['runs100', 'runs', 'gold', 'medal', runs, 100],
-    ['runs250', 'runs', 'gold', 'gem', runs, 250],
-    ['completed10', 'runs', 'bronze', 'check', completed, 10],
-    ['completed25', 'runs', 'silver', 'check', completed, 25],
-    ['completed100', 'runs', 'gold', 'award', completed, 100],
-    ['firstReplay', 'runs', 'bronze', 'repeat', replays, 1],
-    ['replays5', 'runs', 'silver', 'repeat', replays, 5],
-    ['replays10', 'runs', 'gold', 'repeat', replays, 10],
+    ['runs10', 'runs', 'bronze', runs, 10],
+    ['runs50', 'runs', 'silver', runs, 50],
+    ['runs100', 'runs', 'gold', runs, 100],
+    ['runs250', 'runs', 'gold', runs, 250],
+    ['completed10', 'runs', 'bronze', completed, 10],
+    ['completed25', 'runs', 'silver', completed, 25],
+    ['completed100', 'runs', 'gold', completed, 100],
+    ['firstReplay', 'runs', 'bronze', replays, 1],
+    ['replays5', 'runs', 'silver', replays, 5],
+    ['replays10', 'runs', 'gold', replays, 10],
 
-    ['hours100', 'hours', 'bronze', 'clock', totalHours, 100],
-    ['hours500', 'hours', 'silver', 'clock', totalHours, 500],
-    ['hours1000', 'hours', 'gold', 'hourglass', totalHours, 1000],
-    ['hours2500', 'hours', 'gold', 'hourglass', totalHours, 2500],
-    ['marathon50', 'hours', 'bronze', 'timer', maxGameHours, 50],
-    ['marathon', 'hours', 'silver', 'timer', maxGameHours, 100],
-    ['marathon250', 'hours', 'gold', 'mountain', maxGameHours, 250],
+    ['hours100', 'hours', 'bronze', totalHours, 100],
+    ['hours500', 'hours', 'silver', totalHours, 500],
+    ['hours1000', 'hours', 'gold', totalHours, 1000],
+    ['hours2500', 'hours', 'gold', totalHours, 2500],
+    ['marathon50', 'hours', 'bronze', maxGameHours, 50],
+    ['marathon', 'hours', 'silver', maxGameHours, 100],
+    ['marathon250', 'hours', 'gold', maxGameHours, 250],
 
-    ['critic', 'ratings', 'silver', 'star', ratings.length, 20],
-    ['perfectTen', 'ratings', 'silver', 'sparkles', ratings.some((r) => r >= RATING_BADGE_THRESHOLDS.max) ? 1 : 0, 1],
-    ['masterpieces', 'ratings', 'silver', 'heart', ratings.filter((r) => r >= RATING_BADGE_THRESHOLDS.high).length, 5],
-    ['harshCritic', 'ratings', 'bronze', 'thumbsDown', ratings.some((r) => r <= RATING_BADGE_THRESHOLDS.low) ? 1 : 0, 1],
+    ['critic', 'ratings', 'silver', ratings.length, 20],
+    ['perfectTen', 'ratings', 'silver', ratings.some((r) => r >= RATING_BADGE_THRESHOLDS.max) ? 1 : 0, 1],
+    ['masterpieces', 'ratings', 'silver', ratings.filter((r) => r >= RATING_BADGE_THRESHOLDS.high).length, 5],
+    ['harshCritic', 'ratings', 'bronze', ratings.some((r) => r <= RATING_BADGE_THRESHOLDS.low) ? 1 : 0, 1],
 
-    ['firstPlatinum', 'platinums', 'bronze', 'trophy', platinums, 1],
-    ['platinum5', 'platinums', 'silver', 'trophy', platinums, 5],
-    ['platinumHunter', 'platinums', 'gold', 'crown', platinums, 10],
-    ['platinum25', 'platinums', 'gold', 'crown', platinums, 25],
+    ['firstPlatinum', 'platinums', 'bronze', platinums, 1],
+    ['platinum5', 'platinums', 'silver', platinums, 5],
+    ['platinumHunter', 'platinums', 'gold', platinums, 10],
+    ['platinum25', 'platinums', 'gold', platinums, 25],
 
-    ['firstFullCompletion', 'fullCompletions', 'bronze', 'badgeCheck', fullCompletions, 1],
-    ['fullCompletion5', 'fullCompletions', 'silver', 'badgeCheck', fullCompletions, 5],
-    ['fullCompletion10', 'fullCompletions', 'gold', 'gem', fullCompletions, 10],
-    ['fullCompletion25', 'fullCompletions', 'gold', 'gem', fullCompletions, 25],
+    ['firstFullCompletion', 'fullCompletions', 'bronze', fullCompletions, 1],
+    ['fullCompletion5', 'fullCompletions', 'silver', fullCompletions, 5],
+    ['fullCompletion10', 'fullCompletions', 'gold', fullCompletions, 10],
+    ['fullCompletion25', 'fullCompletions', 'gold', fullCompletions, 25],
 
-    ['sagaComplete', 'sagas', 'bronze', 'layers', bestSagaProgress(games, sagas), 1],
-    ['sagaTrilogy', 'sagas', 'silver', 'bookOpen', bestSagaCompleted(games, sagas), 3],
+    ['sagaComplete', 'sagas', 'bronze', bestSagaProgress(games, sagas), 1],
+    ['sagaTrilogy', 'sagas', 'silver', bestSagaCompleted(games, sagas), 3],
 
-    ['platforms', 'platforms', 'bronze', 'monitor', platforms, 3],
-    ['allPlatforms', 'platforms', 'gold', 'globe', platforms, MANY_PLATFORMS],
+    ['platforms', 'platforms', 'bronze', platforms, 3],
+    ['allPlatforms', 'platforms', 'gold', platforms, MANY_PLATFORMS],
 
-    ['years3', 'years', 'bronze', 'calendar', activeYears.length, 3],
-    ['veteran', 'years', 'silver', 'calendar', activeYears.length, 5],
-    ['years10', 'years', 'gold', 'calendar', activeYears.length, 10],
-    ['streak3', 'years', 'bronze', 'zap', longestStreak(activeYears), 3],
-    ['streak5', 'years', 'silver', 'flame', longestStreak(activeYears), 5],
+    ['years3', 'years', 'bronze', activeYears.length, 3],
+    ['veteran', 'years', 'silver', activeYears.length, 5],
+    ['years10', 'years', 'gold', activeYears.length, 10],
+    ['streak3', 'years', 'bronze', longestStreak(activeYears), 3],
+    ['streak5', 'years', 'silver', longestStreak(activeYears), 5],
 
-    ['onlineDebut', 'online', 'bronze', 'wifi', playedOnline, 1],
-    ['variety', 'online', 'bronze', 'shuffle', playedCategories.size, 3],
-    ['online100', 'online', 'silver', 'users', onlineHours, 100],
-    ['online500', 'online', 'gold', 'users', onlineHours, 500],
+    ['onlineDebut', 'online', 'bronze', playedOnline, 1],
+    ['variety', 'online', 'bronze', playedCategories.size, 3],
+    ['online100', 'online', 'silver', onlineHours, 100],
+    ['online500', 'online', 'gold', onlineHours, 500],
 
-    ['multitasker', 'special', 'bronze', 'target', inProgress, 3],
-    ['perfectionist', 'special', 'gold', 'sparkles', perfectGame, 1],
+    ['multitasker', 'special', 'bronze', inProgress, 3],
+    ['perfectionist', 'special', 'gold', perfectGame, 1],
   ];
 
-  const list = defs.map(([id, category, tier, icon, current, target], index) =>
-    achievement(id, category, tier, icon, current, target, TIER_WEIGHT[tier] * 100 + index),
+  const list = defs.map(([id, category, tier, current, target], index) =>
+    achievement(id, category, tier, current, target, TIER_WEIGHT[tier] * 100 + index),
   );
   // Computed after the rest; ranked above every other badge so it always leads the unlocked ones.
   const legend = achievement(
     LEGEND_ID,
     'special',
     'gold',
-    'gem',
     list.filter((a) => a.unlocked).length,
     list.length,
     Math.max(...list.map((a) => a.rank)) + 1,
@@ -207,7 +172,6 @@ function achievement(
   id: string,
   category: AchievementCategory,
   tier: AchievementTier,
-  icon: AchievementIcon,
   current: number,
   target: number,
   rank: number,
@@ -216,7 +180,6 @@ function achievement(
     id,
     category,
     tier,
-    icon,
     current,
     target,
     unlocked: current >= target,

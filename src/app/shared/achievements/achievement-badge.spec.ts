@@ -8,7 +8,6 @@ const MASTERPIECES: Achievement = {
   id: 'masterpieces',
   category: 'ratings',
   tier: 'silver',
-  icon: 'heart',
   current: 2,
   target: 5,
   unlocked: false,
@@ -47,7 +46,7 @@ describe('AchievementBadge', () => {
   });
 
   it('blends the unlocked legend badge (ring and icon gradient), not a tier tone', () => {
-    const legend: Achievement = { ...MASTERPIECES, id: 'legend', category: 'special', tier: 'gold', icon: 'gem' };
+    const legend: Achievement = { ...MASTERPIECES, id: 'legend', category: 'special', tier: 'gold' };
     const fixture = render();
     const chip = () => fixture.nativeElement.querySelector('span[aria-hidden="true"]') as HTMLElement;
 

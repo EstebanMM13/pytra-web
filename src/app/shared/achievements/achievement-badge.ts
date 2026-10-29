@@ -1,43 +1,10 @@
 import { ChangeDetectionStrategy, Component, booleanAttribute, computed, inject, input } from '@angular/core';
-import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
-import { ICONS } from '../ui/icons';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { ACHIEVEMENT_ICONS, ICONS } from '../ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PreferencesService } from '../../core/services/preferences.service';
 import { formatScaledPoint } from '../utils/rating-scale';
-import { Achievement, AchievementIcon, AchievementTier, LEGEND_ID, RATING_BADGE_THRESHOLDS } from './achievements';
-
-const BADGE_ICONS: Record<AchievementIcon, LucideIconInput> = {
-  trophy: ICONS.trophy,
-  crown: ICONS.crown,
-  timer: ICONS.timer,
-  play: ICONS.play,
-  flame: ICONS.flame,
-  medal: ICONS.medal,
-  library: ICONS.library,
-  archive: ICONS.archive,
-  gem: ICONS.gem,
-  layers: ICONS.layers,
-  star: ICONS.star,
-  monitor: ICONS.monitor,
-  calendar: ICONS.calendar,
-  check: ICONS.circleCheck,
-  repeat: ICONS.repeat,
-  hourglass: ICONS.hourglass,
-  clock: ICONS.clock,
-  mountain: ICONS.mountain,
-  sparkles: ICONS.sparkles,
-  heart: ICONS.heart,
-  thumbsDown: ICONS.thumbsDown,
-  award: ICONS.award,
-  globe: ICONS.globe,
-  zap: ICONS.zap,
-  users: ICONS.users,
-  wifi: ICONS.wifi,
-  shuffle: ICONS.shuffle,
-  target: ICONS.target,
-  bookOpen: ICONS.bookOpen,
-  badgeCheck: ICONS.badgeCheck,
-};
+import { Achievement, AchievementTier, LEGEND_ID, RATING_BADGE_THRESHOLDS } from './achievements';
 
 /** Per-instance ids of the legend icon gradient (a page can show the badge more than once). */
 let legendGradientSeq = 0;
@@ -132,7 +99,8 @@ export class AchievementBadge {
   readonly compact = input(false, { transform: booleanAttribute });
 
   protected readonly a = this.achievement;
-  protected readonly icon = computed(() => BADGE_ICONS[this.achievement().icon]);
+  /** The achievement's own icon (the trophy guards an id added without one). */
+  protected readonly icon = computed(() => ACHIEVEMENT_ICONS[this.achievement().id] ?? ICONS.trophy);
   /** The legend meta badge blends purple, gold and diamond blue instead of a tier tone. */
   protected readonly legendUnlocked = computed(() => this.achievement().id === LEGEND_ID && this.achievement().unlocked);
   protected readonly legendGradientId = `pt-legend-stroke-${++legendGradientSeq}`;
