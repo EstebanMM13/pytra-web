@@ -3,7 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router, provideRouter, withViewTransitions } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideTranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Subject, of, throwError } from 'rxjs';
+import { PlayFacts } from '../../core/models/stats.model';
+import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
 import { PsnService } from '../../core/services/psn.service';
@@ -38,14 +41,19 @@ const RPG = { id: 20, name: 'RPG' };
 const PUZZLE = { id: 30, name: 'Puzzle' };
 
 const GAMES = [
-  { ...game(1, [ACTION, RPG, PUZZLE], 'Capcom'), hasPlatinum: true },
-  { ...game(2, [ACTION, RPG], 'FromSoftware'), hasPlatinum: true, hasFullCompletion: true },
+  { ...game(1, [ACTION, RPG, PUZZLE], 'Capcom'), hasPlatinum: true, platformRefs: [{ id: 1, name: 'PS5', color: null }] },
+  {
+    ...game(2, [ACTION, RPG], 'FromSoftware'),
+    hasPlatinum: true,
+    hasFullCompletion: true,
+    platformRefs: [{ id: 1, name: 'PS5', color: null }, { id: 2, name: 'PS4', color: null }],
+  },
   { ...game(3, [ACTION], 'Nintendo'), hasFullCompletion: true },
   game(4, [{ id: 40, name: 'Shooter' }], 'Valve'),
 ];
 
 /** Run facts: game 1 finished in 2024 (10 days, 20 h) on platform 1; game 2 played in 2023; game 3 online in 2024. */
-const PLAY_FACTS = {
+const PLAY_FACTS: PlayFacts = {
   runs: [
     { experienceId: 1, gameId: 1, platformId: 1, year: 2024, status: 'COMPLETADO' as const, hours: 20, daysToFinish: 10 },
     { experienceId: 2, gameId: 2, platformId: 2, year: 2023, status: 'ABANDONADO' as const, hours: 3, daysToFinish: null },
@@ -93,15 +101,19 @@ describe('Games library filters', () => {
   });
 
   const getPlayFacts = vi.fn(() => of(PLAY_FACTS));
+  let saved$: Subject<unknown>;
 
   async function setup() {
-    getPlayFacts.mockClear();
+    getPlayFacts.mockReset();
+    getPlayFacts.mockImplementation(() => of(PLAY_FACTS));
+    saved$ = new Subject();
     TestBed.configureTestingModule({
       providers: [
         provideRouter([{ path: 'games', component: Games }], withViewTransitions(VIEW_TRANSITION_OPTIONS)),
         provideTranslateService(),
         { provide: GameService, useValue: { findAll: () => of(GAMES) } },
         { provide: StatsService, useValue: { getYears: () => of([2024, 2023]), getPlayFacts } },
+        { provide: RunFormLauncher, useValue: { saved$ } },
         ...NO_PENDING,
       ],
     });
@@ -162,6 +174,95 @@ describe('Games library filters', () => {
     expect(listed()).toEqual(['/games/1', '/games/2', '/games/3', '/games/4']);
     await harness.navigateByUrl('/games?decade=1990');
     expect(listed()).toEqual([]);
+  });
+
+  const statusCounts = (el: HTMLElement) =>
+    [...el.querySelectorAll('[aria-label="library.statusLabel"] button .font-mono')].map((c) => c.textContent?.trim());
+
+  it('waits for the run facts with a skeleton and unknown counters, not zeros', async () => {
+    const { harness, el, listed } = await setup();
+    const facts = new Subject<PlayFacts>();
+    getPlayFacts.mockImplementation(() => facts);
+    await harness.navigateByUrl('/games?year=2024');
+    expect(listed()).toEqual([]);
+    expect(el.querySelector('app-skeleton')).not.toBeNull();
+    expect(statusCounts(el).every((c) => c === '…')).toBe(true);
+
+    facts.next(PLAY_FACTS);
+    await harness.fixture.whenStable();
+    expect(listed()).toEqual(['/games/1', '/games/3']);
+    expect(statusCounts(el)[0]).toBe('2');
+  });
+
+  it('shows an error with retry and clear when the API has no play facts (older API: 404)', async () => {
+    const { harness, router, el, listed } = await setup();
+    getPlayFacts.mockImplementation(() => throwError(() => new HttpErrorResponse({ status: 404 })));
+    await harness.navigateByUrl('/games?year=2024');
+    expect(el.querySelector('[data-play-error]')).not.toBeNull();
+    expect(statusCounts(el).every((c) => c === '…')).toBe(true);
+
+    getPlayFacts.mockImplementation(() => of(PLAY_FACTS));
+    el.querySelector<HTMLButtonElement>('[data-play-retry]')!.click();
+    await harness.fixture.whenStable();
+    expect(el.querySelector('[data-play-error]')).toBeNull();
+    expect(listed()).toEqual(['/games/1', '/games/3']);
+    expect(router.url).toBe('/games?year=2024');
+  });
+
+  it('fetches the run facts again when a run filter is set anew after a failure, and after a saved run', async () => {
+    const { harness, listed } = await setup();
+    getPlayFacts.mockImplementation(() => throwError(() => new Error('offline')));
+    await harness.navigateByUrl('/games?year=2024');
+    await harness.navigateByUrl('/games');
+    getPlayFacts.mockImplementation(() => of(PLAY_FACTS));
+    await harness.navigateByUrl('/games?days=8-30');
+    expect(getPlayFacts).toHaveBeenCalledTimes(2);
+    expect(listed()).toEqual(['/games/1']);
+
+    saved$.next({});
+    await harness.fixture.whenStable();
+    expect(getPlayFacts).toHaveBeenCalledTimes(3);
+  });
+
+  it('follows URL changes such as back navigation between run filters', async () => {
+    const { harness, router, listed } = await setup();
+    await router.navigateByUrl('/games?year=2024');
+    await harness.fixture.whenStable();
+    await router.navigateByUrl('/games?year=2023');
+    await harness.fixture.whenStable();
+    expect(listed()).toEqual(['/games/2']);
+    // What "back" does to the page: the previous URL comes in from outside (the test router's
+    // mock location does not replay popstate, so the URL is set directly).
+    await router.navigateByUrl('/games?year=2024');
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/games?year=2024');
+    expect(listed()).toEqual(['/games/1', '/games/3']);
+  });
+
+  it('checks platform and year on the same run, and keeps the platform when the year chip goes', async () => {
+    const { harness, router, el, listed } = await setup();
+    await harness.navigateByUrl('/games?platform=2&year=2023');
+    expect(listed()).toEqual(['/games/2']);
+    await harness.navigateByUrl('/games?platform=1&year=2023');
+    // Game 2 has a PS5 and a 2023 run, but not a PS5 run of 2023.
+    expect(listed()).toEqual([]);
+
+    const yearChip = [...el.querySelectorAll('[aria-label="library.filters.active"] > span')].find((c) =>
+      c.textContent?.includes('library.filters.yearChip'),
+    )!;
+    yearChip.querySelector<HTMLButtonElement>('button')!.click();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/games?platform=1');
+    expect(listed()).toEqual(['/games/1', '/games/2']);
+  });
+
+  it('clears every stats filter with "Limpiar filtros"', async () => {
+    const { harness, router, el } = await setup();
+    await harness.navigateByUrl('/games?year=2024&decade=2020&days=1-&hours=0-&platform=1');
+    const clear = [...el.querySelectorAll<HTMLButtonElement>('[aria-label="library.filters.active"] > button')].at(-1)!;
+    clear.click();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/games');
   });
 
   it('removes a stats filter with its chip', async () => {

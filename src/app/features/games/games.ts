@@ -4,10 +4,11 @@ import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
-import { catchError, filter, map, of, switchMap, take } from 'rxjs';
+import { Subscription, catchError, filter, map, of } from 'rxjs';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
 import { PsnService } from '../../core/services/psn.service';
+import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { SteamService } from '../../core/services/steam.service';
 import { platformNameKey } from '../../core/services/platform.logic';
@@ -194,20 +195,13 @@ export class Games {
 
   private readonly stats = inject(StatsService);
   private readonly hasPlayFilters = computed(() => hasPlayFilters(this.urlQuery().play));
-  /** Run facts, fetched the first time a run filter is set (most library visits never need them). */
-  private readonly playState = toSignal(
-    toObservable(this.hasPlayFilters).pipe(
-      filter(Boolean),
-      take(1),
-      switchMap(() =>
-        this.stats.getPlayFacts().pipe(
-          map((facts): PlayState => ({ index: buildPlayIndex(facts), failed: false })),
-          catchError(() => of<PlayState>({ index: null, failed: true })),
-        ),
-      ),
-    ),
-    { initialValue: { index: null, failed: false } satisfies PlayState },
-  );
+  /**
+   * Run facts behind the run filters. Fetched when a run filter is set (most library visits never
+   * need them), again each time one is set anew (so a failure is not final), on retry and when a
+   * run is saved from this page (the cached facts are invalidated by every write).
+   */
+  private readonly playState = signal<PlayState>({ index: null, failed: false });
+  private playRequest: Subscription | undefined;
   private readonly playIndex = computed(() => this.playState().index);
   /** Run filters set and their facts not loaded yet: the list waits for them. */
   protected readonly playLoading = computed(
@@ -342,8 +336,11 @@ export class Games {
   );
 
   /** Tab counters follow the name and panel filters, so they add up to what each tab would show. */
-  protected readonly statusCounts = computed(() =>
-    countByStatus(this.libraryGames().filter((g) => matchesPanelFilters(g, this.query(), this.playIndex()))),
+  /** Null while the run facts an active run filter needs are loading or failed: no misleading zeros. */
+  protected readonly statusCounts = computed<Record<LibraryStatusFilter, number> | null>(() =>
+    this.hasPlayFilters() && !this.playIndex()
+      ? null
+      : countByStatus(this.libraryGames().filter((g) => matchesPanelFilters(g, this.query(), this.playIndex()))),
   );
   protected readonly filtered = computed(() => filterGames(this.libraryGames(), this.query(), this.playIndex()));
   protected readonly page = computed(() => paginate(this.filtered(), this.query().page));
@@ -363,6 +360,17 @@ export class Games {
       }
     });
     this.load();
+
+    // Run facts: on each (re)applied run filter, and after a run saved from here while one is set.
+    toObservable(this.hasPlayFilters)
+      .pipe(filter(Boolean), takeUntilDestroyed())
+      .subscribe(() => this.loadPlayFacts());
+    inject(RunFormLauncher)
+      .saved$.pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        if (this.hasPlayFilters()) this.loadPlayFacts();
+      });
+    inject(DestroyRef).onDestroy(() => this.playRequest?.unsubscribe());
 
     // External `q` changes (back / forward, links) reach the search box; the echo of our own write is skipped.
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
@@ -425,6 +433,19 @@ export class Games {
         this.allGames.set([]);
         this.loadError.set(true);
       },
+    });
+  }
+
+  /**
+   * Fetches the run facts. A refresh keeps the facts on screen until the new ones arrive; a failure
+   * only shows the error state when there is nothing to show.
+   */
+  protected loadPlayFacts(): void {
+    this.playRequest?.unsubscribe();
+    this.playState.update((state) => ({ index: state.index, failed: false }));
+    this.playRequest = this.stats.getPlayFacts().subscribe({
+      next: (facts) => this.playState.set({ index: buildPlayIndex(facts), failed: false }),
+      error: () => this.playState.update((state) => ({ index: state.index, failed: !state.index })),
     });
   }
 

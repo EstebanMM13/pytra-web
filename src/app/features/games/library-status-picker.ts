@@ -39,7 +39,7 @@ import { LibraryStatusFilter } from './library.logic';
     >
       <span class="text-muted">{{ 'library.statusShort' | translate }}:</span>
       <span class="text-brand-lighter">{{ 'library.status.' + status() | translate }}</span>
-      <span class="font-mono text-[11px] opacity-70">({{ counts()[status()] }})</span>
+      <span class="font-mono text-[11px] opacity-70">({{ counts()?.[status()] ?? '…' }})</span>
       <svg [lucideIcon]="icons.chevronDown" [size]="14" class="text-faint"></svg>
     </button>
 
@@ -66,7 +66,7 @@ import { LibraryStatusFilter } from './library.logic';
               [class]="s === status() ? 'bg-brand-tint text-brand-lighter' : 'text-text-2'"
             >
               <span class="flex-1">{{ 'library.status.' + s | translate }}</span>
-              <span class="font-mono text-[13px] opacity-70">{{ counts()[s] }}</span>
+              <span class="font-mono text-[13px] opacity-70">{{ counts()?.[s] ?? '…' }}</span>
               <svg
                 [lucideIcon]="icons.check"
                 [size]="16"
@@ -90,7 +90,8 @@ export class LibraryStatusPicker {
 
   readonly statuses = input.required<readonly LibraryStatusFilter[]>();
   readonly status = input.required<LibraryStatusFilter>();
-  readonly counts = input.required<Record<LibraryStatusFilter, number>>();
+  /** Games per status; null while unknown (run facts loading), shown as "…". */
+  readonly counts = input.required<Record<LibraryStatusFilter, number> | null>();
   readonly statusChange = output<LibraryStatusFilter>();
 
   protected readonly open = signal(false);
