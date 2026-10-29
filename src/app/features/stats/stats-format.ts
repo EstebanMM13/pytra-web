@@ -5,7 +5,7 @@ import { formatHours } from '../../shared/pipes/hours.pipe';
 import { platformDisplayName } from '../../shared/ui/platform-label';
 import { translatePlural } from '../../shared/utils/plural';
 import { ratingLocale } from '../../shared/utils/rating-format';
-import { formatScaledRating } from '../../shared/utils/rating-scale';
+import { formatScaledPoint, formatScaledRating } from '../../shared/utils/rating-scale';
 
 /**
  * Formatters for row data built in TypeScript (bar lists), matching the hours / rating pipes:
@@ -22,6 +22,8 @@ export function statsFormat() {
     hours: (value: number | null | undefined) => formatHours(value, locale()),
     rating: (value: number | null | undefined) =>
       formatScaledRating(value, preferences.ratingScale(), preferences.ratingPrecision(), locale()),
+    /** A plain point of the rating scale for axis labels (10 -> "10", "100" or "5"). */
+    point: (stored: number) => formatScaledPoint(stored, preferences.ratingScale(), translate.currentLang() ?? 'es'),
     plural: (key: string, count: number, params?: Record<string, unknown>) => {
       locale();
       return translatePlural(translate, key, count, params);
