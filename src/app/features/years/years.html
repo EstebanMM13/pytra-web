@@ -1,6 +1,8 @@
 <app-navbar />
 
 <main class="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-3 pb-10 md:gap-[26px] md:px-10 md:pt-8 md:pb-12">
+  <!-- Years hang off the stats hub: the way back to it (deep links keep working, it is only a link). -->
+  <app-stats-back-link class="-mb-2 md:-mb-4" />
   @if (noYears()) {
     <h1 class="font-display text-[28px] font-bold tracking-[-0.03em] md:text-[34px]">{{ 'years.title' | translate }}</h1>
     <div

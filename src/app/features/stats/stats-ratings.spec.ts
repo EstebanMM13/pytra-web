@@ -4,6 +4,7 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { provideTranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { RatingStats } from '../../core/models/stats.model';
+import { PlatformService } from '../../core/services/platform.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -41,6 +42,7 @@ describe('Stats ratings page', () => {
         { provide: ActivatedRoute, useValue: { queryParamMap, snapshot: { queryParamMap: queryParamMap.value } } },
         { provide: RunFormLauncher, useValue: { saved$: new Subject() } },
         { provide: StatsService, useValue: { getRatings: () => of(data), getYears: () => of([]) } },
+        { provide: PlatformService, useValue: { platforms: () => null, load: () => of([]) } },
       ],
     });
     TestBed.overrideComponent(StatsRatings, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
@@ -53,13 +55,29 @@ describe('Stats ratings page', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('reads the mean in plain language and draws all 21 buckets', () => {
+  it('reads the mean in plain language and draws all 21 buckets (wide) with a label each', () => {
     const el = setup(ratings());
     expect(el.querySelector('[data-mean]')!.textContent).toContain('stats.ratings.temperament.generous');
-    const bars = el.querySelectorAll<HTMLElement>('[data-histogram] [role="listitem"] > div');
+    const [narrow, wide] = [...el.querySelectorAll<HTMLElement>('[data-histogram]')];
+    const bars = wide.querySelectorAll<HTMLElement>('[role="listitem"] > div');
     expect(bars).toHaveLength(21);
     expect(bars[16].style.height).toBe('100%');
     expect(bars[0].style.height).toBe('0%');
+    const [narrowAxis, wideAxis] = [...el.querySelectorAll<HTMLElement>('[data-histogram-axis]')];
+    expect(wideAxis.querySelectorAll('span')).toHaveLength(21);
+    // Phones: whole points, 0..10, every column labelled; 8 and 8.5 merge into the "8" column.
+    const narrowBars = narrow.querySelectorAll<HTMLElement>('[role="listitem"] > div');
+    expect(narrowBars).toHaveLength(11);
+    expect(narrowBars[8].style.height).toBe('100%');
+    expect([...narrowAxis.querySelectorAll('span')].map((s) => s.textContent!.trim())).toEqual(
+      ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+    );
+  });
+
+  it('links genres and platforms to the library', () => {
+    const el = setup(ratings({ byGenre: [{ genreId: 1, genreName: 'RPG', ratedCount: 4, averageRating: 8.5 }] }));
+    expect(el.querySelector('[data-genres] a')!.getAttribute('href')).toBe('/games?genre=1');
+    expect(el.querySelector('[data-platforms] a')!.getAttribute('href')).toBe('/games?platform=1');
   });
 
   it('hides genres with too few ratings', () => {

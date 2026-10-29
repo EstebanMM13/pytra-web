@@ -25,6 +25,7 @@ import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { formatRelativeTime } from '../../shared/utils/relative-time';
+import { StatsBackLink } from '../stats/stats-back-link';
 import { YearSelector } from './year-selector';
 import { toastApiError } from '../../shared/utils/api-error';
 import {
@@ -74,6 +75,7 @@ type SummaryState = { year: number; data: YearSummary | null; failed: boolean };
     Skeleton,
     LucideDynamicIcon,
     YearSelector,
+    StatsBackLink,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './years.html',

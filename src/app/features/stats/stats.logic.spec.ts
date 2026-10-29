@@ -5,7 +5,11 @@ import {
   activityYears,
   buildHeatmap,
   decadeParams,
+  gamesLinkParams,
+  histogramColumns,
   platformColor,
+  platformShades,
+  shadeLightnesses,
   ratingSpread,
   ratingTemperament,
   sagaTeaser,
@@ -173,5 +177,95 @@ describe('hub teasers', () => {
     expect(decadeParams(1990)).toEqual({ decade: 1990, short: '90' });
     expect(decadeParams(2000)).toEqual({ decade: 2000, short: '2000' });
     expect(decadeParams(2010).short).toBe('2010');
+  });
+});
+
+/** Relative luminance-free lightness of a #rrggbb colour (HSL L), for the shade assertions. */
+function lightness(hex: string): number {
+  const n = parseInt(hex.slice(1), 16);
+  const channels = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => c / 255);
+  return (Math.max(...channels) + Math.min(...channels)) / 2;
+}
+
+describe('platformShades', () => {
+  const playstation = ['PS5', 'PS4', 'PS3', 'PS2', 'PS1', 'PSP', 'PS Vita'].map((name, i) => ({
+    id: i + 1,
+    name,
+    color: '#4F7BE8',
+    sortOrder: 20 + i * 10,
+  }));
+
+  it('gives every platform of a shared colour its own shade, deterministically', () => {
+    const shades = platformShades([...playstation].reverse());
+    const colors = playstation.map((p) => shades.get(p.id)!);
+    expect(new Set(colors).size).toBe(playstation.length);
+    // Same catalog in another order: same colours.
+    expect(platformShades(playstation)).toEqual(shades);
+  });
+
+  it('keeps catalog neighbours far apart and every shade readable on both themes', () => {
+    const shades = platformShades(playstation);
+    const ps5 = lightness(shades.get(1)!);
+    const ps4 = lightness(shades.get(2)!);
+    expect(Math.abs(ps5 - ps4)).toBeGreaterThan(0.15);
+    for (const color of shades.values()) {
+      expect(lightness(color)).toBeGreaterThanOrEqual(0.29);
+      expect(lightness(color)).toBeLessThanOrEqual(0.77);
+    }
+  });
+
+  it('keeps the hue of the family colour', () => {
+    const shades = platformShades(playstation);
+    for (const color of shades.values()) {
+      const n = parseInt(color.slice(1), 16);
+      const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      // A blue: blue is the strongest channel, red the weakest.
+      expect(b).toBeGreaterThan(g);
+      expect(g).toBeGreaterThan(r);
+    }
+  });
+
+  it('leaves platforms with a colour of their own (and without one) alone', () => {
+    const shades = platformShades([
+      { id: 1, color: '#E60012', sortOrder: 1 },
+      { id: 2, color: null, sortOrder: 2 },
+    ]);
+    expect(shades.get(1)).toBe('#e60012');
+    expect(shades.has(2)).toBe(false);
+  });
+
+  it('spreads lightness slots around the base, the first one closest to it', () => {
+    const slots = shadeLightnesses(0.5, 3);
+    expect(slots[0]).toBeCloseTo(0.5, 1);
+    expect(new Set(slots.map((l) => l.toFixed(3))).size).toBe(3);
+    expect(shadeLightnesses(0.5, 1)).toEqual([0.5]);
+  });
+});
+
+describe('histogramColumns', () => {
+  const buckets = Array.from({ length: 21 }, (_, i) => ({ from: i / 2, to: i === 20 ? 10 : (i + 1) / 2, count: i }));
+
+  it('keeps the half-point buckets on wide screens', () => {
+    expect(histogramColumns(buckets, false)).toHaveLength(21);
+  });
+
+  it('groups them into whole points plus the perfect 10s', () => {
+    const columns = histogramColumns(buckets, true);
+    expect(columns).toHaveLength(11);
+    expect(columns[0]).toEqual({ from: 0, to: 1, count: 0 + 1 });
+    expect(columns[9]).toEqual({ from: 9, to: 10, count: 18 + 19 });
+    expect(columns[10]).toEqual({ from: 10, to: 10, count: 20 });
+  });
+});
+
+describe('gamesLinkParams', () => {
+  it('writes the library URL filters, leaving out what is not set', () => {
+    expect(gamesLinkParams({ platform: 3, year: 2024 })).toEqual({ platform: '3', year: '2024' });
+    expect(gamesLinkParams({ genre: 5, year: null })).toEqual({ genre: '5' });
+    expect(gamesLinkParams({ days: { min: 366, max: null }, hours: { min: 10, max: 30 }, decade: 1990 })).toEqual({
+      decade: '1990',
+      days: '366-',
+      hours: '10-30',
+    });
   });
 });

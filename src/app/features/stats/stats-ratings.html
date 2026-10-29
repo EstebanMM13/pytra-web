@@ -42,26 +42,35 @@
 
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header class="mb-3.5" [label]="'stats.ratings.histogram' | translate" />
-        <!-- 21 buckets of 0.5 (the last one is a perfect 10); plain divs, axis on the user's scale. -->
-        <div class="flex h-32 items-end gap-0.5 border-b border-divider" role="list" data-histogram>
-          @for (bar of histogram(); track bar.key) {
-            <div class="flex h-full min-w-0 flex-1 items-end" role="listitem" [attr.aria-label]="bar.title" [attr.title]="bar.title">
-              <div class="bar-grow w-full rounded-t bg-gold" [style.height.%]="bar.height"></div>
-            </div>
-          }
+        <!-- Plain divs, every column labelled on the user's scale: whole points on phones (11 columns fit
+             360px with large text), the 21 half-point buckets from md (the last one is a perfect 10). -->
+        <div class="md:hidden">
+          <ng-container *ngTemplateOutlet="histogram; context: { $implicit: histograms().narrow }" />
         </div>
-        <div class="mt-1.5 flex justify-between font-mono text-[11px] text-faint" aria-hidden="true">
-          @for (label of axis(); track $index) {
-            <span>{{ label }}</span>
-          }
+        <div class="hidden md:block">
+          <ng-container *ngTemplateOutlet="histogram; context: { $implicit: histograms().wide }" />
         </div>
+        <ng-template #histogram let-columns>
+          <div class="flex h-32 items-end gap-0.5 border-b border-divider" role="list" data-histogram>
+            @for (bar of columns; track bar.key) {
+              <div class="flex h-full min-w-0 flex-1 items-end" role="listitem" [attr.aria-label]="bar.title" [attr.title]="bar.title">
+                <div class="bar-grow w-full rounded-t bg-gold" [style.height.%]="bar.height"></div>
+              </div>
+            }
+          </div>
+          <div class="mt-1.5 flex gap-0.5 font-mono text-[10px] leading-tight text-faint" aria-hidden="true" data-histogram-axis>
+            @for (bar of columns; track bar.key) {
+              <span class="min-w-0 flex-1 text-center tracking-tighter whitespace-nowrap">{{ bar.label }}</span>
+            }
+          </div>
+        </ng-template>
       </section>
 
       <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
         <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
           <app-section-header class="mb-3" [label]="'stats.ratings.byGenre' | translate" />
           @if (genreRows().length) {
-            <app-stats-bar-list [bars]="genreRows()" tone="gold" data-genres />
+            <app-stats-bar-list [bars]="genreRows()" [limit]="preview" tone="gold" data-genres />
           } @else {
             <p class="py-6 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
           }
@@ -75,7 +84,7 @@
         <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
           <app-section-header class="mb-3" [label]="'stats.ratings.byPlatform' | translate" />
           @if (platformRows().length) {
-            <app-stats-bar-list [bars]="platformRows()" tone="gold" data-platforms />
+            <app-stats-bar-list [bars]="platformRows()" [limit]="preview" tone="gold" data-platforms />
           } @else {
             <p class="py-6 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
           }

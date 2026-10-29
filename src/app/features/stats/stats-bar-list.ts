@@ -1,6 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Params, RouterLink } from '@angular/router';
+import { LucideDynamicIcon } from '@lucide/angular';
+import { TranslatePipe } from '@ngx-translate/core';
+import { ICONS } from '../../shared/ui/icons';
 
 /** One row of a `StatsBarList`. */
 export interface StatsBar {
@@ -18,8 +21,10 @@ export interface StatsBar {
   color?: string | null;
   /** Shows a dot in `color` before the label (platforms). */
   dot?: boolean;
-  /** Router commands the whole row links to. */
+  /** Router commands the whole row links to (a chevron marks it as tappable). */
   link?: readonly (string | number)[] | null;
+  /** Query params of `link` (library filters). */
+  queryParams?: Params | null;
 }
 
 const TONE_COLOR = {
@@ -28,23 +33,35 @@ const TONE_COLOR = {
   danger: 'var(--pt-danger)',
 } as const;
 
+/** Rows a long stats list shows before "Ver todos" (the length of the days-to-finish list). */
+export const STATS_LIST_PREVIEW = 6;
+
 /**
  * Ranked rows built to survive narrow screens and large system fonts: the label (up to two lines,
  * never cut to one) and its figure on the first line, a full-width bar under them and an optional
- * small line below. Plain divs, no chart library.
+ * small line below. Plain divs, no chart library. With `limit`, longer lists show their first rows
+ * and a "Ver todos (N)" toggle that expands them in place (as the profile achievements do).
  */
 @Component({
   selector: 'app-stats-bar-list',
-  imports: [NgTemplateOutlet, RouterLink],
+  imports: [NgTemplateOutlet, RouterLink, LucideDynamicIcon, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
     <ul class="flex flex-col">
-      @for (bar of bars(); track bar.key) {
+      @for (bar of visible(); track bar.key) {
         <li class="border-t border-divider first:border-t-0" data-bar-row>
           @if (bar.link) {
-            <a [routerLink]="bar.link" class="hover-lift -mx-2 block rounded-lg px-2 py-2.5 hover:bg-hover">
-              <ng-container *ngTemplateOutlet="row; context: { $implicit: bar }" />
+            <a
+              [routerLink]="bar.link"
+              [queryParams]="bar.queryParams ?? null"
+              class="hover-lift -mx-2 flex items-center gap-1.5 rounded-lg px-2 py-2.5 hover:bg-hover"
+              data-bar-link
+            >
+              <span class="block min-w-0 flex-1">
+                <ng-container *ngTemplateOutlet="row; context: { $implicit: bar }" />
+              </span>
+              <svg [lucideIcon]="icons.chevronRight" [size]="16" class="-mr-1 shrink-0 text-faint" aria-hidden="true"></svg>
             </a>
           } @else {
             <div class="py-2.5">
@@ -54,6 +71,18 @@ const TONE_COLOR = {
         </li>
       }
     </ul>
+    @if (cut() !== null) {
+      <button
+        type="button"
+        (click)="expanded.set(!expanded())"
+        [attr.aria-expanded]="expanded()"
+        class="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border py-2.5 text-[13px] text-text-2 hover:border-border-strong"
+        data-bar-toggle
+      >
+        {{ (expanded() ? 'stats.showLess' : 'stats.showAll') | translate: { total: bars().length } }}
+        <svg [lucideIcon]="icons.chevronDown" [size]="16" class="transition-transform" [class.rotate-180]="expanded()" aria-hidden="true"></svg>
+      </button>
+    }
 
     <ng-template #row let-bar>
       <span class="flex items-start justify-between gap-3">
@@ -79,8 +108,22 @@ const TONE_COLOR = {
   `,
 })
 export class StatsBarList {
+  protected readonly icons = ICONS;
   readonly bars = input.required<readonly StatsBar[]>();
   /** Default bar colour: brand (activity), gold (ratings) or danger (abandonment). */
   readonly tone = input<keyof typeof TONE_COLOR>('brand');
+  /** Rows shown before the "Ver todos" toggle; null shows every row. */
+  readonly limit = input<number | null>(null);
   protected readonly toneColor = computed(() => TONE_COLOR[this.tone()]);
+  protected readonly expanded = signal(false);
+
+  /** A list that only exceeds the limit by one row shows it whole (a toggle for one row is noise). */
+  protected readonly cut = computed(() => {
+    const limit = this.limit();
+    return limit !== null && this.bars().length > limit + 1 ? limit : null;
+  });
+  protected readonly visible = computed(() => {
+    const cut = this.cut();
+    return cut === null || this.expanded() ? this.bars() : this.bars().slice(0, cut);
+  });
 }

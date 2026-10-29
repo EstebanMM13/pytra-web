@@ -117,6 +117,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/stats/stats-studios').then((m) => m.StatsStudios),
   },
   {
+    // Studio detail: `?name=` is the developer as the studio stats group it (trimmed, any case).
+    path: 'stats/studio',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/stats/stats-studio').then((m) => m.StatsStudio),
+  },
+  {
     path: 'stats/habits',
     canActivate: [authGuard],
     loadComponent: () => import('./features/stats/stats-habits').then((m) => m.StatsHabits),

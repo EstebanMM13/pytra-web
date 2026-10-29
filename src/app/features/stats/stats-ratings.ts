@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
 import { StatsService } from '../../core/services/stats.service';
@@ -12,17 +13,20 @@ import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { ratingTone } from '../../shared/utils/rating-tone';
-import { StatsBar, StatsBarList } from './stats-bar-list';
+import { STATS_LIST_PREVIEW, StatsBar, StatsBarList } from './stats-bar-list';
 import { statsFormat } from './stats-format';
 import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
+import { statsPlatformColors } from './stats-platform-colors';
 import { StatsScope } from './stats-scope';
 import { statsSection } from './stats-section';
 import {
+  GAMES_LINK,
   MIN_GENRE_RATINGS,
   RatingSpread,
   RatingTemperament,
-  platformColor,
+  gamesLinkParams,
+  histogramColumns,
   ratingShare,
   ratingSpread,
   ratingTemperament,
@@ -47,12 +51,14 @@ const MIN_BAR_PERCENT = 3;
 
 /**
  * Ratings section (`/stats/ratings?year=`): mean / median / spread with a plain-language read,
- * the 0.5-wide histogram (plain divs) and the average per genre and per platform.
+ * the histogram (plain divs: 0.5-wide buckets from md, whole points on phones so every column is
+ * labelled) and the average per genre and per platform (rows open the library filtered by them).
  */
 @Component({
   selector: 'app-stats-ratings',
   imports: [
     Navbar,
+    NgTemplateOutlet,
     LucideDynamicIcon,
     TranslatePipe,
     TranslatePluralPipe,
@@ -72,10 +78,12 @@ const MIN_BAR_PERCENT = 3;
 export class StatsRatings {
   protected readonly icons = ICONS;
   protected readonly minGenreRatings = MIN_GENRE_RATINGS;
+  protected readonly preview = STATS_LIST_PREVIEW;
   private readonly stats = inject(StatsService);
   private readonly format = statsFormat();
   protected readonly section = statsSection((year) => this.stats.getRatings(year));
   protected readonly state = this.section.state;
+  private readonly colorOf = statsPlatformColors();
 
   /** Translation key of the mean's plain-language read, null without ratings. */
   protected readonly temperamentKey = computed(() => {
@@ -88,37 +96,52 @@ export class StatsRatings {
     return spread ? SPREAD_KEYS[spread] : null;
   });
 
-  protected readonly histogram = computed(() => {
+  /** Phones: 11 whole-point columns; md and up: the 21 half-point buckets. Each column has its label. */
+  protected readonly histograms = computed(() => {
     const buckets = this.state().data?.histogram ?? [];
-    const ratios = shares(buckets.map((b) => b.count));
-    const f = this.format;
-    return buckets.map((b, i) => ({
-      key: b.from,
-      height: b.count > 0 ? Math.max(MIN_BAR_PERCENT, ratios[i] * 100) : 0,
-      title: f.text('stats.ratings.histogramBar', { from: f.point(b.from), to: f.point(b.to), count: b.count }),
-    }));
+    return { narrow: this.columns(histogramColumns(buckets, true)), wide: this.columns(histogramColumns(buckets, false)) };
   });
-  /** Axis ends and middle on the user's scale. */
-  protected readonly axis = computed(() => [0, 5, 10].map((point) => this.format.point(point)));
+
+  private columns(columns: ReturnType<typeof histogramColumns>) {
+    const ratios = shares(columns.map((c) => c.count));
+    const f = this.format;
+    return columns.map((c, i) => {
+      const from = f.point(c.from);
+      return {
+        key: c.from,
+        height: c.count > 0 ? Math.max(MIN_BAR_PERCENT, ratios[i] * 100) : 0,
+        label: from,
+        title:
+          c.from === c.to
+            ? f.text('stats.ratings.histogramPoint', { point: from, count: c.count })
+            : f.text('stats.ratings.histogramBar', { from, to: f.point(c.to), count: c.count }),
+      };
+    });
+  }
 
   protected readonly genres = computed(() => {
     const byGenre = [...(this.state().data?.byGenre ?? [])].sort((a, b) => b.averageRating - a.averageRating);
     return splitBySample(byGenre, (g) => g.ratedCount, MIN_GENRE_RATINGS);
   });
 
-  protected readonly genreRows = computed<StatsBar[]>(() =>
-    this.genres().shown.map((g) => ({
+  protected readonly genreRows = computed<StatsBar[]>(() => {
+    const year = this.state().year;
+    return this.genres().shown.map((g) => ({
       key: g.genreId,
       label: formatGenreName(g.genreName),
       share: ratingShare(g.averageRating),
       figure: this.format.rating(g.averageRating),
       figureClass: ratingTone(g.averageRating),
       sub: this.format.plural('stats.ratings.count', g.ratedCount),
-    })),
-  );
+      link: GAMES_LINK,
+      queryParams: gamesLinkParams({ genre: g.genreId, year }),
+    }));
+  });
 
-  protected readonly platformRows = computed<StatsBar[]>(() =>
-    [...(this.state().data?.byPlatform ?? [])]
+  protected readonly platformRows = computed<StatsBar[]>(() => {
+    const colorOf = this.colorOf();
+    const year = this.state().year;
+    return [...(this.state().data?.byPlatform ?? [])]
       .sort((a, b) => b.averageRating - a.averageRating)
       .map((p) => ({
         key: p.platformId,
@@ -126,9 +149,11 @@ export class StatsRatings {
         share: ratingShare(p.averageRating),
         figure: this.format.rating(p.averageRating),
         figureClass: ratingTone(p.averageRating),
-        color: platformColor(p.color),
+        color: colorOf(p.platformId, p.color),
         dot: true,
         sub: this.format.plural('stats.ratings.count', p.ratedCount),
-      })),
-  );
+        link: GAMES_LINK,
+        queryParams: gamesLinkParams({ platform: p.platformId, year }),
+      }));
+  });
 }

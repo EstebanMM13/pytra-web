@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Streak } from '../../core/models/stats.model';
@@ -32,8 +32,8 @@ import {
 
 /**
  * Activity section (`/stats/activity?year=`): the year's diary days as a GitHub-style heatmap
- * (two half-year strips on phones so the cells stay tappable, one strip from md), streaks and
- * hours per weekday. Without `year` the API answers for the current year.
+ * (two half-year strips on phones so the cells stay tappable, one strip from md; a tap opens that
+ * day in the diary), streaks and hours per weekday. Without `year` the API answers for the current year.
  */
 @Component({
   selector: 'app-stats-activity',
@@ -88,8 +88,6 @@ export class StatsActivity {
     return data ? HEATMAP_HALVES.map((half) => buildHeatmap(data.year, data.days, half.fromMonth, half.toMonth)) : [];
   });
 
-  /** Day picked on the heatmap (a tap on phones, where there is no hover title). */
-  protected readonly picked = signal<HeatCell | null>(null);
 
   protected readonly weekdayBars = computed<MiniBar[]>(() => {
     const data = this.state().data;
@@ -135,11 +133,14 @@ export class StatsActivity {
   }
 
   protected cellClass(cell: HeatCell): string {
-    return DIARY_LEVEL_CLASS[cell.level] + (this.picked()?.date === cell.date ? ' ring-1 ring-text' : '');
+    return DIARY_LEVEL_CLASS[cell.level];
   }
 
-  protected pick(cell: HeatCell): void {
-    this.picked.set(this.picked()?.date === cell.date ? null : cell);
+  private readonly router = inject(Router);
+
+  /** Opens the day in the diary (its editor: the entry, or a new one for an empty day). */
+  protected open(cell: HeatCell): void {
+    void this.router.navigate(['/diary'], { queryParams: { date: cell.date } });
   }
 
   /** "12 oct – 20 oct" (with the year when the streak is outside the viewed year). */

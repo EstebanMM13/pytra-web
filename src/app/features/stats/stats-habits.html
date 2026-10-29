@@ -61,7 +61,7 @@
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header class="mb-3" [label]="'stats.habits.abandonment' | translate" />
         @if (abandonmentRows().length) {
-          <app-stats-bar-list [bars]="abandonmentRows()" tone="danger" data-abandonment />
+          <app-stats-bar-list [bars]="abandonmentRows()" [limit]="preview" tone="danger" data-abandonment />
         } @else {
           <p class="py-6 text-center text-sm text-muted">{{ 'stats.habits.noAbandonment' | translate }}</p>
         }

@@ -1,30 +1,19 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { LucideDynamicIcon } from '@lucide/angular';
-import { TranslatePipe } from '@ngx-translate/core';
-import { ICONS } from '../../shared/ui/icons';
+import { StatsBackLink } from './stats-back-link';
 
 /**
- * Title block of a stats hub section: a link back to the hub, the title and subtitle, and a
- * projected slot (the period picker) beside them on wide screens, below them on phones.
+ * Title block of a stats hub section: a link back to the hub (or to `backLink`), the title and
+ * subtitle, and a projected slot (the period picker) beside them on wide screens, below them on phones.
  */
 @Component({
   selector: 'app-stats-page-header',
-  imports: [RouterLink, TranslatePipe, LucideDynamicIcon],
+  imports: [StatsBackLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between' },
   template: `
     <div class="min-w-0">
-      <a
-        routerLink="/stats"
-        class="tap-area -ml-1 inline-flex items-center gap-0.5 rounded-md text-[13px] text-text-3 hover:text-text"
-        [attr.aria-label]="'stats.backAria' | translate"
-        data-stats-back
-      >
-        <svg [lucideIcon]="icons.chevronLeft" [size]="16" aria-hidden="true"></svg>
-        {{ 'stats.back' | translate }}
-      </a>
-      <h1 class="mt-1 font-display text-[28px] leading-tight font-bold tracking-[-0.035em] md:text-[36px]">
+      <app-stats-back-link [link]="backLink()" [label]="backLabel()" [aria]="backAria()" />
+      <h1 class="mt-1 font-display text-[28px] leading-tight font-bold tracking-[-0.035em] wrap-break-word md:text-[36px]">
         {{ title() }}
       </h1>
       @if (subtitle(); as text) {
@@ -35,7 +24,11 @@ import { ICONS } from '../../shared/ui/icons';
   `,
 })
 export class StatsPageHeader {
-  protected readonly icons = ICONS;
   readonly title = input.required<string>();
   readonly subtitle = input<string | null>(null);
+  /** Where the back link goes (the hub by default; a section from its detail pages). */
+  readonly backLink = input<string>('/stats');
+  /** Translation keys of the back link's text and accessible name. */
+  readonly backLabel = input('stats.back');
+  readonly backAria = input('stats.backAria');
 }

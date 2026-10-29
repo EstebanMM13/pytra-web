@@ -4,6 +4,7 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { provideTranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { PlatformStats } from '../../core/models/stats.model';
+import { PlatformService } from '../../core/services/platform.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -39,6 +40,18 @@ describe('Stats platforms page', () => {
         { provide: ActivatedRoute, useValue: { queryParamMap, snapshot: { queryParamMap: queryParamMap.value } } },
         { provide: RunFormLauncher, useValue: { saved$: new Subject() } },
         { provide: StatsService, useValue: { getByPlatform, getYears: () => of([2026, 2024]) } },
+        // PS5 and PS4 share the family colour in the catalog: the page shades them apart.
+        {
+          provide: PlatformService,
+          useValue: {
+            platforms: () => null,
+            load: () =>
+              of([
+                { id: 1, name: 'PS5', color: '#6b93f5', family: 'PLAYSTATION', legacyCode: 'PS5', sortOrder: 20 },
+                { id: 4, name: 'PS4', color: '#6b93f5', family: 'PLAYSTATION', legacyCode: 'PS4', sortOrder: 30 },
+              ]),
+          },
+        },
       ],
     });
     TestBed.overrideComponent(StatsPlatforms, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
@@ -57,10 +70,30 @@ describe('Stats platforms page', () => {
     expect(el.querySelectorAll('[data-platform-list] [data-bar-row]')).toHaveLength(2);
   });
 
-  it('stacks every year with hours, newest first, linking to its summary', () => {
-    const { el } = setup({ year: '2026' });
+  it('stacks every year with hours, newest first, linking to its summary (all time only)', () => {
+    const { el } = setup();
     const links = [...el.querySelectorAll('[data-platform-years] a')].map((a) => a.getAttribute('href'));
     expect(links).toEqual(['/years/2026', '/years/2024']);
     expect(el.querySelectorAll('[data-platform-legend] li')).toHaveLength(2);
+  });
+
+  it('hides the yearly stack when a year is picked', () => {
+    const { el } = setup({ year: '2026' });
+    expect(el.querySelector('[data-platform-years-card]')).toBeNull();
+    expect(el.querySelectorAll('[data-platform-list] [data-bar-row]')).toHaveLength(2);
+  });
+
+  it('links each platform to the library filtered by it and by the picked year', () => {
+    const { el } = setup({ year: '2026' });
+    const hrefs = [...el.querySelectorAll('[data-platform-list] a[data-bar-link]')].map((a) => a.getAttribute('href'));
+    expect(hrefs).toEqual(['/games?platform=1&year=2026', '/games?platform=2&year=2026']);
+  });
+
+  it('colours a platform sharing its family colour with a shade of it', () => {
+    const { el } = setup();
+    const dot = el.querySelector<HTMLElement>('[data-platform-list] [data-bar-row] span[aria-hidden="true"].rounded-full')!;
+    // PS5 is first of its family in the catalog: it keeps a shade close to the family colour, not the neutral one.
+    expect(dot.style.backgroundColor).not.toBe('');
+    expect(dot.style.backgroundColor).not.toContain('platform-neutral');
   });
 });

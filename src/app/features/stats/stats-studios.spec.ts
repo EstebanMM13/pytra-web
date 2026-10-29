@@ -71,4 +71,10 @@ describe('Stats studios page', () => {
     const { el } = setup();
     expect(el.querySelectorAll('[data-decades] [data-bar-row]')).toHaveLength(2);
   });
+
+  it('opens a studio page from its row and the library from a decade', () => {
+    const { el } = setup();
+    expect(el.querySelector('[data-developers] a')!.getAttribute('href')).toBe('/stats/studio?name=FromSoftware');
+    expect(el.querySelector('[data-decades] a')!.getAttribute('href')).toBe('/games?decade=1990');
+  });
 });

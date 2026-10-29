@@ -15,7 +15,7 @@
           </p>
         }
         @if (developerRows().length) {
-          <app-stats-bar-list [bars]="developerRows()" [tone]="ranking() === 'rating' ? 'gold' : 'brand'" data-developers />
+          <app-stats-bar-list [bars]="developerRows()" [limit]="preview" [tone]="ranking() === 'rating' ? 'gold' : 'brand'" data-developers />
         } @else {
           <p class="py-6 text-center text-sm text-muted">
             {{ (ranking() === 'rating' ? 'stats.studios.noRated' : 'stats.studios.empty') | translate }}
@@ -26,7 +26,7 @@
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header class="mb-3" [label]="'stats.studios.decades' | translate" />
         @if (decadeRows().length) {
-          <app-stats-bar-list [bars]="decadeRows()" data-decades />
+          <app-stats-bar-list [bars]="decadeRows()" [limit]="preview" data-decades />
         } @else {
           <p class="py-6 text-center text-sm text-muted">{{ 'stats.studios.noDecades' | translate }}</p>
         }

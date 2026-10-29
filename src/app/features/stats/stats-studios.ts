@@ -12,12 +12,12 @@ import { SectionHeader } from '../../shared/ui/section-header';
 import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { ratingTone } from '../../shared/utils/rating-tone';
-import { StatsBar, StatsBarList } from './stats-bar-list';
+import { STATS_LIST_PREVIEW, StatsBar, StatsBarList } from './stats-bar-list';
 import { statsFormat } from './stats-format';
 import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { statsSection } from './stats-section';
-import { decadeParams, joinParts, ratingShare, shares } from './stats.logic';
+import { GAMES_LINK, decadeParams, gamesLinkParams, joinParts, ratingShare, shares } from './stats.logic';
 
 type DeveloperRanking = 'hours' | 'rating';
 
@@ -26,9 +26,13 @@ const RANKING_OPTIONS: readonly SegmentedOption<DeveloperRanking>[] = [
   { value: 'rating', label: 'stats.studios.byRating' },
 ];
 
+/** Router commands of the studio detail page (the name goes in `?name=`). */
+const STUDIO_LINK: readonly string[] = ['/stats/studio'];
+
 /**
  * Studios & eras section (`/stats/studios`, all time): top developers by hours or by rating (only
- * those with enough rated games) and games per release decade.
+ * those with enough rated games; each opens its studio page) and games per release decade (each
+ * opens the library on that decade).
  */
 @Component({
   selector: 'app-stats-studios',
@@ -51,6 +55,7 @@ export class StatsStudios {
   private readonly format = statsFormat();
   protected readonly rankingOptions = RANKING_OPTIONS;
   protected readonly ranking = signal<DeveloperRanking>('hours');
+  protected readonly preview = STATS_LIST_PREVIEW;
 
   // All-time data: the year param is ignored.
   protected readonly section = statsSection(() =>
@@ -76,6 +81,8 @@ export class StatsStudios {
         share: ratios[i],
         figure: f.hours(d.hours),
         sub: f.plural('common.games', d.gameCount),
+        link: STUDIO_LINK,
+        queryParams: { name: d.developer },
       }));
     }
     return developers.topByRating.map((d, i) => ({
@@ -85,6 +92,8 @@ export class StatsStudios {
       figure: f.rating(d.averageRating),
       figureClass: ratingTone(d.averageRating),
       sub: joinParts([f.plural('stats.studios.rated', d.ratedGameCount), f.hours(d.hours)]),
+      link: STUDIO_LINK,
+      queryParams: { name: d.developer },
     }));
   });
 
@@ -97,6 +106,8 @@ export class StatsStudios {
       label: f.text('stats.studios.decade', decadeParams(d.decade)),
       share: ratios[i],
       figure: f.plural('common.games', d.gameCount),
+      link: GAMES_LINK,
+      queryParams: gamesLinkParams({ decade: d.decade }),
       sub: joinParts([
         f.hours(d.hours),
         d.averageRating !== null ? f.text('stats.platforms.average', { rating: f.rating(d.averageRating) }) : null,

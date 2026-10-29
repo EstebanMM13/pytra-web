@@ -84,4 +84,14 @@ describe('Stats habits page', () => {
     expect(el.querySelectorAll('[data-day-buckets] [data-bar-row]')).toHaveLength(6);
     expect(el.querySelectorAll('[data-hours-buckets] [data-bar-row]')).toHaveLength(4);
   });
+
+  it('links buckets and genres to the library, within the picked year', () => {
+    const el = setup();
+    // The empty first day bucket (0 runs) has no link.
+    const days = [...el.querySelectorAll('[data-day-buckets] a')].map((a) => a.getAttribute('href'));
+    expect(days).toHaveLength(5);
+    expect(days[0]).toBe('/games?year=2025&days=1-');
+    expect(el.querySelector('[data-hours-buckets] a')!.getAttribute('href')).toBe('/games?year=2025&hours=0-');
+    expect(el.querySelector('[data-abandonment] a')!.getAttribute('href')).toBe('/games?genre=1&year=2025');
+  });
 });

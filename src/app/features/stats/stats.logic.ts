@@ -2,9 +2,12 @@ import {
   ActivityDay,
   GenreAbandonment,
   PlatformYear,
+  RatingBucket,
   SagaStat,
 } from '../../core/models/stats.model';
+import { Params } from '@angular/router';
 import { DiaryLevel, intensityLevel } from '../diary/diary.logic';
+import { NumberRange, serializeRange } from '../games/play-filters.logic';
 
 /** Fewest runs (completed + abandoned) a genre needs before its abandonment rate is shown. */
 export const MIN_ABANDONMENT_SAMPLE = 3;
@@ -43,6 +46,136 @@ const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 /** A catalog colour safe for a style binding, else the neutral platform colour. */
 export function platformColor(color: string | null | undefined): string {
   return color && HEX_COLOR.test(color) ? color : NEUTRAL_PLATFORM_COLOR;
+}
+
+/** Resolves a platform's colour in the stats: its shade (see `platformShades`), else its catalog colour. */
+export type PlatformColorOf = (platformId: number, color: string | null | undefined) => string;
+
+/** Without a catalog: every platform keeps its catalog colour. */
+export const CATALOG_COLOR: PlatformColorOf = (_id, color) => platformColor(color);
+
+/** Lightness (0..1) band the shades stay in, so every one reads on the light and the dark cards. */
+const SHADE_MIN_LIGHTNESS = 0.3;
+const SHADE_MAX_LIGHTNESS = 0.76;
+/** Widest lightness distance of a shade from its family colour. */
+const SHADE_SPREAD = 0.22;
+
+function hexToHsl(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  const r = ((n >> 16) & 255) / 255;
+  const g = ((n >> 8) & 255) / 255;
+  const b = (n & 255) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h / 6, s, l];
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const channel = (t: number): number => {
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const x = ((t % 1) + 1) % 1;
+    if (x < 1 / 6) return p + (q - p) * 6 * x;
+    if (x < 1 / 2) return q;
+    if (x < 2 / 3) return p + (q - p) * (2 / 3 - x) * 6;
+    return p;
+  };
+  const hex = (v: number) => Math.round(v * 255).toString(16).padStart(2, '0');
+  return `#${hex(channel(h + 1 / 3))}${hex(channel(h))}${hex(channel(h - 1 / 3))}`;
+}
+
+/**
+ * Lightness slots of a group of `count` platforms sharing one colour: evenly spread over a band
+ * around the base lightness, handed out so that catalog neighbours (PS4, PS5) land far apart
+ * (0, then the band's far end, then the middle, ...) and the first platform keeps a value close
+ * to the family colour.
+ */
+export function shadeLightnesses(base: number, count: number): number[] {
+  if (count <= 1) return [base];
+  const lo = Math.max(SHADE_MIN_LIGHTNESS, Math.min(base, SHADE_MAX_LIGHTNESS) - SHADE_SPREAD);
+  const hi = Math.min(SHADE_MAX_LIGHTNESS, Math.max(base, SHADE_MIN_LIGHTNESS) + SHADE_SPREAD);
+  const slots = Array.from({ length: count }, (_, i) => lo + ((hi - lo) * i) / (count - 1));
+  // Start from the slot closest to the base colour, then alternate between the farthest free slots.
+  const order: number[] = [];
+  const free = slots.map((_, i) => i);
+  let current = free.reduce((best, i) => (Math.abs(slots[i] - base) < Math.abs(slots[best] - base) ? i : best), 0);
+  while (free.length) {
+    order.push(slots[current]);
+    free.splice(free.indexOf(current), 1);
+    if (!free.length) break;
+    const from = slots[current];
+    current = free.reduce((best, i) => (Math.abs(slots[i] - from) > Math.abs(slots[best] - from) ? i : best), free[0]);
+  }
+  return order;
+}
+
+/**
+ * One distinct, deterministic colour per catalog platform: platforms sharing a colour (every
+ * PlayStation gets the family blue) get shades of it, in catalog order (sortOrder, then id), with
+ * the hue and saturation kept and the lightness varied (see `shadeLightnesses`). Platforms with a
+ * colour of their own keep it.
+ */
+export function platformShades(
+  catalog: readonly { id: number; color: string | null; sortOrder?: number | null }[],
+): Map<number, string> {
+  const groups = new Map<string, { id: number; sortOrder: number }[]>();
+  for (const p of catalog) {
+    if (!p.color || !HEX_COLOR.test(p.color)) continue;
+    const key = p.color.toLowerCase();
+    const group = groups.get(key) ?? [];
+    group.push({ id: p.id, sortOrder: p.sortOrder ?? Number.MAX_SAFE_INTEGER });
+    groups.set(key, group);
+  }
+  const shades = new Map<number, string>();
+  for (const [color, group] of groups) {
+    group.sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id);
+    if (group.length === 1) {
+      shades.set(group[0].id, color);
+      continue;
+    }
+    const [h, s, l] = hexToHsl(color);
+    const lightness = shadeLightnesses(l, group.length);
+    group.forEach((p, i) => shades.set(p.id, hslToHex(h, s, lightness[i])));
+  }
+  return shades;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Links to the library
+// ---------------------------------------------------------------------------------------------
+
+/** What a stats row filters the library (/games) by; see play-filters.logic for the rules. */
+export interface GamesLinkFilter {
+  platform?: number;
+  genre?: number;
+  /** Played year (the section's year scope); null or absent: all time. */
+  year?: number | null;
+  /** Release decade (first year). */
+  decade?: number;
+  /** Days to finish a completed run. */
+  days?: NumberRange;
+  /** Hours of a completed run (max exclusive). */
+  hours?: NumberRange;
+}
+
+/** Router commands of a library link (with `gamesLinkParams` as its query params). */
+export const GAMES_LINK: readonly string[] = ['/games'];
+
+/** Query params of the library for a stats row, in the library's URL format. */
+export function gamesLinkParams(filter: GamesLinkFilter): Params {
+  const params: Params = {};
+  if (filter.platform !== undefined) params['platform'] = String(filter.platform);
+  if (filter.genre !== undefined) params['genre'] = String(filter.genre);
+  if (filter.year !== undefined && filter.year !== null) params['year'] = String(filter.year);
+  if (filter.decade !== undefined) params['decade'] = String(filter.decade);
+  if (filter.days) params['days'] = serializeRange(filter.days);
+  if (filter.hours) params['hours'] = serializeRange(filter.hours);
+  return params;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -203,6 +336,32 @@ export function ratingSpread(deviation: number | null | undefined): RatingSpread
   return 'moderate';
 }
 
+/** A histogram column: ratings in [from, to) on the stored scale, or exactly 10 when from = to = 10. */
+export interface HistogramColumn {
+  from: number;
+  to: number;
+  count: number;
+}
+
+/**
+ * The API's 21 half-point buckets as drawn: as they are (wide screens), or `grouped` into 11
+ * whole-point columns ([0, 1) .. [9, 10) and the perfect 10s) so every column of a phone-width
+ * chart can carry its own axis label. Buckets are matched by their bounds, so a partial list
+ * (an older API) still adds up.
+ */
+export function histogramColumns(buckets: readonly RatingBucket[], grouped: boolean): HistogramColumn[] {
+  if (!grouped) return buckets.map((b) => ({ from: b.from, to: b.to, count: b.count }));
+  const columns: HistogramColumn[] = Array.from({ length: MAX_STORED_RATING + 1 }, (_, i) => ({
+    from: i,
+    to: i < MAX_STORED_RATING ? i + 1 : i,
+    count: 0,
+  }));
+  for (const b of buckets) {
+    columns[Math.min(Math.max(Math.floor(b.from), 0), MAX_STORED_RATING)].count += b.count;
+  }
+  return columns;
+}
+
 /** Each count as a share (0..1) of the largest one. */
 export function shares(counts: readonly number[]): number[] {
   const max = Math.max(0, ...counts);
@@ -226,11 +385,16 @@ export interface StackSegment {
  * The segments of one year's stacked bar, scaled to `maxTotal` (the busiest year), platforms in
  * their API order and the unassigned online hours last.
  */
-export function yearSegments(year: PlatformYear, maxTotal: number, unassignedName: string): StackSegment[] {
+export function yearSegments(
+  year: PlatformYear,
+  maxTotal: number,
+  unassignedName: string,
+  colorOf: PlatformColorOf = CATALOG_COLOR,
+): StackSegment[] {
   const scale = maxTotal > 0 ? 100 / maxTotal : 0;
   const segments: StackSegment[] = year.platforms
     .filter((p) => p.hours > 0)
-    .map((p) => ({ key: p.platformId, name: p.name, color: platformColor(p.color), hours: p.hours, width: p.hours * scale }));
+    .map((p) => ({ key: p.platformId, name: p.name, color: colorOf(p.platformId, p.color), hours: p.hours, width: p.hours * scale }));
   if (year.unassignedOnlineHours > 0) {
     segments.push({
       key: 'unassigned',
@@ -244,11 +408,14 @@ export function yearSegments(year: PlatformYear, maxTotal: number, unassignedNam
 }
 
 /** Platforms appearing in the yearly bars, most hours overall first (the chart legend). */
-export function stackLegend(years: readonly PlatformYear[]): { platformId: number; name: string; color: string }[] {
+export function stackLegend(
+  years: readonly PlatformYear[],
+  colorOf: PlatformColorOf = CATALOG_COLOR,
+): { platformId: number; name: string; color: string }[] {
   const totals = new Map<number, { platformId: number; name: string; color: string; hours: number }>();
   for (const year of years) {
     for (const p of year.platforms) {
-      const entry = totals.get(p.platformId) ?? { platformId: p.platformId, name: p.name, color: platformColor(p.color), hours: 0 };
+      const entry = totals.get(p.platformId) ?? { platformId: p.platformId, name: p.name, color: colorOf(p.platformId, p.color), hours: 0 };
       entry.hours += p.hours;
       totals.set(p.platformId, entry);
     }

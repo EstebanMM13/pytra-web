@@ -72,6 +72,14 @@ describe('Stats activity page', () => {
     expect(el.querySelector('[data-heat-cell]')).toBeNull();
   });
 
+  it('opens the tapped day in the diary', () => {
+    const { el } = setup(activity());
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const cell = el.querySelector<HTMLElement>('[data-heat-cell]')!;
+    cell.click();
+    expect(navigate).toHaveBeenCalledWith(['/diary'], { queryParams: { date: expect.stringMatching(/^\d{4}-01-01$/) } });
+  });
+
   it('changes the year through the query param', () => {
     const { el } = setup(activity());
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
