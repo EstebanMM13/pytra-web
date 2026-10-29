@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
 import { PsnService } from '../../core/services/psn.service';
+import { StatsService } from '../../core/services/stats.service';
 import { SteamService } from '../../core/services/steam.service';
 import { VIEW_TRANSITION_OPTIONS } from '../../core/view-transitions';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -42,6 +43,15 @@ const GAMES = [
   { ...game(3, [ACTION], 'Nintendo'), hasFullCompletion: true },
   game(4, [{ id: 40, name: 'Shooter' }], 'Valve'),
 ];
+
+/** Run facts: game 1 finished in 2024 (10 days, 20 h) on platform 1; game 2 played in 2023; game 3 online in 2024. */
+const PLAY_FACTS = {
+  runs: [
+    { experienceId: 1, gameId: 1, platformId: 1, year: 2024, status: 'COMPLETADO' as const, hours: 20, daysToFinish: 10 },
+    { experienceId: 2, gameId: 2, platformId: 2, year: 2023, status: 'ABANDONADO' as const, hours: 3, daysToFinish: null },
+  ],
+  onlineYears: [{ gameId: 3, year: 2024, platformIds: [] }],
+};
 
 /** Steam and PSN with nothing pending (the library only reads their pending lists for the banner). */
 const NO_PENDING = [
@@ -82,12 +92,16 @@ describe('Games library filters', () => {
     (document as unknown as DocumentWithTransitions).startViewTransition = original;
   });
 
+  const getPlayFacts = vi.fn(() => of(PLAY_FACTS));
+
   async function setup() {
+    getPlayFacts.mockClear();
     TestBed.configureTestingModule({
       providers: [
         provideRouter([{ path: 'games', component: Games }], withViewTransitions(VIEW_TRANSITION_OPTIONS)),
         provideTranslateService(),
         { provide: GameService, useValue: { findAll: () => of(GAMES) } },
+        { provide: StatsService, useValue: { getYears: () => of([2024, 2023]), getPlayFacts } },
         ...NO_PENDING,
       ],
     });
@@ -120,6 +134,45 @@ describe('Games library filters', () => {
     const listed = () => [...new Set([...el.querySelectorAll('a[href^="/games/"]')].map((a) => a.getAttribute('href')))];
     return { harness, router, navigations, el, pick, chips, listed };
   }
+
+  it('filters by played year from the panel, loading the run facts only then', async () => {
+    const { harness, router, el, listed } = await setup();
+    expect(getPlayFacts).not.toHaveBeenCalled();
+    const years = [...el.querySelectorAll<HTMLButtonElement>('[data-filter-years] button')];
+    expect(years.map((b) => b.textContent?.trim())).toEqual(['library.filters.anyYear', '2024', '2023']);
+
+    years[1].click();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/games?year=2024');
+    expect(getPlayFacts).toHaveBeenCalledTimes(1);
+    // A 2024 run (game 1) or 2024 online hours (game 3).
+    expect(listed()).toEqual(['/games/1', '/games/3']);
+    expect(el.querySelector('[aria-label="library.filters.active"] > span')!.textContent).toContain('library.filters.yearChip');
+  });
+
+  it('applies the stats links: played year, days to finish, run hours and release decade', async () => {
+    const { harness, listed } = await setup();
+    await harness.navigateByUrl('/games?year=2023');
+    expect(listed()).toEqual(['/games/2']);
+    await harness.navigateByUrl('/games?days=8-30');
+    expect(listed()).toEqual(['/games/1']);
+    await harness.navigateByUrl('/games?hours=10-30&year=2024');
+    expect(listed()).toEqual(['/games/1']);
+    await harness.navigateByUrl('/games?decade=2020');
+    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3', '/games/4']);
+    await harness.navigateByUrl('/games?decade=1990');
+    expect(listed()).toEqual([]);
+  });
+
+  it('removes a stats filter with its chip', async () => {
+    const { harness, router, el } = await setup();
+    await harness.navigateByUrl('/games?days=366-&decade=2020');
+    const chips = () => [...el.querySelectorAll('[aria-label="library.filters.active"] > span')];
+    expect(chips()).toHaveLength(2);
+    chips()[0].querySelector<HTMLButtonElement>('button')!.click();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/games?days=366-');
+  });
 
   it('keeps several picked genres in the URL, the panel and the list, with one navigation per pick', async () => {
     const { harness, router, navigations, el, pick, chips, listed } = await setup();

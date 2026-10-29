@@ -1030,9 +1030,19 @@
       "allHint": "Only games that have all the chosen genres are shown.",
       "achievements": "Achievements",
       "platinum": "With platinum",
-      "fullCompletion": "At 100%"
+      "fullCompletion": "At 100%",
+      "year": "Year played",
+      "anyYear": "Any",
+      "yearHint": "Games with a run or online hours that year.",
+      "yearChip": "Played in {{year}}",
+      "daysChip": "Finished in {{min}}–{{max}} days",
+      "daysChipOpen": "Finished in {{min}}+ days",
+      "hoursChip": "{{min}}–{{max}} h runs",
+      "hoursChipOpen": "{{min}}+ h runs",
+      "hoursChipBelow": "Runs under {{max}} h"
     },
-    "statusShort": "Status"
+    "statusShort": "Status",
+    "playFactsError": "Couldn't load your runs to apply this filter."
   },
   "sagas": {
     "title": "Sagas",
@@ -1484,7 +1494,8 @@
       "weekdayTitle": "{{day}}: {{hours}} over {{days}}",
       "emptyTitle": "No days logged in {{year}} yet",
       "emptyText": "The diary keeps what you play each day: with it you will see your calendar and streaks here.",
-      "emptyCta": "Go to the diary"
+      "emptyCta": "Go to the diary",
+      "heatmapHint": "Tap a day to open it in the diary."
     },
     "platforms": {
       "title": "Platforms",
@@ -1571,7 +1582,16 @@
       "count_one": "{{count}} rating",
       "hiddenGenres": "{{count}} genres with fewer than {{min}} ratings are hidden.",
       "hiddenGenres_one": "{{count}} genre with fewer than {{min}} ratings is hidden.",
-      "empty": "No rated runs in this period yet."
+      "empty": "No rated runs in this period yet.",
+      "histogramPoint": "{{point}}: {{count}}"
+    },
+    "showAll": "See all ({{total}})",
+    "showLess": "Show less",
+    "studio": {
+      "unknown": "Studio",
+      "backAria": "Back to Studios & eras",
+      "empty": "There are no games by this studio in your library.",
+      "inLibrary": "See its games in Games"
     }
   }
 }

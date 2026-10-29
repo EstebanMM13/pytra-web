@@ -3,6 +3,7 @@ import { Game, GameCategory } from '../../core/models/game.model';
 import { PlatformRef } from '../../core/models/platform.model';
 import { distinctPlatformRefs } from '../../core/services/platform.logic';
 import { todayIso } from '../../shared/utils/run-dates';
+import { NO_PLAY_FILTERS, PlayFilters, PlayIndex, matchesDecade, matchesPlay, playFilterCount } from './play-filters.logic';
 
 /**
  * Status tab of the library toolbar. `PENDIENTE` also covers games with no runs yet, except online
@@ -56,6 +57,10 @@ export interface LibraryQuery {
   platinum?: boolean;
   /** Only games with a run completed at 100%. */
   fullCompletion?: boolean;
+  /** Release decade (first year, e.g. 1990); null or omitted: any. */
+  decade?: number | null;
+  /** Run filters (played year, days to finish, run hours); see play-filters.logic. */
+  play?: PlayFilters;
 }
 
 /** Steam imports waiting for review live on /steam until confirmed; the library only lists confirmed games. */
@@ -153,10 +158,15 @@ export function matchesAchievements(game: Game, query: Pick<LibraryQuery, 'plati
   return (!query.platinum || !!game.hasPlatinum) && (!query.fullCompletion || !!game.hasFullCompletion);
 }
 
-/** Text, platform, genre, category, developer, publisher and achievement filters: everything except the status tab. */
-export function matchesPanelFilters(game: Game, query: LibraryQuery): boolean {
+/**
+ * Text, platform, genre, category, developer, publisher, achievement, release decade and run filters:
+ * everything except the status tab. Active run filters need `play` (a game missing from it fails).
+ */
+export function matchesPanelFilters(game: Game, query: LibraryQuery, play?: PlayIndex | null): boolean {
   return (
     matchesText(game, query.text) &&
+    matchesDecade(game, query.decade) &&
+    matchesPlay(play?.get(game.id), query.play ?? NO_PLAY_FILTERS, query.platforms) &&
     matchesAchievements(game, query) &&
     matchesPlatforms(game, query.platforms) &&
     matchesGenres(game, query.genres) &&
@@ -168,15 +178,17 @@ export function matchesPanelFilters(game: Game, query: LibraryQuery): boolean {
 
 /**
  * Number of filters set in the filter panel (category, each platform, genre, developer and
- * publisher, platinum, 100%).
+ * publisher, platinum, 100%) or by a stats link (release decade, run filters).
  */
 export function panelFilterCount(
   query: Pick<
     LibraryQuery,
-    'category' | 'platforms' | 'genres' | 'developers' | 'publishers' | 'platinum' | 'fullCompletion'
+    'category' | 'platforms' | 'genres' | 'developers' | 'publishers' | 'platinum' | 'fullCompletion' | 'decade' | 'play'
   >,
 ): number {
   return (
+    (query.decade !== null && query.decade !== undefined ? 1 : 0) +
+    playFilterCount(query.play ?? NO_PLAY_FILTERS) +
     (query.category && query.category !== 'ALL' ? 1 : 0) +
     (query.platinum ? 1 : 0) +
     (query.fullCompletion ? 1 : 0) +
@@ -297,10 +309,10 @@ export function sortGames(games: readonly Game[], sort: LibrarySort): Game[] {
   return [...games].sort(COMPARATORS[sort]);
 }
 
-export function filterGames(games: readonly Game[], query: LibraryQuery): Game[] {
+export function filterGames(games: readonly Game[], query: LibraryQuery, play?: PlayIndex | null): Game[] {
   return sortGames(
     games.filter(
-      (g) => matchesPanelFilters(g, query) && matchesStatus(g, query.status),
+      (g) => matchesPanelFilters(g, query, play) && matchesStatus(g, query.status),
     ),
     query.sort,
   );

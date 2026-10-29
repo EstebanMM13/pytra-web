@@ -10,6 +10,7 @@ import {
   InProgressExperience,
   MostPlayedGame,
   PlatformStats,
+  PlayFacts,
   RatingStats,
   ReleaseEraStats,
   SagaStat,
@@ -60,6 +61,7 @@ export class StatsService {
   private readonly byReleaseEra = this.cache.resource(() =>
     this.http.get<ReleaseEraStats>(`${this.baseUrl}/by-release-era`),
   );
+  private readonly playFacts = this.cache.resource(() => this.http.get<PlayFacts>(`${this.baseUrl}/play-facts`));
 
   /** Cached (see `UserDataCache`): may emit the cached summary, then a fresher one. */
   getSummary(): Observable<StatsSummary> {
@@ -154,6 +156,11 @@ export class StatsService {
   /** Rating distribution of a year (null: all time). Cached per year. */
   getRatings(year: number | null = null): Observable<RatingStats> {
     return this.perYear(this.ratings, year, 'ratings').get();
+  }
+
+  /** Every run's year, platform, hours and days to finish, for the library's run filters. Cached. */
+  getPlayFacts(): Observable<PlayFacts> {
+    return this.playFacts.get();
   }
 
   /** The cached resource of `path?year=<year>` (no param for null), created on first use. */

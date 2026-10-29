@@ -1030,9 +1030,19 @@
       "allHint": "Solo se muestran los juegos que tienen todos los géneros elegidos.",
       "achievements": "Logros",
       "platinum": "Con platino",
-      "fullCompletion": "Al 100%"
+      "fullCompletion": "Al 100%",
+      "year": "Año jugado",
+      "anyYear": "Cualquiera",
+      "yearHint": "Juegos con alguna partida o con horas online ese año.",
+      "yearChip": "Jugado en {{year}}",
+      "daysChip": "Terminado en {{min}}–{{max}} días",
+      "daysChipOpen": "Terminado en {{min}}+ días",
+      "hoursChip": "Partidas de {{min}}–{{max}} h",
+      "hoursChipOpen": "Partidas de {{min}}+ h",
+      "hoursChipBelow": "Partidas de menos de {{max}} h"
     },
-    "statusShort": "Estado"
+    "statusShort": "Estado",
+    "playFactsError": "No se pudieron cargar tus partidas para aplicar este filtro."
   },
   "sagas": {
     "title": "Sagas",
@@ -1484,7 +1494,8 @@
       "weekdayTitle": "{{day}}: {{hours}} en {{days}}",
       "emptyTitle": "Aún no hay días apuntados en {{year}}",
       "emptyText": "El diario guarda lo que juegas cada día: con él verás aquí tu calendario y tus rachas.",
-      "emptyCta": "Ir al diario"
+      "emptyCta": "Ir al diario",
+      "heatmapHint": "Toca un día para abrirlo en el diario."
     },
     "platforms": {
       "title": "Plataformas",
@@ -1571,7 +1582,16 @@
       "count_one": "{{count}} nota",
       "hiddenGenres": "{{count}} géneros con menos de {{min}} notas no se muestran.",
       "hiddenGenres_one": "{{count}} género con menos de {{min}} notas no se muestra.",
-      "empty": "Aún no hay partidas valoradas en este periodo."
+      "empty": "Aún no hay partidas valoradas en este periodo.",
+      "histogramPoint": "{{point}}: {{count}}"
+    },
+    "showAll": "Ver todos ({{total}})",
+    "showLess": "Ver menos",
+    "studio": {
+      "unknown": "Estudio",
+      "backAria": "Volver a Estudios y épocas",
+      "empty": "No hay juegos de este estudio en tu biblioteca.",
+      "inLibrary": "Ver sus juegos en Juegos"
     }
   }
 }

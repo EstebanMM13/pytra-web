@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, effect, untracked } from '@angular/core';
-import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
-import { catchError, map, of } from 'rxjs';
+import { catchError, filter, map, of, switchMap, take } from 'rxjs';
 import { Game } from '../../core/models/game.model';
 import { GameService } from '../../core/services/game.service';
 import { PsnService } from '../../core/services/psn.service';
+import { StatsService } from '../../core/services/stats.service';
 import { SteamService } from '../../core/services/steam.service';
 import { platformNameKey } from '../../core/services/platform.logic';
 import { CollapseStateService } from '../../core/services/collapse-state.service';
@@ -63,22 +64,47 @@ import {
 import { LibraryFilters } from './library-filters';
 import { LibraryStatusPicker } from './library-status-picker';
 import { formatGenreName } from '../../shared/pipes/genre-name.pipe';
+import { decadeParams } from '../stats/stats.logic';
+import { PlayIndex, buildPlayIndex, hasPlayFilters, parseDecade, parsePlayedYear, parseRange } from './play-filters.logic';
 
 /** Pause in typing after which the library search text is written to the URL. */
 const SEARCH_URL_DELAY_MS = 300;
 
 /** Removable chip of an active panel filter; `id` is the platform / genre id or the developer / publisher name. */
 interface FilterChip {
-  kind: 'category' | 'platform' | 'genre' | 'developer' | 'publisher' | 'platinum' | 'fullCompletion';
+  kind:
+    | 'category'
+    | 'platform'
+    | 'genre'
+    | 'developer'
+    | 'publisher'
+    | 'platinum'
+    | 'fullCompletion'
+    | 'year'
+    | 'decade'
+    | 'days'
+    | 'hours';
   id: string;
+  /** Translation key (or plain text), translated with `params`. */
   label: string;
+  params?: Record<string, unknown>;
 }
+
+/** Run facts behind the run filters: `index` null with `failed` false while loading (or not needed). */
+interface PlayState {
+  index: PlayIndex | null;
+  failed: boolean;
+}
+
+/** The params stats rows link with, cleared together with the panel filters. */
+const STATS_FILTER_PARAMS: Params = { year: null, decade: null, days: null, hours: null };
 
 /**
  * Library (/games): confirmed games with their run aggregates, filtered, sorted and paged on the
  * client. Filters live in the URL (`q`, `status`, `platform` and `genre` as comma-separated ids, `dev` and
  * `pub` as repeated names, `category`, `platinum=1` and `full=1` (100%), `sort`, `page`) so back
- * navigation restores them.
+ * navigation restores them. Stats rows link here with `year` (played year), `decade` (release
+ * decade), `days` and `hours` (`min-max` / `min-` buckets of completed runs); see play-filters.logic.
  * The list / grid view is a per-device preference (localStorage); the grid shows every result, unpaged.
  */
 @Component({
@@ -151,6 +177,12 @@ export class Games {
             publishers: parseNameList(params.getAll('pub')),
             platinum: parseFlag(params.get('platinum')),
             fullCompletion: parseFlag(params.get('full')),
+            decade: parseDecade(params.get('decade')),
+            play: {
+              year: parsePlayedYear(params.get('year')),
+              days: parseRange(params.get('days')),
+              runHours: parseRange(params.get('hours')),
+            },
             page: parsePage(params.get('page')),
           }) satisfies LibraryQuery & { page: number },
       ),
@@ -159,6 +191,39 @@ export class Games {
   );
 
   protected readonly loading = computed(() => this.allGames() === null);
+
+  private readonly stats = inject(StatsService);
+  private readonly hasPlayFilters = computed(() => hasPlayFilters(this.urlQuery().play));
+  /** Run facts, fetched the first time a run filter is set (most library visits never need them). */
+  private readonly playState = toSignal(
+    toObservable(this.hasPlayFilters).pipe(
+      filter(Boolean),
+      take(1),
+      switchMap(() =>
+        this.stats.getPlayFacts().pipe(
+          map((facts): PlayState => ({ index: buildPlayIndex(facts), failed: false })),
+          catchError(() => of<PlayState>({ index: null, failed: true })),
+        ),
+      ),
+    ),
+    { initialValue: { index: null, failed: false } satisfies PlayState },
+  );
+  private readonly playIndex = computed(() => this.playState().index);
+  /** Run filters set and their facts not loaded yet: the list waits for them. */
+  protected readonly playLoading = computed(
+    () => this.hasPlayFilters() && !this.playIndex() && !this.playState().failed,
+  );
+  protected readonly playFailed = computed(() => this.hasPlayFilters() && this.playState().failed);
+  /** Played-year options: the years with runs (as the stats period picker has), plus the one in the URL. */
+  private readonly statsYears = toSignal(this.stats.getYears().pipe(catchError(() => of([] as number[]))), {
+    initialValue: [] as number[],
+  });
+  protected readonly playedYears = computed(() => {
+    const year = this.urlQuery().play.year;
+    const years = new Set(this.statsYears());
+    if (year !== null) years.add(year);
+    return [...years].sort((a, b) => b - a);
+  });
 
   /**
    * Search box text. It filters on every keystroke; the URL (`q`) follows once typing pauses, so
@@ -223,6 +288,11 @@ export class Games {
   protected readonly developers = computed(() => libraryNames(this.libraryGames(), (g) => g.developer));
   protected readonly publishers = computed(() => libraryNames(this.libraryGames(), (g) => g.publisher));
   protected readonly filterCount = computed(() => panelFilterCount(this.query()));
+  /** Filters only stats links set (release decade, days to finish, run hours): counted on the filter button too. */
+  protected readonly linkFilterCount = computed(() => {
+    const { decade, play } = this.query();
+    return (decade !== null ? 1 : 0) + (play.days ? 1 : 0) + (play.runHours ? 1 : 0);
+  });
   /** Removable chips for the active panel filters. */
   protected readonly filterChips = computed(() => {
     const query = this.query();
@@ -246,6 +316,24 @@ export class Games {
     }
     for (const name of query.developers) chips.push({ kind: 'developer', id: name, label: name });
     for (const name of query.publishers) chips.push({ kind: 'publisher', id: name, label: name });
+    const { year, days, runHours } = query.play;
+    if (year !== null) chips.push({ kind: 'year', id: String(year), label: 'library.filters.yearChip', params: { year } });
+    if (query.decade !== null) {
+      chips.push({ kind: 'decade', id: String(query.decade), label: 'stats.studios.decade', params: decadeParams(query.decade) });
+    }
+    if (days) {
+      const label = days.max === null ? 'library.filters.daysChipOpen' : 'library.filters.daysChip';
+      chips.push({ kind: 'days', id: 'days', label, params: { ...days } });
+    }
+    if (runHours) {
+      const label =
+        runHours.max === null
+          ? 'library.filters.hoursChipOpen'
+          : runHours.min === 0
+            ? 'library.filters.hoursChipBelow'
+            : 'library.filters.hoursChip';
+      chips.push({ kind: 'hours', id: 'hours', label, params: { ...runHours } });
+    }
     return chips;
   });
   protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
@@ -255,9 +343,9 @@ export class Games {
 
   /** Tab counters follow the name and panel filters, so they add up to what each tab would show. */
   protected readonly statusCounts = computed(() =>
-    countByStatus(this.libraryGames().filter((g) => matchesPanelFilters(g, this.query()))),
+    countByStatus(this.libraryGames().filter((g) => matchesPanelFilters(g, this.query(), this.playIndex()))),
   );
-  protected readonly filtered = computed(() => filterGames(this.libraryGames(), this.query()));
+  protected readonly filtered = computed(() => filterGames(this.libraryGames(), this.query(), this.playIndex()));
   protected readonly page = computed(() => paginate(this.filtered(), this.query().page));
   protected readonly hasFilters = computed(
     () =>
@@ -387,6 +475,10 @@ export class Games {
     this.updateQuery({ full: serializeFlag(on), page: null });
   }
 
+  protected setPlayedYear(year: number | null): void {
+    this.updateQuery({ year, page: null });
+  }
+
   protected removeChip(chip: Pick<FilterChip, 'kind' | 'id'>): void {
     const query = this.query();
     if (chip.kind === 'category') this.setCategory('ALL');
@@ -395,12 +487,17 @@ export class Games {
     else if (chip.kind === 'platform') this.setPlatforms(query.platforms.filter((p) => p !== chip.id));
     else if (chip.kind === 'developer') this.setDevelopers(query.developers.filter((d) => d !== chip.id));
     else if (chip.kind === 'publisher') this.setPublishers(query.publishers.filter((p) => p !== chip.id));
+    else if (chip.kind === 'year') this.setPlayedYear(null);
+    else if (chip.kind === 'decade') this.updateQuery({ decade: null, page: null });
+    else if (chip.kind === 'days') this.updateQuery({ days: null, page: null });
+    else if (chip.kind === 'hours') this.updateQuery({ hours: null, page: null });
     else this.setGenres(query.genres.filter((g) => String(g) !== chip.id));
   }
 
-  /** Clears the filter panel only (type, platforms, genres, developers, publishers, platinum, 100%); search and status tab stay. */
+  /** Clears the filter panel only (type, platforms, genres, developers, publishers, platinum, 100%, stats filters); search and status tab stay. */
   protected clearPanelFilters(): void {
     this.updateQuery({
+      ...STATS_FILTER_PARAMS,
       platform: null,
       genre: null,
       category: null,
@@ -432,6 +529,7 @@ export class Games {
 
   protected clearFilters(): void {
     this.updateQuery({
+      ...STATS_FILTER_PARAMS,
       q: null,
       status: null,
       platform: null,

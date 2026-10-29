@@ -320,6 +320,8 @@ export interface DaysBucket {
   minDays: number;
   maxDays: number | null;
   count: number;
+  /** Distinct games of the bucket's runs (absent from older APIs). */
+  gameCount?: number;
 }
 
 export interface TimeToFinish {
@@ -349,6 +351,8 @@ export interface HoursBucket {
   runCount: number;
   ratedCount: number;
   averageRating: number | null;
+  /** Distinct games of the bucket's runs (absent from older APIs). */
+  gameCount?: number;
 }
 
 /** `GET /stats/completion?year=` (`year` null: all time). */
@@ -397,4 +401,30 @@ export interface RatingStats {
   histogram: RatingBucket[];
   byGenre: GenreRating[];
   byPlatform: PlatformRating[];
+}
+
+/** One run as `/stats/play-facts` sends it (library run filters). */
+export interface RunFact {
+  experienceId: number;
+  gameId: number;
+  platformId: number | null;
+  /** ExperiencePeriod year (explicit year, else end date's, else start date's); null when unknown. */
+  year: number | null;
+  status: ExperienceStatus;
+  hours: number;
+  /** Days from start to end of a completed run with both dates; null otherwise. */
+  daysToFinish: number | null;
+}
+
+/** A year with counted online diary hours of a game, and its online playtime's platforms. */
+export interface OnlineYearFact {
+  gameId: number;
+  year: number;
+  platformIds: number[];
+}
+
+/** `GET /stats/play-facts`: every run's facts and the online play years. */
+export interface PlayFacts {
+  runs: RunFact[];
+  onlineYears: OnlineYearFact[];
 }

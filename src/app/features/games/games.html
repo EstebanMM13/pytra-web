@@ -111,6 +111,10 @@
           [publishers]="publishers()"
           [platinum]="query().platinum"
           [fullCompletion]="query().fullCompletion"
+          [years]="playedYears()"
+          [playedYear]="query().play.year"
+          [linkFilterCount]="linkFilterCount()"
+          (playedYearChange)="setPlayedYear($event)"
           (categoryChange)="setCategory($event)"
           (platformsChange)="setPlatforms($event)"
           (genresChange)="setGenres($event)"
@@ -186,12 +190,12 @@
       <div class="-mt-1 flex flex-wrap items-center gap-1.5 md:-mt-2" [attr.aria-label]="'library.filters.active' | translate" role="group">
         @for (chip of filterChips(); track chip.kind + chip.id) {
           <span class="inline-flex h-8 items-center gap-1 rounded-full border border-brand-line bg-brand-tint pr-1 pl-3 text-[13px] font-medium text-text">
-            {{ chip.label | translate }}
+            {{ chip.label | translate: chip.params ?? {} }}
             <button
               type="button"
               (click)="removeChip(chip)"
               class="grid size-5 place-items-center rounded-full text-brand-light hover:bg-hover hover:text-text"
-              [attr.aria-label]="'common.combobox.remove' | translate: { name: (chip.label | translate) }"
+              [attr.aria-label]="'common.combobox.remove' | translate: { name: (chip.label | translate: chip.params ?? {}) }"
             >
               <svg [lucideIcon]="icons.x" [size]="12"></svg>
             </button>
@@ -203,12 +207,16 @@
       </div>
     }
 
-    @if (loading()) {
+    @if (loading() || playLoading()) {
       <div class="flex flex-col gap-2">
         @for (i of skeletonRows; track i) {
           <app-skeleton class="h-12 rounded-[10px]" />
         }
       </div>
+    } @else if (playFailed()) {
+      <p class="rounded-xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted" data-play-error>
+        {{ 'library.playFactsError' | translate }}
+      </p>
     } @else if (filtered().length === 0) {
       <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-10 text-center">
         <p class="text-sm text-muted">{{ 'library.noMatches' | translate }}</p>

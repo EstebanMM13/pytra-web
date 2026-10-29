@@ -160,6 +160,30 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
           </div>
         </section>
 
+        @if (years().length) {
+          <section class="flex flex-col gap-2 border-t border-divider py-3.5">
+            <h3 id="library-filter-year" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+              {{ 'library.filters.year' | translate }}
+            </h3>
+            <div class="flex flex-wrap gap-1.5" role="radiogroup" aria-labelledby="library-filter-year" data-filter-years>
+              @for (y of yearChoices(); track y ?? 'any') {
+                <button
+                  type="button"
+                  role="radio"
+                  [attr.aria-checked]="playedYear() === y"
+                  (click)="playedYearChange.emit(y)"
+                  class="rounded-full border px-3 py-1.5 text-[13px]"
+                  [class]="playedYear() === y ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
+                  [class.font-mono]="y !== null"
+                >
+                  {{ y === null ? ('library.filters.anyYear' | translate) : y }}
+                </button>
+              }
+            </div>
+            <p class="text-xs text-faint">{{ 'library.filters.yearHint' | translate }}</p>
+          </section>
+        }
+
         @if (platforms().length) {
           <section class="flex flex-col gap-2 border-t border-divider py-3.5">
             <h3 id="library-filter-platforms" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
@@ -290,6 +314,12 @@ export class LibraryFilters {
   /** Only games with a platinum / a 100% run. */
   readonly platinum = input(false);
   readonly fullCompletion = input(false);
+  /** Played-year options, most recent first; the section hides without them. */
+  readonly years = input<readonly number[]>([]);
+  /** Picked played year; null: any. */
+  readonly playedYear = input<number | null>(null);
+  /** Active filters set from stats links only (release decade, days, run hours), for the count. */
+  readonly linkFilterCount = input(0);
 
   readonly categoryChange = output<LibraryCategoryFilter>();
   readonly platformsChange = output<string[]>();
@@ -299,7 +329,8 @@ export class LibraryFilters {
   readonly sortChange = output<LibrarySort>();
   readonly platinumChange = output<boolean>();
   readonly fullCompletionChange = output<boolean>();
-  /** Clears the filters (type, achievements, platforms, genres, developers, publishers); the sort stays. */
+  readonly playedYearChange = output<number | null>();
+  /** Clears the filters (type, achievements, played year, platforms, genres, developers, publishers, stats links); the sort stays. */
   readonly cleared = output<void>();
 
   protected readonly categoryChoices: readonly LibraryCategoryFilter[] = ['ALL', ...GAME_CATEGORIES];
@@ -315,8 +346,11 @@ export class LibraryFilters {
       this.platformIds().length +
       this.genreIds().length +
       this.developerNames().length +
-      this.publisherNames().length,
+      this.publisherNames().length +
+      (this.playedYear() !== null ? 1 : 0) +
+      this.linkFilterCount(),
   );
+  protected readonly yearChoices = computed<(number | null)[]>(() => [null, ...this.years()]);
   /** The combobox works with numeric ids: a name's id is its index in the (sorted) option list. */
   protected readonly developerOptions = computed(() => nameOptions(this.developers()));
   protected readonly publisherOptions = computed(() => nameOptions(this.publishers()));
