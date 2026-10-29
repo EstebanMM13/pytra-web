@@ -1,0 +1,93 @@
+<app-navbar />
+
+<main class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-4 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
+  <app-stats-page-header [title]="'stats.habits.title' | translate" [subtitle]="'stats.habits.subtitle' | translate">
+    <app-stats-scope [years]="section.years()" [year]="section.year()" (yearChange)="section.setYear($event)" />
+  </app-stats-page-header>
+
+  @let s = state();
+  @if (s.data; as c) {
+    @let t = c.timeToFinish;
+    <section class="grid grid-cols-2 gap-2 sm:grid-cols-4 md:gap-3" [attr.aria-label]="'stats.habits.statsLabel' | translate">
+      <app-stat-card [icon]="icons.circleCheck" tone="completion" [label]="'stats.habits.completed' | translate" [value]="c.completedCount" />
+      <app-stat-card [icon]="icons.x" tone="abandoned" [label]="'stats.habits.abandoned' | translate" [value]="c.abandonedCount" />
+      <app-stat-card [icon]="icons.repeat" [label]="'stats.habits.replays' | translate" [value]="c.replayCount" />
+      <app-stat-card
+        [icon]="icons.hourglass"
+        [label]="'stats.habits.median' | translate"
+        [shortLabel]="'stats.habits.medianShort' | translate"
+        [value]="t.medianDays !== null ? ('stats.days' | translatePlural: roundDays(t.medianDays)) : '—'"
+        [hint]="
+          t.averageDays !== null
+            ? ('stats.habits.averageHint' | translate: { days: ('stats.days' | translatePlural: roundDays(t.averageDays)) })
+            : null
+        "
+        data-median
+      />
+    </section>
+
+    @if (t.fastest || t.slowest) {
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:gap-3">
+        @for (entry of [{ key: 'fastest', run: t.fastest }, { key: 'slowest', run: t.slowest }]; track entry.key) {
+          @if (entry.run; as run) {
+            <a
+              [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]"
+              class="hover-lift flex min-w-0 items-center gap-3 rounded-[14px] border border-card-border card-glass p-3.5 md:p-[18px]"
+              [attr.data-run-extreme]="entry.key"
+            >
+              <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span class="text-xs text-text-3">{{ 'stats.habits.' + entry.key | translate }}</span>
+                <span class="line-clamp-2 text-[15px] font-semibold wrap-break-word text-text" [attr.title]="run.gameName">{{ run.gameName }}</span>
+                <span class="line-clamp-2 text-xs text-muted">{{ run.runLabel }}</span>
+              </span>
+              <span class="shrink-0 font-mono text-lg font-bold">{{ 'stats.days' | translatePlural: run.days }}</span>
+            </a>
+          }
+        }
+      </div>
+    }
+
+    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3" [label]="'stats.habits.timeToFinish' | translate" />
+        @if (t.sampleSize > 0) {
+          <app-stats-bar-list [bars]="dayRows()" data-day-buckets />
+          <p class="mt-3 text-xs text-faint">{{ 'stats.habits.sample' | translatePlural: t.sampleSize }}</p>
+        } @else {
+          <p class="py-6 text-center text-sm text-muted">{{ 'stats.habits.noTimes' | translate }}</p>
+        }
+      </section>
+
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3" [label]="'stats.habits.abandonment' | translate" />
+        @if (abandonmentRows().length) {
+          <app-stats-bar-list [bars]="abandonmentRows()" tone="danger" data-abandonment />
+        } @else {
+          <p class="py-6 text-center text-sm text-muted">{{ 'stats.habits.noAbandonment' | translate }}</p>
+        }
+        @if (abandonment().hidden > 0) {
+          <p class="mt-3 text-xs text-faint" data-hidden-genres>
+            {{ 'stats.habits.hiddenGenres' | translatePlural: abandonment().hidden : { min: minSample } }}
+          </p>
+        }
+      </section>
+
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px] lg:col-span-2">
+        <app-section-header class="mb-3" [label]="'stats.habits.hoursVsRating' | translate" />
+        <app-stats-bar-list [bars]="hoursRows()" tone="gold" data-hours-buckets />
+      </section>
+    </div>
+  } @else if (s.failed) {
+    <app-stats-load-error (retry)="section.retry()" />
+  } @else {
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 md:gap-3">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <app-skeleton class="h-[72px] rounded-xl md:h-[90px]" />
+      }
+    </div>
+    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
+      <app-skeleton class="h-[300px] rounded-[14px]" />
+      <app-skeleton class="h-[300px] rounded-[14px]" />
+    </div>
+  }
+</main>
