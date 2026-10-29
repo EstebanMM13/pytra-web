@@ -84,16 +84,7 @@
       </section>
     }
   } @else if (s.failed) {
-    <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-12 text-center">
-      <p class="text-sm text-muted">{{ 'stats.loadError' | translate }}</p>
-      <button
-        type="button"
-        (click)="section.retry()"
-        class="rounded-lg border border-border px-4 py-2 text-sm text-text-2 hover:border-border-strong"
-      >
-        {{ 'stats.retry' | translate }}
-      </button>
-    </div>
+    <app-stats-load-error (retry)="section.retry()" />
   } @else {
     <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 md:gap-3">
       @for (i of [1, 2, 3, 4]; track i) {

@@ -20,7 +20,7 @@
           [label]="'stats.ratings.mean' | translate"
           [value]="r.mean | rating"
           [valueClass]="'font-mono ' + (r.mean | ratingTone)"
-          [hint]="temperament() ? ('stats.ratings.temperament.' + temperament() | translate) : null"
+          [hint]="temperamentKey() | translate"
           data-mean
         />
         <app-stat-card
@@ -35,7 +35,7 @@
           [label]="'stats.ratings.deviation' | translate"
           [value]="r.standardDeviation | rating"
           valueClass="font-mono"
-          [hint]="spread() ? ('stats.ratings.spread.' + spread() | translate) : null"
+          [hint]="spreadKey() | translate"
         />
         <app-stat-card [icon]="icons.badgeCheck" [label]="'stats.ratings.rated' | translate" [value]="r.ratedCount" />
       </section>
@@ -63,7 +63,7 @@
           @if (genreRows().length) {
             <app-stats-bar-list [bars]="genreRows()" tone="gold" data-genres />
           } @else {
-            <p class="py-6 text-center text-sm text-muted">{{ 'stats.noData' | translate }}</p>
+            <p class="py-6 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
           }
           @if (genres().hidden > 0) {
             <p class="mt-3 text-xs text-faint" data-hidden-genres>
@@ -77,7 +77,7 @@
           @if (platformRows().length) {
             <app-stats-bar-list [bars]="platformRows()" tone="gold" data-platforms />
           } @else {
-            <p class="py-6 text-center text-sm text-muted">{{ 'stats.noData' | translate }}</p>
+            <p class="py-6 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
           }
         </section>
       </div>

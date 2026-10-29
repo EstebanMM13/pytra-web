@@ -28,7 +28,7 @@
 
     @if (t.fastest || t.slowest) {
       <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:gap-3">
-        @for (entry of [{ key: 'fastest', run: t.fastest }, { key: 'slowest', run: t.slowest }]; track entry.key) {
+        @for (entry of [{ key: 'fastest', label: 'stats.habits.fastest', run: t.fastest }, { key: 'slowest', label: 'stats.habits.slowest', run: t.slowest }]; track entry.key) {
           @if (entry.run; as run) {
             <a
               [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]"
@@ -36,7 +36,7 @@
               [attr.data-run-extreme]="entry.key"
             >
               <span class="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span class="text-xs text-text-3">{{ 'stats.habits.' + entry.key | translate }}</span>
+                <span class="text-xs text-text-3">{{ entry.label | translate }}</span>
                 <span class="line-clamp-2 text-[15px] font-semibold wrap-break-word text-text" [attr.title]="run.gameName">{{ run.gameName }}</span>
                 <span class="line-clamp-2 text-xs text-muted">{{ run.runLabel }}</span>
               </span>

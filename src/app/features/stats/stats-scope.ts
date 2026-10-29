@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, booleanAttribute, computed, inject, input, output } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { YearSelector } from '../years/year-selector';
 import { yearTabs } from '../years/years.logic';
@@ -18,7 +19,7 @@ const SCOPE_OPTIONS: readonly SegmentedOption<ScopeMode>[] = [
   selector: 'app-stats-scope',
   imports: [Segmented, YearSelector],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'flex flex-col gap-2 sm:w-64' },
+  host: { class: 'flex flex-col gap-2 sm:w-64', role: 'group', '[attr.aria-label]': 'label()' },
   template: `
     @if (allowAll()) {
       <app-segmented stretch [options]="options" [value]="mode()" (valueChange)="setMode($event)" data-scope-mode />
@@ -30,6 +31,12 @@ const SCOPE_OPTIONS: readonly SegmentedOption<ScopeMode>[] = [
 })
 export class StatsScope {
   protected readonly options = SCOPE_OPTIONS;
+  private readonly translate = inject(TranslateService);
+  /** Accessible name of the picker ("Periodo"), following the UI language. */
+  protected readonly label = computed(() => {
+    this.translate.currentLang();
+    return this.translate.instant('stats.scope.label') as string;
+  });
 
   /** Years with data, most recent first. */
   readonly years = input.required<readonly number[]>();

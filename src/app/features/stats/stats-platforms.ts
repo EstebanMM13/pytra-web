@@ -12,7 +12,7 @@ import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { StatsScope } from './stats-scope';
 import { statsSection } from './stats-section';
-import { platformColor, stackLegend, yearSegments } from './stats.logic';
+import { joinParts, platformColor, shares, stackLegend, yearSegments } from './stats.logic';
 
 /**
  * Platforms section (`/stats/platforms?year=`): hours, runs and ratings per platform for all time
@@ -43,23 +43,21 @@ export class StatsPlatforms {
 
   protected readonly rows = computed<StatsBar[]>(() => {
     const platforms = (this.state().data?.platforms ?? []).filter((p) => p.hours > 0);
-    const max = Math.max(0, ...platforms.map((p) => p.hours));
+    const ratios = shares(platforms.map((p) => p.hours));
     const f = this.format;
-    return platforms.map((p) => ({
+    return platforms.map((p, i) => ({
       key: p.platformId,
       label: f.platform(p.name),
-      share: max > 0 ? p.hours / max : 0,
+      share: ratios[i],
       figure: f.hours(p.hours),
       color: platformColor(p.color),
       dot: true,
-      sub: [
+      sub: joinParts([
         p.runCount > 0 ? f.plural('stats.runs', p.runCount) : null,
         p.completedRunCount > 0 ? f.plural('stats.platforms.completed', p.completedRunCount) : null,
         p.onlineHours > 0 ? f.text('stats.platforms.online', { hours: f.hours(p.onlineHours) }) : null,
         p.averageRating !== null ? f.text('stats.platforms.average', { rating: f.rating(p.averageRating) }) : null,
-      ]
-        .filter(Boolean)
-        .join(' · '),
+      ]),
     }));
   });
 

@@ -16,8 +16,11 @@ import { formatScaledPoint, formatScaledRating } from '../../shared/utils/rating
 export function statsFormat() {
   const translate = inject(TranslateService);
   const preferences = inject(PreferencesService);
+  /** UI language for the label tables keyed by language (month names). */
+  const lang = computed(() => (translate.currentLang() === 'en' ? 'en' : 'es'));
   const locale = computed(() => ratingLocale(translate.currentLang()));
   return {
+    lang,
     locale,
     hours: (value: number | null | undefined) => formatHours(value, locale()),
     rating: (value: number | null | undefined) =>

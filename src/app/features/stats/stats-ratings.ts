@@ -18,7 +18,29 @@ import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { StatsScope } from './stats-scope';
 import { statsSection } from './stats-section';
-import { MIN_GENRE_RATINGS, platformColor, ratingSpread, ratingTemperament, shares, splitBySample } from './stats.logic';
+import {
+  MIN_GENRE_RATINGS,
+  RatingSpread,
+  RatingTemperament,
+  platformColor,
+  ratingShare,
+  ratingSpread,
+  ratingTemperament,
+  shares,
+  splitBySample,
+} from './stats.logic';
+
+/** Plain-language hints of the mean and spread cards (listed in full so the keys stay greppable). */
+const TEMPERAMENT_KEYS: Record<RatingTemperament, string> = {
+  generous: 'stats.ratings.temperament.generous',
+  balanced: 'stats.ratings.temperament.balanced',
+  strict: 'stats.ratings.temperament.strict',
+};
+const SPREAD_KEYS: Record<RatingSpread, string> = {
+  tight: 'stats.ratings.spread.tight',
+  moderate: 'stats.ratings.spread.moderate',
+  wide: 'stats.ratings.spread.wide',
+};
 
 /** Bars kept visible (a sliver) when their bucket is not empty. */
 const MIN_BAR_PERCENT = 3;
@@ -55,8 +77,16 @@ export class StatsRatings {
   protected readonly section = statsSection((year) => this.stats.getRatings(year));
   protected readonly state = this.section.state;
 
-  protected readonly temperament = computed(() => ratingTemperament(this.state().data?.mean));
-  protected readonly spread = computed(() => ratingSpread(this.state().data?.standardDeviation));
+  /** Translation key of the mean's plain-language read, null without ratings. */
+  protected readonly temperamentKey = computed(() => {
+    const temperament = ratingTemperament(this.state().data?.mean);
+    return temperament ? TEMPERAMENT_KEYS[temperament] : null;
+  });
+  /** Translation key of the spread's plain-language read, null without ratings. */
+  protected readonly spreadKey = computed(() => {
+    const spread = ratingSpread(this.state().data?.standardDeviation);
+    return spread ? SPREAD_KEYS[spread] : null;
+  });
 
   protected readonly histogram = computed(() => {
     const buckets = this.state().data?.histogram ?? [];
@@ -80,7 +110,7 @@ export class StatsRatings {
     this.genres().shown.map((g) => ({
       key: g.genreId,
       label: formatGenreName(g.genreName),
-      share: g.averageRating / 10,
+      share: ratingShare(g.averageRating),
       figure: this.format.rating(g.averageRating),
       figureClass: ratingTone(g.averageRating),
       sub: this.format.plural('stats.ratings.count', g.ratedCount),
@@ -93,7 +123,7 @@ export class StatsRatings {
       .map((p) => ({
         key: p.platformId,
         label: this.format.platform(p.name),
-        share: p.averageRating / 10,
+        share: ratingShare(p.averageRating),
         figure: this.format.rating(p.averageRating),
         figureClass: ratingTone(p.averageRating),
         color: platformColor(p.color),

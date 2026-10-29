@@ -2,25 +2,33 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Streak } from '../../core/models/stats.model';
 import { StatsService } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
-import { HoursPipe, formatHours } from '../../shared/pipes/hours.pipe';
+import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
 import { ICONS } from '../../shared/ui/icons';
 import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
-import { translatePlural } from '../../shared/utils/plural';
-import { ratingLocale } from '../../shared/utils/rating-format';
 import { DIARY_LEVEL_CLASS, DiaryLevel } from '../diary/diary.logic';
 import { monthLabels, monthValueLabel } from '../years/years.logic';
+import { statsFormat } from './stats-format';
+import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { StatsScope } from './stats-scope';
 import { statsSection } from './stats-section';
-import { HeatCell, activityYears, buildHeatmap, weekdayShortLabels } from './stats.logic';
+import {
+  HEATMAP_HALVES,
+  HeatCell,
+  activityYears,
+  buildHeatmap,
+  isoToUtcDate,
+  weekdayDate,
+  weekdayShortLabels,
+} from './stats.logic';
 
 /**
  * Activity section (`/stats/activity?year=`): the year's diary days as a GitHub-style heatmap
@@ -41,6 +49,7 @@ import { HeatCell, activityYears, buildHeatmap, weekdayShortLabels } from './sta
     SectionHeader,
     Skeleton,
     StatCard,
+    StatsLoadError,
     StatsPageHeader,
     StatsScope,
   ],
@@ -52,7 +61,7 @@ export class StatsActivity {
   protected readonly levels: DiaryLevel[] = [0, 1, 2, 3, 4];
   protected readonly levelClass = DIARY_LEVEL_CLASS;
   private readonly stats = inject(StatsService);
-  private readonly translate = inject(TranslateService);
+  private readonly format = statsFormat();
 
   protected readonly section = statsSection((year) => this.stats.getActivity(year));
   protected readonly state = this.section.state;
@@ -64,12 +73,10 @@ export class StatsActivity {
     activityYears(this.section.years(), this.currentYear, this.viewYear()),
   );
 
-  private readonly lang = computed(() => (this.translate.currentLang() === 'en' ? 'en' : 'es'));
-  private readonly locale = computed(() => ratingLocale(this.lang()));
-  protected readonly months = computed(() => monthLabels(this.lang(), 'short'));
+  protected readonly months = computed(() => monthLabels(this.format.lang(), 'short'));
   /** Monday, Wednesday and Friday rows are labelled (GitHub style); the others stay blank. */
   protected readonly rowLabels = computed(() =>
-    weekdayShortLabels(this.locale()).map((label, i) => (i % 2 === 0 && i < 6 ? label : '')),
+    weekdayShortLabels(this.format.locale()).map((label, i) => (i % 2 === 0 && i < 6 ? label : '')),
   );
 
   protected readonly heatmap = computed(() => {
@@ -78,7 +85,7 @@ export class StatsActivity {
   });
   protected readonly halves = computed(() => {
     const data = this.state().data;
-    return data ? [buildHeatmap(data.year, data.days, 0, 5), buildHeatmap(data.year, data.days, 6, 11)] : [];
+    return data ? HEATMAP_HALVES.map((half) => buildHeatmap(data.year, data.days, half.fromMonth, half.toMonth)) : [];
   });
 
   /** Day picked on the heatmap (a tap on phones, where there is no hover title). */
@@ -87,20 +94,20 @@ export class StatsActivity {
   protected readonly weekdayBars = computed<MiniBar[]>(() => {
     const data = this.state().data;
     if (!data) return [];
-    const narrow = new Intl.DateTimeFormat(this.locale(), { weekday: 'narrow', timeZone: 'UTC' });
-    const long = new Intl.DateTimeFormat(this.locale(), { weekday: 'long', timeZone: 'UTC' });
+    const f = this.format;
+    const narrow = new Intl.DateTimeFormat(f.locale(), { weekday: 'narrow', timeZone: 'UTC' });
+    const long = new Intl.DateTimeFormat(f.locale(), { weekday: 'long', timeZone: 'UTC' });
     return data.weekdays.map((day) => {
-      // 2024-01-01 was a Monday.
-      const date = new Date(Date.UTC(2024, 0, day.dayOfWeek));
+      const date = weekdayDate(day.dayOfWeek);
       return {
         key: day.dayOfWeek,
         value: day.hours,
         label: narrow.format(date),
         subLabel: monthValueLabel(day.hours) || null,
-        title: this.translate.instant('stats.activity.weekdayTitle', {
+        title: f.text('stats.activity.weekdayTitle', {
           day: long.format(date),
-          hours: formatHours(day.hours, this.locale()),
-          days: translatePlural(this.translate, 'stats.days', day.daysPlayed),
+          hours: f.hours(day.hours),
+          days: f.plural('stats.days', day.daysPlayed),
         }),
       };
     });
@@ -111,17 +118,13 @@ export class StatsActivity {
     const map = this.heatmap();
     const titles = new Map<string, string>();
     if (!map) return titles;
-    const locale = this.locale();
-    const format = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+    const f = this.format;
+    const day = new Intl.DateTimeFormat(f.locale(), { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
     for (const cell of map.cells) {
       if (!cell) continue;
-      const [y, m, d] = cell.date.split('-').map(Number);
       titles.set(
         cell.date,
-        this.translate.instant('stats.activity.dayTitle', {
-          day: format.format(new Date(Date.UTC(y, m - 1, d))),
-          hours: formatHours(cell.hours, locale),
-        }),
+        f.text('stats.activity.dayTitle', { day: day.format(isoToUtcDate(cell.date)), hours: f.hours(cell.hours) }),
       );
     }
     return titles;
@@ -144,12 +147,12 @@ export class StatsActivity {
     if (!streak.startDate || !streak.endDate || streak.length === 0) return null;
     const year = this.viewYear();
     const short = (iso: string): string => {
-      const [y, m, d] = iso.split('-').map(Number);
+      const date = isoToUtcDate(iso);
       const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', timeZone: 'UTC' };
-      if (y !== year) options.year = 'numeric';
-      return new Intl.DateTimeFormat(this.locale(), options).format(new Date(Date.UTC(y, m - 1, d)));
+      if (date.getUTCFullYear() !== year) options.year = 'numeric';
+      return new Intl.DateTimeFormat(this.format.locale(), options).format(date);
     };
-    return this.translate.instant('stats.activity.streakRange', { from: short(streak.startDate), to: short(streak.endDate) });
+    return this.format.text('stats.activity.streakRange', { from: short(streak.startDate), to: short(streak.endDate) });
   }
 
   protected columnsStyle(columns: number): string {

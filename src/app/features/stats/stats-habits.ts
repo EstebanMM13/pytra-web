@@ -16,7 +16,7 @@ import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { StatsScope } from './stats-scope';
 import { statsSection } from './stats-section';
-import { MIN_ABANDONMENT_SAMPLE, abandonmentRanking, shares } from './stats.logic';
+import { MIN_ABANDONMENT_SAMPLE, abandonmentRanking, ratingShare, shares } from './stats.logic';
 
 /**
  * Habits section (`/stats/habits?year=`): completion counts, days to finish (median, extremes,
@@ -82,7 +82,7 @@ export class StatsHabits {
     return (this.state().data?.hoursBuckets ?? []).map((b) => ({
       key: b.label,
       label: f.text('stats.habits.hoursRange', { label: b.label }),
-      share: (b.averageRating ?? 0) / 10,
+      share: ratingShare(b.averageRating),
       figure: b.averageRating !== null ? f.rating(b.averageRating) : f.text('stats.habits.noRating'),
       figureClass: b.averageRating !== null ? ratingTone(b.averageRating) : 'text-faint',
       sub: f.text('stats.habits.hoursRow', {

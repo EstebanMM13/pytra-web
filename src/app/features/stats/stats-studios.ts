@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { combineLatest, map } from 'rxjs';
-import { StatsService } from '../../core/services/stats.service';
+import {
+  DEVELOPER_MIN_RATED_GAMES,
+  DEVELOPER_RANKING_LIMIT,
+  StatsService,
+} from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
 import { SectionHeader } from '../../shared/ui/section-header';
@@ -13,7 +17,7 @@ import { statsFormat } from './stats-format';
 import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { statsSection } from './stats-section';
-import { decadeParams } from './stats.logic';
+import { decadeParams, joinParts, ratingShare, shares } from './stats.logic';
 
 type DeveloperRanking = 'hours' | 'rating';
 
@@ -50,7 +54,11 @@ export class StatsStudios {
 
   // All-time data: the year param is ignored.
   protected readonly section = statsSection(() =>
-    combineLatest([this.stats.getByDeveloper(), this.stats.getByReleaseEra()]).pipe(
+    combineLatest([
+      // Same parameters as the hub teaser: one shared cache entry.
+      this.stats.getByDeveloper(DEVELOPER_RANKING_LIMIT, DEVELOPER_MIN_RATED_GAMES),
+      this.stats.getByReleaseEra(),
+    ]).pipe(
       map(([developers, eras]) => ({ developers, eras })),
     ),
   );
@@ -61,11 +69,11 @@ export class StatsStudios {
     if (!developers) return [];
     const f = this.format;
     if (this.ranking() === 'hours') {
-      const max = Math.max(0, ...developers.topByHours.map((d) => d.hours));
+      const ratios = shares(developers.topByHours.map((d) => d.hours));
       return developers.topByHours.map((d, i) => ({
         key: i,
         label: d.developer,
-        share: max > 0 ? d.hours / max : 0,
+        share: ratios[i],
         figure: f.hours(d.hours),
         sub: f.plural('common.games', d.gameCount),
       }));
@@ -73,25 +81,26 @@ export class StatsStudios {
     return developers.topByRating.map((d, i) => ({
       key: i,
       label: d.developer,
-      share: (d.averageRating ?? 0) / 10,
+      share: ratingShare(d.averageRating),
       figure: f.rating(d.averageRating),
       figureClass: ratingTone(d.averageRating),
-      sub: `${f.plural('stats.studios.rated', d.ratedGameCount)} · ${f.hours(d.hours)}`,
+      sub: joinParts([f.plural('stats.studios.rated', d.ratedGameCount), f.hours(d.hours)]),
     }));
   });
 
   protected readonly decadeRows = computed<StatsBar[]>(() => {
     const decades = (this.state().data?.eras.byDecade ?? []).filter((d) => d.gameCount > 0);
-    const max = Math.max(0, ...decades.map((d) => d.gameCount));
+    const ratios = shares(decades.map((d) => d.gameCount));
     const f = this.format;
-    return decades.map((d) => ({
+    return decades.map((d, i) => ({
       key: d.decade,
       label: f.text('stats.studios.decade', decadeParams(d.decade)),
-      share: max > 0 ? d.gameCount / max : 0,
+      share: ratios[i],
       figure: f.plural('common.games', d.gameCount),
-      sub: [f.hours(d.hours), d.averageRating !== null ? f.text('stats.platforms.average', { rating: f.rating(d.averageRating) }) : null]
-        .filter(Boolean)
-        .join(' · '),
+      sub: joinParts([
+        f.hours(d.hours),
+        d.averageRating !== null ? f.text('stats.platforms.average', { rating: f.rating(d.averageRating) }) : null,
+      ]),
     }));
   });
 }

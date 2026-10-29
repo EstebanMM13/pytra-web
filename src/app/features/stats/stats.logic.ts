@@ -11,6 +11,30 @@ export const MIN_ABANDONMENT_SAMPLE = 3;
 /** Fewest ratings a genre needs before its average is ranked. */
 export const MIN_GENRE_RATINGS = 3;
 
+/** Top of the stored rating scale (ratings are stored 0-10 whatever scale the user picks). */
+export const MAX_STORED_RATING = 10;
+
+/** A stored rating as a share (0..1) of the scale, for bar lengths; 0 when unrated. */
+export function ratingShare(rating: number | null | undefined): number {
+  return (rating ?? 0) / MAX_STORED_RATING;
+}
+
+/** Non-empty parts joined with the " · " separator of the stats meta lines. */
+export function joinParts(parts: readonly (string | null | undefined | false)[]): string {
+  return parts.filter(Boolean).join(' · ');
+}
+
+/** A `YYYY-MM-DD` API date as a UTC midnight Date (format with `timeZone: 'UTC'`). */
+export function isoToUtcDate(iso: string): Date {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d));
+}
+
+/** A date falling on `dayOfWeek` (1 Monday .. 7 Sunday), for weekday names: 2024-01-01 was a Monday. */
+export function weekdayDate(dayOfWeek: number): Date {
+  return new Date(Date.UTC(2024, 0, dayOfWeek));
+}
+
 /** Neutral colour for platforms without a catalog colour (and the unassigned online hours). */
 export const NEUTRAL_PLATFORM_COLOR = 'var(--pt-platform-neutral)';
 
@@ -95,11 +119,16 @@ export function buildHeatmap(
   return { columns, cells, months };
 }
 
-/** Short weekday names, Monday first (for the weekday bars). */
+/** Month spans of the two phone heatmap strips (0-based, inclusive): January-June and July-December. */
+export const HEATMAP_HALVES = [
+  { fromMonth: 0, toMonth: 5 },
+  { fromMonth: 6, toMonth: 11 },
+] as const;
+
+/** Short weekday names, Monday first (the heatmap row labels). */
 export function weekdayShortLabels(locale: string): string[] {
   const format = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
-  // 2024-01-01 was a Monday.
-  return Array.from({ length: 7 }, (_, i) => format.format(new Date(Date.UTC(2024, 0, 1 + i))).replace('.', ''));
+  return Array.from({ length: 7 }, (_, i) => format.format(weekdayDate(i + 1)).replace('.', ''));
 }
 
 /**
@@ -151,19 +180,26 @@ export function abandonmentRanking(
 export type RatingTemperament = 'generous' | 'balanced' | 'strict';
 export type RatingSpread = 'tight' | 'moderate' | 'wide';
 
+/** Mean rating (stored scale) from which the user reads as generous, and up to which as strict. */
+export const GENEROUS_MEAN = 7.5;
+export const STRICT_MEAN = 5.5;
+/** Standard deviation (stored scale) below which ratings read as tight, above which as wide. */
+export const TIGHT_SPREAD = 1;
+export const WIDE_SPREAD = 2;
+
 /** Plain-language read of a mean rating (stored 0-10 scale). */
 export function ratingTemperament(mean: number | null | undefined): RatingTemperament | null {
   if (mean === null || mean === undefined) return null;
-  if (mean >= 7.5) return 'generous';
-  if (mean <= 5.5) return 'strict';
+  if (mean >= GENEROUS_MEAN) return 'generous';
+  if (mean <= STRICT_MEAN) return 'strict';
   return 'balanced';
 }
 
 /** Plain-language read of the ratings' standard deviation (stored 0-10 scale). */
 export function ratingSpread(deviation: number | null | undefined): RatingSpread | null {
   if (deviation === null || deviation === undefined) return null;
-  if (deviation < 1) return 'tight';
-  if (deviation > 2) return 'wide';
+  if (deviation < TIGHT_SPREAD) return 'tight';
+  if (deviation > WIDE_SPREAD) return 'wide';
   return 'moderate';
 }
 
