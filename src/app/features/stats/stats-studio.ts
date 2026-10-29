@@ -30,8 +30,8 @@ interface LibraryState {
 
 /**
  * Studio detail (`/stats/studio?name=`), opened from a developer row of "Estudios y épocas": the
- * library games whose developer groups with the name (trimmed, case-insensitive, like the API's
- * developer stats), with the saga page's stat cards and release-order timeline. Figures come
+ * library games whose developer groups with the name the way the library's developer filter does
+ * (trimmed, any case, accents folded; see `developerKey`), with the saga page's stat cards and release-order timeline. Figures come
  * from the library list (one cached request), as on the saga page.
  */
 @Component({

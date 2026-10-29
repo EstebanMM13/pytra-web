@@ -120,12 +120,13 @@ export function summarizeSaga(saga: Saga, allGames: readonly Game[]): SagaSummar
 }
 
 /**
- * Grouping key of a developer name, as the API's developer stats group them: trimmed and
- * lower-cased (no accent folding), blank names have none.
+ * Grouping key of a developer name: the library's developer filter key (`normalizeText`: trimmed,
+ * lower-cased, accents folded), so a studio page lists exactly what Juegos lists for `?dev=`. The
+ * API's developer stats only trim and lower-case, so "Estudio" and "Éstudio" are one studio here
+ * and two rows there (rare). Blank names have no key.
  */
 export function developerKey(name: string | null | undefined): string | null {
-  const key = (name ?? '').trim().toLowerCase();
-  return key || null;
+  return normalizeText(name ?? '') || null;
 }
 
 /** The games whose developer groups with `name` (see `developerKey`). */
