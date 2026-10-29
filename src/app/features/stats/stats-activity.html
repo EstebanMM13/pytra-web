@@ -1,0 +1,139 @@
+<app-navbar />
+
+<main class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-4 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
+  <app-stats-page-header [title]="'stats.activity.title' | translate" [subtitle]="'stats.activity.subtitle' | translate">
+    <app-stats-scope
+      [allowAll]="false"
+      [years]="yearOptions()"
+      [year]="viewYear()"
+      (yearChange)="section.setYear($event)"
+    />
+  </app-stats-page-header>
+
+  @let s = state();
+  @if (s.data; as a) {
+    @if (a.activeDays === 0) {
+      <div
+        class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-12 text-center"
+        data-activity-empty
+      >
+        <svg [lucideIcon]="icons.notebookPen" [size]="28" class="text-brand-light" aria-hidden="true"></svg>
+        <p class="text-[15px] font-medium text-text-2">{{ 'stats.activity.emptyTitle' | translate: { year: a.year } }}</p>
+        <p class="max-w-sm text-sm text-muted">{{ 'stats.activity.emptyText' | translate }}</p>
+        <a
+          routerLink="/diary"
+          class="press mt-1 flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+        >
+          <svg [lucideIcon]="icons.calendarDays" [size]="15" aria-hidden="true"></svg>
+          {{ 'stats.activity.emptyCta' | translate }}
+        </a>
+      </div>
+    } @else {
+      <section class="grid grid-cols-2 gap-2 sm:grid-cols-4 md:gap-3" [attr.aria-label]="'stats.activity.statsLabel' | translate">
+        <app-stat-card [icon]="icons.clock" [label]="'stats.activity.hours' | translate" [value]="a.totalHours | hours" />
+        <app-stat-card [icon]="icons.calendarDays" [label]="'stats.activity.activeDays' | translate" [value]="a.activeDays" />
+        <app-stat-card
+          [icon]="icons.flame"
+          [label]="'stats.activity.currentStreak' | translate"
+          [value]="'stats.days' | translatePlural: a.currentStreak.length"
+          [hint]="streakRange(a.currentStreak) ?? ('stats.activity.noStreak' | translate)"
+        />
+        <app-stat-card
+          [icon]="icons.trophy"
+          tone="gold"
+          [label]="'stats.activity.longestStreak' | translate"
+          [value]="'stats.days' | translatePlural: a.longestStreak.length"
+          [hint]="streakRange(a.longestStreak)"
+        />
+      </section>
+
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3.5" [label]="'stats.activity.heatmap' | translate" />
+        <div role="img" [attr.aria-label]="('stats.activity.heatmap' | translate) + ' ' + a.year">
+          <!-- Phones: two half-year strips (about 10px cells); md+: the whole year in one strip. -->
+          <div class="flex flex-col gap-4 md:hidden">
+            @for (half of halves(); track $index) {
+              <ng-container *ngTemplateOutlet="heat; context: { $implicit: half }" />
+            }
+          </div>
+          @if (heatmap(); as full) {
+            <div class="hidden md:block">
+              <ng-container *ngTemplateOutlet="heat; context: { $implicit: full }" />
+            </div>
+          }
+        </div>
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-muted">
+          <p class="min-h-4" aria-live="polite" data-picked-day>
+            @if (picked(); as cell) {
+              {{ cellTitle(cell) }}
+            }
+          </p>
+          <span class="flex items-center gap-1.5" aria-hidden="true">
+            {{ 'diary.calendar.less' | translate }}
+            @for (level of levels; track level) {
+              <span class="size-3 rounded-[3px]" [class]="levelClass[level]"></span>
+            }
+            {{ 'diary.calendar.more' | translate }}
+          </span>
+        </div>
+      </section>
+
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3.5" [label]="'stats.activity.weekdays' | translate" />
+        <app-mini-bar-chart [bars]="weekdayBars()" [height]="150" topTone="muted" dense expressive />
+      </section>
+    }
+  } @else if (s.failed) {
+    <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-12 text-center">
+      <p class="text-sm text-muted">{{ 'stats.loadError' | translate }}</p>
+      <button
+        type="button"
+        (click)="section.retry()"
+        class="rounded-lg border border-border px-4 py-2 text-sm text-text-2 hover:border-border-strong"
+      >
+        {{ 'stats.retry' | translate }}
+      </button>
+    </div>
+  } @else {
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 md:gap-3">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <app-skeleton class="h-[72px] rounded-xl md:h-[90px]" />
+      }
+    </div>
+    <app-skeleton class="h-[240px] rounded-[14px]" />
+    <app-skeleton class="h-[190px] rounded-[14px]" />
+  }
+</main>
+
+<!-- One heatmap strip: weekday labels, month labels over their first week, Monday-first week columns. -->
+<ng-template #heat let-map>
+  <div class="flex gap-1.5">
+    <div class="grid shrink-0 grid-rows-7 gap-[2px] pt-4 text-[10px] leading-none text-faint" aria-hidden="true">
+      @for (label of rowLabels(); track $index) {
+        <span class="flex items-center">{{ label }}</span>
+      }
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="relative h-4 text-[10px] leading-none text-faint" aria-hidden="true">
+        @for (m of map.months; track m.month) {
+          <span class="absolute top-0 whitespace-nowrap" [style.left.%]="(m.column / map.columns) * 100">{{ months()[m.month] }}</span>
+        }
+      </div>
+      <div class="grid grid-flow-col grid-rows-7 gap-[2px]" [style.grid-template-columns]="columnsStyle(map.columns)">
+        @for (cell of map.cells; track $index) {
+          @if (cell) {
+            <span
+              class="aspect-square rounded-[2px]"
+              [class]="cellClass(cell)"
+              [attr.title]="cellTitle(cell)"
+              (click)="pick(cell)"
+              data-heat-cell
+            ></span>
+          } @else {
+            <span></span>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</ng-template>

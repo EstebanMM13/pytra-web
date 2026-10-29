@@ -214,7 +214,7 @@ export interface WeekdayActivity {
 
 /**
  * `GET /stats/activity?year=`: the year's diary days (play days only, oldest first). Streaks are
- * all-time; the current one is alive while its last day is today or yesterday.
+ * all-time; the current one is alive while its last day is yesterday, today or tomorrow (the server's UTC date can lag the user's).
  */
 export interface ActivityStats {
   year: number;
