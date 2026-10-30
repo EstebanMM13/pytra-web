@@ -176,6 +176,20 @@ describe('Games library filters', () => {
     expect(listed()).toEqual([]);
   });
 
+  it('filters by release year from the eras release-year rows, with a removable chip', async () => {
+    const { harness, router, el, listed } = await setup();
+    await harness.navigateByUrl('/games?released=2020');
+    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3', '/games/4']);
+    const chips = () => [...el.querySelectorAll('[aria-label="library.filters.active"] > span')];
+    expect(chips()).toHaveLength(1);
+    expect(chips()[0].textContent).toContain('library.filters.releasedChip');
+    await harness.navigateByUrl('/games?released=2021');
+    expect(listed()).toEqual([]);
+    chips()[0].querySelector<HTMLButtonElement>('button')!.click();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/games');
+  });
+
   const statusCounts = (el: HTMLElement) =>
     [...el.querySelectorAll('[aria-label="library.statusLabel"] button .font-mono')].map((c) => c.textContent?.trim());
 
@@ -258,7 +272,7 @@ describe('Games library filters', () => {
 
   it('clears every stats filter with "Limpiar filtros"', async () => {
     const { harness, router, el } = await setup();
-    await harness.navigateByUrl('/games?year=2024&decade=2020&days=1-&hours=0-&platform=1');
+    await harness.navigateByUrl('/games?year=2024&decade=2020&released=2020&days=1-&hours=0-&platform=1');
     const clear = [...el.querySelectorAll<HTMLButtonElement>('[aria-label="library.filters.active"] > button')].at(-1)!;
     clear.click();
     await harness.fixture.whenStable();

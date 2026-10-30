@@ -18,7 +18,7 @@
         <p class="text-sm text-muted">{{ 'stats.ratings.empty' | translate }}</p>
       </div>
     } @else {
-      <section class="grid grid-cols-2 gap-2 sm:grid-cols-4 md:gap-3" [attr.aria-label]="'stats.ratings.statsLabel' | translate">
+      <app-stat-strip role="region" class="grid-cols-2 sm:grid-cols-4" [attr.aria-label]="'stats.ratings.statsLabel' | translate">
         <app-stat-card
           [icon]="icons.star"
           tone="gold-tile"
@@ -43,7 +43,7 @@
           [hint]="spreadKey() | translate"
         />
         <app-stat-card [icon]="icons.badgeCheck" [label]="'stats.ratings.rated' | translate" [value]="r.ratedCount" />
-      </section>
+      </app-stat-strip>
 
       <!-- Hero: the histogram on the GOTY card's gold fill and border, a star watermark behind. -->
       <app-stats-hero class="p-[18px] md:p-[22px]" tone="gold" [watermark]="icons.star" data-ratings-hero>

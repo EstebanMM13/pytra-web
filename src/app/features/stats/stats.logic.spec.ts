@@ -1,8 +1,10 @@
 import { GenreAbandonment, PlatformYear, SagaStat } from '../../core/models/stats.model';
 import {
   NEUTRAL_PLATFORM_COLOR,
+  REST_SLICE_COLOR,
   abandonmentRanking,
   activityYears,
+  activeDayShare,
   buildHeatmap,
   byDeveloper,
   coverMap,
@@ -165,7 +167,8 @@ describe('platform stacks', () => {
     expect(segments.map((s) => [s.key, s.width, s.color])).toEqual([
       [1, 100 / 3, '#112233'],
       [2, 100 / 12, NEUTRAL_PLATFORM_COLOR],
-      ['unassigned', 100 / 12, NEUTRAL_PLATFORM_COLOR],
+      // Not the colourless platform's grey: the two would read as one.
+      ['unassigned', 100 / 12, REST_SLICE_COLOR],
     ]);
   });
 
@@ -503,6 +506,21 @@ describe('developerCovers', () => {
     expect(index.get('fromsoftware')!.map((c) => c.id)).toEqual([2, 1]);
     expect(index.get('supergiant')).toEqual([{ id: 3, name: 'Hades', url: null, hours: 40 }]);
     expect(index.size).toBe(2);
+  });
+});
+
+describe('activeDayShare', () => {
+  it('divides by the days elapsed so far in the current year', () => {
+    expect(activeDayShare(16, 2025, '2025-02-01')).toBeCloseTo(16 / 32);
+  });
+
+  it('divides by the whole year (leap years included) once it is over', () => {
+    expect(activeDayShare(183, 2024, '2026-01-01')).toBeCloseTo(183 / 366);
+    expect(activeDayShare(365, 2025, '2026-01-01')).toBe(1);
+  });
+
+  it('has no share for a future year', () => {
+    expect(activeDayShare(0, 2027, '2026-01-01')).toBeNull();
   });
 });
 

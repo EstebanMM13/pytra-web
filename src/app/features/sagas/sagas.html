@@ -26,6 +26,33 @@
       </button>
     </div>
 
+    @if (!loading() && !loadError() && insights(); as ins) {
+      <!-- Overview: the sagas' progress at a glance, set apart from the list under it (collapsible). -->
+      <section class="mb-2 flex flex-col gap-2.5 border-b border-divider pb-4 md:mx-2" data-saga-insights>
+        <app-section-header collapseKey="sagas.insights" [label]="'sagas.insights.title' | translate" />
+        <app-stat-strip class="grid-cols-3">
+          @for (count of ins.counts; track count.key) {
+            <app-stat-card centered [icon]="count.icon" [label]="count.label | translate" [value]="count.value" [attr.data-saga-count]="count.key" />
+          }
+        </app-stat-strip>
+        @if (ins.picks.length) {
+          <div class="flex flex-col">
+            @for (pick of ins.picks; track pick.key) {
+              <app-stats-callout
+                variant="row"
+                [link]="pick.link"
+                [label]="pick.label | translate"
+                [name]="pick.saga.name"
+                [covers]="pick.covers"
+                [attr.data-saga-pick]="pick.key"
+                >{{ pick.figure }}</app-stats-callout
+              >
+            }
+          </div>
+        }
+      </section>
+    }
+
     @if (!loading() && summaries().length > 1) {
       <!-- Search: the library's pill input, full width above the sort (the column is too narrow for both in a row) -->
       <label
@@ -275,7 +302,7 @@
       </div>
 
       <!-- Stats: 2 x 2 on mobile, one row on web -->
-      <div class="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
+      <app-stat-strip class="grid-cols-2 md:grid-cols-4">
         <app-stat-card
           [icon]="icons.gamepad2"
           [label]="'sagas.stats.played' | translate"
@@ -296,7 +323,7 @@
           [label]="'sagas.stats.platinums' | translate"
           [value]="s.platinums || '—'"
         />
-      </div>
+      </app-stat-strip>
 
       <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
         <app-section-header collapseKey="sagas.releaseOrder" [label]="'sagas.releaseOrder' | translate" class="mb-2" />

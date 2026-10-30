@@ -24,7 +24,7 @@ import { CoverRef } from './stats.logic';
       <a
         [routerLink]="link()"
         [queryParams]="queryParams()"
-        class="flex min-w-0 items-center gap-3.5 p-[18px] hover:bg-hover/30 md:gap-5 md:p-[22px]"
+        class="flex min-w-0 items-center gap-3.5 p-[18px] hover:bg-hover/30 max-sm:flex-wrap md:gap-5 md:p-[22px]"
         data-spotlight-link
       >
         @if (covers().length || pending()) {
@@ -46,10 +46,14 @@ import { CoverRef } from './stats.logic';
             <span class="text-xs text-muted">{{ meta() }}</span>
           }
         </span>
-        @if (hasGames()) {
+        @if (games() && hasGames()) {
           <app-stats-hero-games [games]="covers()" />
         }
-        <span class="flex shrink-0 flex-col items-end gap-0.5 text-right">
+        <!-- Phones: the figure drops to its own line under the name, so a long hint never squeezes the name. -->
+        <span
+          class="flex shrink-0 flex-col items-end gap-0.5 text-right max-sm:w-full max-sm:flex-row max-sm:items-baseline max-sm:gap-2 max-sm:text-left"
+          data-spotlight-figure
+        >
           <ng-content />
         </span>
         <svg [lucideIcon]="icons.chevronRight" [size]="18" class="-mr-1 hidden shrink-0 text-faint sm:block" aria-hidden="true"></svg>
@@ -70,5 +74,7 @@ export class StatsSpotlight {
   readonly pending = input(false);
   /** The section icon: watermark and badge without covers. */
   readonly icon = input.required<LucideIconInput>();
+  /** Lists the covers' games with their hours beside the figure (lg+); off where the figure says enough. */
+  readonly games = input(true);
   protected readonly hasGames = computed(() => this.covers().length > 0);
 }

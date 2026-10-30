@@ -41,6 +41,8 @@ export function weekdayDate(dayOfWeek: number): Date {
 
 /** Neutral colour for platforms without a catalog colour (and the unassigned online hours). */
 export const NEUTRAL_PLATFORM_COLOR = 'var(--pt-platform-neutral)';
+/** The leftovers of a share ("Others", hours without a platform): darker than the neutral platform grey. */
+export const REST_SLICE_COLOR = 'var(--pt-border-strong)';
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
@@ -165,6 +167,8 @@ export interface GamesLinkFilter {
   year?: number | null;
   /** Release decade (first year). */
   decade?: number;
+  /** Release year. */
+  released?: number;
   /** Days to finish a completed run. */
   days?: NumberRange;
   /** Hours of a completed run (max exclusive). */
@@ -181,6 +185,7 @@ export function gamesLinkParams(filter: GamesLinkFilter): Params {
   if (filter.genre !== undefined) params['genre'] = String(filter.genre);
   if (filter.year !== undefined && filter.year !== null) params['year'] = String(filter.year);
   if (filter.decade !== undefined) params['decade'] = String(filter.decade);
+  if (filter.released !== undefined) params['released'] = String(filter.released);
   if (filter.days) params['days'] = serializeRange(filter.days);
   if (filter.hours) params['hours'] = serializeRange(filter.hours);
   return params;
@@ -407,7 +412,7 @@ export function yearSegments(
     segments.push({
       key: 'unassigned',
       name: unassignedName,
-      color: NEUTRAL_PLATFORM_COLOR,
+      color: REST_SLICE_COLOR,
       hours: year.unassignedOnlineHours,
       width: year.unassignedOnlineHours * scale,
     });
@@ -700,6 +705,19 @@ export function hoursTrend(days: readonly ActivityDay[], year: number, today: st
   if (year > thisYear) return [];
   const months = monthlyHours(days, year);
   return year === thisYear ? months.slice(0, thisMonth) : months;
+}
+
+/**
+ * Share (0..1) of the year's days that have diary entries: over the days elapsed so far in the
+ * current year, over the whole year (365 or 366) for a past one; null for a future year.
+ */
+export function activeDayShare(activeDays: number, year: number, today: string): number | null {
+  const thisYear = Number(today.slice(0, 4));
+  if (year > thisYear) return null;
+  const start = Date.UTC(year, 0, 1);
+  const end = year === thisYear ? Date.parse(today + 'T00:00:00Z') + DAY_MS : Date.UTC(year + 1, 0, 1);
+  const days = Math.round((end - start) / DAY_MS);
+  return Math.min(1, activeDays / days);
 }
 
 /** Hours of every year added up (the hub hero's all-time figure). */

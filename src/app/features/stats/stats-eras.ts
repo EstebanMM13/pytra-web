@@ -12,7 +12,7 @@ import { STATS_LIST_PREVIEW, StatsBar, StatsBarList } from './stats-bar-list';
 import { StatsCallout } from './stats-callout';
 import { StatsColumn, StatsColumnChart } from './stats-column-chart';
 import { MAX_STACK_COVERS } from './stats-cover-stack';
-import { bestRatedDecade, decadeOf, inDecade, releaseExtremes, topDecade } from './stats-eras.logic';
+import { bestRatedDecade, inDecade, releaseExtremes, topDecade } from './stats-eras.logic';
 import { statsFormat } from './stats-format';
 import { STATS_HERO_RADIUS } from './stats-hero';
 import { statsLibrary } from './stats-library';
@@ -195,7 +195,7 @@ export class StatsEras {
         y.averageRating !== null ? format.text('stats.platforms.average', { rating: format.rating(y.averageRating) }) : null,
       ]),
       link: GAMES_LINK,
-      queryParams: gamesLinkParams({ decade: decadeOf(y.year) }),
+      queryParams: gamesLinkParams({ released: y.year }),
       cover: covers.get(y.year) ?? null,
     }));
   });

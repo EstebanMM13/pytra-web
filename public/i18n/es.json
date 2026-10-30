@@ -1035,6 +1035,7 @@
       "anyYear": "Cualquiera",
       "yearHint": "Juegos con alguna partida o con horas online ese año.",
       "yearChip": "Jugado en {{year}}",
+      "releasedChip": "Lanzado en {{year}}",
       "daysChip": "Terminado en {{min}}–{{max}} días",
       "daysChipOpen": "Terminado en {{min}}+ días",
       "hoursChip": "Partidas de {{min}}–{{max}} h",
@@ -1091,6 +1092,14 @@
       "rating": "Nota media",
       "completion": "% completado",
       "recent": "Actividad reciente"
+    },
+    "insights": {
+      "title": "Resumen",
+      "complete": "Completas",
+      "inProgress": "En curso",
+      "notStarted": "Sin empezar",
+      "closest": "Más cerca de completarla",
+      "longest": "La saga con más horas"
     }
   },
   "language": {
@@ -1482,7 +1491,7 @@
       },
       "eras": "Épocas",
       "erasHint": "{{hours}} · tu década más jugada",
-      "genres": "Géneros y sagas",
+      "genres": "Géneros",
       "genresShort": "Géneros",
       "genresHint": "{{percent}} de tus horas · tu género principal"
     },
@@ -1491,6 +1500,7 @@
       "statsLabel": "Resumen de actividad",
       "hours": "Horas del año",
       "activeDays": "Días activos",
+      "activeShare": "{{share}} del año",
       "currentStreak": "Racha actual",
       "longestStreak": "Mejor racha",
       "streakRange": "{{from}} – {{to}}",
@@ -1645,10 +1655,10 @@
     },
     "genres": {
       "heading": {
-        "lead": "Géneros y",
-        "key": "sagas"
+        "lead": "Tus",
+        "key": "géneros"
       },
-      "subtitle": "Qué tipo de juegos juegas y cómo van tus sagas.",
+      "subtitle": "Qué tipo de juegos juegas.",
       "top": "Tu género más jugado",
       "shareOfHours": "de tus horas · {{hours}}",
       "bestRated": "Género mejor valorado",
@@ -1658,14 +1668,7 @@
       "empty": "Aún no hay juegos con género.",
       "abandonedShare": "{{percent}} abandonadas",
       "ofTheYear": "Género de cada año",
-      "ofTheYearHint": "El género con más horas de partidas de cada año (sin las horas online).",
-      "sagas": "Tus sagas",
-      "allSagas": "Ver sagas",
-      "sagasComplete": "Completas",
-      "sagasInProgress": "En curso",
-      "sagasNotStarted": "Sin empezar",
-      "sagaClosest": "Más cerca de completarla",
-      "sagaLongest": "La saga con más horas"
+      "ofTheYearHint": "El género con más horas de partidas de cada año (sin las horas online)."
     },
     "decadeLabel": "Años {{short}}"
   }

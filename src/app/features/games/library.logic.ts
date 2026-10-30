@@ -3,7 +3,15 @@ import { Game, GameCategory } from '../../core/models/game.model';
 import { PlatformRef } from '../../core/models/platform.model';
 import { distinctPlatformRefs } from '../../core/services/platform.logic';
 import { todayIso } from '../../shared/utils/run-dates';
-import { NO_PLAY_FILTERS, PlayFilters, PlayIndex, matchesDecade, matchesPlay, playFilterCount } from './play-filters.logic';
+import {
+  NO_PLAY_FILTERS,
+  PlayFilters,
+  PlayIndex,
+  matchesDecade,
+  matchesPlay,
+  matchesReleaseYear,
+  playFilterCount,
+} from './play-filters.logic';
 
 /**
  * Status tab of the library toolbar. `PENDIENTE` also covers games with no runs yet, except online
@@ -59,6 +67,8 @@ export interface LibraryQuery {
   fullCompletion?: boolean;
   /** Release decade (first year, e.g. 1990); null or omitted: any. */
   decade?: number | null;
+  /** Release year (e.g. 1998); null or omitted: any. */
+  released?: number | null;
   /** Run filters (played year, days to finish, run hours); see play-filters.logic. */
   play?: PlayFilters;
 }
@@ -166,6 +176,7 @@ export function matchesPanelFilters(game: Game, query: LibraryQuery, play?: Play
   return (
     matchesText(game, query.text) &&
     matchesDecade(game, query.decade) &&
+    matchesReleaseYear(game, query.released) &&
     matchesPlay(play?.get(game.id), query.play ?? NO_PLAY_FILTERS, query.platforms) &&
     matchesAchievements(game, query) &&
     matchesPlatforms(game, query.platforms) &&
@@ -183,11 +194,12 @@ export function matchesPanelFilters(game: Game, query: LibraryQuery, play?: Play
 export function panelFilterCount(
   query: Pick<
     LibraryQuery,
-    'category' | 'platforms' | 'genres' | 'developers' | 'publishers' | 'platinum' | 'fullCompletion' | 'decade' | 'play'
+    'category' | 'platforms' | 'genres' | 'developers' | 'publishers' | 'platinum' | 'fullCompletion' | 'decade' | 'released' | 'play'
   >,
 ): number {
   return (
     (query.decade !== null && query.decade !== undefined ? 1 : 0) +
+    (query.released !== null && query.released !== undefined ? 1 : 0) +
     playFilterCount(query.play ?? NO_PLAY_FILTERS) +
     (query.category && query.category !== 'ALL' ? 1 : 0) +
     (query.platinum ? 1 : 0) +

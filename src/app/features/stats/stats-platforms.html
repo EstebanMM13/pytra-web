@@ -25,7 +25,8 @@
             }}</span>
             <span class="mt-1 line-clamp-2 text-[11px] leading-tight wrap-break-word text-text-3 md:text-xs">{{ hero.slices[0].name }}</span>
           </app-stats-donut>
-          <ul class="flex min-w-0 flex-1 flex-col gap-2" data-platform-share-legend>
+          <!-- Capped width: on wide screens the percentages stay next to their names. -->
+          <ul class="flex min-w-0 flex-1 flex-col gap-2 md:max-w-80" data-platform-share-legend>
             @for (slice of hero.slices; track slice.key) {
               <li class="flex items-start gap-2 text-[13px] leading-5 md:text-sm">
                 <span class="mt-1.5 size-2.5 shrink-0 rounded-full" [style.background-color]="slice.color" aria-hidden="true"></span>
@@ -38,7 +39,8 @@
       </app-stats-hero>
     }
 
-    <div class="grid grid-cols-1 items-start gap-4 md:gap-5 lg:grid-cols-2">
+    <!-- Side by side from lg, both cards take the row's height. -->
+    <div class="grid grid-cols-1 items-start gap-4 md:gap-5 lg:grid-cols-2 lg:items-stretch">
       <!-- In a year the yearly stack is meaningless: the list takes the whole row. -->
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]" [class]="s.year !== null ? 'lg:col-span-2' : ''">
         <app-section-header class="mb-3" [label]="'stats.platforms.list' | translate" />

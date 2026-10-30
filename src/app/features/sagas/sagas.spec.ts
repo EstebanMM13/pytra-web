@@ -86,6 +86,16 @@ describe('Sagas search', () => {
     expect(el.querySelector('h1')!.nextElementSibling!.textContent!.trim()).toBe('3');
   });
 
+  it('sums up the sagas above the list, set apart from it', () => {
+    const { el } = setup();
+    const overview = el.querySelector('[data-saga-insights]')!;
+    expect(overview.querySelector('app-stat-strip')).not.toBeNull();
+    expect(overview.querySelector('[data-saga-count="notStarted"]')!.textContent).toContain('3');
+    expect(overview.querySelector('[data-saga-count="complete"]')!.textContent).toContain('0');
+    // Nothing played yet: no saga is closest to completion or has hours.
+    expect(overview.querySelector('[data-saga-pick]')).toBeNull();
+  });
+
   it('starts from the q query param', () => {
     const { el, listed } = setup('ascension');
     expect((el.querySelector('[data-saga-search]') as HTMLInputElement).value).toBe('ascension');

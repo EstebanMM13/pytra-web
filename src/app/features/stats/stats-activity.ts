@@ -13,6 +13,7 @@ import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
+import { StatStrip } from '../../shared/ui/stat-strip';
 import { todayIso } from '../../shared/utils/run-dates';
 import { DIARY_LEVEL_CLASS, DiaryLevel } from '../diary/diary.logic';
 import { monthLabels, monthValueLabel } from '../years/years.logic';
@@ -25,8 +26,10 @@ import { statsSection } from './stats-section';
 import {
   HEATMAP_HALVES,
   HeatCell,
+  activeDayShare,
   activityYears,
   buildHeatmap,
+  percentFormat,
   isoToUtcDate,
   hoursTrend,
   weekdayDate,
@@ -53,6 +56,7 @@ import {
     SectionHeader,
     Skeleton,
     StatCard,
+    StatStrip,
     StatsHero,
     StatsLoadError,
     StatsPageHeader,
@@ -98,6 +102,15 @@ export class StatsActivity {
   protected readonly hoursTrend = computed(() => {
     const data = this.state().data;
     return data ? hoursTrend(data.days, data.year, this.today) : null;
+  });
+  /** Share of the year's days played (elapsed days for the current year): the active days meter. */
+  protected readonly activeShare = computed(() => {
+    const data = this.state().data;
+    return data ? activeDayShare(data.activeDays, data.year, this.today) : null;
+  });
+  protected readonly activeShareHint = computed(() => {
+    const share = this.activeShare();
+    return share === null ? null : this.format.text('stats.activity.activeShare', { share: percentFormat(this.format.locale())(share) });
   });
   protected readonly halves = computed(() => {
     const data = this.state().data;

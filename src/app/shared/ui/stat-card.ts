@@ -16,6 +16,7 @@ import { LucideDynamicIcon, LucideIconInput } from '@lucide/angular';
 import { Sparkline } from './sparkline';
 import { countUpValue, parseCountUp } from '../utils/count-up';
 import { canAnimate } from '../utils/motion';
+import { StatStrip } from './stat-strip';
 
 /**
  * Label + big figure tile, one design for every screen size: label row on top (on phones it wraps to
@@ -30,14 +31,18 @@ import { canAnimate } from '../utils/motion';
   imports: [LucideDynamicIcon, NgTemplateOutlet, RouterLink, Sparkline],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: 'block min-w-0 rounded-xl border',
-    // Neutral glass tile by default; the rating tile (tone 'gold-tile') sits on a gold tint.
-    '[class.border-card-border]': "tone() !== 'gold-tile'",
-    '[class.card-glass]': "tone() !== 'gold-tile'",
-    '[class.border-gold-card-border]': "tone() === 'gold-tile'",
+    class: 'block min-w-0',
+    // Neutral glass tile by default; the rating tile (tone 'gold-tile') sits on a gold tint. Inside
+    // an `app-stat-strip` the strip draws the frame: the card is a bare cell (gold-tile keeps its tint).
+    '[class.rounded-xl]': '!inStrip',
+    '[class.border]': '!inStrip',
+    '[class.stat-cell]': 'inStrip',
+    '[class.border-card-border]': "!inStrip && tone() !== 'gold-tile'",
+    '[class.card-glass]': "!inStrip && tone() !== 'gold-tile'",
+    '[class.border-gold-card-border]': "!inStrip && tone() === 'gold-tile'",
     '[class.bg-gold-tint]': "tone() === 'gold-tile'",
     // Linked cards lift on hover and shrink while pressed, like the other clickable cards.
-    '[class.hover-lift]': 'link() !== null',
+    '[class.hover-lift]': 'link() !== null && !inStrip',
   },
   // Entrance: a short rise + fade, staggered across a row of cards (none with reduced motion).
   styles: `
@@ -49,6 +54,13 @@ import { canAnimate } from '../utils/motion';
     :host(:nth-child(4)) { animation-delay: 120ms; }
     :host(:nth-child(5)) { animation-delay: 160ms; }
     :host(:nth-child(n + 6)) { animation-delay: 200ms; }
+
+    /* Strip cell: hairline dividers on the left and top edge; the strip clips its outer ones. */
+    :host(.stat-cell) {
+      box-shadow:
+        -1px 0 0 var(--pt-card-border),
+        0 -1px 0 var(--pt-card-border);
+    }
 
     @keyframes stat-card-in {
       from {
@@ -115,6 +127,9 @@ import { canAnimate } from '../utils/motion';
   `,
 })
 export class StatCard {
+  /** Drawn as a frameless cell of an `app-stat-strip` instead of a standalone tile. */
+  protected readonly inStrip = inject(StatStrip, { optional: true }) !== null;
+
   readonly label = input.required<string>();
   /** Shown instead of `label` on narrow screens (< sm), where three cards share a row. */
   readonly shortLabel = input<string | null>(null);

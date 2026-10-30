@@ -5,8 +5,10 @@ import {
   buildPlayIndex,
   bucketRange,
   matchesDecade,
+  matchesReleaseYear,
   matchesPlay,
   parseDecade,
+  parseReleaseYear,
   parsePlayedYear,
   parseRange,
   playFilterCount,
@@ -53,6 +55,9 @@ describe('play filter parsing', () => {
     expect(parseDecade('1990')).toBe(1990);
     expect(parseDecade('1995')).toBeNull();
     expect(parseDecade('abcd')).toBeNull();
+    expect(parseReleaseYear('1998')).toBe(1998);
+    expect(parseReleaseYear('1900')).toBeNull();
+    expect(parseReleaseYear('98')).toBeNull();
   });
 
   it('counts the active run filters', () => {
@@ -67,6 +72,15 @@ describe('matchesDecade', () => {
     expect(matchesDecade({ releaseDate: '2000-01-01' }, 1990)).toBe(false);
     expect(matchesDecade({ releaseDate: null }, 1990)).toBe(false);
     expect(matchesDecade({ releaseDate: null }, null)).toBe(true);
+  });
+});
+
+describe('matchesReleaseYear', () => {
+  it('keeps games released that year only', () => {
+    expect(matchesReleaseYear({ releaseDate: '1998-03-01' }, 1998)).toBe(true);
+    expect(matchesReleaseYear({ releaseDate: '1999-01-01' }, 1998)).toBe(false);
+    expect(matchesReleaseYear({ releaseDate: null }, 1998)).toBe(false);
+    expect(matchesReleaseYear({ releaseDate: null }, null)).toBe(true);
   });
 });
 

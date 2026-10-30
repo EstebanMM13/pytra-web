@@ -14,6 +14,7 @@ import { ICONS } from '../../shared/ui/icons';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
+import { StatStrip } from '../../shared/ui/stat-strip';
 import { GameTimeline } from '../sagas/game-timeline';
 import { developerGames, gameGroupFigures, sagaYearRange } from '../sagas/saga.logic';
 import { StatsLoadError } from './stats-load-error';
@@ -47,6 +48,7 @@ interface LibraryState {
     SectionHeader,
     Skeleton,
     StatCard,
+    StatStrip,
     StatsLoadError,
     StatsPageHeader,
     GameTimeline,
@@ -81,7 +83,7 @@ interface LibraryState {
             <p class="text-sm text-muted">{{ 'stats.studio.empty' | translate }}</p>
           </div>
         } @else {
-          <div class="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3" data-studio-stats>
+          <app-stat-strip class="grid-cols-2 md:grid-cols-4" data-studio-stats>
             <app-stat-card
               [icon]="icons.gamepad2"
               [label]="'sagas.stats.played' | translate"
@@ -97,7 +99,7 @@ interface LibraryState {
               [valueClass]="'font-mono ' + (g.avgRating | ratingTone)"
             />
             <app-stat-card [icon]="icons.trophy" tone="platinum" [label]="'sagas.stats.platinums' | translate" [value]="g.platinums || '—'" />
-          </div>
+          </app-stat-strip>
 
           <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">
             <app-section-header [label]="'sagas.releaseOrder' | translate" class="mb-2" />

@@ -66,7 +66,15 @@ import { LibraryFilters } from './library-filters';
 import { LibraryStatusPicker } from './library-status-picker';
 import { formatGenreName } from '../../shared/pipes/genre-name.pipe';
 import { decadeParams } from '../stats/stats.logic';
-import { PlayIndex, buildPlayIndex, hasPlayFilters, parseDecade, parsePlayedYear, parseRange } from './play-filters.logic';
+import {
+  PlayIndex,
+  buildPlayIndex,
+  hasPlayFilters,
+  parseDecade,
+  parsePlayedYear,
+  parseRange,
+  parseReleaseYear,
+} from './play-filters.logic';
 
 /** Pause in typing after which the library search text is written to the URL. */
 const SEARCH_URL_DELAY_MS = 300;
@@ -83,6 +91,7 @@ interface FilterChip {
     | 'fullCompletion'
     | 'year'
     | 'decade'
+    | 'released'
     | 'days'
     | 'hours';
   id: string;
@@ -98,14 +107,14 @@ interface PlayState {
 }
 
 /** The params stats rows link with, cleared together with the panel filters. */
-const STATS_FILTER_PARAMS: Params = { year: null, decade: null, days: null, hours: null };
+const STATS_FILTER_PARAMS: Params = { year: null, decade: null, released: null, days: null, hours: null };
 
 /**
  * Library (/games): confirmed games with their run aggregates, filtered, sorted and paged on the
  * client. Filters live in the URL (`q`, `status`, `platform` and `genre` as comma-separated ids, `dev` and
  * `pub` as repeated names, `category`, `platinum=1` and `full=1` (100%), `sort`, `page`) so back
  * navigation restores them. Stats rows link here with `year` (played year), `decade` (release
- * decade), `days` and `hours` (`min-max` / `min-` buckets of completed runs); see play-filters.logic.
+ * decade), `released` (release year), `days` and `hours` (`min-max` / `min-` buckets of completed runs); see play-filters.logic.
  * The list / grid view is a per-device preference (localStorage); the grid shows every result, unpaged.
  */
 @Component({
@@ -179,6 +188,7 @@ export class Games {
             platinum: parseFlag(params.get('platinum')),
             fullCompletion: parseFlag(params.get('full')),
             decade: parseDecade(params.get('decade')),
+            released: parseReleaseYear(params.get('released')),
             play: {
               year: parsePlayedYear(params.get('year')),
               days: parseRange(params.get('days')),
@@ -282,10 +292,10 @@ export class Games {
   protected readonly developers = computed(() => libraryNames(this.libraryGames(), (g) => g.developer));
   protected readonly publishers = computed(() => libraryNames(this.libraryGames(), (g) => g.publisher));
   protected readonly filterCount = computed(() => panelFilterCount(this.query()));
-  /** Filters only stats links set (release decade, days to finish, run hours): counted on the filter button too. */
+  /** Filters only stats links set (release decade / year, days to finish, run hours): counted on the filter button too. */
   protected readonly linkFilterCount = computed(() => {
-    const { decade, play } = this.query();
-    return (decade !== null ? 1 : 0) + (play.days ? 1 : 0) + (play.runHours ? 1 : 0);
+    const { decade, released, play } = this.query();
+    return (decade !== null ? 1 : 0) + (released !== null ? 1 : 0) + (play.days ? 1 : 0) + (play.runHours ? 1 : 0);
   });
   /** Removable chips for the active panel filters. */
   protected readonly filterChips = computed(() => {
@@ -314,6 +324,10 @@ export class Games {
     if (year !== null) chips.push({ kind: 'year', id: String(year), label: 'library.filters.yearChip', params: { year } });
     if (query.decade !== null) {
       chips.push({ kind: 'decade', id: String(query.decade), label: 'stats.decadeLabel', params: decadeParams(query.decade) });
+    }
+    if (query.released !== null) {
+      const year = query.released;
+      chips.push({ kind: 'released', id: String(year), label: 'library.filters.releasedChip', params: { year } });
     }
     if (days) {
       const label = days.max === null ? 'library.filters.daysChipOpen' : 'library.filters.daysChip';
@@ -510,6 +524,7 @@ export class Games {
     else if (chip.kind === 'publisher') this.setPublishers(query.publishers.filter((p) => p !== chip.id));
     else if (chip.kind === 'year') this.setPlayedYear(null);
     else if (chip.kind === 'decade') this.updateQuery({ decade: null, page: null });
+    else if (chip.kind === 'released') this.updateQuery({ released: null, page: null });
     else if (chip.kind === 'days') this.updateQuery({ days: null, page: null });
     else if (chip.kind === 'hours') this.updateQuery({ hours: null, page: null });
     else this.setGenres(query.genres.filter((g) => String(g) !== chip.id));

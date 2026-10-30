@@ -134,21 +134,18 @@ describe('Stats genres page', () => {
     ['fails', down],
     ['is empty', () => of([])],
   ] as const) {
-    it(`still ranks the genres, without covers or sagas, when the library ${name}`, () => {
+    it(`still ranks the genres, without covers, when the library ${name}`, () => {
       const el = setup({ findAll });
       expect(el.querySelectorAll('[data-genre-list] [data-bar-row]')).toHaveLength(2);
       expect(el.querySelector('[data-genre-list] app-game-cover')).toBeNull();
-      expect(el.querySelector('[data-saga-insights]')).toBeNull();
       // Without the library, the share falls back to the yearly hours: 150 of 180.
       expect(el.querySelector('[data-top-genre-share]')!.textContent).toContain('83');
     });
   }
 
-  it('sums up the sagas from the library and points at the closest to completion and the longest', () => {
+  it('leaves the sagas to the sagas page and keeps the spotlight to the genre and its share', () => {
     const el = setup();
-    expect(el.querySelector('[data-saga-count="inProgress"]')!.textContent).toContain('1');
-    expect(el.querySelector('[data-saga-pick="closest"] a')!.getAttribute('href')).toBe('/sagas/7');
-    expect(el.querySelector('[data-saga-pick="closest"]')!.textContent).toContain('1/2');
-    expect(el.querySelector('[data-saga-pick="longest"] a')!.getAttribute('href')).toBe('/sagas/7');
+    expect(el.querySelector('[data-saga-insights]')).toBeNull();
+    expect(el.querySelector('[data-top-genre] [data-hero-games]')).toBeNull();
   });
 });

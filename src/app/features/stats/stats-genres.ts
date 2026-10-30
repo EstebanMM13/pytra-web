@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { catchError, combineLatest, map, of } from 'rxjs';
 import { CompletionStats, RatingStats, YearStat } from '../../core/models/stats.model';
@@ -19,10 +18,9 @@ import { STATS_HERO_RADIUS } from './stats-hero';
 import { statsLibrary, statsPlayFacts } from './stats-library';
 import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
-import { sagaInsights, sagaProgress } from './stats-sagas.logic';
 import { statsSection } from './stats-section';
 import { StatsSpotlight } from './stats-spotlight';
-import { CoverRef, GAMES_LINK, gamesLinkParams, genreCovers, joinParts, percentFormat, shares, topCovers, withArt } from './stats.logic';
+import { CoverRef, GAMES_LINK, gamesLinkParams, genreCovers, joinParts, percentFormat, shares, withArt } from './stats.logic';
 
 /** Years listed in "genre of each year". */
 export const GENRE_YEARS = 8;
@@ -39,21 +37,18 @@ interface GenreCallout {
 }
 
 /**
- * Genres & sagas section (`/stats/genres`, all time). Genres: the most played one as the
- * spotlight (its share of all the hours, games, rating and its most played games), the genres
+ * Genres section (`/stats/genres`, all time): the most played one as the spotlight (its share
+ * of all the hours, games and rating), the genres
  * that stand out (best rated, most abandoned, most games), every genre ranked by hours with its
  * rating and abandonment, and each year's main genre (run hours from `/stats/play-facts` credited
- * to the genres of the library's games). Sagas: how many are complete, in progress or not
- * started, the one closest to completion and the longest, from the library list (the sagas
- * page's figures). Only the genre list is required: ratings, abandonment, the yearly hours, the
- * play facts and the library each fall back to nothing when they fail. Genres open the library
- * filtered by them; sagas open the saga.
+ * to the genres of the library's games). Only the genre list is required: ratings, abandonment,
+ * the yearly hours, the play facts and the library each fall back to nothing when they fail.
+ * Genres open the library filtered by them.
  */
 @Component({
   selector: 'app-stats-genres',
   imports: [
     Navbar,
-    RouterLink,
     TranslatePipe,
     SectionHeader,
     Skeleton,
@@ -198,39 +193,5 @@ export class StatsGenres {
         link: GAMES_LINK,
         queryParams: gamesLinkParams({ genre: y.genreId, year: y.year }),
       }));
-  });
-
-  /** The sagas' progress and the two that stand out, with covers; null before the library loads or without sagas. */
-  protected readonly sagas = computed(() => {
-    const games = this.library();
-    if (!games) return null;
-    const progress = sagaProgress(games);
-    if (!progress.length) return null;
-    const insights = sagaInsights(progress);
-    const format = this.format;
-    const covers = (sagaId: number) => withArt(topCovers(games, (g) => g.sagaId === sagaId, MAX_STACK_COVERS));
-    return {
-      counts: [
-        { key: 'complete', label: 'stats.genres.sagasComplete', value: insights.complete },
-        { key: 'inProgress', label: 'stats.genres.sagasInProgress', value: insights.inProgress },
-        { key: 'notStarted', label: 'stats.genres.sagasNotStarted', value: insights.notStarted },
-      ],
-      picks: [
-        insights.closest && {
-          key: 'closest',
-          label: 'stats.genres.sagaClosest',
-          saga: insights.closest,
-          figure: `${insights.closest.played}/${insights.closest.total}`,
-        },
-        insights.longest && {
-          key: 'longest',
-          label: 'stats.genres.sagaLongest',
-          saga: insights.longest,
-          figure: format.hours(insights.longest.hours),
-        },
-      ]
-        .filter((pick) => pick !== null)
-        .map((pick) => ({ ...pick, covers: covers(pick.saga.sagaId), link: ['/sagas', pick.saga.sagaId] })),
-    };
   });
 }

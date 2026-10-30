@@ -18,7 +18,13 @@ import { GameCover } from '../../shared/ui/game-cover';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
+import { StatStrip } from '../../shared/ui/stat-strip';
 import { StatsBackLink } from '../stats/stats-back-link';
+import { StatsCallout } from '../stats/stats-callout';
+import { MAX_STACK_COVERS } from '../stats/stats-cover-stack';
+import { statsFormat } from '../stats/stats-format';
+import { sagaInsights } from '../stats/stats-sagas.logic';
+import { topCovers, withArt } from '../stats/stats.logic';
 import { GameTimeline } from './game-timeline';
 import { SagaDialog } from './saga-dialog';
 import { Dropdown, DropdownOption } from '../../shared/ui/dropdown';
@@ -62,11 +68,13 @@ const SEARCH_URL_DELAY_MS = 300;
     SectionHeader,
     Skeleton,
     StatCard,
+    StatStrip,
     SagaDialog,
     GameCover,
     Dropdown,
     GameTimeline,
     StatsBackLink,
+    StatsCallout,
     ScrollParallax,
     LucideDynamicIcon,
   ],
@@ -133,6 +141,46 @@ export class Sagas {
   private urlText = this.searchText();
   /** `q` this component wrote and whose URL echo has not arrived yet (it must not overwrite newer typing). */
   private echoText: string | null = null;
+
+  private readonly format = statsFormat();
+
+  /**
+   * Overview above the list: how many sagas are complete, in progress or not started, the one
+   * closest to completion and the one with the most hours (sagas without reviewed games left out);
+   * null without such sagas.
+   */
+  protected readonly insights = computed(() => {
+    const summaries = this.summaries().filter((s) => s.total > 0);
+    if (!summaries.length) return null;
+    const insights = sagaInsights(
+      summaries.map((s) => ({ sagaId: s.saga.id, name: s.saga.name, played: s.played, total: s.total, hours: s.hours })),
+    );
+    const games = this.games();
+    const covers = (sagaId: number) => withArt(topCovers(games, (g) => g.sagaId === sagaId, MAX_STACK_COVERS));
+    return {
+      counts: [
+        { key: 'complete', label: 'sagas.insights.complete', value: insights.complete, icon: this.icons.circleCheck },
+        { key: 'inProgress', label: 'sagas.insights.inProgress', value: insights.inProgress, icon: this.icons.gamepad2 },
+        { key: 'notStarted', label: 'sagas.insights.notStarted', value: insights.notStarted, icon: this.icons.hourglass },
+      ],
+      picks: [
+        insights.closest && {
+          key: 'closest',
+          label: 'sagas.insights.closest',
+          saga: insights.closest,
+          figure: `${insights.closest.played}/${insights.closest.total}`,
+        },
+        insights.longest && {
+          key: 'longest',
+          label: 'sagas.insights.longest',
+          saga: insights.longest,
+          figure: this.format.hours(insights.longest.hours),
+        },
+      ]
+        .filter((pick) => pick !== null)
+        .map((pick) => ({ ...pick, covers: covers(pick.saga.sagaId), link: ['/sagas', pick.saga.sagaId] })),
+    };
+  });
 
   /** The listed sagas: the sorted ones matching the search. */
   protected readonly visible = computed(() => filterSagas(this.summaries(), this.searchText()));

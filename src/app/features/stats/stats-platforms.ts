@@ -18,7 +18,7 @@ import { StatsScope } from './stats-scope';
 import { statsSection } from './stats-section';
 import {
   GAMES_LINK,
-  NEUTRAL_PLATFORM_COLOR,
+  REST_SLICE_COLOR,
   gamesLinkParams,
   joinParts,
   percentFormat,
@@ -99,7 +99,7 @@ export class StatsPlatforms {
     const slices = shareSlices(
       platforms.map((p) => ({ key: p.platformId, name: this.format.platform(p.name), value: p.hours, color: colorOf(p.platformId, p.color) })),
       SHARE_SLICES,
-      { name: this.format.text('stats.platforms.others'), color: NEUTRAL_PLATFORM_COLOR },
+      { name: this.format.text('stats.platforms.others'), color: REST_SLICE_COLOR },
     );
     if (!slices.length) return null;
     const percent = percentFormat(this.format.locale());

@@ -75,6 +75,10 @@ describe('Stats eras page', () => {
     const el = setup();
     expect(el.querySelector('[data-release-years] [data-rank-first]')).not.toBeNull();
     expect(el.querySelectorAll('[data-release-years] [data-bar-row]')).toHaveLength(2);
+    // A release year opens the library on that year alone, not its whole decade.
+    expect(el.querySelector('[data-release-years] [data-bar-row] a')!.getAttribute('href')).toBe(
+      '/games?released=2015',
+    );
     expect(el.querySelector('[data-era-callout="bestRated"] a')!.getAttribute('href')).toBe('/games?decade=2010');
     expect(el.querySelector('[data-era-callout="oldest"] a')!.getAttribute('href')).toBe('/games/2');
     expect(el.querySelector('[data-era-callout="newest"] a')!.getAttribute('href')).toBe('/games/1');

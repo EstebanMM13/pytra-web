@@ -12,6 +12,7 @@ import { ICONS } from '../../shared/ui/icons';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
+import { StatStrip } from '../../shared/ui/stat-strip';
 import { ratingTone } from '../../shared/utils/rating-tone';
 import { STATS_LIST_PREVIEW, StatsBar, StatsBarList } from './stats-bar-list';
 import { statsFormat } from './stats-format';
@@ -65,6 +66,7 @@ const SPREAD_KEYS: Record<RatingSpread, string> = {
     SectionHeader,
     Skeleton,
     StatCard,
+    StatStrip,
     StatsBarList,
     StatsHero,
     StatsLoadError,

@@ -1035,6 +1035,7 @@
       "anyYear": "Any",
       "yearHint": "Games with a run or online hours that year.",
       "yearChip": "Played in {{year}}",
+      "releasedChip": "Released in {{year}}",
       "daysChip": "Finished in {{min}}–{{max}} days",
       "daysChipOpen": "Finished in {{min}}+ days",
       "hoursChip": "{{min}}–{{max}} h runs",
@@ -1091,6 +1092,14 @@
       "rating": "Average rating",
       "completion": "% completed",
       "recent": "Recent activity"
+    },
+    "insights": {
+      "title": "Overview",
+      "complete": "Complete",
+      "inProgress": "In progress",
+      "notStarted": "Not started",
+      "closest": "Closest to complete",
+      "longest": "The saga with the most hours"
     }
   },
   "language": {
@@ -1482,7 +1491,7 @@
       },
       "eras": "Eras",
       "erasHint": "{{hours}} · your most played decade",
-      "genres": "Genres & sagas",
+      "genres": "Genres",
       "genresShort": "Genres",
       "genresHint": "{{percent}} of your hours · your main genre"
     },
@@ -1491,6 +1500,7 @@
       "statsLabel": "Activity summary",
       "hours": "Hours this year",
       "activeDays": "Active days",
+      "activeShare": "{{share}} of the year",
       "currentStreak": "Current streak",
       "longestStreak": "Best streak",
       "streakRange": "{{from}} – {{to}}",
@@ -1645,10 +1655,10 @@
     },
     "genres": {
       "heading": {
-        "lead": "Genres &",
-        "key": "sagas"
+        "lead": "Your",
+        "key": "genres"
       },
-      "subtitle": "What kind of games you play, and how your sagas are going.",
+      "subtitle": "What kind of games you play.",
       "top": "Your most played genre",
       "shareOfHours": "of your hours · {{hours}}",
       "bestRated": "Best rated genre",
@@ -1658,14 +1668,7 @@
       "empty": "No games with a genre yet.",
       "abandonedShare": "{{percent}} abandoned",
       "ofTheYear": "Genre of each year",
-      "ofTheYearHint": "The genre with the most run hours each year (online hours left out).",
-      "sagas": "Your sagas",
-      "allSagas": "See sagas",
-      "sagasComplete": "Complete",
-      "sagasInProgress": "In progress",
-      "sagasNotStarted": "Not started",
-      "sagaClosest": "Closest to complete",
-      "sagaLongest": "Saga with the most hours"
+      "ofTheYearHint": "The genre with the most run hours each year (online hours left out)."
     },
     "decadeLabel": "{{decade}}s"
   }

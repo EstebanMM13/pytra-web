@@ -116,6 +116,9 @@ describe('Stats platforms page', () => {
     const legend = [...el.querySelectorAll('[data-platform-share-legend] li')].map((li) => li.textContent!);
     expect(legend).toHaveLength(6);
     expect(legend[5]).toContain('stats.platforms.others');
+    // Its own colour, never the grey of a colourless platform.
+    const dot = el.querySelectorAll<HTMLElement>('[data-platform-share-legend] li > span:first-child')[5];
+    expect(dot.style.backgroundColor).toContain('border-strong');
   });
 
   it('ranks the platform list, the first in the gold chip', () => {

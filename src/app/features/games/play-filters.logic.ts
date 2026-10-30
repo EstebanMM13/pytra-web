@@ -75,6 +75,19 @@ export function parseDecade(value: string | null | undefined): number | null {
   return decade % 10 === 0 && decade >= 1950 && decade <= 2990 ? decade : null;
 }
 
+/** `released=1998`: a release year from 1950 to 2999, else null. */
+export function parseReleaseYear(value: string | null | undefined): number | null {
+  if (!value || !/^\d{4}$/.test(value)) return null;
+  const year = Number(value);
+  return year >= 1950 ? year : null;
+}
+
+/** Released in `year`; no year picked: every game. */
+export function matchesReleaseYear(game: Pick<Game, 'releaseDate'>, year: number | null | undefined): boolean {
+  if (year === null || year === undefined) return true;
+  return Number(/^(\d{4})/.exec(game.releaseDate ?? '')?.[1]) === year;
+}
+
 /** Released in `decade` (its first year .. first year + 9); no decade picked: every game. */
 export function matchesDecade(game: Pick<Game, 'releaseDate'>, decade: number | null | undefined): boolean {
   if (decade === null || decade === undefined) return true;
