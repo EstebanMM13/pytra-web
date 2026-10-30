@@ -2,11 +2,40 @@
 
 <main class="mx-auto flex max-w-5xl flex-col gap-5 px-4 pt-4 pb-8 md:gap-7 md:px-6 md:pt-8 md:pb-12 lg:px-10">
   <header class="min-w-0">
-    <h1 class="font-display text-[28px] leading-tight font-bold tracking-[-0.035em] md:text-[36px]">
-      {{ 'stats.title' | translate }}
+    <!-- Title with its key word in the brand gradient, as the dashboard greeting and the year page. -->
+    <h1 class="font-display text-[30px] leading-tight font-bold tracking-[-0.035em] md:text-[40px]">
+      {{ 'stats.heading.lead' | translate }} <span class="text-figure text-brand-light">{{ 'stats.heading.key' | translate }}</span>
     </h1>
     <p class="mt-1 text-sm text-text-3">{{ 'stats.subtitle' | translate }}</p>
   </header>
+
+  <!-- Hero: all-time hours over the dashboard's glow and mark, the most played games' covers beside. -->
+  @let h = hero();
+  @if (h === undefined) {
+    <app-skeleton class="h-[142px] md:h-[176px]" [class]="heroRadius" />
+  } @else {
+    <app-stats-hero role="region" [attr.aria-label]="'stats.hub.hero.label' | translate" data-hub-hero>
+      <div class="flex items-center gap-4 p-[18px] md:gap-6 md:p-7">
+        <div class="min-w-0 flex-1">
+          <app-stats-eyebrow class="mb-2">{{ 'stats.allTime' | translate }}</app-stats-eyebrow>
+          <p class="font-display text-[34px] leading-none font-bold tracking-[-0.04em] whitespace-nowrap md:text-5xl" data-hub-total>
+            <span class="text-figure text-brand-light">{{ h.hours !== null ? (h.hours | hours) : '—' }}</span>
+          </p>
+          @if (h.since !== null) {
+            <p class="mt-1.5 text-sm text-text-3">{{ 'stats.hub.hero.since' | translate: { year: h.since } }}</p>
+          }
+          @if (h.pills.length) {
+            <p class="mt-3 flex flex-wrap gap-1.5">
+              @for (pill of h.pills; track pill) {
+                <app-stats-pill>{{ pill }}</app-stats-pill>
+              }
+            </p>
+          }
+        </div>
+        <app-stats-cover-stack size="md" compactSize="sm" [covers]="h.covers" [pending]="coversPending()" />
+      </div>
+    </app-stats-hero>
+  }
 
   <!-- Two columns on phones (whole labels at a large font size), four on desktop; Activity spans two. -->
   <nav class="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4" [attr.aria-label]="'stats.hub.sectionsLabel' | translate">
@@ -25,7 +54,13 @@
             : ('stats.hub.activityEmpty' | translate)
           : null
       "
-    />
+    >
+      <span class="flex h-full items-end gap-[3px]">
+        @for (day of activityStrip(); track day.date) {
+          <span class="h-4 min-w-0 flex-1 rounded-[3px]" [class]="levelClass[day.level]" data-hub-day></span>
+        }
+      </span>
+    </app-stats-hub-card>
 
     @let y = latestYear();
     <app-stats-hub-card
@@ -35,7 +70,18 @@
       [loading]="y === undefined"
       [figure]="y ? (y.totalHours | hours) : null"
       [hint]="y ? ('stats.hub.yearsHint' | translate: { year: y.year }) : ('common.noData' | translate)"
-    />
+    >
+      <span class="flex h-full items-end gap-1">
+        @for (bar of yearBars(); track bar.year; let last = $last) {
+          <span
+            class="bar-grow min-w-0 flex-1 rounded-t-[3px]"
+            [class]="last ? 'bg-(--hub-accent)' : 'bg-[color-mix(in_srgb,var(--hub-accent)_40%,transparent)]'"
+            [style.height.%]="bar.height"
+            data-hub-year-bar
+          ></span>
+        }
+      </span>
+    </app-stats-hub-card>
 
     @let s = sagas();
     <app-stats-hub-card
@@ -45,7 +91,13 @@
       [loading]="s === undefined"
       [figure]="s ? ('stats.hub.sagasFigure' | translatePlural: s.count) : null"
       [hint]="s && s.top ? ('stats.hub.sagasHint' | translate: { name: s.top.sagaName }) : null"
-    />
+    >
+      @if (sagaCovers().length) {
+        <app-stats-cover-stack size="xs" [covers]="sagaCovers()" />
+      } @else {
+        <ng-container *ngTemplateOutlet="shareBar; context: { $implicit: sagaSlices() }" />
+      }
+    </app-stats-hub-card>
 
     @let p = topPlatform();
     <app-stats-hub-card
@@ -55,17 +107,30 @@
       [loading]="p === undefined"
       [figure]="p ? platformName(p.name) : null"
       [hint]="p ? ('stats.hub.platformsHint' | translate: { hours: (p.hours | hours) }) : ('common.noData' | translate)"
-    />
+    >
+      <ng-container *ngTemplateOutlet="shareBar; context: { $implicit: platformSlices() }" />
+    </app-stats-hub-card>
 
     @let d = topDeveloper();
     <app-stats-hub-card
       link="/stats/studios"
       [icon]="icons.building"
       [title]="'stats.hub.studios' | translate"
+      [shortTitle]="'stats.hub.studiosShort' | translate"
       [loading]="d === undefined"
       [figure]="d ? d.developer : null"
       [hint]="d ? ('stats.hub.studiosHint' | translate: { hours: (d.hours | hours) }) : ('common.noData' | translate)"
-    />
+    >
+      @if (studioCovers().length) {
+        <app-stats-cover-stack size="xs" [covers]="studioCovers()" />
+      } @else {
+        <span class="flex h-full flex-col justify-end gap-[3px]">
+          @for (bar of studioBars(); track bar.key) {
+            <span class="bar-fill block h-1 rounded-full" [style.width.%]="bar.width" [style.background-color]="bar.color" data-hub-studio-bar></span>
+          }
+        </span>
+      }
+    </app-stats-hub-card>
 
     @let median = medianDays();
     <app-stats-hub-card
@@ -75,17 +140,37 @@
       [loading]="completion() === undefined"
       [figure]="median !== null ? ('stats.days' | translatePlural: median) : null"
       [hint]="median !== null ? ('stats.hub.habitsHint' | translate) : ('common.noData' | translate)"
-    />
+    >
+      <ng-container *ngTemplateOutlet="shareBar; context: { $implicit: habitSlices() }" />
+    </app-stats-hub-card>
 
     @let r = ratingsTeaser();
     <app-stats-hub-card
       link="/stats/ratings"
+      [accent]="gold"
       [icon]="icons.star"
       [title]="'stats.hub.ratings' | translate"
       [loading]="r === undefined"
       [figure]="r ? (r.mean | rating) : null"
       [figureClass]="r ? 'font-mono ' + (r.mean | ratingTone) : ''"
       [hint]="r ? ('stats.hub.ratingsHint' | translatePlural: r.count) : ('common.noData' | translate)"
-    />
+    >
+      <span class="flex h-full items-end gap-0.5">
+        @for (height of ratingBars(); track $index) {
+          <span class="bar-grow min-w-0 flex-1 rounded-t-[2px] bg-gold" [style.height.%]="height" data-hub-rating-bar></span>
+        }
+      </span>
+    </app-stats-hub-card>
   </nav>
 </main>
+
+<!-- A stacked share bar (sagas, platforms, habits): slices end to end, the biggest first. -->
+<ng-template #shareBar let-slices>
+  <span class="flex h-full items-end">
+    <span class="flex h-2 w-full gap-0.5 overflow-hidden rounded-full">
+      @for (slice of slices; track slice.key) {
+        <span class="bar-fill h-full basis-0" [style.flex-grow]="slice.share" [style.background-color]="slice.color" data-hub-slice></span>
+      }
+    </span>
+  </span>
+</ng-template>

@@ -6,6 +6,7 @@ import {
   SagaStat,
 } from '../../core/models/stats.model';
 import { Params } from '@angular/router';
+import { Game } from '../../core/models/game.model';
 import { DiaryLevel, intensityLevel } from '../diary/diary.logic';
 import { NumberRange, serializeRange } from '../games/play-filters.logic';
 
@@ -447,4 +448,222 @@ export function sagaTeaser(stats: readonly SagaStat[]): { count: number; top: Sa
 /** Short decade label params: 1990 -> "90" (Spanish "Años 90"), 2000 -> "2000". */
 export function decadeParams(decade: number): { decade: number; short: string } {
   return { decade, short: decade < 2000 ? String(decade % 100).padStart(2, '0') : String(decade) };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Charts: donut, columns, share bars
+// ---------------------------------------------------------------------------------------------
+
+/** One slice of a share chart (donut, stacked share bar). */
+export interface ShareSlice {
+  key: string | number;
+  name: string;
+  value: number;
+  color: string;
+  /** Share (0..1) of the total of every slice. */
+  share: number;
+}
+
+/**
+ * The biggest `limit` items (positive values only, most first) as slices, the rest summed into
+ * one `other` slice (left out when it is empty), each with its share of the total.
+ */
+export function shareSlices(
+  items: readonly { key: string | number; name: string; value: number; color: string }[],
+  limit: number,
+  other: { name: string; color: string },
+): ShareSlice[] {
+  const sorted = items.filter((item) => item.value > 0).sort((a, b) => b.value - a.value);
+  const total = sorted.reduce((sum, item) => sum + item.value, 0);
+  if (total === 0) return [];
+  const kept = sorted.length > limit + 1 ? sorted.slice(0, limit) : sorted;
+  const rest = sorted.slice(kept.length).reduce((sum, item) => sum + item.value, 0);
+  const slices = kept.map((item) => ({ ...item, share: item.value / total }));
+  if (rest > 0) slices.push({ key: 'other', name: other.name, value: rest, color: other.color, share: rest / total });
+  return slices;
+}
+
+/** A share (0..1) as a percentage: whole points, one decimal under 10% so small slices do not read as 0. */
+export function percentFormat(locale: string): (share: number) => string {
+  const whole = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 });
+  const fine = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 });
+  return (share) => (share < 0.1 ? fine : whole).format(share);
+}
+
+/** A donut arc, as fractions (0..1) of the circle: where it starts (clockwise from the top) and its length. */
+export interface DonutArc {
+  key: string | number;
+  color: string;
+  start: number;
+  length: number;
+}
+
+/**
+ * Consecutive arcs of the given shares (they should add up to 1), each shortened by `gap` so
+ * neighbours stay apart; a lone full slice keeps the whole circle. Slices shorter than the gap
+ * are dropped (nothing would be drawn).
+ */
+export function donutArcs(slices: readonly { key: string | number; color: string; share: number }[], gap = 0): DonutArc[] {
+  const drawn = slices.filter((slice) => slice.share > 0);
+  const spacing = drawn.length > 1 ? gap : 0;
+  const arcs: DonutArc[] = [];
+  let start = 0;
+  for (const slice of drawn) {
+    const length = slice.share - spacing;
+    if (length > 0) arcs.push({ key: slice.key, color: slice.color, start: start + spacing / 2, length });
+    start += slice.share;
+  }
+  return arcs;
+}
+
+/** Share (0..1) of the finished runs that were completed, null when none was finished or abandoned. */
+export function finishRate(completed: number, abandoned: number): number | null {
+  const total = completed + abandoned;
+  return total > 0 ? completed / total : null;
+}
+
+/** Shortest visible column (percent of the chart height), so a count of 1 next to 100 still shows. */
+export const MIN_COLUMN_PERCENT = 3;
+
+/** Column heights (0..100) scaled to the largest count: empty columns get 0, others at least `min`. */
+export function columnHeights(counts: readonly number[], min = MIN_COLUMN_PERCENT): number[] {
+  return shares(counts).map((ratio, i) => (counts[i] > 0 ? Math.max(min, ratio * 100) : 0));
+}
+
+/** The items without the empty ones at either end (a histogram spans from its first to its last count). */
+export function trimEmptyEnds<T>(items: readonly T[], count: (item: T) => number): T[] {
+  const first = items.findIndex((item) => count(item) > 0);
+  if (first === -1) return [];
+  let last = items.length - 1;
+  while (count(items[last]) <= 0) last--;
+  return items.slice(first, last + 1);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Hub teasers: small visuals
+// ---------------------------------------------------------------------------------------------
+
+/** Heat level of each of the `count` days up to `today` (YYYY-MM-DD), oldest first. */
+export function recentDays(
+  days: readonly ActivityDay[],
+  today: string,
+  count: number,
+): { date: string; level: DiaryLevel }[] {
+  const byDate = new Map(days.map((day) => [day.date, day.hours]));
+  const end = isoToUtcDate(today).getTime();
+  return Array.from({ length: count }, (_, i) => {
+    const date = isoOf(end - (count - 1 - i) * DAY_MS);
+    return { date, level: intensityLevel(byDate.get(date)) };
+  });
+}
+
+/**
+ * The last `count` years up to the most recent one with hours, oldest first, each scaled to the
+ * busiest (non-empty years at least `minPercent`).
+ */
+export function recentYearBars(
+  years: readonly { year: number; totalHours: number }[],
+  count: number,
+  minPercent = MIN_COLUMN_PERCENT,
+): { year: number; height: number }[] {
+  const played = [...years].filter((y) => y.totalHours > 0).sort((a, b) => a.year - b.year);
+  if (!played.length) return [];
+  const last = played[played.length - 1].year;
+  const hours = new Map(played.map((y) => [y.year, y.totalHours]));
+  const span = Array.from({ length: count }, (_, i) => last - count + 1 + i).filter((y) => y >= played[0].year);
+  const heights = columnHeights(span.map((y) => hours.get(y) ?? 0), minPercent);
+  return span.map((year, i) => ({ year, height: heights[i] }));
+}
+
+// ---------------------------------------------------------------------------------------------
+// Covers (from the cached library list: the stats endpoints send none)
+// ---------------------------------------------------------------------------------------------
+
+/** A game's box art for the stats covers. */
+export interface CoverRef {
+  id: number;
+  name: string;
+  url: string | null;
+}
+
+/** The library fields the covers need. */
+export type CoverSource = Pick<Game, 'id' | 'name' | 'coverImageUrl' | 'totalHours'>;
+
+/**
+ * Covers of the games matching `match`, most played first, games with a cover before those
+ * without (so a stack shows art when there is any), at most `limit`.
+ */
+export function topCovers<T extends CoverSource>(games: readonly T[], match: (game: T) => boolean, limit: number): CoverRef[] {
+  return games
+    .filter(match)
+    .sort((a, b) => Number(!a.coverImageUrl) - Number(!b.coverImageUrl) || (b.totalHours ?? 0) - (a.totalHours ?? 0))
+    .slice(0, limit)
+    .map((game) => ({ id: game.id, name: game.name, url: game.coverImageUrl }));
+}
+
+/** A developer name as the covers match it: case and surrounding spaces ignored. */
+export function developerKey(developer: string | null | undefined): string {
+  return (developer ?? '').trim().toLowerCase();
+}
+
+/** Whether a library game is by `developer` (the studio ranking's name; see `developerKey`). */
+export function byDeveloper(developer: string): (game: Pick<Game, 'developer'>) => boolean {
+  const key = developerKey(developer);
+  return (game) => developerKey(game.developer) === key;
+}
+
+/**
+ * Covers per developer (keyed by `developerKey`), each list as `topCovers` orders it, at most
+ * `limit`: one pass over the library for a whole studio ranking.
+ */
+export function developerCovers<T extends CoverSource & Pick<Game, 'developer'>>(
+  games: readonly T[],
+  limit: number,
+): Map<string, CoverRef[]> {
+  const groups = new Map<string, T[]>();
+  for (const game of games) {
+    const key = developerKey(game.developer);
+    if (!key) continue;
+    const group = groups.get(key) ?? [];
+    group.push(game);
+    groups.set(key, group);
+  }
+  return new Map([...groups].map(([key, group]) => [key, topCovers(group, () => true, limit)]));
+}
+
+/** The covers when at least one has art, else none (a stack of initials only adds noise). */
+export function withArt(covers: CoverRef[]): CoverRef[] {
+  return covers.some((cover) => cover.url) ? covers : [];
+}
+
+/** Cover url per game id (games without a cover left out). */
+export function coverMap(games: readonly CoverSource[]): Map<number, string> {
+  return new Map(games.filter((g) => !!g.coverImageUrl).map((g) => [g.id, g.coverImageUrl!]));
+}
+
+/** Diary hours per month of `year` (12 values, January first). */
+export function monthlyHours(days: readonly ActivityDay[], year: number): number[] {
+  const months = Array.from({ length: 12 }, () => 0);
+  for (const day of days) {
+    const [y, m] = day.date.split('-').map(Number);
+    if (y === year && m >= 1 && m <= 12) months[m - 1] += day.hours;
+  }
+  return months;
+}
+
+/**
+ * The activity hours trend of `year` as of `today` (YYYY-MM-DD): its months up to today's in the
+ * current year (the months to come would drag the line to 0), every month of a past year, none
+ * of a future one.
+ */
+export function hoursTrend(days: readonly ActivityDay[], year: number, today: string): number[] {
+  const [thisYear, thisMonth] = today.split('-').map(Number);
+  if (year > thisYear) return [];
+  const months = monthlyHours(days, year);
+  return year === thisYear ? months.slice(0, thisMonth) : months;
+}
+
+/** Hours of every year added up (the hub hero's all-time figure). */
+export function totalHours(years: readonly { totalHours: number }[]): number {
+  return years.reduce((sum, y) => sum + y.totalHours, 0);
 }

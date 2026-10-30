@@ -93,4 +93,10 @@ describe('Stats activity page', () => {
     el.querySelector<HTMLButtonElement>('[data-year-older]')!.click();
     expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({ queryParams: { year: 2025 }, replaceUrl: true }));
   });
+
+  it('sets the heatmap apart as the hero and draws the hours tile trend of a past year', () => {
+    const { el } = setup(activity({ year: 2025, days: [{ date: '2025-03-02', hours: 4, gameCount: 1 }] }), { year: '2025' });
+    expect(el.querySelector('[data-activity-hero] [data-heat-cell]')).not.toBeNull();
+    expect(el.querySelector('[data-visual="trend"]')).not.toBeNull();
+  });
 });

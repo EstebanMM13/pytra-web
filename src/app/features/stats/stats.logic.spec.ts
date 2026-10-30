@@ -4,18 +4,34 @@ import {
   abandonmentRanking,
   activityYears,
   buildHeatmap,
+  byDeveloper,
+  coverMap,
+  developerCovers,
+  columnHeights,
   decadeParams,
+  donutArcs,
+  finishRate,
   gamesLinkParams,
+  percentFormat,
   histogramColumns,
+  hoursTrend,
+  monthlyHours,
   platformColor,
   platformShades,
   shadeLightnesses,
   ratingSpread,
   ratingTemperament,
+  recentDays,
+  recentYearBars,
   sagaTeaser,
+  shareSlices,
   shares,
   splitBySample,
   stackLegend,
+  topCovers,
+  withArt,
+  totalHours,
+  trimEmptyEnds,
   weekdayShortLabels,
   yearSegments,
 } from './stats.logic';
@@ -282,5 +298,227 @@ describe('gamesLinkParams', () => {
       days: '366-',
       hours: '10-30',
     });
+  });
+});
+
+describe('shareSlices', () => {
+  const item = (key: number, value: number) => ({ key, name: `P${key}`, value, color: `#00000${key}` });
+  const other = { name: 'Other', color: 'grey' };
+
+  it('keeps the biggest items, most first, and sums the rest into one slice', () => {
+    const slices = shareSlices([item(1, 10), item(2, 50), item(3, 25), item(4, 15), item(5, 0)], 2, other);
+    expect(slices.map((s) => s.key)).toEqual([2, 3, 'other']);
+    expect(slices.map((s) => s.share)).toEqual([0.5, 0.25, 0.25]);
+    expect(slices[2]).toMatchObject({ name: 'Other', value: 25, color: 'grey' });
+  });
+
+  it('does not fold a single leftover item into "other"', () => {
+    expect(shareSlices([item(1, 3), item(2, 2), item(3, 1)], 2, other).map((s) => s.key)).toEqual([1, 2, 3]);
+  });
+
+  it('is empty without positive values', () => {
+    expect(shareSlices([item(1, 0)], 3, other)).toEqual([]);
+  });
+});
+
+describe('donutArcs', () => {
+  it('lays the shares end to end from the top, each shortened by the gap', () => {
+    const arcs = donutArcs(
+      [
+        { key: 'a', color: 'red', share: 0.75 },
+        { key: 'b', color: 'blue', share: 0.25 },
+      ],
+      0.02,
+    );
+    expect(arcs).toHaveLength(2);
+    expect(arcs[0]).toMatchObject({ key: 'a', start: 0.01 });
+    expect(arcs[0].length).toBeCloseTo(0.73);
+    expect(arcs[1].start).toBeCloseTo(0.76);
+    expect(arcs[1].length).toBeCloseTo(0.23);
+  });
+
+  it('draws a lone slice as the whole circle, with no gap', () => {
+    expect(donutArcs([{ key: 'a', color: 'red', share: 1 }], 0.02)).toEqual([{ key: 'a', color: 'red', start: 0, length: 1 }]);
+  });
+
+  it('drops empty slices and slices thinner than the gap', () => {
+    const arcs = donutArcs(
+      [
+        { key: 'a', color: 'red', share: 0.99 },
+        { key: 'b', color: 'blue', share: 0 },
+        { key: 'c', color: 'green', share: 0.01 },
+      ],
+      0.02,
+    );
+    expect(arcs.map((a) => a.key)).toEqual(['a']);
+  });
+});
+
+describe('finishRate', () => {
+  it('is the completed share of the finished and abandoned runs', () => {
+    expect(finishRate(12, 3)).toBe(0.8);
+    expect(finishRate(0, 4)).toBe(0);
+  });
+
+  it('is null when nothing was finished or abandoned', () => {
+    expect(finishRate(0, 0)).toBeNull();
+  });
+});
+
+describe('columnHeights', () => {
+  it('scales to the largest count, keeping small counts visible and empty ones flat', () => {
+    expect(columnHeights([0, 1, 100, 50])).toEqual([0, 3, 100, 50]);
+    expect(columnHeights([0, 0])).toEqual([0, 0]);
+  });
+});
+
+describe('trimEmptyEnds', () => {
+  it('drops the empty items at both ends only', () => {
+    expect(trimEmptyEnds([0, 0, 2, 0, 3, 0], (n) => n)).toEqual([2, 0, 3]);
+    expect(trimEmptyEnds([0, 0], (n) => n)).toEqual([]);
+  });
+});
+
+describe('recentDays', () => {
+  it('gives the heat level of each day up to today, oldest first, empty days at 0', () => {
+    const days = recentDays(
+      [
+        { date: '2024-02-28', hours: 0.5, gameCount: 1 },
+        { date: '2024-03-01', hours: 8, gameCount: 2 },
+      ],
+      '2024-03-01',
+      3,
+    );
+    // 2024 is a leap year: the 29th sits between them.
+    expect(days).toEqual([
+      { date: '2024-02-28', level: 1 },
+      { date: '2024-02-29', level: 0 },
+      { date: '2024-03-01', level: 4 },
+    ]);
+  });
+});
+
+describe('recentYearBars', () => {
+  it('spans the last years up to the latest played one, gaps at 0, scaled to the busiest', () => {
+    const bars = recentYearBars(
+      [
+        { year: 2019, totalHours: 10 },
+        { year: 2021, totalHours: 40 },
+        { year: 2022, totalHours: 20 },
+        { year: 2023, totalHours: 0 },
+      ],
+      3,
+      8,
+    );
+    expect(bars).toEqual([
+      { year: 2020, height: 0 },
+      { year: 2021, height: 100 },
+      { year: 2022, height: 50 },
+    ]);
+  });
+
+  it('does not reach back before the first played year', () => {
+    expect(recentYearBars([{ year: 2024, totalHours: 5 }], 6)).toEqual([{ year: 2024, height: 100 }]);
+    expect(recentYearBars([], 6)).toEqual([]);
+  });
+});
+
+describe('percentFormat', () => {
+  it('rounds to whole points, keeping one decimal under 10%', () => {
+    const percent = percentFormat('en-US');
+    expect(percent(0.456)).toBe('46%');
+    expect(percent(0.034)).toBe('3.4%');
+    expect(percent(1)).toBe('100%');
+  });
+});
+
+describe('topCovers', () => {
+  const game = (id: number, totalHours: number | null, cover: string | null, developer = 'FromSoftware') => ({
+    id,
+    name: `G${id}`,
+    coverImageUrl: cover,
+    totalHours,
+    developer,
+  });
+
+  it('keeps the matching games, covered ones first, then most played', () => {
+    const games = [game(1, 10, 'a'), game(2, 90, null), game(3, 50, 'c'), game(4, 70, 'd', 'Valve'), game(5, null, 'e')];
+    expect(topCovers(games, byDeveloper(' fromsoftware '), 3)).toEqual([
+      { id: 3, name: 'G3', url: 'c' },
+      { id: 1, name: 'G1', url: 'a' },
+      { id: 5, name: 'G5', url: 'e' },
+    ]);
+  });
+
+  it('keeps a stack only when some cover has art', () => {
+    const plain = { id: 1, name: 'A', url: null };
+    expect(withArt([plain])).toEqual([]);
+    expect(withArt([plain, { id: 2, name: 'B', url: 'b' }])).toHaveLength(2);
+  });
+
+  it('maps cover urls by game id, leaving out games without one', () => {
+    const map = coverMap([game(1, 1, 'a'), game(2, 1, null)]);
+    expect(map.get(1)).toBe('a');
+    expect(map.has(2)).toBe(false);
+  });
+});
+
+describe('monthlyHours', () => {
+  it('adds the diary hours of the year per month, other years left out', () => {
+    const months = monthlyHours(
+      [
+        { date: '2025-01-03', hours: 2, gameCount: 1 },
+        { date: '2025-01-20', hours: 1.5, gameCount: 1 },
+        { date: '2025-12-31', hours: 4, gameCount: 1 },
+        { date: '2024-12-31', hours: 9, gameCount: 1 },
+      ],
+      2025,
+    );
+    expect(months).toHaveLength(12);
+    expect(months[0]).toBe(3.5);
+    expect(months[11]).toBe(4);
+    expect(months.slice(1, 11).every((h) => h === 0)).toBe(true);
+  });
+});
+
+describe('totalHours', () => {
+  it('adds every year up', () => {
+    expect(totalHours([{ totalHours: 10 }, { totalHours: 2.5 }])).toBe(12.5);
+    expect(totalHours([])).toBe(0);
+  });
+});
+
+describe('developerCovers', () => {
+  it('groups the covers by developer in one pass, case and spaces ignored, games without one left out', () => {
+    const games = [
+      { id: 1, name: 'Elden Ring', developer: 'FromSoftware', coverImageUrl: 'er', totalHours: 100 },
+      { id: 2, name: 'Sekiro', developer: ' fromsoftware', coverImageUrl: 'sk', totalHours: 150 },
+      { id: 3, name: 'Hades', developer: 'Supergiant', coverImageUrl: null, totalHours: 40 },
+      { id: 4, name: 'Unknown', developer: null, coverImageUrl: 'u', totalHours: 1 },
+    ];
+    const index = developerCovers(games, 4);
+    expect(index.get('fromsoftware')!.map((c) => c.id)).toEqual([2, 1]);
+    expect(index.get('supergiant')).toEqual([{ id: 3, name: 'Hades', url: null }]);
+    expect(index.size).toBe(2);
+  });
+});
+
+describe('hoursTrend', () => {
+  const days = [
+    { date: '2025-01-10', hours: 2, gameCount: 1 },
+    { date: '2025-03-01', hours: 5, gameCount: 1 },
+  ];
+
+  it('stops at the current month in the current year', () => {
+    expect(hoursTrend(days, 2025, '2025-03-15')).toEqual([2, 0, 5]);
+  });
+
+  it('has a single point in January (the stat card then draws no line)', () => {
+    expect(hoursTrend(days, 2025, '2025-01-20')).toEqual([2]);
+  });
+
+  it('spans every month of a past year and none of a future one', () => {
+    expect(hoursTrend(days, 2025, '2026-02-01')).toHaveLength(12);
+    expect(hoursTrend(days, 2027, '2026-02-01')).toEqual([]);
   });
 });

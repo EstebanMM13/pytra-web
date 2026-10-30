@@ -1,7 +1,12 @@
 <app-navbar />
 
 <main class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-4 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
-  <app-stats-page-header [title]="'stats.activity.title' | translate" [subtitle]="'stats.activity.subtitle' | translate">
+  <app-stats-page-header
+    [title]="'stats.activity.heading' | translate"
+    [highlight]="viewYear()"
+    [eyebrow]="'stats.activity.eyebrow' | translate"
+    [subtitle]="'stats.activity.subtitle' | translate"
+  >
     <app-stats-scope
       [allowAll]="false"
       [years]="yearOptions()"
@@ -30,7 +35,7 @@
       </div>
     } @else {
       <section class="grid grid-cols-2 gap-2 sm:grid-cols-4 md:gap-3" [attr.aria-label]="'stats.activity.statsLabel' | translate">
-        <app-stat-card [icon]="icons.clock" [label]="'stats.activity.hours' | translate" [value]="a.totalHours | hours" />
+        <app-stat-card [icon]="icons.clock" [label]="'stats.activity.hours' | translate" [value]="a.totalHours | hours" [trend]="hoursTrend()" />
         <app-stat-card [icon]="icons.calendarDays" [label]="'stats.activity.activeDays' | translate" [value]="a.activeDays" />
         <app-stat-card
           [icon]="icons.flame"
@@ -47,7 +52,8 @@
         />
       </section>
 
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+      <!-- Hero: the year's heatmap, set apart with the dashboard's glow and a flame watermark. -->
+      <app-stats-hero class="p-[18px] md:p-[22px]" [watermark]="icons.flame" data-activity-hero>
         <app-section-header class="mb-3.5" [label]="'stats.activity.heatmap' | translate" />
         <div role="img" [attr.aria-label]="('stats.activity.heatmap' | translate) + ' ' + a.year">
           <!-- Phones: two half-year strips (about 10px cells); md+: the whole year in one strip. -->
@@ -87,7 +93,7 @@
             {{ 'diary.calendar.more' | translate }}
           </span>
         </div>
-      </section>
+      </app-stats-hero>
 
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header class="mb-3.5" [label]="'stats.activity.weekdays' | translate" />

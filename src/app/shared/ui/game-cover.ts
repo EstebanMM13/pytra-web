@@ -33,6 +33,16 @@ const SIZE_CLASS: Record<GameCoverSize, string> = {
   fill: 'aspect-[3/4] w-full rounded-lg',
 };
 
+/** Fixed cover boxes in px (the `SIZE_CLASS` sizes above), for layouts that place covers themselves. */
+export const COVER_BOX_PX = {
+  xs: { width: 27, height: 36 },
+  sm: { width: 36, height: 48 },
+  md: { width: 63, height: 84 },
+} as const satisfies Partial<Record<GameCoverSize, { width: number; height: number }>>;
+
+/** The cover sizes with a fixed box (see `COVER_BOX_PX`). */
+export type FixedCoverSize = keyof typeof COVER_BOX_PX;
+
 const INITIALS_TEXT: Record<GameCoverSize, string> = {
   xs: 'text-[8px]',
   sm: 'text-[10px]',

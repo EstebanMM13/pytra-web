@@ -9,10 +9,11 @@ const rows = (prefix: string, count: number): StatsBar[] =>
 
 @Component({
   imports: [StatsBarList],
-  template: `<app-stats-bar-list [bars]="bars()" [limit]="6" />`,
+  template: `<app-stats-bar-list [bars]="bars()" [limit]="6" [ranked]="ranked()" />`,
 })
 class Host {
   readonly bars = signal(rows('hours', 10));
+  readonly ranked = signal(false);
 }
 
 describe('StatsBarList', () => {
@@ -55,5 +56,15 @@ describe('StatsBarList', () => {
     fixture.detectChanges();
     expect(shown()).toBe(7);
     expect(toggle()).toBeNull();
+  });
+
+  it('numbers ranked rows, the first in a gold chip', () => {
+    const { fixture } = setup();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[data-rank-first]')).toBeNull();
+    fixture.componentInstance.ranked.set(true);
+    fixture.detectChanges();
+    expect(el.querySelector('[data-rank-first]')!.textContent!.trim()).toBe('1');
+    expect([...el.querySelectorAll('[data-rank]')].map((r) => r.textContent!.trim())).toEqual(['2', '3', '4', '5', '6']);
   });
 });

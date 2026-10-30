@@ -91,4 +91,13 @@ describe('Stats ratings page', () => {
     expect(el.querySelector('[data-ratings-empty]')).not.toBeNull();
     expect(el.querySelector('[data-histogram]')).toBeNull();
   });
+
+  it('draws the histogram as the gold hero and ranks genres and platforms', () => {
+    const el = setup(ratings());
+    const hero = el.querySelector('[data-ratings-hero]')!;
+    expect(hero.classList).toContain('gold-border');
+    expect(hero.querySelector('[data-histogram]')).not.toBeNull();
+    expect(el.querySelector('[data-genres] [data-rank-first]')).not.toBeNull();
+    expect(el.querySelector('[data-platforms] [data-rank-first]')).not.toBeNull();
+  });
 });

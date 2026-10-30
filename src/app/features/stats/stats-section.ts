@@ -5,6 +5,7 @@ import { Observable, Subject, catchError, combineLatest, map, merge, of, startWi
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { parseYearParam } from '../years/years.logic';
+import { statsFormat } from './stats-format';
 
 /** What a section shows for the viewed year: `data` null with `failed` false while loading. */
 export interface SectionState<T> {
@@ -15,8 +16,8 @@ export interface SectionState<T> {
 
 /**
  * Shared wiring of the stats sections, created in a component's injection context: the period in
- * the `?year=` query param (absent: all time, or the API default), the years to pick from, and
- * the section data reloaded on year changes, retries and runs saved elsewhere.
+ * the `?year=` query param (absent: all time, or the API default) and its label, the years to pick
+ * from, and the section data reloaded on year changes, retries and runs saved elsewhere.
  */
 export function statsSection<T>(load: (year: number | null) => Observable<T>) {
   const route = inject(ActivatedRoute);
@@ -24,6 +25,7 @@ export function statsSection<T>(load: (year: number | null) => Observable<T>) {
   const stats = inject(StatsService);
   const saved$ = inject(RunFormLauncher).saved$;
   const retry$ = new Subject<void>();
+  const format = statsFormat();
 
   const year: Signal<number | null> = toSignal(
     route.queryParamMap.pipe(map((params) => parseYearParam(params.get('year')))),
@@ -52,6 +54,11 @@ export function statsSection<T>(load: (year: number | null) => Observable<T>) {
 
   return {
     year,
+    /** The period on screen, for the header eyebrow: the year, or "all time". */
+    scopeLabel: computed(() => {
+      const y = year();
+      return y !== null ? String(y) : format.text('stats.allTime');
+    }),
     years,
     state: current,
     /** Changes the period in the URL (replacing the entry: the back button leaves the section). */

@@ -1,7 +1,12 @@
 <app-navbar />
 
 <main class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-4 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
-  <app-stats-page-header [title]="'stats.ratings.title' | translate" [subtitle]="'stats.ratings.subtitle' | translate">
+  <app-stats-page-header
+    [title]="'stats.ratings.heading.lead' | translate"
+    [highlight]="'stats.ratings.heading.key' | translate"
+    [eyebrow]="section.scopeLabel()"
+    [subtitle]="'stats.ratings.subtitle' | translate"
+  >
     <app-stats-scope [years]="section.years()" [year]="section.year()" (yearChange)="section.setYear($event)" />
   </app-stats-page-header>
 
@@ -40,8 +45,9 @@
         <app-stat-card [icon]="icons.badgeCheck" [label]="'stats.ratings.rated' | translate" [value]="r.ratedCount" />
       </section>
 
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header class="mb-3.5" [label]="'stats.ratings.histogram' | translate" />
+      <!-- Hero: the histogram on the GOTY card's gold fill and border, a star watermark behind. -->
+      <app-stats-hero class="p-[18px] md:p-[22px]" tone="gold" [watermark]="icons.star" data-ratings-hero>
+        <app-section-header class="mb-3.5" tone="gold" [label]="'stats.ratings.histogram' | translate" />
         <!-- Plain divs, every column labelled on the user's scale: whole points on phones (11 columns fit
              360px with large text), the 21 half-point buckets from md (the last one is a perfect 10). -->
         <div class="md:hidden">
@@ -64,13 +70,13 @@
             }
           </div>
         </ng-template>
-      </section>
+      </app-stats-hero>
 
       <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
         <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
           <app-section-header class="mb-3" [label]="'stats.ratings.byGenre' | translate" />
           @if (genreRows().length) {
-            <app-stats-bar-list [bars]="genreRows()" [limit]="preview" tone="gold" data-genres />
+            <app-stats-bar-list [bars]="genreRows()" [limit]="preview" tone="gold" ranked data-genres />
           } @else {
             <p class="py-6 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
           }
@@ -84,7 +90,7 @@
         <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
           <app-section-header class="mb-3" [label]="'stats.ratings.byPlatform' | translate" />
           @if (platformRows().length) {
-            <app-stats-bar-list [bars]="platformRows()" [limit]="preview" tone="gold" data-platforms />
+            <app-stats-bar-list [bars]="platformRows()" [limit]="preview" tone="gold" ranked data-platforms />
           } @else {
             <p class="py-6 text-center text-sm text-muted">{{ 'common.noData' | translate }}</p>
           }

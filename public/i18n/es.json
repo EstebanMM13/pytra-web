@@ -1442,7 +1442,6 @@
     }
   },
   "stats": {
-    "title": "Estadísticas",
     "subtitle": "Tu historial de juego, desde todos los ángulos.",
     "back": "Estadísticas",
     "backAria": "Volver a Estadísticas",
@@ -1476,10 +1475,14 @@
       "habitsHint": "mediana hasta terminar una partida",
       "ratings": "Notas",
       "ratingsHint": "nota media de {{count}} valoraciones",
-      "ratingsHint_one": "nota media de {{count}} valoración"
+      "ratingsHint_one": "nota media de {{count}} valoración",
+      "studiosShort": "Estudios",
+      "hero": {
+        "since": "jugadas desde {{year}}",
+        "label": "Resumen de todo tu historial"
+      }
     },
     "activity": {
-      "title": "Actividad",
       "subtitle": "Los días que has jugado, según tu diario.",
       "statsLabel": "Resumen de actividad",
       "hours": "Horas del año",
@@ -1496,10 +1499,11 @@
       "emptyText": "El diario guarda lo que juegas cada día: con él verás aquí tu calendario y tus rachas.",
       "emptyCta": "Ir al diario",
       "heatmapHint": "Toca un día para ver sus horas y abrirlo en el diario.",
-      "openDay": "Ver en el diario"
+      "openDay": "Ver en el diario",
+      "heading": "Actividad",
+      "eyebrow": "Desde tu diario"
     },
     "platforms": {
-      "title": "Plataformas",
       "subtitle": "Dónde juegas y cuánto.",
       "list": "Horas por plataforma",
       "completed": "{{count}} terminadas",
@@ -1510,7 +1514,13 @@
       "unassignedNote": "{{hours}} online de juegos sin plataforma asignada.",
       "byYear": "Horas por año",
       "yearTitle": "{{year}}: {{hours}}",
-      "empty": "Sin horas registradas en este periodo."
+      "empty": "Sin horas registradas en este periodo.",
+      "share": "Reparto de horas",
+      "others": "Otras",
+      "heading": {
+        "lead": "Tus",
+        "key": "plataformas"
+      }
     },
     "studios": {
       "title": "Estudios y épocas",
@@ -1528,17 +1538,21 @@
       "undated_one": "{{count}} juego sin fecha de lanzamiento.",
       "empty": "Aún no hay juegos con estudio.",
       "noRated": "Ningún estudio llega aún al mínimo de juegos valorados.",
-      "noDecades": "Aún no hay juegos con fecha de lanzamiento."
+      "noDecades": "Aún no hay juegos con fecha de lanzamiento.",
+      "topByHours": "Tu estudio más jugado",
+      "topByRating": "Tu estudio mejor valorado",
+      "heading": {
+        "lead": "Estudios y",
+        "key": "épocas"
+      }
     },
     "habits": {
-      "title": "Hábitos",
       "subtitle": "Cómo terminas (o abandonas) tus partidas.",
       "statsLabel": "Resumen de hábitos",
       "completed": "Terminadas",
       "abandoned": "Abandonadas",
       "replays": "Rejugadas",
       "median": "Mediana hasta terminar",
-      "medianShort": "Mediana",
       "averageHint": "media: {{days}}",
       "fastest": "La más rápida",
       "slowest": "La más lenta",
@@ -1555,10 +1569,14 @@
       "hoursVsRating": "Duración y nota",
       "hoursRange": "{{label}} h",
       "hoursRow": "{{runs}} · {{rated}}",
-      "noRating": "sin nota"
+      "noRating": "sin nota",
+      "finishRate": "terminadas",
+      "heading": {
+        "lead": "Tus",
+        "key": "hábitos"
+      }
     },
     "ratings": {
-      "title": "Notas",
       "subtitle": "Cómo puntúas lo que juegas.",
       "statsLabel": "Resumen de notas",
       "mean": "Media",
@@ -1584,7 +1602,11 @@
       "hiddenGenres": "{{count}} géneros con menos de {{min}} notas no se muestran.",
       "hiddenGenres_one": "{{count}} género con menos de {{min}} notas no se muestra.",
       "empty": "Aún no hay partidas valoradas en este periodo.",
-      "histogramPoint": "{{point}}: {{count}}"
+      "histogramPoint": "{{point}}: {{count}}",
+      "heading": {
+        "lead": "Tus",
+        "key": "notas"
+      }
     },
     "showAll": "Ver todos ({{total}})",
     "showLess": "Ver menos",
@@ -1593,6 +1615,11 @@
       "backAria": "Volver a Estudios y épocas",
       "empty": "No hay juegos de este estudio en tu biblioteca.",
       "inLibrary": "Ver sus juegos en Juegos"
-    }
+    },
+    "heading": {
+      "lead": "Tus",
+      "key": "estadísticas"
+    },
+    "allTime": "Todo el historial"
   }
 }

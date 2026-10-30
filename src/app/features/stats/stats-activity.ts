@@ -13,9 +13,11 @@ import { MiniBar, MiniBarChart } from '../../shared/ui/mini-bar-chart';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
+import { todayIso } from '../../shared/utils/run-dates';
 import { DIARY_LEVEL_CLASS, DiaryLevel } from '../diary/diary.logic';
 import { monthLabels, monthValueLabel } from '../years/years.logic';
 import { statsFormat } from './stats-format';
+import { StatsHero } from './stats-hero';
 import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { StatsScope } from './stats-scope';
@@ -26,6 +28,7 @@ import {
   activityYears,
   buildHeatmap,
   isoToUtcDate,
+  hoursTrend,
   weekdayDate,
   weekdayShortLabels,
 } from './stats.logic';
@@ -50,6 +53,7 @@ import {
     SectionHeader,
     Skeleton,
     StatCard,
+    StatsHero,
     StatsLoadError,
     StatsPageHeader,
     StatsScope,
@@ -66,7 +70,9 @@ export class StatsActivity {
 
   protected readonly section = statsSection((year) => this.stats.getActivity(year));
   protected readonly state = this.section.state;
-  private readonly currentYear = new Date().getFullYear();
+  /** Today (YYYY-MM-DD), read once: the current year and the trend's last month. */
+  private readonly today = todayIso();
+  private readonly currentYear = Number(this.today.slice(0, 4));
 
   /** The year on screen: the API's answer, else the requested one, else the current year. */
   protected readonly viewYear = computed(() => this.state().data?.year ?? this.section.year() ?? this.currentYear);
@@ -83,6 +89,15 @@ export class StatsActivity {
   protected readonly heatmap = computed(() => {
     const data = this.state().data;
     return data ? buildHeatmap(data.year, data.days) : null;
+  });
+  /**
+   * Hours per month of the viewed year (see `hoursTrend`): the hours tile's sparkline. It adds up
+   * the same diary days as the tile's figure (the API's `totalHours` is their sum), and only its
+   * shape is drawn, so a rounding difference would not show.
+   */
+  protected readonly hoursTrend = computed(() => {
+    const data = this.state().data;
+    return data ? hoursTrend(data.days, data.year, this.today) : null;
   });
   protected readonly halves = computed(() => {
     const data = this.state().data;

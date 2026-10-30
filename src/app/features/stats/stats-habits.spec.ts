@@ -4,6 +4,7 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { provideTranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { CompletionStats } from '../../core/models/stats.model';
+import { GameService } from '../../core/services/game.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -45,7 +46,7 @@ const data: CompletionStats = {
 };
 
 describe('Stats habits page', () => {
-  function setup() {
+  function setup(stats: CompletionStats = data) {
     const queryParamMap = new BehaviorSubject(convertToParamMap({ year: '2025' }));
     TestBed.configureTestingModule({
       imports: [StatsHabits],
@@ -54,7 +55,8 @@ describe('Stats habits page', () => {
         provideTranslateService(),
         { provide: ActivatedRoute, useValue: { queryParamMap, snapshot: { queryParamMap: queryParamMap.value } } },
         { provide: RunFormLauncher, useValue: { saved$: new Subject() } },
-        { provide: StatsService, useValue: { getCompletion: () => of(data), getYears: () => of([2025]) } },
+        { provide: GameService, useValue: { findAll: () => of([{ id: 3, name: 'Celeste', coverImageUrl: 'celeste.jpg', totalHours: 9 }]) } },
+        { provide: StatsService, useValue: { getCompletion: () => of(stats), getYears: () => of([2025]) } },
       ],
     });
     TestBed.overrideComponent(StatsHabits, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
@@ -71,6 +73,10 @@ describe('Stats habits page', () => {
     const el = setup();
     expect(el.querySelector('[data-run-extreme="fastest"]')!.getAttribute('href')).toBe('/games/3/experiences/7');
     expect(el.querySelector('[data-run-extreme="slowest"]')!.getAttribute('href')).toBe('/games/4/experiences/8');
+    // The library has Celeste's cover (blurred behind its card), not Elden Ring's; both show the days pill.
+    expect(el.querySelector('[data-run-extreme="fastest"] img[src="celeste.jpg"]')).not.toBeNull();
+    expect(el.querySelector('[data-run-extreme="slowest"] img[src="celeste.jpg"]')).toBeNull();
+    expect(el.querySelectorAll('[data-run-days]')).toHaveLength(2);
   });
 
   it('hides genres with too few runs and says so', () => {
@@ -79,9 +85,18 @@ describe('Stats habits page', () => {
     expect(el.querySelector('[data-hidden-genres]')).not.toBeNull();
   });
 
-  it('shows the six day buckets and the four length buckets', () => {
+  it('rings the finish rate with the counts beside it', () => {
     const el = setup();
-    expect(el.querySelectorAll('[data-day-buckets] [data-bar-row]')).toHaveLength(6);
+    // 12 completed, 3 abandoned: 80%, the ring in two arcs.
+    expect(el.querySelector('[data-finish-rate]')!.textContent).toContain('80');
+    expect(el.querySelectorAll('[data-habits-hero] [data-donut-arc]')).toHaveLength(2);
+    expect(el.querySelector('[data-habit-count="abandoned"] dd')!.textContent!.trim()).toBe('3');
+  });
+
+  it('shows the six day buckets as columns and the four length buckets', () => {
+    const el = setup();
+    expect(el.querySelectorAll('[data-day-buckets] [data-column]')).toHaveLength(6);
+    expect(el.querySelector('[data-median]')).not.toBeNull();
     expect(el.querySelectorAll('[data-hours-buckets] [data-bar-row]')).toHaveLength(4);
   });
 
@@ -93,5 +108,18 @@ describe('Stats habits page', () => {
     expect(days[0]).toBe('/games?year=2025&days=1-');
     expect(el.querySelector('[data-hours-buckets] a')!.getAttribute('href')).toBe('/games?year=2025&hours=0-');
     expect(el.querySelector('[data-abandonment] a')!.getAttribute('href')).toBe('/games?genre=1&year=2025');
+  });
+
+  it('leaves the median out without one, still drawing the buckets and the ring', () => {
+    const el = setup({ ...data, timeToFinish: { ...data.timeToFinish, medianDays: null, averageDays: null } });
+    expect(el.querySelector('[data-median]')).toBeNull();
+    expect(el.querySelectorAll('[data-day-buckets] [data-column]')).toHaveLength(6);
+    expect(el.querySelector('[data-finish-rate]')!.textContent).toContain('80');
+  });
+
+  it('shows an empty ring and a dash before any completed or abandoned run', () => {
+    const el = setup({ ...data, completedCount: 0, abandonedCount: 0 });
+    expect(el.querySelector('[data-finish-rate]')!.textContent!.trim()).toBe('—');
+    expect(el.querySelectorAll('[data-habits-hero] [data-donut-arc]')).toHaveLength(0);
   });
 });

@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
 import { combineLatest, map } from 'rxjs';
 import {
@@ -8,16 +10,33 @@ import {
 } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
+import { ICONS } from '../../shared/ui/icons';
 import { SectionHeader } from '../../shared/ui/section-header';
 import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { ratingTone } from '../../shared/utils/rating-tone';
 import { STATS_LIST_PREVIEW, StatsBar, StatsBarList } from './stats-bar-list';
+import { StatsColumn, StatsColumnChart } from './stats-column-chart';
+import { MAX_STACK_COVERS, StatsCoverStack } from './stats-cover-stack';
 import { statsFormat } from './stats-format';
+import { StatsHero } from './stats-hero';
+import { statsLibrary } from './stats-library';
 import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { statsSection } from './stats-section';
-import { GAMES_LINK, decadeParams, gamesLinkParams, joinParts, ratingShare, shares } from './stats.logic';
+import {
+  CoverRef,
+  GAMES_LINK,
+  decadeParams,
+  developerCovers,
+  developerKey,
+  gamesLinkParams,
+  joinParts,
+  ratingShare,
+  shares,
+  trimEmptyEnds,
+  withArt,
+} from './stats.logic';
 
 type DeveloperRanking = 'hours' | 'rating';
 
@@ -30,20 +49,26 @@ const RANKING_OPTIONS: readonly SegmentedOption<DeveloperRanking>[] = [
 const STUDIO_LINK: readonly string[] = ['/stats/studio'];
 
 /**
- * Studios & eras section (`/stats/studios`, all time): top developers by hours or by rating (only
- * those with enough rated games; each opens its studio page) and games per release decade (each
- * opens the library on that decade).
+ * Studios & eras section (`/stats/studios`, all time): the first studio of the picked ranking as a
+ * hero card, top developers by hours or by rating (only those with enough rated games; each opens
+ * its studio page) and a histogram of games per release decade (each column opens the library on
+ * that decade).
  */
 @Component({
   selector: 'app-stats-studios',
   imports: [
     Navbar,
+    RouterLink,
+    LucideDynamicIcon,
     TranslatePipe,
     TranslatePluralPipe,
     SectionHeader,
     Segmented,
     Skeleton,
     StatsBarList,
+    StatsColumnChart,
+    StatsCoverStack,
+    StatsHero,
     StatsLoadError,
     StatsPageHeader,
   ],
@@ -51,6 +76,8 @@ const STUDIO_LINK: readonly string[] = ['/stats/studio'];
   templateUrl: './stats-studios.html',
 })
 export class StatsStudios {
+  protected readonly icons = ICONS;
+  protected readonly studioLink = STUDIO_LINK;
   private readonly stats = inject(StatsService);
   private readonly format = statsFormat();
   protected readonly rankingOptions = RANKING_OPTIONS;
@@ -68,50 +95,81 @@ export class StatsStudios {
     ),
   );
   protected readonly state = this.section.state;
+  private readonly library = statsLibrary();
 
-  protected readonly developerRows = computed<StatsBar[]>(() => {
+  /** The library is still loading: the hero keeps the covers' room. */
+  protected readonly coversPending = computed(() => this.library() === null);
+  /** Covers per studio, indexed once per library load (rows and hero look them up). */
+  private readonly coverIndex = computed(() => developerCovers(this.library() ?? [], MAX_STACK_COVERS));
+
+  /** Up to four covers of a studio's games, most played first. */
+  private coversOf(developer: string): CoverRef[] {
+    return this.coverIndex().get(developerKey(developer)) ?? [];
+  }
+
+  /** The picked ranking's developers (by hours, or by rating among those with enough rated games). */
+  private readonly ranked = computed(() => {
     const developers = this.state().data?.developers;
     if (!developers) return [];
-    const f = this.format;
-    if (this.ranking() === 'hours') {
-      const ratios = shares(developers.topByHours.map((d) => d.hours));
-      return developers.topByHours.map((d, i) => ({
-        key: i,
-        label: d.developer,
-        share: ratios[i],
-        figure: f.hours(d.hours),
-        sub: f.plural('common.games', d.gameCount),
-        link: STUDIO_LINK,
-        queryParams: { name: d.developer },
-      }));
-    }
-    return developers.topByRating.map((d, i) => ({
+    return this.ranking() === 'hours' ? developers.topByHours : developers.topByRating;
+  });
+
+  protected readonly developerRows = computed<StatsBar[]>(() => {
+    const format = this.format;
+    const byHours = this.ranking() === 'hours';
+    const ranked = this.ranked();
+    const ratios = shares(ranked.map((d) => d.hours));
+    return ranked.map((d, i) => ({
       key: i,
       label: d.developer,
-      share: ratingShare(d.averageRating),
-      figure: f.rating(d.averageRating),
-      figureClass: ratingTone(d.averageRating),
-      sub: joinParts([f.plural('stats.studios.rated', d.ratedGameCount), f.hours(d.hours)]),
+      share: byHours ? ratios[i] : ratingShare(d.averageRating),
+      figure: byHours ? format.hours(d.hours) : format.rating(d.averageRating),
+      figureClass: byHours ? undefined : ratingTone(d.averageRating),
+      sub: byHours
+        ? format.plural('common.games', d.gameCount)
+        : joinParts([format.plural('stats.studios.rated', d.ratedGameCount), format.hours(d.hours)]),
       link: STUDIO_LINK,
       queryParams: { name: d.developer },
+      cover: this.coversOf(d.developer)[0] ?? null,
     }));
   });
 
-  protected readonly decadeRows = computed<StatsBar[]>(() => {
-    const decades = (this.state().data?.eras.byDecade ?? []).filter((d) => d.gameCount > 0);
-    const ratios = shares(decades.map((d) => d.gameCount));
+  /** The first studio of the picked ranking, with its headline figure; null when the ranking is empty. */
+  protected readonly topStudio = computed(() => {
+    const top = this.ranked()[0];
+    if (!top) return null;
+    const format = this.format;
+    const byHours = this.ranking() === 'hours';
+    return {
+      name: top.developer,
+      covers: withArt(this.coversOf(top.developer)),
+      figure: byHours ? format.hours(top.hours) : format.rating(top.averageRating),
+      figureClass: byHours ? '' : ratingTone(top.averageRating),
+      meta: byHours
+        ? joinParts([
+            format.plural('common.games', top.gameCount),
+            top.averageRating !== null ? format.text('stats.platforms.average', { rating: format.rating(top.averageRating) }) : null,
+          ])
+        : joinParts([format.plural('stats.studios.rated', top.ratedGameCount), format.hours(top.hours)]),
+    };
+  });
+
+  /** Games per release decade, from the first to the last decade with games. */
+  protected readonly decadeColumns = computed<StatsColumn[]>(() => {
+    const decades = trimEmptyEnds(this.state().data?.eras.byDecade ?? [], (d) => d.gameCount);
     const f = this.format;
-    return decades.map((d, i) => ({
+    return decades.map((d) => ({
       key: d.decade,
-      label: f.text('stats.studios.decade', decadeParams(d.decade)),
-      share: ratios[i],
-      figure: f.plural('common.games', d.gameCount),
-      link: GAMES_LINK,
-      queryParams: gamesLinkParams({ decade: d.decade }),
-      sub: joinParts([
-        f.hours(d.hours),
+      label: String(d.decade),
+      value: d.gameCount,
+      figure: String(d.gameCount),
+      title: joinParts([
+        `${f.text('stats.studios.decade', decadeParams(d.decade))}: ${f.plural('common.games', d.gameCount)}`,
+        d.gameCount > 0 ? f.hours(d.hours) : null,
         d.averageRating !== null ? f.text('stats.platforms.average', { rating: f.rating(d.averageRating) }) : null,
       ]),
+      link: d.gameCount > 0 ? GAMES_LINK : null,
+      queryParams: gamesLinkParams({ decade: d.decade }),
     }));
   });
 }

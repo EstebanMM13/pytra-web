@@ -15,6 +15,7 @@ import { StatCard } from '../../shared/ui/stat-card';
 import { ratingTone } from '../../shared/utils/rating-tone';
 import { STATS_LIST_PREVIEW, StatsBar, StatsBarList } from './stats-bar-list';
 import { statsFormat } from './stats-format';
+import { StatsHero } from './stats-hero';
 import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { statsPlatformColors } from './stats-platform-colors';
@@ -25,12 +26,12 @@ import {
   MIN_GENRE_RATINGS,
   RatingSpread,
   RatingTemperament,
+  columnHeights,
   gamesLinkParams,
   histogramColumns,
   ratingShare,
   ratingSpread,
   ratingTemperament,
-  shares,
   splitBySample,
 } from './stats.logic';
 
@@ -45,9 +46,6 @@ const SPREAD_KEYS: Record<RatingSpread, string> = {
   moderate: 'stats.ratings.spread.moderate',
   wide: 'stats.ratings.spread.wide',
 };
-
-/** Bars kept visible (a sliver) when their bucket is not empty. */
-const MIN_BAR_PERCENT = 3;
 
 /**
  * Ratings section (`/stats/ratings?year=`): mean / median / spread with a plain-language read,
@@ -68,6 +66,7 @@ const MIN_BAR_PERCENT = 3;
     Skeleton,
     StatCard,
     StatsBarList,
+    StatsHero,
     StatsLoadError,
     StatsPageHeader,
     StatsScope,
@@ -103,13 +102,13 @@ export class StatsRatings {
   });
 
   private columns(columns: ReturnType<typeof histogramColumns>) {
-    const ratios = shares(columns.map((c) => c.count));
+    const heights = columnHeights(columns.map((c) => c.count));
     const f = this.format;
     return columns.map((c, i) => {
       const from = f.point(c.from);
       return {
         key: c.from,
-        height: c.count > 0 ? Math.max(MIN_BAR_PERCENT, ratios[i] * 100) : 0,
+        height: heights[i],
         label: from,
         title:
           c.from === c.to

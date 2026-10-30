@@ -29,8 +29,8 @@ const data: PlatformStats = {
 };
 
 describe('Stats platforms page', () => {
-  function setup(query: Record<string, string> = {}) {
-    const getByPlatform = vi.fn(() => of(data));
+  function setup(query: Record<string, string> = {}, stats: PlatformStats = data) {
+    const getByPlatform = vi.fn(() => of(stats));
     const queryParamMap = new BehaviorSubject(convertToParamMap(query));
     TestBed.configureTestingModule({
       imports: [StatsPlatforms],
@@ -95,5 +95,32 @@ describe('Stats platforms page', () => {
     // PS5 is first of its family in the catalog: it keeps a shade close to the family colour, not the neutral one.
     expect(dot.style.backgroundColor).not.toBe('');
     expect(dot.style.backgroundColor).not.toContain('platform-neutral');
+  });
+
+  it('heads the page with a share ring of the platforms with hours, the top one in its hole', () => {
+    const { el } = setup();
+    const hero = el.querySelector('[data-platform-hero]')!;
+    expect(hero.querySelectorAll('[data-donut-arc]')).toHaveLength(2);
+    expect(hero.querySelector('[data-platform-top-share]')!.textContent).toContain('67');
+    expect(el.querySelectorAll('[data-platform-share-legend] li')).toHaveLength(2);
+  });
+
+  it('leaves the ring out when no platform has hours', () => {
+    const { el } = setup({}, { ...data, platforms: data.platforms.map((p) => ({ ...p, hours: 0 })) });
+    expect(el.querySelector('[data-platform-hero]')).toBeNull();
+  });
+
+  it('groups the platforms past the fifth into one "others" slice', () => {
+    const many = Array.from({ length: 7 }, (_, i) => ({ ...data.platforms[0], platformId: i + 1, name: `P${i}`, hours: 70 - i * 5 }));
+    const { el } = setup({}, { ...data, platforms: many });
+    const legend = [...el.querySelectorAll('[data-platform-share-legend] li')].map((li) => li.textContent!);
+    expect(legend).toHaveLength(6);
+    expect(legend[5]).toContain('stats.platforms.others');
+  });
+
+  it('ranks the platform list, the first in the gold chip', () => {
+    const { el } = setup();
+    expect(el.querySelector('[data-platform-list] [data-rank-first]')).not.toBeNull();
+    expect(el.querySelector('[data-platform-list] [data-rank]')!.textContent!.trim()).toBe('2');
   });
 });

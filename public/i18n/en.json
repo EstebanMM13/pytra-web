@@ -1442,7 +1442,6 @@
     }
   },
   "stats": {
-    "title": "Stats",
     "subtitle": "Your gaming history, from every angle.",
     "back": "Stats",
     "backAria": "Back to Stats",
@@ -1476,10 +1475,14 @@
       "habitsHint": "median time to finish a run",
       "ratings": "Ratings",
       "ratingsHint": "average of {{count}} ratings",
-      "ratingsHint_one": "average of {{count}} rating"
+      "ratingsHint_one": "average of {{count}} rating",
+      "studiosShort": "Studios",
+      "hero": {
+        "since": "played since {{year}}",
+        "label": "Summary of your whole history"
+      }
     },
     "activity": {
-      "title": "Activity",
       "subtitle": "The days you played, from your diary.",
       "statsLabel": "Activity summary",
       "hours": "Hours this year",
@@ -1496,10 +1499,11 @@
       "emptyText": "The diary keeps what you play each day: with it you will see your calendar and streaks here.",
       "emptyCta": "Go to the diary",
       "heatmapHint": "Tap a day to see its hours and open it in the diary.",
-      "openDay": "Open in the diary"
+      "openDay": "Open in the diary",
+      "heading": "Activity",
+      "eyebrow": "From your diary"
     },
     "platforms": {
-      "title": "Platforms",
       "subtitle": "Where you play, and how much.",
       "list": "Hours per platform",
       "completed": "{{count}} completed",
@@ -1510,7 +1514,13 @@
       "unassignedNote": "{{hours}} online from games without a platform.",
       "byYear": "Hours per year",
       "yearTitle": "{{year}}: {{hours}}",
-      "empty": "No hours logged in this period."
+      "empty": "No hours logged in this period.",
+      "share": "Share of hours",
+      "others": "Others",
+      "heading": {
+        "lead": "Your",
+        "key": "platforms"
+      }
     },
     "studios": {
       "title": "Studios & eras",
@@ -1528,17 +1538,21 @@
       "undated_one": "{{count}} game without a release date.",
       "empty": "No games with a studio yet.",
       "noRated": "No studio reaches the minimum of rated games yet.",
-      "noDecades": "No games with a release date yet."
+      "noDecades": "No games with a release date yet.",
+      "topByHours": "Your most played studio",
+      "topByRating": "Your top-rated studio",
+      "heading": {
+        "lead": "Studios &",
+        "key": "eras"
+      }
     },
     "habits": {
-      "title": "Habits",
       "subtitle": "How you finish (or drop) your runs.",
       "statsLabel": "Habits summary",
       "completed": "Completed",
       "abandoned": "Abandoned",
       "replays": "Replays",
       "median": "Median time to finish",
-      "medianShort": "Median",
       "averageHint": "average: {{days}}",
       "fastest": "Fastest",
       "slowest": "Slowest",
@@ -1555,10 +1569,14 @@
       "hoursVsRating": "Length and rating",
       "hoursRange": "{{label}} h",
       "hoursRow": "{{runs}} · {{rated}}",
-      "noRating": "no rating"
+      "noRating": "no rating",
+      "finishRate": "finished",
+      "heading": {
+        "lead": "Your",
+        "key": "habits"
+      }
     },
     "ratings": {
-      "title": "Ratings",
       "subtitle": "How you score what you play.",
       "statsLabel": "Ratings summary",
       "mean": "Average",
@@ -1584,7 +1602,11 @@
       "hiddenGenres": "{{count}} genres with fewer than {{min}} ratings are hidden.",
       "hiddenGenres_one": "{{count}} genre with fewer than {{min}} ratings is hidden.",
       "empty": "No rated runs in this period yet.",
-      "histogramPoint": "{{point}}: {{count}}"
+      "histogramPoint": "{{point}}: {{count}}",
+      "heading": {
+        "lead": "Your",
+        "key": "ratings"
+      }
     },
     "showAll": "See all ({{total}})",
     "showLess": "Show less",
@@ -1593,6 +1615,11 @@
       "backAria": "Back to Studios & eras",
       "empty": "There are no games by this studio in your library.",
       "inLibrary": "See its games in Games"
-    }
+    },
+    "heading": {
+      "lead": "Your",
+      "key": "stats"
+    },
+    "allTime": "All time"
   }
 }

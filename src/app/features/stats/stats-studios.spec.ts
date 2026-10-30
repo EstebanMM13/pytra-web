@@ -4,6 +4,7 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { provideTranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { DeveloperStats, ReleaseEraStats } from '../../core/models/stats.model';
+import { GameService } from '../../core/services/game.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -41,6 +42,16 @@ describe('Stats studios page', () => {
         { provide: ActivatedRoute, useValue: { queryParamMap, snapshot: { queryParamMap: queryParamMap.value } } },
         { provide: RunFormLauncher, useValue: { saved$: new Subject() } },
         {
+          provide: GameService,
+          useValue: {
+            findAll: () =>
+              of([
+                { id: 1, name: 'Elden Ring', developer: 'FromSoftware', coverImageUrl: 'er.jpg', totalHours: 200 },
+                { id: 2, name: 'Sekiro', developer: 'FromSoftware', coverImageUrl: 'sk.jpg', totalHours: 100 },
+              ]),
+          },
+        },
+        {
           provide: StatsService,
           useValue: { getByDeveloper: () => of(developers), getByReleaseEra: () => of(eras), getYears: () => of([]) },
         },
@@ -67,9 +78,23 @@ describe('Stats studios page', () => {
     expect(el.querySelector('[data-threshold]')).not.toBeNull();
   });
 
-  it('shows the release decades', () => {
+  it('shows the release decades as columns', () => {
     const { el } = setup();
-    expect(el.querySelectorAll('[data-decades] [data-bar-row]')).toHaveLength(2);
+    expect(el.querySelectorAll('[data-decades] [data-column]')).toHaveLength(2);
+  });
+
+  it('heads the page with the first studio of the picked ranking', () => {
+    const { fixture, el } = setup();
+    const hero = el.querySelector('[data-top-studio]')!;
+    expect(hero.getAttribute('href')).toBe('/stats/studio?name=FromSoftware');
+    expect(hero.querySelector('[data-top-studio-name]')!.textContent!.trim()).toBe('FromSoftware');
+    // Its games' covers from the library, and the most played one blurred behind the card.
+    expect(hero.querySelectorAll('app-stats-cover-stack')[0].querySelectorAll('app-game-cover')).toHaveLength(2);
+    expect(el.querySelector('[data-stats-hero] img[src="er.jpg"]')).not.toBeNull();
+
+    el.querySelectorAll<HTMLButtonElement>('[data-ranking] button')[1].click();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-top-studio]')!.textContent).toContain('9,20');
   });
 
   it('opens a studio page from its row and the library from a decade', () => {
