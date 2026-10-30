@@ -16,7 +16,12 @@ class NavbarStub {}
 const LIBRARY = [
   { id: 1, name: 'Elden Ring', developer: 'FromSoftware', sagaId: null, coverImageUrl: 'er.jpg', totalHours: 200 },
   { id: 2, name: 'Witcher 3', developer: 'CDPR', sagaId: 1, coverImageUrl: 'w3.jpg', totalHours: 90 },
-];
+].map((g) => ({ ...g, genres: [{ id: 5, name: 'RPG' }], sagaName: g.sagaId ? 'Zelda' : null, reviewStatus: 'REVIEWED', experienceCount: 1 }));
+
+/** A card's teaser visual and figure, found by the section it links to. */
+const visual = (el: HTMLElement, link: string) => el.querySelector<HTMLElement>(`[data-hub-card][href="${link}"] [data-hub-visual]`)!;
+const figure = (el: HTMLElement, link: string) =>
+  el.querySelector(`[data-hub-card][href="${link}"] [data-hub-figure]`)!.textContent!.trim();
 
 describe('Stats hub', () => {
   function setup(
@@ -51,6 +56,20 @@ describe('Stats hub', () => {
               }),
             getByDeveloper: () => of({ topByHours: [{ developer: 'FromSoftware', hours: 250 }] }),
             getCompletion: () => of({ completedCount: 8, abandonedCount: 2, timeToFinish: { medianDays: 22.6 } }),
+            getByGenre: () =>
+              of([
+                { genreId: 5, genreName: 'RPG', gameCount: 2, totalHours: 46.25 },
+                { genreId: 6, genreName: 'SHOOTER', gameCount: 1, totalHours: 10 },
+              ]),
+            getByReleaseEra: () =>
+              of({
+                byDecade: [
+                  { decade: 2000, gameCount: 1, hours: 5, ratedGameCount: 0, averageRating: null },
+                  { decade: 2010, gameCount: 3, hours: 70, ratedGameCount: 2, averageRating: 8 },
+                ],
+                byYear: [],
+                undatedGameCount: 0,
+              }),
             getRatings: () =>
               of({ mean: 7.94, ratedCount: 40, histogram: [{ from: 7, to: 7.5, count: 30 }, { from: 9, to: 9.5, count: 10 }] }),
             ...overrides,
@@ -71,10 +90,12 @@ describe('Stats hub', () => {
     const links = [...el.querySelectorAll('[data-hub-card]')].map((a) => a.getAttribute('href'));
     expect(links).toEqual([
       '/stats/activity',
+      '/stats/genres',
       '/years',
       '/sagas',
       '/stats/platforms',
       '/stats/studios',
+      '/stats/eras',
       '/stats/habits',
       '/stats/ratings',
     ]);
@@ -83,30 +104,43 @@ describe('Stats hub', () => {
   it('shows a teaser figure per section', () => {
     const el = setup();
     const figures = [...el.querySelectorAll('[data-hub-figure]')].map((f) => f.textContent!.trim());
-    expect(figures).toEqual(['stats.days', '12,5 h', 'stats.hub.sagasFigure', 'PlayStation 5', 'FromSoftware', 'stats.days', '7,94']);
+    expect(figures).toEqual([
+      'stats.days',
+      'RPG',
+      '12,5 h',
+      'stats.hub.sagasFigure',
+      'PlayStation 5',
+      'FromSoftware',
+      'stats.decadeLabel',
+      'stats.days',
+      '7,94',
+    ]);
   });
 
   it('draws a small visual of the same data on every card', () => {
     const el = setup();
-    const visuals = [...el.querySelectorAll<HTMLElement>('[data-hub-visual]')];
-    expect(visuals).toHaveLength(7);
-    // Activity: one cell per day of the last five weeks; platforms: one slice each; ratings: 11 whole points.
-    expect(visuals[0].querySelectorAll('[data-hub-day]')).toHaveLength(35);
-    expect(visuals[1].querySelectorAll('[data-hub-year-bar]').length).toBeGreaterThan(0);
-    expect(visuals[3].querySelectorAll('[data-hub-slice]')).toHaveLength(2);
+    expect(el.querySelectorAll('[data-hub-visual]')).toHaveLength(9);
+    // Activity: fixed cells (the card clips the oldest); platforms: one slice each; ratings: 11 whole points.
+    expect(visual(el, '/stats/activity').querySelectorAll('[data-hub-day]')).toHaveLength(70);
+    expect(visual(el, '/years').querySelectorAll('[data-hub-column]').length).toBeGreaterThan(0);
+    expect(visual(el, '/stats/platforms').querySelectorAll('[data-hub-slice]')).toHaveLength(2);
+    expect(visual(el, '/stats/genres').querySelectorAll('[data-hub-slice]')).toHaveLength(2);
+    expect(visual(el, '/stats/eras').querySelectorAll('[data-hub-column]')).toHaveLength(2);
     // Habits: completed and abandoned.
-    expect(visuals[5].querySelectorAll('[data-hub-slice]')).toHaveLength(2);
-    expect(visuals[6].querySelectorAll('[data-hub-rating-bar]')).toHaveLength(11);
+    expect(visual(el, '/stats/habits').querySelectorAll('[data-hub-slice]')).toHaveLength(2);
+    expect(visual(el, '/stats/ratings').querySelectorAll('[data-hub-rating-bar]')).toHaveLength(11);
   });
 
-  it('heads the hub with the all-time hours and the most played covers, and shows saga and studio covers', () => {
+  it('heads the hub with the all-time hours and the most played covers, and shows genre, saga and studio covers', () => {
     const el = setup();
     const hero = el.querySelector('[data-hub-hero]')!;
     expect(hero.querySelector('[data-hub-total]')!.textContent).toContain('92,5 h');
     expect(hero.querySelectorAll('app-stats-cover-stack')[0].querySelectorAll('app-game-cover')).toHaveLength(2);
-    const visuals = el.querySelectorAll('[data-hub-visual]');
-    expect(visuals[2].querySelectorAll('app-game-cover')).toHaveLength(1);
-    expect(visuals[4].querySelectorAll('app-game-cover')).toHaveLength(1);
+    expect(visual(el, '/stats/genres').querySelectorAll('app-game-cover')).toHaveLength(2);
+    expect(visual(el, '/sagas').querySelectorAll('app-game-cover')).toHaveLength(1);
+    // The most played saga's progress beside its covers: 1 of its 1 game played.
+    expect(visual(el, '/sagas').querySelector('[data-hub-saga-played]')!.textContent).toBe('1/1');
+    expect(visual(el, '/stats/studios').querySelectorAll('app-game-cover')).toHaveLength(1);
   });
 
   for (const [name, findAll] of [
@@ -117,11 +151,10 @@ describe('Stats hub', () => {
     it(`keeps the hero and falls back to bars when the library ${name}`, () => {
       const el = setup({}, findAll);
       expect(el.querySelector('[data-hub-hero] [data-hub-total]')!.textContent).toContain('92,5 h');
-      const visuals = el.querySelectorAll('[data-hub-visual]');
-      expect(visuals[2].querySelector('app-game-cover')).toBeNull();
-      expect(visuals[2].querySelectorAll('[data-hub-slice]')).toHaveLength(1);
-      expect(visuals[4].querySelector('app-game-cover')).toBeNull();
-      expect(visuals[4].querySelectorAll('[data-hub-studio-bar]')).toHaveLength(1);
+      expect(visual(el, '/sagas').querySelector('app-game-cover')).toBeNull();
+      expect(visual(el, '/sagas').querySelectorAll('[data-hub-slice]')).toHaveLength(1);
+      expect(visual(el, '/stats/studios').querySelector('app-game-cover')).toBeNull();
+      expect(visual(el, '/stats/studios').querySelectorAll('[data-hub-studio-bar]')).toHaveLength(1);
     });
   }
 
@@ -132,9 +165,8 @@ describe('Stats hub', () => {
 
   it('shows a dash on a section whose teaser failed, keeping the others', () => {
     const el = setup({ getRatings: () => throwError(() => new Error('down')) });
-    const figures = [...el.querySelectorAll('[data-hub-figure]')].map((f) => f.textContent!.trim());
-    expect(figures[6]).toBe('—');
-    expect(figures[4]).toBe('FromSoftware');
+    expect(figure(el, '/stats/ratings')).toBe('—');
+    expect(figure(el, '/stats/studios')).toBe('FromSoftware');
   });
 
   it('reloads the teasers when a run is saved from the "+" menu', () => {
@@ -143,7 +175,6 @@ describe('Stats hub', () => {
     mean = 9;
     el.saved$.next();
     el.fixture.detectChanges();
-    const figures = [...el.querySelectorAll('[data-hub-figure]')].map((f) => f.textContent!.trim());
-    expect(figures[6]).toBe('9,00');
+    expect(figure(el, '/stats/ratings')).toBe('9,00');
   });
 });

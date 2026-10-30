@@ -1,0 +1,112 @@
+<app-navbar />
+
+<main class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-4 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
+  <app-stats-page-header
+    [title]="'stats.genres.heading.lead' | translate"
+    [highlight]="'stats.genres.heading.key' | translate"
+    [eyebrow]="'stats.allTime' | translate"
+    [subtitle]="'stats.genres.subtitle' | translate"
+  />
+
+  @let s = state();
+  @if (s.data) {
+    @if (top(); as t) {
+      <app-stats-spotlight
+        [link]="gamesLink"
+        [queryParams]="t.queryParams"
+        [label]="'stats.genres.top' | translate"
+        [name]="t.name"
+        [meta]="t.meta"
+        [covers]="t.covers"
+        [pending]="coversPending()"
+        [icon]="icon"
+        data-top-genre
+      >
+        <span class="font-mono text-2xl leading-none font-bold tracking-[-0.03em] text-brand-light md:text-4xl" data-top-genre-share>{{
+          t.percent
+        }}</span>
+        <span class="text-xs text-text-3">{{ t.shareHint }}</span>
+      </app-stats-spotlight>
+    }
+
+    @if (callouts().length) {
+      <!-- The genres that stand out for another reason than hours. -->
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:gap-3" data-genre-callouts>
+        @for (c of callouts(); track c.key) {
+          <app-stats-callout
+            [link]="gamesLink"
+            [queryParams]="c.queryParams"
+            [label]="c.label | translate"
+            [name]="c.genre.name"
+            [covers]="c.covers"
+            [figureClass]="c.figureClass"
+            [attr.data-genre-callout]="c.key"
+            >{{ c.figure }}</app-stats-callout
+          >
+        }
+      </div>
+    }
+
+    <!-- Cards keep their own height: a short card does not stretch beside a long one. -->
+    <div class="grid grid-cols-1 items-start gap-4 md:gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3" [label]="'stats.genres.byHours' | translate" />
+        @if (rows().length) {
+          <app-stats-bar-list [bars]="rows()" [limit]="preview" ranked data-genre-list />
+        } @else {
+          <p class="py-6 text-center text-sm text-muted" data-genres-empty>{{ 'stats.genres.empty' | translate }}</p>
+        }
+      </section>
+
+      <div class="flex flex-col gap-4 md:gap-5">
+        @if (years().length) {
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]" data-genre-years>
+            <app-section-header class="mb-1" [label]="'stats.genres.ofTheYear' | translate" />
+            <p class="mb-2 text-xs text-faint">{{ 'stats.genres.ofTheYearHint' | translate }}</p>
+            <app-stats-bar-list [bars]="years()" />
+          </section>
+        }
+
+        @if (sagas(); as sg) {
+          <!-- Sagas: their progress counted from the library, as the sagas page shows it. -->
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]" data-saga-insights>
+            <app-section-header class="mb-3" [label]="'stats.genres.sagas' | translate">
+              <a routerLink="/sagas" class="shrink-0 text-xs text-brand-light hover:underline">{{ 'stats.genres.allSagas' | translate }}</a>
+            </app-section-header>
+            <div class="grid grid-cols-3 gap-2">
+              @for (count of sg.counts; track count.key) {
+                <!-- Plain tiles: the labels wrap in a third of the card instead of being cut. -->
+                <div class="rounded-xl border border-card-border bg-hover/30 px-2 py-2.5 text-center" [attr.data-saga-count]="count.key">
+                  <p class="text-[11px] leading-tight text-text-3 md:text-xs">{{ count.label | translate }}</p>
+                  <p class="mt-1 font-mono text-xl font-bold md:text-2xl">{{ count.value }}</p>
+                </div>
+              }
+            </div>
+            @for (pick of sg.picks; track pick.key) {
+              <app-stats-callout
+                class="mt-2"
+                variant="row"
+                [link]="pick.link"
+                [label]="pick.label | translate"
+                [name]="pick.saga.name"
+                [covers]="pick.covers"
+                [attr.data-saga-pick]="pick.key"
+                >{{ pick.figure }}</app-stats-callout
+              >
+            }
+          </section>
+        }
+      </div>
+    </div>
+  } @else if (s.failed) {
+    <app-stats-load-error (retry)="section.retry()" />
+  } @else {
+    <app-skeleton class="h-[132px] md:h-[150px]" [class]="heroRadius" />
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:gap-3">
+      @for (i of [1, 2, 3]; track i) {
+        <app-skeleton class="h-[76px] rounded-[14px]" />
+      }
+    </div>
+    <app-skeleton class="h-[320px] rounded-[14px]" />
+  }
+</main>

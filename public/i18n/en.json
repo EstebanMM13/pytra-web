@@ -1469,18 +1469,22 @@
       "sagasHint": "Most played: {{name}}",
       "platforms": "Platforms",
       "platformsHint": "{{hours}} · your main platform",
-      "studios": "Studios & eras",
+      "studios": "Studios",
       "studiosHint": "{{hours}} · your most played studio",
       "habits": "Habits",
       "habitsHint": "median time to finish a run",
       "ratings": "Ratings",
       "ratingsHint": "average of {{count}} ratings",
       "ratingsHint_one": "average of {{count}} rating",
-      "studiosShort": "Studios",
       "hero": {
         "since": "played since {{year}}",
         "label": "Summary of your whole history"
-      }
+      },
+      "eras": "Eras",
+      "erasHint": "{{hours}} · your most played decade",
+      "genres": "Genres & sagas",
+      "genresShort": "Genres",
+      "genresHint": "{{percent}} of your hours · your main genre"
     },
     "activity": {
       "subtitle": "The days you played, from your diary.",
@@ -1523,8 +1527,8 @@
       }
     },
     "studios": {
-      "title": "Studios & eras",
-      "subtitle": "Who makes the games you play, and when they came out.",
+      "title": "Studios",
+      "subtitle": "Who makes the games you play.",
       "developers": "Studios",
       "byHours": "By hours",
       "byRating": "By rating",
@@ -1532,18 +1536,13 @@
       "threshold_one": "Only studios with at least {{count}} rated game.",
       "rated": "{{count}} rated",
       "rated_one": "{{count}} rated",
-      "decades": "By release decade",
-      "decade": "{{decade}}s",
-      "undated": "{{count}} games without a release date.",
-      "undated_one": "{{count}} game without a release date.",
       "empty": "No games with a studio yet.",
       "noRated": "No studio reaches the minimum of rated games yet.",
-      "noDecades": "No games with a release date yet.",
       "topByHours": "Your most played studio",
       "topByRating": "Your top-rated studio",
       "heading": {
-        "lead": "Studios &",
-        "key": "eras"
+        "lead": "Your",
+        "key": "studios"
       }
     },
     "habits": {
@@ -1620,6 +1619,54 @@
       "lead": "Your",
       "key": "stats"
     },
-    "allTime": "All time"
+    "allTime": "All time",
+    "eras": {
+      "noDecades": "No games with a release date yet.",
+      "undated": "{{count}} games without a release date.",
+      "undated_one": "{{count}} game without a release date.",
+      "heading": {
+        "lead": "Your",
+        "key": "eras"
+      },
+      "subtitle": "When the games you play came out.",
+      "top": "Your most played decade",
+      "bestRated": "Best rated decade",
+      "oldest": "Your oldest release",
+      "newest": "Your newest release",
+      "decades": "Games per release decade",
+      "years": "Release years by hours",
+      "columns": {
+        "decade": "Decade",
+        "games": "Games",
+        "hours": "Hours",
+        "rating": "Rating"
+      },
+      "noYears": "No games with a release year yet."
+    },
+    "genres": {
+      "heading": {
+        "lead": "Genres &",
+        "key": "sagas"
+      },
+      "subtitle": "What kind of games you play, and how your sagas are going.",
+      "top": "Your most played genre",
+      "shareOfHours": "of your hours · {{hours}}",
+      "bestRated": "Best rated genre",
+      "mostAbandoned": "Most abandoned genre",
+      "mostGames": "Genre with most games",
+      "byHours": "Genres by hours",
+      "empty": "No games with a genre yet.",
+      "abandonedShare": "{{percent}} abandoned",
+      "ofTheYear": "Genre of each year",
+      "ofTheYearHint": "The genre with the most run hours each year (online hours left out).",
+      "sagas": "Your sagas",
+      "allSagas": "See sagas",
+      "sagasComplete": "Complete",
+      "sagasInProgress": "In progress",
+      "sagasNotStarted": "Not started",
+      "sagaClosest": "Closest to complete",
+      "sagaLongest": "Saga with the most hours"
+    },
+    "decadeLabel": "{{decade}}s"
   }
 }

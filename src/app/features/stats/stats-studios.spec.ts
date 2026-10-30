@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subject, of } from 'rxjs';
-import { DeveloperStats, ReleaseEraStats } from '../../core/models/stats.model';
+import { DeveloperStats } from '../../core/models/stats.model';
 import { GameService } from '../../core/services/game.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
@@ -20,15 +20,6 @@ const developers: DeveloperStats = {
     { developer: 'Nintendo EPD', gameCount: 3, hours: 120, ratedGameCount: 1, averageRating: 8 },
   ],
   topByRating: [{ developer: 'FromSoftware', gameCount: 4, hours: 300, ratedGameCount: 4, averageRating: 9.2 }],
-};
-
-const eras: ReleaseEraStats = {
-  byDecade: [
-    { decade: 1990, gameCount: 2, hours: 40, ratedGameCount: 1, averageRating: 9 },
-    { decade: 2010, gameCount: 5, hours: 200, ratedGameCount: 4, averageRating: null },
-  ],
-  byYear: [],
-  undatedGameCount: 3,
 };
 
 describe('Stats studios page', () => {
@@ -53,7 +44,7 @@ describe('Stats studios page', () => {
         },
         {
           provide: StatsService,
-          useValue: { getByDeveloper: () => of(developers), getByReleaseEra: () => of(eras), getYears: () => of([]) },
+          useValue: { getByDeveloper: () => of(developers), getYears: () => of([]) },
         },
       ],
     });
@@ -78,16 +69,16 @@ describe('Stats studios page', () => {
     expect(el.querySelector('[data-threshold]')).not.toBeNull();
   });
 
-  it('shows the release decades as columns', () => {
-    const { el } = setup();
-    expect(el.querySelectorAll('[data-decades] [data-column]')).toHaveLength(2);
-  });
-
   it('heads the page with the first studio of the picked ranking', () => {
     const { fixture, el } = setup();
     const hero = el.querySelector('[data-top-studio]')!;
-    expect(hero.getAttribute('href')).toBe('/stats/studio?name=FromSoftware');
-    expect(hero.querySelector('[data-top-studio-name]')!.textContent!.trim()).toBe('FromSoftware');
+    expect(hero.querySelector('[data-spotlight-link]')!.getAttribute('href')).toBe('/stats/studio?name=FromSoftware');
+    expect(hero.querySelector('[data-spotlight-name]')!.textContent!.trim()).toBe('FromSoftware');
+    // Its most played games, listed beside the figure on wide screens.
+    expect([...hero.querySelectorAll('[data-hero-games] li')].map((li) => li.textContent)).toEqual([
+      expect.stringContaining('Elden Ring'),
+      expect.stringContaining('Sekiro'),
+    ]);
     // Its games' covers from the library, and the most played one blurred behind the card.
     expect(hero.querySelectorAll('app-stats-cover-stack')[0].querySelectorAll('app-game-cover')).toHaveLength(2);
     expect(el.querySelector('[data-stats-hero] img[src="er.jpg"]')).not.toBeNull();
@@ -97,9 +88,8 @@ describe('Stats studios page', () => {
     expect(el.querySelector('[data-top-studio]')!.textContent).toContain('9,20');
   });
 
-  it('opens a studio page from its row and the library from a decade', () => {
+  it('opens a studio page from its row', () => {
     const { el } = setup();
     expect(el.querySelector('[data-developers] a')!.getAttribute('href')).toBe('/stats/studio?name=FromSoftware');
-    expect(el.querySelector('[data-decades] a')!.getAttribute('href')).toBe('/games?decade=1990');
   });
 });

@@ -1469,18 +1469,22 @@
       "sagasHint": "Más jugada: {{name}}",
       "platforms": "Plataformas",
       "platformsHint": "{{hours}} · tu plataforma principal",
-      "studios": "Estudios y épocas",
+      "studios": "Estudios",
       "studiosHint": "{{hours}} · tu estudio más jugado",
       "habits": "Hábitos",
       "habitsHint": "mediana hasta terminar una partida",
       "ratings": "Notas",
       "ratingsHint": "nota media de {{count}} valoraciones",
       "ratingsHint_one": "nota media de {{count}} valoración",
-      "studiosShort": "Estudios",
       "hero": {
         "since": "jugadas desde {{year}}",
         "label": "Resumen de todo tu historial"
-      }
+      },
+      "eras": "Épocas",
+      "erasHint": "{{hours}} · tu década más jugada",
+      "genres": "Géneros y sagas",
+      "genresShort": "Géneros",
+      "genresHint": "{{percent}} de tus horas · tu género principal"
     },
     "activity": {
       "subtitle": "Los días que has jugado, según tu diario.",
@@ -1523,8 +1527,8 @@
       }
     },
     "studios": {
-      "title": "Estudios y épocas",
-      "subtitle": "Quién hace los juegos que juegas y de qué época son.",
+      "title": "Estudios",
+      "subtitle": "Quién hace los juegos que juegas.",
       "developers": "Estudios",
       "byHours": "Por horas",
       "byRating": "Por nota",
@@ -1532,18 +1536,13 @@
       "threshold_one": "Solo estudios con al menos {{count}} juego valorado.",
       "rated": "{{count}} valorados",
       "rated_one": "{{count}} valorado",
-      "decades": "Por década de lanzamiento",
-      "decade": "Años {{short}}",
-      "undated": "{{count}} juegos sin fecha de lanzamiento.",
-      "undated_one": "{{count}} juego sin fecha de lanzamiento.",
       "empty": "Aún no hay juegos con estudio.",
       "noRated": "Ningún estudio llega aún al mínimo de juegos valorados.",
-      "noDecades": "Aún no hay juegos con fecha de lanzamiento.",
       "topByHours": "Tu estudio más jugado",
       "topByRating": "Tu estudio mejor valorado",
       "heading": {
-        "lead": "Estudios y",
-        "key": "épocas"
+        "lead": "Tus",
+        "key": "estudios"
       }
     },
     "habits": {
@@ -1620,6 +1619,54 @@
       "lead": "Tus",
       "key": "estadísticas"
     },
-    "allTime": "Todo el historial"
+    "allTime": "Todo el historial",
+    "eras": {
+      "noDecades": "Aún no hay juegos con fecha de lanzamiento.",
+      "undated": "{{count}} juegos sin fecha de lanzamiento.",
+      "undated_one": "{{count}} juego sin fecha de lanzamiento.",
+      "heading": {
+        "lead": "Tus",
+        "key": "épocas"
+      },
+      "subtitle": "De qué época son los juegos que juegas.",
+      "top": "Tu década más jugada",
+      "bestRated": "Década mejor valorada",
+      "oldest": "Tu lanzamiento más antiguo",
+      "newest": "Tu lanzamiento más reciente",
+      "decades": "Juegos por década de lanzamiento",
+      "years": "Años de lanzamiento por horas",
+      "columns": {
+        "decade": "Década",
+        "games": "Juegos",
+        "hours": "Horas",
+        "rating": "Nota"
+      },
+      "noYears": "Aún no hay juegos con año de lanzamiento."
+    },
+    "genres": {
+      "heading": {
+        "lead": "Géneros y",
+        "key": "sagas"
+      },
+      "subtitle": "Qué tipo de juegos juegas y cómo van tus sagas.",
+      "top": "Tu género más jugado",
+      "shareOfHours": "de tus horas · {{hours}}",
+      "bestRated": "Género mejor valorado",
+      "mostAbandoned": "Género más abandonado",
+      "mostGames": "Género con más juegos",
+      "byHours": "Géneros por horas",
+      "empty": "Aún no hay juegos con género.",
+      "abandonedShare": "{{percent}} abandonadas",
+      "ofTheYear": "Género de cada año",
+      "ofTheYearHint": "El género con más horas de partidas de cada año (sin las horas online).",
+      "sagas": "Tus sagas",
+      "allSagas": "Ver sagas",
+      "sagasComplete": "Completas",
+      "sagasInProgress": "En curso",
+      "sagasNotStarted": "Sin empezar",
+      "sagaClosest": "Más cerca de completarla",
+      "sagaLongest": "La saga con más horas"
+    },
+    "decadeLabel": "Años {{short}}"
   }
 }

@@ -61,6 +61,7 @@ export class StatsService {
   private readonly byReleaseEra = this.cache.resource(() =>
     this.http.get<ReleaseEraStats>(`${this.baseUrl}/by-release-era`),
   );
+  private readonly byGenre = this.cache.resource(() => this.http.get<GenreStat[]>(`${this.baseUrl}/by-genre`));
   private readonly playFacts = this.cache.resource(() => this.http.get<PlayFacts>(`${this.baseUrl}/play-facts`));
 
   /** Cached (see `UserDataCache`): may emit the cached summary, then a fresher one. */
@@ -98,8 +99,9 @@ export class StatsService {
     return this.bySaga.get();
   }
 
+  /** Hours and games per genre (all time). Cached (see `UserDataCache`): the hub and the genres section share it. */
   getByGenre(): Observable<GenreStat[]> {
-    return this.http.get<GenreStat[]>(`${this.baseUrl}/by-genre`);
+    return this.byGenre.get();
   }
 
   /** Cached per limit (see `UserDataCache`). */

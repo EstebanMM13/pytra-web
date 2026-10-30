@@ -25,7 +25,8 @@
         <span class="font-mono text-[26px] leading-none font-bold tracking-[-0.03em] md:text-3xl" data-finish-rate>{{ finishPercent() ?? '—' }}</span>
         <span class="mt-1 text-[11px] leading-tight text-text-3 md:text-xs">{{ 'stats.habits.finishRate' | translate }}</span>
       </app-stats-donut>
-      <dl class="flex min-w-0 flex-1 flex-col gap-2.5">
+      <!-- Labels and counts stay together: the list keeps a reading width instead of spanning the card. -->
+      <dl class="flex w-full max-w-64 min-w-0 flex-col gap-2.5">
         @for (row of countRows(); track row.key) {
           <div class="flex items-center justify-between gap-3" [attr.data-habit-count]="row.key">
             <dt class="flex min-w-0 items-center gap-2 text-[13px] text-text-2 md:text-sm">
@@ -80,29 +81,40 @@
       </div>
     }
 
-    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header class="mb-3" [label]="'stats.habits.timeToFinish' | translate" />
-        @if (t.sampleSize > 0) {
-          @if (t.medianDays !== null) {
-            <p class="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5" data-median>
-              <span class="font-mono text-2xl font-bold tracking-[-0.03em] text-brand-light">{{
-                'stats.days' | translatePlural: roundDays(t.medianDays)
-              }}</span>
-              <span class="text-xs text-muted">
-                {{ 'stats.habits.median' | translate }}
-                @if (t.averageDays !== null) {
-                  · {{ 'stats.habits.averageHint' | translate: { days: ('stats.days' | translatePlural: roundDays(t.averageDays)) } }}
-                }
-              </span>
-            </p>
+    <!--
+      Two columns from lg: days to finish and length vs rating stacked beside the (longer)
+      abandonment list, so no card is stretched to its neighbour's height.
+    -->
+    <div class="grid grid-cols-1 items-start gap-4 md:gap-5 lg:grid-cols-2">
+      <div class="flex flex-col gap-4 md:gap-5">
+        <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+          <app-section-header class="mb-3" [label]="'stats.habits.timeToFinish' | translate" />
+          @if (t.sampleSize > 0) {
+            @if (t.medianDays !== null) {
+              <p class="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5" data-median>
+                <span class="font-mono text-2xl font-bold tracking-[-0.03em] text-brand-light">{{
+                  'stats.days' | translatePlural: roundDays(t.medianDays)
+                }}</span>
+                <span class="text-xs text-muted">
+                  {{ 'stats.habits.median' | translate }}
+                  @if (t.averageDays !== null) {
+                    · {{ 'stats.habits.averageHint' | translate: { days: ('stats.days' | translatePlural: roundDays(t.averageDays)) } }}
+                  }
+                </span>
+              </p>
+            }
+            <app-stats-column-chart [columns]="dayColumns()" data-day-buckets />
+            <p class="mt-2 text-xs text-faint">{{ 'stats.habits.sample' | translatePlural: t.sampleSize }}</p>
+          } @else {
+            <p class="py-6 text-center text-sm text-muted">{{ 'stats.habits.noTimes' | translate }}</p>
           }
-          <app-stats-column-chart [columns]="dayColumns()" data-day-buckets />
-          <p class="mt-2 text-xs text-faint">{{ 'stats.habits.sample' | translatePlural: t.sampleSize }}</p>
-        } @else {
-          <p class="py-6 text-center text-sm text-muted">{{ 'stats.habits.noTimes' | translate }}</p>
-        }
-      </section>
+        </section>
+
+        <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+          <app-section-header class="mb-3" [label]="'stats.habits.hoursVsRating' | translate" />
+          <app-stats-bar-list [bars]="hoursRows()" tone="gold" data-hours-buckets />
+        </section>
+      </div>
 
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
         <app-section-header class="mb-3" [label]="'stats.habits.abandonment' | translate" />
@@ -117,17 +129,12 @@
           </p>
         }
       </section>
-
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px] lg:col-span-2">
-        <app-section-header class="mb-3" [label]="'stats.habits.hoursVsRating' | translate" />
-        <app-stats-bar-list [bars]="hoursRows()" tone="gold" data-hours-buckets />
-      </section>
     </div>
   } @else if (s.failed) {
     <app-stats-load-error (retry)="section.retry()" />
   } @else {
     <app-skeleton class="h-[166px] rounded-[14px] md:h-[188px]" />
-    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
+    <div class="grid grid-cols-1 items-start gap-4 md:gap-5 lg:grid-cols-2">
       <app-skeleton class="h-[300px] rounded-[14px]" />
       <app-skeleton class="h-[300px] rounded-[14px]" />
     </div>

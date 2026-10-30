@@ -37,7 +37,11 @@
     </app-stats-hero>
   }
 
-  <!-- Two columns on phones (whole labels at a large font size), four on desktop; Activity spans two. -->
+  <!--
+    Two columns up to lg, four from lg; Activity, Genres and Ratings span two, so every row is full:
+    phones and tablets: Activity / Genres / Years Sagas / Platforms Studios / Eras Habits / Ratings;
+    desktop: Activity Genres / Years Sagas Platforms Studios / Eras Habits Ratings.
+  -->
   <nav class="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4" [attr.aria-label]="'stats.hub.sectionsLabel' | translate">
     @let a = activity();
     <app-stats-hub-card
@@ -55,10 +59,32 @@
           : null
       "
     >
-      <span class="flex h-full items-end gap-[3px]">
+      <!-- Fixed cells, newest on the right: a wider card shows more days, the oldest are clipped. -->
+      <span class="flex h-full items-end justify-end gap-[3px] overflow-hidden">
         @for (day of activityStrip(); track day.date) {
-          <span class="h-4 min-w-0 flex-1 rounded-[3px]" [class]="levelClass[day.level]" data-hub-day></span>
+          <span class="h-4 w-2.5 shrink-0 rounded-[3px] md:h-5 md:w-3" [class]="levelClass[day.level]" data-hub-day></span>
         }
+      </span>
+    </app-stats-hub-card>
+
+    @let g = topGenre();
+    <app-stats-hub-card
+      class="col-span-2"
+      link="/stats/genres"
+      [icon]="icons.layoutGrid"
+      [title]="'stats.hub.genres' | translate"
+      [shortTitle]="'stats.hub.genresShort' | translate"
+      [loading]="g === undefined"
+      [figure]="g ? g.name : null"
+      [hint]="g && g.percent ? ('stats.hub.genresHint' | translate: { percent: g.percent }) : ('common.noData' | translate)"
+    >
+      <span class="flex h-full items-end gap-3">
+        @if (g && g.covers.length) {
+          <app-stats-cover-stack size="sm" compactSize="xs" compactBelow="md" [covers]="g.covers" />
+        }
+        <span class="min-w-0 flex-1">
+          <ng-container *ngTemplateOutlet="shareBar; context: { $implicit: genreSlices() }" />
+        </span>
       </span>
     </app-stats-hub-card>
 
@@ -71,16 +97,7 @@
       [figure]="y ? (y.totalHours | hours) : null"
       [hint]="y ? ('stats.hub.yearsHint' | translate: { year: y.year }) : ('common.noData' | translate)"
     >
-      <span class="flex h-full items-end gap-1">
-        @for (bar of yearBars(); track bar.year; let last = $last) {
-          <span
-            class="bar-grow min-w-0 flex-1 rounded-t-[3px]"
-            [class]="last ? 'bg-(--hub-accent)' : 'bg-[color-mix(in_srgb,var(--hub-accent)_40%,transparent)]'"
-            [style.height.%]="bar.height"
-            data-hub-year-bar
-          ></span>
-        }
-      </span>
+      <ng-container *ngTemplateOutlet="columns; context: { $implicit: yearBars() }" />
     </app-stats-hub-card>
 
     @let s = sagas();
@@ -93,7 +110,13 @@
       [hint]="s && s.top ? ('stats.hub.sagasHint' | translate: { name: s.top.sagaName }) : null"
     >
       @if (sagaCovers().length) {
-        <app-stats-cover-stack size="xs" [covers]="sagaCovers()" />
+        <span class="flex h-full items-end gap-2.5">
+          <app-stats-cover-stack size="sm" compactSize="xs" compactBelow="md" [covers]="sagaCovers()" />
+          @if (sagaPlayed(); as progress) {
+            <!-- The most played saga's progress (games played of its games), as the sagas page counts it. -->
+            <span class="min-w-0 truncate pb-0.5 font-mono text-xs text-muted" data-hub-saga-played>{{ progress.played }}/{{ progress.total }}</span>
+          }
+        </span>
       } @else {
         <ng-container *ngTemplateOutlet="shareBar; context: { $implicit: sagaSlices() }" />
       }
@@ -116,13 +139,12 @@
       link="/stats/studios"
       [icon]="icons.building"
       [title]="'stats.hub.studios' | translate"
-      [shortTitle]="'stats.hub.studiosShort' | translate"
       [loading]="d === undefined"
       [figure]="d ? d.developer : null"
       [hint]="d ? ('stats.hub.studiosHint' | translate: { hours: (d.hours | hours) }) : ('common.noData' | translate)"
     >
       @if (studioCovers().length) {
-        <app-stats-cover-stack size="xs" [covers]="studioCovers()" />
+        <app-stats-cover-stack size="sm" compactSize="xs" compactBelow="md" [covers]="studioCovers()" />
       } @else {
         <span class="flex h-full flex-col justify-end gap-[3px]">
           @for (bar of studioBars(); track bar.key) {
@@ -130,6 +152,18 @@
           }
         </span>
       }
+    </app-stats-hub-card>
+
+    @let e = eraTeaser();
+    <app-stats-hub-card
+      link="/stats/eras"
+      [icon]="icons.calendarClock"
+      [title]="'stats.hub.eras' | translate"
+      [loading]="e === undefined"
+      [figure]="e ? e.label : null"
+      [hint]="e ? ('stats.hub.erasHint' | translate: { hours: (e.hours | hours) }) : ('common.noData' | translate)"
+    >
+      <ng-container *ngTemplateOutlet="columns; context: { $implicit: decadeBars() }" />
     </app-stats-hub-card>
 
     @let median = medianDays();
@@ -146,6 +180,7 @@
 
     @let r = ratingsTeaser();
     <app-stats-hub-card
+      class="col-span-2"
       link="/stats/ratings"
       [accent]="gold"
       [icon]="icons.star"
@@ -172,5 +207,19 @@
         <span class="bar-fill h-full basis-0" [style.flex-grow]="slice.share" [style.background-color]="slice.color" data-hub-slice></span>
       }
     </span>
+  </span>
+</ng-template>
+
+<!-- Small columns (years, decades): the last one in the full accent, the others muted. -->
+<ng-template #columns let-bars>
+  <span class="flex h-full items-end gap-1">
+    @for (bar of bars; track $index; let last = $last) {
+      <span
+        class="bar-grow min-w-0 flex-1 rounded-t-[3px]"
+        [class]="last ? 'bg-(--hub-accent)' : 'bg-[color-mix(in_srgb,var(--hub-accent)_40%,transparent)]'"
+        [style.height.%]="bar.height"
+        data-hub-column
+      ></span>
+    }
   </span>
 </ng-template>

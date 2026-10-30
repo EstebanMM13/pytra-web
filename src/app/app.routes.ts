@@ -123,6 +123,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/stats/stats-studio').then((m) => m.StatsStudio),
   },
   {
+    path: 'stats/eras',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/stats/stats-eras').then((m) => m.StatsEras),
+  },
+  {
+    path: 'stats/genres',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/stats/stats-genres').then((m) => m.StatsGenres),
+  },
+  {
     path: 'stats/habits',
     canActivate: [authGuard],
     loadComponent: () => import('./features/stats/stats-habits').then((m) => m.StatsHabits),

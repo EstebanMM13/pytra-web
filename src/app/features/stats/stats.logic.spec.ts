@@ -6,6 +6,9 @@ import {
   buildHeatmap,
   byDeveloper,
   coverMap,
+  genreCovers,
+  releaseYearCovers,
+  releaseYearOf,
   developerCovers,
   columnHeights,
   decadeParams,
@@ -444,9 +447,9 @@ describe('topCovers', () => {
   it('keeps the matching games, covered ones first, then most played', () => {
     const games = [game(1, 10, 'a'), game(2, 90, null), game(3, 50, 'c'), game(4, 70, 'd', 'Valve'), game(5, null, 'e')];
     expect(topCovers(games, byDeveloper(' fromsoftware '), 3)).toEqual([
-      { id: 3, name: 'G3', url: 'c' },
-      { id: 1, name: 'G1', url: 'a' },
-      { id: 5, name: 'G5', url: 'e' },
+      { id: 3, name: 'G3', url: 'c', hours: 50 },
+      { id: 1, name: 'G1', url: 'a', hours: 10 },
+      { id: 5, name: 'G5', url: 'e', hours: undefined },
     ]);
   });
 
@@ -498,7 +501,7 @@ describe('developerCovers', () => {
     ];
     const index = developerCovers(games, 4);
     expect(index.get('fromsoftware')!.map((c) => c.id)).toEqual([2, 1]);
-    expect(index.get('supergiant')).toEqual([{ id: 3, name: 'Hades', url: null }]);
+    expect(index.get('supergiant')).toEqual([{ id: 3, name: 'Hades', url: null, hours: 40 }]);
     expect(index.size).toBe(2);
   });
 });
@@ -520,5 +523,37 @@ describe('hoursTrend', () => {
   it('spans every month of a past year and none of a future one', () => {
     expect(hoursTrend(days, 2025, '2026-02-01')).toHaveLength(12);
     expect(hoursTrend(days, 2027, '2026-02-01')).toEqual([]);
+  });
+});
+
+describe('covers per key', () => {
+  const game = (id: number, genres: number[], releaseDate: string | null, totalHours: number | null, cover: string | null = `${id}.jpg`) => ({
+    id,
+    name: `G${id}`,
+    genres: genres.map((g) => ({ id: g, name: `Genre ${g}` })),
+    releaseDate,
+    totalHours,
+    coverImageUrl: cover,
+  });
+
+  it('indexes the covers of every genre in one pass, a game under each of its genres', () => {
+    const index = genreCovers([game(1, [10, 20], null, 5), game(2, [20], null, 50), game(3, [], null, 9)], 4);
+    expect(index.get(10)!.map((c) => c.id)).toEqual([1]);
+    expect(index.get(20)!.map((c) => c.id)).toEqual([2, 1]);
+    expect(index.size).toBe(2);
+  });
+
+  it('keeps the most played game of each release year (ties by the lower id), undated games left out', () => {
+    const covers = releaseYearCovers([game(1, [], '2015-05-19', 10), game(2, [], '2015', 40), game(3, [], '2015-01', 40), game(4, [], null, 99)]);
+    expect(covers.get(2015)).toEqual({ id: 2, name: 'G2', url: '2.jpg', hours: 40 });
+    expect(covers.size).toBe(1);
+  });
+
+  it('reads the year of full and partial dates', () => {
+    expect(releaseYearOf('2001')).toBe(2001);
+    expect(releaseYearOf('2001-05')).toBe(2001);
+    expect(releaseYearOf('2001-05-03')).toBe(2001);
+    expect(releaseYearOf(null)).toBeNull();
+    expect(releaseYearOf('n/a')).toBeNull();
   });
 });

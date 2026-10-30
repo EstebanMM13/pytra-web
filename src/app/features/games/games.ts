@@ -313,7 +313,7 @@ export class Games {
     const { year, days, runHours } = query.play;
     if (year !== null) chips.push({ kind: 'year', id: String(year), label: 'library.filters.yearChip', params: { year } });
     if (query.decade !== null) {
-      chips.push({ kind: 'decade', id: String(query.decade), label: 'stats.studios.decade', params: decadeParams(query.decade) });
+      chips.push({ kind: 'decade', id: String(query.decade), label: 'stats.decadeLabel', params: decadeParams(query.decade) });
     }
     if (days) {
       const label = days.max === null ? 'library.filters.daysChipOpen' : 'library.filters.daysChip';

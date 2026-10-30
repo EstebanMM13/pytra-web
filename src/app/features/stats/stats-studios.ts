@@ -1,8 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
-import { combineLatest, map } from 'rxjs';
 import {
   DEVELOPER_MIN_RATED_GAMES,
   DEVELOPER_RANKING_LIMIT,
@@ -16,25 +13,20 @@ import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { ratingTone } from '../../shared/utils/rating-tone';
 import { STATS_LIST_PREVIEW, StatsBar, StatsBarList } from './stats-bar-list';
-import { StatsColumn, StatsColumnChart } from './stats-column-chart';
-import { MAX_STACK_COVERS, StatsCoverStack } from './stats-cover-stack';
+import { MAX_STACK_COVERS } from './stats-cover-stack';
 import { statsFormat } from './stats-format';
-import { StatsHero } from './stats-hero';
 import { statsLibrary } from './stats-library';
 import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 import { statsSection } from './stats-section';
+import { StatsSpotlight } from './stats-spotlight';
 import {
   CoverRef,
-  GAMES_LINK,
-  decadeParams,
   developerCovers,
   developerKey,
-  gamesLinkParams,
   joinParts,
   ratingShare,
   shares,
-  trimEmptyEnds,
   withArt,
 } from './stats.logic';
 
@@ -49,28 +41,24 @@ const RANKING_OPTIONS: readonly SegmentedOption<DeveloperRanking>[] = [
 const STUDIO_LINK: readonly string[] = ['/stats/studio'];
 
 /**
- * Studios & eras section (`/stats/studios`, all time): the first studio of the picked ranking as a
- * hero card, top developers by hours or by rating (only those with enough rated games; each opens
- * its studio page) and a histogram of games per release decade (each column opens the library on
- * that decade).
+ * Studios section (`/stats/studios`, all time): the first studio of the picked ranking as a hero
+ * card (its games' covers and, on wide screens, its most played games), and the top developers by
+ * hours or by rating (only those with enough rated games). Each studio opens its studio page.
+ * Release decades live in their own section (`/stats/eras`).
  */
 @Component({
   selector: 'app-stats-studios',
   imports: [
     Navbar,
-    RouterLink,
-    LucideDynamicIcon,
     TranslatePipe,
     TranslatePluralPipe,
     SectionHeader,
     Segmented,
     Skeleton,
     StatsBarList,
-    StatsColumnChart,
-    StatsCoverStack,
-    StatsHero,
     StatsLoadError,
     StatsPageHeader,
+    StatsSpotlight,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './stats-studios.html',
@@ -86,13 +74,8 @@ export class StatsStudios {
 
   // All-time data: the year param is ignored.
   protected readonly section = statsSection(() =>
-    combineLatest([
-      // Same parameters as the hub teaser: one shared cache entry.
-      this.stats.getByDeveloper(DEVELOPER_RANKING_LIMIT, DEVELOPER_MIN_RATED_GAMES),
-      this.stats.getByReleaseEra(),
-    ]).pipe(
-      map(([developers, eras]) => ({ developers, eras })),
-    ),
+    // Same parameters as the hub teaser: one shared cache entry.
+    this.stats.getByDeveloper(DEVELOPER_RANKING_LIMIT, DEVELOPER_MIN_RATED_GAMES),
   );
   protected readonly state = this.section.state;
   private readonly library = statsLibrary();
@@ -109,7 +92,7 @@ export class StatsStudios {
 
   /** The picked ranking's developers (by hours, or by rating among those with enough rated games). */
   private readonly ranked = computed(() => {
-    const developers = this.state().data?.developers;
+    const developers = this.state().data;
     if (!developers) return [];
     return this.ranking() === 'hours' ? developers.topByHours : developers.topByRating;
   });
@@ -152,24 +135,5 @@ export class StatsStudios {
           ])
         : joinParts([format.plural('stats.studios.rated', top.ratedGameCount), format.hours(top.hours)]),
     };
-  });
-
-  /** Games per release decade, from the first to the last decade with games. */
-  protected readonly decadeColumns = computed<StatsColumn[]>(() => {
-    const decades = trimEmptyEnds(this.state().data?.eras.byDecade ?? [], (d) => d.gameCount);
-    const f = this.format;
-    return decades.map((d) => ({
-      key: d.decade,
-      label: String(d.decade),
-      value: d.gameCount,
-      figure: String(d.gameCount),
-      title: joinParts([
-        `${f.text('stats.studios.decade', decadeParams(d.decade))}: ${f.plural('common.games', d.gameCount)}`,
-        d.gameCount > 0 ? f.hours(d.hours) : null,
-        d.averageRating !== null ? f.text('stats.platforms.average', { rating: f.rating(d.averageRating) }) : null,
-      ]),
-      link: d.gameCount > 0 ? GAMES_LINK : null,
-      queryParams: gamesLinkParams({ decade: d.decade }),
-    }));
   });
 }

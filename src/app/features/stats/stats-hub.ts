@@ -10,6 +10,7 @@ import {
   StatsService,
 } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
+import { formatGenreName } from '../../shared/pipes/genre-name.pipe';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
@@ -19,13 +20,16 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { todayIso } from '../../shared/utils/run-dates';
 import { DIARY_LEVEL_CLASS } from '../diary/diary.logic';
 import { MAX_STACK_COVERS, StatsCoverStack } from './stats-cover-stack';
+import { topDecade } from './stats-eras.logic';
 import { StatsEyebrow } from './stats-eyebrow';
 import { statsFormat } from './stats-format';
+import { genreProfiles, genreShareBase, inGenre } from './stats-genres.logic';
 import { STATS_HERO_RADIUS, StatsHero } from './stats-hero';
 import { StatsHubCard } from './stats-hub-card';
 import { statsLibrary } from './stats-library';
 import { STATS_BRAND, STATS_BRAND_MUTED, STATS_GOLD } from './stats-palette';
 import { StatsPill } from './stats-pill';
+import { sagaProgress } from './stats-sagas.logic';
 import {
   byDeveloper,
   columnHeights,
@@ -37,12 +41,20 @@ import {
   shareSlices,
   shares,
   topCovers,
+  decadeParams,
+  percentFormat,
   totalHours,
+  trimEmptyEnds,
   withArt,
 } from './stats.logic';
 
-/** Days of the activity card's strip (five weeks). */
-const ACTIVITY_STRIP_DAYS = 35;
+/**
+ * Days drawn in the activity card's strip: fixed-size cells right-aligned, so a wider card shows
+ * more of the most recent days and the oldest are clipped. Enough to fill the widest strip (the
+ * full-width card of a tablet, about nine weeks); a phone and the half-row desktop card show
+ * about four weeks.
+ */
+const ACTIVITY_STRIP_DAYS = 70;
 /** Years of the years card's bars. */
 const YEAR_BARS = 8;
 /** Shortest drawn bar (percent) of the years and ratings teasers, so a small count still shows. */
@@ -132,6 +144,8 @@ export class StatsHub {
   );
   protected readonly completion = teaser(() => this.stats.getCompletion());
   private readonly ratings = teaser(() => this.stats.getRatings());
+  private readonly byGenre = teaser(() => this.stats.getByGenre());
+  private readonly eras = teaser(() => this.stats.getByReleaseEra());
   private readonly today = todayIso();
   private readonly library = statsLibrary();
 
@@ -161,6 +175,47 @@ export class StatsHub {
       ].filter((pill): pill is string => pill !== null),
       covers: withArt(topCovers(games, (g) => (g.totalHours ?? 0) > 0, MAX_STACK_COVERS)),
     };
+  });
+
+  /** The most played genre and its share of all the hours (genres overlap: a share, not a slice). */
+  protected readonly topGenre = computed(() => {
+    const genres = this.byGenre();
+    if (genres === undefined) return undefined;
+    // The genres section's ranking and share base, so the hub and the section agree.
+    const base = genreShareBase(this.library(), this.byYear() ?? []);
+    const top = genreProfiles(genres ?? [], [], [], base, formatGenreName)[0];
+    if (!top || top.hours <= 0) return null;
+    return {
+      ...top,
+      percent: base > 0 ? percentFormat(this.format.locale())(top.share) : null,
+      covers: withArt(topCovers(this.library() ?? [], inGenre(top.genreId), MAX_STACK_COVERS)),
+    };
+  });
+
+  /** Hours of the most played genres, shaded from the accent down. */
+  protected readonly genreSlices = computed(() =>
+    accentSlices((this.byGenre() ?? []).map((g) => ({ key: g.genreId, value: g.totalHours }))),
+  );
+
+  /** The release decade with the most hours, and every decade with games as small columns. */
+  protected readonly eraTeaser = computed(() => {
+    const eras = this.eras();
+    if (eras === undefined) return undefined;
+    const top = eras ? topDecade(eras.byDecade) : null;
+    return top ? { ...top, label: this.format.text('stats.decadeLabel', decadeParams(top.decade)) } : null;
+  });
+  protected readonly decadeBars = computed(() => {
+    const decades = trimEmptyEnds(this.eras()?.byDecade ?? [], (d) => d.gameCount);
+    const heights = columnHeights(decades.map((d) => d.hours), YEAR_MIN_BAR_PERCENT);
+    return decades.map((d, i) => ({ decade: d.decade, height: heights[i] }));
+  });
+
+  /** The most played saga's progress (games played of its games), from the library. */
+  protected readonly sagaPlayed = computed(() => {
+    const top = this.sagas()?.top;
+    const games = this.library();
+    if (!top || !games) return null;
+    return sagaProgress(games).find((s) => s.sagaId === top.sagaId) ?? null;
   });
 
   /** Covers of the most played saga's games (from the cached library). */

@@ -584,6 +584,8 @@ export interface CoverRef {
   id: number;
   name: string;
   url: string | null;
+  /** The game's hours (run + online) as the library lists them; absent when unknown. */
+  hours?: number;
 }
 
 /** The library fields the covers need. */
@@ -596,9 +598,9 @@ export type CoverSource = Pick<Game, 'id' | 'name' | 'coverImageUrl' | 'totalHou
 export function topCovers<T extends CoverSource>(games: readonly T[], match: (game: T) => boolean, limit: number): CoverRef[] {
   return games
     .filter(match)
-    .sort((a, b) => Number(!a.coverImageUrl) - Number(!b.coverImageUrl) || (b.totalHours ?? 0) - (a.totalHours ?? 0))
+    .sort((a, b) => Number(!a.coverImageUrl) - Number(!b.coverImageUrl) || (b.totalHours ?? 0) - (a.totalHours ?? 0) || a.id - b.id)
     .slice(0, limit)
-    .map((game) => ({ id: game.id, name: game.name, url: game.coverImageUrl }));
+    .map((game) => ({ id: game.id, name: game.name, url: game.coverImageUrl, hours: game.totalHours ?? undefined }));
 }
 
 /** A developer name as the covers match it: case and surrounding spaces ignored. */
@@ -613,22 +615,59 @@ export function byDeveloper(developer: string): (game: Pick<Game, 'developer'>) 
 }
 
 /**
- * Covers per developer (keyed by `developerKey`), each list as `topCovers` orders it, at most
- * `limit`: one pass over the library for a whole studio ranking.
+ * Covers grouped by key in one pass over the library (a game under every key `keysOf` gives it,
+ * none skips it), each list as `topCovers` orders it, at most `limit`: one map per library list
+ * for a whole ranking instead of a scan per row.
  */
+export function coversBy<T extends CoverSource, K>(
+  games: readonly T[],
+  keysOf: (game: T) => readonly K[],
+  limit: number,
+): Map<K, CoverRef[]> {
+  const groups = new Map<K, T[]>();
+  for (const game of games) {
+    for (const key of keysOf(game)) {
+      const group = groups.get(key) ?? [];
+      group.push(game);
+      groups.set(key, group);
+    }
+  }
+  return new Map([...groups].map(([key, group]) => [key, topCovers(group, () => true, limit)]));
+}
+
+/** Covers per developer, keyed by `developerKey` (games without a developer left out). */
 export function developerCovers<T extends CoverSource & Pick<Game, 'developer'>>(
   games: readonly T[],
   limit: number,
 ): Map<string, CoverRef[]> {
-  const groups = new Map<string, T[]>();
-  for (const game of games) {
+  return coversBy(games, (game) => {
     const key = developerKey(game.developer);
-    if (!key) continue;
-    const group = groups.get(key) ?? [];
-    group.push(game);
-    groups.set(key, group);
+    return key ? [key] : [];
+  }, limit);
+}
+
+/** Covers per genre id (a game under each of its genres). */
+export function genreCovers<T extends CoverSource & Pick<Game, 'genres'>>(games: readonly T[], limit: number): Map<number, CoverRef[]> {
+  return coversBy(games, (game) => (game.genres ?? []).map((genre) => genre.id), limit);
+}
+
+/** The most played game's cover per release year (one pass; ties go to the lower id). */
+export function releaseYearCovers<T extends CoverSource & Pick<Game, 'releaseDate'>>(games: readonly T[]): Map<number, CoverRef> {
+  const best = new Map<number, T>();
+  for (const game of games) {
+    const year = releaseYearOf(game.releaseDate);
+    if (year === null) continue;
+    const current = best.get(year);
+    const hours = (g: T) => g.totalHours ?? 0;
+    if (!current || hours(game) > hours(current) || (hours(game) === hours(current) && game.id < current.id)) best.set(year, game);
   }
-  return new Map([...groups].map(([key, group]) => [key, topCovers(group, () => true, limit)]));
+  return new Map([...best].map(([year, game]) => [year, { id: game.id, name: game.name, url: game.coverImageUrl, hours: game.totalHours ?? undefined }]));
+}
+
+/** The year of a `YYYY`, `YYYY-MM` or `YYYY-MM-DD` date, null without one. */
+export function releaseYearOf(date: string | null | undefined): number | null {
+  const match = /^(\d{4})/.exec(date ?? '');
+  return match ? Number(match[1]) : null;
 }
 
 /** The covers when at least one has art, else none (a stack of initials only adds noise). */

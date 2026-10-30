@@ -1,0 +1,104 @@
+<app-navbar />
+
+<main class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-4 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
+  <app-stats-page-header
+    [title]="'stats.eras.heading.lead' | translate"
+    [highlight]="'stats.eras.heading.key' | translate"
+    [eyebrow]="'stats.allTime' | translate"
+    [subtitle]="'stats.eras.subtitle' | translate"
+  />
+
+  @let s = state();
+  @if (s.data; as eras) {
+    @if (top(); as t) {
+      <app-stats-spotlight
+        [link]="gamesLink"
+        [queryParams]="t.queryParams"
+        [label]="'stats.eras.top' | translate"
+        [name]="t.label"
+        [meta]="t.meta"
+        [covers]="t.covers"
+        [pending]="coversPending()"
+        [icon]="icons.calendarClock"
+        data-top-decade
+      >
+        <span class="font-mono text-2xl leading-none font-bold tracking-[-0.03em] text-brand-light md:text-4xl">{{ t.hours | hours }}</span>
+      </app-stats-spotlight>
+    }
+
+    <!--
+      Two columns from lg: the decades and the callouts under them beside the (longer) release-year
+      list, so neither column leaves a stretched empty card.
+    -->
+    <div class="grid grid-cols-1 items-start gap-4 md:gap-5 lg:grid-cols-2">
+      <div class="flex flex-col gap-4 md:gap-5">
+        <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+          <app-section-header class="mb-3" [label]="'stats.eras.decades' | translate" />
+          @if (decadeColumns().length) {
+            <app-stats-column-chart [columns]="decadeColumns()" data-decades />
+            <!-- Each decade's figures under the chart, newest first. -->
+            <table class="mt-4 w-full text-sm" data-decade-table>
+              <thead class="text-left text-xs text-faint">
+                <tr>
+                  <th class="pb-1.5 font-normal">{{ 'stats.eras.columns.decade' | translate }}</th>
+                  <th class="pb-1.5 text-right font-normal">{{ 'stats.eras.columns.games' | translate }}</th>
+                  <th class="pb-1.5 text-right font-normal">{{ 'stats.eras.columns.hours' | translate }}</th>
+                  <th class="pb-1.5 text-right font-normal">{{ 'stats.eras.columns.rating' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (d of decadeRows(); track d.decade) {
+                  <tr class="border-t border-divider">
+                    <td class="py-2 text-text-2">{{ d.label }}</td>
+                    <td class="py-2 text-right font-mono">{{ d.gameCount }}</td>
+                    <td class="py-2 text-right font-mono">{{ d.hours | hours }}</td>
+                    <td class="py-2 text-right font-mono" [class]="d.ratingClass">{{ d.rating }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="py-6 text-center text-sm text-muted">{{ 'stats.eras.noDecades' | translate }}</p>
+          }
+          @if (eras.undatedGameCount > 0) {
+            <p class="mt-3 text-xs text-faint">{{ 'stats.eras.undated' | translatePlural: eras.undatedGameCount }}</p>
+          }
+        </section>
+
+        @if (callouts().length) {
+          <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 md:gap-3 lg:grid-cols-1" data-era-callouts>
+            @for (c of callouts(); track c.key) {
+              <app-stats-callout
+                [link]="c.link"
+                [queryParams]="c.queryParams"
+                [label]="c.label | translate"
+                [name]="c.name"
+                [covers]="c.covers"
+                [figureClass]="c.figureClass"
+                [attr.data-era-callout]="c.key"
+                >{{ c.figure }}</app-stats-callout
+              >
+            }
+          </div>
+        }
+      </div>
+
+      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+        <app-section-header class="mb-3" [label]="'stats.eras.years' | translate" />
+        @if (yearRows().length) {
+          <app-stats-bar-list [bars]="yearRows()" [limit]="preview" ranked data-release-years />
+        } @else {
+          <p class="py-6 text-center text-sm text-muted">{{ 'stats.eras.noYears' | translate }}</p>
+        }
+      </section>
+    </div>
+  } @else if (s.failed) {
+    <app-stats-load-error (retry)="section.retry()" />
+  } @else {
+    <app-skeleton class="h-[132px] md:h-[150px]" [class]="heroRadius" />
+    <div class="grid grid-cols-1 items-start gap-4 md:gap-5 lg:grid-cols-2">
+      <app-skeleton class="h-[320px] rounded-[14px]" />
+      <app-skeleton class="h-[320px] rounded-[14px]" />
+    </div>
+  }
+</main>

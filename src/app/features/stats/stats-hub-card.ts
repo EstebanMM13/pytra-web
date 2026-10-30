@@ -11,7 +11,7 @@ const MIN_FIGURE_PX = 14;
 
 /**
  * A stats hub entry, the whole card linking to the section: the section's icon in a badge of its
- * accent colour and its name (a short name on phones), a teaser figure, a hint and a small visual
+ * accent colour and its name (a short name when the card is narrow), a teaser figure, a hint and a small visual
  * (projected content) pinned to the bottom. Every part keeps a fixed number of lines (one for the
  * name and the figure, which shrinks with the card width rather than wrapping; two reserved for
  * the hint) and the visual a fixed height, so the cards of a row line up on a 360px phone.
@@ -36,8 +36,9 @@ const MIN_FIGURE_PX = 14;
           <svg [lucideIcon]="icon()" [size]="16"></svg>
         </span>
         @if (shortTitle(); as short) {
-          <span class="min-w-0 flex-1 truncate sm:hidden" [attr.title]="title()">{{ short }}</span>
-          <span class="hidden min-w-0 flex-1 truncate sm:inline">{{ title() }}</span>
+          <!-- A container query on the card: the short name below 15rem of content width (half a phone row, a quarter of the desktop row). -->
+          <span class="min-w-0 flex-1 truncate @[15rem]:hidden" [attr.title]="title()">{{ short }}</span>
+          <span class="hidden min-w-0 flex-1 truncate @[15rem]:inline">{{ title() }}</span>
         } @else {
           <span class="min-w-0 flex-1 truncate">{{ title() }}</span>
         }
@@ -47,7 +48,7 @@ const MIN_FIGURE_PX = 14;
       @if (loading()) {
         <app-skeleton class="mt-3 h-7 w-20 rounded-md" />
         <app-skeleton class="mt-1.5 h-3.5 w-28 rounded" />
-        <app-skeleton class="mt-auto h-9 w-full rounded-md md:h-11" />
+        <app-skeleton class="mt-auto h-9 w-full rounded-md md:h-14" />
       } @else {
         <span
           class="mt-3 block h-7 overflow-hidden leading-7 font-bold tracking-[-0.02em] text-ellipsis whitespace-nowrap md:h-8 md:leading-8"
@@ -58,7 +59,7 @@ const MIN_FIGURE_PX = 14;
           >{{ figure() ?? '—' }}</span
         >
         <span class="mt-0.5 line-clamp-2 min-h-[2lh] text-xs leading-snug wrap-break-word text-muted">{{ hint() }}</span>
-        <span class="mt-auto block h-[42px] pt-1.5 md:h-11 md:pt-2" aria-hidden="true" data-hub-visual>
+        <span class="mt-auto block h-[42px] pt-1.5 md:h-14 md:pt-2" aria-hidden="true" data-hub-visual>
           <ng-content />
         </span>
       }
@@ -70,7 +71,7 @@ export class StatsHubCard {
   readonly link = input.required<string>();
   readonly icon = input.required<LucideIconInput>();
   readonly title = input.required<string>();
-  /** Shown instead of `title` on phones (< sm), where two cards share a row. */
+  /** Shown instead of `title` when the card is narrow (half a phone row, a quarter of a desktop one). */
   readonly shortTitle = input<string | null>(null);
   /** The section's colour (a CSS colour, e.g. `var(--pt-gold)`): icon badge and teaser visual. */
   readonly accent = input(STATS_BRAND);

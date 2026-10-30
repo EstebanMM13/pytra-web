@@ -9,77 +9,44 @@
   />
 
   @let s = state();
-  @if (s.data; as data) {
+  @if (s.data; as developers) {
     @if (topStudio(); as top) {
-      <!-- Hero: the first studio of the picked ranking over its most played game's blurred cover,
-           a stack of its games' covers (from the cached library), opening its studio page. -->
-      <app-stats-hero [backdrop]="top.covers[0]?.url ?? null" [watermark]="top.covers.length ? null : icons.building">
-        <a
-          [routerLink]="studioLink"
-          [queryParams]="{ name: top.name }"
-          class="flex min-w-0 items-center gap-3.5 p-[18px] hover:bg-hover/30 md:gap-5 md:p-[22px]"
-          data-top-studio
-        >
-          @if (top.covers.length || coversPending()) {
-            <app-stats-cover-stack size="md" compactSize="sm" compactBelow="md" [covers]="top.covers" [pending]="coversPending()" />
-          } @else {
-            <span
-              class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-tint text-brand-light md:size-14"
-              aria-hidden="true"
-            >
-              <svg [lucideIcon]="icons.building" [size]="22"></svg>
-            </span>
-          }
-          <span class="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span class="text-xs text-text-3">{{ (ranking() === 'rating' ? 'stats.studios.topByRating' : 'stats.studios.topByHours') | translate }}</span>
-            <span class="font-display text-xl leading-tight font-bold tracking-[-0.02em] wrap-break-word md:text-2xl" data-top-studio-name>{{
-              top.name
-            }}</span>
-            <span class="text-xs text-muted">{{ top.meta }}</span>
-          </span>
-          <span class="shrink-0 font-mono text-xl font-bold md:text-2xl" [class]="top.figureClass">{{ top.figure }}</span>
-          <svg [lucideIcon]="icons.chevronRight" [size]="18" class="-mr-1 hidden shrink-0 text-faint sm:block" aria-hidden="true"></svg>
-        </a>
-      </app-stats-hero>
+      <!-- The first studio of the picked ranking, opening its studio page. -->
+      <app-stats-spotlight
+        [link]="studioLink"
+        [queryParams]="{ name: top.name }"
+        [label]="(ranking() === 'rating' ? 'stats.studios.topByRating' : 'stats.studios.topByHours') | translate"
+        [name]="top.name"
+        [meta]="top.meta"
+        [covers]="top.covers"
+        [pending]="coversPending()"
+        [icon]="icons.building"
+        data-top-studio
+      >
+        <span class="font-mono text-2xl leading-none font-bold md:text-4xl" [class]="top.figureClass">{{ top.figure }}</span>
+      </app-stats-spotlight>
     }
 
-    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header class="mb-3" [label]="'stats.studios.developers' | translate" />
-        <app-segmented class="mb-3" stretch [options]="rankingOptions" [(value)]="ranking" data-ranking />
-        @if (ranking() === 'rating') {
-          <p class="mb-2 text-xs text-faint" data-threshold>
-            {{ 'stats.studios.threshold' | translatePlural: data.developers.minRatedGames }}
-          </p>
-        }
-        @if (developerRows().length) {
-          <app-stats-bar-list [bars]="developerRows()" [limit]="preview" [tone]="ranking() === 'rating' ? 'gold' : 'brand'" ranked data-developers />
-        } @else {
-          <p class="py-6 text-center text-sm text-muted">
-            {{ (ranking() === 'rating' ? 'stats.studios.noRated' : 'stats.studios.empty') | translate }}
-          </p>
-        }
-      </section>
-
-      <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-        <app-section-header class="mb-3" [label]="'stats.studios.decades' | translate" />
-        @if (decadeColumns().length) {
-          <app-stats-column-chart [columns]="decadeColumns()" data-decades />
-        } @else {
-          <p class="py-6 text-center text-sm text-muted">{{ 'stats.studios.noDecades' | translate }}</p>
-        }
-        @if (data.eras.undatedGameCount > 0) {
-          <p class="mt-3 text-xs text-faint">{{ 'stats.studios.undated' | translatePlural: data.eras.undatedGameCount }}</p>
-        }
-      </section>
-    </div>
+    <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+      <app-section-header class="mb-3" [label]="'stats.studios.developers' | translate" />
+      <app-segmented class="mb-3" stretch [options]="rankingOptions" [(value)]="ranking" data-ranking />
+      @if (ranking() === 'rating') {
+        <p class="mb-2 text-xs text-faint" data-threshold>
+          {{ 'stats.studios.threshold' | translatePlural: developers.minRatedGames }}
+        </p>
+      }
+      @if (developerRows().length) {
+        <app-stats-bar-list [bars]="developerRows()" [limit]="preview" [tone]="ranking() === 'rating' ? 'gold' : 'brand'" ranked data-developers />
+      } @else {
+        <p class="py-6 text-center text-sm text-muted">
+          {{ (ranking() === 'rating' ? 'stats.studios.noRated' : 'stats.studios.empty') | translate }}
+        </p>
+      }
+    </section>
   } @else if (s.failed) {
     <app-stats-load-error (retry)="section.retry()" />
   } @else {
     <app-skeleton class="h-[88px] rounded-[14px] md:h-[102px]" />
-    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
-      <app-skeleton class="h-[320px] rounded-[14px]" />
-      <app-skeleton class="h-[320px] rounded-[14px]" />
-    </div>
+    <app-skeleton class="h-[420px] rounded-[14px]" />
   }
 </main>

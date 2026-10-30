@@ -38,7 +38,7 @@
       </app-stats-hero>
     }
 
-    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
+    <div class="grid grid-cols-1 items-start gap-4 md:gap-5 lg:grid-cols-2">
       <!-- In a year the yearly stack is meaningless: the list takes the whole row. -->
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]" [class]="s.year !== null ? 'lg:col-span-2' : ''">
         <app-section-header class="mb-3" [label]="'stats.platforms.list' | translate" />
@@ -102,7 +102,7 @@
     <app-stats-load-error (retry)="section.retry()" />
   } @else {
     <app-skeleton class="h-[200px] rounded-[14px] md:h-[240px]" />
-    <div class="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
+    <div class="grid grid-cols-1 items-start gap-4 md:gap-5 lg:grid-cols-2">
       <app-skeleton class="h-[320px] rounded-[14px]" />
       <app-skeleton class="h-[320px] rounded-[14px]" />
     </div>
