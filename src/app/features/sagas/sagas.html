@@ -28,17 +28,21 @@
 
     @if (!loading() && !loadError() && insights(); as ins) {
       <!-- Overview: the sagas' progress at a glance, set apart from the list under it (collapsible). -->
-      <section class="mb-2 flex flex-col gap-2.5 border-b border-divider pb-4 md:mx-2" data-saga-insights>
+      <!-- shrink-0 (as the search and sort below): the web column has a capped height and would squash them. -->
+      <section
+        class="mb-2 flex shrink-0 flex-col gap-3.5 rounded-xl border border-card-border card-glass p-4 md:mx-2"
+        data-saga-insights
+      >
         <app-section-header collapseKey="sagas.insights" [label]="'sagas.insights.title' | translate" />
         <!-- One stacked bar of the sagas by progress, its legend under it (fits the narrow list column). -->
-        <div class="flex h-2 gap-px overflow-hidden rounded-full bg-hover" aria-hidden="true">
+        <div class="flex h-2.5 gap-0.5 overflow-hidden rounded-full bg-hover" aria-hidden="true">
           @for (count of ins.counts; track count.key) {
             @if (count.value) {
               <span class="bar-fill h-full" [class]="count.color" [style.width.%]="count.width"></span>
             }
           }
         </div>
-        <ul class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-3">
+        <ul class="-mt-1 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-text-3">
           @for (count of ins.counts; track count.key) {
             <li class="flex items-center gap-1.5" [attr.data-saga-count]="count.key">
               <span class="size-2 shrink-0 rounded-full" [class]="count.color" aria-hidden="true"></span>
@@ -48,9 +52,10 @@
           }
         </ul>
         @if (ins.picks.length) {
-          <div class="-mb-1 flex flex-col">
+          <div class="-my-1 flex flex-col divide-y divide-divider border-t border-divider pt-1">
             @for (pick of ins.picks; track pick.key) {
               <app-stats-callout
+                class="py-1"
                 variant="row"
                 [link]="pick.link"
                 [label]="pick.label | translate"
@@ -68,7 +73,7 @@
     @if (!loading() && summaries().length > 1) {
       <!-- Search: the library's pill input, full width above the sort (the column is too narrow for both in a row) -->
       <label
-        class="flex h-11 min-w-0 items-center gap-2 rounded-full border border-border bg-surface px-4 text-faint focus-within:border-brand-light md:mx-2 md:h-9 md:px-3.5"
+        class="flex h-11 min-w-0 shrink-0 items-center gap-2 rounded-full border border-border bg-surface px-4 text-faint focus-within:border-brand-light md:mx-2 md:h-9 md:px-3.5"
       >
         <svg [lucideIcon]="icons.search" [size]="15" class="shrink-0" aria-hidden="true"></svg>
         <input
@@ -82,7 +87,7 @@
         />
       </label>
       <app-dropdown
-        class="-mt-1 mb-1 self-start md:mx-2"
+        class="-mt-1 mb-1 shrink-0 self-start md:mx-2"
         [options]="sortOptions"
         [value]="sort()"
         (valueChange)="setSort($event)"
