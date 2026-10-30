@@ -89,7 +89,8 @@ describe('Sagas search', () => {
   it('sums up the sagas above the list, set apart from it', () => {
     const { el } = setup();
     const overview = el.querySelector('[data-saga-insights]')!;
-    expect(overview.querySelector('app-stat-strip')).not.toBeNull();
+    // A stacked progress bar with its legend, not a row of tiles cut in the narrow column.
+    expect(overview.querySelector('app-stat-strip')).toBeNull();
     expect(overview.querySelector('[data-saga-count="notStarted"]')!.textContent).toContain('3');
     expect(overview.querySelector('[data-saga-count="complete"]')!.textContent).toContain('0');
     // Nothing played yet: no saga is closest to completion or has hours.

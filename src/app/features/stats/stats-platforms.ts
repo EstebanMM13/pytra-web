@@ -84,9 +84,7 @@ export class StatsPlatforms {
       sub: joinParts([
         // Games, as the library lists them once the row is tapped.
         p.gameCount > 0 ? f.plural('common.games', p.gameCount) : null,
-        p.runCount > 0 ? f.plural('stats.runs', p.runCount) : null,
         p.completedRunCount > 0 ? f.plural('stats.platforms.completed', p.completedRunCount) : null,
-        p.onlineHours > 0 ? f.text('stats.platforms.online', { hours: f.hours(p.onlineHours) }) : null,
         p.averageRating !== null ? f.text('stats.platforms.average', { rating: f.rating(p.averageRating) }) : null,
       ]),
     }));

@@ -89,6 +89,15 @@ describe('Stats platforms page', () => {
     expect(hrefs).toEqual(['/games?platform=1&year=2026', '/games?platform=2&year=2026']);
   });
 
+  it('keeps each platform row to its games, finished runs and average rating', () => {
+    const { el } = setup();
+    const sub = el.querySelector('[data-platform-list] [data-bar-row] [data-bar-sub]')!.textContent!;
+    expect(sub).toContain('stats.platforms.completed');
+    expect(sub).toContain('stats.platforms.average');
+    expect(sub).not.toContain('stats.runs');
+    expect(sub).not.toContain('stats.platforms.online');
+  });
+
   it('colours a platform sharing its family colour with a shade of it', () => {
     const { el } = setup();
     const dot = el.querySelector<HTMLElement>('[data-platform-list] [data-bar-row] span[aria-hidden="true"].rounded-full')!;

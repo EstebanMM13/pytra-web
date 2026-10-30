@@ -30,13 +30,25 @@
       <!-- Overview: the sagas' progress at a glance, set apart from the list under it (collapsible). -->
       <section class="mb-2 flex flex-col gap-2.5 border-b border-divider pb-4 md:mx-2" data-saga-insights>
         <app-section-header collapseKey="sagas.insights" [label]="'sagas.insights.title' | translate" />
-        <app-stat-strip class="grid-cols-3">
+        <!-- One stacked bar of the sagas by progress, its legend under it (fits the narrow list column). -->
+        <div class="flex h-2 gap-px overflow-hidden rounded-full bg-hover" aria-hidden="true">
           @for (count of ins.counts; track count.key) {
-            <app-stat-card centered [icon]="count.icon" [label]="count.label | translate" [value]="count.value" [attr.data-saga-count]="count.key" />
+            @if (count.value) {
+              <span class="bar-fill h-full" [class]="count.color" [style.width.%]="count.width"></span>
+            }
           }
-        </app-stat-strip>
+        </div>
+        <ul class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-3">
+          @for (count of ins.counts; track count.key) {
+            <li class="flex items-center gap-1.5" [attr.data-saga-count]="count.key">
+              <span class="size-2 shrink-0 rounded-full" [class]="count.color" aria-hidden="true"></span>
+              <span class="font-mono font-semibold text-text">{{ count.value }}</span>
+              {{ count.label | translate }}
+            </li>
+          }
+        </ul>
         @if (ins.picks.length) {
-          <div class="flex flex-col">
+          <div class="-mb-1 flex flex-col">
             @for (pick of ins.picks; track pick.key) {
               <app-stats-callout
                 variant="row"

@@ -129,7 +129,7 @@ export const STATS_LIST_PREVIEW = 6;
         ></span>
       </span>
       @if (bar.sub) {
-        <span class="mt-1 block text-xs text-faint">{{ bar.sub }}</span>
+        <span class="mt-1.5 block text-xs text-faint" data-bar-sub>{{ bar.sub }}</span>
       }
     </ng-template>
   `,

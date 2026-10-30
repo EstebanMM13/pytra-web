@@ -21,7 +21,6 @@ import { StatCard } from '../../shared/ui/stat-card';
 import { StatStrip } from '../../shared/ui/stat-strip';
 import { StatsBackLink } from '../stats/stats-back-link';
 import { StatsCallout } from '../stats/stats-callout';
-import { MAX_STACK_COVERS } from '../stats/stats-cover-stack';
 import { statsFormat } from '../stats/stats-format';
 import { sagaInsights } from '../stats/stats-sagas.logic';
 import { topCovers, withArt } from '../stats/stats.logic';
@@ -156,13 +155,13 @@ export class Sagas {
       summaries.map((s) => ({ sagaId: s.saga.id, name: s.saga.name, played: s.played, total: s.total, hours: s.hours })),
     );
     const games = this.games();
-    const covers = (sagaId: number) => withArt(topCovers(games, (g) => g.sagaId === sagaId, MAX_STACK_COVERS));
+    const covers = (sagaId: number) => withArt(topCovers(games, (g) => g.sagaId === sagaId, 1));
     return {
       counts: [
-        { key: 'complete', label: 'sagas.insights.complete', value: insights.complete, icon: this.icons.circleCheck },
-        { key: 'inProgress', label: 'sagas.insights.inProgress', value: insights.inProgress, icon: this.icons.gamepad2 },
-        { key: 'notStarted', label: 'sagas.insights.notStarted', value: insights.notStarted, icon: this.icons.hourglass },
-      ],
+        { key: 'complete', label: 'sagas.insights.complete', value: insights.complete, color: 'bg-brand-light' },
+        { key: 'inProgress', label: 'sagas.insights.inProgress', value: insights.inProgress, color: 'bg-brand-light/45' },
+        { key: 'notStarted', label: 'sagas.insights.notStarted', value: insights.notStarted, color: 'bg-border-strong' },
+      ].map((count) => ({ ...count, width: (count.value / summaries.length) * 100 })),
       picks: [
         insights.closest && {
           key: 'closest',
