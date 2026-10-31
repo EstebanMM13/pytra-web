@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Params } from '@angular/router';
 import { StatsBackLink } from './stats-back-link';
 import { StatsEyebrow } from './stats-eyebrow';
 
@@ -15,7 +16,7 @@ import { StatsEyebrow } from './stats-eyebrow';
   host: { class: 'flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between' },
   template: `
     <div class="min-w-0">
-      <app-stats-back-link [link]="backLink()" [label]="backLabel()" [aria]="backAria()" />
+      <app-stats-back-link [link]="backLink()" [queryParams]="backQueryParams()" [label]="backLabel()" [aria]="backAria()" />
       @if (eyebrow(); as text) {
         <app-stats-eyebrow class="mt-3 mb-1" data-stats-eyebrow>{{ text }}</app-stats-eyebrow>
       }
@@ -44,6 +45,7 @@ export class StatsPageHeader {
   readonly subtitle = input<string | null>(null);
   /** Where the back link goes (the hub by default; a section from its detail pages). */
   readonly backLink = input<string>('/stats');
+  readonly backQueryParams = input<Params | null>(null);
   /** Translation keys of the back link's text and accessible name. */
   readonly backLabel = input('stats.back');
   readonly backAria = input('stats.backAria');

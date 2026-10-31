@@ -8,14 +8,17 @@
     [subtitle]="'stats.studios.subtitle' | translate"
   />
 
+  <app-segmented stretch [options]="kindOptions" [value]="kind()" (valueChange)="setKind($event)" data-studio-kind />
+
   @let s = state();
+  @let t = text();
   @if (s.data; as developers) {
     @if (topStudio(); as top) {
       <!-- The first studio of the picked ranking, opening its studio page. -->
       <app-stats-spotlight
         [link]="studioLink"
-        [queryParams]="{ name: top.name }"
-        [label]="(ranking() === 'rating' ? 'stats.studios.topByRating' : 'stats.studios.topByHours') | translate"
+        [queryParams]="top.queryParams"
+        [label]="(ranking() === 'rating' ? t.topByRating : t.topByHours) | translate"
         [name]="top.name"
         [meta]="top.meta"
         [covers]="top.covers"
@@ -28,23 +31,23 @@
     }
 
     <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-      <app-section-header class="mb-3" [label]="'stats.studios.developers' | translate" />
+      <app-section-header class="mb-3" [label]="t.list | translate" />
       <app-segmented class="mb-3" stretch [options]="rankingOptions" [(value)]="ranking" data-ranking />
       @if (ranking() === 'rating') {
         <p class="mb-2 text-xs text-faint" data-threshold>
-          {{ 'stats.studios.threshold' | translatePlural: developers.minRatedGames }}
+          {{ t.threshold | translatePlural: developers.minRatedGames }}
         </p>
       }
       @if (developerRows().length) {
         <app-stats-bar-list [bars]="developerRows()" [limit]="preview" [tone]="ranking() === 'rating' ? 'gold' : 'brand'" ranked data-developers />
       } @else {
         <p class="py-6 text-center text-sm text-muted">
-          {{ (ranking() === 'rating' ? 'stats.studios.noRated' : 'stats.studios.empty') | translate }}
+          {{ (ranking() === 'rating' ? t.noRated : t.empty) | translate }}
         </p>
       }
     </section>
   } @else if (s.failed) {
-    <app-stats-load-error (retry)="section.retry()" />
+    <app-stats-load-error (retry)="section().retry()" />
   } @else {
     <app-skeleton class="h-[88px] rounded-[14px] md:h-[102px]" />
     <app-skeleton class="h-[420px] rounded-[14px]" />

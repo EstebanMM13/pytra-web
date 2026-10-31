@@ -27,9 +27,9 @@ type YearKey = number | 'all';
 
 /**
  * Developer ranking request shared by the stats hub teaser and the studios section, so both read
- * the same cached entry.
+ * the same cached entry. 0 asks for every developer (the studios section lists them all).
  */
-export const DEVELOPER_RANKING_LIMIT = 10;
+export const DEVELOPER_RANKING_LIMIT = 0;
 export const DEVELOPER_MIN_RATED_GAMES = 2;
 
 @Injectable({ providedIn: 'root' })
@@ -58,6 +58,7 @@ export class StatsService {
   private readonly completion = new Map<YearKey, CachedResource<CompletionStats>>();
   private readonly ratings = new Map<YearKey, CachedResource<RatingStats>>();
   private readonly byDeveloper = new Map<string, CachedResource<DeveloperStats>>();
+  private readonly byPublisher = new Map<string, CachedResource<DeveloperStats>>();
   private readonly byReleaseEra = this.cache.resource(() =>
     this.http.get<ReleaseEraStats>(`${this.baseUrl}/by-release-era`),
   );
@@ -134,13 +135,28 @@ export class StatsService {
 
   /** Top developers by hours and by rating (all time). Cached per parameters. */
   getByDeveloper(limit = DEVELOPER_RANKING_LIMIT, minRatedGames = DEVELOPER_MIN_RATED_GAMES): Observable<DeveloperStats> {
+    return this.studioRanking(this.byDeveloper, 'by-developer', limit, minRatedGames);
+  }
+
+  /** Top publishers by hours and by rating (all time); each stat's `developer` holds the publisher. */
+  getByPublisher(limit = DEVELOPER_RANKING_LIMIT, minRatedGames = DEVELOPER_MIN_RATED_GAMES): Observable<DeveloperStats> {
+    return this.studioRanking(this.byPublisher, 'by-publisher', limit, minRatedGames);
+  }
+
+  /** A studio ranking (`path`) cached per parameters. */
+  private studioRanking(
+    resources: Map<string, CachedResource<DeveloperStats>>,
+    path: string,
+    limit: number,
+    minRatedGames: number,
+  ): Observable<DeveloperStats> {
     const key = `${limit}:${minRatedGames}`;
-    let resource = this.byDeveloper.get(key);
+    let resource = resources.get(key);
     if (!resource) {
       resource = this.cache.resource(() =>
-        this.http.get<DeveloperStats>(`${this.baseUrl}/by-developer`, { params: { limit, minRatedGames } }),
+        this.http.get<DeveloperStats>(`${this.baseUrl}/${path}`, { params: { limit, minRatedGames } }),
       );
-      this.byDeveloper.set(key, resource);
+      resources.set(key, resource);
     }
     return resource.get();
   }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Params, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ICONS } from '../../shared/ui/icons';
@@ -16,6 +16,7 @@ import { ICONS } from '../../shared/ui/icons';
   template: `
     <a
       [routerLink]="link()"
+      [queryParams]="queryParams()"
       class="tap-area -ml-1 inline-flex items-center gap-0.5 rounded-md text-[13px] text-text-3 hover:text-text"
       [attr.aria-label]="aria() | translate"
       data-stats-back
@@ -28,6 +29,8 @@ import { ICONS } from '../../shared/ui/icons';
 export class StatsBackLink {
   protected readonly icons = ICONS;
   readonly link = input<string>('/stats');
+  /** Query params of `link` (e.g. the studios page's kind). */
+  readonly queryParams = input<Params | null>(null);
   /** Translation keys of the text and the accessible name. */
   readonly label = input('stats.back');
   readonly aria = input('stats.backAria');

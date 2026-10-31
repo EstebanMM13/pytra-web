@@ -16,7 +16,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatCard } from '../../shared/ui/stat-card';
 import { StatStrip } from '../../shared/ui/stat-strip';
 import { GameTimeline } from '../sagas/game-timeline';
-import { developerGames, gameGroupFigures, sagaYearRange } from '../sagas/saga.logic';
+import { developerGames, gameGroupFigures, publisherGames, sagaYearRange } from '../sagas/saga.logic';
 import { StatsLoadError } from './stats-load-error';
 import { StatsPageHeader } from './stats-page-header';
 
@@ -30,8 +30,8 @@ interface LibraryState {
 }
 
 /**
- * Studio detail (`/stats/studio?name=`), opened from a developer row of "Estudios y épocas": the
- * library games whose developer groups with the name the way the library's developer filter does
+ * Studio detail (`/stats/studio?name=`, `&by=publisher` for a publisher), opened from a row of the
+ * studios section: the library games whose developer (or publisher) groups with the name the way the library's developer filter does
  * (trimmed, any case, accents folded; see `developerKey`), with the saga page's stat cards and release-order timeline. Figures come
  * from the library list (one cached request), as on the saga page.
  */
@@ -59,9 +59,10 @@ interface LibraryState {
 
     <main class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-4 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
       <app-stats-page-header
-        [title]="displayName() || ('stats.studio.unknown' | translate)"
+        [title]="displayName() || ((publisher() ? 'stats.studio.unknownPublisher' : 'stats.studio.unknown') | translate)"
         [subtitle]="subtitle()"
         backLink="/stats/studios"
+        [backQueryParams]="publisher() ? { by: 'publisher' } : null"
         backLabel="stats.studios.title"
         backAria="stats.studio.backAria"
       />
@@ -106,7 +107,7 @@ interface LibraryState {
             <app-game-timeline [games]="g.games" />
             <a
               routerLink="/games"
-              [queryParams]="{ dev: displayName() }"
+              [queryParams]="publisher() ? { pub: displayName() } : { dev: displayName() }"
               class="tap-area mt-3 inline-flex items-center gap-1 self-start text-[13px] font-medium text-brand-light hover:underline"
               data-studio-library
             >
@@ -124,10 +125,15 @@ export class StatsStudio {
   private readonly gameService = inject(GameService);
 
   /** Studio name from the URL, trimmed and capped. */
+  private readonly params = inject(ActivatedRoute).queryParamMap;
   protected readonly name = toSignal(
-    inject(ActivatedRoute).queryParamMap.pipe(map((params) => (params.get('name') ?? '').trim().slice(0, MAX_NAME_LENGTH))),
+    this.params.pipe(map((params) => (params.get('name') ?? '').trim().slice(0, MAX_NAME_LENGTH))),
     { initialValue: '' },
   );
+  /** A publisher's page (`?by=publisher`): groups and links the library by publisher instead of developer. */
+  protected readonly publisher = toSignal(this.params.pipe(map((params) => params.get('by') === 'publisher')), {
+    initialValue: false,
+  });
 
   private readonly retry$ = new Subject<void>();
   protected readonly library = toSignal(
@@ -146,7 +152,8 @@ export class StatsStudio {
 
   protected readonly group = computed(() => {
     const games = this.library().games;
-    return games ? gameGroupFigures(developerGames(games, this.name())) : null;
+    if (!games) return null;
+    return gameGroupFigures(this.publisher() ? publisherGames(games, this.name()) : developerGames(games, this.name()));
   });
 
   /** The studio as the library spells it (most common spelling), else as linked. */
@@ -154,7 +161,7 @@ export class StatsStudio {
     const games = this.group()?.games ?? [];
     const counts = new Map<string, number>();
     for (const g of games) {
-      const name = g.developer?.trim();
+      const name = (this.publisher() ? g.publisher : g.developer)?.trim();
       if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
     }
     const best = [...counts].sort(([a, ca], [b, cb]) => cb - ca || a.localeCompare(b))[0];

@@ -135,6 +135,12 @@ export function developerGames(games: readonly Game[], name: string): Game[] {
   return key === null ? [] : games.filter((g) => developerKey(g.developer) === key);
 }
 
+/** The games whose publisher groups with `name` (same grouping as `developerGames`). */
+export function publisherGames(games: readonly Game[], name: string): Game[] {
+  const key = developerKey(name);
+  return key === null ? [] : games.filter((g) => developerKey(g.publisher) === key);
+}
+
 /** All sagas with their figures, alphabetically. */
 export function summarizeSagas(sagas: readonly Saga[], games: readonly Game[]): SagaSummary[] {
   return sagas

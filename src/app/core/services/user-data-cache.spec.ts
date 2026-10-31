@@ -242,7 +242,7 @@ describe('UserDataCache (through the cached services)', () => {
     const reads: [() => { subscribe: (next: (value: unknown) => void) => unknown }, string][] = [
       [() => stats.getActivity(2026), `${base}/activity?year=2026`],
       [() => stats.getByPlatform(), `${base}/by-platform`],
-      [() => stats.getByDeveloper(), `${base}/by-developer?limit=10&minRatedGames=2`],
+      [() => stats.getByDeveloper(), `${base}/by-developer?limit=0&minRatedGames=2`],
       [() => stats.getByReleaseEra(), `${base}/by-release-era`],
       [() => stats.getCompletion(2025), `${base}/completion?year=2025`],
       [() => stats.getRatings(), `${base}/ratings`],

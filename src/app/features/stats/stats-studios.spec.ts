@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { DeveloperStats } from '../../core/models/stats.model';
@@ -22,9 +22,15 @@ const developers: DeveloperStats = {
   topByRating: [{ developer: 'FromSoftware', gameCount: 4, hours: 300, ratedGameCount: 4, averageRating: 9.2 }],
 };
 
+const publishers: DeveloperStats = {
+  minRatedGames: 2,
+  topByHours: [{ developer: 'Bandai Namco', gameCount: 2, hours: 300, ratedGameCount: 2, averageRating: 9 }],
+  topByRating: [],
+};
+
 describe('Stats studios page', () => {
-  function setup() {
-    const queryParamMap = new BehaviorSubject(convertToParamMap({}));
+  function setup(params: Record<string, string> = {}) {
+    const queryParamMap = new BehaviorSubject(convertToParamMap(params));
     TestBed.configureTestingModule({
       imports: [StatsStudios],
       providers: [
@@ -38,13 +44,13 @@ describe('Stats studios page', () => {
             findAll: () =>
               of([
                 { id: 1, name: 'Elden Ring', developer: 'FromSoftware', coverImageUrl: 'er.jpg', totalHours: 200 },
-                { id: 2, name: 'Sekiro', developer: 'FromSoftware', coverImageUrl: 'sk.jpg', totalHours: 100 },
+                { id: 2, name: 'Sekiro', developer: 'FromSoftware', publisher: 'Bandai Namco', coverImageUrl: 'sk.jpg', totalHours: 100 },
               ]),
           },
         },
         {
           provide: StatsService,
-          useValue: { getByDeveloper: () => of(developers), getYears: () => of([]) },
+          useValue: { getByDeveloper: () => of(developers), getByPublisher: () => of(publishers), getYears: () => of([]) },
         },
       ],
     });
@@ -53,7 +59,7 @@ describe('Stats studios page', () => {
     fixture.detectChanges();
     TestBed.tick();
     fixture.detectChanges();
-    return { fixture, el: fixture.nativeElement as HTMLElement };
+    return { fixture, el: fixture.nativeElement as HTMLElement, queryParamMap };
   }
 
   afterEach(() => TestBed.resetTestingModule());
@@ -91,5 +97,31 @@ describe('Stats studios page', () => {
   it('opens a studio page from its row', () => {
     const { el } = setup();
     expect(el.querySelector('[data-developers] a')!.getAttribute('href')).toBe('/stats/studio?name=FromSoftware');
+  });
+
+  it('switches to publishers from the selector, keeping the choice in the URL', () => {
+    const { fixture, el, queryParamMap } = setup();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    el.querySelectorAll<HTMLButtonElement>('[data-studio-kind] button')[1].click();
+    expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({ queryParams: { by: 'publisher' }, replaceUrl: true }));
+
+    queryParamMap.next(convertToParamMap({ by: 'publisher' }));
+    fixture.detectChanges();
+    TestBed.tick();
+    fixture.detectChanges();
+    expect(el.textContent).toContain('stats.studios.publishers');
+    expect([...el.querySelectorAll('[data-developers] [data-bar-row]')].map((r) => r.textContent)).toEqual([
+      expect.stringContaining('Bandai Namco'),
+    ]);
+    expect(el.querySelector('[data-developers] a')!.getAttribute('href')).toBe('/stats/studio?name=Bandai%20Namco&by=publisher');
+    // The publisher's games' covers from the library.
+    expect(el.querySelector('[data-top-studio] app-stats-cover-stack app-game-cover')).not.toBeNull();
+  });
+
+  it('opens on publishers when the URL asks for them', () => {
+    const { el } = setup({ by: 'publisher' });
+    expect(el.querySelector('[data-top-studio] [data-spotlight-name]')!.textContent!.trim()).toBe('Bandai Namco');
+    expect(el.textContent).toContain('stats.studios.topPublisherByHours');
   });
 });

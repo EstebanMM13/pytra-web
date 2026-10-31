@@ -655,6 +655,17 @@ export function developerCovers<T extends CoverSource & Pick<Game, 'developer'>>
   }, limit);
 }
 
+/** Covers per publisher key (see `developerKey`), like `developerCovers`. */
+export function publisherCovers<T extends CoverSource & Pick<Game, 'publisher'>>(
+  games: readonly T[],
+  limit: number,
+): Map<string, CoverRef[]> {
+  return coversBy(games, (game) => {
+    const key = developerKey(game.publisher);
+    return key ? [key] : [];
+  }, limit);
+}
+
 /** Covers per genre id (a game under each of its genres). */
 export function genreCovers<T extends CoverSource & Pick<Game, 'genres'>>(games: readonly T[], limit: number): Map<number, CoverRef[]> {
   return coversBy(games, (game) => (game.genres ?? []).map((genre) => genre.id), limit);
