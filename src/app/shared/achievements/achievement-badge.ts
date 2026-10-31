@@ -5,9 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PreferencesService } from '../../core/services/preferences.service';
 import { formatScaledPoint } from '../utils/rating-scale';
 import { Achievement, AchievementTier, LEGEND_ID, RATING_BADGE_THRESHOLDS } from './achievements';
-
-/** Per-instance ids of the legend icon gradient (a page can show the badge more than once). */
-let legendGradientSeq = 0;
+import { LegendTrophy } from './legend-trophy';
 
 /** Unlocked chip tone per tier (bronze = copper, silver = slate, gold = the app's gold). */
 const TIER_TONE: Record<AchievementTier, string> = {
@@ -21,7 +19,7 @@ const TIER_TONE: Record<AchievementTier, string> = {
 /** Achievement tile: brand-tinted icon when unlocked, muted with a progress bar when locked. */
 @Component({
   selector: 'app-achievement-badge',
-  imports: [LucideDynamicIcon, TranslatePipe],
+  imports: [LucideDynamicIcon, TranslatePipe, LegendTrophy],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'flex min-w-0 items-center gap-2.5 md:gap-3' },
   template: `
@@ -33,22 +31,10 @@ const TIER_TONE: Record<AchievementTier, string> = {
       "
       aria-hidden="true"
     >
-      <svg
-        [lucideIcon]="icon()"
-        [size]="compact() ? 16 : 20"
-        [style.stroke]="legendUnlocked() ? 'url(#' + legendGradientId + ')' : null"
-      ></svg>
       @if (legendUnlocked()) {
-        <!-- Purple -> gold -> diamond blue icon stroke, in the 24-unit lucide viewBox. -->
-        <svg class="absolute size-0" focusable="false">
-          <defs>
-            <linearGradient [attr.id]="legendGradientId" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22">
-              <stop offset="0" style="stop-color: var(--pt-brand-vivid)" />
-              <stop offset="0.5" style="stop-color: var(--pt-gold)" />
-              <stop offset="1" style="stop-color: var(--pt-diamond)" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <app-legend-trophy [size]="compact() ? 28 : 34" />
+      } @else {
+        <svg [lucideIcon]="icon()" [size]="compact() ? 16 : 20"></svg>
       }
     </span>
     <span class="min-w-0 flex-1">
@@ -101,9 +87,8 @@ export class AchievementBadge {
   protected readonly a = this.achievement;
   /** The achievement's own icon (the trophy guards an id added without one). */
   protected readonly icon = computed(() => ACHIEVEMENT_ICONS[this.achievement().id] ?? ICONS.trophy);
-  /** The legend meta badge blends purple, gold and diamond blue instead of a tier tone. */
+  /** The unlocked legend meta badge shows the platinum Pytriarca trophy instead of a tier-toned icon. */
   protected readonly legendUnlocked = computed(() => this.achievement().id === LEGEND_ID && this.achievement().unlocked);
-  protected readonly legendGradientId = `pt-legend-stroke-${++legendGradientSeq}`;
   protected readonly tone = computed(() => (this.legendUnlocked() ? 'legend-badge' : TIER_TONE[this.achievement().tier]));
   protected readonly percent = computed(() => Math.round(this.achievement().progress * 100));
   private readonly preferences = inject(PreferencesService);

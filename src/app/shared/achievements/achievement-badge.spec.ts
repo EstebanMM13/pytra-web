@@ -45,7 +45,7 @@ describe('AchievementBadge', () => {
     expect(fixture.nativeElement.textContent).toContain('Puntúa 5 juegos con 90 o más (máx. 100, mín. 40)');
   });
 
-  it('blends the unlocked legend badge (ring and icon gradient), not a tier tone', () => {
+  it('shows the platinum Pytriarca trophy once the legend is unlocked, the stroke icon before', () => {
     const legend: Achievement = { ...MASTERPIECES, id: 'legend', category: 'special', tier: 'gold' };
     const fixture = render();
     const chip = () => fixture.nativeElement.querySelector('span[aria-hidden="true"]') as HTMLElement;
@@ -53,12 +53,21 @@ describe('AchievementBadge', () => {
     fixture.componentRef.setInput('achievement', legend);
     fixture.detectChanges();
     expect(chip().classList.contains('legend-badge')).toBe(false);
+    expect(chip().querySelector('app-legend-trophy')).toBeNull();
+    expect(chip().querySelector('svg.lucide')).not.toBeNull();
 
     fixture.componentRef.setInput('achievement', { ...legend, current: 5, unlocked: true, progress: 1 });
     fixture.detectChanges();
     expect(chip().classList.contains('legend-badge')).toBe(true);
-    const gradientId = chip().querySelector('linearGradient')!.getAttribute('id');
-    expect(gradientId).toMatch(/^pt-legend-stroke-\d+$/);
-    expect((chip().querySelector('svg') as SVGElement).style.stroke).toContain(gradientId!);
+    expect(chip().querySelector('svg.lucide')).toBeNull();
+    expect(chip().querySelector('app-legend-trophy svg')!.getAttribute('width')).toBe('34');
+  });
+
+  it('draws the accent detail of a v3 icon as its own path', () => {
+    const fixture = render();
+    fixture.componentRef.setInput('achievement', { ...MASTERPIECES, unlocked: true, progress: 1 });
+    fixture.detectChanges();
+    const paths = fixture.nativeElement.querySelectorAll('svg.lucide path') as NodeListOf<SVGPathElement>;
+    expect([...paths].some((p) => p.getAttribute('class') === 'pt-icon-accent')).toBe(true);
   });
 });

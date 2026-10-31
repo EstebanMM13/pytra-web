@@ -874,3 +874,33 @@ select optgroup {
   font-optical-sizing: auto;
   text-wrap: balance;
 }
+
+/* Pytra iconos v3: append to pytra-web/src/styles.css (outside any @layer that could lose to utilities). */
+
+/* Accent detail: gold in every UI context (light theme already redefines --pt-gold). */
+.pt-icon-accent {
+  stroke: var(--pt-gold);
+}
+
+/* Inside achievement chips the accent follows the tier tone, slightly dimmed. */
+app-achievement-badge .pt-icon-accent {
+  stroke: currentColor;
+  opacity: 0.6;
+}
+
+/* Active / selected nav items: keep the accent gold even if the item recolours currentColor. */
+[aria-current='page'] .pt-icon-accent {
+  stroke: var(--pt-gold);
+  opacity: 1;
+}
+
+/*
+ * Square caps and mitred joins of the v3 style. LucideDynamicIcon only forwards d/class/stroke/fill per path
+ * (not the per-path stroke-linecap/linejoin/miterlimit in icons.ts) and sets round ones on the <svg>,
+ * so the style is set here: CSS wins over those presentation attributes.
+ */
+svg.lucide {
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  stroke-miterlimit: 2;
+}
