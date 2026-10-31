@@ -1,4 +1,5 @@
 import { OnlinePlaytime, OnlinePlaytimeRequest } from '../../../core/models/online-playtime.model';
+import { formatHoursInput, parseDecimal } from '../../../shared/utils/decimal-input';
 
 /** Load state of a game's online playtime card. */
 export type OnlinePlaytimeLoadState = 'loading' | 'loaded' | 'missing' | 'error';
@@ -19,6 +20,8 @@ export interface OnlinePlaytimeDraft {
   /** The card's platinum / 100% switches (the stored flags, or pending ones before the first save). */
   platinum: boolean;
   fullCompletion: boolean;
+  /** Hours per platform id to save; omitted keeps the stored breakdown. */
+  platformHours?: Record<number, number>;
 }
 
 /**
@@ -37,7 +40,61 @@ export function buildOnlinePlaytimeRequest(draft: OnlinePlaytimeDraft): OnlinePl
   if (draft.existing || draft.platformsTouched) {
     request.platformIds = [...draft.platformIds];
   }
+  if (draft.platformHours) {
+    request.platformHours = { ...draft.platformHours };
+  }
   return request;
+}
+
+/** Text of the online card's per-platform hour inputs, by platform id. */
+export type PlatformHoursInputs = Record<number, string>;
+
+/** Inputs for the picked platforms from the stored breakdown (blank where nothing is assigned). */
+export function platformHoursInputsOf(
+  playtime: OnlinePlaytime | null,
+  platformIds: number[],
+  lang: string,
+): PlatformHoursInputs {
+  const stored = playtime?.platformHours ?? {};
+  return Object.fromEntries(platformIds.map((id) => [id, formatHoursInput(stored[String(id)], lang)]));
+}
+
+export interface PlatformHoursSplit {
+  /** Hours per platform id; blank inputs are left out (unassigned). */
+  hours: Record<number, number>;
+  assigned: number;
+  /** What is left of the total for no platform in particular (never negative). */
+  unassigned: number;
+  error: 'invalid' | 'exceedsTotal' | null;
+}
+
+/** Tolerance for decimal sums like 0,1 + 0,2 (the API uses the same). */
+const HOURS_TOLERANCE = 1e-6;
+
+/**
+ * Parses the inputs of the picked platforms against the total: unparsable or negative hours are
+ * `invalid`, a split adding up to more than the total is `exceedsTotal`.
+ */
+export function parsePlatformHours(
+  inputs: PlatformHoursInputs,
+  platformIds: number[],
+  totalHours: number,
+): PlatformHoursSplit {
+  const hours: Record<number, number> = {};
+  let invalid = false;
+  for (const id of platformIds) {
+    const text = (inputs[id] ?? '').trim();
+    if (!text) continue;
+    const value = parseDecimal(text);
+    if (value === null || Number.isNaN(value) || value < 0) {
+      invalid = true;
+      continue;
+    }
+    hours[id] = value;
+  }
+  const assigned = Object.values(hours).reduce((sum, h) => sum + h, 0);
+  const error = invalid ? 'invalid' : assigned - totalHours > HOURS_TOLERANCE ? 'exceedsTotal' : null;
+  return { hours, assigned, unassigned: Math.max(0, totalHours - assigned), error };
 }
 
 /** The online playtime's flags, as the card shows them (absent from older API versions means false). */

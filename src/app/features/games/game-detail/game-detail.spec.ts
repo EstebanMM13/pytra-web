@@ -569,6 +569,49 @@ describe('GameDetail online platinum / 100%', () => {
     expect(el.querySelector('[data-online-switch="platinum"]')!.getAttribute('aria-checked')).toBe('false');
   });
 
+  it('asks for the hours of each platform with two or more and saves them with the hours', () => {
+    const platforms = [
+      { id: 2, name: 'PC', color: null },
+      { id: 5, name: 'PS5', color: null },
+    ];
+    const { el, fixture, upsert } = render({ totalHours: 20, platforms, platformHours: { '2': 5 } });
+    const inputs = el.querySelectorAll<HTMLInputElement>('[data-online-platform-hours] input');
+    expect(inputs.length).toBe(2);
+    expect(inputs[0].value).toBe('5');
+    expect(el.querySelector('[data-online-unassigned]')!.textContent).toContain('game.online.platformHoursUnassigned');
+
+    inputs[1].value = '12';
+    inputs[1].dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    (el.querySelector('form button[type="submit"]') as HTMLButtonElement).click();
+    expect(upsert).toHaveBeenCalledWith(7, expect.objectContaining({ totalHours: 20, platformHours: { 2: 5, 5: 12 } }));
+  });
+
+  it('refuses per-platform hours above the total without calling the API', () => {
+    const platforms = [
+      { id: 2, name: 'PC', color: null },
+      { id: 5, name: 'PS5', color: null },
+    ];
+    const { el, fixture, upsert } = render({ totalHours: 20, platforms });
+    const inputs = el.querySelectorAll<HTMLInputElement>('[data-online-platform-hours] input');
+    inputs[0].value = '15';
+    inputs[0].dispatchEvent(new Event('input'));
+    inputs[1].value = '6';
+    inputs[1].dispatchEvent(new Event('input'));
+    (el.querySelector('form button[type="submit"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(upsert).not.toHaveBeenCalled();
+    expect(el.querySelector('[data-online-platform-hours-error]')!.textContent).toContain('game.online.platformHoursExceed');
+  });
+
+  it('shows no per-platform hours with a single platform and sends none', () => {
+    const { el, upsert } = render({ totalHours: 20, platforms: [{ id: 2, name: 'PC', color: null }] });
+    expect(el.querySelector('[data-online-platform-hours]')).toBeNull();
+    (el.querySelector('form button[type="submit"]') as HTMLButtonElement).click();
+    expect(upsert).toHaveBeenCalledTimes(1);
+    expect('platformHours' in (upsert.mock.calls[0][1] as object)).toBe(false);
+  });
+
   it('saves a switch right away with the stored hours, and lights the tile', () => {
     const { el, upsert, toggle } = render({ totalHours: 120, platforms: [{ id: 2, name: 'PC', color: null }] });
     toggle('fullCompletion');

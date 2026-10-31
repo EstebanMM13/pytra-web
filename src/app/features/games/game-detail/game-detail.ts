@@ -49,9 +49,13 @@ import { TitleClamp } from './title-clamp';
 import {
   OnlineFlags,
   OnlinePlaytimeLoadState,
+  PlatformHoursInputs,
+  PlatformHoursSplit,
   buildOnlinePlaytimeRequest,
   onlineFlagsOf,
   onlinePlaytimeErrorState,
+  parsePlatformHours,
+  platformHoursInputsOf,
   shouldCelebrateOnline,
 } from './online-playtime.logic';
 import { CategoryBadge, UpcomingBadge } from '../../../shared/ui/game-badges';
@@ -207,6 +211,10 @@ export class GameDetail {
   /** Whether the picker changed since the card loaded (decides if the PUT sends platformIds). */
   private readonly onlinePlatformsTouched = signal(false);
   readonly savingOnlinePlatforms = signal(false);
+  /** Per-platform hour inputs of the online card (shown with two or more platforms), by platform id. */
+  readonly onlinePlatformHours = signal<PlatformHoursInputs>({});
+  /** The per-platform hours failed validation on the last save attempt. */
+  readonly onlinePlatformHoursError = signal<PlatformHoursSplit['error']>(null);
   /** The online card's platinum / 100% switches: the stored flags, or pending ones before the first save. */
   readonly onlineFlags = signal<OnlineFlags>({ platinum: false, fullCompletion: false });
   readonly savingOnlineFlags = signal(false);
@@ -472,6 +480,8 @@ export class GameDetail {
     // Also drop hours loaded earlier, e.g. when an edit turns the game into SINGLEPLAYER.
     this.onlinePlaytime.set(null);
     this.onlinePlatforms.set([]);
+    this.onlinePlatformHours.set({});
+    this.onlinePlatformHoursError.set(null);
     this.onlinePlatformsTouched.set(false);
     this.onlineFlags.set(onlineFlagsOf(null));
     this.onlineLoadState.set('loading');
@@ -488,6 +498,9 @@ export class GameDetail {
         const lang = this.lang();
         this.onlinePlaytime.set(playtime);
         this.onlinePlatforms.set(playtime.platforms ?? []);
+        this.onlinePlatformHours.set(
+          platformHoursInputsOf(playtime, (playtime.platforms ?? []).map((p) => p.id), lang),
+        );
         this.onlineFlags.set(onlineFlagsOf(playtime));
         this.onlineLoadState.set('loaded');
         this.onlinePlaytimeForm.setValue({
@@ -582,6 +595,8 @@ export class GameDetail {
     }
     const previous = this.onlinePlatforms();
     this.onlinePlatforms.set(next);
+    // Keep what was typed for the platforms that stay; new ones start blank.
+    this.onlinePlatformHours.update((inputs) => Object.fromEntries(next.map((p) => [p.id, inputs[p.id] ?? ''])));
     this.onlinePlatformsTouched.set(true);
     const existing = this.onlinePlaytime();
     if (!existing) {
@@ -710,9 +725,27 @@ export class GameDetail {
     this.router.navigate(['/games']);
   }
 
+  protected setOnlinePlatformHours(platformId: number, text: string): void {
+    this.onlinePlatformHours.update((inputs) => ({ ...inputs, [platformId]: text }));
+    this.onlinePlatformHoursError.set(null);
+  }
+
+  /** The per-platform split against the typed total; null below two platforms (nothing to split). */
+  protected onlinePlatformSplit(): PlatformHoursSplit | null {
+    const ids = this.onlinePlatforms().map((p) => p.id);
+    if (ids.length < 2) return null;
+    const total = parseDecimal(this.onlinePlaytimeForm.controls.totalHours.value) ?? 0;
+    return parsePlatformHours(this.onlinePlatformHours(), ids, Number.isNaN(total) ? 0 : total);
+  }
+
   protected submitOnlinePlaytime(): void {
     if (this.onlinePlaytimeForm.invalid || this.savingOnline() || this.onlineLoadState() === 'error') {
       this.onlinePlaytimeForm.markAllAsTouched();
+      return;
+    }
+    const split = this.onlinePlatformSplit();
+    if (split?.error) {
+      this.onlinePlatformHoursError.set(split.error);
       return;
     }
     const raw = this.onlinePlaytimeForm.getRawValue();
@@ -730,6 +763,8 @@ export class GameDetail {
           platformIds: this.onlinePlatforms().map((p) => p.id),
           platformsTouched: this.onlinePlatformsTouched(),
           ...this.onlineFlags(),
+          // Below two platforms nothing is sent: the API clears the breakdown there.
+          platformHours: split?.hours,
         }),
       )
       .subscribe({

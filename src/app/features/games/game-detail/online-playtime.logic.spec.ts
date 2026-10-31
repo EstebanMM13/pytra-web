@@ -3,6 +3,8 @@ import {
   buildOnlinePlaytimeRequest,
   onlineFlagsOf,
   onlinePlaytimeErrorState,
+  parsePlatformHours,
+  platformHoursInputsOf,
   shouldCelebrateOnline,
 } from './online-playtime.logic';
 
@@ -121,5 +123,46 @@ describe('online flags', () => {
     expect(shouldCelebrateOnline({ platinum: true, fullCompletion: false }, { platinum: true, fullCompletion: false }, false)).toBe(false);
     expect(shouldCelebrateOnline(none, { platinum: true, fullCompletion: true }, false)).toBe(false);
     expect(shouldCelebrateOnline({ platinum: true, fullCompletion: true }, none, true)).toBe(false);
+  });
+});
+
+describe('online platform hours', () => {
+  const base = {
+    totalHours: 30,
+    generalRating: 8,
+    existing,
+    platformIds: [1, 2],
+    platformsTouched: false,
+    platinum: false,
+    fullCompletion: false,
+  };
+
+  it('sends the per-platform hours when given and leaves them out otherwise', () => {
+    expect(buildOnlinePlaytimeRequest({ ...base, platformHours: { 1: 10, 2: 5.5 } }).platformHours).toEqual({
+      1: 10,
+      2: 5.5,
+    });
+    expect('platformHours' in buildOnlinePlaytimeRequest(base)).toBe(false);
+  });
+
+  it('turns the stored hours into inputs for the picked platforms', () => {
+    const playtime: OnlinePlaytime = { ...existing, platformHours: { '1': 12.5, '9': 3 } };
+    expect(platformHoursInputsOf(playtime, [1, 2], 'es')).toEqual({ 1: '12,5', 2: '' });
+    expect(platformHoursInputsOf(null, [1, 2], 'es')).toEqual({ 1: '', 2: '' });
+  });
+
+  it('parses the inputs: blank is unassigned and the rest is what is left of the total', () => {
+    expect(parsePlatformHours({ 1: '12,5', 2: '' }, [1, 2], 30)).toEqual({
+      hours: { 1: 12.5 },
+      assigned: 12.5,
+      unassigned: 17.5,
+      error: null,
+    });
+  });
+
+  it('rejects unparsable or negative hours and a split above the total', () => {
+    expect(parsePlatformHours({ 1: 'abc', 2: '' }, [1, 2], 30).error).toBe('invalid');
+    expect(parsePlatformHours({ 1: '-1', 2: '' }, [1, 2], 30).error).toBe('invalid');
+    expect(parsePlatformHours({ 1: '20', 2: '10,5' }, [1, 2], 30).error).toBe('exceedsTotal');
   });
 });

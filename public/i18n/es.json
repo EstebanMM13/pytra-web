@@ -780,7 +780,11 @@
       "addPlatform": "Añadir plataforma…",
       "removePlatform": "Quitar {{name}}",
       "loadError": "No se pudieron cargar los datos online. Recarga la página antes de guardar.",
-      "platformsPending": "Se guardarán al pulsar Guardar."
+      "platformsPending": "Se guardarán al pulsar Guardar.",
+      "platformHours": "Horas por plataforma",
+      "platformHoursUnassigned": "Sin asignar: {{hours}}",
+      "platformHoursInvalid": "Horas por plataforma ≥ 0 (p. ej. 12,5).",
+      "platformHoursExceed": "Las horas por plataforma no pueden superar el total."
     },
     "loadError": "No se pudo cargar el juego.",
     "editTitle": "Editar juego",

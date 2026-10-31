@@ -619,6 +619,37 @@
                 {{ 'game.online.save' | translate }}
               </button>
             </form>
+            @if (onlinePlatformSplit(); as split) {
+              <div class="mt-3" role="group" aria-labelledby="game-online-platform-hours" data-online-platform-hours>
+                <p id="game-online-platform-hours" class="mb-1.5 text-xs text-muted">{{ 'game.online.platformHours' | translate }}</p>
+                <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                  @for (p of onlinePlatforms(); track p.id) {
+                    <label class="flex min-w-0 flex-col gap-1 text-xs text-muted">
+                      <span class="truncate">{{ p.name }}</span>
+                      <input
+                        #platformHoursInput
+                        type="text"
+                        inputmode="decimal"
+                        autocomplete="off"
+                        placeholder="—"
+                        [value]="onlinePlatformHours()[p.id] ?? ''"
+                        (input)="setOnlinePlatformHours(p.id, platformHoursInput.value)"
+                        [disabled]="savingOnline() || onlineLoadState() === 'error' || onlineLoadState() === 'loading'"
+                        class="h-10 w-full rounded-lg border border-border bg-bg px-3 font-mono text-sm text-text"
+                      />
+                    </label>
+                  }
+                </div>
+                <p class="mt-1.5 text-xs text-faint" data-online-unassigned>
+                  {{ 'game.online.platformHoursUnassigned' | translate: { hours: (split.unassigned | hours) } }}
+                </p>
+              </div>
+            }
+            @if (onlinePlatformHoursError(); as error) {
+              <p class="mt-2 text-xs text-danger" data-online-platform-hours-error>
+                {{ (error === 'exceedsTotal' ? 'game.online.platformHoursExceed' : 'game.online.platformHoursInvalid') | translate }}
+              </p>
+            }
             @if (onlinePlaytimeForm.invalid && onlinePlaytimeForm.touched) {
               <p class="mt-2 text-xs text-danger">{{ 'game.online.invalid' | translate: { max: preferences.ratingMax() } }}</p>
             }

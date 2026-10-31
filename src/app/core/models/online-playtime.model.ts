@@ -13,6 +13,11 @@ export interface OnlinePlaytime {
   platinum?: boolean;
   /** "100%": every trophy/achievement obtained. Independent of `platinum`; absent from older API versions. */
   fullCompletion?: boolean;
+  /**
+   * Online hours the user assigned per platform id (JSON keys are strings): a breakdown of `totalHours`,
+   * the rest being unassigned. Empty without a breakdown; absent from older API versions.
+   */
+  platformHours?: Record<string, number> | null;
 }
 
 export interface OnlinePlaytimeRequest {
@@ -26,4 +31,9 @@ export interface OnlinePlaytimeRequest {
   platinum?: boolean;
   /** Omitted keeps the stored flag (false on create). */
   fullCompletion?: boolean;
+  /**
+   * Hours per platform id, at most `totalHours` in all. Omitted keeps the stored breakdown; an empty
+   * object clears it. The API drops it below two platforms.
+   */
+  platformHours?: Record<number, number>;
 }
