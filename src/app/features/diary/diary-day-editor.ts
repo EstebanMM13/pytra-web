@@ -3,6 +3,7 @@ import {
   Component,
   OnInit,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -21,6 +22,8 @@ import { DemoModeService } from '../../core/services/demo-mode.service';
 import { DiaryService } from '../../core/services/diary.service';
 import { ExperienceService } from '../../core/services/experience.service';
 import { GameService } from '../../core/services/game.service';
+import { OnlinePlaytimeService } from '../../core/services/online-playtime.service';
+import { PlatformRef } from '../../core/models/platform.model';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { ToastService } from '../../shared/toast/toast.service';
@@ -41,6 +44,7 @@ import {
   formatDiaryHours,
   isValidDiaryDate,
   parseDiaryHours,
+  platformErrorIndexes,
   playingNowGames,
   runErrorIndexes,
   searchLibrary,
@@ -49,6 +53,8 @@ import {
 
 /** Runs a row can be moved to, loaded when the row needs a run chooser. */
 type RunOptions = Experience[] | 'loading' | 'error';
+/** Online platforms of an online game (empty without an online record or when they failed to load). */
+type PlatformOptions = PlatformRef[] | 'loading';
 
 /**
  * Editor of one diary day (modal on web, full-screen sheet on mobile): the games played with their
@@ -215,6 +221,33 @@ type RunOptions = Experience[] | 'loading' | 'error';
                   </button>
                 </div>
 
+                @if (platformChoices(game); as platforms) {
+                  <label
+                    class="flex flex-col gap-1 rounded-lg border p-2.5 text-sm"
+                    [class]="platformMissing().has(game.gameId) ? 'border-danger' : 'border-border'"
+                    data-platform-chooser
+                  >
+                    @if (platformMissing().has(game.gameId)) {
+                      <span class="text-xs text-danger" role="alert">
+                        {{ 'diary.editor.platformRequired' | translate }}
+                      </span>
+                    }
+                    <span class="text-xs text-muted">{{ 'diary.editor.whichPlatform' | translate }}</span>
+                    <select
+                      class="rounded-lg border border-border bg-bg px-3 py-2 text-[15px] text-text"
+                      (change)="pickPlatform(i, $any($event.target).value)"
+                    >
+                      <option value="" [selected]="game.platformId === null" disabled>
+                        {{ 'diary.editor.pickPlatform' | translate }}
+                      </option>
+                      @for (platform of platforms; track platform.id) {
+                        <option [value]="platform.id" [selected]="platform.id === game.platformId">
+                          {{ platform.name }}
+                        </option>
+                      }
+                    </select>
+                  </label>
+                }
                 @if (runOptions()[game.gameId]; as options) {
                   <div
                     class="flex flex-col gap-2 rounded-lg border p-2.5 text-sm"
@@ -366,6 +399,7 @@ export class DiaryDayEditor implements OnInit {
   private readonly gameService = inject(GameService);
   private readonly statsService = inject(StatsService);
   private readonly experienceService = inject(ExperienceService);
+  private readonly onlinePlaytimeService = inject(OnlinePlaytimeService);
   private readonly runFormLauncher = inject(RunFormLauncher);
   private readonly demoMode = inject(DemoModeService);
   private readonly toast = inject(ToastService);
@@ -389,6 +423,10 @@ export class DiaryDayEditor implements OnInit {
   /** Games the API could not place on a run. */
   protected readonly runMissing = signal<ReadonlySet<number>>(new Set());
   protected readonly runOptions = signal<Record<number, RunOptions>>({});
+  /** Online platforms per online game, loaded once the game is in the day. */
+  private readonly platformOptions = signal<Record<number, PlatformOptions>>({});
+  /** Online games played on several platforms whose platform is still missing. */
+  protected readonly platformMissing = signal<ReadonlySet<number>>(new Set());
 
   private readonly library = signal<Game[]>([]);
   private readonly playing = signal<InProgressExperience[]>([]);
@@ -436,6 +474,39 @@ export class DiaryDayEditor implements OnInit {
         };
       });
       this.updateGame(gameId, { experienceId: experience.id, runLabel: experience.runLabel });
+    });
+    // Online games (their category may only be known once the library loads) need their platforms.
+    effect(() => {
+      const known = this.platformOptions();
+      for (const game of this.games()) {
+        if (game.category === 'ONLINE' && !game.synced && !(game.gameId in known)) {
+          this.loadPlatforms(game.gameId);
+        }
+      }
+    });
+  }
+
+  /** The platforms to pick from for a row: only for an online game played on two or more. */
+  protected platformChoices(game: DiaryDraftGame): PlatformRef[] | null {
+    if (game.category !== 'ONLINE' || game.synced) return null;
+    const options = this.platformOptions()[game.gameId];
+    return Array.isArray(options) && options.length >= 2 ? options : null;
+  }
+
+  protected pickPlatform(index: number, value: string): void {
+    const game = this.games()[index];
+    const platform = game ? this.platformChoices(game)?.find((p) => p.id === Number(value)) : undefined;
+    if (!game || !platform) return;
+    this.updateAt(index, { platformId: platform.id });
+    this.platformMissing.update((ids) => new Set([...ids].filter((id) => id !== game.gameId)));
+  }
+
+  private loadPlatforms(gameId: number): void {
+    this.platformOptions.update((all) => ({ ...all, [gameId]: 'loading' }));
+    this.onlinePlaytimeService.findByGame(gameId).subscribe({
+      next: (playtime) => this.platformOptions.update((all) => ({ ...all, [gameId]: playtime.platforms ?? [] })),
+      // No online record yet (404) or a failure: nothing to pick, the API decides.
+      error: () => this.platformOptions.update((all) => ({ ...all, [gameId]: [] })),
     });
   }
 
@@ -522,6 +593,11 @@ export class DiaryDayEditor implements OnInit {
       this.invalid.set(new Set(result.invalid));
       return;
     }
+    const noPlatform = this.games().filter((g) => this.platformChoices(g) && g.platformId === null);
+    if (noPlatform.length) {
+      this.platformMissing.set(new Set(noPlatform.map((g) => g.gameId)));
+      return;
+    }
     const date = this.currentDate();
     this.saving.set(true);
     this.diaryService.saveDay(date, result.request).subscribe({
@@ -538,6 +614,15 @@ export class DiaryDayEditor implements OnInit {
         if (rows) {
           this.showRunChoosers(rows);
           this.toast.error(this.translate.instant('diary.editor.runRequiredToast'));
+          return;
+        }
+        const platformRows = platformErrorIndexes(err);
+        if (platformRows) {
+          // The online platforms changed since they loaded: reload them and ask again.
+          const ids = platformRows.map((i) => this.games()[i]?.gameId).filter((id): id is number => id !== undefined);
+          ids.forEach((id) => this.loadPlatforms(id));
+          this.platformMissing.set(new Set(ids));
+          this.toast.error(this.translate.instant('diary.editor.platformRequired'));
           return;
         }
         toastApiError(this.toast, this.translate, err, 'diary.toast.saveError');
@@ -574,6 +659,7 @@ export class DiaryDayEditor implements OnInit {
     this.invalid.set(new Set());
     this.runMissing.set(new Set());
     this.runOptions.set({});
+    this.platformMissing.set(new Set());
     this.diaryService.findDay(date).subscribe({
       next: (day) => {
         if (date !== this.currentDate()) return;

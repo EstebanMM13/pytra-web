@@ -19,6 +19,7 @@ const MESSAGE_KEYS: Record<string, string> = {
   EXPORT_RATE_LIMITED: 'profile.export.rateLimited',
   INVALID_PLATFORM: 'errors.invalidPlatform',
   PLATFORM_HOURS_EXCEED_TOTAL: 'game.online.platformHoursExceed',
+  DIARY_PLATFORM_REQUIRED: 'diary.editor.platformRequired',
   INVALID_YEAR: 'errors.invalidYear',
   ONLINE_GAME_RUN: 'game.onlineNoRuns',
   INVALID_DIARY_DATE: 'errors.invalidDiaryDate',

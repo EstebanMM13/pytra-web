@@ -11,6 +11,7 @@ import { DemoModeService } from '../../core/services/demo-mode.service';
 import { DiaryService } from '../../core/services/diary.service';
 import { ExperienceService } from '../../core/services/experience.service';
 import { GameService } from '../../core/services/game.service';
+import { OnlinePlaytimeService } from '../../core/services/online-playtime.service';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { ToastService } from '../../shared/toast/toast.service';
@@ -60,7 +61,9 @@ function savedDay(): DiaryDay {
   };
 }
 
-function setup(options: { day?: DiaryDay | null; save?: () => unknown } = {}) {
+function setup(
+  options: { day?: DiaryDay | null; save?: () => unknown; onlinePlatforms?: { id: number; name: string }[] } = {},
+) {
   const diary = {
     findDay: vi.fn(() =>
       options.day ? of(options.day) : throwError(() => new HttpErrorResponse({ status: 404 })),
@@ -79,6 +82,13 @@ function setup(options: { day?: DiaryDay | null; save?: () => unknown } = {}) {
       ] as Experience[]),
     ),
   };
+  const onlinePlaytime = {
+    findByGame: vi.fn(() =>
+      options.onlinePlatforms
+        ? of({ gameId: 2, totalHours: 10, platforms: options.onlinePlatforms.map((p) => ({ ...p, color: null })) })
+        : throwError(() => new HttpErrorResponse({ status: 404 })),
+    ),
+  };
   TestBed.configureTestingModule({
     imports: [DiaryDayEditor],
     providers: [
@@ -87,6 +97,7 @@ function setup(options: { day?: DiaryDay | null; save?: () => unknown } = {}) {
       { provide: GameService, useValue: { findAll: () => of(library) } },
       { provide: StatsService, useValue: { getInProgress: () => of(playing) } },
       { provide: ExperienceService, useValue: experiences },
+      { provide: OnlinePlaytimeService, useValue: onlinePlaytime },
       { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },
       { provide: DemoModeService, useValue: { isDemo: signal(false), blockWrite: () => false } },
       { provide: ToastService, useValue: toast },
@@ -119,6 +130,48 @@ describe('DiaryDayEditor', () => {
   afterEach(() => {
     TestBed.resetTestingModule();
     document.body.innerHTML = '';
+  });
+
+  const twoPlatforms = [
+    { id: 4, name: 'PC' },
+    { id: 5, name: 'PS5' },
+  ];
+
+  it('asks the platform of an online game played on several and saves it', () => {
+    const { fixture, diary, root } = setup({ day: savedDay(), onlinePlatforms: twoPlatforms });
+    fixture.detectChanges();
+    const select = root().querySelector<HTMLSelectElement>('[data-platform-chooser] select')!;
+    expect([...select.options].map((o) => o.textContent!.trim())).toEqual(['diary.editor.pickPlatform', 'PC', 'PS5']);
+
+    select.value = '5';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    save(root());
+
+    expect(diary.saveDay).toHaveBeenCalledWith(
+      DATE,
+      expect.objectContaining({ games: [expect.objectContaining({ gameId: 2, platformId: 5 })] }),
+    );
+  });
+
+  it('does not save an online game played on several platforms until one is picked', () => {
+    const { fixture, diary, root } = setup({ day: savedDay(), onlinePlatforms: twoPlatforms });
+    fixture.detectChanges();
+    save(root());
+    fixture.detectChanges();
+
+    expect(diary.saveDay).not.toHaveBeenCalled();
+    expect(root().querySelector('[data-platform-chooser] [role="alert"]')!.textContent).toContain(
+      'diary.editor.platformRequired',
+    );
+  });
+
+  it('asks nothing for an online game with a single platform', () => {
+    const { fixture, diary, root } = setup({ day: savedDay(), onlinePlatforms: [{ id: 4, name: 'PC' }] });
+    fixture.detectChanges();
+    expect(root().querySelector('[data-platform-chooser]')).toBeNull();
+    save(root());
+    expect(diary.saveDay).toHaveBeenCalledTimes(1);
   });
 
   it('starts empty for a day without entry and adds a "playing now" game', () => {

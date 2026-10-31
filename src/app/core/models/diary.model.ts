@@ -12,6 +12,8 @@ export interface DiaryGame {
   countsHours: boolean;
   /** Linked to Steam/PSN: the platform sync counts the real playtime instead. */
   synced: boolean;
+  /** Online platform the counted online hours were played on (absent from older API versions). */
+  platformId?: number | null;
 }
 
 /** A diary day (`date` is `yyyy-mm-dd`): its note, the hours played in total and its games. */
@@ -28,6 +30,8 @@ export interface DiaryGameRequest {
   experienceId?: number | null;
   hours: number;
   note?: string | null;
+  /** Online platform the hours were played on: required for an online game played on two or more. */
+  platformId?: number | null;
 }
 
 /** The whole day (PUT replaces it). No games and no note deletes the day. */
@@ -48,3 +52,5 @@ export interface GameDiaryDay {
 /** API error codes of the diary. */
 export const DIARY_RUN_REQUIRED = 'DIARY_RUN_REQUIRED';
 export const INVALID_DIARY_RUN = 'INVALID_DIARY_RUN';
+export const DIARY_PLATFORM_REQUIRED = 'DIARY_PLATFORM_REQUIRED';
+export const INVALID_PLATFORM = 'INVALID_PLATFORM';

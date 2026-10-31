@@ -1,9 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+  DIARY_PLATFORM_REQUIRED,
   DIARY_RUN_REQUIRED,
   DiaryDay,
   DiaryDayRequest,
   INVALID_DIARY_RUN,
+  INVALID_PLATFORM,
 } from '../../core/models/diary.model';
 import { Game, GameCategory } from '../../core/models/game.model';
 import { InProgressExperience } from '../../core/models/stats.model';
@@ -205,6 +207,8 @@ export interface DiaryDraftGame {
   note: string;
   /** Known from a saved day: the platform sync counts this game's hours. */
   synced: boolean;
+  /** Online platform the hours were played on (asked for online games played on two or more). */
+  platformId: number | null;
 }
 
 /** Editor rows for a saved day (names and categories completed from the library when known). */
@@ -226,6 +230,7 @@ export function draftFromDay(
       hoursText: formatHoursInput(line.hours, lang),
       note: line.note ?? '',
       synced: line.synced,
+      platformId: line.platformId ?? null,
     };
   });
 }
@@ -245,6 +250,7 @@ export function draftForGame(
     hoursText,
     note: '',
     synced: false,
+    platformId: null,
   };
 }
 
@@ -268,6 +274,7 @@ export function toDayRequest(note: string, games: readonly DiaryDraftGame[]): Di
       ...(game.experienceId !== null ? { experienceId: game.experienceId } : {}),
       hours,
       note: game.note.trim() || null,
+      ...(game.platformId !== null ? { platformId: game.platformId } : {}),
     });
   });
   return invalid.length ? { ok: false, invalid } : { ok: true, request };
@@ -285,6 +292,23 @@ export function runErrorIndexes(err: unknown): number[] | null {
     body.fieldErrors && typeof body.fieldErrors === 'object' ? Object.keys(body.fieldErrors) : [];
   return fields
     .map((field) => /^games\[(\d+)\]\.experienceId$/.exec(field)?.[1])
+    .filter((index): index is string => index !== undefined)
+    .map(Number)
+    .sort((a, b) => a - b);
+}
+
+/**
+ * Rows the API needs an online platform for (400 DIARY_PLATFORM_REQUIRED / INVALID_PLATFORM), from its
+ * `games[i].platformId` field errors; null when the error is something else.
+ */
+export function platformErrorIndexes(err: unknown): number[] | null {
+  if (!(err instanceof HttpErrorResponse) || err.status !== 400) return null;
+  const body = (err.error ?? null) as { message?: unknown; fieldErrors?: unknown } | null;
+  if (body?.message !== DIARY_PLATFORM_REQUIRED && body?.message !== INVALID_PLATFORM) return null;
+  const fields =
+    body.fieldErrors && typeof body.fieldErrors === 'object' ? Object.keys(body.fieldErrors) : [];
+  return fields
+    .map((field) => /^games\[(\d+)\]\.platformId$/.exec(field)?.[1])
     .filter((index): index is string => index !== undefined)
     .map(Number)
     .sort((a, b) => a - b);

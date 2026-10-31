@@ -14,6 +14,7 @@ import {
   monthOf,
   monthTotal,
   parseDiaryHours,
+  platformErrorIndexes,
   playingNowGames,
   runErrorIndexes,
   searchLibrary,
@@ -209,6 +210,7 @@ describe('day editor payload', () => {
         hoursText: '1,5',
         note: '',
         synced: true,
+        platformId: null,
       },
     ]);
   });
@@ -260,5 +262,56 @@ describe('game picker', () => {
         { id: 2, name: 'G2', coverImageUrl: null },
       ],
     );
+  });
+});
+
+describe('online platform of a diary line', () => {
+  const online = { id: 2, name: 'Apex', coverImageUrl: null, category: 'ONLINE' as const };
+
+  it('keeps the saved platform in the editor row and sends it back', () => {
+    const saved: DiaryDay = {
+      date: '2026-10-20',
+      note: null,
+      totalHours: 2,
+      games: [
+        {
+          gameId: 2,
+          gameName: 'Apex',
+          coverImageUrl: null,
+          experienceId: null,
+          runLabel: null,
+          hours: 2,
+          note: null,
+          countsHours: true,
+          synced: false,
+          platformId: 5,
+        },
+      ],
+    };
+    const [row] = draftFromDay(saved, [], 'es');
+    expect(row.platformId).toBe(5);
+    const result = toDayRequest('', [row]);
+    expect(result.ok && result.request.games[0].platformId).toBe(5);
+  });
+
+  it('starts new rows without platform and leaves it out of the request', () => {
+    const row = { ...draftForGame(online), hoursText: '1' };
+    expect(row.platformId).toBeNull();
+    const result = toDayRequest('', [row]);
+    expect(result.ok && 'platformId' in result.request.games[0]).toBe(false);
+  });
+
+  it('reads the rows the API needs a platform for', () => {
+    const error = (message: string, fieldErrors: Record<string, string>) =>
+      new HttpErrorResponse({ status: 400, error: { message, fieldErrors } });
+    expect(
+      platformErrorIndexes(
+        error('DIARY_PLATFORM_REQUIRED', {
+          'games[1].platformId': 'DIARY_PLATFORM_REQUIRED',
+          'games[0].platformId': 'INVALID_PLATFORM',
+        }),
+      ),
+    ).toEqual([0, 1]);
+    expect(platformErrorIndexes(error('DIARY_RUN_REQUIRED', { 'games[0].experienceId': 'x' }))).toBeNull();
   });
 });
