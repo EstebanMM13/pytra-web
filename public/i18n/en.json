@@ -1630,8 +1630,13 @@
     },
     "showAll": "See all ({{total}})",
     "showLess": "Show less",
+    "order": {
+      "descending": "Highest first",
+      "ascending": "Lowest first"
+    },
     "studio": {
       "unknown": "Studio",
+      "unknownPublisher": "Publisher",
       "backAria": "Back to Studios & eras",
       "empty": "There are no games by this studio in your library.",
       "inLibrary": "See its games in Games"

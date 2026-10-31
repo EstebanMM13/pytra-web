@@ -1630,8 +1630,13 @@
     },
     "showAll": "Ver todos ({{total}})",
     "showLess": "Ver menos",
+    "order": {
+      "descending": "Mayor a menor",
+      "ascending": "Menor a mayor"
+    },
     "studio": {
       "unknown": "Estudio",
+      "unknownPublisher": "Distribuidora",
       "backAria": "Volver a Estudios y épocas",
       "empty": "No hay juegos de este estudio en tu biblioteca.",
       "inLibrary": "Ver sus juegos en Juegos"

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, linkedSignal, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Params, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -45,7 +45,8 @@ export const STATS_LIST_PREVIEW = 6;
  * small line below. Plain divs, no chart library. `ranked` numbers the rows (the first in the year
  * page's gold rank chip) where the order is a ranking; rows may lead with a cover. With `limit`,
  * longer lists show their first rows and a "show all (N)" toggle that expands them in place (as
- * the profile achievements do).
+ * the profile achievements do); those long lists also get a button that reverses the order (bottom
+ * rows first), each row keeping its rank.
  */
 @Component({
   selector: 'app-stats-bar-list',
@@ -53,6 +54,20 @@ export const STATS_LIST_PREVIEW = 6;
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
+    @if (cut() !== null) {
+      <div class="-mt-1 mb-1 flex justify-end">
+        <button
+          type="button"
+          (click)="reversed.set(!reversed())"
+          [attr.aria-pressed]="reversed()"
+          class="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-text-2 hover:bg-hover"
+          data-bar-order
+        >
+          <svg [lucideIcon]="icons.arrowUpDown" [size]="14" aria-hidden="true"></svg>
+          {{ (reversed() ? 'stats.order.ascending' : 'stats.order.descending') | translate }}
+        </button>
+      </div>
+    }
     <ul class="flex flex-col">
       @for (bar of visible(); track bar.key) {
         <li class="border-t border-divider first:border-t-0" data-bar-row>
@@ -96,14 +111,15 @@ export const STATS_LIST_PREVIEW = 6;
     <!-- Rank number (the first in a gold chip, as the year page's top rated) and the cover. -->
     <ng-template #lead let-bar let-index="index">
       @if (ranked()) {
-        @if (index === 0) {
+        @let rank = reverses() ? bars().length - index : index + 1;
+        @if (rank === 1) {
           <span
             class="mr-1 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-gold-tint font-mono text-[11px] font-semibold text-gold-tint-fg ring-1 ring-gold/45 ring-inset"
             data-rank-first
             >1</span
           >
         } @else {
-          <span class="mr-1 w-5 shrink-0 text-center font-mono text-xs text-faint" data-rank>{{ index + 1 }}</span>
+          <span class="mr-1 w-5 shrink-0 text-center font-mono text-xs text-faint" data-rank>{{ rank }}</span>
         }
       }
       @if (bar.cover; as cover) {
@@ -154,8 +170,12 @@ export class StatsBarList {
     const limit = this.limit();
     return limit !== null && this.bars().length > limit + 1 ? limit : null;
   });
+  /** Bottom rows first (only offered on long lists). */
+  protected readonly reversed = signal(false);
+  protected readonly reverses = computed(() => this.reversed() && this.cut() !== null);
+  private readonly ordered = computed(() => (this.reverses() ? [...this.bars()].reverse() : this.bars()));
   protected readonly visible = computed(() => {
     const cut = this.cut();
-    return cut === null || this.expanded() ? this.bars() : this.bars().slice(0, cut);
+    return cut === null || this.expanded() ? this.ordered() : this.ordered().slice(0, cut);
   });
 }

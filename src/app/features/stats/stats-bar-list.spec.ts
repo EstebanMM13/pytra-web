@@ -67,4 +67,39 @@ describe('StatsBarList', () => {
     expect(el.querySelector('[data-rank-first]')!.textContent!.trim()).toBe('1');
     expect([...el.querySelectorAll('[data-rank]')].map((r) => r.textContent!.trim())).toEqual(['2', '3', '4', '5', '6']);
   });
+
+  it('reverses a long list with the order button, ranks kept', () => {
+    const { fixture } = setup();
+    const el = fixture.nativeElement as HTMLElement;
+    fixture.componentInstance.ranked.set(true);
+    fixture.detectChanges();
+    const labels = () =>
+      [...el.querySelectorAll('[data-bar-row]')].map(
+        (r) => `${r.querySelector('[data-rank], [data-rank-first]')!.textContent!.trim()} ${r.querySelector('[title]')!.getAttribute('title')}`,
+      );
+    const order = el.querySelector<HTMLButtonElement>('[data-bar-order]')!;
+    expect(order.getAttribute('aria-pressed')).toBe('false');
+
+    order.click();
+    fixture.detectChanges();
+    expect(order.getAttribute('aria-pressed')).toBe('true');
+    expect(labels()).toEqual(['10 hours 9', '9 hours 8', '8 hours 7', '7 hours 6', '6 hours 5', '5 hours 4']);
+    expect(el.querySelector('[data-rank-first]')).toBeNull();
+
+    el.querySelector<HTMLButtonElement>('[data-bar-toggle]')!.click();
+    fixture.detectChanges();
+    expect(labels().at(-1)).toBe('1 hours 0');
+    expect(el.querySelector('[data-rank-first]')!.textContent!.trim()).toBe('1');
+
+    order.click();
+    fixture.detectChanges();
+    expect(labels()[0]).toBe('1 hours 0');
+  });
+
+  it('shows no order button on a short list', () => {
+    const { fixture } = setup();
+    fixture.componentInstance.bars.set(rows('hours', 7));
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('[data-bar-order]')).toBeNull();
+  });
 });
