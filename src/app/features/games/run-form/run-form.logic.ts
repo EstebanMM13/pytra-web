@@ -82,8 +82,15 @@ export function statusForEndDate(
   return status === 'COMPLETADO' ? 'EN_CURSO' : status;
 }
 
-/** Group validator: `postgameEndDate` must not be before `endDate` (the API rejects it). */
+/**
+ * Group validator: `postgameEndDate` must not be before `endDate` (the API rejects it). Skipped when the
+ * run is not COMPLETADO: the postgame fields are hidden then and never sent, so they must not block saving.
+ */
 export const postgameRangeValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+  const status = group.get('status')?.value as ExperienceStatus | undefined;
+  if (status !== undefined && status !== 'COMPLETADO') {
+    return null;
+  }
   const end = group.get('endDate')?.value as string | null;
   const postgameEnd = group.get('postgameEndDate')?.value as string | null;
   return isValidDateRange(end, postgameEnd) ? null : { postgameRange: true };

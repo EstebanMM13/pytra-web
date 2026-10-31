@@ -177,6 +177,17 @@ describe('run form logic', () => {
       group.controls.postgameEndDate.setValue('2024-05-09');
       expect(postgameRangeValidator(group)).toBeNull();
     });
+
+    it('ignores the hidden postgame end date when the run is not completed', () => {
+      const group = new FormGroup({
+        status: new FormControl('COMPLETADO'),
+        endDate: new FormControl('2024-05-10'),
+        postgameEndDate: new FormControl('2024-05-09'),
+      });
+      expect(postgameRangeValidator(group)).toEqual({ postgameRange: true });
+      group.controls.status.setValue('ABANDONADO');
+      expect(postgameRangeValidator(group)).toBeNull();
+    });
   });
 
   describe('postgameForEndDate', () => {
