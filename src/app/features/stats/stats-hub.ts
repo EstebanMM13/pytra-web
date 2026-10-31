@@ -43,7 +43,6 @@ import {
   topCovers,
   decadeParams,
   percentFormat,
-  totalHours,
   trimEmptyEnds,
   withArt,
 } from './stats.logic';
@@ -136,6 +135,8 @@ export class StatsHub {
 
   protected readonly activity = teaser(() => this.stats.getActivity());
   protected readonly byYear = teaser(() => this.stats.getByYear());
+  /** All-time totals, like the dashboard: every run (dated or not) plus every online hour. */
+  private readonly summary = teaser(() => this.stats.getSummary());
   protected readonly bySaga = teaser(() => this.stats.getBySaga());
   protected readonly platforms = teaser(() => this.stats.getByPlatform());
   // Same parameters as the studios section: one shared cache entry.
@@ -153,20 +154,22 @@ export class StatsHub {
   protected readonly coversPending = computed(() => this.library() === null);
 
   /**
-   * The hero's all-time summary: hours of every year (null when they failed to load: the figure
-   * shows a dash, like the cards), the first year played, a few counts as pills and the most
-   * played games' covers. `undefined` while the years load.
+   * The hero's all-time summary: run plus online hours from the summary, so it matches the dashboard
+   * (the years leave out undated runs and online hours not logged in the diary; null when it failed:
+   * the figure shows a dash, like the cards), the first year played, a few counts as pills and the
+   * most played games' covers. `undefined` while the years or the summary load.
    */
   protected readonly hero = computed(() => {
     const years = this.byYear();
-    if (years === undefined) return undefined;
+    const summary = this.summary();
+    if (years === undefined || summary === undefined) return undefined;
     const played = (years ?? []).filter((y) => y.totalHours > 0);
     const format = this.format;
     const games = this.library() ?? [];
     const completed = this.completion()?.completedCount ?? 0;
     const sagas = this.sagas()?.count ?? 0;
     return {
-      hours: years ? totalHours(years) : null,
+      hours: summary ? summary.totalSingleplayerHours + summary.totalOnlineHours : null,
       since: played.length ? Math.min(...played.map((y) => y.year)) : null,
       pills: [
         games.length ? format.plural('common.games', games.length) : null,

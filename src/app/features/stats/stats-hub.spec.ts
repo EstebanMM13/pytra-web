@@ -46,6 +46,8 @@ describe('Stats hub', () => {
             getActivity: () =>
               of({ currentStreak: { length: 4 }, longestStreak: { length: 12 }, activeDays: 30 }),
             getByYear: () => of([{ year: 2024, totalHours: 80 }, { year: 2026, totalHours: 12.5 }]),
+            // Undated runs and online hours outside the diary: the all-time total is above the years' 92,5 h.
+            getSummary: () => of({ totalSingleplayerHours: 70, totalOnlineHours: 30 }),
             getBySaga: () => of([{ sagaId: 1, sagaName: 'Zelda', gameCount: 3, totalHours: 90 }]),
             getByPlatform: () =>
               of({
@@ -134,7 +136,7 @@ describe('Stats hub', () => {
   it('heads the hub with the all-time hours and the most played covers, and shows genre, saga and studio covers', () => {
     const el = setup();
     const hero = el.querySelector('[data-hub-hero]')!;
-    expect(hero.querySelector('[data-hub-total]')!.textContent).toContain('92,5 h');
+    expect(hero.querySelector('[data-hub-total]')!.textContent).toContain('100 h');
     expect(hero.querySelectorAll('app-stats-cover-stack')[0].querySelectorAll('app-game-cover')).toHaveLength(2);
     expect(visual(el, '/stats/genres').querySelectorAll('app-game-cover')).toHaveLength(2);
     expect(visual(el, '/sagas').querySelectorAll('app-game-cover')).toHaveLength(1);
@@ -150,7 +152,7 @@ describe('Stats hub', () => {
   ] as const) {
     it(`keeps the hero and falls back to bars when the library ${name}`, () => {
       const el = setup({}, findAll);
-      expect(el.querySelector('[data-hub-hero] [data-hub-total]')!.textContent).toContain('92,5 h');
+      expect(el.querySelector('[data-hub-hero] [data-hub-total]')!.textContent).toContain('100 h');
       expect(visual(el, '/sagas').querySelector('app-game-cover')).toBeNull();
       expect(visual(el, '/sagas').querySelectorAll('[data-hub-slice]')).toHaveLength(1);
       expect(visual(el, '/stats/studios').querySelector('app-game-cover')).toBeNull();
@@ -158,8 +160,8 @@ describe('Stats hub', () => {
     });
   }
 
-  it('shows the hero with a dash when the years fail', () => {
-    const el = setup({ getByYear: () => throwError(() => new Error('down')) });
+  it('shows the hero with a dash when the all-time summary fails', () => {
+    const el = setup({ getSummary: () => throwError(() => new Error('down')) });
     expect(el.querySelector('[data-hub-hero] [data-hub-total]')!.textContent!.trim()).toBe('—');
   });
 
