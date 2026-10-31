@@ -10,7 +10,7 @@ import { GameService } from '../../core/services/game.service';
 import { SagaService } from '../../core/services/saga.service';
 import { StatsService } from '../../core/services/stats.service';
 import { AchievementBadge } from '../../shared/achievements/achievement-badge';
-import { Achievement, computeAchievements, groupByCategory, topUnlocked } from '../../shared/achievements/achievements';
+import { Achievement, LEGEND_ID, computeAchievements, groupByCategory, topUnlocked } from '../../shared/achievements/achievements';
 import { findPlatformByKey, groupPlatformsByFamily, platformNameKey } from '../../core/services/platform.logic';
 import { PlatformService } from '../../core/services/platform.service';
 import { ExportFormat } from '../../core/models/user.model';
@@ -112,6 +112,8 @@ const EXPORT_FALLBACK_NAME: Record<ExportFormat, string> = {
 })
 export class Profile {
   protected readonly icons = ICONS;
+  /** The Pytriarca meta badge, the most important one: it spans its own row. */
+  protected readonly legendId = LEGEND_ID;
 
   // Read-only demo: every section is shown; its writes (and the export) stop at the demo toast.
   private readonly demoMode = inject(DemoModeService);

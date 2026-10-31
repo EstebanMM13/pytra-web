@@ -218,7 +218,7 @@
               @if (featuredAchievements().length) {
                 <ul class="mt-4 grid grid-cols-2 gap-x-3 gap-y-3.5 sm:grid-cols-3 sm:gap-x-5">
                   @for (badge of featuredAchievements(); track badge.id) {
-                    <li class="min-w-0"><app-achievement-badge compact [achievement]="badge" /></li>
+                    <li class="min-w-0" [class.col-span-full]="badge.id === legendId"><app-achievement-badge compact [achievement]="badge" /></li>
                   }
                 </ul>
               } @else {
@@ -243,7 +243,7 @@
                 </h3>
                 <ul class="grid grid-cols-2 gap-x-3 gap-y-3.5 md:gap-x-6 md:gap-y-4">
                   @for (badge of group.items; track badge.id) {
-                    <li class="min-w-0"><app-achievement-badge [compact]="isMobile()" [achievement]="badge" /></li>
+                    <li class="min-w-0" [class.col-span-full]="badge.id === legendId"><app-achievement-badge [compact]="isMobile()" [achievement]="badge" /></li>
                   }
                 </ul>
               } @empty {
