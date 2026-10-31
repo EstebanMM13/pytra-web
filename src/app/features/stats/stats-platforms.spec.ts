@@ -86,7 +86,7 @@ describe('Stats platforms page', () => {
   it('links each platform to the library filtered by it and by the picked year', () => {
     const { el } = setup({ year: '2026' });
     const hrefs = [...el.querySelectorAll('[data-platform-list] a[data-bar-link]')].map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/games?platform=1&year=2026', '/games?platform=2&year=2026']);
+    expect(hrefs).toEqual(['/games?platform=1&year=2026&sort=hours', '/games?platform=2&year=2026&sort=hours']);
   });
 
   it('keeps each platform row to its games, finished runs and average rating', () => {

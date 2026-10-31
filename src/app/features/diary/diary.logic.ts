@@ -25,8 +25,9 @@ const LEVEL_BOUNDS: readonly number[] = [1, 3, 6];
 
 /** Cell background per heat level, brand purple for activity (the diary calendar and the stats activity heatmap share them). */
 export const DIARY_LEVEL_CLASS: Record<DiaryLevel, string> = {
-  0: 'bg-hover/50',
-  1: 'bg-[color-mix(in_srgb,var(--pt-brand)_22%,transparent)]',
+  // Light theme: the hover grey vanishes on the light cards, so empty days take a text-tinted grey.
+  0: 'bg-hover/50 light:bg-[color-mix(in_srgb,var(--pt-text)_11%,transparent)]',
+  1: 'bg-[color-mix(in_srgb,var(--pt-brand)_22%,transparent)] light:bg-[color-mix(in_srgb,var(--pt-brand)_30%,transparent)]',
   2: 'bg-[color-mix(in_srgb,var(--pt-brand)_42%,transparent)]',
   3: 'bg-[color-mix(in_srgb,var(--pt-brand)_66%,transparent)] text-white',
   4: 'bg-brand text-white',

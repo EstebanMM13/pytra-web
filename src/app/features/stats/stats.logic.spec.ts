@@ -296,6 +296,11 @@ describe('histogramColumns', () => {
 });
 
 describe('gamesLinkParams', () => {
+  it('orders the library like the tile ranks it', () => {
+    expect(gamesLinkParams({ released: 2015, sort: 'hours' })).toEqual({ released: '2015', sort: 'hours' });
+    expect(gamesLinkParams({ genre: 4, sort: 'rating' })).toEqual({ genre: '4', sort: 'rating' });
+  });
+
   it('writes the library URL filters, leaving out what is not set', () => {
     expect(gamesLinkParams({ platform: 3, year: 2024 })).toEqual({ platform: '3', year: '2024' });
     expect(gamesLinkParams({ genre: 5, year: null })).toEqual({ genre: '5' });

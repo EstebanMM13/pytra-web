@@ -11,8 +11,9 @@ import { LegendTrophy } from './legend-trophy';
 const TIER_TONE: Record<AchievementTier, string> = {
   bronze:
     'bg-[color-mix(in_srgb,#c98552_20%,transparent)] text-[#d89a6a] ring-1 ring-[#c98552]/40 light:text-[#8f5428] light:ring-[#a8662f]/40',
+  // Light theme: a solid steel fill and ring, so silver never reads as the grey locked chip.
   silver:
-    'bg-[color-mix(in_srgb,#aab4c3_18%,transparent)] text-[#c4ccd8] ring-1 ring-[#aab4c3]/40 light:text-[#4f5b6b] light:ring-[#6b7787]/40',
+    'bg-[color-mix(in_srgb,#aab4c3_18%,transparent)] text-[#c4ccd8] ring-1 ring-[#aab4c3]/40 light:bg-[#d5dde8] light:text-[#2f3b4b] light:ring-[#6f7d90]/70',
   gold: 'bg-gold-tint text-gold-tint-fg ring-1 ring-gold-line',
 };
 
@@ -27,7 +28,7 @@ const TIER_TONE: Record<AchievementTier, string> = {
       class="flex shrink-0 items-center justify-center rounded-xl"
       [class]="
         (compact() ? 'size-9 ' : 'size-11 ') +
-        (a().unlocked ? tone() : 'border border-dashed border-border bg-bg text-faint')
+        (a().unlocked ? tone() : 'border border-dashed border-border bg-bg text-faint light:bg-transparent light:text-[#8e8e94]')
       "
       aria-hidden="true"
     >

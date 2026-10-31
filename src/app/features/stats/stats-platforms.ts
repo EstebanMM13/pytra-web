@@ -80,7 +80,7 @@ export class StatsPlatforms {
       color: colorOf(p.platformId, p.color),
       dot: true,
       link: GAMES_LINK,
-      queryParams: gamesLinkParams({ platform: p.platformId, year }),
+      queryParams: gamesLinkParams({ platform: p.platformId, year, sort: 'hours' }),
       sub: joinParts([
         // Games, as the library lists them once the row is tapped.
         p.gameCount > 0 ? f.plural('common.games', p.gameCount) : null,

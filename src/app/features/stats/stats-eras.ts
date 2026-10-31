@@ -108,7 +108,7 @@ export class StatsEras {
         format.plural('common.games', top.gameCount),
         top.averageRating !== null ? format.text('stats.platforms.average', { rating: format.rating(top.averageRating) }) : null,
       ]),
-      queryParams: gamesLinkParams({ decade: top.decade }),
+      queryParams: gamesLinkParams({ decade: top.decade, sort: 'hours' }),
       covers: withArt(topCovers(this.library() ?? [], inDecade(top.decade), MAX_STACK_COVERS)),
     };
   });
@@ -127,7 +127,7 @@ export class StatsEras {
         figureClass: ratingTone(best.averageRating),
         covers: [],
         link: GAMES_LINK,
-        queryParams: gamesLinkParams({ decade: best.decade }),
+        queryParams: gamesLinkParams({ decade: best.decade, sort: 'rating' }),
       },
       ...[
         { key: 'oldest' as const, label: 'stats.eras.oldest', game: oldest },
@@ -195,7 +195,7 @@ export class StatsEras {
         y.averageRating !== null ? format.text('stats.platforms.average', { rating: format.rating(y.averageRating) }) : null,
       ]),
       link: GAMES_LINK,
-      queryParams: gamesLinkParams({ released: y.year }),
+      queryParams: gamesLinkParams({ released: y.year, sort: 'hours' }),
       cover: covers.get(y.year) ?? null,
     }));
   });

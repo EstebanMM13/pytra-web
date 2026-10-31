@@ -1,3 +1,4 @@
+import { LibrarySort } from '../games/library.logic';
 import {
   ActivityDay,
   GenreAbandonment,
@@ -173,6 +174,8 @@ export interface GamesLinkFilter {
   days?: NumberRange;
   /** Hours of a completed run (max exclusive). */
   hours?: NumberRange;
+  /** Library order matching what the tile ranks (its hours or its rating). */
+  sort?: LibrarySort;
 }
 
 /** Router commands of a library link (with `gamesLinkParams` as its query params). */
@@ -188,6 +191,7 @@ export function gamesLinkParams(filter: GamesLinkFilter): Params {
   if (filter.released !== undefined) params['released'] = String(filter.released);
   if (filter.days) params['days'] = serializeRange(filter.days);
   if (filter.hours) params['hours'] = serializeRange(filter.hours);
+  if (filter.sort) params['sort'] = filter.sort;
   return params;
 }
 

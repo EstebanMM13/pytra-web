@@ -115,7 +115,7 @@ export class StatsGenres {
         format.plural('common.games', top.gameCount),
         top.rating !== null ? format.text('stats.platforms.average', { rating: format.rating(top.rating) }) : null,
       ]),
-      queryParams: gamesLinkParams({ genre: top.genreId }),
+      queryParams: gamesLinkParams({ genre: top.genreId, sort: 'hours' }),
     };
   });
 
@@ -151,7 +151,7 @@ export class StatsGenres {
       .map((c) => ({
         ...c,
         covers: this.coversOf(c.genre.genreId).slice(0, 1),
-        queryParams: gamesLinkParams({ genre: c.genre.genreId }),
+        queryParams: gamesLinkParams({ genre: c.genre.genreId, sort: c.key === 'bestRated' ? 'rating' : undefined }),
       }));
   });
 
@@ -172,7 +172,7 @@ export class StatsGenres {
         p.abandonment !== null ? format.text('stats.genres.abandonedShare', { percent: percent(p.abandonment) }) : null,
       ]),
       link: GAMES_LINK,
-      queryParams: gamesLinkParams({ genre: p.genreId }),
+      queryParams: gamesLinkParams({ genre: p.genreId, sort: 'hours' }),
       cover: this.coversOf(p.genreId)[0] ?? null,
     }));
   });
@@ -191,7 +191,7 @@ export class StatsGenres {
         share: y.share,
         figure: percent(y.share),
         link: GAMES_LINK,
-        queryParams: gamesLinkParams({ genre: y.genreId, year: y.year }),
+        queryParams: gamesLinkParams({ genre: y.genreId, year: y.year, sort: 'hours' }),
       }));
   });
 }

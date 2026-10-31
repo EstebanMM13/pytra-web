@@ -135,7 +135,7 @@ export class StatsRatings {
       figureClass: ratingTone(g.averageRating),
       sub: this.format.plural('stats.ratings.count', g.ratedCount),
       link: GAMES_LINK,
-      queryParams: gamesLinkParams({ genre: g.genreId, year }),
+      queryParams: gamesLinkParams({ genre: g.genreId, year, sort: 'rating' }),
     }));
   });
 
@@ -154,7 +154,7 @@ export class StatsRatings {
         dot: true,
         sub: this.format.plural('stats.ratings.count', p.ratedCount),
         link: GAMES_LINK,
-        queryParams: gamesLinkParams({ platform: p.platformId, year }),
+        queryParams: gamesLinkParams({ platform: p.platformId, year, sort: 'rating' }),
       }));
   });
 }

@@ -80,14 +80,14 @@ describe('Stats genres page', () => {
   it('spotlights the most played genre and its share of the confirmed library hours', () => {
     const el = setup();
     const hero = el.querySelector('[data-top-genre]')!;
-    expect(hero.querySelector('[data-spotlight-link]')!.getAttribute('href')).toBe('/games?genre=1');
+    expect(hero.querySelector('[data-spotlight-link]')!.getAttribute('href')).toBe('/games?genre=1&sort=hours');
     expect(hero.querySelector('[data-spotlight-name]')!.textContent!.trim()).toBe('RPG');
     expect(hero.querySelector('[data-top-genre-share]')!.textContent).toContain('75');
   });
 
   it('calls out the best rated, most abandoned and biggest genres, and ranks every genre', () => {
     const el = setup();
-    expect(el.querySelector('[data-genre-callout="bestRated"] a')!.getAttribute('href')).toBe('/games?genre=1');
+    expect(el.querySelector('[data-genre-callout="bestRated"] a')!.getAttribute('href')).toBe('/games?genre=1&sort=rating');
     expect(el.querySelector('[data-genre-callout="mostAbandoned"] a')!.getAttribute('href')).toBe('/games?genre=2');
     expect(el.querySelectorAll('[data-genre-list] [data-bar-row]')).toHaveLength(2);
     expect(el.querySelector('[data-genre-list] [data-rank-first]')).not.toBeNull();
@@ -99,7 +99,7 @@ describe('Stats genres page', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].textContent).toContain('2025 · Shooter');
     expect(rows[0].textContent).toContain('100');
-    expect(rows[0].querySelector('a')!.getAttribute('href')).toBe('/games?genre=2&year=2025');
+    expect(rows[0].querySelector('a')!.getAttribute('href')).toBe('/games?genre=2&year=2025&sort=hours');
   });
 
   it(`lists at most ${GENRE_YEARS} years`, () => {

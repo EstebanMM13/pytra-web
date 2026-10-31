@@ -59,7 +59,7 @@ describe('Stats eras page', () => {
   it('heads the page with the decade played most, opening the library on it', () => {
     const el = setup();
     const hero = el.querySelector('[data-top-decade]')!;
-    expect(hero.querySelector('[data-spotlight-link]')!.getAttribute('href')).toBe('/games?decade=2010');
+    expect(hero.querySelector('[data-spotlight-link]')!.getAttribute('href')).toBe('/games?decade=2010&sort=hours');
     expect(hero.querySelector('app-stats-cover-stack app-game-cover')).not.toBeNull();
   });
 
@@ -77,9 +77,9 @@ describe('Stats eras page', () => {
     expect(el.querySelectorAll('[data-release-years] [data-bar-row]')).toHaveLength(2);
     // A release year opens the library on that year alone, not its whole decade.
     expect(el.querySelector('[data-release-years] [data-bar-row] a')!.getAttribute('href')).toBe(
-      '/games?released=2015',
+      '/games?released=2015&sort=hours',
     );
-    expect(el.querySelector('[data-era-callout="bestRated"] a')!.getAttribute('href')).toBe('/games?decade=2010');
+    expect(el.querySelector('[data-era-callout="bestRated"] a')!.getAttribute('href')).toBe('/games?decade=2010&sort=rating');
     expect(el.querySelector('[data-era-callout="oldest"] a')!.getAttribute('href')).toBe('/games/2');
     expect(el.querySelector('[data-era-callout="newest"] a')!.getAttribute('href')).toBe('/games/1');
   });

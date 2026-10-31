@@ -76,8 +76,8 @@ describe('Stats ratings page', () => {
 
   it('links genres and platforms to the library', () => {
     const el = setup(ratings({ byGenre: [{ genreId: 1, genreName: 'RPG', ratedCount: 4, averageRating: 8.5 }] }));
-    expect(el.querySelector('[data-genres] a')!.getAttribute('href')).toBe('/games?genre=1');
-    expect(el.querySelector('[data-platforms] a')!.getAttribute('href')).toBe('/games?platform=1');
+    expect(el.querySelector('[data-genres] a')!.getAttribute('href')).toBe('/games?genre=1&sort=rating');
+    expect(el.querySelector('[data-platforms] a')!.getAttribute('href')).toBe('/games?platform=1&sort=rating');
   });
 
   it('hides genres with too few ratings', () => {
