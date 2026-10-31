@@ -85,6 +85,17 @@ describe('GameDetail', () => {
     expect(el.querySelector('h1')!.parentElement!.querySelector('.platinum-pill')).toBeNull();
   });
 
+  it('gives the hero text a background-colour halo only over a cover backdrop', () => {
+    const plain = setup(game('SINGLEPLAYER')).el;
+    expect(plain.querySelector('h1')!.closest('.cover-legible')).toBeNull();
+    TestBed.resetTestingModule();
+
+    const { el } = setup({ ...game('SINGLEPLAYER'), coverImageUrl: 'https://img.example/cover.jpg' });
+    const legible = el.querySelector('h1')!.closest('.cover-legible')!;
+    expect(legible).not.toBeNull();
+    expect(legible.querySelector('dl')).not.toBeNull();
+  });
+
   it('lights up the 100% tile on its own, independent of the platinum', () => {
     const none = setup(game('SINGLEPLAYER')).el;
     expect(none.querySelector('[data-stat="fullCompletion"]')).toBeNull();

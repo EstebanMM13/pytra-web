@@ -72,7 +72,8 @@
           <app-game-cover decorative priority size="hero" class="shadow-lg ring-1 shadow-black/25 ring-border" [name]="g.name" />
         }
 
-        <div class="flex min-w-0 flex-1 flex-col">
+        <!-- Over a cover backdrop the text gets a halo in the page colour, so any cover keeps it readable -->
+        <div class="flex min-w-0 flex-1 flex-col" [class.cover-legible]="!!g.coverImageUrl">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
               <!-- The saga line always takes its room, so the title sits at the same height with or without one -->

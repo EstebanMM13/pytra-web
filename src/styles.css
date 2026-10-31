@@ -603,6 +603,20 @@
  * no color-mix fallback is emitted) and a crisp silver hairline.
  * Text (platinum-tint-fg) clears AA even on the brightest band of the sheen, in both themes.
  */
+/* Text laid over a blurred cover (game hero): a soft halo in the page background colour (dark on the
+   dark theme, light on the light one) keeps labels and values readable whatever the cover looks like.
+   Icons are SVG, so they get the same halo as a drop shadow. */
+@utility cover-legible {
+  text-shadow:
+    0 0 2px var(--pt-bg),
+    0 0 6px var(--pt-bg),
+    0 0 14px color-mix(in srgb, var(--pt-bg) 70%, transparent);
+
+  & svg {
+    filter: drop-shadow(0 0 1.5px var(--pt-bg)) drop-shadow(0 0 4px var(--pt-bg));
+  }
+}
+
 @utility platinum-pill {
   border: 1px solid var(--pt-platinum-line);
   color: var(--pt-platinum-tint-fg);
