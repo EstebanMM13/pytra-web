@@ -510,13 +510,7 @@
               <div class="flex items-baseline justify-between gap-3">
                 <span id="game-online-platforms">{{ 'game.online.platforms' | translate }}</span>
                 @if (split) {
-                  <span class="font-mono" [class]="split.over > 0 ? 'text-danger' : 'text-faint'" data-online-unassigned>
-                    @if (split.over > 0) {
-                      {{ 'game.online.platformHoursOver' | translate: { hours: (split.over | hours) } }}
-                    } @else {
-                      {{ 'game.online.platformHoursUnassigned' | translate: { hours: (split.unassigned | hours) } }}
-                    }
-                  </span>
+                  <span class="font-mono text-faint" data-online-total>{{ split.assigned | hours }}</span>
                 }
               </div>
               @if (split) {
@@ -551,6 +545,25 @@
                       >
                         <svg [lucideIcon]="icons.x" [size]="14"></svg>
                       </button>
+                    </li>
+                  }
+                  @if (showUnassignedRow()) {
+                    <li class="flex items-center gap-2 py-1.5 pr-1.5 pl-3" data-online-unassigned>
+                      <span class="min-w-0 flex-1 truncate text-sm text-faint">{{ 'game.online.unassignedRow' | translate }}</span>
+                      <input
+                        #unassignedInput
+                        type="text"
+                        inputmode="decimal"
+                        autocomplete="off"
+                        placeholder="—"
+                        [value]="onlineUnassignedHours()"
+                        (input)="setOnlineUnassignedHours(unassignedInput.value)"
+                        [disabled]="savingOnline() || onlineLoadState() === 'error' || onlineLoadState() === 'loading'"
+                        [attr.aria-label]="'game.online.unassignedRow' | translate"
+                        class="h-8 w-20 rounded-md border border-border bg-surface px-2 text-right font-mono text-sm text-text md:w-24"
+                      />
+                      <span class="w-3 text-faint">h</span>
+                      <span class="size-8 shrink-0"></span>
                     </li>
                   }
                 </ul>
@@ -643,45 +656,35 @@
                 </span>
                 <span>{{ 'runForm.fullCompletion' | translate }}</span>
               </button>
+              <form
+                [formGroup]="onlinePlaytimeForm"
+                (ngSubmit)="submitOnlinePlaytime()"
+                novalidate
+                class="ml-auto flex items-center gap-2"
+              >
+                <label class="flex items-center gap-2 text-sm text-text-2">
+                  {{ 'game.online.rating' | translate }}
+                  <input
+                    type="text"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    formControlName="generalRating"
+                    placeholder="—"
+                    class="h-10 w-20 rounded-lg border border-border bg-bg px-3 font-mono text-sm text-gold"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  [disabled]="savingOnline() || onlineLoadState() === 'error' || onlineLoadState() === 'loading'"
+                  class="press h-10 rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
+                >
+                  {{ 'game.online.save' | translate }}
+                </button>
+              </form>
             </div>
             @if (onlineLoadState() === 'missing' && (onlinePlatforms().length || flags.platinum || flags.fullCompletion)) {
               <p class="-mt-1 mb-3 text-xs text-faint">{{ 'game.online.platformsPending' | translate }}</p>
             }
-            <form
-              [formGroup]="onlinePlaytimeForm"
-              (ngSubmit)="submitOnlinePlaytime()"
-              novalidate
-              class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-end gap-2.5"
-            >
-              <label class="flex min-w-0 flex-col gap-1.5 text-xs text-muted">
-                {{ 'game.online.hours' | translate }}
-                <input
-                  type="text"
-                  inputmode="decimal"
-                  autocomplete="off"
-                  formControlName="totalHours"
-                  class="h-10 w-full rounded-lg border border-border bg-bg px-3 font-mono text-sm text-text"
-                />
-              </label>
-              <label class="flex min-w-0 flex-col gap-1.5 text-xs text-muted">
-                {{ 'game.online.rating' | translate }}
-                <input
-                  type="text"
-                  inputmode="decimal"
-                  autocomplete="off"
-                  formControlName="generalRating"
-                  placeholder="—"
-                  class="h-10 w-full rounded-lg border border-border bg-bg px-3 font-mono text-sm text-gold"
-                />
-              </label>
-              <button
-                type="submit"
-                [disabled]="savingOnline() || onlineLoadState() === 'error' || onlineLoadState() === 'loading'"
-                class="press h-10 rounded-lg bg-brand px-3.5 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
-              >
-                {{ 'game.online.save' | translate }}
-              </button>
-            </form>
             @if (onlinePlaytimeForm.invalid && onlinePlaytimeForm.touched) {
               <p class="mt-2 text-xs text-danger">{{ 'game.online.invalid' | translate: { max: preferences.ratingMax() } }}</p>
             }

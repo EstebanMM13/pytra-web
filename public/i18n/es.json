@@ -783,6 +783,7 @@
       "platformsPending": "Se guardarán al pulsar Guardar.",
       "platformHours": "Horas por plataforma",
       "platformHoursUnassigned": "Sin asignar: {{hours}}",
+      "unassignedRow": "Sin asignar",
       "platformHoursOver": "Sobran {{hours}}",
       "platformHoursInvalid": "Horas por plataforma ≥ 0 (p. ej. 12,5).",
       "platformHoursExceed": "Las horas por plataforma no pueden superar el total.",

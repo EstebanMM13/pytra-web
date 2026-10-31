@@ -119,3 +119,19 @@ export function shouldCelebrateOnline(saved: OnlineFlags, previous: OnlineFlags,
   }
   return (saved.platinum && !previous.platinum) || (saved.fullCompletion && !previous.fullCompletion);
 }
+
+/** Stored online hours on no platform: the total minus the per-platform hours (never negative). */
+export function unassignedHoursOf(playtime: OnlinePlaytime | null): number {
+  if (!playtime) return 0;
+  const assigned = Object.values(playtime.platformHours ?? {}).reduce((sum, h) => sum + h, 0);
+  return Math.max(0, playtime.totalHours - assigned);
+}
+
+/** The stored total once the platforms not in `keptIds` (and their hours) are removed. */
+export function totalWithout(playtime: OnlinePlaytime, keptIds: number[]): number {
+  const kept = new Set(keptIds.map(String));
+  const removed = Object.entries(playtime.platformHours ?? {})
+    .filter(([id]) => !kept.has(id))
+    .reduce((sum, [, h]) => sum + h, 0);
+  return Math.max(0, playtime.totalHours - removed);
+}

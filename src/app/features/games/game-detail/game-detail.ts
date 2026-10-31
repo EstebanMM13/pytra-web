@@ -57,6 +57,8 @@ import {
   onlinePlaytimeErrorState,
   parsePlatformHours,
   platformHoursInputsOf,
+  totalWithout,
+  unassignedHoursOf,
   shouldCelebrateOnline,
 } from './online-playtime.logic';
 import { CategoryBadge, UpcomingBadge } from '../../../shared/ui/game-badges';
@@ -217,6 +219,8 @@ export class GameDetail {
   readonly onlinePlatformHours = signal<PlatformHoursInputs>({});
   /** The per-platform hours failed validation on the last save attempt. */
   readonly onlinePlatformHoursError = signal<PlatformHoursSplit['error']>(null);
+  /** Online hours on no platform (typed before platforms existed, or left over): its own editable row. */
+  readonly onlineUnassignedHours = signal('');
   /** The online card's platinum / 100% switches: the stored flags, or pending ones before the first save. */
   readonly onlineFlags = signal<OnlineFlags>({ platinum: false, fullCompletion: false });
   readonly savingOnlineFlags = signal(false);
@@ -231,7 +235,6 @@ export class GameDetail {
 
   // Text inputs so "12,5" works on every keyboard/locale (number inputs drop it as empty).
   readonly onlinePlaytimeForm = this.fb.group({
-    totalHours: this.fb.control('0', [Validators.required, decimalValidator('hours', (h) => h >= 0)]),
     // Typed on the rating scale with the run form's rules; stored on 0–10 with two decimals.
     generalRating: this.fb.control(
       '',
@@ -490,7 +493,7 @@ export class GameDetail {
     if (game.category === 'SINGLEPLAYER') {
       return;
     }
-    this.onlinePlaytimeForm.reset({ totalHours: '0', generalRating: '' });
+    this.onlinePlaytimeForm.reset({ generalRating: '' });
     // Catalog for the online platform picker (cached after the first load).
     this.platformService.load().subscribe({ error: () => {} });
     const id = game.id;
@@ -503,10 +506,11 @@ export class GameDetail {
         this.onlinePlatformHours.set(
           platformHoursInputsOf(playtime, (playtime.platforms ?? []).map((p) => p.id), lang),
         );
+        const unassigned = unassignedHoursOf(playtime);
+        this.onlineUnassignedHours.set(unassigned > 0 ? formatHoursInput(unassigned, lang) : '');
         this.onlineFlags.set(onlineFlagsOf(playtime));
         this.onlineLoadState.set('loaded');
         this.onlinePlaytimeForm.setValue({
-          totalHours: formatHoursInput(playtime.totalHours, lang),
           generalRating: scaledRatingDraft(playtime.generalRating, this.preferences.ratingScale(), lang),
         });
       },
@@ -611,7 +615,7 @@ export class GameDetail {
         id,
         // The stored hours and rating, not the form's possibly unsaved edits.
         buildOnlinePlaytimeRequest({
-          totalHours: existing.totalHours,
+          totalHours: totalWithout(existing, next.map((p) => p.id)),
           generalRating: existing.generalRating,
           existing,
           platformIds: next.map((p) => p.id),
@@ -732,12 +736,31 @@ export class GameDetail {
     this.onlinePlatformHoursError.set(null);
   }
 
-  /** The per-platform split against the typed total; null below two platforms (nothing to split). */
+  protected setOnlineUnassignedHours(text: string): void {
+    this.onlineUnassignedHours.set(text);
+    this.onlinePlatformHoursError.set(null);
+  }
+
+  /** The unassigned row shows while there are hours on no platform (stored or typed). */
+  protected showUnassignedRow(): boolean {
+    return this.onlineUnassignedHours().trim() !== '' || unassignedHoursOf(this.onlinePlaytime()) > 0;
+  }
+
+  /**
+   * The hours of each platform plus the unassigned row; their sum is the online total (`assigned`).
+   * Null without platforms.
+   */
   protected onlinePlatformSplit(): PlatformHoursSplit | null {
     const ids = this.onlinePlatforms().map((p) => p.id);
-    if (ids.length < 2) return null;
-    const total = parseDecimal(this.onlinePlaytimeForm.controls.totalHours.value) ?? 0;
-    return parsePlatformHours(this.onlinePlatformHours(), ids, Number.isNaN(total) ? 0 : total);
+    if (!ids.length) return null;
+    const UNASSIGNED = -1;
+    const split = parsePlatformHours(
+      { ...this.onlinePlatformHours(), [UNASSIGNED]: this.onlineUnassignedHours() },
+      [...ids, UNASSIGNED],
+      Number.MAX_SAFE_INTEGER,
+    );
+    const { [UNASSIGNED]: unassigned = 0, ...hours } = split.hours;
+    return { ...split, hours, unassigned, over: 0 };
   }
 
   protected submitOnlinePlaytime(): void {
@@ -759,13 +782,13 @@ export class GameDetail {
       .upsert(
         id,
         buildOnlinePlaytimeRequest({
-          totalHours: parseDecimal(raw.totalHours) ?? 0,
+          // The total is the platforms' hours plus the unassigned row; without platforms it is kept.
+          totalHours: split ? split.assigned : (this.onlinePlaytime()?.totalHours ?? 0),
           generalRating: this.storedOnlineRating(raw.generalRating),
           existing: this.onlinePlaytime(),
           platformIds: this.onlinePlatforms().map((p) => p.id),
           platformsTouched: this.onlinePlatformsTouched(),
           ...this.onlineFlags(),
-          // Below two platforms nothing is sent: the API clears the breakdown there.
           platformHours: split?.hours,
         }),
       )

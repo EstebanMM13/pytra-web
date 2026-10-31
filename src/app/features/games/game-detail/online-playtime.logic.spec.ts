@@ -6,6 +6,8 @@ import {
   parsePlatformHours,
   platformHoursInputsOf,
   shouldCelebrateOnline,
+  totalWithout,
+  unassignedHoursOf,
 } from './online-playtime.logic';
 
 const existing: OnlinePlaytime = {
@@ -165,5 +167,14 @@ describe('online platform hours', () => {
     expect(parsePlatformHours({ 1: 'abc', 2: '' }, [1, 2], 30).error).toBe('invalid');
     expect(parsePlatformHours({ 1: '-1', 2: '' }, [1, 2], 30).error).toBe('invalid');
     expect(parsePlatformHours({ 1: '20', 2: '10,5' }, [1, 2], 30)).toMatchObject({ error: 'exceedsTotal', over: 0.5 });
+  });
+});
+
+describe('online total from the platforms', () => {
+  it('finds the stored hours on no platform and the total without removed platforms', () => {
+    const playtime: OnlinePlaytime = { ...existing, totalHours: 30, platformHours: { '1': 10, '2': 15 } };
+    expect(unassignedHoursOf(playtime)).toBe(5);
+    expect(unassignedHoursOf({ ...existing, totalHours: 8, platformHours: {} })).toBe(8);
+    expect(totalWithout(playtime, [1])).toBe(15);
   });
 });
