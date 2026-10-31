@@ -255,6 +255,15 @@
                 <p class="truncate text-base font-semibold" [attr.title]="hero.gameName">{{ hero.gameName }}</p>
                 <!-- The meta wraps on phones instead of cutting the start date -->
                 <p class="mt-1 text-[13px] text-text-3 wrap-break-word sm:truncate" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
+                @if (hero.postgame) {
+                  <span
+                    class="mt-2 mr-1.5 inline-block rounded-full bg-brand-tint px-2 py-0.5 text-[11px] font-medium text-brand-lighter"
+                    [attr.title]="'run.postgameAria' | translate"
+                    data-postgame
+                  >
+                    {{ 'run.postgame' | translate }}
+                  </span>
+                }
                 <!-- Days pill under the meta on phones, where the title needs the width -->
                 @if (daysPlaying(hero); as days) {
                   <span class="mt-2 inline-block rounded-full bg-hover px-2 py-0.5 font-mono text-[11px] text-text-3 ring-1 ring-gold/70 ring-inset sm:hidden">
@@ -283,6 +292,7 @@
                 [title]="run.gameName"
                 [coverUrl]="run.coverImageUrl"
                 [meta]="playingMeta(run)"
+                [postgame]="!!run.postgame"
               >
                 @if (daysPlaying(run); as days) {
                   <span runRowBelow class="mt-1.5 inline-block rounded-full bg-hover px-2 py-0.5 font-mono text-[11px] text-text-3 ring-1 ring-gold/70 ring-inset sm:hidden">

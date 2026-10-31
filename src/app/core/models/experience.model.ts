@@ -21,6 +21,13 @@ export interface Experience {
   /** "100%": every trophy/achievement of the game obtained. Independent of `platinum`. */
   fullCompletion: boolean;
   replay: boolean;
+  /**
+   * Beaten (COMPLETADO) but still being played: the postgame. Always false on other statuses.
+   * Optional: absent from an API deployed before the postgame existed.
+   */
+  postgame?: boolean;
+  /** Date (`yyyy-MM-dd`) the postgame ended; setting it ends the postgame. */
+  postgameEndDate?: string | null;
   summary: string | null;
   pros: string | null;
   cons: string | null;
@@ -50,6 +57,10 @@ export interface ExperienceRequest {
   platinum?: boolean;
   fullCompletion?: boolean;
   replay?: boolean;
+  /** Only kept on COMPLETADO runs, and only while `postgameEndDate` is empty. */
+  postgame?: boolean;
+  /** Not before `endDate`; the API drops it on runs that are not COMPLETADO. */
+  postgameEndDate?: string | null;
   summary?: string | null;
   pros?: string | null;
   cons?: string | null;

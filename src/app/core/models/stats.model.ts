@@ -73,6 +73,8 @@ export interface InProgressExperience {
   startDate: string | null;
   hours: number | null;
   updatedAt: string;
+  /** A completed run whose postgame is still being played (absent or false: the run is in progress). */
+  postgame?: boolean;
 }
 
 /** One month of a year summary (`month` is 1-12). */

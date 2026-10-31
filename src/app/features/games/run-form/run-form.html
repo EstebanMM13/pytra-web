@@ -319,6 +319,53 @@
       </div>
     </div>
 
+    <!-- Postgame: only on a completed run (beaten, still being played) -->
+    @if (postgameOffered()) {
+      <div class="flex flex-col gap-2" data-postgame>
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
+          <div class="divide-y divide-border rounded-xl border border-border bg-surface md:contents">
+            <button
+              type="button"
+              role="switch"
+              [attr.aria-checked]="postgame()"
+              (click)="toggle('postgame')"
+              class="run-form-switch"
+              data-postgame-switch
+            >
+              <span class="run-form-track" [class]="postgame() ? 'bg-brand' : 'bg-border'">
+                <span class="run-form-thumb" [class]="postgame() ? 'translate-x-[18px] bg-white md:translate-x-4' : 'bg-muted'"></span>
+              </span>
+              <span>{{ 'runForm.postgame' | translate }}</span>
+            </button>
+          </div>
+          @if (postgame() || postgameEndDate()) {
+            <label class="run-form-cell rounded-xl border border-border bg-surface md:w-56 md:rounded-none md:border-0 md:bg-transparent">
+              <span>{{ 'runForm.postgameEnd' | translate }}</span>
+              <input
+                type="date"
+                formControlName="postgameEndDate"
+                class="run-form-cell-input"
+                data-postgame-end
+                [min]="dateMin"
+                [max]="dateMax()"
+                [attr.aria-invalid]="postgameRangeError() || dateLimitsError('postgameEndDate')"
+                (change)="onPostgameEndDateChange($any($event.target))"
+              />
+            </label>
+          }
+        </div>
+        @if (postgameHint()) {
+          <p class="text-xs text-muted" data-postgame-hint>{{ 'runForm.postgameHint' | translate }}</p>
+        }
+        @if (dateLimitsError('postgameEndDate')) {
+          <p class="text-xs text-danger">{{ 'runForm.errors.dateLimits' | translate }}</p>
+        }
+        @if (postgameRangeError()) {
+          <p class="text-xs text-danger">{{ 'runForm.errors.postgameDates' | translate }}</p>
+        }
+      </div>
+    }
+
     <!-- Summary -->
     <div class="flex flex-col gap-2">
       <label for="run-form-summary" class="text-[13px] text-text-3">{{ 'runForm.summary' | translate }}</label>

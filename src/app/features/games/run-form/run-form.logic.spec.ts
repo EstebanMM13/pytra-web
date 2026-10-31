@@ -8,6 +8,8 @@ import {
   isValidDateRange,
   isValidRating,
   nextRunLabel,
+  postgameForEndDate,
+  postgameRangeValidator,
   ratingValidator,
   canStartRun,
   ratingValidatorFor,
@@ -162,6 +164,27 @@ describe('run form logic', () => {
       group.controls.endDate.setValue('2024-06-01');
       expect(dateRangeValidator(group)).toBeNull();
     });
+
+    it('requires the postgame end on or after the end date', () => {
+      const group = new FormGroup({
+        endDate: new FormControl('2024-05-10'),
+        postgameEndDate: new FormControl('2024-05-09'),
+      });
+      expect(postgameRangeValidator(group)).toEqual({ postgameRange: true });
+      group.controls.postgameEndDate.setValue('2024-05-10');
+      expect(postgameRangeValidator(group)).toBeNull();
+      group.controls.endDate.setValue('');
+      group.controls.postgameEndDate.setValue('2024-05-09');
+      expect(postgameRangeValidator(group)).toBeNull();
+    });
+  });
+
+  describe('postgameForEndDate', () => {
+    it('ends the postgame when its end date is set and resumes it when the date is cleared', () => {
+      expect(postgameForEndDate('2026-10-01')).toBe(false);
+      expect(postgameForEndDate('')).toBe(true);
+      expect(postgameForEndDate(null)).toBe(true);
+    });
   });
 
   describe('deriveRunYear', () => {
@@ -196,6 +219,8 @@ describe('run form logic', () => {
       platinum: true,
       fullCompletion: false,
       replay: true,
+      postgame: false,
+      postgameEndDate: '',
       pros: 'Combate\nArte',
       cons: '',
       notes: '',
@@ -214,11 +239,33 @@ describe('run form logic', () => {
         platinum: true,
         fullCompletion: false,
         replay: true,
+        postgame: false,
+        postgameEndDate: null,
         summary: null,
         pros: 'Combate\nArte',
         cons: null,
         notes: null,
       });
+    });
+
+    it('sends the postgame of a completed run, and its end date ends it', () => {
+      expect(buildExperienceRequest({ ...value, postgame: true })).toMatchObject({
+        postgame: true,
+        postgameEndDate: null,
+      });
+      expect(buildExperienceRequest({ ...value, postgame: true, postgameEndDate: '2025-06-01' })).toMatchObject({
+        postgame: false,
+        postgameEndDate: '2025-06-01',
+      });
+    });
+
+    it('drops the postgame and its end date when the run is not completed', () => {
+      for (const status of ['EN_CURSO', 'ABANDONADO', 'PENDIENTE'] as const) {
+        expect(buildExperienceRequest({ ...value, status, postgame: true, postgameEndDate: '2025-06-01' })).toMatchObject({
+          postgame: false,
+          postgameEndDate: null,
+        });
+      }
     });
 
     it('sends the 100% flag independently of the platinum', () => {

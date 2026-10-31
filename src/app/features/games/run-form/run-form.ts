@@ -43,6 +43,8 @@ import {
   ratingValidatorFor,
   runDateValidator,
   statusForEndDate,
+  postgameForEndDate,
+  postgameRangeValidator,
 } from './run-form.logic';
 
 const MAX_RESULTS = 8;
@@ -140,11 +142,13 @@ export class RunForm implements OnInit {
       platinum: this.fb.control(false),
       fullCompletion: this.fb.control(false),
       replay: this.fb.control(false),
+      postgame: this.fb.control(false),
+      postgameEndDate: this.fb.control('', runDateValidator),
       pros: this.fb.control(''),
       cons: this.fb.control(''),
       notes: this.fb.control(''),
     },
-    { validators: dateRangeValidator },
+    { validators: [dateRangeValidator, postgameRangeValidator] },
   );
 
   private controlSignal<T>(source: Observable<unknown>, read: () => T) {
@@ -166,6 +170,17 @@ export class RunForm implements OnInit {
     () => this.form.controls.fullCompletion.value,
   );
   protected readonly replay = this.controlSignal(this.form.controls.replay.valueChanges, () => this.form.controls.replay.value);
+  protected readonly postgame = this.controlSignal(this.form.controls.postgame.valueChanges, () => this.form.controls.postgame.value);
+  protected readonly postgameEndDate = this.controlSignal(
+    this.form.controls.postgameEndDate.valueChanges,
+    () => this.form.controls.postgameEndDate.value,
+  );
+  /** Postgame only exists on a completed run. */
+  protected readonly postgameOffered = computed(() => this.status() === 'COMPLETADO');
+  /** Platinum or 100% while the postgame is on: suggest recording its end (never switched off for the user). */
+  protected readonly postgameHint = computed(
+    () => this.postgameOffered() && this.postgame() && (this.platinum() || this.fullCompletion()),
+  );
 
   protected readonly isEdit = computed(() => this.request().mode === 'edit');
   protected readonly saving = signal(false);
@@ -254,6 +269,8 @@ export class RunForm implements OnInit {
       platinum: experience.platinum,
       fullCompletion: experience.fullCompletion ?? false,
       replay: experience.replay,
+      postgame: experience.postgame ?? false,
+      postgameEndDate: experience.postgameEndDate ?? '',
       pros: experience.pros ?? '',
       cons: experience.cons ?? '',
       notes: experience.notes ?? '',
@@ -382,6 +399,17 @@ export class RunForm implements OnInit {
     }
   }
 
+  /**
+   * The user picked or cleared the postgame end date: a date ends the postgame, clearing it resumes it
+   * (see postgameForEndDate). An empty value with `badInput` is a date being typed.
+   */
+  protected onPostgameEndDateChange(input: Pick<HTMLInputElement, 'value' | 'validity'>): void {
+    if (!input.value && input.validity?.badInput) {
+      return;
+    }
+    this.form.controls.postgame.setValue(postgameForEndDate(input.value));
+  }
+
   protected startAddPlatform(): void {
     this.addingPlatform.set(true);
     this.newPlatformName.set('');
@@ -417,7 +445,7 @@ export class RunForm implements OnInit {
     });
   }
 
-  protected toggle(control: 'platinum' | 'fullCompletion' | 'replay'): void {
+  protected toggle(control: 'platinum' | 'fullCompletion' | 'replay' | 'postgame'): void {
     const c = this.form.controls[control];
     c.setValue(!c.value);
     // A user choice: later defaults (e.g. Replay from the game's runs) must not override it.
@@ -440,7 +468,11 @@ export class RunForm implements OnInit {
     return runDateMax();
   }
 
-  protected dateLimitsError(name: 'startDate' | 'endDate'): boolean {
+  protected postgameRangeError(): boolean {
+    return this.form.hasError('postgameRange');
+  }
+
+  protected dateLimitsError(name: 'startDate' | 'endDate' | 'postgameEndDate'): boolean {
     return this.form.controls[name].hasError('runDate');
   }
 

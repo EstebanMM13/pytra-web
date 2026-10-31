@@ -16,7 +16,7 @@ import { ICONS } from './icons';
  * `onSurface` is for rows placed directly on the page (mobile) instead of inside a card.
  * Binding `coverUrl` (even to null, which shows the initials fallback) swaps the accent bar for a cover thumbnail.
  * `platinum` adds an icy trophy badge and turns the accent bar silver (unless best); `fullCompletion`
- * adds a teal badge-check badge. Both sit by the status: on the line under the meta on phones (with
+ * adds a teal badge-check badge; `postgame` adds a "Postgame" pill (beaten, still being played). They sit by the status: on the line under the meta on phones (with
  * the best pill, so the title keeps its width), before the projected figures from sm up.
  * `backdropUrl` lays a soft blurred cover behind the row (lighter than the game hero's, so text stays first).
  */
@@ -87,6 +87,15 @@ import { ICONS } from './icons';
           <svg [lucideIcon]="icons.badgeCheck" [size]="13" aria-hidden="true"></svg>
         </span>
       }
+      @if (postgame()) {
+        <span
+          class="inline-flex h-6 shrink-0 items-center rounded-full bg-brand-tint px-2 text-[11px] font-medium text-brand-lighter"
+          [attr.title]="'run.postgameAria' | translate"
+          data-postgame
+        >
+          {{ 'run.postgame' | translate }}
+        </span>
+      }
     </ng-template>
     <div class="min-w-0 flex-1">
       <p class="flex items-center gap-2 text-[15px] font-semibold">
@@ -105,7 +114,7 @@ import { ICONS } from './icons';
            its own top margin, so the line takes no room when empty. -->
       <div class="flex flex-wrap items-center gap-x-1.5" data-status-line>
         <ng-content select="[runRowBelow]" />
-        @if (best() || platinum() || fullCompletion()) {
+        @if (best() || platinum() || fullCompletion() || postgame()) {
           <span class="mt-1.5 flex items-center gap-1.5 sm:hidden">
             @if (best()) {
               <ng-container [ngTemplateOutlet]="bestPill" [ngTemplateOutletContext]="{ $implicit: 'inline-flex h-6' }" />
@@ -115,7 +124,7 @@ import { ICONS } from './icons';
         }
       </div>
     </div>
-    @if (platinum() || fullCompletion()) {
+    @if (platinum() || fullCompletion() || postgame()) {
       <!-- From sm up the badges sit just before the projected figures (e.g. the status pill) -->
       <span class="hidden shrink-0 items-center gap-1.5 sm:flex">
         <ng-container [ngTemplateOutlet]="badges" />
@@ -153,6 +162,8 @@ export class RunRow {
   readonly best = input(false, { transform: booleanAttribute });
   readonly platinum = input(false, { transform: booleanAttribute });
   readonly fullCompletion = input(false, { transform: booleanAttribute });
+  /** Beaten run still being played (postgame). */
+  readonly postgame = input(false, { transform: booleanAttribute });
   readonly onSurface = input(false, { transform: booleanAttribute });
   /** Cover shown blurred behind the row; null / undefined keeps the plain background. */
   readonly backdropUrl = input<string | null | undefined>(undefined);

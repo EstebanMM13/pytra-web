@@ -82,6 +82,21 @@ export function statusForEndDate(
   return status === 'COMPLETADO' ? 'EN_CURSO' : status;
 }
 
+/** Group validator: `postgameEndDate` must not be before `endDate` (the API rejects it). */
+export const postgameRangeValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+  const end = group.get('endDate')?.value as string | null;
+  const postgameEnd = group.get('postgameEndDate')?.value as string | null;
+  return isValidDateRange(end, postgameEnd) ? null : { postgameRange: true };
+};
+
+/**
+ * Postgame flag after the user edits the postgame end date: a date means the postgame is over (off);
+ * clearing it means it is still going (on), as clearing a run's end date reopens it.
+ */
+export function postgameForEndDate(postgameEndDate: string | null | undefined): boolean {
+  return !postgameEndDate;
+}
+
 /** ONLINE games are tracked through online playtime only: new runs are not offered for them. */
 export function canStartRun(game: Pick<Game, 'category'>): boolean {
   return game.category !== 'ONLINE';
@@ -128,6 +143,8 @@ export interface RunFormValue {
   platinum: boolean;
   fullCompletion: boolean;
   replay: boolean;
+  postgame: boolean;
+  postgameEndDate: string;
   pros: string;
   cons: string;
   notes: string;
@@ -156,6 +173,9 @@ export function buildExperienceRequest(
   const rating = numberOrNull(value.rating);
   const startDate = value.startDate || null;
   const endDate = value.endDate || null;
+  // Postgame only exists on a completed run; its end date ends it (the API applies the same rules).
+  const completed = value.status === 'COMPLETADO';
+  const postgameEndDate = completed ? value.postgameEndDate || null : null;
   return {
     runLabel: value.runLabel.trim(),
     year: deriveRunYear({ startDate, endDate }, original),
@@ -168,6 +188,8 @@ export function buildExperienceRequest(
     platinum: value.platinum,
     fullCompletion: value.fullCompletion,
     replay: value.replay,
+    postgame: completed && postgameEndDate === null && value.postgame,
+    postgameEndDate,
     summary: textOrNull(value.summary),
     pros: textOrNull(value.pros),
     cons: textOrNull(value.cons),

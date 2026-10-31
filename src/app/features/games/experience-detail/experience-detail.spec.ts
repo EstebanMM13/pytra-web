@@ -280,6 +280,20 @@ describe('ExperienceDetail inline edit', () => {
     expect(pill.querySelector('.sr-only')!.textContent).toContain('run.fullCompletionAria');
   });
 
+  it('shows the postgame pill while it lasts, then when it ended', () => {
+    expect(setup(run({ status: 'COMPLETADO' })).el.querySelector('[data-postgame], [data-postgame-ended]')).toBeNull();
+    TestBed.resetTestingModule();
+
+    const playing = setup(run({ status: 'COMPLETADO', postgame: true })).el;
+    expect(playing.querySelector('[data-postgame]')!.textContent).toContain('run.postgame');
+    expect(playing.querySelector('[data-postgame-ended]')).toBeNull();
+    TestBed.resetTestingModule();
+
+    const ended = setup(run({ status: 'COMPLETADO', postgameEndDate: '2026-10-20' })).el;
+    expect(ended.querySelector('[data-postgame]')).toBeNull();
+    expect(ended.querySelector('[data-postgame-ended]')!.textContent).toContain('run.postgameEnded');
+  });
+
   it('never sends the change in the read-only demo', () => {
     const t = setup(run(), true);
     const input = openHours(t);

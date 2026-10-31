@@ -13,6 +13,7 @@ import { RunRow } from './run-row';
     [best]="best()"
     [platinum]="platinum()"
     [fullCompletion]="fullCompletion()"
+    [postgame]="postgame()"
   >
     <span runRowBelow class="mt-1.5 sm:hidden" data-below-status>Done</span>
     <span class="hidden sm:block" data-side-status>Done</span>
@@ -22,16 +23,18 @@ class Host {
   readonly best = signal(false);
   readonly platinum = signal(false);
   readonly fullCompletion = signal(false);
+  readonly postgame = signal(false);
 }
 
 describe('RunRow', () => {
-  function setup(flags: Partial<{ best: boolean; platinum: boolean; fullCompletion: boolean }> = {}) {
+  function setup(flags: Partial<{ best: boolean; platinum: boolean; fullCompletion: boolean; postgame: boolean }> = {}) {
     TestBed.configureTestingModule({ imports: [Host], providers: [provideTranslateService()] });
     const fixture = TestBed.createComponent(Host);
     const host = fixture.componentInstance;
     host.best.set(flags.best ?? false);
     host.platinum.set(flags.platinum ?? false);
     host.fullCompletion.set(flags.fullCompletion ?? false);
+    host.postgame.set(flags.postgame ?? false);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     const titleLine = el.querySelector('p')!;
@@ -70,6 +73,17 @@ describe('RunRow', () => {
     expect(phoneFull.getAttribute('aria-label')).toBe('run.fullCompletionAria');
     expect(phoneFull.getAttribute('title')).toBe('run.fullCompletionAria');
     expect(el.querySelectorAll('[data-full-completion]').length).toBe(2);
+  });
+
+  it('shows the postgame pill next to the status only when the run is in its postgame', () => {
+    expect(setup().el.querySelector('[data-postgame]')).toBeNull();
+    TestBed.resetTestingModule();
+
+    const { el, statusLine, titleLine } = setup({ postgame: true });
+    expect(titleLine.querySelector('[data-postgame]')).toBeNull();
+    expect(statusLine.querySelector('[data-postgame]')!.textContent).toContain('run.postgame');
+    expect(el.querySelectorAll('[data-postgame]').length).toBe(2);
+    expect(el.querySelector('[data-postgame]')!.getAttribute('title')).toBe('run.postgameAria');
   });
 
   it('renders each badge only when its flag is set', () => {

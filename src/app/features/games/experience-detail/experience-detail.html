@@ -107,6 +107,19 @@
               <span class="sr-only">{{ 'run.fullCompletionAria' | translate }}</span>
             </span>
           }
+          @if (e.postgame) {
+            <span
+              class="rounded-full bg-brand-tint px-2.5 py-1 text-xs font-medium text-brand-lighter"
+              [attr.title]="'run.postgameAria' | translate"
+              data-postgame
+            >
+              {{ 'run.postgame' | translate }}
+            </span>
+          } @else if (e.postgameEndDate) {
+            <span class="rounded-full border border-border px-2.5 py-[3px] text-xs text-text-3" data-postgame-ended>
+              {{ 'run.postgameEnded' | translate: { date: date(e.postgameEndDate) } }}
+            </span>
+          }
           <app-platform-label
             class="rounded-full border border-border px-2.5 py-[3px] text-xs text-text-3"
             [platform]="{ name: e.platformName, color: e.platformColor }"

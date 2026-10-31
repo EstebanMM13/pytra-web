@@ -45,7 +45,8 @@ interface RunFormHarness {
   onEndDateChange(input: Pick<HTMLInputElement, 'value' | 'validity'>): void;
   games(): Game[] | null;
   selectGame(game: Game): void;
-  toggle(control: 'platinum' | 'fullCompletion' | 'replay'): void;
+  onPostgameEndDateChange(input: Pick<HTMLInputElement, 'value' | 'validity'>): void;
+  toggle(control: 'platinum' | 'fullCompletion' | 'replay' | 'postgame'): void;
   submit(): void;
 }
 
@@ -67,6 +68,8 @@ function experience(overrides: Partial<Experience> = {}): Experience {
     platinum: false,
     fullCompletion: false,
     replay: false,
+    postgame: false,
+    postgameEndDate: null,
     summary: null,
     pros: null,
     cons: null,
@@ -242,6 +245,54 @@ describe('RunForm', () => {
       const { form } = setup({ mode: 'edit', experience: experience({ fullCompletion: true }) });
       expect(form.form.controls.fullCompletion.value).toBe(true);
       expect(form.form.controls.platinum.value).toBe(false);
+    });
+  });
+
+  describe('postgame', () => {
+    const postgameSwitch = () => document.querySelector<HTMLButtonElement>('button[data-postgame-switch]');
+    const completed = (overrides: Partial<Experience> = {}) =>
+      experience({ status: 'COMPLETADO', endDate: '2026-10-01', postgame: true, ...overrides });
+
+    it('is only offered on a completed run', () => {
+      const { form, fixture } = setup({ mode: 'edit', experience: experience() });
+      expect(postgameSwitch()).toBeNull();
+
+      form.setStatus('COMPLETADO');
+      fixture.detectChanges();
+
+      expect(postgameSwitch()?.getAttribute('aria-checked')).toBe('false');
+      postgameSwitch()!.click();
+      fixture.detectChanges();
+      expect(form.form.controls.postgame.value).toBe(true);
+      expect(postgameSwitch()!.getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('its end date ends the postgame, and clearing the date resumes it', () => {
+      const { form } = setup({ mode: 'edit', experience: completed() });
+      expect(form.form.controls.postgame.value).toBe(true);
+
+      form.onPostgameEndDateChange(dateInput('2026-10-20'));
+      expect(form.form.controls.postgame.value).toBe(false);
+
+      form.onPostgameEndDateChange(dateInput(''));
+      expect(form.form.controls.postgame.value).toBe(true);
+    });
+
+    it('keeps the stored end date when editing a run', () => {
+      const { form } = setup({ mode: 'edit', experience: completed({ postgame: false, postgameEndDate: '2026-10-20' }) });
+      expect(form.form.controls.postgame.value).toBe(false);
+      expect(form.form.controls.postgameEndDate.value).toBe('2026-10-20');
+    });
+
+    it('suggests ending it when the platinum or the 100% is marked, without changing it', () => {
+      const { form, fixture } = setup({ mode: 'edit', experience: completed() });
+      expect(document.querySelector('[data-postgame-hint]')).toBeNull();
+
+      form.toggle('platinum');
+      fixture.detectChanges();
+
+      expect(document.querySelector('[data-postgame-hint]')?.textContent).toContain('runForm.postgameHint');
+      expect(form.form.controls.postgame.value).toBe(true);
     });
   });
 

@@ -446,6 +446,7 @@
                   [best]="run.id === bestRunId()"
                   [platinum]="run.platinum"
                   [fullCompletion]="run.fullCompletion"
+                  [postgame]="!!run.postgame"
                   [backdropUrl]="g.coverImageUrl"
                 >
                   <span runRowBelow class="mt-1.5 block sm:hidden"><app-status-pill [status]="run.status" /></span>
