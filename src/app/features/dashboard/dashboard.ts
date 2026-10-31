@@ -97,12 +97,12 @@ export class Dashboard {
 
   protected readonly statIcons = {
     games: ICONS.gamepad2,
-    sagas: ICONS.layers,
+    sagas: ICONS.sagas,
     runs: ICONS.play,
-    single: ICONS.clock,
+    single: ICONS.singlePlayer,
     online: ICONS.wifi,
     rating: ICONS.star,
-    steam: ICONS.download,
+    steam: ICONS.import,
     addGame: ICONS.plus,
   };
 

@@ -188,7 +188,7 @@ export class GameDetail {
     hours: ICONS.clock,
     rating: ICONS.star,
     best: ICONS.award,
-    platinum: ICONS.trophy,
+    platinum: ICONS.platinum,
     fullCompletion: ICONS.badgeCheck,
   };
 

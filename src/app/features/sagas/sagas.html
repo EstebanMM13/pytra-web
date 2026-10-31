@@ -111,7 +111,7 @@
         </div>
       } @else if (summaries().length === 0) {
         <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-5 py-10 text-center" data-saga-empty>
-          <svg [lucideIcon]="icons.layers" [size]="28" class="text-brand-light" aria-hidden="true"></svg>
+          <svg [lucideIcon]="icons.sagas" [size]="28" class="text-brand-light" aria-hidden="true"></svg>
           <p class="text-sm text-muted">{{ 'sagas.empty' | translate }}</p>
           <button
             type="button"
@@ -335,7 +335,7 @@
           [valueClass]="'font-mono ' + (s.avgRating | ratingTone)"
         />
         <app-stat-card
-          [icon]="icons.trophy"
+          [icon]="icons.platinum"
           tone="platinum"
           [label]="'sagas.stats.platinums' | translate"
           [value]="s.platinums || '—'"
@@ -355,7 +355,7 @@
         {{ 'sagas.back' | translate }}
       </a>
       <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-12 text-center" data-saga-not-found>
-        <svg [lucideIcon]="icons.layers" [size]="28" class="text-brand-light" aria-hidden="true"></svg>
+        <svg [lucideIcon]="icons.sagas" [size]="28" class="text-brand-light" aria-hidden="true"></svg>
         <p class="text-sm text-muted">{{ 'sagas.notFound' | translate }}</p>
       </div>
     }

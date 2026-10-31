@@ -34,8 +34,8 @@ const PAGES: (SearchPage & { icon: LucideIconInput })[] = [
   { path: '/dashboard', labelKey: 'nav.home', icon: ICONS.house },
   { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
   { path: '/stats', labelKey: 'nav.stats', icon: ICONS.chartColumn },
-  { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.layers },
-  { path: '/years', labelKey: 'nav.years', icon: ICONS.calendar },
+  { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.sagas },
+  { path: '/years', labelKey: 'nav.years', icon: ICONS.years },
   { path: '/diary', labelKey: 'nav.diary', icon: ICONS.calendarDays },
   { path: '/sync', labelKey: 'nav.sync', icon: ICONS.refreshCw },
   { path: '/profile', labelKey: 'nav.profile', icon: ICONS.user },
@@ -81,7 +81,7 @@ export class GlobalSearch {
   /** Translation key for seeded platform names that have one, else the name (renders as-is). */
   protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
   protected readonly pageIcons = new Map(PAGES.map((p) => [p.path, p.icon]));
-  protected readonly sagaIcon = ICONS.layers;
+  protected readonly sagaIcon = ICONS.sagas;
   protected readonly yearIcon = ICONS.chartColumn;
   protected readonly releaseYear = releaseYear;
 

@@ -395,7 +395,7 @@
               (click)="installPrompt.install()"
               class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark"
             >
-              <svg [lucideIcon]="icons.download" [size]="14"></svg>
+              <svg [lucideIcon]="icons.install" [size]="14"></svg>
               {{ 'profile.installApp' | translate }}
             </button>
           } @else if (installPrompt.showIosHint()) {
@@ -417,7 +417,7 @@
             (click)="androidApp.open($event)"
             class="press flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-[7px] text-[13px] font-semibold text-text hover:bg-hover"
           >
-            <svg [lucideIcon]="icons.download" [size]="14"></svg>
+            <svg [lucideIcon]="icons.install" [size]="14"></svg>
             {{ androidApp.labelKey | translate }}
           </a>
           <p class="w-full text-xs text-faint">{{ 'profile.androidAppHint' | translate }}</p>

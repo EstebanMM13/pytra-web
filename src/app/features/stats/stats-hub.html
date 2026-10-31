@@ -71,7 +71,7 @@
     <app-stats-hub-card
       class="col-span-2"
       link="/stats/genres"
-      [icon]="icons.layoutGrid"
+      [icon]="icons.genres"
       [title]="'stats.hub.genres' | translate"
       [shortTitle]="'stats.hub.genresShort' | translate"
       [loading]="g === undefined"
@@ -91,7 +91,7 @@
     @let y = latestYear();
     <app-stats-hub-card
       link="/years"
-      [icon]="icons.calendar"
+      [icon]="icons.years"
       [title]="'stats.hub.years' | translate"
       [loading]="y === undefined"
       [figure]="y ? (y.totalHours | hours) : null"
@@ -103,7 +103,7 @@
     @let s = sagas();
     <app-stats-hub-card
       link="/sagas"
-      [icon]="icons.layers"
+      [icon]="icons.sagas"
       [title]="'stats.hub.sagas' | translate"
       [loading]="s === undefined"
       [figure]="s ? ('stats.hub.sagasFigure' | translatePlural: s.count) : null"
@@ -157,7 +157,7 @@
     @let e = eraTeaser();
     <app-stats-hub-card
       link="/stats/eras"
-      [icon]="icons.calendarClock"
+      [icon]="icons.eras"
       [title]="'stats.hub.eras' | translate"
       [loading]="e === undefined"
       [figure]="e ? e.label : null"
@@ -169,7 +169,7 @@
     @let median = medianDays();
     <app-stats-hub-card
       link="/stats/habits"
-      [icon]="icons.hourglass"
+      [icon]="icons.habits"
       [title]="'stats.hub.habits' | translate"
       [loading]="completion() === undefined"
       [figure]="median !== null ? ('stats.days' | translatePlural: median) : null"

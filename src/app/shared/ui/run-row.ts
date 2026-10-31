@@ -73,7 +73,7 @@ import { ICONS } from './icons';
           [attr.title]="'game.stats.platinum' | translate"
           data-platinum
         >
-          <svg [lucideIcon]="icons.trophy" [size]="13" aria-hidden="true"></svg>
+          <svg [lucideIcon]="icons.platinum" [size]="13" aria-hidden="true"></svg>
         </span>
       }
       @if (fullCompletion()) {
@@ -157,5 +157,5 @@ export class RunRow {
   /** Cover shown blurred behind the row; null / undefined keeps the plain background. */
   readonly backdropUrl = input<string | null | undefined>(undefined);
 
-  protected readonly icons = { trophy: ICONS.trophy, badgeCheck: ICONS.badgeCheck };
+  protected readonly icons = { platinum: ICONS.platinum, badgeCheck: ICONS.badgeCheck };
 }

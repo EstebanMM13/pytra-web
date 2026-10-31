@@ -65,7 +65,7 @@ export class StatsGenres {
   protected readonly preview = STATS_LIST_PREVIEW;
   protected readonly heroRadius = STATS_HERO_RADIUS;
   protected readonly gamesLink = GAMES_LINK;
-  protected readonly icon = ICONS.layoutGrid;
+  protected readonly icon = ICONS.genres;
   private readonly stats = inject(StatsService);
   private readonly format = statsFormat();
   private readonly library = statsLibrary();

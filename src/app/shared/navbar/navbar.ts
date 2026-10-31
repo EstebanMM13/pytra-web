@@ -104,7 +104,7 @@ export class Navbar {
     { kind: 'diary', labelKey: 'nav.addDiary', icon: ICONS.notebookPen },
     { kind: 'run', labelKey: 'nav.addRun', icon: ICONS.play },
     { kind: 'game', labelKey: 'nav.addGame', icon: ICONS.gamepad2 },
-    { kind: 'saga', labelKey: 'nav.addSaga', icon: ICONS.layers },
+    { kind: 'saga', labelKey: 'nav.addSaga', icon: ICONS.sagas },
   ];
 
   protected onGlobalKeydown(event: KeyboardEvent): void {

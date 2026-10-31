@@ -99,7 +99,7 @@ interface LibraryState {
               [value]="g.avgRating | rating"
               [valueClass]="'font-mono ' + (g.avgRating | ratingTone)"
             />
-            <app-stat-card [icon]="icons.trophy" tone="platinum" [label]="'sagas.stats.platinums' | translate" [value]="g.platinums || '—'" />
+            <app-stat-card [icon]="icons.platinum" tone="platinum" [label]="'sagas.stats.platinums' | translate" [value]="g.platinums || '—'" />
           </app-stat-strip>
 
           <section class="flex flex-col md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[22px]">

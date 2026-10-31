@@ -36,13 +36,13 @@
           [valueClass]="'font-mono ' + (r.median | ratingTone)"
         />
         <app-stat-card
-          [icon]="icons.arrowUpDown"
+          [icon]="icons.spread"
           [label]="'stats.ratings.deviation' | translate"
           [value]="r.standardDeviation | rating"
           valueClass="font-mono"
           [hint]="spreadKey() | translate"
         />
-        <app-stat-card [icon]="icons.badgeCheck" [label]="'stats.ratings.rated' | translate" [value]="r.ratedCount" />
+        <app-stat-card [icon]="icons.rated" [label]="'stats.ratings.rated' | translate" [value]="r.ratedCount" />
       </app-stat-strip>
 
       <!-- Hero: the histogram on the GOTY card's gold fill and border, a star watermark behind. -->

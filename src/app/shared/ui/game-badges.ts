@@ -46,7 +46,7 @@ export class CategoryBadge {
       'inline-flex shrink-0 items-center gap-1 rounded-full bg-gold-tint px-1.5 py-px text-[11px] leading-4 font-medium whitespace-nowrap text-gold-tint-fg',
   },
   template: `
-    <svg [lucideIcon]="icons.calendarClock" [size]="11" class="shrink-0" aria-hidden="true"></svg>
+    <svg [lucideIcon]="icons.calendar" [size]="11" class="shrink-0" aria-hidden="true"></svg>
     <span>{{ 'game.upcoming' | translate }}</span>
   `,
 })

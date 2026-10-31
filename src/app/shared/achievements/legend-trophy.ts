@@ -6,7 +6,7 @@ let seq = 0;
 /**
  * Pytriarca (legend) trophy, design 4a: the Pytra play mark in platinum on a two-step plinth,
  * three bars cut out, the fourth bar white, plus a sparkle. Filled artwork (not a stroke icon),
- * so it lives outside ICONS. Source: pytra-datos/iconos v3/pytriarca.svg.
+ * so it lives outside ICONS. Source: pytra-datos/iconos v4/pytriarca.svg.
  */
 @Component({
   selector: 'app-legend-trophy',

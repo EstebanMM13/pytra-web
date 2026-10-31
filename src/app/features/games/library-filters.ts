@@ -143,7 +143,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
               [class]="platinum() ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
               data-filter-platinum
             >
-              <svg [lucideIcon]="icons.trophy" [size]="14" class="shrink-0 text-platinum" aria-hidden="true"></svg>
+              <svg [lucideIcon]="icons.platinum" [size]="14" class="shrink-0 text-platinum" aria-hidden="true"></svg>
               {{ 'library.filters.platinum' | translate }}
             </button>
             <button

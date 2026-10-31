@@ -65,7 +65,7 @@ const SECTION_ICONS: Record<ProfileSection, LucideIconInput> = {
   account: ICONS.user,
   achievements: ICONS.trophy,
   preferences: ICONS.slidersHorizontal,
-  data: ICONS.download,
+  data: ICONS.data,
 };
 
 const MOBILE_ROWS: readonly ProfileRow[] = [
