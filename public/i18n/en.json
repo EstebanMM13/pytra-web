@@ -783,6 +783,7 @@
       "platformsPending": "They will be saved when you press Save.",
       "platformHours": "Hours per platform",
       "platformHoursUnassigned": "Unassigned: {{hours}}",
+      "platformHoursOver": "{{hours}} over the total",
       "platformHoursInvalid": "Hours per platform ≥ 0 (e.g. 12.5).",
       "platformHoursExceed": "Hours per platform can't add up to more than the total.",
       "platformHoursFor": "Hours on {{name}}",

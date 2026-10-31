@@ -65,6 +65,8 @@ export interface PlatformHoursSplit {
   assigned: number;
   /** What is left of the total for no platform in particular (never negative). */
   unassigned: number;
+  /** How far the split goes above the total (0 when it fits). */
+  over: number;
   error: 'invalid' | 'exceedsTotal' | null;
 }
 
@@ -94,7 +96,7 @@ export function parsePlatformHours(
   }
   const assigned = Object.values(hours).reduce((sum, h) => sum + h, 0);
   const error = invalid ? 'invalid' : assigned - totalHours > HOURS_TOLERANCE ? 'exceedsTotal' : null;
-  return { hours, assigned, unassigned: Math.max(0, totalHours - assigned), error };
+  return { hours, assigned, unassigned: Math.max(0, totalHours - assigned), over: Math.max(0, assigned - totalHours), error };
 }
 
 /** The online playtime's flags, as the card shows them (absent from older API versions means false). */

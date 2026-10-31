@@ -602,6 +602,7 @@ describe('GameDetail online platinum / 100%', () => {
     fixture.detectChanges();
     expect(upsert).not.toHaveBeenCalled();
     expect(el.querySelector('[data-online-platform-hours-error]')!.textContent).toContain('game.online.platformHoursExceed');
+    expect(el.querySelector('[data-online-unassigned]')!.textContent).toContain('game.online.platformHoursOver');
   });
 
   it('shows no per-platform hours with a single platform and sends none', () => {

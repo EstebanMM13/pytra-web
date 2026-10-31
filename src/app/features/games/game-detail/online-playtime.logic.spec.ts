@@ -156,6 +156,7 @@ describe('online platform hours', () => {
       hours: { 1: 12.5 },
       assigned: 12.5,
       unassigned: 17.5,
+      over: 0,
       error: null,
     });
   });
@@ -163,6 +164,6 @@ describe('online platform hours', () => {
   it('rejects unparsable or negative hours and a split above the total', () => {
     expect(parsePlatformHours({ 1: 'abc', 2: '' }, [1, 2], 30).error).toBe('invalid');
     expect(parsePlatformHours({ 1: '-1', 2: '' }, [1, 2], 30).error).toBe('invalid');
-    expect(parsePlatformHours({ 1: '20', 2: '10,5' }, [1, 2], 30).error).toBe('exceedsTotal');
+    expect(parsePlatformHours({ 1: '20', 2: '10,5' }, [1, 2], 30)).toMatchObject({ error: 'exceedsTotal', over: 0.5 });
   });
 });

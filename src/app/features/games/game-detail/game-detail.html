@@ -510,8 +510,12 @@
               <div class="flex items-baseline justify-between gap-3">
                 <span id="game-online-platforms">{{ 'game.online.platforms' | translate }}</span>
                 @if (split) {
-                  <span class="font-mono" [class]="split.error === 'exceedsTotal' ? 'text-danger' : 'text-faint'" data-online-unassigned>
-                    {{ 'game.online.platformHoursUnassigned' | translate: { hours: (split.unassigned | hours) } }}
+                  <span class="font-mono" [class]="split.over > 0 ? 'text-danger' : 'text-faint'" data-online-unassigned>
+                    @if (split.over > 0) {
+                      {{ 'game.online.platformHoursOver' | translate: { hours: (split.over | hours) } }}
+                    } @else {
+                      {{ 'game.online.platformHoursUnassigned' | translate: { hours: (split.unassigned | hours) } }}
+                    }
                   </span>
                 }
               </div>
