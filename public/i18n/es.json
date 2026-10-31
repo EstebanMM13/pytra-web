@@ -784,7 +784,9 @@
       "platformHours": "Horas por plataforma",
       "platformHoursUnassigned": "Sin asignar: {{hours}}",
       "platformHoursInvalid": "Horas por plataforma ≥ 0 (p. ej. 12,5).",
-      "platformHoursExceed": "Las horas por plataforma no pueden superar el total."
+      "platformHoursExceed": "Las horas por plataforma no pueden superar el total.",
+      "platformHoursFor": "Horas en {{name}}",
+      "platformHoursHint": "Se guardan con Guardar."
     },
     "loadError": "No se pudo cargar el juego.",
     "editTitle": "Editar juego",

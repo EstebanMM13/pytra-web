@@ -784,7 +784,9 @@
       "platformHours": "Hours per platform",
       "platformHoursUnassigned": "Unassigned: {{hours}}",
       "platformHoursInvalid": "Hours per platform ≥ 0 (e.g. 12.5).",
-      "platformHoursExceed": "Hours per platform can't add up to more than the total."
+      "platformHoursExceed": "Hours per platform can't add up to more than the total.",
+      "platformHoursFor": "Hours on {{name}}",
+      "platformHoursHint": "Saved with Save."
     },
     "loadError": "Could not load the game.",
     "editTitle": "Edit game",

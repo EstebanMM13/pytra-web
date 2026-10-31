@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, shareReplay } from 'rxjs';
@@ -140,6 +141,7 @@ const HOURS_LEGEND_PX = 128;
     TranslatePipe,
     Navbar,
     HoursPipe,
+    NgTemplateOutlet,
     RatingPipe,
     RatingTonePipe,
     PlatformLabel,
