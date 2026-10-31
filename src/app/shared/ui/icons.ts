@@ -57,7 +57,8 @@ export const ICONS = {
   moon: path('moon', 'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z', 'M18 5h.01', 'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z'),
   notebookPen: path('notebook-pen', 'M6.5 3h10L19 5.5v13L16.5 21h-10L5 19.5v-15z M9 3v18', 'M13 3v6l2-1.5 2 1.5V3', 'M9 3h7.5L19 5.5v13L16.5 21H9z'),
   pencil: path('pencil', 'M4 20h4L19 9l-4-4L4 16z', 'M13.5 6.5l4 4', 'M4 20h4L19 9l-4-4L4 16z'),
-  platinum: path('platinum', 'M7 4h10l4 5-9 11L3 9z M3 9h18', 'M12 20L8.5 9l2-5 M12 20l3.5-11-2-5', 'M3 9h18l-9 11z'),
+  // Exception to the v4 source: platinum keeps the v3 trophy with a diamond (user preference), not the v4 gem.
+  platinum: path('platinum', 'M7 4h10v5.5L14 13h-4L7 9.5z M7 6H4v2l2.5 2.5h1.3 M17 6h3v2l-2.5 2.5h-1.3 M12 13v4 M8 21v-1.5l2.5-2.5h3l2.5 2.5V21z', 'M12 6l1.5 2-1.5 2-1.5-2z'),
   play: path('play', 'M7 4v16l13-8z', undefined, 'M7 4v16l13-8z'),
   plus: path('plus', 'M12 5v14 M5 12h14'),
   rated: path('rated', 'M7.5 4H16.5L19 6.5V18.5L16.5 21H7.5L5 18.5V6.5z M9 2.5h6v3H9z', 'M12 9.5l1.2 2.4 2.6.4-1.9 1.8.45 2.6L12 15.5l-2.35 1.2.45-2.6-1.9-1.8 2.6-.4z', 'M7.5 4H16.5L19 6.5V18.5L16.5 21H7.5L5 18.5V6.5z'),
