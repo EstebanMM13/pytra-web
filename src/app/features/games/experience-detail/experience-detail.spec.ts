@@ -14,7 +14,7 @@ import { RunFormLauncher } from '../../../core/services/run-form-launcher.servic
 import { StatsService } from '../../../core/services/stats.service';
 import { Navbar } from '../../../shared/navbar/navbar';
 import { ToastService } from '../../../shared/toast/toast.service';
-import { ExperienceDetail } from './experience-detail';
+import { ExperienceDetail, ratingFontSize } from './experience-detail';
 
 @Component({ selector: 'app-navbar', template: '' })
 class NavbarStub {}
@@ -298,6 +298,15 @@ describe('ExperienceDetail inline edit', () => {
     const ended = setup(run({ status: 'COMPLETADO', postgameEndDate: '2026-10-20' })).el;
     expect(ended.querySelector('[data-postgame]')).toBeNull();
     expect(ended.querySelector('[data-postgame-ended]')!.textContent).toContain('run.postgameEnded');
+  });
+
+  it('sizes the rating from the reserve each breakpoint keeps for the scale and pencil', () => {
+    expect(ratingFontSize('8,75')).toBe('min(var(--fig-max), calc((100cqi - var(--rating-reserve)) / 2.48))');
+    const el = setup(run({ rating: 8.75 })).el;
+    const card = el.querySelector<HTMLElement>('[data-stat="rating"] > div')!;
+    expect(card.className).toContain('[--rating-reserve:42px]');
+    expect(card.className).toContain('md:[--rating-reserve:72px]');
+    expect(el.querySelector('[data-rating-pencil]')!.className).toContain('max-md:absolute');
   });
 
   it('marks the platinum pill with the platinum icon', () => {

@@ -70,7 +70,7 @@ export class ExperienceDetail {
   /** Inline-editable figures share their row with the pencil chip (26px chip + 8px gap + 12px padding, 2px slack). */
   protected readonly editableFigureSize = (value: string | number): string => figureFontSize(String(value), 48);
   /** The rating figure also shares its line with the "/ 10" scale. */
-  protected readonly ratingFigureSize = (value: string | number): string => figureFontSize(String(value), 72);
+  protected readonly ratingFigureSize = (value: string | number): string => ratingFontSize(String(value));
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -331,4 +331,14 @@ export class ExperienceDetail {
       },
     });
   }
+}
+
+/**
+ * Rating figure size: the card's `--fig-max`, shrunk so the figure, the "/ 10" and (from md) the
+ * pencil fit the line; `--rating-reserve` is the width they keep (smaller on phones, where the
+ * pencil sits in the card's corner).
+ */
+export function ratingFontSize(text: string): string {
+  const ems = Math.round(Math.max(1, Array.from(text).length) * 0.62 * 100) / 100;
+  return `min(var(--fig-max), calc((100cqi - var(--rating-reserve)) / ${ems}))`;
 }
