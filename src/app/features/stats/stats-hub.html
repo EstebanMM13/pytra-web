@@ -38,15 +38,11 @@
   }
 
   <!--
-    Two columns up to lg, four from lg; Games, Activity, Genres and Ratings span two (Games four
-    from lg), so every row is full:
-    phones and tablets: Games / Activity / Genres / Years Sagas / Platforms Studios / Eras Habits / Ratings;
-    desktop: Games / Activity Genres / Years Sagas Platforms Studios / Eras Habits Ratings.
+    Ten cards of one size: two columns up to lg (five full rows), five from lg (two full rows).
   -->
-  <nav class="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4" [attr.aria-label]="'stats.hub.sectionsLabel' | translate">
+  <nav class="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-5" [attr.aria-label]="'stats.hub.sectionsLabel' | translate">
     @let replayed = replayTeaser();
     <app-stats-hub-card
-      class="col-span-2 lg:col-span-4"
       link="/stats/games"
       [icon]="icons.gamepad2"
       [title]="'stats.hub.games' | translate"
@@ -62,7 +58,6 @@
 
     @let a = activity();
     <app-stats-hub-card
-      class="col-span-2"
       link="/stats/activity"
       [icon]="icons.flame"
       [title]="'stats.hub.activity' | translate"
@@ -86,7 +81,6 @@
 
     @let g = topGenre();
     <app-stats-hub-card
-      class="col-span-2"
       link="/stats/genres"
       [icon]="icons.genres"
       [title]="'stats.hub.genres' | translate"
@@ -197,7 +191,6 @@
 
     @let r = ratingsTeaser();
     <app-stats-hub-card
-      class="col-span-2"
       link="/stats/ratings"
       [accent]="gold"
       [icon]="icons.star"
