@@ -30,6 +30,19 @@ describe('AchievementBadge', () => {
     return fixture;
   }
 
+  it('shows the progress count of a locked badge in the compact (mobile) layout too', () => {
+    const fixture = render();
+    expect(fixture.nativeElement.querySelector('[data-progress-count]')!.textContent.trim()).toBe('2/5');
+
+    fixture.componentRef.setInput('compact', true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-progress-count]')!.textContent.trim()).toBe('2/5');
+
+    fixture.componentRef.setInput('achievement', { ...MASTERPIECES, current: 5, progress: 1, unlocked: true });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-progress-count]')).toBeNull();
+  });
+
   it('words the rating thresholds on 0–10 by default', () => {
     expect(render().nativeElement.textContent).toContain('Puntúa 5 juegos con 9 o más (máx. 10, mín. 4)');
   });
