@@ -227,7 +227,7 @@
             <span class="truncate">{{ 'run.hours' | translate }}</span>
           </p>
           @if (editing() === 'hours') {
-            <div class="mt-2 flex min-w-0 flex-col gap-1.5" (focusout)="onEditorFocusOut($event)" (keydown.escape)="cancelEdit()">
+            <div class="my-auto flex min-w-0 pt-2 flex-col gap-1.5" (focusout)="onEditorFocusOut($event)" (keydown.escape)="cancelEdit()">
               <app-hours-input
                 class="run-inline-hours"
                 inputId="run-inline-hours"
@@ -258,7 +258,7 @@
               }
             </div>
           } @else {
-            <p class="mt-2 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="editableFigureSize(e.hours | hours)">
+            <p class="my-auto pt-2 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="editableFigureSize(e.hours | hours)">
               <button
                 id="run-inline-hours-trigger"
                 type="button"
@@ -283,7 +283,7 @@
             <span class="truncate">{{ 'run.duration' | translate }}</span>
           </p>
           <p
-            class="mt-2 flex min-h-11 items-center leading-tight font-bold tracking-[-0.03em] whitespace-nowrap"
+            class="my-auto flex min-h-11 pt-2 items-center leading-tight font-bold tracking-[-0.03em] whitespace-nowrap"
             [style.font-size]="figureSize(durationLabel(false))"
           >
             <span>{{ durationLabel(false) }}</span>
@@ -301,12 +301,12 @@
             </span>
             <span class="hidden @[18rem]:inline">{{ 'run.end' | translate }}</span>
           </div>
-          <div class="hidden items-center gap-2.5 font-mono text-base font-semibold text-text @[18rem]:flex" data-dates-row>
+          <div class="my-auto hidden items-center gap-2.5 font-mono text-base font-semibold text-text @[18rem]:flex" data-dates-row>
             <span class="whitespace-nowrap">{{ date(e.startDate) }}</span>
             <span class="h-px min-w-3 flex-1 bg-border-strong" aria-hidden="true"></span>
             <span class="whitespace-nowrap">{{ date(e.endDate) }}</span>
           </div>
-          <div class="flex flex-col gap-1 @[18rem]:hidden" data-dates-stacked>
+          <div class="my-auto flex flex-col gap-1 @[18rem]:hidden" data-dates-stacked>
             <span class="font-mono text-[15px] font-semibold whitespace-nowrap text-text">{{ date(e.startDate) }}</span>
             <span class="mt-1 text-xs text-text-3">{{ 'run.end' | translate }}</span>
             <span class="font-mono text-[15px] font-semibold whitespace-nowrap text-text">{{ date(e.endDate) }}</span>
