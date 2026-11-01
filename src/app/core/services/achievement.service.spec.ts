@@ -77,6 +77,21 @@ describe('AchievementService', () => {
     expect(values).toEqual([[stored('years10'), stored('multitasker')]]);
   });
 
+  it('refreshes the cached stored list after recording, so the next screen reads the new unlock', () => {
+    service.getUnlocked().subscribe();
+    http.expectOne({ method: 'GET', url }).flush([stored('years10')]);
+
+    record([badge('years10', true), badge('multitasker', true)], [stored('years10')]);
+    http.expectOne({ method: 'POST', url }).flush([stored('years10'), stored('multitasker')]);
+
+    const values: UnlockedAchievement[][] = [];
+    service.getUnlocked().subscribe((value) => values.push(value));
+    http.expectOne({ method: 'GET', url }).flush([stored('years10'), stored('multitasker')]);
+    expect(values.at(-1)).toEqual([stored('years10'), stored('multitasker')]);
+    // No stale list without the new unlock is served first.
+    expect(values.every((list) => list.some((a) => a.id === 'multitasker'))).toBe(true);
+  });
+
   it('records each id once: a later load while the first record is pending or done sends nothing', () => {
     record([badge('multitasker', true)]);
     const req = http.expectOne({ method: 'POST', url });

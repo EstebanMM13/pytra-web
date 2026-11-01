@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { EMPTY, Observable, catchError, defer } from 'rxjs';
+import { catchError, defer, EMPTY, Observable, tap } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
 import { UnlockedAchievement } from '../models/achievement.model';
 import { Achievement, idsToRecord } from '../../shared/achievements/achievements';
@@ -45,6 +45,8 @@ export class AchievementService {
       if (ids.length === 0) return EMPTY;
       ids.forEach((id) => sent.add(id));
       return this.http.post<UnlockedAchievement[]>(this.baseUrl, { ids }).pipe(
+        // The stored list changed: the next screen fetches it instead of serving the old cache.
+        tap(() => this.unlocked.invalidate()),
         catchError(() => {
           ids.forEach((id) => sent.delete(id));
           return EMPTY;
