@@ -12,12 +12,16 @@ Frontend for **Pytra** ("Play, Track, Remember"), a personal video game tracker.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/dashboard.png" alt="Dashboard" width="100%"><br><sub><b>Dashboard</b>: totals, achievements, games in progress and hours per year</sub></td>
-    <td width="50%"><img src="docs/screenshots/library.png" alt="Game library" width="100%"><br><sub><b>Library</b>: cover grid with status filters, search and list/grid views</sub></td>
+    <td width="50%"><img src="docs/screenshots/dashboard.png" alt="Dashboard" width="100%"><br><sub><b>Dashboard</b>: greeting, diary shortcut, totals, achievements, games in progress and hours per year</sub></td>
+    <td width="50%"><img src="docs/screenshots/library.png" alt="Game library" width="100%"><br><sub><b>Library</b>: cover grid with status filters (Playing, Completed, Dropped, Pending, Online), search and list/grid views</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/game-detail.png" alt="Game detail" width="100%"><br><sub><b>Game detail</b>: metadata, saga, hours, ratings, platinum and runs</sub></td>
-    <td width="50%"><img src="docs/screenshots/years.png" alt="Year in review" width="100%"><br><sub><b>Years</b>: year in review with GOTY, surprises, disappointments and hours per month</sub></td>
+    <td width="50%"><img src="docs/screenshots/stats.png" alt="Stats hub" width="100%"><br><sub><b>Stats</b>: all-time hero and one card per section (games, activity, genres, years, sagas, platforms, studios, eras, habits, ratings)</sub></td>
+    <td width="50%"><img src="docs/screenshots/diary.png" alt="Diary" width="100%"><br><sub><b>Diary</b>: month heatmap calendar of the hours played each day, with the days listed below</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/sync.png" alt="Sync" width="100%"><br><sub><b>Sync</b>: link Steam and PlayStation to import your library and playtime</sub></td>
+    <td width="50%"><img src="docs/screenshots/profile.png" alt="Profile" width="100%"><br><sub><b>Profile</b>: account, achievements, preferences and data</sub></td>
   </tr>
 </table>
 
@@ -36,17 +40,21 @@ npm start          # ng serve on http://localhost:4200
 |---|---|
 | Auth | Register, mandatory email verification (with resend), login with username or email, forgot/reset password, Google login |
 | Demo | Read-only demo session from the login screen; write actions are hidden or blocked |
-| Dashboard | Stats summary, achievements, games in progress, hours per year, top-rated runs, most-played singleplayer and online games |
-| Library | Games with cover, saga, genres, developer/publisher and release date; status filters, search, sorting, list and grid views |
-| Runs | Log, edit and delete runs (experiences) per game: platform, dates, hours, status, rating, platinum. Online playtime for `ONLINE`/`HYBRID` games |
-| Sagas | Group games into sagas and see progress per saga |
-| Years | Year in review: totals, GOTY, surprises, disappointments, hours per month, the year's runs and a free-text note |
-| Achievements | Badges derived from your library and stats (hours, completed runs, sagas, online time...) |
+| Dashboard | Stats summary, achievements, games in progress, hours per year (linked to each year page), top-rated runs, most-played singleplayer and online games |
+| Library ("Biblioteca") | Games with cover, saga, genres, developer/publisher and release date. Collapsible sections (En curso, Completado...), with postgame games under both En curso and Completado; filters by status, platinum, 100%, played year, release decade and run buckets; search, sorting, list and grid views |
+| Backlog | "Pendiente" is a per-game backlog switch, not a run status; starting a run takes the game out of the backlog |
+| Runs | Log, edit and delete runs (experiences) per game: platform, dates, hours, status (En curso, Completado, Abandonado), rating, platinum, 100% and postgame (with its end date). Hours and rating are editable inline on the run page, and several runs can be queued to edit one after another. Play time is shown and entered as hours and minutes |
+| Online playtime | For `ONLINE`/`HYBRID` games: hours per online platform (the total is their sum), rating, platinum and 100% |
+| Diary | Month heatmap calendar and a day editor: the games played each day, their hours (added to the run or the online playtime) and notes. The game page lists its days played. Optional daily reminder notification on Android |
+| Stats | Stats hub with heroes, covers and charts: activity (year heatmap, streaks, weekday hours), platforms, studios (developers and publishers, with a studio page), eras, genres and sagas, habits (time to finish, abandonment), ratings and game rankings. Rows drill down into the library |
+| Sagas | Group games into sagas, search them by saga or game name, and see progress and a release timeline per saga |
+| Years | Year in review: totals, GOTY, surprises, disappointments, hours per month (online diary hours included), the year's runs and a free-text note |
+| Achievements | Badges derived from your library and stats (hours, completed runs, 100% tiers, sagas, online time...); once unlocked they are stored in the API and stay unlocked |
 | Global search | Jump to any game from anywhere (`Ctrl K`) |
 | Sync | Link **Steam** and **PlayStation** (by online ID) and sync the library. Unmatched games land in a pending queue; each one is confirmed with the full game form (or ignored). The API fills pending games from IGDB in the background |
 | IGDB autofill | Search IGDB (or the Steam store) from the game form to prefill name, cover, developer, publisher, release date and genres |
-| Profile | Avatar, username, data export (CSV / Markdown), account deletion |
-| Preferences | Theme (dark / light / system), language (Spanish / English), rating precision (integers, halves or two decimals), default platform, animations (system / full / reduced) |
+| Profile | Avatar, username, data export (CSV / Markdown), personal access tokens for the Obsidian sync, Android app download, account deletion |
+| Preferences | Theme (dark / light / system), language (Spanish / English), rating scale (0–10, 0–100 or 0–5), rating precision (integers, halves or two decimals), default platform, animations (system / full / reduced) |
 
 ## Tech stack
 
@@ -56,7 +64,7 @@ npm start          # ng serve on http://localhost:4200
 | Language | TypeScript 6.0 |
 | Styling | Tailwind CSS 4 (via PostCSS) |
 | i18n | @ngx-translate/core 18, `public/i18n/es.json` and `en.json` (Spanish by default) |
-| Mobile | Capacitor 8.5 (Android): `app`, `browser`, `filesystem`, `share` |
+| Mobile | Capacitor 8.5 (Android): `app`, `browser`, `filesystem`, `share`, `local-notifications`, plus a native APK installer plugin for in-app updates |
 | Tests | Vitest 5 + jsdom (through `ng test`) |
 | Serving | nginx 1.27 (Docker), Node 24 build stage |
 
@@ -75,6 +83,8 @@ src/app/
 │   ├── auth/             # login, register, verify-email, forgot/reset-password, oauth-callback
 │   ├── dashboard/
 │   ├── games/            # library, game detail, game form (with IGDB autofill), run form and detail
+│   ├── diary/            # month calendar and day editor
+│   ├── stats/            # stats hub and its sections (activity, platforms, studios, eras, genres, habits, ratings, games)
 │   ├── sagas/
 │   ├── years/
 │   ├── sync/             # steam/, psn/, shared/ (pending review)
@@ -97,9 +107,9 @@ src/app/
 | `npm run watch` | Development build in watch mode |
 | `npm test` | Unit tests (`ng test`, Vitest on jsdom) |
 
-**Bundle budget:** the initial bundle warns above **420 kB** and fails above 500 kB (`angular.json`). Keep heavy features in lazy routes.
+**Bundle budget:** the initial bundle warns above **430 kB** and fails above 500 kB (`angular.json`). Keep heavy features in lazy routes.
 
-**CI:** `.github/workflows/ci.yml` runs `npm ci`, `npm run build` and `ng test --watch=false` on Node 24 for every push and pull request to `master`.
+**CI:** `.github/workflows/ci.yml` runs `npm ci`, `npm run build` and `ng test --watch=false` on Node 24 for every push and pull request to `master`. `.github/workflows/android-release.yml` builds a signed APK and publishes it as a GitHub release on every `v*` tag.
 
 ## Configuration
 
@@ -155,6 +165,16 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk # 4. install / update o
 
 > The APK **bundles the web build**. After any web change, repeat all four steps; otherwise the app keeps running the old code.
 
+**Signed release builds.** One key signs every published APK, so installs from GitHub update in place. `android/app/build.gradle` reads it from the CI env vars (`ANDROID_KEYSTORE_FILE`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`), else from `~/.android/pytra-release.properties` (or `-PpytraReleaseProperties=<path>`); without either, release builds are unsigned.
+
+```bash
+scripts/setup-release-signing.sh   # once: creates the keystore, the local properties and the GitHub secrets
+scripts/build-release-apk.sh       # local signed release APK
+git tag v1.2.0 && git push --tags  # CI publishes the signed APK as a GitHub release
+```
+
+**In-app updates.** At launch the app checks the latest GitHub release and offers to download and install the new APK.
+
 **How login works on Android:** Google rejects OAuth in embedded WebViews, so Google login and Steam linking open in a Custom Tab with `client=android`. The API finishes by redirecting to `com.estebanmm13.pytra://oauth-callback?code=...`; the app catches that deep link, closes the tab and routes to `/oauth-callback`, which exchanges the one-time code for a JWT. On the web, the same flows use a normal full-page redirect.
 
 The Android WebView origin is `https://localhost`, which the API allows in CORS by default.
@@ -169,4 +189,4 @@ railway up --service pytra-web --environment production --detach
 
 ## Known limitations
 
-- **Debug APK only:** there is no release signing configuration.
+- **No automatic web deploys:** the web is deployed manually with `railway up`.
