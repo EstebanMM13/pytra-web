@@ -271,9 +271,11 @@
                     }
                     @if (game.hasPlatinum) {
                       <span
-                        class="platinum-glow absolute top-1.5 left-1.5 rounded-md bg-bg/85 px-1 py-0.5 text-xs backdrop-blur-sm cover-lift"
+                        class="platinum-glow absolute top-1.5 left-1.5 grid place-items-center rounded-md bg-bg/85 p-1 text-platinum backdrop-blur-sm cover-lift"
+                        role="img"
                         [attr.aria-label]="'library.platinum' | translate"
-                        >🏆</span
+                        data-poster-platinum
+                        ><svg [lucideIcon]="icons.platinum" [size]="14" aria-hidden="true"></svg></span
                       >
                     }
                   </div>

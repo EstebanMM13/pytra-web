@@ -148,6 +148,17 @@ describe('Games library filters', () => {
     return { harness, router, navigations, el, pick, chips, listed };
   }
 
+  it('marks platinum posters with the platinum icon, not an emoji', async () => {
+    const { el } = await setup();
+    const badges = [...el.querySelectorAll('[data-poster-platinum]')];
+    expect(badges.length).toBeGreaterThan(0);
+    for (const badge of badges) {
+      expect(badge.querySelector('svg')).not.toBeNull();
+      expect(badge.textContent).not.toContain('🏆');
+      expect(badge.getAttribute('aria-label')).toBe('library.platinum');
+    }
+  });
+
   it('filters by played year from the panel, loading the run facts only then', async () => {
     const { harness, router, el, listed } = await setup();
     expect(getPlayFacts).not.toHaveBeenCalled();
