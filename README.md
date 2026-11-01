@@ -16,6 +16,10 @@ Frontend for **Pytra** ("Play, Track, Remember"), a personal video game tracker.
     <td width="50%"><img src="docs/screenshots/library.png" alt="Game library" width="100%"><br><sub><b>Library</b>: cover grid with status filters (Playing, Completed, Dropped, Pending, Online), search and list/grid views</sub></td>
   </tr>
   <tr>
+    <td width="50%"><img src="docs/screenshots/game-detail.png" alt="Game detail" width="100%"><br><sub><b>Game detail</b>: cover hero, metadata, total hours, ratings, 100% and platinum, runs and details</sub></td>
+    <td width="50%"><img src="docs/screenshots/run-detail.png" alt="Run detail" width="100%"><br><sub><b>Run detail</b>: status and badges, inline-editable rating and hours, dates, duration, review with pros, cons and notes</sub></td>
+  </tr>
+  <tr>
     <td width="50%"><img src="docs/screenshots/stats.png" alt="Stats hub" width="100%"><br><sub><b>Stats</b>: all-time hero and one card per section (games, activity, genres, years, sagas, platforms, studios, eras, habits, ratings)</sub></td>
     <td width="50%"><img src="docs/screenshots/diary.png" alt="Diary" width="100%"><br><sub><b>Diary</b>: month heatmap calendar of the hours played each day, with the days listed below</sub></td>
   </tr>
