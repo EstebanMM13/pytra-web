@@ -61,42 +61,26 @@
           }
           {{ e.runLabel }}
         </p>
-        <!-- Title row: desktop actions sit beside the name, level with its first line -->
-        <div class="flex items-start justify-between gap-6">
-          <h1
-            class="font-display min-w-0 line-clamp-3 text-[28px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-[44px] md:tracking-[-0.035em]"
-            [attr.title]="game()?.name ?? null"
-          >
-            @if (game(); as g) {
-              {{ g.name }}
-            } @else {
-              <app-skeleton class="h-10 w-72 max-w-full rounded-lg" />
-            }
-          </h1>
-          <div class="hidden shrink-0 gap-2.5 md:mt-2 md:flex">
-            <button
-              type="button"
-              (click)="remove()"
-              [disabled]="deleting()"
-              class="flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong hover:text-danger disabled:opacity-60"
-            >
-              <svg [lucideIcon]="icons.trash" [size]="14"></svg>
-              {{ 'run.delete' | translate }}
-            </button>
-            <button
-              type="button"
-              (click)="edit()"
-              class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
-            >
-              <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
-              {{ 'run.edit' | translate }}
-            </button>
-          </div>
-        </div>
-        <div class="mt-3 flex flex-wrap gap-1.5 md:mt-3.5 md:gap-2">
+        <h1
+          class="font-display min-w-0 line-clamp-3 text-[28px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-[44px] md:tracking-[-0.035em]"
+          [attr.title]="game()?.name ?? null"
+        >
+          @if (game(); as g) {
+            {{ g.name }}
+          } @else {
+            <app-skeleton class="h-10 w-72 max-w-full rounded-lg" />
+          }
+        </h1>
+        <!-- Pills, with the desktop actions at the end of the row (mobile keeps its icon actions up top) -->
+        <div class="mt-3 flex items-end justify-between gap-4 md:mt-3.5">
+        <div class="flex min-w-0 flex-wrap gap-1.5 md:gap-2">
           <app-status-pill [status]="e.status" />
           @if (e.platinum) {
-            <span class="platinum-glow platinum-glow-pulse platinum-pill relative rounded-full px-2.5 py-1 text-xs font-medium">
+            <span
+              class="platinum-glow platinum-glow-pulse platinum-pill relative inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
+              data-platinum
+            >
+              <svg [lucideIcon]="icons.platinum" [size]="13" class="shrink-0" aria-hidden="true"></svg>
               {{ 'run.platinum' | translate }}
             </span>
           }
@@ -130,13 +114,33 @@
             </span>
           }
         </div>
+          <div class="hidden shrink-0 gap-2.5 md:flex" data-desktop-actions>
+            <button
+              type="button"
+              (click)="remove()"
+              [disabled]="deleting()"
+              class="flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong hover:text-danger disabled:opacity-60"
+            >
+              <svg [lucideIcon]="icons.trash" [size]="14"></svg>
+              {{ 'run.delete' | translate }}
+            </button>
+            <button
+              type="button"
+              (click)="edit()"
+              class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+            >
+              <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
+              {{ 'run.edit' | translate }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Run figures (every size): hero rating tile, hours and duration, then the start -> end dates -->
+    <!-- Run figures: rating, hours, duration and dates; 2 x 2 on phones, one row of four from md -->
     <section class="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3" [attr.aria-label]="'run.data' | translate">
-      <div class="relative col-span-2 min-w-0 overflow-hidden rounded-xl border border-gold-card-border bg-gold-tint lg:row-span-2" data-stat="rating">
-        <div class="@container relative flex h-full flex-col p-4 [--fig-max:52px] md:px-5 md:[--fig-max:60px]">
+      <div class="relative min-w-0 overflow-hidden rounded-xl border border-gold-card-border bg-gold-tint" data-stat="rating">
+        <div class="@container relative flex h-full flex-col p-4 [--fig-max:36px] md:px-5 md:[--fig-max:40px]">
           <p class="flex items-center gap-1.5 text-xs leading-4 text-gold md:gap-2 md:text-[13px] md:leading-5">
             <svg [lucideIcon]="icons.star" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
             {{ 'run.rating' | translate }}
@@ -181,7 +185,7 @@
                 <span
                   class="font-mono leading-none font-bold tracking-[-0.03em]"
                   [class]="e.rating | ratingTone"
-                  [style.font-size]="editableFigureSize(e.rating | rating)"
+                  [style.font-size]="ratingFigureSize(e.rating | rating)"
                 >
                   {{ e.rating | rating }}
                 </span>
@@ -287,21 +291,26 @@
         </div>
       </div>
 
-      <div
-        class="col-span-2 flex min-w-0 flex-col justify-center gap-2 rounded-xl border border-card-border card-glass p-4 md:col-span-4 md:px-5 lg:col-span-2"
-        data-stat="dates"
-      >
-        <div class="flex items-center justify-between gap-3 text-xs text-text-3 md:text-[13px]">
-          <span class="flex items-center gap-1.5 md:gap-2">
-            <svg [lucideIcon]="icons.calendar" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
-            {{ 'run.start' | translate }}
-          </span>
-          <span>{{ 'run.end' | translate }}</span>
-        </div>
-        <div class="flex items-center gap-2.5 font-mono text-base font-semibold text-text md:text-lg">
-          <span class="whitespace-nowrap">{{ date(e.startDate) }}</span>
-          <span class="h-px min-w-3 flex-1 bg-border-strong" aria-hidden="true"></span>
-          <span class="whitespace-nowrap">{{ date(e.endDate) }}</span>
+      <!-- Dates: start -> end on one line when the card is wide enough, stacked when it is narrow (phones, tablets) -->
+      <div class="@container min-w-0 rounded-xl border border-card-border card-glass" data-stat="dates">
+        <div class="flex h-full flex-col justify-center gap-2 p-4 md:px-5">
+          <div class="flex items-center justify-between gap-3 text-xs text-text-3 md:text-[13px]">
+            <span class="flex items-center gap-1.5 md:gap-2">
+              <svg [lucideIcon]="icons.calendar" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
+              {{ 'run.start' | translate }}
+            </span>
+            <span class="hidden @[18rem]:inline">{{ 'run.end' | translate }}</span>
+          </div>
+          <div class="hidden items-center gap-2.5 font-mono text-base font-semibold text-text @[18rem]:flex" data-dates-row>
+            <span class="whitespace-nowrap">{{ date(e.startDate) }}</span>
+            <span class="h-px min-w-3 flex-1 bg-border-strong" aria-hidden="true"></span>
+            <span class="whitespace-nowrap">{{ date(e.endDate) }}</span>
+          </div>
+          <div class="flex flex-col gap-1 @[18rem]:hidden" data-dates-stacked>
+            <span class="font-mono text-[15px] font-semibold whitespace-nowrap text-text">{{ date(e.startDate) }}</span>
+            <span class="mt-1 text-xs text-text-3">{{ 'run.end' | translate }}</span>
+            <span class="font-mono text-[15px] font-semibold whitespace-nowrap text-text">{{ date(e.endDate) }}</span>
+          </div>
         </div>
       </div>
       <p class="sr-only" aria-live="polite">{{ inlineStatus() }}</p>
@@ -309,7 +318,7 @@
 
     <!-- Review -->
     <section
-      class="flex flex-col gap-3.5 md:rounded-[14px] md:border md:border-card-border md:card-glass md:p-[26px]"
+      class="flex flex-col gap-3.5 rounded-[14px] border border-card-border card-glass p-4 md:p-[26px]"
     >
       <app-section-header collapseKey="run.review" [label]="'run.summary' | translate" />
       @if (e.summary) {
@@ -321,9 +330,9 @@
       }
 
       @if (pros().length || cons().length) {
-        <!-- Web: two sub-cards -->
-        <div class="mt-2.5 hidden grid-cols-2 gap-4 md:grid">
-          <div class="rounded-[10px] border border-border bg-bg p-[18px]">
+        <!-- Two sub-cards, side by side from md -->
+        <div class="mt-1 grid grid-cols-1 gap-3 md:mt-2.5 md:grid-cols-2 md:gap-4" data-best-worst>
+          <div class="rounded-[10px] border border-border bg-bg p-4 md:p-[18px]">
             <h3 class="mb-3 text-[13px] font-semibold tracking-[0.06em] text-success uppercase">
               {{ 'run.best' | translate }}
             </h3>
@@ -337,7 +346,7 @@
               }
             </ul>
           </div>
-          <div class="rounded-[10px] border border-border bg-bg p-[18px]">
+          <div class="rounded-[10px] border border-border bg-bg p-4 md:p-[18px]">
             <h3 class="mb-3 text-[13px] font-semibold tracking-[0.06em] text-danger uppercase">
               {{ 'run.worst' | translate }}
             </h3>
@@ -352,21 +361,6 @@
             </ul>
           </div>
         </div>
-
-        <!-- Mobile: one combined list -->
-        <app-section-header class="mt-1 md:hidden" [label]="'run.bestWorst' | translate" />
-        <ul class="flex flex-col gap-2 text-sm wrap-anywhere text-text-2 md:hidden">
-          @for (item of pros(); track $index) {
-            <li class="flex gap-2.5">
-              <svg [lucideIcon]="icons.plus" [size]="16" class="mt-0.5 shrink-0 text-success"></svg>{{ item }}
-            </li>
-          }
-          @for (item of cons(); track $index) {
-            <li class="flex gap-2.5">
-              <svg [lucideIcon]="icons.minus" [size]="16" class="mt-0.5 shrink-0 text-danger"></svg>{{ item }}
-            </li>
-          }
-        </ul>
       }
 
       @if (e.notes) {

@@ -300,6 +300,30 @@ describe('ExperienceDetail inline edit', () => {
     expect(ended.querySelector('[data-postgame-ended]')!.textContent).toContain('run.postgameEnded');
   });
 
+  it('marks the platinum pill with the platinum icon', () => {
+    const pill = setup(run({ platinum: true })).el.querySelector('[data-platinum]')!;
+    expect(pill.querySelector('svg')).not.toBeNull();
+    expect(pill.textContent).toContain('run.platinum');
+  });
+
+  it('shows the best and worst as two cards, one list each, at every size', () => {
+    const el = setup(run({ pros: 'Balanceo\nCombate', cons: 'Sigilo' })).el;
+    const cards = el.querySelectorAll('[data-best-worst] > div');
+    expect(cards).toHaveLength(2);
+    expect(cards[0].querySelectorAll('li')).toHaveLength(2);
+    expect(cards[1].querySelectorAll('li')).toHaveLength(1);
+    expect(el.textContent).not.toContain('run.bestWorst');
+  });
+
+  it('shows both dates in the wide row and in the stacked layout for narrow cards', () => {
+    const el = setup(run({ startDate: '2018-09-08', endDate: '2018-10-28' })).el;
+    for (const selector of ['[data-dates-row]', '[data-dates-stacked]']) {
+      const text = el.querySelector(selector)!.textContent!;
+      expect(text).toContain('08/09/2018');
+      expect(text).toContain('28/10/2018');
+    }
+  });
+
   it('never sends the change in the read-only demo', () => {
     const t = setup(run(), true);
     const input = openHours(t);

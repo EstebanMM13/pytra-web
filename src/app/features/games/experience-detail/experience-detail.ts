@@ -69,6 +69,8 @@ export class ExperienceDetail {
   protected readonly figureSize = (value: string | number): string => figureFontSize(String(value));
   /** Inline-editable figures share their row with the pencil chip (26px chip + 8px gap + 12px padding, 2px slack). */
   protected readonly editableFigureSize = (value: string | number): string => figureFontSize(String(value), 48);
+  /** The rating figure also shares its line with the "/ 10" scale. */
+  protected readonly ratingFigureSize = (value: string | number): string => figureFontSize(String(value), 84);
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
