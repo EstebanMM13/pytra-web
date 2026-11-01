@@ -133,7 +133,13 @@ export const ACHIEVEMENT_ICONS: Partial<Record<string, LucideIconData>> = {
   allPlatforms: path('achievement-all-platforms', 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M12 3a14 14 0 0 1 0 18 M12 3a14 14 0 0 0 0 18', 'M3 12h18', 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'),
   years3: path('achievement-years3', 'M4 7.5L6.5 5h11L20 7.5v11L17.5 21h-11L4 18.5z M4 10h16 M8 3v4 M16 3v4 M8 15.5h.01 M12 15.5h.01', 'M16 15.5h.01', 'M4 7.5L6.5 5h11L20 7.5V10H4z'),
   veteran: path('achievement-veteran', 'M4 7.5L6.5 5h11L20 7.5v11L17.5 21h-11L4 18.5z M4 10h16 M8 3v4 M16 3v4', 'M12 12.5l1.1 2.2 2.4.3-1.8 1.6.5 2.4-2.2-1.2-2.2 1.2.5-2.4-1.8-1.6 2.4-.3z', 'M4 7.5L6.5 5h11L20 7.5V10H4z'),
-  years10: path('achievement-years10', 'M7 20.5C3.5 18.5 2 15 2.5 10.5 M17 20.5c3.5-2 5-5.5 4.5-10 M3 14.5l2.5-.5 M4.5 18l2-1.5 M2.5 10.5L4.5 12 M21 14.5l-2.5-.5 M19.5 18l-2-1.5 M21.5 10.5L19.5 12 M12.6 12a2.2 4 0 1 0 4.4 0a2.2 4 0 1 0 -4.4 0', 'M8.5 9.5l1.8-1.5v8'),
+  // A tall "10" nearly the icon's height, between two light laurel branches (two leaves each, low and
+  // outward) so the number stays legible at small sizes.
+  years10: path(
+    'achievement-years10',
+    'M6.5 21C3 19 1.5 15.5 2 11 M17.5 21c3.5-2 5-5.5 4.5-10 M2.2 15l2.3-.3 M3.8 18.6l1.9-1.3 M21.8 15l-2.3-.3 M20.2 18.6l-1.9-1.3 M11.5 11a3 6.5 0 1 0 6 0a3 6.5 0 1 0 -6 0',
+    'M7.5 7l2.5-2.5v13',
+  ),
   streak3: path('achievement-streak3', 'M13 2L5 13.5h6L10 22l8-11.5h-6z', undefined, 'M13 2L5 13.5h6L10 22l8-11.5h-6z'),
   streak5: path('achievement-streak5', 'M2 12a10 10 0 1 0 20 0a10 10 0 1 0 -20 0', 'M13 5l-5 8h4l-1 6 5-8h-4z', 'M2 12a10 10 0 1 0 20 0a10 10 0 1 0 -20 0'),
   onlineDebut: path('achievement-online-debut', 'M12 11v10 M9 21h6 M8 5.5a5 5 0 0 0 0 7 M16 5.5a5 5 0 0 1 0 7 M5 2.5a9.5 9.5 0 0 0 0 13 M19 2.5a9.5 9.5 0 0 1 0 13', 'M10 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0'),
