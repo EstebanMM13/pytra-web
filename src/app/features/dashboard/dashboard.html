@@ -384,6 +384,9 @@
         } @else {
           <ng-container *ngTemplateOutlet="listSkeleton" />
         }
+        @if (topRated()?.length) {
+          <ng-container *ngTemplateOutlet="seeAllGames" />
+        }
       </section>
 
       <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
@@ -410,6 +413,9 @@
           }
         } @else {
           <ng-container *ngTemplateOutlet="listSkeleton" />
+        }
+        @if (mostPlayed()?.length) {
+          <ng-container *ngTemplateOutlet="seeAllGames" />
         }
       </section>
 
@@ -456,6 +462,14 @@
       <app-pytra-mark class="size-8 animate-spin [animation-duration:1.4s]" />
     </div>
   </div>
+</ng-template>
+
+<!-- "See all" under the top rated and most played lists: their full rankings live in the stats Games section. -->
+<ng-template #seeAllGames>
+  <a routerLink="/stats/games" class="tap-area mt-3 flex items-center gap-1 self-end text-[13px] text-text-2 hover:text-text hover:underline" data-see-all-games>
+    {{ 'dashboard.seeAll' | translate }}
+    <svg [lucideIcon]="icons.arrowRight" [size]="14" class="text-brand-light" aria-hidden="true"></svg>
+  </a>
 </ng-template>
 
 <ng-template #sectionError>
