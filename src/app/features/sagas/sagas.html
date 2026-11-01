@@ -3,7 +3,7 @@
 <main class="mx-auto max-w-7xl md:grid md:min-h-[calc(100dvh-62px)] md:grid-cols-[300px_minmax(0,1fr)] lg:grid-cols-[380px_minmax(0,1fr)]">
   <!-- Saga list -->
   <section
-    class="flex-col gap-2.5 px-5 pt-3 pb-8 md:sticky md:top-0 md:max-h-[calc(100dvh-62px)] md:gap-2 md:self-start md:px-5 md:py-7"
+    class="flex-col gap-2.5 px-5 pt-3 pb-8 md:sticky md:top-0 md:max-h-[calc(100dvh-62px)] md:gap-2 md:self-start md:pr-5 md:pl-6 md:py-7 lg:pl-10"
     [class]="routeId() !== null ? 'hidden md:flex' : 'flex'"
   >
     <!-- Sagas hang off the stats hub: the way back to it (the detail screen keeps its own back to the list). -->
@@ -221,7 +221,7 @@
 
   <!-- Selected saga -->
   <section
-    class="min-w-0 flex-col gap-4 px-5 pt-3 pb-8 md:gap-6 md:border-l md:border-border md:px-8 md:py-8 lg:px-10"
+    class="min-w-0 flex-col gap-4 px-5 pt-3 pb-8 md:gap-6 md:border-l md:border-border md:pr-6 md:pl-8 md:py-8 lg:px-10"
     [class]="routeId() === null ? 'hidden md:flex' : 'flex'"
   >
     @if (loading()) {
