@@ -636,6 +636,13 @@ describe('Games library sections', () => {
     expect(listed()).toEqual(['/games/1', '/games/3']);
   });
 
+  it('points the arrow of a section folded on a previous visit sideways, and the others down', async () => {
+    localStorage.setItem('pytra_library_collapsed', '["undated"]');
+    const { headers } = await setup([online, undated, dated]);
+    const turned = headers().map((h) => h.querySelector('[data-section-chevron]')!.classList.contains('-rotate-90'));
+    expect(turned).toEqual([false, true, false]);
+  });
+
   it('lists every game in the desktop table when there are sections, without pages', async () => {
     const { el, listed } = await setup([...many, online], { wide: true, view: 'list' });
     expect(listed().length).toBe(13);

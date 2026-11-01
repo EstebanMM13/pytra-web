@@ -466,13 +466,10 @@
     (click)="toggleSection(block.id)"
     data-library-section
   >
-    <svg
-      [lucideIcon]="icons.chevronDown"
-      [size]="16"
-      class="shrink-0 transition-transform"
-      [class.-rotate-90]="isCollapsed(block.id)"
-      aria-hidden="true"
-    ></svg>
+    <!-- The rotation sits on a wrapper: lucideIcon rewrites the svg's whole class attribute and would drop it -->
+    <span class="inline-flex shrink-0 transition-transform" [class.-rotate-90]="isCollapsed(block.id)" data-section-chevron>
+      <svg [lucideIcon]="icons.chevronDown" [size]="16" aria-hidden="true"></svg>
+    </span>
     <span>{{ 'library.section.' + block.id | translate }}</span>
     <span class="font-mono text-xs font-normal text-muted">{{ block.games.length }}</span>
   </button>
