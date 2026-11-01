@@ -23,6 +23,14 @@ const RANKINGS: GameRankings = {
   shortGems: [{ gameId: 3, gameName: 'Inside', rating: 9, hours: 4 }],
   mostDaysPlayed: [],
   longestPending: [
+    // Announced, no runs yet: pending since it was added (no run to link).
+    {
+      gameId: 6,
+      gameName: 'GTA VI',
+      experienceId: null,
+      runLabel: null,
+      pendingSince: '2023-12-05T08:00:00',
+    },
     {
       gameId: 4,
       gameName: 'Persona 5',
@@ -53,7 +61,15 @@ describe('Stats games page', () => {
           provide: GameService,
           useValue: {
             findAll: () =>
-              of([{ id: 1, name: 'Elden Ring', coverImageUrl: 'er.jpg', totalHours: 200 }]),
+              of([
+                {
+                  id: 1,
+                  name: 'Elden Ring',
+                  coverImageUrl: 'er.jpg',
+                  totalHours: 200,
+                  experienceCount: 3,
+                },
+              ]),
           },
         },
         {
@@ -164,8 +180,24 @@ describe('Stats games page', () => {
       el.querySelector('[data-ranking="shortGems"] [data-ranking-hint]')!.textContent,
     ).toContain('stats.games.shortGemsHint');
     expect(rows(el, 'shortGems')).toEqual([expect.stringContaining('Inside')]);
-    expect(rows(el, 'longestPending')).toEqual([expect.stringContaining('stats.games.since')]);
-    expect(links(el, 'longestPending')).toEqual(['/games/4']);
+    // A game without runs is pending too (the library's Pendiente tab), opening its game page.
+    expect(rows(el, 'longestPending')).toEqual([
+      expect.stringContaining('GTA VI'),
+      expect.stringContaining('Persona 5'),
+    ]);
+    expect(rows(el, 'longestPending')[0]).toContain('stats.games.since');
+    expect(links(el, 'longestPending')).toEqual(['/games/6', '/games/4']);
+  });
+
+  it('gives every row its small line, so the cards side by side keep the same height', () => {
+    const { el } = setup();
+    const allRows = [...el.querySelectorAll('[data-ranking] [data-bar-row]')];
+    expect(allRows.length).toBeGreaterThan(0);
+    for (const row of allRows) {
+      expect(row.querySelector('[data-bar-sub]')).not.toBeNull();
+    }
+    // Most played single player rows show the library's run count.
+    expect(rows(el, 'mostPlayed')[0]).toContain('stats.runs');
   });
 
   it('shows an empty note on a ranking without rows', () => {

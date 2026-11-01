@@ -1663,7 +1663,7 @@
       "noReplays": "Ningún juego tiene dos partidas o más.",
       "longestRuns": "Partidas más largas",
       "shortGems": "Joyas cortas",
-      "shortGemsHint": "Nota {{rating}} o más en {{hours}} o menos",
+      "shortGemsHint": "Nota ≥ {{rating}} · ≤ {{hours}}",
       "noGems": "Ningún juego con nota alta y pocas horas.",
       "mostDaysPlayed": "Más días jugados",
       "noDiary": "Apunta días en el diario para ver este ranking.",

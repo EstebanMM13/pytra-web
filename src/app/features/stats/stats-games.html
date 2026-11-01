@@ -18,14 +18,15 @@
         class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]"
         data-ranking="mostPlayed"
       >
-        <app-section-header class="mb-3" [label]="'stats.games.mostPlayed' | translate" />
-        <app-segmented
-          class="mb-3"
-          stretch
-          [options]="playModeOptions"
-          [(value)]="playMode"
-          data-play-mode
-        />
+        <app-section-header class="mb-3 min-h-7" [label]="'stats.games.mostPlayed' | translate">
+          <app-segmented
+            size="sm"
+            tone="neutral"
+            [options]="playModeOptions"
+            [(value)]="playMode"
+            data-play-mode
+          />
+        </app-section-header>
         @if (mostPlayedRows().length) {
           <app-stats-bar-list [bars]="mostPlayedRows()" [limit]="preview" tone="brand" ranked />
         } @else {
@@ -38,10 +39,12 @@
           class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]"
           [attr.data-ranking]="ranking.key"
         >
-          <app-section-header class="mb-3" [label]="ranking.title" />
-          @if (ranking.hint) {
-            <p class="-mt-1 mb-3 text-xs text-faint" data-ranking-hint>{{ ranking.hint }}</p>
-          }
+          <!-- The rule (short gems) sits beside the title, so every card keeps the same height. -->
+          <app-section-header class="mb-3 min-h-7" [label]="ranking.title">
+            @if (ranking.hint) {
+              <span class="shrink-0 text-xs text-faint" data-ranking-hint>{{ ranking.hint }}</span>
+            }
+          </app-section-header>
           @if (ranking.rows.length) {
             <app-stats-bar-list
               [bars]="ranking.rows"

@@ -68,8 +68,17 @@ export interface GameRankings {
   shortGems: { gameId: number; gameName: string; rating: number; hours: number }[];
   /** Games by distinct diary days, most first. */
   mostDaysPlayed: { gameId: number; gameName: string; days: number }[];
-  /** Games whose latest run is pending, oldest waiting first; `pendingSince` is a local ISO date-time. */
-  longestPending: { gameId: number; gameName: string; experienceId: number; runLabel: string | null; pendingSince: string }[];
+  /**
+   * Pending games as the library's Pendiente tab sees them (latest run pending, or a single player
+   * game without runs: `experienceId` null), oldest waiting first; `pendingSince` is a local ISO date-time.
+   */
+  longestPending: {
+    gameId: number;
+    gameName: string;
+    experienceId: number | null;
+    runLabel: string | null;
+    pendingSince: string;
+  }[];
 }
 
 /** A run with status EN_CURSO, from `/stats/in-progress` (most recently started first). */

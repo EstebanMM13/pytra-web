@@ -18,6 +18,14 @@ import { SHORT_GEM_MAX_HOURS, SHORT_GEM_MIN_RATING, waitingDays } from './stats-
 
 type PlayMode = 'single' | 'online';
 
+/**
+ * Every row keeps its small line, a blank one when there is nothing to say, so all the rows (and
+ * the cards side by side) have the same height.
+ */
+function subLine(text: string | null | undefined): string {
+  return text || ' ';
+}
+
 const PLAY_MODE_OPTIONS: readonly SegmentedOption<PlayMode>[] = [
   { value: 'single', label: 'stats.games.single' },
   { value: 'online', label: 'stats.games.online' },
@@ -74,6 +82,10 @@ export class StatsGames {
   protected readonly state = this.section.state;
   private readonly library = statsLibrary();
   private readonly covers = computed(() => coverMap(this.library() ?? []));
+  /** Library games by id, for each row's small line (runs, hours) the rankings do not send. */
+  private readonly games = computed(
+    () => new Map((this.library() ?? []).map((game) => [game.id, game])),
+  );
 
   private cover(gameId: number, name: string): StatsBar['cover'] {
     return { url: this.covers().get(gameId) ?? null, name };
@@ -90,10 +102,27 @@ export class StatsGames {
       label: g.gameName,
       share: ratios[i],
       figure: this.format.hours(g.totalHours),
+      sub: subLine(
+        this.playMode() === 'online'
+          ? this.format.text('stats.games.online')
+          : this.runsOf(g.gameId),
+      ),
       link: ['/games', g.gameId],
       cover: this.cover(g.gameId, g.gameName),
     }));
   });
+
+  /** "3 runs" from the library, null while it loads or when unknown. */
+  private runsOf(gameId: number): string | null {
+    const count = this.games().get(gameId)?.experienceCount;
+    return count ? this.format.plural('stats.runs', count) : null;
+  }
+
+  /** The game's total hours from the library, null while it loads or when unknown. */
+  private hoursOf(gameId: number): string | null {
+    const hours = this.games().get(gameId)?.totalHours;
+    return hours ? this.format.hours(hours) : null;
+  }
 
   /** The other rankings, in page order. */
   protected readonly rankings = computed<Ranking[]>(() => {
@@ -122,7 +151,7 @@ export class StatsGames {
           share: ratingShare(r.rating),
           figure: format.rating(r.rating),
           figureClass: ratingTone(r.rating),
-          sub: r.online ? format.text('stats.games.online') : r.runLabel,
+          sub: subLine(r.online ? format.text('stats.games.online') : r.runLabel),
           link: r.experienceId
             ? ['/games', r.gameId, 'experiences', r.experienceId]
             : ['/games', r.gameId],
@@ -156,7 +185,7 @@ export class StatsGames {
           label: r.gameName,
           share: runRatios[i],
           figure: format.hours(r.hours),
-          sub: r.runLabel,
+          sub: subLine(r.runLabel),
           link: ['/games', r.gameId, 'experiences', r.experienceId],
           cover: this.cover(r.gameId, r.gameName),
         })),
@@ -192,6 +221,7 @@ export class StatsGames {
           label: g.gameName,
           share: dayRatios[i],
           figure: format.plural('stats.days', g.days),
+          sub: subLine(this.hoursOf(g.gameId)),
           link: ['/games', g.gameId],
           cover: this.cover(g.gameId, g.gameName),
         })),
@@ -203,7 +233,7 @@ export class StatsGames {
         tone: 'brand',
         empty: format.text('stats.games.noPending'),
         rows: rankings.longestPending.map((g, i) => ({
-          key: g.experienceId,
+          key: g.gameId,
           label: g.gameName,
           share: waitRatios[i],
           figure: format.text('stats.games.since', {

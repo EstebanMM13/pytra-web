@@ -1663,7 +1663,7 @@
       "noReplays": "No game has two runs or more.",
       "longestRuns": "Longest runs",
       "shortGems": "Short gems",
-      "shortGemsHint": "Rated {{rating}} or more in {{hours}} or less",
+      "shortGemsHint": "Rating ≥ {{rating}} · ≤ {{hours}}",
       "noGems": "No highly rated game with few hours.",
       "mostDaysPlayed": "Most days played",
       "noDiary": "Log days in the diary to see this ranking.",
