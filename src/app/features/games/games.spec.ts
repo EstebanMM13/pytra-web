@@ -558,10 +558,10 @@ describe('Games library postgame', () => {
     return { hrefs, pills: el.querySelectorAll('[data-postgame]').length };
   }
 
-  it('lists a game in its postgame under En curso, with its Postgame pill', async () => {
+  it('lists a game in its postgame under En curso, without a Postgame pill that would cut its status', async () => {
     const { hrefs, pills } = await listed('/games?status=EN_CURSO');
     expect(hrefs).toEqual(['/games/7']);
-    expect(pills).toBeGreaterThan(0);
+    expect(pills).toBe(0);
   });
 
   it('keeps it under Completado too, next to games that are only beaten', async () => {

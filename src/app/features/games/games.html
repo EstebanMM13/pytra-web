@@ -314,14 +314,6 @@
                         <span class="truncate">
                           {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
                         </span>
-                        @if (isInPostgame(game)) {
-                          <span
-                    class="shrink-0 rounded-full bg-brand-tint px-1.5 py-px text-[10px] font-medium text-brand-lighter"
-                    [attr.title]="'run.postgameAria' | translate"
-                    data-postgame
-                    >{{ 'run.postgame' | translate }}</span
-                  >
-                        }
                         @if (game.totalHours) {
                           <span class="-ml-0.5 shrink-0 whitespace-nowrap max-sm:ml-0 max-sm:basis-full max-sm:pl-3.5"
                             ><span class="max-sm:hidden">· </span>{{ game.totalHours | hours }}</span
@@ -381,17 +373,7 @@
                 <span class="text-right font-mono" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
                 <span>
                   @if (game.lastExperienceStatus; as status) {
-                    <span class="inline-flex items-center gap-1.5">
-                      <app-status-pill [status]="status" />
-                      @if (isInPostgame(game)) {
-                        <span
-                    class="shrink-0 rounded-full bg-brand-tint px-1.5 py-px text-[10px] font-medium text-brand-lighter"
-                    [attr.title]="'run.postgameAria' | translate"
-                    data-postgame
-                    >{{ 'run.postgame' | translate }}</span
-                  >
-                      }
-                    </span>
+                    <app-status-pill [status]="status" />
                   } @else if (statusLine(game) === 'played') {
                     <span class="text-xs text-faint">—</span>
                   } @else if (isOnlineOnly(game)) {
@@ -451,9 +433,6 @@
                           {{ game.totalHours ? ('library.hoursPlayed' | translate: { hours: (game.totalHours | hours) }) : ('library.noHours' | translate) }}
                         } @else {
                           {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
-                          @if (isInPostgame(game)) {
-                            · <span class="text-brand-lighter" data-postgame>{{ 'run.postgame' | translate }}</span>
-                          }
                           · {{ 'library.runsCount' | translatePlural: game.experienceCount ?? 0 }}
                           @if (game.totalHours) {
                             · <span class="whitespace-nowrap">{{ game.totalHours | hours }}</span>
