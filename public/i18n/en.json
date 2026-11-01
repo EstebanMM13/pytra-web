@@ -1358,7 +1358,8 @@
     "showAll": "See all ({{total}})",
     "showLess": "Show less",
     "noneUnlocked": "No achievements unlocked yet. Log your first run!",
-    "emptyFilter": "No achievements in this filter."
+    "emptyFilter": "No achievements in this filter.",
+    "unlockedOn": "Unlocked on {{date}}"
   },
   "demo": {
     "banner": "Demo mode · read-only",

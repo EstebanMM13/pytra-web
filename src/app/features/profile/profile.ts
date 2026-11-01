@@ -10,7 +10,16 @@ import { GameService } from '../../core/services/game.service';
 import { SagaService } from '../../core/services/saga.service';
 import { StatsService } from '../../core/services/stats.service';
 import { AchievementBadge } from '../../shared/achievements/achievement-badge';
-import { Achievement, LEGEND_ID, computeAchievements, groupByCategory, topUnlocked } from '../../shared/achievements/achievements';
+import {
+  Achievement,
+  LEGEND_ID,
+  applyStoredUnlocks,
+  computeAchievements,
+  groupByCategory,
+  topUnlocked,
+} from '../../shared/achievements/achievements';
+import { AchievementService } from '../../core/services/achievement.service';
+import { formatTokenDate } from './access-tokens.logic';
 import { findPlatformByKey, groupPlatformsByFamily, platformNameKey } from '../../core/services/platform.logic';
 import { PlatformService } from '../../core/services/platform.service';
 import { ExportFormat } from '../../core/models/user.model';
@@ -178,6 +187,11 @@ export class Profile {
     formatMemberSince(this.user()?.createdAt, this.translate.currentLang() === 'en' ? 'en' : 'es'),
   );
 
+  /** "1 nov 2026" / "Nov 1, 2026" for a stored achievement; null when it has no unlock date. */
+  protected unlockDate(badge: Achievement): string | null {
+    return badge.unlocked ? formatTokenDate(badge.unlockedAt, this.translate.currentLang() === 'en' ? 'en' : 'es') : null;
+  }
+
 
   /** Highlighted sidebar entry: the targeted section on arrival (the top, "Cuenta", by default). */
   protected readonly activeSection = signal<ProfileSection>('account');
@@ -307,15 +321,28 @@ export class Profile {
     });
 
     // combineLatest, not forkJoin: the cached lists render at once, a fresher emission recomputes.
+    const achievementService = inject(AchievementService);
     combineLatest({
       games: inject(GameService).findAll(),
       sagas: inject(SagaService).findAll(),
       summary: inject(StatsService).getSummary(),
       years: inject(StatsService).getByYear().pipe(catchError(() => of([]))),
+      // Stored unlocks stay unlocked; without them the page still shows the computed ones.
+      stored: achievementService.getUnlocked().pipe(catchError(() => of([]))),
     })
       .pipe(catchError(() => of(null)))
       .subscribe((data) => {
-        this.achievements.set(data ? computeAchievements(data) : []);
+        if (!data) {
+          this.achievements.set([]);
+        } else {
+          const computed = computeAchievements(data);
+          const merged = applyStoredUnlocks(computed, data.stored);
+          this.achievements.set(merged);
+          // Saves the new unlocks; the answer brings their unlock dates.
+          achievementService
+            .recordNew(merged, data.stored)
+            .subscribe((stored) => this.achievements.set(applyStoredUnlocks(computed, stored)));
+        }
         this.scrollToTarget();
       });
 

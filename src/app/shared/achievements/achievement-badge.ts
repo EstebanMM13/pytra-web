@@ -78,12 +78,17 @@ const TIER_TONE: Record<AchievementTier, string> = {
           </span>
         }
       }
+      @if (a().unlocked && unlockedOn()) {
+        <span class="mt-0.5 block text-[11px] text-faint">{{ 'achievements.unlockedOn' | translate: { date: unlockedOn() } }}</span>
+      }
     </span>
   `,
 })
 export class AchievementBadge {
   readonly achievement = input.required<Achievement>();
   readonly compact = input(false, { transform: booleanAttribute });
+  /** Formatted unlock date ("1 nov 2026"), shown under an unlocked badge when given. */
+  readonly unlockedOn = input<string | null>(null);
 
   protected readonly a = this.achievement;
   /** The achievement's own icon (the trophy guards an id added without one). */

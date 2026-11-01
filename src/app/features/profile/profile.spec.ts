@@ -2,10 +2,12 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Event as RouterEvent, NavigationEnd, Router, Scroll, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { provideTranslateService } from '@ngx-translate/core';
-import { Subject, of } from 'rxjs';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
+import { EMPTY, Subject, of } from 'rxjs';
+import { UnlockedAchievement } from '../../core/models/achievement.model';
 import { CurrentUser } from '../../core/models/user.model';
 import { AccessTokenService } from '../../core/services/access-token.service';
+import { AchievementService } from '../../core/services/achievement.service';
 import { AuthService } from '../../core/services/auth.service';
 import { DemoModeService } from '../../core/services/demo-mode.service';
 import { FileExportService } from '../../core/services/file-export.service';
@@ -34,7 +36,8 @@ const USER: CurrentUser = {
 };
 
 describe('Profile', () => {
-  function configure(demo = false) {
+  function configure(demo = false, stored: UnlockedAchievement[] = []) {
+    const achievementService = { getUnlocked: () => of(stored), recordNew: vi.fn(() => EMPTY) };
     const userService = {
       currentUser: signal(USER),
       displayName: signal('Ana'),
@@ -57,14 +60,15 @@ describe('Profile', () => {
         { provide: FileExportService, useValue: { save: vi.fn() } },
         { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: AccessTokenService, useValue: { list: () => of([]), create: vi.fn(), revoke: vi.fn() } },
+        { provide: AchievementService, useValue: achievementService },
       ],
     });
     TestBed.overrideComponent(Profile, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
-    return { userService, blockWrite };
+    return { userService, blockWrite, achievementService };
   }
 
-  function setup(demo = false) {
-    const mocks = configure(demo);
+  function setup(demo = false, stored: UnlockedAchievement[] = []) {
+    const mocks = configure(demo, stored);
     const fixture = TestBed.createComponent(Profile);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
@@ -145,6 +149,36 @@ describe('Profile', () => {
       expect(scrollIntoView).toHaveBeenCalledTimes(1);
       expect(scrollIntoView.mock.contexts[0]).toBe(target);
     }
+  });
+
+  it('keeps a stored achievement unlocked and shows its unlock date in the full list', () => {
+    configure(false, [{ id: 'collector25', unlockedAt: '2026-11-01T10:00:00' }]);
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('es', { achievements: { unlockedOn: 'Conseguido el {{date}}' } });
+    translate.use('es');
+    const fixture = TestBed.createComponent(Profile);
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    // Featured (top unlocked) already shows it although the empty library alone would lock it.
+    expect(el.querySelector('#profile-achievements app-achievement-badge')).not.toBeNull();
+    [...el.querySelectorAll<HTMLButtonElement>('#profile-achievements button')]
+      .find((b) => b.textContent?.includes('achievements.showAll'))!
+      .click();
+    fixture.detectChanges();
+
+    expect(el.querySelector('#profile-achievements')!.textContent).toContain('Conseguido el 1 nov 2026');
+  });
+
+  it('records the unlocks it computes that are not stored yet', () => {
+    const { achievementService } = setup(false, [{ id: 'collector25', unlockedAt: '2026-11-01T10:00:00' }]);
+    expect(achievementService.recordNew).toHaveBeenCalledTimes(1);
+    const [list, stored] = achievementService.recordNew.mock.calls[0] as unknown as [
+      { id: string; unlocked: boolean }[],
+      UnlockedAchievement[],
+    ];
+    expect(list.find((a) => a.id === 'collector25')?.unlocked).toBe(true);
+    expect(stored.map((s) => s.id)).toEqual(['collector25']);
   });
 
   it('sets the rating scale from the preferences section', () => {

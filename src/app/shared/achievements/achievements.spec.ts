@@ -1,6 +1,14 @@
 import { Game } from '../../core/models/game.model';
 import { StatsSummary, YearStat } from '../../core/models/stats.model';
-import { ACHIEVEMENT_CATEGORIES, computeAchievements, groupByCategory, sortAchievements, topUnlocked } from './achievements';
+import {
+  ACHIEVEMENT_CATEGORIES,
+  applyStoredUnlocks,
+  computeAchievements,
+  groupByCategory,
+  idsToRecord,
+  sortAchievements,
+  topUnlocked,
+} from './achievements';
 
 const PC = { id: 1, name: 'PC', color: '#8A857C' };
 const PS5 = { id: 2, name: 'PS5', color: '#4F7BE8' };
@@ -289,5 +297,63 @@ describe('computeAchievements', () => {
     const gold = computeAchievements({ games: [], summary: summary({ totalPlatinums: 10 }), sagas: [] });
     expect(topUnlocked(gold, 1)[0].id).toBe('platinumHunter');
     expect(topUnlocked(computeAchievements({ games: [], summary: summary(), sagas: [] }))).toEqual([]);
+  });
+});
+
+describe('stored unlocks', () => {
+  const at = '2026-11-01T10:00:00';
+  /** Two runs in progress: Multitarea (3) is locked by the data alone. */
+  const twoInProgress = () => computeAchievements({ games: [], summary: summary({ inProgressCount: 2 }), sagas: [] });
+
+  it('still computes unlocks from the data alone, with no unlock date', () => {
+    const a = byId(computeAchievements({ games: [], summary: summary({ inProgressCount: 3 }), sagas: [] }));
+    expect(a['multitasker'].unlocked).toBe(true);
+    expect(a['multitasker'].unlockedAt).toBeUndefined();
+    expect(byId(twoInProgress())['multitasker'].unlocked).toBe(false);
+  });
+
+  it('keeps a stored achievement unlocked, with complete progress and its date, when the data fell below the target', () => {
+    const a = byId(applyStoredUnlocks(twoInProgress(), [{ id: 'multitasker', unlockedAt: at }]));
+    expect(a['multitasker'].unlocked).toBe(true);
+    expect(a['multitasker'].progress).toBe(1);
+    expect(a['multitasker'].current).toBe(a['multitasker'].target);
+    expect(a['multitasker'].unlockedAt).toBe(at);
+    expect(a['runs10'].unlocked).toBe(false);
+    expect(a['runs10'].unlockedAt).toBeUndefined();
+  });
+
+  it('counts stored achievements for the legend and the top unlocked badges', () => {
+    const merged = applyStoredUnlocks(twoInProgress(), [{ id: 'multitasker', unlockedAt: at }]);
+    expect(byId(merged)['legend'].current).toBe(1);
+    expect(topUnlocked(merged).map((a) => a.id)).toEqual(['multitasker']);
+
+    const others = twoInProgress().filter((a) => a.id !== 'legend');
+    const all = applyStoredUnlocks(
+      twoInProgress(),
+      others.map((a) => ({ id: a.id, unlockedAt: at })),
+    );
+    expect(byId(all)['legend'].unlocked).toBe(true);
+    expect(topUnlocked(all, 1)[0].id).toBe('legend');
+  });
+
+  it('keeps a stored legend unlocked and ignores ids the catalog no longer has', () => {
+    const merged = applyStoredUnlocks(twoInProgress(), [
+      { id: 'legend', unlockedAt: at },
+      { id: 'retiredBadge', unlockedAt: at },
+    ]);
+    expect(merged.length).toBe(twoInProgress().length);
+    expect(merged.map((a) => a.id)).not.toContain('retiredBadge');
+    expect(byId(merged)['legend'].unlocked).toBe(true);
+    expect(byId(merged)['legend'].progress).toBe(1);
+  });
+
+  it('records the unlocked achievements that are not stored yet (the legend too)', () => {
+    const list = computeAchievements({ games: [], summary: summary({ inProgressCount: 3, totalPlatinums: 1 }), sagas: [] });
+    const stored = [{ id: 'firstPlatinum', unlockedAt: at }];
+    expect(idsToRecord(applyStoredUnlocks(list, stored), stored)).toEqual(['multitasker']);
+    expect(idsToRecord(applyStoredUnlocks(list, []), [])).toEqual(['firstPlatinum', 'multitasker']);
+
+    const others = list.filter((a) => a.id !== 'legend').map((a) => ({ id: a.id, unlockedAt: at }));
+    expect(idsToRecord(applyStoredUnlocks(list, others), others)).toEqual(['legend']);
   });
 });

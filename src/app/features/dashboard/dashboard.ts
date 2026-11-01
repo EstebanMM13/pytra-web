@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -39,7 +39,9 @@ import { Saga } from '../../core/models/saga.model';
 import { GameService } from '../../core/services/game.service';
 import { SagaService } from '../../core/services/saga.service';
 import { AchievementBadge } from '../../shared/achievements/achievement-badge';
-import { computeAchievements, topUnlocked } from '../../shared/achievements/achievements';
+import { applyStoredUnlocks, computeAchievements, topUnlocked } from '../../shared/achievements/achievements';
+import { AchievementService } from '../../core/services/achievement.service';
+import { UnlockedAchievement } from '../../core/models/achievement.model';
 import { pickTagline, STAT_LINKS, statMeters, topRatedKey, topRatedLink } from './dashboard.logic';
 
 type PlayMode = 'single' | 'online';
@@ -92,6 +94,7 @@ export class Dashboard {
   private readonly runFormLauncher = inject(RunFormLauncher);
   private readonly gameService = inject(GameService);
   private readonly sagaService = inject(SagaService);
+  private readonly achievementService = inject(AchievementService);
   protected readonly displayName = inject(UserService).displayName;
   private readonly preferences = inject(PreferencesService);
 
@@ -122,6 +125,8 @@ export class Dashboard {
   /** Library and sagas, only for achievements; `null` while loading (badges stay hidden). */
   readonly games = signal<Game[] | null>(null);
   readonly sagas = signal<Saga[] | null>(null);
+  /** Unlocks the API keeps (they never lock again); `null` while loading, empty when unavailable. */
+  private readonly storedAchievements = signal<UnlockedAchievement[] | null>(null);
 
   /** Runs with status EN_CURSO (`/stats/in-progress`); `null` while loading. */
   readonly playing = signal<InProgressExperience[] | null>(null);
@@ -177,14 +182,17 @@ export class Dashboard {
     };
   });
 
-  /** Most impressive unlocked badges (max 4); empty until games, sagas and summary load. */
-  protected readonly topBadges = computed(() => {
+  /** Computed achievements merged with the stored unlocks; `null` until games, sagas and summary load. */
+  private readonly achievements = computed(() => {
     const games = this.games();
     const sagas = this.sagas();
     const summary = this.summary();
-    if (!games || !sagas || !summary) return [];
-    return topUnlocked(computeAchievements({ games, sagas, summary, years: this.byYear() }), 4);
+    if (!games || !sagas || !summary) return null;
+    return applyStoredUnlocks(computeAchievements({ games, sagas, summary, years: this.byYear() }), this.storedAchievements() ?? []);
   });
+
+  /** Most impressive unlocked badges (max 4); empty until games, sagas and summary load. */
+  protected readonly topBadges = computed(() => topUnlocked(this.achievements() ?? [], 4));
 
   /** New account (no games yet): show the onboarding card instead of empty stats. */
   protected readonly isEmptyLibrary = computed(() => this.summary()?.totalGames === 0);
@@ -242,6 +250,13 @@ export class Dashboard {
     this.load();
     // A run created/edited from the form changes the totals and "Jugando ahora".
     this.runFormLauncher.saved$.pipe(takeUntilDestroyed()).subscribe(() => this.load());
+    // Saves the unlocks computed here that are not stored yet (once; a failure retries on a later load).
+    effect(() => {
+      const list = this.achievements();
+      const stored = this.storedAchievements();
+      if (!list || !stored) return;
+      untracked(() => this.achievementService.recordNew(list, stored).subscribe((s) => this.storedAchievements.set(s)));
+    });
   }
 
   private load(): void {
@@ -273,6 +288,10 @@ export class Dashboard {
       .findAll()
       .pipe(catchError(() => of(null)))
       .subscribe((sagas) => this.sagas.set(sagas));
+    this.achievementService
+      .getUnlocked()
+      .pipe(catchError(() => of([])))
+      .subscribe((stored) => this.storedAchievements.set(stored));
     // Not linked / not configured answers with an error: simply hide the notice (no inline error).
     this.steamService
       .getPending()

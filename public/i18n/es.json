@@ -1358,7 +1358,8 @@
     "showAll": "Ver todos ({{total}})",
     "showLess": "Ver menos",
     "noneUnlocked": "Aún no has desbloqueado logros. ¡Registra tu primera partida!",
-    "emptyFilter": "No hay logros en este filtro."
+    "emptyFilter": "No hay logros en este filtro.",
+    "unlockedOn": "Conseguido el {{date}}"
   },
   "demo": {
     "banner": "Modo demo · solo lectura",

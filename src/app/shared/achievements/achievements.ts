@@ -1,3 +1,4 @@
+import { UnlockedAchievement } from '../../core/models/achievement.model';
 import { Game } from '../../core/models/game.model';
 import { Saga } from '../../core/models/saga.model';
 import { StatsSummary, YearStat } from '../../core/models/stats.model';
@@ -44,6 +45,8 @@ export interface Achievement {
   progress: number;
   /** Higher = harder; used to pick the most impressive unlocked badges. */
   rank: number;
+  /** First unlock date (ISO local date-time) when the API has it stored; set by `applyStoredUnlocks`. */
+  unlockedAt?: string;
 }
 
 export interface AchievementInput {
@@ -234,6 +237,34 @@ function longestStreak(years: readonly number[]): number {
     best = Math.max(best, run);
   });
   return best;
+}
+
+/**
+ * Merges the unlocks the API stored: an achievement is unlocked when computed as unlocked OR stored,
+ * so it never locks again when the data that earned it changes (a stored one shows complete progress
+ * and carries its unlock date). The `legend` meta badge is recounted over the merged list. Stored ids
+ * the catalog no longer has are ignored.
+ */
+export function applyStoredUnlocks(list: readonly Achievement[], stored: readonly UnlockedAchievement[]): Achievement[] {
+  const dates = new Map(stored.map((s) => [s.id, s.unlockedAt]));
+  const merged = list.map((a) => (a.id === LEGEND_ID ? a : withStoredUnlock(a, dates.get(a.id))));
+  const unlockedOthers = merged.filter((a) => a.id !== LEGEND_ID && a.unlocked).length;
+  return merged.map((a) => {
+    if (a.id !== LEGEND_ID) return a;
+    const legend = achievement(a.id, a.category, a.tier, unlockedOthers, a.target, a.rank);
+    return withStoredUnlock(legend, dates.get(LEGEND_ID));
+  });
+}
+
+function withStoredUnlock(a: Achievement, unlockedAt: string | undefined): Achievement {
+  if (unlockedAt == null) return a;
+  return { ...a, unlocked: true, progress: 1, current: Math.max(a.current, a.target), unlockedAt };
+}
+
+/** Ids unlocked in the (merged) list that the API has not stored yet, in list order. */
+export function idsToRecord(list: readonly Achievement[], stored: readonly UnlockedAchievement[]): string[] {
+  const storedIds = new Set(stored.map((s) => s.id));
+  return list.filter((a) => a.unlocked && !storedIds.has(a.id)).map((a) => a.id);
 }
 
 /** Unlocked first (hardest first), then locked by progress desc. */
