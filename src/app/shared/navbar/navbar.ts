@@ -29,7 +29,7 @@ interface NavTab {
 
 const WEB_TABS: NavTab[] = [
   { path: '/dashboard', labelKey: 'nav.home', icon: ICONS.house },
-  { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
+  { path: '/games', labelKey: 'nav.games', icon: ICONS.library },
   // Years and sagas are sections of the stats hub: the tab stays lit on them.
   { path: '/stats', labelKey: 'nav.stats', icon: ICONS.chartColumn, also: ['/years', '/sagas'] },
   { path: '/diary', labelKey: 'nav.diary', icon: ICONS.calendarDays },

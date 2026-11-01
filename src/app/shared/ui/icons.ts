@@ -49,6 +49,13 @@ export const ICONS = {
   info: path('info', 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M12 11v5', 'M12 8h.01', 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0'),
   install: path('install', 'M8.5 2H15.5L18 4.5V19.5L15.5 22H8.5L6 19.5V4.5z M10.5 18.5h3', 'M12 6v7 M9 10l3 3 3-3', 'M8.5 2H15.5L18 4.5V19.5L15.5 22H8.5L6 19.5V4.5z'),
   layoutGrid: path('layout-grid', 'M4.5 3H8.5L10 4.5V8.5L8.5 10H4.5L3 8.5V4.5z M4.5 14H8.5L10 15.5V19.5L8.5 21H4.5L3 19.5V15.5z M15.5 14H19.5L21 15.5V19.5L19.5 21H15.5L14 19.5V15.5z', 'M15.5 3H19.5L21 4.5V8.5L19.5 10H15.5L14 8.5V4.5z', 'M4.5 14H8.5L10 15.5V19.5L8.5 21H4.5L3 19.5V15.5z M15.5 14H19.5L21 15.5V19.5L19.5 21H15.5L14 19.5V15.5z'),
+  /** The library (Biblioteca): two upright books and a leaning one on a shelf. */
+  library: path(
+    'library',
+    'M4 5.5L4.5 5H6.5L7 5.5V19H4z M8.5 3.5L9 3H11.5L12 3.5V19H8.5z M13.4 6.6L15.3 5.9L19.6 18.1L17.3 18.9z M3 21h18',
+    'M8.5 7h3.5 M8.5 15h3.5',
+    'M8.5 3.5L9 3H11.5L12 3.5V19H8.5z',
+  ),
   list: path('list', 'M8 6h13 M8 12h13 M8 18h13 M3 12h.01 M3 18h.01', 'M3 6h.01'),
   loaderCircle: path('loader-circle', 'M21 12a9 9 0 1 1-6.2-8.6'),
   logOut: path('log-out', 'M9 21H6.5L4 18.5v-13L6.5 3H9 M21 12H9', 'M16 17l5-5-5-5', 'M9 21H6.5L4 18.5v-13L6.5 3H9z'),

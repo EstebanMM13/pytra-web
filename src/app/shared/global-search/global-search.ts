@@ -32,7 +32,7 @@ import {
 
 const PAGES: (SearchPage & { icon: LucideIconInput })[] = [
   { path: '/dashboard', labelKey: 'nav.home', icon: ICONS.house },
-  { path: '/games', labelKey: 'nav.games', icon: ICONS.gamepad2 },
+  { path: '/games', labelKey: 'nav.games', icon: ICONS.library },
   { path: '/stats', labelKey: 'nav.stats', icon: ICONS.chartColumn },
   { path: '/sagas', labelKey: 'nav.sagas', icon: ICONS.sagas },
   { path: '/years', labelKey: 'nav.years', icon: ICONS.years },
