@@ -586,15 +586,20 @@ describe('GameDetail online platinum / 100%', () => {
       { id: 5, name: 'PS5', color: null },
     ];
     const { el, fixture, upsert } = render({ totalHours: 20, platforms, platformHours: { '2': 5 } });
-    const inputs = el.querySelectorAll<HTMLInputElement>('[data-online-platform-hours] input');
-    // PC, PS5 and the 15 h on no platform.
-    expect([...inputs].map((i) => i.value)).toEqual(['5', '', '15']);
+    const inputs = el.querySelectorAll<HTMLInputElement>('[data-online-platform-hours] app-hours-input input');
+    // PC, PS5 and the 15 h on no platform, each as h and min.
+    expect([...inputs].map((i) => i.value)).toEqual(['5', '0', '', '', '15', '0']);
 
-    inputs[1].value = '12';
-    inputs[1].dispatchEvent(new Event('input'));
+    inputs[2].value = '12';
+    inputs[2].dispatchEvent(new Event('input'));
+    inputs[3].value = '30';
+    inputs[3].dispatchEvent(new Event('input'));
     fixture.detectChanges();
     (el.querySelector('form button[type="submit"]') as HTMLButtonElement).click();
-    expect(upsert).toHaveBeenCalledWith(7, expect.objectContaining({ totalHours: 32, platformHours: { 2: 5, 5: 12 } }));
+    expect(upsert).toHaveBeenCalledWith(
+      7,
+      expect.objectContaining({ totalHours: 32.5, platformHours: { 2: 5, 5: 12.5 } }),
+    );
   });
 
   it('shows a single platform as a row too, its hours being the total', () => {
@@ -603,8 +608,8 @@ describe('GameDetail online platinum / 100%', () => {
       platforms: [{ id: 2, name: 'PC', color: null }],
       platformHours: { '2': 20 },
     });
-    const inputs = el.querySelectorAll<HTMLInputElement>('[data-online-platform-hours] input');
-    expect(inputs.length).toBe(1);
+    const inputs = el.querySelectorAll<HTMLInputElement>('[data-online-platform-hours] app-hours-input input');
+    expect(inputs.length).toBe(2);
     inputs[0].value = '25';
     inputs[0].dispatchEvent(new Event('input'));
     fixture.detectChanges();

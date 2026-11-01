@@ -31,7 +31,9 @@ import { GameCover } from '../../shared/ui/game-cover';
 import { ICONS } from '../../shared/ui/icons';
 import { ModalSheet } from '../../shared/ui/modal-sheet';
 import { toastApiError } from '../../shared/utils/api-error';
+import { formatHours } from '../../shared/pipes/hours.pipe';
 import { formatDecimalInput } from '../../shared/utils/decimal-input';
+import { HoursInput } from '../../shared/ui/hours-input';
 import { ratingLocale } from '../../shared/utils/rating-format';
 import { RUN_DATE_MIN, runDateMax } from '../../shared/utils/run-dates';
 import { HOUR_STEPS, bumpHoursDraft } from '../games/experience-detail/inline-edit.logic';
@@ -41,7 +43,6 @@ import {
   draftForGame,
   draftFromDay,
   draftTotal,
-  formatDiaryHours,
   isValidDiaryDate,
   parseDiaryHours,
   platformErrorIndexes,
@@ -58,12 +59,12 @@ type PlatformOptions = PlatformRef[] | 'loading';
 
 /**
  * Editor of one diary day (modal on web, full-screen sheet on mobile): the games played with their
- * hours (+0,5 / +1 steps like the run's inline edit), optional notes, and a run chooser when the API
- * cannot tell which run the hours go to. Saving replaces the whole day.
+ * hours as h and min (+30 min / +1 h steps like the run's inline edit), optional notes, and a run
+ * chooser when the API cannot tell which run the hours go to. Saving replaces the whole day.
  */
 @Component({
   selector: 'app-diary-day-editor',
-  imports: [ModalSheet, TranslatePipe, LucideDynamicIcon, GameCover],
+  imports: [ModalSheet, TranslatePipe, LucideDynamicIcon, GameCover, HoursInput],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-modal-sheet
@@ -299,19 +300,16 @@ type PlatformOptions = PlatformRef[] | 'loading';
 
                 <div class="flex flex-col gap-1.5">
                   <div class="flex items-stretch gap-1.5">
-                    <input
-                      type="text"
-                      inputmode="decimal"
-                      autocomplete="off"
-                      class="min-h-11 w-full min-w-0 flex-[1.4] rounded-lg border bg-bg px-3 font-mono text-lg font-bold text-text"
-                      [class]="invalid().has(i) ? 'border-danger' : 'border-border-strong'"
-                      [placeholder]="'diary.editor.hoursPlaceholder' | translate"
-                      [attr.aria-label]="
-                        'diary.editor.hoursLabel' | translate: { name: game.gameName }
+                    <app-hours-input
+                      class="flex-[2] font-mono text-sm text-faint"
+                      [fieldClass]="
+                        'min-h-11 w-full min-w-0 rounded-lg border bg-bg px-2 font-mono text-lg font-bold text-text ' +
+                        (invalid().has(i) ? 'border-danger' : 'border-border-strong')
                       "
-                      [attr.aria-invalid]="invalid().has(i)"
+                      [label]="'diary.editor.hoursLabel' | translate: { name: game.gameName }"
+                      [invalid]="invalid().has(i)"
                       [value]="game.hoursText"
-                      (input)="setHours(i, $any($event.target).value)"
+                      (valueChange)="setHours(i, $event)"
                     />
                     @for (step of hourSteps; track step) {
                       <button
@@ -444,7 +442,7 @@ export class DiaryDayEditor implements OnInit {
     searchLibrary(this.library(), this.query(), this.pickedIds()),
   );
   protected readonly total = computed(() =>
-    formatDiaryHours(draftTotal(this.games()), this.locale()),
+    formatHours(draftTotal(this.games()), this.locale()),
   );
 
   constructor() {
@@ -561,8 +559,9 @@ export class DiaryDayEditor implements OnInit {
     this.updateAt(index, { note: text });
   }
 
+  /** "30 min" / "1 h", for the quick hour steps. */
   protected stepLabel(step: number): string {
-    return formatDecimalInput(step, this.lang());
+    return formatHours(step, this.locale());
   }
 
   protected loadRuns(gameId: number): void {

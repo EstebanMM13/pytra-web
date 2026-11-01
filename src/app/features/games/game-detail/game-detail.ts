@@ -19,6 +19,7 @@ import { RunFormLauncher } from '../../../core/services/run-form-launcher.servic
 import { Navbar } from '../../../shared/navbar/navbar';
 import { formatGenreName } from '../../../shared/pipes/genre-name.pipe';
 import { HoursPipe } from '../../../shared/pipes/hours.pipe';
+import { HoursInput } from '../../../shared/ui/hours-input';
 import { RatingPipe } from '../../../shared/pipes/rating.pipe';
 import { PlatformLabel, platformDisplayName } from '../../../shared/ui/platform-label';
 import { PlatformRef } from '../../../core/models/platform.model';
@@ -143,6 +144,7 @@ const HOURS_LEGEND_PX = 128;
     TranslatePipe,
     Navbar,
     HoursPipe,
+    HoursInput,
     NgTemplateOutlet,
     RatingPipe,
     RatingTonePipe,
@@ -730,6 +732,10 @@ export class GameDetail {
     this.editing.set(false);
     this.router.navigate(['/games']);
   }
+
+  /** Classes of the h and min fields of the online hours rows. */
+  protected readonly onlineHoursFieldClass =
+    'h-8 w-10 min-w-0 rounded-md border border-border bg-surface px-1.5 text-right font-mono text-sm text-text md:w-12';
 
   protected setOnlinePlatformHours(platformId: number, text: string): void {
     this.onlinePlatformHours.update((inputs) => ({ ...inputs, [platformId]: text }));

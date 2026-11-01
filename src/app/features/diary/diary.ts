@@ -8,6 +8,7 @@ import { DiaryService } from '../../core/services/diary.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { ICONS } from '../../shared/ui/icons';
 import { Skeleton } from '../../shared/ui/skeleton';
+import { compactHours, formatHours } from '../../shared/pipes/hours.pipe';
 import { ratingLocale } from '../../shared/utils/rating-format';
 import { todayIso } from '../../shared/utils/run-dates';
 import { DiaryDayEditor } from './diary-day-editor';
@@ -17,7 +18,6 @@ import {
   DiaryLevel,
   buildMonthGrid,
   dayLabel,
-  formatDiaryHours,
   gridRange,
   isValidDiaryDate,
   monthLabel,
@@ -63,7 +63,7 @@ export class Diary {
     buildMonthGrid(this.year(), this.month(), this.days() ?? [], this.today()),
   );
   protected readonly total = computed(() =>
-    formatDiaryHours(monthTotal(this.days() ?? [], this.year(), this.month()), this.locale()),
+    formatHours(monthTotal(this.days() ?? [], this.year(), this.month()), this.locale()),
   );
   protected readonly isCurrentMonth = computed(
     () => this.year() === this.current.year && this.month() === this.current.month,
@@ -144,17 +144,17 @@ export class Diary {
     return cell.hasEntry
       ? this.translate.instant('diary.calendar.dayWithHours', {
           day,
-          hours: formatDiaryHours(cell.hours, this.locale()),
+          hours: formatHours(cell.hours, this.locale()),
         })
       : day;
   }
 
   protected hours(value: number): string {
-    return formatDiaryHours(value, this.locale());
+    return formatHours(value, this.locale());
   }
 
   protected shortHours(value: number): string {
-    return new Intl.NumberFormat(this.locale(), { maximumFractionDigits: 1 }).format(value);
+    return compactHours(value);
   }
 
   protected dayTitle(date: string): string {

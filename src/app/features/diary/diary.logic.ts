@@ -191,11 +191,6 @@ export function parseDiaryHours(text: string): number | null {
   return round2(value) === value ? value : null;
 }
 
-/** "1,5 h" / "1.5 h": up to two decimals (the diary keeps quarter hours). */
-export function formatDiaryHours(value: number | null | undefined, locale: string): string {
-  return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value ?? 0)} h`;
-}
-
 /** A game row of the day editor. */
 export interface DiaryDraftGame {
   gameId: number;

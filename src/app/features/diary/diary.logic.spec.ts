@@ -7,7 +7,6 @@ import {
   draftForGame,
   draftFromDay,
   draftTotal,
-  formatDiaryHours,
   gridRange,
   intensityLevel,
   isValidDiaryDate,
@@ -139,11 +138,6 @@ describe('diary hours', () => {
     for (const text of ['', '0', '-1', '24,5', '1,255', 'abc']) {
       expect(parseDiaryHours(text)).toBeNull();
     }
-  });
-
-  it('formats with up to two decimals in the UI locale', () => {
-    expect(formatDiaryHours(1.25, 'es-ES')).toBe('1,25 h');
-    expect(formatDiaryHours(2, 'en-US')).toBe('2 h');
   });
 });
 

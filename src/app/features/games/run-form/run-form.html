@@ -244,15 +244,15 @@
           />
         </label>
         <label class="run-form-cell">
-          <span>{{ (selectedGame()?.category === 'HYBRID' ? 'runForm.campaignHours' : 'runForm.hours') | translate }}</span>
-          <input
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
+          @let hoursLabel = (selectedGame()?.category === 'HYBRID' ? 'runForm.campaignHours' : 'runForm.hours') | translate;
+          <span>{{ hoursLabel }}</span>
+          <app-hours-input
+            class="run-form-hours"
+            inputId="run-form-hours"
             formControlName="hours"
-            placeholder="0"
-            class="run-form-cell-input"
-            [attr.aria-invalid]="showError('hours')"
+            fieldClass="run-form-cell-input"
+            [label]="hoursLabel"
+            [invalid]="showError('hours')"
           />
         </label>
         <label class="run-form-cell">

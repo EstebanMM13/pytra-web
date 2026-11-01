@@ -242,7 +242,7 @@ describe('PsnPanel', () => {
     const row = el().querySelector('li') as HTMLElement;
     expect(row.textContent).toContain('Astro Bot');
     expect(row.textContent).toContain('PS4');
-    expect(row.textContent).toMatch(/2[.,]5 h/);
+    expect(row.textContent).toContain('2 h 30 min');
     expect(row.textContent).toContain('steam.ignore');
     expect(row.textContent).toContain('steam.createRun');
   });

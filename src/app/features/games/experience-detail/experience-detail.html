@@ -224,19 +224,15 @@
           </p>
           @if (editing() === 'hours') {
             <div class="mt-2 flex min-w-0 flex-col gap-1.5" (focusout)="onEditorFocusOut($event)" (keydown.escape)="cancelEdit()">
-              <input
-                id="run-inline-hours"
-                type="text"
-                inputmode="decimal"
-                enterkeyhint="done"
-                autocomplete="off"
-                class="run-inline-input"
-                placeholder="0"
+              <app-hours-input
+                class="run-inline-hours"
+                inputId="run-inline-hours"
+                fieldClass="run-inline-input"
                 [value]="draft()"
-                [attr.aria-label]="'run.inlineHoursLabel' | translate"
-                [attr.aria-invalid]="draftInvalid()"
-                [attr.aria-describedby]="draftInvalid() ? 'run-inline-hours-error' : null"
-                (input)="onDraftInput($any($event.target).value)"
+                (valueChange)="onDraftInput($event)"
+                [label]="'run.inlineHoursLabel' | translate"
+                [invalid]="draftInvalid()"
+                [describedBy]="draftInvalid() ? 'run-inline-hours-error' : null"
                 (keydown.enter)="commitEdit()"
               />
               <div class="flex gap-1.5">

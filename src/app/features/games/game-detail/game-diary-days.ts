@@ -13,7 +13,8 @@ import { GameDiaryDay } from '../../../core/models/diary.model';
 import { DiaryService } from '../../../core/services/diary.service';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { ratingLocale } from '../../../shared/utils/rating-format';
-import { dayLabel, formatDiaryHours } from '../../diary/diary.logic';
+import { dayLabel } from '../../diary/diary.logic';
+import { formatHours } from '../../../shared/pipes/hours.pipe';
 
 /** Days shown before "show all". */
 const VISIBLE_DAYS = 8;
@@ -88,7 +89,7 @@ export class GameDiaryDays {
     () => (this.days()?.length ?? 0) - this.visible().length,
   );
   protected readonly total = computed(() =>
-    formatDiaryHours(
+    formatHours(
       (this.days() ?? []).reduce((sum, d) => sum + d.hours, 0),
       this.locale(),
     ),
@@ -113,6 +114,6 @@ export class GameDiaryDays {
   }
 
   protected hours(value: number): string {
-    return formatDiaryHours(value, this.locale());
+    return formatHours(value, this.locale());
   }
 }

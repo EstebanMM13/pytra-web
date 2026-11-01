@@ -525,19 +525,15 @@
                   @for (p of onlinePlatforms(); track p.id) {
                     <li class="flex items-center gap-2 py-1.5 pr-1.5 pl-3">
                       <app-platform-label class="min-w-0 flex-1 truncate text-sm text-text-2" [platform]="p" />
-                      <input
-                        #platformHoursInput
-                        type="text"
-                        inputmode="decimal"
-                        autocomplete="off"
+                      <app-hours-input
+                        class="shrink-0 font-mono text-xs"
                         placeholder="—"
+                        [fieldClass]="onlineHoursFieldClass"
                         [value]="onlinePlatformHours()[p.id] ?? ''"
-                        (input)="setOnlinePlatformHours(p.id, platformHoursInput.value)"
+                        (valueChange)="setOnlinePlatformHours(p.id, $event)"
                         [disabled]="savingOnline() || onlineLoadState() === 'error' || onlineLoadState() === 'loading'"
-                        [attr.aria-label]="'game.online.platformHoursFor' | translate: { name: p.name }"
-                        class="h-8 w-20 rounded-md border border-border bg-surface px-2 text-right font-mono text-sm text-text md:w-24"
+                        [label]="'game.online.platformHoursFor' | translate: { name: p.name }"
                       />
-                      <span class="w-3 text-faint">h</span>
                       <button
                         type="button"
                         (click)="removeOnlinePlatform(p.id)"
@@ -552,19 +548,15 @@
                   @if (showUnassignedRow()) {
                     <li class="flex items-center gap-2 py-1.5 pr-1.5 pl-3" data-online-unassigned>
                       <span class="min-w-0 flex-1 truncate text-sm text-faint">{{ 'game.online.unassignedRow' | translate }}</span>
-                      <input
-                        #unassignedInput
-                        type="text"
-                        inputmode="decimal"
-                        autocomplete="off"
+                      <app-hours-input
+                        class="shrink-0 font-mono text-xs"
                         placeholder="—"
+                        [fieldClass]="onlineHoursFieldClass"
                         [value]="onlineUnassignedHours()"
-                        (input)="setOnlineUnassignedHours(unassignedInput.value)"
+                        (valueChange)="setOnlineUnassignedHours($event)"
                         [disabled]="savingOnline() || onlineLoadState() === 'error' || onlineLoadState() === 'loading'"
-                        [attr.aria-label]="'game.online.unassignedRow' | translate"
-                        class="h-8 w-20 rounded-md border border-border bg-surface px-2 text-right font-mono text-sm text-text md:w-24"
+                        [label]="'game.online.unassignedRow' | translate"
                       />
-                      <span class="w-3 text-faint">h</span>
                       <span class="size-8 shrink-0"></span>
                     </li>
                   }

@@ -108,12 +108,16 @@ describe('ExperienceDetail inline edit', () => {
     expect(trigger.getAttribute('aria-label')).toBe('run.inlineEditHours');
 
     const input = openHours(t);
-    expect(input.value).toBe('12,5');
-    expect(input.getAttribute('aria-label')).toBe('run.inlineHoursLabel');
+    const minutes = t.byId<HTMLInputElement>('run-inline-hours-min')!;
+    expect(input.value).toBe('12');
+    expect(minutes.value).toBe('30');
+    expect(input.getAttribute('aria-label')).toBe('run.inlineHoursLabel (h)');
+    expect(minutes.getAttribute('aria-label')).toBe('run.inlineHoursLabel (min)');
     expect(input.getAttribute('inputmode')).toBe('decimal');
 
-    t.type(input, '14,25');
-    t.key(input, 'Enter');
+    t.type(input, '14');
+    t.type(minutes, '15');
+    t.key(minutes, 'Enter');
     t.fixture.detectChanges();
 
     expect(patch).toHaveBeenCalledWith(11, { hours: 14.25 });
@@ -133,12 +137,13 @@ describe('ExperienceDetail inline edit', () => {
     patch.mockReturnValue(of(run({ hours: 14 })));
     const input = openHours(t);
     const steps = [...t.el.querySelectorAll<HTMLButtonElement>('.run-inline-step')];
-    expect(steps.map((b) => b.textContent?.trim())).toEqual(['+0,5', '+1']);
+    expect(steps.map((b) => b.textContent?.trim())).toEqual(['+30 min', '+1 h']);
 
     steps[0].click();
     steps[1].click();
     t.fixture.detectChanges();
     expect(input.value).toBe('14');
+    expect(t.byId<HTMLInputElement>('run-inline-hours-min')!.value).toBe('0');
 
     t.key(input, 'Enter');
     expect(patch).toHaveBeenCalledWith(11, { hours: 14 });
@@ -178,6 +183,7 @@ describe('ExperienceDetail inline edit', () => {
     patch.mockReturnValue(of(run({ hours: 20 })));
     const input = openHours(t);
     t.type(input, '20');
+    t.type(t.byId<HTMLInputElement>('run-inline-hours-min')!, '0');
     const step = t.el.querySelector<HTMLButtonElement>('.run-inline-step')!;
     input.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: step }));
     expect(patch).not.toHaveBeenCalled();

@@ -145,6 +145,45 @@ describe('RunForm', () => {
     );
   });
 
+  describe('hours as hours and minutes', () => {
+    function hoursFields(): { hours: HTMLInputElement; minutes: HTMLInputElement } {
+      return {
+        hours: document.getElementById('run-form-hours') as HTMLInputElement,
+        minutes: document.getElementById('run-form-hours-min') as HTMLInputElement,
+      };
+    }
+
+    it('loads the stored decimal hours split into h and min', () => {
+      setup({ mode: 'edit', experience: experience({ hours: 0.77 }) });
+      expect(hoursFields().hours.value).toBe('0');
+      expect(hoursFields().minutes.value).toBe('46');
+    });
+
+    it('saving still sends decimal hours', () => {
+      const { form, fixture } = setup({ mode: 'edit', experience: experience({ hours: 3 }) });
+      const update = vi.spyOn(TestBed.inject(ExperienceService), 'update');
+      const { hours, minutes } = hoursFields();
+      hours.value = '1';
+      hours.dispatchEvent(new Event('input'));
+      minutes.value = '30';
+      minutes.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      form.submit();
+
+      expect(update).toHaveBeenCalledWith(9, expect.objectContaining({ hours: 1.5 }));
+    });
+
+    it('rejects minutes over 59', () => {
+      const { form, fixture } = setup({ mode: 'edit', experience: experience({ hours: 3 }) });
+      const { minutes } = hoursFields();
+      minutes.value = '75';
+      minutes.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      expect(form.form.controls.hours.hasError('hours')).toBe(true);
+    });
+  });
+
   describe('status and end date', () => {
     const create: RunFormRequest = { mode: 'create', gameId: 1, navigateOnCreate: false };
 

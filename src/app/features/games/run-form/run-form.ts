@@ -30,6 +30,7 @@ import { Segmented, SegmentedOption } from '../../../shared/ui/segmented';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { RUN_DATE_MIN, runDateMax, todayIso } from '../../../shared/utils/run-dates';
 import { formatHoursInput } from '../../../shared/utils/decimal-input';
+import { HoursInput } from '../../../shared/ui/hours-input';
 import { ratingInputParams, scaledRatingDraft } from '../../../shared/utils/rating-scale';
 import { toastApiError } from '../../../shared/utils/api-error';
 import {
@@ -62,7 +63,7 @@ function normalize(text: string): string {
  */
 @Component({
   selector: 'app-run-form',
-  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, Skeleton, LucideDynamicIcon],
+  imports: [ReactiveFormsModule, TranslatePipe, ModalSheet, Segmented, Skeleton, LucideDynamicIcon, HoursInput],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './run-form.html',
   styleUrl: './run-form.css',

@@ -192,12 +192,14 @@ describe('DiaryDayEditor', () => {
     const { fixture, diary, saved, toast, root } = setup();
     root().querySelector<HTMLButtonElement>('[data-playing-chips] button')!.click();
     fixture.detectChanges();
-    clickButton(root(), '+1');
-    clickButton(root(), '+0,5');
+    clickButton(root(), '+1 h');
+    clickButton(root(), '+30 min');
     fixture.detectChanges();
-    expect(
-      root().querySelector<HTMLInputElement>('[data-diary-row] input[inputmode="decimal"]')!.value,
-    ).toBe('1,5');
+    const [hours, minutes] = [
+      ...root().querySelectorAll<HTMLInputElement>('[data-diary-row] app-hours-input input'),
+    ];
+    expect(hours.value).toBe('1');
+    expect(minutes.value).toBe('30');
 
     save(root());
 
@@ -219,6 +221,27 @@ describe('DiaryDayEditor', () => {
     expect(diary.saveDay).toHaveBeenCalledWith(DATE, {
       note: 'Late night',
       games: [{ gameId: 2, hours: 2, note: null }],
+    });
+  });
+
+  it('saves hours typed as hours and minutes in decimal hours', () => {
+    const { fixture, diary, root } = setup();
+    root().querySelector<HTMLButtonElement>('[data-playing-chips] button')!.click();
+    fixture.detectChanges();
+    const [hours, minutes] = [
+      ...root().querySelectorAll<HTMLInputElement>('[data-diary-row] app-hours-input input'),
+    ];
+    hours.value = '0';
+    hours.dispatchEvent(new Event('input'));
+    minutes.value = '46';
+    minutes.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    save(root());
+
+    expect(diary.saveDay).toHaveBeenCalledWith(DATE, {
+      note: null,
+      games: [{ gameId: 1, hours: 0.77, note: null }],
     });
   });
 
@@ -248,7 +271,7 @@ describe('DiaryDayEditor', () => {
     });
     root().querySelector<HTMLButtonElement>('[data-playing-chips] button')!.click();
     fixture.detectChanges();
-    clickButton(root(), '+1');
+    clickButton(root(), '+1 h');
     save(root());
     fixture.detectChanges();
 

@@ -29,6 +29,25 @@
   color: var(--pt-danger);
 }
 
+/* Hours as two fields (h and min) inside app-hours-input, which the component styles cannot reach directly. */
+.run-form-hours ::ng-deep .run-form-cell-input {
+  width: 3.5rem;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--pt-text);
+  border: 0;
+  background: transparent;
+  text-align: right;
+}
+
+.run-form-hours ::ng-deep .run-form-cell-input:focus {
+  box-shadow: none;
+}
+
+.run-form-hours ::ng-deep .run-form-cell-input[aria-invalid='true'] {
+  color: var(--pt-danger);
+}
+
 .run-form-textarea {
   width: 100%;
   resize: vertical;
@@ -130,6 +149,30 @@
   }
 
   .run-form-cell-input[aria-invalid='true'] {
+    border-color: var(--pt-danger);
+  }
+
+  .run-form-hours {
+    width: 100%;
+  }
+
+  .run-form-hours ::ng-deep .run-form-cell-input {
+    flex: 1 1 0;
+    width: 100%;
+    height: 46px;
+    border: 1px solid var(--pt-border);
+    border-radius: 10px;
+    background: var(--pt-bg);
+    padding: 0 14px;
+    text-align: left;
+  }
+
+  .run-form-hours ::ng-deep .run-form-cell-input:focus {
+    border-color: var(--pt-brand-light);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pt-brand) 20%, transparent);
+  }
+
+  .run-form-hours ::ng-deep .run-form-cell-input[aria-invalid='true'] {
     border-color: var(--pt-danger);
   }
 

@@ -775,7 +775,7 @@
       "save": "Save",
       "saved": "Online data saved.",
       "error": "Could not save the online data.",
-      "invalid": "Hours ≥ 0 (e.g. 12.5) and a rating from 0 to {{max}} (per your preferences).",
+      "invalid": "The rating goes from 0 to {{max}} (per your preferences).",
       "explain": "Hours played online, separate from each run's hours: the game total adds both.",
       "platforms": "Platforms",
       "addPlatform": "Add platform…",
@@ -786,7 +786,7 @@
       "platformHoursUnassigned": "Unassigned: {{hours}}",
       "unassignedRow": "Unassigned",
       "platformHoursOver": "{{hours}} over the total",
-      "platformHoursInvalid": "Hours per platform ≥ 0 (e.g. 12.5).",
+      "platformHoursInvalid": "Hours per platform ≥ 0, minutes 0 to 59.",
       "platformHoursExceed": "Hours per platform can't add up to more than the total.",
       "platformHoursFor": "Hours on {{name}}",
       "platformHoursHint": "Saved with Save."
@@ -892,7 +892,7 @@
     "inlineAddRating": "Not rated. Add a rating",
     "inlineHoursLabel": "Hours played",
     "inlineRatingLabel": "Rating from 0 to {{max}}",
-    "inlineAddHours": "Add {{hours}} h",
+    "inlineAddHours": "Add {{hours}}",
     "inlineSaved": "Saved.",
     "inlineSaveError": "Could not save the change."
   },
@@ -935,7 +935,7 @@
       "game": "Pick a game from your library.",
       "runLabel": "Give the run a name.",
       "rating": "The rating goes from 0 to 10, with up to 2 decimals.",
-      "hours": "Enter valid hours: 0 or more (e.g. 12.5).",
+      "hours": "Enter valid hours: 0 or more, minutes 0 to 59.",
       "dateLimits": "Dates go from 01/01/1970 to tomorrow.",
       "dates": "The end cannot be before the start.",
       "postgameDates": "The postgame end cannot be before the run end.",
@@ -1142,6 +1142,7 @@
     "title": "Achievements",
     "count": "{{unlocked}} of {{total}}",
     "progress": "Progress",
+    "unlockedOn": "Unlocked on {{date}}",
     "items": {
       "collector25": {
         "title": "Collector",
@@ -1358,8 +1359,7 @@
     "showAll": "See all ({{total}})",
     "showLess": "Show less",
     "noneUnlocked": "No achievements unlocked yet. Log your first run!",
-    "emptyFilter": "No achievements in this filter.",
-    "unlockedOn": "Unlocked on {{date}}"
+    "emptyFilter": "No achievements in this filter."
   },
   "demo": {
     "banner": "Demo mode · read-only",
@@ -1449,7 +1449,7 @@
       "newRun": "New run",
       "hoursPlaceholder": "Hours",
       "hoursLabel": "Hours played of {{name}}",
-      "hoursError": "Enter between 0.01 and 24 hours, with at most two decimals.",
+      "hoursError": "Enter between 1 min and 24 h (minutes 0 to 59).",
       "gameNote": "Note (optional)",
       "gameNoteLabel": "Note for {{name}}",
       "total": "Total",

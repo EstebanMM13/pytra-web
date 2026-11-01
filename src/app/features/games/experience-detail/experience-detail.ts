@@ -13,7 +13,8 @@ import { PreferencesService } from '../../../core/services/preferences.service';
 import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
 import { StatsService } from '../../../core/services/stats.service';
 import { Navbar } from '../../../shared/navbar/navbar';
-import { HoursPipe } from '../../../shared/pipes/hours.pipe';
+import { HoursPipe, formatHours } from '../../../shared/pipes/hours.pipe';
+import { ratingLocale } from '../../../shared/utils/rating-format';
 import { RatingPipe } from '../../../shared/pipes/rating.pipe';
 import { PlatformLabel } from '../../../shared/ui/platform-label';
 import { RatingTonePipe } from '../../../shared/pipes/rating-tone.pipe';
@@ -25,7 +26,7 @@ import { StatusPill } from '../../../shared/ui/status-pill';
 import { translatePlural } from '../../../shared/utils/plural';
 import { formatDayMonthYear, runDuration, splitLines } from '../../../shared/utils/run-dates';
 import { toastApiError } from '../../../shared/utils/api-error';
-import { formatDecimalInput } from '../../../shared/utils/decimal-input';
+import { HoursInput } from '../../../shared/ui/hours-input';
 import { ratingInputParams } from '../../../shared/utils/rating-scale';
 import { HOUR_STEPS, InlineField, bumpHoursDraft, inlineDraft, parseInlineEdit } from './inline-edit.logic';
 
@@ -49,6 +50,7 @@ export function ratingRank(rating: number, topRatings: readonly number[], window
     TranslatePipe,
     Navbar,
     HoursPipe,
+    HoursInput,
     RatingPipe,
     RatingTonePipe,
     PlatformLabel,
@@ -194,9 +196,9 @@ export class ExperienceDetail {
     return this.translate.currentLang() === 'en' ? 'en' : 'es';
   }
 
-  /** "0,5" / "1" in the UI language, for the quick hour steps. */
+  /** "30 min" / "1 h", for the quick hour steps. */
   protected stepLabel(step: number): string {
-    return formatDecimalInput(step, this.lang());
+    return formatHours(step, ratingLocale(this.lang()));
   }
 
   protected startEdit(field: InlineField): void {

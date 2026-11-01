@@ -119,7 +119,7 @@ describe('Stats hub', () => {
       'Elden Ring',
       'stats.days',
       'RPG',
-      '12,5 h',
+      '12 h 30 min',
       'stats.hub.sagasFigure',
       'PlayStation 5',
       'FromSoftware',

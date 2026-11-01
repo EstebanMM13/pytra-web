@@ -775,7 +775,7 @@
       "save": "Guardar",
       "saved": "Datos online guardados.",
       "error": "No se pudieron guardar los datos online.",
-      "invalid": "Horas ≥ 0 (p. ej. 12,5) y valoración de 0 a {{max}} (según tus preferencias).",
+      "invalid": "La valoración va de 0 a {{max}} (según tus preferencias).",
       "explain": "Horas jugadas online, aparte de las horas de cada partida: el total del juego suma ambas.",
       "platforms": "Plataformas",
       "addPlatform": "Añadir plataforma…",
@@ -786,7 +786,7 @@
       "platformHoursUnassigned": "Sin asignar: {{hours}}",
       "unassignedRow": "Sin asignar",
       "platformHoursOver": "Sobran {{hours}}",
-      "platformHoursInvalid": "Horas por plataforma ≥ 0 (p. ej. 12,5).",
+      "platformHoursInvalid": "Horas por plataforma ≥ 0, minutos de 0 a 59.",
       "platformHoursExceed": "Las horas por plataforma no pueden superar el total.",
       "platformHoursFor": "Horas en {{name}}",
       "platformHoursHint": "Se guardan con Guardar."
@@ -892,7 +892,7 @@
     "inlineAddRating": "Sin nota. Añadir una nota",
     "inlineHoursLabel": "Horas jugadas",
     "inlineRatingLabel": "Nota de 0 a {{max}}",
-    "inlineAddHours": "Sumar {{hours}} h",
+    "inlineAddHours": "Sumar {{hours}}",
     "inlineSaved": "Guardado.",
     "inlineSaveError": "No se pudo guardar el cambio."
   },
@@ -935,7 +935,7 @@
       "game": "Elige un juego de tu biblioteca.",
       "runLabel": "Ponle nombre a la partida.",
       "rating": "La nota va de 0 a 10, con hasta 2 decimales.",
-      "hours": "Introduce unas horas válidas: 0 o más (p. ej. 12,5).",
+      "hours": "Introduce unas horas válidas: 0 o más, minutos de 0 a 59.",
       "dateLimits": "Las fechas van del 01/01/1970 a mañana.",
       "dates": "El fin no puede ser anterior al inicio.",
       "postgameDates": "El fin del postgame no puede ser anterior al fin de la partida.",
@@ -1142,6 +1142,7 @@
     "title": "Logros",
     "count": "{{unlocked}} de {{total}}",
     "progress": "Progreso",
+    "unlockedOn": "Conseguido el {{date}}",
     "items": {
       "collector25": {
         "title": "Coleccionista",
@@ -1358,8 +1359,7 @@
     "showAll": "Ver todos ({{total}})",
     "showLess": "Ver menos",
     "noneUnlocked": "Aún no has desbloqueado logros. ¡Registra tu primera partida!",
-    "emptyFilter": "No hay logros en este filtro.",
-    "unlockedOn": "Conseguido el {{date}}"
+    "emptyFilter": "No hay logros en este filtro."
   },
   "demo": {
     "banner": "Modo demo · solo lectura",
@@ -1449,7 +1449,7 @@
       "newRun": "Nueva partida",
       "hoursPlaceholder": "Horas",
       "hoursLabel": "Horas jugadas a {{name}}",
-      "hoursError": "Indica entre 0,01 y 24 horas, con dos decimales como mucho.",
+      "hoursError": "Indica entre 1 min y 24 h (minutos de 0 a 59).",
       "gameNote": "Nota (opcional)",
       "gameNoteLabel": "Nota de {{name}}",
       "total": "Total",
