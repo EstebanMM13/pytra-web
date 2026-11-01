@@ -2,6 +2,11 @@ import { Game } from '../../core/models/game.model';
 import {
   countByStatus,
   filterGames,
+  groupLibrarySections,
+  isInPostgame,
+  librarySectionOf,
+  parseCollapsedSections,
+  serializeCollapsedSections,
   isLibraryGame,
   isOnlineOnly,
   isUpcoming,
@@ -87,6 +92,17 @@ describe('library logic', () => {
       expect(matchesStatus(unplayed, 'PENDIENTE')).toBe(true);
       expect(matchesStatus(planned, 'PENDIENTE')).toBe(true);
       expect(matchesStatus(unplayed, 'ALL')).toBe(true);
+    });
+
+    it('shows a game whose last run is in its postgame under both En curso and Completado', () => {
+      const postgame = { ...hollow, lastExperiencePostgame: true };
+      expect(matchesStatus(postgame, 'EN_CURSO')).toBe(true);
+      expect(matchesStatus(postgame, 'COMPLETADO')).toBe(true);
+      expect(isInPostgame(postgame)).toBe(true);
+      expect(isInPostgame(hollow)).toBe(false);
+      expect(countByStatus([...all, { ...postgame, id: 99 }])).toEqual({
+        ALL: 6, EN_CURSO: 2, COMPLETADO: 2, ABANDONADO: 1, PENDIENTE: 2, ONLINE: 0,
+      });
     });
 
     it('counts every tab', () => {
@@ -486,5 +502,65 @@ describe('pendingSummary', () => {
 
   it('is empty with nothing pending', () => {
     expect(pendingSummary([], []).count).toBe(0);
+  });
+});
+
+describe('library sections', () => {
+  const dated = game({
+    id: 1,
+    name: 'Saros',
+    lastExperienceStatus: 'COMPLETADO',
+    lastPlayedAt: '2026-10-20',
+  });
+  const yearOnly = game({
+    id: 2,
+    name: 'Zelda',
+    lastExperienceStatus: 'COMPLETADO',
+    lastPlayedYear: 2019,
+  });
+  const undatedRun = game({ id: 3, name: 'Hades', lastExperienceStatus: 'EN_CURSO' });
+  const noRuns = game({ id: 4, name: 'Silksong' });
+  const online = game({
+    id: 5,
+    name: 'Fortnite',
+    category: 'ONLINE',
+    lastActivityAt: '2026-10-30',
+  });
+  const hybridNoRuns = game({ id: 6, name: 'Elden Ring Nightreign', category: 'HYBRID' });
+  const hybridDated = game({
+    id: 7,
+    name: 'Destiny 2',
+    category: 'HYBRID',
+    lastExperienceStatus: 'EN_CURSO',
+    lastPlayedAt: '2025-01-01',
+  });
+
+  it('puts dated games (a year is enough) first, then games without dates or runs, then online ones', () => {
+    expect(librarySectionOf(dated)).toBe('dated');
+    expect(librarySectionOf(yearOnly)).toBe('dated');
+    expect(librarySectionOf(undatedRun)).toBe('undated');
+    expect(librarySectionOf(noRuns)).toBe('undated');
+    expect(librarySectionOf(online)).toBe('online');
+    expect(librarySectionOf(hybridNoRuns)).toBe('online');
+    expect(librarySectionOf(hybridDated)).toBe('dated');
+  });
+
+  it('groups in section order, keeps the sorted order inside each and drops empty sections', () => {
+    const sections = groupLibrarySections([online, undatedRun, dated, noRuns, yearOnly]);
+    expect(sections.map((s) => [s.id, s.games.map((g) => g.id)])).toEqual([
+      ['dated', [1, 2]],
+      ['undated', [3, 4]],
+      ['online', [5]],
+    ]);
+    expect(groupLibrarySections([dated, yearOnly]).map((s) => s.id)).toEqual(['dated']);
+    expect(groupLibrarySections([])).toEqual([]);
+  });
+
+  it('reads and writes the collapsed sections, ignoring unknown or broken values', () => {
+    expect(parseCollapsedSections('["online","undated"]')).toEqual(['undated', 'online']);
+    expect(parseCollapsedSections('["online","nope",3]')).toEqual(['online']);
+    expect(parseCollapsedSections('not json')).toEqual([]);
+    expect(parseCollapsedSections(null)).toEqual([]);
+    expect(serializeCollapsedSections(['undated'])).toBe('["undated"]');
   });
 });

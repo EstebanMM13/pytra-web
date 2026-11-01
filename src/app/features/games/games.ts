@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, effect, untracked } from '@angular/core';
 import { toObservable, toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
+import { NgTemplateOutlet } from '@angular/common';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -31,6 +32,12 @@ import {
   libraryPlatforms,
   LibraryCategoryFilter,
   LIBRARY_STATUS_FILTERS,
+  groupLibrarySections,
+  isInPostgame,
+  LIBRARY_COLLAPSED_KEY,
+  LibrarySectionId,
+  parseCollapsedSections,
+  serializeCollapsedSections,
   isOnlineOnly,
   LibraryQuery,
   LibrarySort,
@@ -120,6 +127,7 @@ const STATS_FILTER_PARAMS: Params = { year: null, decade: null, released: null, 
 @Component({
   selector: 'app-games',
   imports: [
+    NgTemplateOutlet,
     CoverTilt,
     GameCover,
     RouterLink,
@@ -158,6 +166,7 @@ export class Games {
 
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
   protected readonly isOnlineOnly = isOnlineOnly;
+  protected readonly isInPostgame = isInPostgame;
   protected readonly statusLine = libraryStatusLine;
   /** Fixed when the page loads: good enough for a "coming soon" badge. */
   private readonly today = todayIso();
@@ -358,6 +367,19 @@ export class Games {
   );
   protected readonly filtered = computed(() => filterGames(this.libraryGames(), this.query(), this.playIndex()));
   protected readonly page = computed(() => paginate(this.filtered(), this.query().page));
+  /** Results split into dated / undated / online blocks; headers and folding only with two or more. */
+  protected readonly sections = computed(() => groupLibrarySections(this.filtered()));
+  protected readonly sectioned = computed(() => this.sections().length > 1);
+  /** Grid and phone list: the sections, or every result as one block without a header. */
+  protected readonly blocks = computed<LibraryBlock[]>(() =>
+    this.sectioned() ? this.sections() : [{ id: 'all', games: this.filtered() }],
+  );
+  /** Desktop table: the sections unpaged (folding keeps it short), else the current page. */
+  protected readonly tableBlocks = computed<LibraryBlock[]>(() =>
+    this.sectioned() ? this.sections() : [{ id: 'all', games: this.page().items }],
+  );
+  /** Folded sections, a per-device preference (localStorage). */
+  private readonly collapsed = signal<LibrarySectionId[]>(readCollapsedSections());
   protected readonly hasFilters = computed(
     () =>
       !!this.query().text.trim() ||
@@ -432,7 +454,8 @@ export class Games {
       if (this.loading()) {
         return;
       }
-      const shown = this.page().page;
+      // With sections the table is unpaged, so a leftover `?page=` goes.
+      const shown = this.sectioned() ? 1 : this.page().page;
       if (this.query().page !== shown) {
         untracked(() => this.updateQuery({ page: shown > 1 ? shown : null }));
       }
@@ -563,6 +586,19 @@ export class Games {
     }
   }
 
+  protected isCollapsed(id: LibraryBlock['id']): boolean {
+    return id !== 'all' && this.collapsed().includes(id);
+  }
+
+  protected toggleSection(id: LibrarySectionId): void {
+    this.collapsed.update((ids) => (ids.includes(id) ? ids.filter((c) => c !== id) : [...ids, id]));
+    try {
+      localStorage.setItem(LIBRARY_COLLAPSED_KEY, serializeCollapsedSections(this.collapsed()));
+    } catch {
+      // Storage unavailable (private mode, quota): keep the in-memory choice only.
+    }
+  }
+
   protected clearFilters(): void {
     this.updateQuery({
       ...STATS_FILTER_PARAMS,
@@ -615,6 +651,20 @@ export class Games {
     this.creating.set(false);
     this.allGames.update((list) => [...(list ?? []), game]);
     this.router.navigate(['/games', game.id]);
+  }
+}
+
+/** A run of library results: one section, or every result (`all`) when there is nothing to split. */
+interface LibraryBlock {
+  id: LibrarySectionId | 'all';
+  games: Game[];
+}
+
+function readCollapsedSections(): LibrarySectionId[] {
+  try {
+    return parseCollapsedSections(localStorage.getItem(LIBRARY_COLLAPSED_KEY));
+  } catch {
+    return [];
   }
 }
 

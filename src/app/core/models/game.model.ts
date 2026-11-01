@@ -28,6 +28,8 @@ export interface Game {
   /** Best of the run ratings and the online general rating. */
   bestRating?: number | null;
   lastExperienceStatus?: ExperienceStatus | null;
+  /** The last run is COMPLETADO and its postgame is still being played. Absent from older APIs. */
+  lastExperiencePostgame?: boolean | null;
   lastPlayedYear?: number | null;
   hasPlatinum?: boolean | null;
   /** Some run is flagged 100% (every trophy/achievement obtained). */

@@ -139,7 +139,16 @@ export function matchesStatus(game: Game, status: LibraryStatusFilter): boolean 
     return game.category === 'ONLINE' || game.category === 'HYBRID';
   }
   const last = game.lastExperienceStatus ?? null;
+  if (status === 'EN_CURSO' && isInPostgame(game)) {
+    // Beaten and still being played: it is both in progress and completed.
+    return true;
+  }
   return status === 'PENDIENTE' ? last === 'PENDIENTE' || (last === null && !isOnlineOnly(game)) : last === status;
+}
+
+/** The game's last run is beaten (COMPLETADO) but its postgame is still being played. */
+export function isInPostgame(game: Game): boolean {
+  return game.lastExperienceStatus === 'COMPLETADO' && game.lastExperiencePostgame === true;
 }
 
 /** ANY of the platforms (none picked: every game). */
@@ -363,6 +372,51 @@ export const LIBRARY_VIEW_KEY = 'pytra_library_view';
 
 export function parseLibraryView(value: string | null): LibraryView {
   return value === 'list' ? 'list' : 'grid';
+}
+
+/**
+ * Blocks the library splits its (already sorted) results into, in this order: games with a play date
+ * (a year is enough), games without dates or without runs, and online games (ONLINE, or HYBRID never
+ * played as a run), whose activity is tracked through online playtime.
+ */
+export type LibrarySectionId = 'dated' | 'undated' | 'online';
+
+export const LIBRARY_SECTIONS: readonly LibrarySectionId[] = ['dated', 'undated', 'online'];
+
+export interface LibrarySection {
+  id: LibrarySectionId;
+  games: Game[];
+}
+
+export function librarySectionOf(game: Game): LibrarySectionId {
+  if (game.category === 'ONLINE' || isOnlineOnly(game)) return 'online';
+  return lastPlayedKey(game) !== null ? 'dated' : 'undated';
+}
+
+/** Sections in LIBRARY_SECTIONS order, each keeping the incoming order; empty sections are left out. */
+export function groupLibrarySections(games: readonly Game[]): LibrarySection[] {
+  const byId = new Map<LibrarySectionId, Game[]>(LIBRARY_SECTIONS.map((id) => [id, []]));
+  for (const game of games) {
+    byId.get(librarySectionOf(game))!.push(game);
+  }
+  return LIBRARY_SECTIONS.filter((id) => byId.get(id)!.length > 0).map((id) => ({ id, games: byId.get(id)! }));
+}
+
+/** localStorage key of the collapsed library sections (per device). */
+export const LIBRARY_COLLAPSED_KEY = 'pytra_library_collapsed';
+
+/** Folded sections from storage, in LIBRARY_SECTIONS order; unknown or broken values are dropped. */
+export function parseCollapsedSections(value: string | null): LibrarySectionId[] {
+  try {
+    const parsed: unknown = JSON.parse(value ?? '[]');
+    return Array.isArray(parsed) ? LIBRARY_SECTIONS.filter((id) => parsed.includes(id)) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function serializeCollapsedSections(ids: readonly LibrarySectionId[]): string {
+  return JSON.stringify(ids);
 }
 
 /** Most ids a list filter keeps from the URL (anything longer is not a hand-made link). */

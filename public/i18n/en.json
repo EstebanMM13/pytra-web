@@ -1015,6 +1015,11 @@
     "platinum": "Platinum",
     "online": "Online",
     "noRuns": "No runs",
+    "section": {
+      "dated": "With dates",
+      "undated": "Without dates",
+      "online": "Online"
+    },
     "showing": "Showing {{shown}} of {{total}}",
     "runsCount": "{{count}} runs",
     "runsCount_one": "{{count}} run",

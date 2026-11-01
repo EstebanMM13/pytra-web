@@ -240,87 +240,102 @@
         }
       </div>
     } @else if (view() === 'grid') {
-      <!-- Poster grid (all results) -->
-      <ul class="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 md:grid-cols-5 md:gap-x-5 md:gap-y-7 lg:grid-cols-6">
-        @for (game of filtered(); track game.id) {
-          <li class="library-in poster-item min-w-0" [style.--i]="$index">
-            <a [routerLink]="['/games', game.id]" class="cover-card press group flex flex-col gap-2 rounded-lg">
-              <div class="relative" appCoverTilt>
-                <span class="cover-glow cover-lift" aria-hidden="true"></span>
-                <!-- The li's library-in is the poster's only entrance: no scroll reveal on top. -->
-                <app-game-cover
-                  decorative
-                  noReveal
-                  size="fill"
-                  class="cover-art shadow-md ring-1 shadow-black/25 ring-border cover-lift group-hover:shadow-xl group-hover:ring-brand-light"
-                  [url]="game.coverImageUrl"
-                  [name]="game.name"
-                />
-                <span class="cover-shine cover-lift" aria-hidden="true"></span>
-                @if (game.bestRating !== null && game.bestRating !== undefined) {
-                  <span
-                    class="absolute right-1.5 bottom-1.5 rounded-md border border-border bg-bg/85 px-1.5 py-0.5 font-mono text-xs font-medium backdrop-blur-sm cover-lift"
-                    [class]="game.bestRating | ratingTone"
-                    >{{ game.bestRating | rating }}</span
-                  >
-                }
-                @if (game.hasPlatinum) {
-                  <span
-                    class="platinum-glow absolute top-1.5 left-1.5 rounded-md bg-bg/85 px-1 py-0.5 text-xs backdrop-blur-sm cover-lift"
-                    [attr.aria-label]="'library.platinum' | translate"
-                    >🏆</span
-                  >
-                }
-              </div>
-              <div class="min-w-0 px-0.5">
-                <!-- Always two lines tall (2 × leading-snug), so the meta lines up across a row -->
-                <p
-                  class="line-clamp-2 min-h-[2.75em] text-[13px] leading-snug font-medium group-hover:text-brand-lighter md:text-sm"
-                  [title]="game.name"
-                  data-poster-title
-                >
-                  {{ game.name }}
-                </p>
-                @if (game.category || isUpcoming(game)) {
-                  <!-- Phones drop the mode chip (three narrow columns), so the row only stays for the upcoming badge -->
-                  <div class="mt-1 flex min-w-0 flex-wrap items-center gap-1" [class.max-sm:hidden]="!isUpcoming(game)">
-                    @if (game.category; as category) {
-                      <app-category-badge class="max-sm:hidden" [category]="category" />
-                    }
-                    @if (isUpcoming(game)) {
-                      <app-upcoming-badge />
-                    }
-                  </div>
-                }
-                <!-- Phones: the hours wrap to their own line under the status instead of being cut -->
-                <p class="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] text-muted max-sm:flex-wrap max-sm:gap-y-0 md:text-xs">
-                  @if (game.lastExperienceStatus; as status) {
-                    <app-status-pill dot [status]="status" class="shrink-0" />
-                  } @else if (isOnlineOnly(game)) {
-                    <span class="size-2 shrink-0 rounded-full bg-brand-light" aria-hidden="true"></span>
-                  } @else {
-                    <span class="size-2 shrink-0 rounded-full border border-faint" aria-hidden="true"></span>
-                  }
-                  @if (statusLine(game) === 'played') {
-                    <span class="truncate">
-                      {{ game.totalHours ? ('library.hoursPlayed' | translate: { hours: (game.totalHours | hours) }) : ('library.noHours' | translate) }}
-                    </span>
-                  } @else {
-                    <span class="truncate">
-                      {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
-                    </span>
-                    @if (game.totalHours) {
-                      <span class="-ml-0.5 shrink-0 whitespace-nowrap max-sm:ml-0 max-sm:basis-full max-sm:pl-3.5"
-                        ><span class="max-sm:hidden">· </span>{{ game.totalHours | hours }}</span
+      <!-- Poster grid (all results, in sections) -->
+      @for (block of blocks(); track block.id) {
+        @if (sectioned()) {
+          <ng-container [ngTemplateOutlet]="sectionHeader" [ngTemplateOutletContext]="{ $implicit: block, first: $first }" />
+        }
+        @if (!isCollapsed(block.id)) {
+          <ul class="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 md:grid-cols-5 md:gap-x-5 md:gap-y-7 lg:grid-cols-6">
+            @for (game of block.games; track game.id) {
+              <li class="library-in poster-item min-w-0" [style.--i]="$index">
+                <a [routerLink]="['/games', game.id]" class="cover-card press group flex flex-col gap-2 rounded-lg">
+                  <div class="relative" appCoverTilt>
+                    <span class="cover-glow cover-lift" aria-hidden="true"></span>
+                    <!-- The li's library-in is the poster's only entrance: no scroll reveal on top. -->
+                    <app-game-cover
+                      decorative
+                      noReveal
+                      size="fill"
+                      class="cover-art shadow-md ring-1 shadow-black/25 ring-border cover-lift group-hover:shadow-xl group-hover:ring-brand-light"
+                      [url]="game.coverImageUrl"
+                      [name]="game.name"
+                    />
+                    <span class="cover-shine cover-lift" aria-hidden="true"></span>
+                    @if (game.bestRating !== null && game.bestRating !== undefined) {
+                      <span
+                        class="absolute right-1.5 bottom-1.5 rounded-md border border-border bg-bg/85 px-1.5 py-0.5 font-mono text-xs font-medium backdrop-blur-sm cover-lift"
+                        [class]="game.bestRating | ratingTone"
+                        >{{ game.bestRating | rating }}</span
                       >
                     }
-                  }
-                </p>
-              </div>
-            </a>
-          </li>
+                    @if (game.hasPlatinum) {
+                      <span
+                        class="platinum-glow absolute top-1.5 left-1.5 rounded-md bg-bg/85 px-1 py-0.5 text-xs backdrop-blur-sm cover-lift"
+                        [attr.aria-label]="'library.platinum' | translate"
+                        >🏆</span
+                      >
+                    }
+                  </div>
+                  <div class="min-w-0 px-0.5">
+                    <!-- Always two lines tall (2 × leading-snug), so the meta lines up across a row -->
+                    <p
+                      class="line-clamp-2 min-h-[2.75em] text-[13px] leading-snug font-medium group-hover:text-brand-lighter md:text-sm"
+                      [title]="game.name"
+                      data-poster-title
+                    >
+                      {{ game.name }}
+                    </p>
+                    @if (game.category || isUpcoming(game)) {
+                      <!-- Phones drop the mode chip (three narrow columns), so the row only stays for the upcoming badge -->
+                      <div class="mt-1 flex min-w-0 flex-wrap items-center gap-1" [class.max-sm:hidden]="!isUpcoming(game)">
+                        @if (game.category; as category) {
+                          <app-category-badge class="max-sm:hidden" [category]="category" />
+                        }
+                        @if (isUpcoming(game)) {
+                          <app-upcoming-badge />
+                        }
+                      </div>
+                    }
+                    <!-- Phones: the hours wrap to their own line under the status instead of being cut -->
+                    <p class="mt-1 flex min-w-0 items-center gap-1.5 text-[11px] text-muted max-sm:flex-wrap max-sm:gap-y-0 md:text-xs">
+                      @if (game.lastExperienceStatus; as status) {
+                        <app-status-pill dot [status]="status" class="shrink-0" />
+                      } @else if (isOnlineOnly(game)) {
+                        <span class="size-2 shrink-0 rounded-full bg-brand-light" aria-hidden="true"></span>
+                      } @else {
+                        <span class="size-2 shrink-0 rounded-full border border-faint" aria-hidden="true"></span>
+                      }
+                      @if (statusLine(game) === 'played') {
+                        <span class="truncate">
+                          {{ game.totalHours ? ('library.hoursPlayed' | translate: { hours: (game.totalHours | hours) }) : ('library.noHours' | translate) }}
+                        </span>
+                      } @else {
+                        <span class="truncate">
+                          {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
+                        </span>
+                        @if (isInPostgame(game)) {
+                          <span
+                    class="shrink-0 rounded-full bg-brand-tint px-1.5 py-px text-[10px] font-medium text-brand-lighter"
+                    [attr.title]="'run.postgameAria' | translate"
+                    data-postgame
+                    >{{ 'run.postgame' | translate }}</span
+                  >
+                        }
+                        @if (game.totalHours) {
+                          <span class="-ml-0.5 shrink-0 whitespace-nowrap max-sm:ml-0 max-sm:basis-full max-sm:pl-3.5"
+                            ><span class="max-sm:hidden">· </span>{{ game.totalHours | hours }}</span
+                          >
+                        }
+                      }
+                    </p>
+                  </div>
+                </a>
+              </li>
+            }
+          </ul>
         }
-      </ul>
+      }
     } @else if (wide()) {
       <!-- Web table (paged), md and up -->
       <section class="overflow-hidden rounded-[14px] border border-card-border card-glass">
@@ -336,95 +351,124 @@
           <span>{{ 'library.col.status' | translate }}</span>
           <span class="text-right">{{ 'library.col.year' | translate }}</span>
         </div>
-        @for (game of page().items; track game.id) {
-          <a
-            [routerLink]="['/games', game.id]"
-            [style.--i]="$index"
-            class="library-in grid grid-cols-[minmax(0,3fr)_minmax(0,1.6fr)_90px_90px_90px_130px_80px] items-center gap-4 border-t border-divider px-[22px] py-2 text-sm first-of-type:border-t-0 hover:bg-hover"
-          >
-            <span class="flex min-w-0 items-center gap-3 font-medium">
-              <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
-              <span class="truncate" [title]="game.name">{{ game.name }}</span>
-              @if (game.hasPlatinum) {
-                <span class="text-xs" [attr.aria-label]="'library.platinum' | translate">🏆</span>
-              }
-              @if (game.category; as category) {
-                <app-category-badge [category]="category" />
-              }
-              @if (isUpcoming(game)) {
-                <app-upcoming-badge />
-              }
-            </span>
-            <span class="truncate text-text-3" [title]="game.sagaName ?? ''">{{ game.sagaName ?? '—' }}</span>
-            <span class="text-right font-mono text-text-3">{{ game.experienceCount ?? 0 }}</span>
-            <span class="text-right font-mono">{{ game.totalHours ? (game.totalHours | hours) : '—' }}</span>
-            <span class="text-right font-mono" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
-            <span>
-              @if (game.lastExperienceStatus; as status) {
-                <app-status-pill [status]="status" />
-              } @else if (statusLine(game) === 'played') {
-                <span class="text-xs text-faint">—</span>
-              } @else if (isOnlineOnly(game)) {
-                <span class="rounded-full bg-hover px-2 py-0.5 text-xs text-text-3">{{ 'library.online' | translate }}</span>
-              } @else {
-                <span class="text-xs text-faint">{{ 'library.noRuns' | translate }}</span>
-              }
-            </span>
-            <span class="text-right font-mono text-muted">{{ game.lastPlayedYear ?? '—' }}</span>
-          </a>
-        }
-        <div class="flex items-center justify-between gap-4 border-t border-border px-[22px] py-3.5 text-[13px] text-muted">
-          <span>{{ 'library.showing' | translate: { shown: page().items.length, total: page().total } }}</span>
-          <app-pagination [page]="page().page" [total]="page().totalPages" (pageChange)="setPage($event)" />
-        </div>
-      </section>
-    } @else {
-      <!-- Mobile list (all results), below md -->
-      <ul class="flex flex-col">
-        @for (game of filtered(); track game.id) {
-          <li class="library-in list-item" [style.--i]="$index">
-            <a [routerLink]="['/games', game.id]" class="flex items-center gap-3 border-b border-divider py-2.5">
-              @if (game.lastExperienceStatus; as status) {
-                <app-status-pill dot [status]="status" class="shrink-0" />
-              } @else if (isOnlineOnly(game)) {
-                <span class="size-2 shrink-0 rounded-full bg-brand-light" aria-hidden="true"></span>
-              } @else {
-                <span class="size-2 shrink-0 rounded-full border border-faint" aria-hidden="true"></span>
-              }
-              <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
-              <div class="min-w-0 flex-1">
-                <!-- Name and status line wrap to two lines (narrow rows, large system font sizes) -->
-                <p class="line-clamp-2 text-[15px] font-medium wrap-break-word" [title]="game.name">
-                  {{ game.name }}
+        @for (block of tableBlocks(); track block.id) {
+          @if (sectioned()) {
+            <ng-container [ngTemplateOutlet]="sectionHeader" [ngTemplateOutletContext]="{ $implicit: block, first: $first, table: true }" />
+          }
+          @if (!isCollapsed(block.id)) {
+            @for (game of block.games; track game.id) {
+              <a
+                [routerLink]="['/games', game.id]"
+                [style.--i]="$index"
+                class="library-in grid grid-cols-[minmax(0,3fr)_minmax(0,1.6fr)_90px_90px_90px_130px_80px] items-center gap-4 border-t border-divider px-[22px] py-2 text-sm first-of-type:border-t-0 hover:bg-hover"
+              >
+                <span class="flex min-w-0 items-center gap-3 font-medium">
+                  <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
+                  <span class="truncate" [title]="game.name">{{ game.name }}</span>
                   @if (game.hasPlatinum) {
-                    <span class="text-xs">🏆</span>
+                    <span class="text-xs" [attr.aria-label]="'library.platinum' | translate">🏆</span>
                   }
-                </p>
-                <p class="mt-[3px] flex min-w-0 items-center gap-1.5 text-xs text-muted">
                   @if (game.category; as category) {
-                    <app-category-badge compact [category]="category" />
+                    <app-category-badge [category]="category" />
                   }
                   @if (isUpcoming(game)) {
                     <app-upcoming-badge />
                   }
-                  <span class="line-clamp-2">
-                    @if (statusLine(game) === 'played') {
-                      {{ game.totalHours ? ('library.hoursPlayed' | translate: { hours: (game.totalHours | hours) }) : ('library.noHours' | translate) }}
-                    } @else {
-                      {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
-                      · {{ 'library.runsCount' | translatePlural: game.experienceCount ?? 0 }}
-                      @if (game.totalHours) {
-                        · <span class="whitespace-nowrap">{{ game.totalHours | hours }}</span>
+                </span>
+                <span class="truncate text-text-3" [title]="game.sagaName ?? ''">{{ game.sagaName ?? '—' }}</span>
+                <span class="text-right font-mono text-text-3">{{ game.experienceCount ?? 0 }}</span>
+                <span class="text-right font-mono">{{ game.totalHours ? (game.totalHours | hours) : '—' }}</span>
+                <span class="text-right font-mono" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
+                <span>
+                  @if (game.lastExperienceStatus; as status) {
+                    <span class="inline-flex items-center gap-1.5">
+                      <app-status-pill [status]="status" />
+                      @if (isInPostgame(game)) {
+                        <span
+                    class="shrink-0 rounded-full bg-brand-tint px-1.5 py-px text-[10px] font-medium text-brand-lighter"
+                    [attr.title]="'run.postgameAria' | translate"
+                    data-postgame
+                    >{{ 'run.postgame' | translate }}</span
+                  >
                       }
-                    }
-                  </span>
-                </p>
-              </div>
-              <span class="shrink-0 font-mono text-[15px]" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
-            </a>
-          </li>
+                    </span>
+                  } @else if (statusLine(game) === 'played') {
+                    <span class="text-xs text-faint">—</span>
+                  } @else if (isOnlineOnly(game)) {
+                    <span class="rounded-full bg-hover px-2 py-0.5 text-xs text-text-3">{{ 'library.online' | translate }}</span>
+                  } @else {
+                    <span class="text-xs text-faint">{{ 'library.noRuns' | translate }}</span>
+                  }
+                </span>
+                <span class="text-right font-mono text-muted">{{ game.lastPlayedYear ?? '—' }}</span>
+              </a>
+            }
+          }
         }
-      </ul>
+        <div class="flex items-center justify-between gap-4 border-t border-border px-[22px] py-3.5 text-[13px] text-muted">
+          <span>{{ 'library.showing' | translate: { shown: sectioned() ? filtered().length : page().items.length, total: page().total } }}</span>
+          @if (!sectioned()) {
+            <app-pagination [page]="page().page" [total]="page().totalPages" (pageChange)="setPage($event)" />
+          }
+        </div>
+      </section>
+    } @else {
+      <!-- Mobile list (all results, in sections), below md -->
+      @for (block of blocks(); track block.id) {
+        @if (sectioned()) {
+          <ng-container [ngTemplateOutlet]="sectionHeader" [ngTemplateOutletContext]="{ $implicit: block, first: $first }" />
+        }
+        @if (!isCollapsed(block.id)) {
+          <ul class="flex flex-col">
+            @for (game of block.games; track game.id) {
+              <li class="library-in list-item" [style.--i]="$index">
+                <a [routerLink]="['/games', game.id]" class="flex items-center gap-3 border-b border-divider py-2.5">
+                  @if (game.lastExperienceStatus; as status) {
+                    <app-status-pill dot [status]="status" class="shrink-0" />
+                  } @else if (isOnlineOnly(game)) {
+                    <span class="size-2 shrink-0 rounded-full bg-brand-light" aria-hidden="true"></span>
+                  } @else {
+                    <span class="size-2 shrink-0 rounded-full border border-faint" aria-hidden="true"></span>
+                  }
+                  <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
+                  <div class="min-w-0 flex-1">
+                    <!-- Name and status line wrap to two lines (narrow rows, large system font sizes) -->
+                    <p class="line-clamp-2 text-[15px] font-medium wrap-break-word" [title]="game.name">
+                      {{ game.name }}
+                      @if (game.hasPlatinum) {
+                        <span class="text-xs">🏆</span>
+                      }
+                    </p>
+                    <p class="mt-[3px] flex min-w-0 items-center gap-1.5 text-xs text-muted">
+                      @if (game.category; as category) {
+                        <app-category-badge compact [category]="category" />
+                      }
+                      @if (isUpcoming(game)) {
+                        <app-upcoming-badge />
+                      }
+                      <span class="line-clamp-2">
+                        @if (statusLine(game) === 'played') {
+                          {{ game.totalHours ? ('library.hoursPlayed' | translate: { hours: (game.totalHours | hours) }) : ('library.noHours' | translate) }}
+                        } @else {
+                          {{ (game.lastExperienceStatus ? 'status.' + game.lastExperienceStatus : isOnlineOnly(game) ? 'library.online' : 'library.noRuns') | translate }}
+                          @if (isInPostgame(game)) {
+                            · <span class="text-brand-lighter" data-postgame>{{ 'run.postgame' | translate }}</span>
+                          }
+                          · {{ 'library.runsCount' | translatePlural: game.experienceCount ?? 0 }}
+                          @if (game.totalHours) {
+                            · <span class="whitespace-nowrap">{{ game.totalHours | hours }}</span>
+                          }
+                        }
+                      </span>
+                    </p>
+                  </div>
+                  <span class="shrink-0 font-mono text-[15px]" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      }
     }
   }
 </main>
@@ -432,3 +476,25 @@
 @if (creating()) {
   <app-game-edit-dialog (saved)="onGameCreated($event)" (closed)="creating.set(false)" />
 }
+
+<!-- Header of a library section: name, count and a fold toggle (only shown with two or more sections) -->
+<ng-template #sectionHeader let-block let-first="first" let-table="table">
+  <button
+    type="button"
+    class="flex w-full items-center gap-2 text-left text-sm font-medium text-text-2 hover:text-text"
+    [class]="table ? 'bg-hover px-[22px] py-2.5 ' + (first ? '' : 'border-t border-divider') : first ? 'mb-3' : 'mt-6 mb-3'"
+    [attr.aria-expanded]="!isCollapsed(block.id)"
+    (click)="toggleSection(block.id)"
+    data-library-section
+  >
+    <svg
+      [lucideIcon]="icons.chevronDown"
+      [size]="16"
+      class="shrink-0 transition-transform"
+      [class.-rotate-90]="isCollapsed(block.id)"
+      aria-hidden="true"
+    ></svg>
+    <span>{{ 'library.section.' + block.id | translate }}</span>
+    <span class="font-mono text-xs font-normal text-muted">{{ block.games.length }}</span>
+  </button>
+</ng-template>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router, provideRouter, withViewTransitions } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -8,6 +8,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { PlayFacts } from '../../core/models/stats.model';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { Game } from '../../core/models/game.model';
+import { CollapseStateService } from '../../core/services/collapse-state.service';
 import { GameService } from '../../core/services/game.service';
 import { PsnService } from '../../core/services/psn.service';
 import { StatsService } from '../../core/services/stats.service';
@@ -525,5 +526,125 @@ describe('Games library pending banner', () => {
   it('uses neutral copy when the pending games came from both', async () => {
     const banner = await setup([101], [102]);
     expect(banner?.textContent).toContain('library.pendingMixed');
+  });
+});
+
+describe('Games library postgame', () => {
+  const postgame: Game = {
+    ...game(7, [], 'Housemarque'),
+    lastExperienceStatus: 'COMPLETADO',
+    lastExperiencePostgame: true,
+  };
+  const beaten: Game = { ...game(8, [], 'Team Cherry'), lastExperienceStatus: 'COMPLETADO' };
+
+  async function listed(url: string) {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: 'games', component: Games }]),
+        provideTranslateService(),
+        { provide: GameService, useValue: { findAll: () => of([postgame, beaten]) } },
+        ...NO_PENDING,
+      ],
+    });
+    TestBed.overrideComponent(Games, {
+      remove: { imports: [Navbar] },
+      add: { imports: [NavbarStub] },
+    });
+    const harness = await RouterTestingHarness.create(url);
+    const el = harness.routeNativeElement!;
+    const hrefs = [
+      ...new Set([...el.querySelectorAll('a[href^="/games/"]')].map((a) => a.getAttribute('href'))),
+    ];
+    return { hrefs, pills: el.querySelectorAll('[data-postgame]').length };
+  }
+
+  it('lists a game in its postgame under En curso, with its Postgame pill', async () => {
+    const { hrefs, pills } = await listed('/games?status=EN_CURSO');
+    expect(hrefs).toEqual(['/games/7']);
+    expect(pills).toBeGreaterThan(0);
+  });
+
+  it('keeps it under Completado too, next to games that are only beaten', async () => {
+    const { hrefs } = await listed('/games?status=COMPLETADO');
+    expect(hrefs.sort()).toEqual(['/games/7', '/games/8']);
+  });
+});
+
+describe('Games library sections', () => {
+  const dated: Game = { ...game(1, [], 'A'), name: 'Saros', lastExperienceStatus: 'COMPLETADO', lastPlayedAt: '2026-10-20' };
+  const undated: Game = { ...game(2, [], 'B'), name: 'Hades', lastExperienceStatus: 'EN_CURSO' };
+  const online: Game = { ...game(3, [], 'C'), name: 'Fortnite', category: 'ONLINE' };
+  const many = Array.from({ length: 12 }, (_, i) => ({ ...dated, id: 100 + i, name: `Dated ${i}` }));
+
+  afterEach(() => localStorage.clear());
+
+  async function setup(games: Game[], { wide = false, view = 'grid' } = {}) {
+    localStorage.setItem('pytra_library_view', view);
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: 'games', component: Games }]),
+        provideTranslateService(),
+        { provide: GameService, useValue: { findAll: () => of(games) } },
+        { provide: CollapseStateService, useValue: { atLeast: () => signal(wide) } },
+        ...NO_PENDING,
+      ],
+    });
+    TestBed.overrideComponent(Games, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
+    const harness = await RouterTestingHarness.create('/games');
+    const el = harness.routeNativeElement!;
+    const headers = () => [...el.querySelectorAll<HTMLButtonElement>('[data-library-section]')];
+    const listed = () => [...new Set([...el.querySelectorAll('a[href^="/games/"]')].map((a) => a.getAttribute('href')))];
+    return { harness, el, headers, listed };
+  }
+
+  it('splits the results into dated, undated and online sections, in that order, with their counts', async () => {
+    const { headers, listed } = await setup([online, undated, dated]);
+    expect(headers().map((h) => h.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
+      'library.section.dated1',
+      'library.section.undated1',
+      'library.section.online1',
+    ]);
+    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3']);
+  });
+
+  it('shows no section headers when every result falls in one section', async () => {
+    const { headers, listed } = await setup([dated, { ...dated, id: 9 }]);
+    expect(headers()).toEqual([]);
+    expect(listed().length).toBe(2);
+  });
+
+  it('folds and unfolds a section, remembering it on the device', async () => {
+    const { harness, headers, listed } = await setup([online, undated, dated]);
+    const onlineHeader = headers()[2];
+    expect(onlineHeader.getAttribute('aria-expanded')).toBe('true');
+
+    onlineHeader.click();
+    await harness.fixture.whenStable();
+    expect(listed()).toEqual(['/games/1', '/games/2']);
+    expect(headers()[2].getAttribute('aria-expanded')).toBe('false');
+    expect(localStorage.getItem('pytra_library_collapsed')).toBe('["online"]');
+
+    headers()[2].click();
+    await harness.fixture.whenStable();
+    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3']);
+    expect(localStorage.getItem('pytra_library_collapsed')).toBe('[]');
+  });
+
+  it('starts with the sections folded on a previous visit', async () => {
+    localStorage.setItem('pytra_library_collapsed', '["undated"]');
+    const { listed } = await setup([online, undated, dated]);
+    expect(listed()).toEqual(['/games/1', '/games/3']);
+  });
+
+  it('lists every game in the desktop table when there are sections, without pages', async () => {
+    const { el, listed } = await setup([...many, online], { wide: true, view: 'list' });
+    expect(listed().length).toBe(13);
+    expect(el.querySelector('app-pagination')).toBeNull();
+  });
+
+  it('keeps the desktop table paged when there is a single section', async () => {
+    const { el, listed } = await setup(many, { wide: true, view: 'list' });
+    expect(listed().length).toBe(10);
+    expect(el.querySelector('app-pagination')).not.toBeNull();
   });
 });
