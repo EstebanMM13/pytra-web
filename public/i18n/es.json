@@ -554,7 +554,7 @@
   },
   "nav": {
     "home": "Inicio",
-    "games": "Juegos",
+    "games": "Biblioteca",
     "sagas": "Sagas",
     "years": "Años",
     "stats": "Estadísticas",
@@ -729,7 +729,7 @@
     }
   },
   "game": {
-    "breadcrumb": "Juegos",
+    "breadcrumb": "Biblioteca",
     "saga": "Saga {{saga}}",
     "sagaPosition": "Saga {{saga}} · {{index}} de {{total}}",
     "viewCover": "Ver portada ampliada",
@@ -969,7 +969,7 @@
     "next": "Página siguiente"
   },
   "library": {
-    "title": "Juegos",
+    "title": "Biblioteca",
     "addGame": "Añadir juego",
     "sortLabel": "Ordenar por",
     "sort": {
@@ -1655,7 +1655,7 @@
       "unknownPublisher": "Distribuidora",
       "backAria": "Volver a Estudios y épocas",
       "empty": "No hay juegos de este estudio en tu biblioteca.",
-      "inLibrary": "Ver sus juegos en Juegos"
+      "inLibrary": "Ver sus juegos en tu Biblioteca"
     },
     "heading": {
       "lead": "Tus",

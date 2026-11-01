@@ -554,7 +554,7 @@
   },
   "nav": {
     "home": "Home",
-    "games": "Games",
+    "games": "Library",
     "sagas": "Sagas",
     "years": "Years",
     "stats": "Stats",
@@ -729,7 +729,7 @@
     }
   },
   "game": {
-    "breadcrumb": "Games",
+    "breadcrumb": "Library",
     "saga": "{{saga}} saga",
     "sagaPosition": "{{saga}} saga · {{index}} of {{total}}",
     "viewCover": "View larger cover",
@@ -969,7 +969,7 @@
     "next": "Next page"
   },
   "library": {
-    "title": "Games",
+    "title": "Library",
     "addGame": "Add game",
     "sortLabel": "Sort by",
     "sort": {
@@ -1655,7 +1655,7 @@
       "unknownPublisher": "Publisher",
       "backAria": "Back to Studios & eras",
       "empty": "There are no games by this studio in your library.",
-      "inLibrary": "See its games in Games"
+      "inLibrary": "See its games in your Library"
     },
     "heading": {
       "lead": "Your",

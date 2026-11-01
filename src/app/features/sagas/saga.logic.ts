@@ -121,7 +121,7 @@ export function summarizeSaga(saga: Saga, allGames: readonly Game[]): SagaSummar
 
 /**
  * Grouping key of a developer name: the library's developer filter key (`normalizeText`: trimmed,
- * lower-cased, accents folded), so a studio page lists exactly what Juegos lists for `?dev=`. The
+ * lower-cased, accents folded), so a studio page lists exactly what the library lists for `?dev=`. The
  * API's developer stats only trim and lower-case, so "Estudio" and "Éstudio" are one studio here
  * and two rows there (rare). Blank names have no key.
  */
