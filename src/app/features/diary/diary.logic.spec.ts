@@ -9,6 +9,7 @@ import {
   draftTotal,
   gridRange,
   intensityLevel,
+  levelRanges,
   isValidDiaryDate,
   monthOf,
   monthTotal,
@@ -59,9 +60,19 @@ function game(id: number, name: string, extra: Partial<Game> = {}): Game {
 }
 
 describe('intensity levels', () => {
-  it('buckets the day total: nothing, under 1 h, under 3 h, under 6 h, 6 h or more', () => {
-    expect([0, -1, null, 0.5, 1, 2.99, 3, 5.5, 6, 14].map((h) => intensityLevel(h))).toEqual([
-      0, 0, 0, 1, 2, 2, 3, 3, 4, 4,
+  it('buckets the day total: nothing, under 2 h, under 3.5 h, under 5 h, 5 h or more', () => {
+    expect([0, -1, null, 0.5, 1.99, 2, 3, 3.49, 3.5, 4.5, 4.99, 5, 6, 14].map((h) => intensityLevel(h))).toEqual([
+      0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4,
+    ]);
+  });
+
+  it('describes each level as an hour range for the legend', () => {
+    expect(levelRanges()).toEqual([
+      { level: 0, min: null, max: null },
+      { level: 1, min: null, max: 2 },
+      { level: 2, min: 2, max: 3.5 },
+      { level: 3, min: 3.5, max: 5 },
+      { level: 4, min: 5, max: null },
     ]);
   });
 });

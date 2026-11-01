@@ -1426,6 +1426,12 @@
       "monthTotal": "Total del mes",
       "less": "Menos",
       "more": "Más",
+      "legend": {
+        "none": "Nada",
+        "under": "< {{max}} h",
+        "range": "{{min}}–{{max}} h",
+        "over": "{{min}} h o más"
+      },
       "loadError": "No se pudo cargar el diario.",
       "retry": "Reintentar",
       "dayWithHours": "{{day}}: {{hours}}"

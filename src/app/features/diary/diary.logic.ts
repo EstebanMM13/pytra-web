@@ -21,7 +21,27 @@ export const MAX_DIARY_HOURS = 24;
 export type DiaryLevel = 0 | 1 | 2 | 3 | 4;
 
 /** Upper bounds (exclusive) of levels 1, 2 and 3; anything above is level 4. */
-const LEVEL_BOUNDS: readonly number[] = [1, 3, 6];
+const LEVEL_BOUNDS: readonly number[] = [2, 3.5, 5];
+
+/** Hour range of a heat level for the legend: `min` inclusive, `max` exclusive (null = open end). */
+export interface LevelRange {
+  level: DiaryLevel;
+  min: number | null;
+  max: number | null;
+}
+
+/** Legend entries, level 0 (nothing played) to 4, built from the same bounds as `intensityLevel`. */
+export function levelRanges(): LevelRange[] {
+  const ranges: LevelRange[] = [{ level: 0, min: null, max: null }];
+  for (let i = 0; i <= LEVEL_BOUNDS.length; i++) {
+    ranges.push({
+      level: (i + 1) as DiaryLevel,
+      min: i === 0 ? null : LEVEL_BOUNDS[i - 1],
+      max: i < LEVEL_BOUNDS.length ? LEVEL_BOUNDS[i] : null,
+    });
+  }
+  return ranges;
+}
 
 /** Cell background per heat level, brand purple for activity (the diary calendar and the stats activity heatmap share them). */
 export const DIARY_LEVEL_CLASS: Record<DiaryLevel, string> = {

@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
-import { provideTranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { DiaryService } from '../../core/services/diary.service';
 import { Navbar } from '../../shared/navbar/navbar';
@@ -68,6 +68,23 @@ describe('Diary', () => {
     expect(cell.getAttribute('data-level')).toBe('3');
     expect(el.querySelectorAll('[data-month-day]')).toHaveLength(1);
     expect(el.querySelector('app-diary-day-editor')).toBeNull();
+  });
+
+  it('labels the legend colours with their hour ranges', () => {
+    const { fixture, el } = setup();
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('es', {
+      diary: {
+        calendar: {
+          legend: { none: 'Nada', under: '< {{max}} h', range: '{{min}}–{{max}} h', over: '{{min}} h o más' },
+        },
+      },
+    });
+    translate.use('es');
+    fixture.detectChanges();
+
+    const entries = Array.from(el.querySelectorAll('[data-legend] li')).map((li) => li.textContent!.trim());
+    expect(entries).toEqual(['Nada', '< 2 h', '2–3,5 h', '3,5–5 h', '5 h o más']);
   });
 
   it('opens the editor of the day given in the URL, and a tapped day through the URL', () => {

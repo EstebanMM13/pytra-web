@@ -1426,6 +1426,12 @@
       "monthTotal": "Month total",
       "less": "Less",
       "more": "More",
+      "legend": {
+        "none": "None",
+        "under": "< {{max}} h",
+        "range": "{{min}}–{{max}} h",
+        "over": "{{min}} h or more"
+      },
       "loadError": "The diary could not be loaded.",
       "retry": "Retry",
       "dayWithHours": "{{day}}: {{hours}}"

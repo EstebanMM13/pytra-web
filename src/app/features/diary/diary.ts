@@ -7,6 +7,7 @@ import { DiaryDay } from '../../core/models/diary.model';
 import { DiaryService } from '../../core/services/diary.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { ICONS } from '../../shared/ui/icons';
+import { SectionHeader } from '../../shared/ui/section-header';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { compactHours, formatHours } from '../../shared/pipes/hours.pipe';
 import { ratingLocale } from '../../shared/utils/rating-format';
@@ -20,6 +21,7 @@ import {
   dayLabel,
   gridRange,
   isValidDiaryDate,
+  levelRanges,
   monthLabel,
   monthOf,
   monthTotal,
@@ -33,13 +35,12 @@ import {
  */
 @Component({
   selector: 'app-diary',
-  imports: [Navbar, TranslatePipe, LucideDynamicIcon, Skeleton, DiaryDayEditor],
+  imports: [Navbar, TranslatePipe, LucideDynamicIcon, SectionHeader, Skeleton, DiaryDayEditor],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './diary.html',
 })
 export class Diary {
   protected readonly icons = ICONS;
-  protected readonly levels: DiaryLevel[] = [0, 1, 2, 3, 4];
 
   private readonly diaryService = inject(DiaryService);
   private readonly route = inject(ActivatedRoute);
@@ -65,6 +66,18 @@ export class Diary {
   protected readonly total = computed(() =>
     formatHours(monthTotal(this.days() ?? [], this.year(), this.month()), this.locale()),
   );
+  /** Legend entries: each level's colour with its hour range ("< 2 h", "2–3,5 h", "5 h o más"). */
+  protected readonly legend = computed(() => {
+    const number = new Intl.NumberFormat(this.locale(), { maximumFractionDigits: 1 });
+    return levelRanges().map(({ level, min, max }) => {
+      let key = 'range';
+      if (level === 0) key = 'none';
+      else if (min === null) key = 'under';
+      else if (max === null) key = 'over';
+      const params = { min: min === null ? '' : number.format(min), max: max === null ? '' : number.format(max) };
+      return { level, label: this.translate.instant(`diary.calendar.legend.${key}`, params) as string };
+    });
+  });
   protected readonly isCurrentMonth = computed(
     () => this.year() === this.current.year && this.month() === this.current.month,
   );
@@ -131,7 +144,7 @@ export class Diary {
   protected cellClass(cell: CalendarCell): string {
     const base = DIARY_LEVEL_CLASS[cell.level];
     const muted = cell.inMonth ? '' : ' opacity-40';
-    const today = cell.isToday ? ' ring-2 ring-inset ring-text-2 font-bold' : '';
+    const today = cell.isToday ? ' ring-2 ring-inset ring-brand-light font-bold' : '';
     return `${base}${muted}${today}`;
   }
 
