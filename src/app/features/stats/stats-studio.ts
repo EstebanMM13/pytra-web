@@ -57,7 +57,7 @@ interface LibraryState {
   template: `
     <app-navbar />
 
-    <main class="mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-4 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
+    <main class="mx-auto flex max-w-7xl flex-col gap-4 px-5 pt-3 pb-8 md:gap-6 md:px-6 md:pt-8 md:pb-12 lg:px-10">
       <app-stats-page-header
         [title]="displayName() || ((publisher() ? 'stats.studio.unknownPublisher' : 'stats.studio.unknown') | translate)"
         [subtitle]="subtitle()"
