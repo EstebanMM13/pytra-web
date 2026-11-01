@@ -3,7 +3,7 @@
 <main class="mx-auto flex max-w-7xl flex-col gap-[18px] px-5 pt-3 pb-8 md:gap-7 md:px-6 md:pt-8 md:pb-12 lg:px-10 lg:pt-10">
   <!-- Greeting + Steam notice, over the login panel's brand glows + watermark mark -->
   <div
-    class="relative isolate flex flex-col gap-3 overflow-hidden rounded-[18px] border border-card-border px-4 py-4 md:flex-row md:items-end md:justify-between md:px-7 md:py-7"
+    class="relative isolate flex flex-col gap-4 overflow-hidden rounded-[18px] border border-card-border px-4 py-4 md:flex-row md:items-center md:justify-between md:gap-6 md:px-7 md:py-7"
   >
     <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
       <div
@@ -25,8 +25,9 @@
         </h1>
         @if (summary() || summaryFailed()) {
           <p
-            class="mt-2 inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-hover/60 px-3 py-1.5 text-sm font-medium text-text-2 md:mt-3"
+            class="mt-2 flex max-w-full items-center gap-2 text-sm text-text-2 md:mt-3"
             [attr.title]="tagline().key | translatePlural: tagline().count : tagline().params"
+            data-tagline
           >
             <svg [lucideIcon]="icons.sparkles" [size]="14" class="shrink-0 text-text-2" aria-hidden="true"></svg>
             <span class="truncate">{{ tagline().key | translatePlural: tagline().count : tagline().params }}</span>
@@ -36,15 +37,37 @@
         <app-skeleton class="h-9 w-56 rounded-lg" />
       }
     </div>
-    @if (pending().count > 0) {
-      <a
-        routerLink="/sync"
-        class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-[13px] text-gold-tint-fg hover:opacity-90 md:self-auto"
-      >
-        <svg [lucideIcon]="icons.import" [size]="14"></svg>
-        {{ pendingBannerKey() | translatePlural: pending().count }}
-        <svg [lucideIcon]="icons.arrowRight" [size]="14"></svg>
-      </a>
+    @if (pending().count > 0 || !isEmptyLibrary()) {
+      <div class="flex shrink-0 flex-col gap-2.5 md:w-[min(414px,45%)]">
+        @if (!isEmptyLibrary()) {
+          <!-- Diary quick entry: today's day editor -->
+          <a
+            routerLink="/diary"
+            [queryParams]="diaryToday"
+            data-diary-card
+            class="hover-lift flex items-center gap-3 rounded-xl border border-card-border card-glass px-4 py-3.5"
+          >
+            <span class="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-tint text-brand-light" aria-hidden="true">
+              <svg [lucideIcon]="icons.notebookPen" [size]="20"></svg>
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-[15px] font-semibold">{{ 'dashboard.diary.title' | translate }}</span>
+              <span class="block text-[13px] text-text-3">{{ 'dashboard.diary.text' | translate }}</span>
+            </span>
+            <svg [lucideIcon]="icons.arrowRight" [size]="18" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
+          </a>
+        }
+        @if (pending().count > 0) {
+          <a
+            routerLink="/sync"
+            class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-[13px] text-gold-tint-fg hover:opacity-90 md:self-end"
+          >
+            <svg [lucideIcon]="icons.import" [size]="14"></svg>
+            {{ pendingBannerKey() | translatePlural: pending().count }}
+            <svg [lucideIcon]="icons.arrowRight" [size]="14"></svg>
+          </a>
+        }
+      </div>
     }
   </div>
 
@@ -72,25 +95,6 @@
         <svg [lucideIcon]="icons.x" [size]="16"></svg>
       </button>
     </div>
-  }
-
-  @if (!isEmptyLibrary()) {
-    <!-- Diary quick entry: today's day editor -->
-    <a
-      routerLink="/diary"
-      [queryParams]="diaryToday"
-      data-diary-card
-      class="hover-lift flex items-center gap-3 rounded-xl border border-card-border card-glass px-4 py-3.5 md:px-5"
-    >
-      <span class="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-tint text-brand-light" aria-hidden="true">
-        <svg [lucideIcon]="icons.notebookPen" [size]="20"></svg>
-      </span>
-      <span class="min-w-0 flex-1">
-        <span class="block text-[15px] font-semibold">{{ 'dashboard.diary.title' | translate }}</span>
-        <span class="block text-[13px] text-text-3">{{ 'dashboard.diary.text' | translate }}</span>
-      </span>
-      <svg [lucideIcon]="icons.arrowRight" [size]="18" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
-    </a>
   }
 
   @if (isEmptyLibrary()) {
@@ -136,8 +140,8 @@
     <!-- Stats: same 6 cards everywhere (3 x 2 on mobile and tablet, one row on desktop) -->
     <section class="grid grid-cols-3 gap-2 md:gap-3 lg:grid-cols-6">
       @if (summary(); as s) {
-        <!-- Every card: centred figure plus one small visual (per-year sparkline, else a proportion bar). -->
-        @let m = meters();
+        <!-- Every card: centred figure plus one line of context under it. -->
+        @let h = statLines();
         <app-stat-card
           centered
           [link]="statLinks.games.link"
@@ -145,7 +149,7 @@
           [icon]="statIcons.games"
           [label]="'dashboard.stats.games' | translate"
           [value]="s.totalGames"
-          [meter]="m?.games ?? null"
+          [hint]="h?.games ?? null"
         />
         <app-stat-card
           centered
@@ -154,7 +158,7 @@
           [icon]="statIcons.sagas"
           [label]="'dashboard.stats.sagas' | translate"
           [value]="s.totalSagas"
-          [meter]="m?.sagas ?? null"
+          [hint]="h?.sagas ?? null"
         />
         <app-stat-card
           centered
@@ -163,8 +167,7 @@
           [icon]="statIcons.runs"
           [label]="'dashboard.stats.runs' | translate"
           [value]="s.totalExperiences"
-          [trend]="trends().runs"
-          [meter]="m?.runs ?? null"
+          [hint]="h?.runs ?? null"
         />
         <app-stat-card
           centered
@@ -174,8 +177,7 @@
           [label]="'dashboard.stats.singleHours' | translate"
           [shortLabel]="'dashboard.stats.singleHoursShort' | translate"
           [value]="s.totalSingleplayerHours | hours"
-          [trend]="trends().hours"
-          [meter]="m?.singleHours ?? null"
+          [hint]="h?.singleHours ?? null"
         />
         <app-stat-card
           centered
@@ -185,7 +187,7 @@
           [label]="'dashboard.stats.onlineHours' | translate"
           [shortLabel]="'dashboard.stats.onlineHoursShort' | translate"
           [value]="s.totalOnlineHours | hours"
-          [meter]="m?.onlineHours ?? null"
+          [hint]="h?.onlineHours ?? null"
         />
         <app-stat-card
           centered
@@ -195,10 +197,9 @@
           [label]="'dashboard.stats.avgRating' | translate"
           [shortLabel]="'dashboard.stats.avgRatingShort' | translate"
           [value]="s.averageRating | rating"
-          [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
-          [trend]="trends().rating"
-          tone="gold"
-          [meter]="m?.rating ?? null"
+          valueClass="text-gold"
+          tone="gold-tile"
+          [hint]="h?.rating ?? null"
         />
       } @else if (!summaryFailed()) {
         @for (i of [1, 2, 3, 4, 5, 6]; track i) {
@@ -213,7 +214,12 @@
     @if (topBadges().length) {
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:px-[22px] md:py-4">
         <app-section-header collapseKey="dashboard.achievements" tone="gold" class="mb-3" [label]="'dashboard.achievements' | translate">
-          <a routerLink="/profile" [queryParams]="{ section: 'achievements' }" class="tap-area flex shrink-0 items-center gap-1 text-[13px] text-text-2 hover:text-text hover:underline">
+          @if (achievementCount(); as c) {
+            <span class="shrink-0 font-mono text-[13px] text-text-3" data-achievement-count>
+              {{ 'dashboard.achievementsCount' | translate: c }}
+            </span>
+          }
+          <a routerLink="/profile" [queryParams]="{ section: 'achievements' }" class="tap-area flex shrink-0 items-center gap-1 text-[13px] font-medium text-text hover:underline">
             {{ 'dashboard.achievementsAll' | translate }}
             <svg [lucideIcon]="icons.arrowRight" [size]="14" class="text-brand-light" aria-hidden="true"></svg>
           </a>

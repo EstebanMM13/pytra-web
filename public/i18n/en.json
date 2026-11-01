@@ -100,7 +100,14 @@
       "replays": "Replays",
       "singleHoursShort": "Single",
       "onlineHoursShort": "Online",
-      "avgRatingShort": "Avg"
+      "avgRatingShort": "Avg",
+      "hint": {
+        "inProgress": "{{count}} in progress",
+        "topSaga": "Most played: {{name}}",
+        "completed": "{{count}} completed",
+        "shareOfTotal": "{{percent}}% of total",
+        "rated": "{{count}} rated"
+      }
     },
     "playingNow": "Playing now",
     "nothingPlaying": "Nothing in progress",
@@ -144,6 +151,7 @@
     },
     "achievements": "Achievements",
     "achievementsAll": "See all",
+    "achievementsCount": "{{unlocked}} of {{total}}",
     "seeAll": "See all",
     "topRatedOnline": "Online",
     "diary": {

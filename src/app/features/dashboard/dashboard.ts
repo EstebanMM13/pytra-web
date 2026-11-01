@@ -42,13 +42,11 @@ import { AchievementBadge } from '../../shared/achievements/achievement-badge';
 import { applyStoredUnlocks, computeAchievements, topUnlocked } from '../../shared/achievements/achievements';
 import { AchievementService } from '../../core/services/achievement.service';
 import { UnlockedAchievement } from '../../core/models/achievement.model';
-import { pickTagline, STAT_LINKS, statMeters, topRatedKey, topRatedLink } from './dashboard.logic';
+import { pickTagline, STAT_LINKS, statHints, topRatedKey, topRatedLink } from './dashboard.logic';
 
 type PlayMode = 'single' | 'online';
 
 const RANKING_SIZE = 5;
-/** Years shown in the stat-card sparklines. */
-const TREND_YEARS = 8;
 
 /** Sections that show an inline error (with retry) when their request fails. */
 type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated' | 'mostPlayed';
@@ -166,19 +164,22 @@ export class Dashboard {
     return { key: `dashboard.tagline.${t.key}`, params, count };
   });
 
-  /** Proportion bars for the stat cards without a per-year sparkline (e.g. online hours). */
-  protected readonly meters = computed(() => {
+  /** Line under each stat card ("4 en curso", "64 % del total"...); null while the summary loads. */
+  protected readonly statLines = computed(() => {
     const summary = this.summary();
-    return summary ? statMeters(summary, this.games()) : null;
-  });
-
-  /** Per-year series (oldest first, last TREND_YEARS) for the stat-card sparklines. */
-  protected readonly trends = computed(() => {
-    const years = [...(this.byYear() ?? [])].sort((a, b) => a.year - b.year).slice(-TREND_YEARS);
+    if (!summary) return null;
+    this.translate.currentLang();
+    const h = statHints(summary, this.games(), this.bySaga());
+    const plural = (key: string, count: number) => translatePlural(this.translate, `dashboard.stats.hint.${key}`, count);
+    const shareOf = (percent: number | null) =>
+      percent === null ? null : (this.translate.instant('dashboard.stats.hint.shareOfTotal', { percent }) as string);
     return {
-      hours: years.map((y) => y.totalHours),
-      runs: years.map((y) => y.experienceCount),
-      rating: years.flatMap((y) => (y.averageRating == null ? [] : [y.averageRating])),
+      games: plural('inProgress', h.inProgress),
+      sagas: h.topSaga ? (this.translate.instant('dashboard.stats.hint.topSaga', { name: h.topSaga }) as string) : null,
+      runs: plural('completed', h.completed),
+      singleHours: shareOf(h.singleShare),
+      onlineHours: shareOf(h.onlineShare),
+      rating: h.rated === null ? null : plural('rated', h.rated),
     };
   });
 
@@ -189,6 +190,12 @@ export class Dashboard {
     const summary = this.summary();
     if (!games || !sagas || !summary) return null;
     return applyStoredUnlocks(computeAchievements({ games, sagas, summary, years: this.byYear() }), this.storedAchievements() ?? []);
+  });
+
+  /** Unlocked / total achievements for the section header ("35 de 48"); null until they load. */
+  protected readonly achievementCount = computed(() => {
+    const list = this.achievements();
+    return list ? { unlocked: list.filter((a) => a.unlocked).length, total: list.length } : null;
   });
 
   /** Most impressive unlocked badges (max 4); empty until games, sagas and summary load. */

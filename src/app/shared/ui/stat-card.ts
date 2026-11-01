@@ -103,7 +103,7 @@ import { StatStrip } from './stat-strip';
         <span data-figure [class]="valueClass()">{{ display() }}</span>
       </p>
       @if (hint()) {
-        <p class="mt-1.5 line-clamp-2 text-[11px] leading-snug text-muted md:text-xs" [attr.title]="hint()">{{ hint() }}</p>
+        <p class="mt-1.5 line-clamp-2 text-[11px] leading-snug text-muted md:text-xs" [class.text-center]="centered()" [attr.title]="hint()">{{ hint() }}</p>
       }
       @switch (visual()) {
         @case ('trend') {

@@ -100,7 +100,16 @@
       "replays": "Replays",
       "singleHoursShort": "Un jugador",
       "onlineHoursShort": "Online",
-      "avgRatingShort": "Media"
+      "avgRatingShort": "Media",
+      "hint": {
+        "inProgress": "{{count}} en curso",
+        "topSaga": "Más jugada: {{name}}",
+        "completed": "{{count}} completadas",
+        "completed_one": "{{count}} completada",
+        "shareOfTotal": "{{percent}} % del total",
+        "rated": "{{count}} valoradas",
+        "rated_one": "{{count}} valorada"
+      }
     },
     "playingNow": "Jugando ahora",
     "nothingPlaying": "Nada en curso",
@@ -144,6 +153,7 @@
     },
     "achievements": "Logros",
     "achievementsAll": "Ver todos",
+    "achievementsCount": "{{unlocked}} de {{total}}",
     "seeAll": "Ver todos",
     "topRatedOnline": "Online",
     "diary": {

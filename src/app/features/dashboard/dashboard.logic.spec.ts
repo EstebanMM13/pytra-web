@@ -6,7 +6,7 @@ import {
   pickTagline,
   STAT_LINKS,
   share,
-  statMeters,
+  statHints,
   taglineCandidates,
   TaglineInput,
   topRatedKey,
@@ -124,40 +124,45 @@ describe('top rated links', () => {
   });
 });
 
-describe('dashboard stat meters', () => {
-  it('computes each card share, null when there is nothing to divide', () => {
+describe('dashboard stat hints', () => {
+  it('computes the line under each stat card', () => {
     expect(share(1, 4)).toBe(0.25);
     expect(share(5, 4)).toBe(1);
     expect(share(1, 0)).toBeNull();
 
     const games = [
-      { reviewStatus: 'CONFIRMED', sagaId: 1, experienceCount: 2, totalHours: 10 },
-      { reviewStatus: 'CONFIRMED', sagaId: null, experienceCount: 0, totalHours: 3 },
-      { reviewStatus: 'CONFIRMED', sagaId: null, experienceCount: 0, totalHours: 0 },
-      { reviewStatus: 'CONFIRMED', sagaId: 2, experienceCount: 0, totalHours: 0 },
-      { reviewStatus: 'PENDING_REVIEW', sagaId: 3, experienceCount: 0, totalHours: 0 },
+      { reviewStatus: 'CONFIRMED', bestRating: 9 },
+      { reviewStatus: 'CONFIRMED', bestRating: null },
+      { reviewStatus: 'CONFIRMED', bestRating: 7.5 },
+      { reviewStatus: 'CONFIRMED' },
+      { reviewStatus: 'PENDING_REVIEW', bestRating: 8 },
     ];
-    const meters = statMeters(
-      summary({
-        totalExperiences: 4,
-        completedCount: 3,
-        totalSingleplayerHours: 75,
-        totalOnlineHours: 25,
-        averageRating: 8.5,
-      }),
+    const sagas = [
+      { sagaId: null, sagaName: 'No saga', gameCount: 9, totalHours: 900 },
+      { sagaId: 1, sagaName: 'Mass Effect', gameCount: 3, totalHours: 200 },
+      { sagaId: 2, sagaName: 'The Witcher', gameCount: 3, totalHours: 400 },
+    ];
+    const hints = statHints(
+      summary({ inProgressCount: 4, completedCount: 34, totalSingleplayerHours: 1806, totalOnlineHours: 996 }),
       games,
+      sagas,
     );
-    expect(meters).toEqual({ games: 0.5, sagas: 0.5, runs: 0.75, singleHours: 0.75, onlineHours: 0.25, rating: 0.85 });
+    expect(hints).toEqual({ inProgress: 4, topSaga: 'The Witcher', completed: 34, singleShare: 64, onlineShare: 36, rated: 2 });
   });
 
-  it('has no meters without data', () => {
-    expect(statMeters(summary(), null)).toEqual({
-      games: null,
-      sagas: null,
-      runs: null,
-      singleHours: null,
-      onlineHours: null,
-      rating: null,
+  it('keeps the two hour shares adding up to 100', () => {
+    const hints = statHints(summary({ totalSingleplayerHours: 2, totalOnlineHours: 1 }), null, null);
+    expect([hints.singleShare, hints.onlineShare]).toEqual([67, 33]);
+  });
+
+  it('has no shares, saga or rated count without data', () => {
+    expect(statHints(summary(), null, null)).toEqual({
+      inProgress: 0,
+      topSaga: null,
+      completed: 0,
+      singleShare: null,
+      onlineShare: null,
+      rated: null,
     });
   });
 });
