@@ -612,6 +612,23 @@ export function topCovers<T extends CoverSource>(games: readonly T[], match: (ga
     .map((game) => ({ id: game.id, name: game.name, url: game.coverImageUrl, hours: game.totalHours ?? undefined }));
 }
 
+/**
+ * One cover per section leader (the hub cards' number one), in order, each game once and only
+ * those with art; then the fallback covers (most played) until `limit`.
+ */
+export function leaderCovers(
+  leaders: readonly (CoverRef | null | undefined)[],
+  fallback: readonly CoverRef[],
+  limit: number,
+): CoverRef[] {
+  const picked: CoverRef[] = [];
+  for (const cover of [...leaders, ...fallback]) {
+    if (picked.length >= limit) break;
+    if (cover?.url && !picked.some((p) => p.id === cover.id)) picked.push(cover);
+  }
+  return picked;
+}
+
 /** A developer name as the covers match it: case and surrounding spaces ignored. */
 export function developerKey(developer: string | null | undefined): string {
   return (developer ?? '').trim().toLowerCase();

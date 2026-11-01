@@ -40,6 +40,7 @@ import {
   sagaTeaser,
   shareSlices,
   shares,
+  leaderCovers,
   topCovers,
   decadeParams,
   percentFormat,
@@ -170,7 +171,7 @@ export class StatsHub {
    * The hero's all-time summary: run plus online hours from the summary, so it matches the dashboard
    * (the years leave out undated runs and online hours not logged in the diary; null when it failed:
    * the figure shows a dash, like the cards), the first year played, a few counts as pills and the
-   * most played games' covers. `undefined` while the years or the summary load.
+   * covers of the cards' number ones. `undefined` while the years or the summary load.
    */
   protected readonly hero = computed(() => {
     const years = this.byYear();
@@ -189,8 +190,23 @@ export class StatsHub {
         completed ? format.plural('stats.platforms.completed', completed) : null,
         sagas ? format.plural('stats.hub.sagasFigure', sagas) : null,
       ].filter((pill): pill is string => pill !== null),
-      covers: withArt(topCovers(games, (g) => (g.totalHours ?? 0) > 0, MAX_STACK_COVERS)),
+      covers: this.heroCovers(),
     };
+  });
+
+  /**
+   * The hero's covers: the number one of the Games (most replayed), Genres, Sagas and Studios
+   * cards, then the most played games when some is missing or repeated.
+   */
+  private readonly heroCovers = computed(() => {
+    const games = this.library() ?? [];
+    const replayed = this.replayTeaser();
+    const top = replayed ? topCovers(games, (g) => g.id === replayed.gameId, 1)[0] : null;
+    return leaderCovers(
+      [top, this.topGenre()?.covers[0], this.sagaCovers()[0], this.studioCovers()[0]],
+      topCovers(games, (g) => (g.totalHours ?? 0) > 0, MAX_STACK_COVERS),
+      MAX_STACK_COVERS,
+    );
   });
 
   /** The most played genre and its share of all the hours (genres overlap: a share, not a slice). */

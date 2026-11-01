@@ -3,6 +3,7 @@ import {
   NEUTRAL_PLATFORM_COLOR,
   REST_SLICE_COLOR,
   abandonmentRanking,
+  leaderCovers,
   activityYears,
   activeDayShare,
   buildHeatmap,
@@ -440,6 +441,18 @@ describe('percentFormat', () => {
     expect(percent(0.456)).toBe('46%');
     expect(percent(0.034)).toBe('3.4%');
     expect(percent(1)).toBe('100%');
+  });
+});
+
+describe('leaderCovers', () => {
+  const c = (id: number, url: string | null = `${id}.jpg`) => ({ id, name: `G${id}`, url });
+
+  it('takes each section leader once, in order, then fills with the fallback', () => {
+    expect(leaderCovers([c(1), null, c(2), c(1)], [c(1), c(3), c(4)], 4).map((x) => x.id)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('skips leaders without art and stops at the limit', () => {
+    expect(leaderCovers([c(1, null), c(2), c(3)], [c(5)], 2).map((x) => x.id)).toEqual([2, 3]);
   });
 });
 
