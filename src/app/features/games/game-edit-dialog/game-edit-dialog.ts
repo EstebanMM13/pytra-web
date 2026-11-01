@@ -159,6 +159,8 @@ export class GameEditDialog implements OnInit {
   protected readonly genres = signal<Genre[]>([]);
   protected readonly selectedGenreIds = signal<Set<number>>(new Set());
   protected readonly category = signal<GameCategory>('SINGLEPLAYER');
+  /** In the backlog ("Pendiente"): the user plans to play it. */
+  protected readonly backlog = signal(false);
   protected readonly saving = signal(false);
   protected readonly deleting = signal(false);
   protected readonly autofillOpen = signal(false);
@@ -225,6 +227,7 @@ export class GameEditDialog implements OnInit {
         coverImageUrl: this.pendingReview() ? pendingCoverUrl(game.coverImageUrl) : (game.coverImageUrl ?? ''),
       });
       this.category.set(game.category ?? 'SINGLEPLAYER');
+      this.backlog.set(game.backlog === true);
       this.selectedGenreIds.set(new Set(game.genres.map((g) => g.id)));
     }
     this.sagaService.findAll().subscribe({
@@ -341,6 +344,7 @@ export class GameEditDialog implements OnInit {
       sagaId: raw.sagaId,
       coverImageUrl: raw.coverImageUrl.trim() || null,
       genreIds: [...this.selectedGenreIds()],
+      backlog: this.backlog(),
     };
     this.saving.set(true);
     if (review && game) {

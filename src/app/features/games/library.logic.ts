@@ -14,8 +14,9 @@ import {
 } from './play-filters.logic';
 
 /**
- * Status tab of the library toolbar. `PENDIENTE` also covers games with no runs yet, except online
- * games: those are tracked through online playtime, not runs, so they get their own `ONLINE` tab.
+ * Status tab of the library toolbar. `PENDIENTE` is the game's backlog flag (`Game.backlog`), plus games
+ * with no runs yet except online ones: those are tracked through online playtime, not runs, so they get
+ * their own `ONLINE` tab.
  */
 export type LibraryStatusFilter = 'ALL' | 'EN_CURSO' | 'COMPLETADO' | 'ABANDONADO' | 'PENDIENTE' | 'ONLINE';
 export type LibrarySort = 'recent' | 'name' | 'rating' | 'hours';
@@ -143,7 +144,17 @@ export function matchesStatus(game: Game, status: LibraryStatusFilter): boolean 
     // Beaten and still being played: it is both in progress and completed.
     return true;
   }
-  return status === 'PENDIENTE' ? last === 'PENDIENTE' || (last === null && !isOnlineOnly(game)) : last === status;
+  if (status === 'PENDIENTE') {
+    // "Pendiente" is the game's backlog flag; a game never played (and not online-only) waits too.
+    return game.backlog === true || (last === null && !isOnlineOnly(game));
+  }
+  return last === status;
+}
+
+/** What a library row says for a game without runs: "Pendiente" in the backlog, "Online", or "no runs". */
+export function noRunsLabel(game: Game): 'library.backlog' | 'library.online' | 'library.noRuns' {
+  if (game.backlog) return 'library.backlog';
+  return isOnlineOnly(game) ? 'library.online' : 'library.noRuns';
 }
 
 /** The game's last run is beaten (COMPLETADO) but its postgame is still being played. */

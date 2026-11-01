@@ -4,6 +4,7 @@ import {
   filterGames,
   groupLibrarySections,
   isInPostgame,
+  noRunsLabel,
   librarySectionOf,
   parseCollapsedSections,
   serializeCollapsedSections,
@@ -76,7 +77,7 @@ const hollow = game({ id: 1, name: 'Hollow Knight', experienceCount: 1, totalHou
 const pokemon = game({ id: 2, name: 'Pokémon Rojo', experienceCount: 2, totalHours: 80, bestRating: 8, lastExperienceStatus: 'EN_CURSO', lastPlayedYear: 2025 });
 const celeste = game({ id: 3, name: 'Celeste', experienceCount: 1, totalHours: 10, bestRating: 9.25, lastExperienceStatus: 'ABANDONADO', lastPlayedYear: 2023, updatedAt: '2025-06-01T00:00:00' });
 const unplayed = game({ id: 4, name: 'Alan Wake' });
-const planned = game({ id: 5, name: 'Bloodborne', experienceCount: 1, lastExperienceStatus: 'PENDIENTE', lastPlayedYear: null });
+const planned = game({ id: 5, name: 'Bloodborne', backlog: true });
 const all = [hollow, pokemon, celeste, unplayed, planned];
 
 describe('library logic', () => {
@@ -103,6 +104,23 @@ describe('library logic', () => {
       expect(countByStatus([...all, { ...postgame, id: 99 }])).toEqual({
         ALL: 6, EN_CURSO: 2, COMPLETADO: 2, ABANDONADO: 1, PENDIENTE: 2, ONLINE: 0,
       });
+    });
+
+    it('lists backlog games under Pendientes, also when they have runs or are online', () => {
+      const replay = { ...hollow, backlog: true };
+      const arena = game({ id: 6, name: 'Fortnite', category: 'ONLINE', backlog: true });
+      expect(matchesStatus(replay, 'PENDIENTE')).toBe(true);
+      expect(matchesStatus(replay, 'COMPLETADO')).toBe(true);
+      expect(matchesStatus(arena, 'PENDIENTE')).toBe(true);
+      expect(matchesStatus(hollow, 'PENDIENTE')).toBe(false);
+      expect(matchesStatus(game({ id: 7, name: 'Apex', category: 'ONLINE' }), 'PENDIENTE')).toBe(false);
+    });
+
+    it('names a game without runs Pendiente when it is in the backlog', () => {
+      expect(noRunsLabel(planned)).toBe('library.backlog');
+      expect(noRunsLabel(unplayed)).toBe('library.noRuns');
+      expect(noRunsLabel(game({ id: 6, name: 'Fortnite', category: 'ONLINE' }))).toBe('library.online');
+      expect(noRunsLabel(game({ id: 6, name: 'Fortnite', category: 'ONLINE', backlog: true }))).toBe('library.backlog');
     });
 
     it('counts every tab', () => {

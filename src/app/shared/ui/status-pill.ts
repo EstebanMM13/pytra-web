@@ -6,7 +6,6 @@ const TONES: Record<ExperienceStatus, { pill: string; dot: string }> = {
   EN_CURSO: { pill: 'bg-brand-tint text-brand-lighter', dot: 'bg-brand-lighter' },
   COMPLETADO: { pill: 'bg-success-bg text-success', dot: 'bg-success' },
   ABANDONADO: { pill: 'bg-danger-bg text-danger', dot: 'bg-danger' },
-  PENDIENTE: { pill: 'bg-neutral-bg text-neutral', dot: 'bg-neutral' },
 };
 
 /** Run status as a rounded pill, or as an 8px dot (`dot`) for dense mobile lists. */

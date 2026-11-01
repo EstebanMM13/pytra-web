@@ -319,6 +319,24 @@ describe('GameEditDialog pending review', () => {
     expect(edited.saved).toHaveBeenCalledWith(PENDING);
   });
 
+  it('sends the Pendiente (backlog) switch, starting from the game it edits', () => {
+    const created = setup(null, null);
+    created.dialog.form.controls.name.setValue('New game');
+    const backlogSwitch = () => created.el.querySelector<HTMLButtonElement>('[data-backlog-switch]')!;
+    expect(backlogSwitch().getAttribute('aria-checked')).toBe('false');
+    backlogSwitch().click();
+    created.fixture.detectChanges();
+    expect(backlogSwitch().getAttribute('aria-checked')).toBe('true');
+    created.submit();
+    expect(created.gameService.create).toHaveBeenCalledWith(expect.objectContaining({ backlog: true }));
+    TestBed.resetTestingModule();
+
+    const edited = setup(null, { ...PENDING, backlog: true });
+    expect(edited.el.querySelector('[data-backlog-switch]')!.getAttribute('aria-checked')).toBe('true');
+    edited.submit();
+    expect(edited.gameService.update).toHaveBeenCalledWith(7, expect.objectContaining({ backlog: true }));
+  });
+
   it('confirms with the edited form and emits the confirmed game without a toast', () => {
     const confirmed = { ...PENDING, reviewStatus: 'CONFIRMED' } as Game;
     const confirmWith = vi.fn<PendingConfirmFn>(() => of(confirmed));
@@ -335,6 +353,7 @@ describe('GameEditDialog pending review', () => {
       sagaId: 2,
       coverImageUrl: 'https://images.example.com/astro.jpg',
       genreIds: [11],
+      backlog: false,
     });
     expect(saved).toHaveBeenCalledWith(confirmed);
     expect(gameService.create).not.toHaveBeenCalled();

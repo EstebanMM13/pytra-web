@@ -27,6 +27,8 @@ export interface Game {
   totalHours?: number | null;
   /** Best of the run ratings and the online general rating. */
   bestRating?: number | null;
+  /** In the backlog ("Pendiente"): the user plans to play it. Absent from older APIs. */
+  backlog?: boolean | null;
   lastExperienceStatus?: ExperienceStatus | null;
   /** The last run is COMPLETADO and its postgame is still being played. Absent from older APIs. */
   lastExperiencePostgame?: boolean | null;
@@ -53,4 +55,6 @@ export interface GameRequest {
   sagaId?: number | null;
   coverImageUrl?: string | null;
   genreIds?: number[];
+  /** In the backlog ("Pendiente"). Omitted: the API keeps the current value. */
+  backlog?: boolean;
 }

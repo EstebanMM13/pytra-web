@@ -595,8 +595,7 @@
   "status": {
     "EN_CURSO": "In progress",
     "COMPLETADO": "Completed",
-    "ABANDONADO": "Dropped",
-    "PENDIENTE": "Pending"
+    "ABANDONADO": "Dropped"
   },
   "common": {
     "collapseSection": "Collapse {{name}}",
@@ -809,6 +808,8 @@
       "genres": "Genres",
       "coverUrl": "Cover URL",
       "coverUrlHint": "Optional. https link to an image; portrait box art (2:3) recommended.",
+      "backlog": "Backlog",
+      "backlogHint": "You want to play it but have not started it yet. Adding a run takes it out of the backlog.",
       "coverUrlInvalid": "Enter a valid https URL.",
       "coverPreview": "Cover preview",
       "sagaPlaceholder": "Search sagas…",
@@ -1015,6 +1016,7 @@
     "platinum": "Platinum",
     "online": "Online",
     "noRuns": "No runs",
+    "backlog": "Backlog",
     "section": {
       "dated": "With dates",
       "undated": "Without dates",

@@ -21,14 +21,13 @@ describe('run form logic', () => {
   describe('statusForEndDate', () => {
     const today = '2026-10-15';
 
-    it('completes a run in progress or pending when an end date up to today is set', () => {
+    it('completes a run in progress when an end date up to today is set', () => {
       expect(statusForEndDate('EN_CURSO', '2026-10-01', today)).toBe('COMPLETADO');
-      expect(statusForEndDate('PENDIENTE', '2026-10-15', today)).toBe('COMPLETADO');
+      expect(statusForEndDate('EN_CURSO', '2026-10-15', today)).toBe('COMPLETADO');
     });
 
     it('does not complete a run for a future end date', () => {
       expect(statusForEndDate('EN_CURSO', '2026-10-16', today)).toBe('EN_CURSO');
-      expect(statusForEndDate('PENDIENTE', '2027-01-01', today)).toBe('PENDIENTE');
     });
 
     it('reopens a completed run when its end date is cleared', () => {
@@ -45,9 +44,9 @@ describe('run form logic', () => {
       expect(statusForEndDate('ABANDONADO', '', today)).toBe('ABANDONADO');
     });
 
-    it('leaves runs without an end date in progress or pending', () => {
+    it('leaves runs without an end date in progress', () => {
       expect(statusForEndDate('EN_CURSO', '', today)).toBe('EN_CURSO');
-      expect(statusForEndDate('PENDIENTE', null, today)).toBe('PENDIENTE');
+      expect(statusForEndDate('EN_CURSO', null, today)).toBe('EN_CURSO');
     });
   });
 
@@ -271,7 +270,7 @@ describe('run form logic', () => {
     });
 
     it('drops the postgame and its end date when the run is not completed', () => {
-      for (const status of ['EN_CURSO', 'ABANDONADO', 'PENDIENTE'] as const) {
+      for (const status of ['EN_CURSO', 'ABANDONADO'] as const) {
         expect(buildExperienceRequest({ ...value, status, postgame: true, postgameEndDate: '2025-06-01' })).toMatchObject({
           postgame: false,
           postgameEndDate: null,

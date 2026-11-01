@@ -38,6 +38,7 @@ import {
   parseCollapsedSections,
   serializeCollapsedSections,
   isOnlineOnly,
+  noRunsLabel,
   LibraryQuery,
   LibrarySort,
   LibraryStatusFilter,
@@ -165,6 +166,7 @@ export class Games {
 
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
   protected readonly isOnlineOnly = isOnlineOnly;
+  protected readonly noRunsLabel = noRunsLabel;
   protected readonly statusLine = libraryStatusLine;
   /** Fixed when the page loads: good enough for a "coming soon" badge. */
   private readonly today = todayIso();

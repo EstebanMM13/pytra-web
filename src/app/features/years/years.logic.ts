@@ -205,7 +205,6 @@ export const STATUS_TEXT: Record<ExperienceStatus, string> = {
   EN_CURSO: 'text-brand-lighter',
   COMPLETADO: 'text-success',
   ABANDONADO: 'text-danger',
-  PENDIENTE: 'text-neutral',
 };
 
 /** Compact whole hours under a month bar ("12h"): "" for empty months, "<1h" for a few minutes. */

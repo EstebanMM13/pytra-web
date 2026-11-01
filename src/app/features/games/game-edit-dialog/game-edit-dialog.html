@@ -138,6 +138,29 @@
       }
     </div>
 
+    <div class="flex flex-col gap-1.5">
+      <button
+        type="button"
+        role="switch"
+        [attr.aria-checked]="backlog()"
+        (click)="backlog.set(!backlog())"
+        class="flex items-center gap-3 text-left text-sm text-text-2"
+        data-backlog-switch
+      >
+        <span
+          class="relative inline-block h-[22px] w-[38px] shrink-0 rounded-full transition-colors"
+          [class]="backlog() ? 'bg-brand' : 'bg-border'"
+        >
+          <span
+            class="absolute top-[3px] left-[3px] size-4 rounded-full transition-transform"
+            [class]="backlog() ? 'translate-x-4 bg-white' : 'bg-muted'"
+          ></span>
+        </span>
+        <span>{{ 'game.form.backlog' | translate }}</span>
+      </button>
+      <p class="text-xs text-muted">{{ 'game.form.backlogHint' | translate }}</p>
+    </div>
+
     <div class="flex flex-col gap-2">
       <span id="game-edit-genres" class="text-[13px] text-text-3">{{ 'game.form.genres' | translate }}</span>
       <app-combobox

@@ -595,8 +595,7 @@
   "status": {
     "EN_CURSO": "En curso",
     "COMPLETADO": "Completado",
-    "ABANDONADO": "Abandonado",
-    "PENDIENTE": "Pendiente"
+    "ABANDONADO": "Abandonado"
   },
   "common": {
     "collapseSection": "Contraer {{name}}",
@@ -809,6 +808,8 @@
       "genres": "Géneros",
       "coverUrl": "URL de portada",
       "coverUrlHint": "Opcional. Enlace https a una imagen; se recomienda carátula vertical (2:3).",
+      "backlog": "Pendiente",
+      "backlogHint": "Lo quieres jugar pero aún no lo has empezado. Al añadir una partida deja de estar pendiente.",
       "coverUrlInvalid": "Introduce una URL https válida.",
       "coverPreview": "Vista previa de la portada",
       "sagaPlaceholder": "Buscar saga…",
@@ -1015,6 +1016,7 @@
     "platinum": "Platino",
     "online": "Online",
     "noRuns": "Sin partidas",
+    "backlog": "Pendiente",
     "section": {
       "dated": "Con fechas",
       "undated": "Sin fechas",

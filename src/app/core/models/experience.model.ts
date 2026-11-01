@@ -1,6 +1,7 @@
 import { LegacyPlatformCode } from './platform.model';
 
-export type ExperienceStatus = 'EN_CURSO' | 'COMPLETADO' | 'ABANDONADO' | 'PENDIENTE';
+/** Run status. "Pendiente" is not a run status: it is the game's backlog flag (`Game.backlog`). */
+export type ExperienceStatus = 'EN_CURSO' | 'COMPLETADO' | 'ABANDONADO';
 
 export interface Experience {
   id: number;

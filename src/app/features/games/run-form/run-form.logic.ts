@@ -8,7 +8,8 @@ import { RatingScale, fromRatingScale, isValidTypedRating } from '../../../share
 
 /** Pure helpers behind the run form: validation, defaults and request building. */
 
-export const RUN_STATUSES: readonly ExperienceStatus[] = ['EN_CURSO', 'COMPLETADO', 'ABANDONADO', 'PENDIENTE'];
+/** "Pendiente" is not a run status: it is the game's backlog flag, set in the game dialog. */
+export const RUN_STATUSES: readonly ExperienceStatus[] = ['EN_CURSO', 'COMPLETADO', 'ABANDONADO'];
 
 /** Default label for a new run of a game that already has `existingRuns` runs. */
 export function nextRunLabel(existingRuns: number): string {
@@ -66,7 +67,7 @@ export const dateRangeValidator: ValidatorFn = (group: AbstractControl): Validat
 };
 
 /**
- * Status after the user edits the end date: a date up to `today` on a run in progress or pending
+ * Status after the user edits the end date: a date up to `today` on a run in progress
  * finishes it (COMPLETADO); clearing the date of a completed run reopens it (EN_CURSO). A future end
  * date changes nothing, ABANDONADO is never changed, and any other combination keeps the status.
  * Dates are ISO `yyyy-mm-dd`, so they compare as text.
@@ -77,7 +78,7 @@ export function statusForEndDate(
   today: string,
 ): ExperienceStatus {
   if (endDate) {
-    return (status === 'EN_CURSO' || status === 'PENDIENTE') && endDate <= today ? 'COMPLETADO' : status;
+    return status === 'EN_CURSO' && endDate <= today ? 'COMPLETADO' : status;
   }
   return status === 'COMPLETADO' ? 'EN_CURSO' : status;
 }

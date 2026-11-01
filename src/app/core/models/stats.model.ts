@@ -69,8 +69,9 @@ export interface GameRankings {
   /** Games by distinct diary days, most first. */
   mostDaysPlayed: { gameId: number; gameName: string; days: number }[];
   /**
-   * Pending games as the library's Pendiente tab sees them (latest run pending, or a single player
-   * game without runs: `experienceId` null), oldest waiting first; `pendingSince` is a local ISO date-time.
+   * Pending games as the library's Pendiente tab sees them (in the backlog, or a single player game
+   * without runs), oldest waiting first; `pendingSince` (local ISO date-time) is when the game was added.
+   * `experienceId` and `runLabel` are always null since "Pendiente" moved from runs to the game.
    */
   longestPending: {
     gameId: number;
