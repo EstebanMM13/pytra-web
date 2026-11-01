@@ -134,7 +134,7 @@ export type BarOrientation = 'vertical' | 'horizontal';
           </div>
           <span
             class="shrink-0 whitespace-nowrap"
-            [class]="(bar.top ? 'text-text ' : 'text-muted ') +(dense() ? 'text-[10px]' : large() ? 'text-sm' : 'text-xs')"
+            [class]="(bar.top ? 'text-text ' : 'text-muted ') + (bar.top && large() ? 'font-semibold ' : '') + (dense() ? 'text-[10px]' : large() ? 'text-sm' : 'text-xs')"
           >
             {{ bar.label }}
           </span>
@@ -263,7 +263,7 @@ export class MiniBarChart {
   protected readonly hostClass = computed(() =>
     !this.vertical()
       ? 'flex flex-col gap-2.5'
-      : 'flex items-stretch ' + (this.dense() ? 'gap-[7px]' : this.large() ? 'gap-5' : 'gap-3.5'),
+      : 'flex items-stretch ' + (this.dense() ? 'gap-[7px]' : this.large() ? 'gap-2.5 md:gap-5' : 'gap-3.5'),
   );
 
   /** Plot height kept free for the labels above the bars (line plus gap), when any bar has one. */

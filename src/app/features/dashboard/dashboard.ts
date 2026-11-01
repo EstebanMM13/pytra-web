@@ -227,7 +227,7 @@ export class Dashboard {
           label: `'${String(y.year).slice(-2)}`,
           fullLabel: String(y.year),
           // Whole hours keep the per-year label on one line under narrow bars.
-          subLabel: `${Math.round(y.totalHours)}h`,
+          subLabel: `${Math.round(y.totalHours)} h`,
           title: `${y.year}: ${hours}`,
           hint: hours,
           link: `/years/${y.year}`,
