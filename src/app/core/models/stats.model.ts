@@ -58,6 +58,20 @@ export interface MostPlayedGame {
   totalHours: number;
 }
 
+/** Game rankings of the stats Games screen (`/stats/game-rankings`): CONFIRMED games, up to 50 rows each. */
+export interface GameRankings {
+  /** Games with 2+ runs that are not pending, most runs first. */
+  mostReplayed: { gameId: number; gameName: string; runCount: number; hours: number }[];
+  /** Single runs by their own hours, longest first. */
+  longestRuns: { experienceId: number; gameId: number; gameName: string; runLabel: string | null; hours: number }[];
+  /** Games rated 8+ with at most 15 total hours, best rating first. */
+  shortGems: { gameId: number; gameName: string; rating: number; hours: number }[];
+  /** Games by distinct diary days, most first. */
+  mostDaysPlayed: { gameId: number; gameName: string; days: number }[];
+  /** Games whose latest run is pending, oldest waiting first; `pendingSince` is a local ISO date-time. */
+  longestPending: { gameId: number; gameName: string; experienceId: number; runLabel: string | null; pendingSince: string }[];
+}
+
 /** A run with status EN_CURSO, from `/stats/in-progress` (most recently started first). */
 export interface InProgressExperience {
   experienceId: number;

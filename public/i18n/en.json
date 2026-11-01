@@ -1511,7 +1511,10 @@
       "erasHint": "{{hours}} · your most played decade",
       "genres": "Genres",
       "genresShort": "Genres",
-      "genresHint": "{{percent}} of your hours · your main genre"
+      "genresHint": "{{percent}} of your hours · your main genre",
+      "games": "Games",
+      "gamesHint": "{{runs}} · your most replayed game",
+      "gamesEmpty": "Full rankings of your library"
     },
     "activity": {
       "subtitle": "The days you played, from your diary.",
@@ -1643,6 +1646,29 @@
         "lead": "Your",
         "key": "ratings"
       }
+    },
+    "games": {
+      "subtitle": "Full rankings of your library.",
+      "heading": {
+        "lead": "Your",
+        "key": "games"
+      },
+      "mostPlayed": "Most played",
+      "single": "Single player",
+      "online": "Online",
+      "topRated": "Top rated",
+      "noRated": "You have not rated any game yet.",
+      "mostReplayed": "Most replayed",
+      "noReplays": "No game has two runs or more.",
+      "longestRuns": "Longest runs",
+      "shortGems": "Short gems",
+      "shortGemsHint": "Rated {{rating}} or more in {{hours}} or less",
+      "noGems": "No highly rated game with few hours.",
+      "mostDaysPlayed": "Most days played",
+      "noDiary": "Log days in the diary to see this ranking.",
+      "longestPending": "Longest pending",
+      "noPending": "You have no pending games.",
+      "since": "since {{date}}"
     },
     "showAll": "See all ({{total}})",
     "showLess": "Show less",

@@ -147,11 +147,24 @@ export class StatsHub {
   private readonly ratings = teaser(() => this.stats.getRatings());
   private readonly byGenre = teaser(() => this.stats.getByGenre());
   private readonly eras = teaser(() => this.stats.getByReleaseEra());
+  private readonly gameRankings = teaser(() => this.stats.getGameRankings());
   private readonly today = todayIso();
   private readonly library = statsLibrary();
 
   /** The library is still loading: the covers keep their room. */
   protected readonly coversPending = computed(() => this.library() === null);
+
+  /** The most replayed game (null when none has two runs or the request failed); `undefined` while loading. */
+  protected readonly replayTeaser = computed(() => {
+    const rankings = this.gameRankings();
+    return rankings === undefined ? undefined : (rankings?.mostReplayed[0] ?? null);
+  });
+
+  /** Covers of the most replayed games (from the cached library). */
+  protected readonly replayCovers = computed(() => {
+    const ids = new Set((this.gameRankings()?.mostReplayed ?? []).map((g) => g.gameId));
+    return withArt(topCovers(this.library() ?? [], (g) => ids.has(g.id), MAX_STACK_COVERS));
+  });
 
   /**
    * The hero's all-time summary: run plus online hours from the summary, so it matches the dashboard

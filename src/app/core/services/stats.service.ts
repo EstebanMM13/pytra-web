@@ -6,6 +6,7 @@ import {
   ActivityStats,
   CompletionStats,
   DeveloperStats,
+  GameRankings,
   GenreStat,
   InProgressExperience,
   MostPlayedGame,
@@ -31,6 +32,8 @@ type YearKey = number | 'all';
  */
 export const DEVELOPER_RANKING_LIMIT = 0;
 export const DEVELOPER_MIN_RATED_GAMES = 2;
+/** Rows of every full ranking of the stats Games screen (the API caps stats lists at 50). */
+export const STATS_RANKING_LIMIT = 50;
 
 @Injectable({ providedIn: 'root' })
 export class StatsService {
@@ -64,6 +67,9 @@ export class StatsService {
   );
   private readonly byGenre = this.cache.resource(() => this.http.get<GenreStat[]>(`${this.baseUrl}/by-genre`));
   private readonly playFacts = this.cache.resource(() => this.http.get<PlayFacts>(`${this.baseUrl}/play-facts`));
+  private readonly gameRankings = this.cache.resource(() =>
+    this.http.get<GameRankings>(`${this.baseUrl}/game-rankings`, { params: { limit: STATS_RANKING_LIMIT } }),
+  );
 
   /** Cached (see `UserDataCache`): may emit the cached summary, then a fresher one. */
   getSummary(): Observable<StatsSummary> {
@@ -174,6 +180,11 @@ export class StatsService {
   /** Rating distribution of a year (null: all time). Cached per year. */
   getRatings(year: number | null = null): Observable<RatingStats> {
     return this.perYear(this.ratings, year, 'ratings').get();
+  }
+
+  /** Replays, longest runs, short gems, diary days and pending games (all time). Cached: the hub and the Games section share it. */
+  getGameRankings(): Observable<GameRankings> {
+    return this.gameRankings.get();
   }
 
   /** Every run's year, platform, hours and days to finish, for the library's run filters. Cached. */

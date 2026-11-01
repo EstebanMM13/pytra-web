@@ -72,6 +72,14 @@ describe('Stats hub', () => {
                 byYear: [],
                 undatedGameCount: 0,
               }),
+            getGameRankings: () =>
+              of({
+                mostReplayed: [{ gameId: 1, gameName: 'Elden Ring', runCount: 3, hours: 200 }],
+                longestRuns: [],
+                shortGems: [],
+                mostDaysPlayed: [],
+                longestPending: [],
+              }),
             getRatings: () =>
               of({ mean: 7.94, ratedCount: 40, histogram: [{ from: 7, to: 7.5, count: 30 }, { from: 9, to: 9.5, count: 10 }] }),
             ...overrides,
@@ -91,6 +99,7 @@ describe('Stats hub', () => {
     const el = setup();
     const links = [...el.querySelectorAll('[data-hub-card]')].map((a) => a.getAttribute('href'));
     expect(links).toEqual([
+      '/stats/games',
       '/stats/activity',
       '/stats/genres',
       '/years',
@@ -107,6 +116,7 @@ describe('Stats hub', () => {
     const el = setup();
     const figures = [...el.querySelectorAll('[data-hub-figure]')].map((f) => f.textContent!.trim());
     expect(figures).toEqual([
+      'Elden Ring',
       'stats.days',
       'RPG',
       '12,5 h',
@@ -121,7 +131,7 @@ describe('Stats hub', () => {
 
   it('draws a small visual of the same data on every card', () => {
     const el = setup();
-    expect(el.querySelectorAll('[data-hub-visual]')).toHaveLength(9);
+    expect(el.querySelectorAll('[data-hub-visual]')).toHaveLength(10);
     // Activity: fixed cells (the card clips the oldest); platforms: one slice each; ratings: 11 whole points.
     expect(visual(el, '/stats/activity').querySelectorAll('[data-hub-day]')).toHaveLength(70);
     expect(visual(el, '/years').querySelectorAll('[data-hub-column]').length).toBeGreaterThan(0);
@@ -143,6 +153,19 @@ describe('Stats hub', () => {
     // The most played saga's progress beside its covers: 1 of its 1 game played.
     expect(visual(el, '/sagas').querySelector('[data-hub-saga-played]')!.textContent).toBe('1/1');
     expect(visual(el, '/stats/studios').querySelectorAll('app-game-cover')).toHaveLength(1);
+    // The most replayed games' covers on the Games card.
+    expect(visual(el, '/stats/games').querySelectorAll('app-game-cover')).toHaveLength(1);
+  });
+
+  it('leads with the Games card: the most replayed game, or an invitation when none is replayed', () => {
+    let el = setup();
+    expect(figure(el, '/stats/games')).toBe('Elden Ring');
+    TestBed.resetTestingModule();
+    el = setup({
+      getGameRankings: () => of({ mostReplayed: [], longestRuns: [], shortGems: [], mostDaysPlayed: [], longestPending: [] }),
+    });
+    expect(figure(el, '/stats/games')).toBe('—');
+    expect(el.querySelector('[data-hub-card][href="/stats/games"]')!.textContent).toContain('stats.hub.gamesEmpty');
   });
 
   for (const [name, findAll] of [

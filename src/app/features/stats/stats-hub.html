@@ -38,11 +38,28 @@
   }
 
   <!--
-    Two columns up to lg, four from lg; Activity, Genres and Ratings span two, so every row is full:
-    phones and tablets: Activity / Genres / Years Sagas / Platforms Studios / Eras Habits / Ratings;
-    desktop: Activity Genres / Years Sagas Platforms Studios / Eras Habits Ratings.
+    Two columns up to lg, four from lg; Games, Activity, Genres and Ratings span two (Games four
+    from lg), so every row is full:
+    phones and tablets: Games / Activity / Genres / Years Sagas / Platforms Studios / Eras Habits / Ratings;
+    desktop: Games / Activity Genres / Years Sagas Platforms Studios / Eras Habits Ratings.
   -->
   <nav class="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-4" [attr.aria-label]="'stats.hub.sectionsLabel' | translate">
+    @let replayed = replayTeaser();
+    <app-stats-hub-card
+      class="col-span-2 lg:col-span-4"
+      link="/stats/games"
+      [icon]="icons.gamepad2"
+      [title]="'stats.hub.games' | translate"
+      [loading]="replayed === undefined"
+      [figure]="replayed ? replayed.gameName : null"
+      [hint]="replayed ? ('stats.hub.gamesHint' | translate: { runs: ('stats.runs' | translatePlural: replayed.runCount) }) : ('stats.hub.gamesEmpty' | translate)"
+      data-hub-games
+    >
+      @if (replayCovers().length) {
+        <app-stats-cover-stack size="sm" compactSize="xs" compactBelow="md" [covers]="replayCovers()" />
+      }
+    </app-stats-hub-card>
+
     @let a = activity();
     <app-stats-hub-card
       class="col-span-2"

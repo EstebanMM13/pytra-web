@@ -1511,7 +1511,10 @@
       "erasHint": "{{hours}} · tu década más jugada",
       "genres": "Géneros",
       "genresShort": "Géneros",
-      "genresHint": "{{percent}} de tus horas · tu género principal"
+      "genresHint": "{{percent}} de tus horas · tu género principal",
+      "games": "Juegos",
+      "gamesHint": "{{runs}} · tu juego más rejugado",
+      "gamesEmpty": "Rankings completos de tu biblioteca"
     },
     "activity": {
       "subtitle": "Los días que has jugado, según tu diario.",
@@ -1643,6 +1646,29 @@
         "lead": "Tus",
         "key": "notas"
       }
+    },
+    "games": {
+      "subtitle": "Rankings completos de tu biblioteca.",
+      "heading": {
+        "lead": "Tus",
+        "key": "juegos"
+      },
+      "mostPlayed": "Más jugados",
+      "single": "Un jugador",
+      "online": "Online",
+      "topRated": "Mejor valorados",
+      "noRated": "Aún no has valorado ningún juego.",
+      "mostReplayed": "Más rejugados",
+      "noReplays": "Ningún juego tiene dos partidas o más.",
+      "longestRuns": "Partidas más largas",
+      "shortGems": "Joyas cortas",
+      "shortGemsHint": "Nota {{rating}} o más en {{hours}} o menos",
+      "noGems": "Ningún juego con nota alta y pocas horas.",
+      "mostDaysPlayed": "Más días jugados",
+      "noDiary": "Apunta días en el diario para ver este ranking.",
+      "longestPending": "Más tiempo en pendientes",
+      "noPending": "No tienes juegos pendientes.",
+      "since": "desde {{date}}"
     },
     "showAll": "Ver todos ({{total}})",
     "showLess": "Ver menos",
