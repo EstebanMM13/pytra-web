@@ -99,8 +99,8 @@ describe('Stats hub', () => {
     const el = setup();
     const links = [...el.querySelectorAll('[data-hub-card]')].map((a) => a.getAttribute('href'));
     expect(links).toEqual([
-      '/stats/games',
       '/stats/activity',
+      '/stats/games',
       '/stats/genres',
       '/years',
       '/sagas',
@@ -116,8 +116,8 @@ describe('Stats hub', () => {
     const el = setup();
     const figures = [...el.querySelectorAll('[data-hub-figure]')].map((f) => f.textContent!.trim());
     expect(figures).toEqual([
-      'Elden Ring',
       'stats.days',
+      'Elden Ring',
       'RPG',
       '12 h 30 min',
       'stats.hub.sagasFigure',
