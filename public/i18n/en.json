@@ -408,17 +408,18 @@
     "syncing": "Syncing…",
     "synced": "Synced. Days with new play time: {{count}}",
     "appsTitle": "Installed apps",
-    "appsHint": "Link each phone game to a game in your library. Hours go to your run in progress on Mobile (or to the online time on Mobile) from the day you link it, and are logged in the diary.",
+    "appsHint": "Link each phone game to a game in your library. Syncing imports the last 7 days the phone keeps: hours go to your run in progress on Mobile (or to the online time on Mobile) and are logged in the diary.",
     "showAllApps": "Show all apps",
     "noApps": "No games installed. Turn on \"Show all apps\" if your game is missing.",
     "notLinked": "Not linked",
-    "gameFor": "Game for {{app}}",
+    "searchGame": "Search game…",
     "errors": {
       "load": "Could not load the linked apps.",
       "link": "Could not save the link.",
       "gameTaken": "That game is already linked to another app.",
       "sync": "Could not sync the Android play time."
-    }
+    },
+    "weekUsage": "On the phone, last 7 days: {{hours}}"
   },
   "steam": {
     "title": "Steam",

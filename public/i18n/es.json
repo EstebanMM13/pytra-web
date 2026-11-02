@@ -410,17 +410,18 @@
     "syncing": "Sincronizando…",
     "synced": "Sincronizado. Días con tiempo nuevo: {{count}}",
     "appsTitle": "Apps instaladas",
-    "appsHint": "Vincula cada juego del móvil con un juego de tu biblioteca. Las horas se suman a tu partida en curso en Móvil (o al tiempo online en Móvil) desde el día en que lo vinculas, y se apuntan en el diario.",
+    "appsHint": "Vincula cada juego del móvil con un juego de tu biblioteca. Al sincronizar se importan los últimos 7 días que guarda el móvil: las horas se suman a tu partida en curso en Móvil (o al tiempo online en Móvil) y se apuntan en el diario.",
     "showAllApps": "Mostrar todas las apps",
     "noApps": "No hay juegos instalados. Activa «Mostrar todas las apps» si tu juego no aparece.",
     "notLinked": "Sin vincular",
-    "gameFor": "Juego de {{app}}",
+    "searchGame": "Buscar juego…",
     "errors": {
       "load": "No se pudieron cargar las apps vinculadas.",
       "link": "No se pudo guardar el vínculo.",
       "gameTaken": "Ese juego ya está vinculado a otra app.",
       "sync": "No se pudo sincronizar el tiempo de juego de Android."
-    }
+    },
+    "weekUsage": "En el móvil, últimos 7 días: {{hours}}"
   },
   "steam": {
     "title": "Steam",

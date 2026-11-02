@@ -4,11 +4,13 @@ import { LucideDynamicIcon } from '@lucide/angular';
 import { firstValueFrom } from 'rxjs';
 import { Game } from '../../../core/models/game.model';
 import { AndroidUsageService } from '../../../core/services/android-usage.service';
-import { AndroidUsageSyncService } from '../../../core/services/android-usage-sync.service';
+import { AndroidUsageSyncService, syncWindow } from '../../../core/services/android-usage-sync.service';
 import { DemoModeService } from '../../../core/services/demo-mode.service';
 import { GameService } from '../../../core/services/game.service';
-import { LaunchableApp, UsageStatsService } from '../../../core/services/usage-stats.service';
+import { LaunchableApp, USAGE_TIME_ZONE, UsageStatsService } from '../../../core/services/usage-stats.service';
+import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 import { ICONS } from '../../../shared/ui/icons';
+import { Combobox, ComboboxOption } from '../../../shared/ui/combobox';
 import { PlatformCard } from '../../../shared/ui/platform-card';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { ToastService } from '../../../shared/toast/toast.service';
@@ -33,7 +35,7 @@ export function visibleApps(apps: LaunchableApp[], links: Map<string, number>, s
  */
 @Component({
   selector: 'app-android-panel',
-  imports: [TranslatePipe, LucideDynamicIcon, PlatformCard],
+  imports: [TranslatePipe, LucideDynamicIcon, PlatformCard, Combobox, HoursPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './android-panel.html',
   host: { class: 'contents' },
@@ -59,9 +61,14 @@ export class AndroidPanel {
   /** Packages with a link change in flight. */
   readonly busy = signal<ReadonlySet<string>>(new Set());
   readonly errorKey = signal<string | null>(null);
+  /** Foreground minutes the phone reports per linked package over the last 7 days (what a sync sends). */
+  readonly weekMinutes = signal<ReadonlyMap<string, number>>(new Map());
 
   readonly rows = computed(() => visibleApps(this.apps(), this.links(), this.showAll()));
-  readonly sortedGames = computed(() => [...this.games()].sort((a, b) => a.name.localeCompare(b.name)));
+  /** Library games for the picker, by name. */
+  readonly gameOptions = computed<ComboboxOption[]>(() =>
+    [...this.games()].sort((a, b) => a.name.localeCompare(b.name)).map((game) => ({ id: game.id, label: game.name })),
+  );
   readonly linkedCount = computed(() => this.links().size);
   private readonly locale = computed(() => (this.translate.currentLang() === 'en' ? 'en-US' : 'es-ES'));
   /** "hace 5 minutos" / "5 minutes ago"; null before the first sync. */
@@ -73,7 +80,9 @@ export class AndroidPanel {
     void this.load();
     // Back from the usage access settings (or any return to the app): the permission may have changed.
     effect(() => {
-      if (this.syncService.resumed() > 0) untracked(() => void this.refreshPermission());
+      if (this.syncService.resumed() > 0) {
+        untracked(() => void this.refreshPermission().then(() => this.loadUsage()));
+      }
     });
   }
 
@@ -92,6 +101,7 @@ export class AndroidPanel {
     } catch {
       this.errorKey.set('androidUsage.errors.load');
     }
+    void this.loadUsage();
     this.gameService.findAll().subscribe({ next: (games) => this.games.set(games) });
   }
 
@@ -99,14 +109,31 @@ export class AndroidPanel {
     this.hasPermission.set(await this.usageStats.hasPermission());
   }
 
+  /** Reads the last 7 days of the linked packages from the phone. Never throws (it is only shown). */
+  async loadUsage(): Promise<void> {
+    const packages = [...this.links().keys()];
+    if (!this.hasPermission() || packages.length === 0) {
+      this.weekMinutes.set(new Map());
+      return;
+    }
+    try {
+      const { from, to } = syncWindow(new Date(), USAGE_TIME_ZONE);
+      const days = await this.usageStats.getDailyUsage(from, to, packages);
+      const totals = new Map<string, number>();
+      for (const day of days) totals.set(day.packageName, (totals.get(day.packageName) ?? 0) + day.minutes);
+      this.weekMinutes.set(totals);
+    } catch {
+      this.weekMinutes.set(new Map());
+    }
+  }
+
   async grantPermission(): Promise<void> {
     await this.usageStats.openPermissionSettings();
   }
 
-  /** Links `packageName` to `gameId` ('' unlinks), replacing its previous game. */
-  async changeLink(packageName: string, value: string): Promise<void> {
+  /** Links `packageName` to `gameId` (null unlinks), replacing its previous game. */
+  async changeLink(packageName: string, gameId: number | null): Promise<void> {
     if (this.demoMode.blockWrite()) return;
-    const gameId = value ? Number(value) : null;
     const current = this.links().get(packageName) ?? null;
     if (gameId === current) return;
     this.errorKey.set(null);
@@ -119,6 +146,7 @@ export class AndroidPanel {
       if (gameId !== null) {
         await firstValueFrom(this.api.link(packageName, gameId));
         this.updateLinks((links) => links.set(packageName, gameId));
+        void this.loadUsage();
       }
     } catch (error: unknown) {
       const status = (error as { status?: number } | null)?.status;

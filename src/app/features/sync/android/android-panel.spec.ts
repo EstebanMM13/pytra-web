@@ -40,6 +40,12 @@ describe('AndroidPanel', () => {
       hasPermission: vi.fn(() => Promise.resolve(options.permission ?? true)),
       openPermissionSettings: vi.fn(() => Promise.resolve()),
       listLaunchableApps: vi.fn(() => Promise.resolve([GAME_APP, CHAT_APP])),
+      getDailyUsage: vi.fn(() =>
+        Promise.resolve([
+          { date: '2026-11-01', packageName: 'com.example.game', minutes: 90 },
+          { date: '2026-11-02', packageName: 'com.example.game', minutes: 30 },
+        ]),
+      ),
     };
     const api = {
       getLinks: vi.fn(() => of([{ packageName: 'com.example.game', gameId: 1 }])),
@@ -100,23 +106,35 @@ describe('AndroidPanel', () => {
 
     const rows = fixture.nativeElement.querySelectorAll('[data-app]');
     expect(rows).toHaveLength(1);
-    expect((rows[0].querySelector('select') as HTMLSelectElement).value).toBe('1');
+    // The picker shows the linked game's name.
+    expect((rows[0].querySelector('input') as HTMLInputElement).value).toBe('Zeta');
 
     await panel.syncNow();
     expect(syncService.syncNow).toHaveBeenCalled();
     expect(toast.success).toHaveBeenCalled();
   });
 
+  it('shows the minutes the phone reports for each linked app over the last 7 days', async () => {
+    const { fixture, panel, usageStats } = setup();
+    await render(fixture);
+    await panel.loadUsage();
+    fixture.detectChanges();
+
+    expect(usageStats.getDailyUsage).toHaveBeenCalledWith(expect.any(String), expect.any(String), ['com.example.game']);
+    expect(panel.weekMinutes().get('com.example.game')).toBe(120);
+    expect(fixture.nativeElement.querySelector('[data-week-usage]')).not.toBeNull();
+  });
+
   it('moves a link to another game and unlinks with the empty choice', async () => {
     const { fixture, panel, api } = setup();
     await render(fixture);
 
-    await panel.changeLink('com.example.game', '2');
+    await panel.changeLink('com.example.game', 2);
     expect(api.unlink).toHaveBeenCalledWith('com.example.game');
     expect(api.link).toHaveBeenCalledWith('com.example.game', 2);
     expect(panel.links().get('com.example.game')).toBe(2);
 
-    await panel.changeLink('com.example.game', '');
+    await panel.changeLink('com.example.game', null);
     expect(panel.links().has('com.example.game')).toBe(false);
   });
 
@@ -125,7 +143,7 @@ describe('AndroidPanel', () => {
     await render(fixture);
     api.link.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
 
-    await panel.changeLink('com.example.chat', '1');
+    await panel.changeLink('com.example.chat', 1);
 
     expect(panel.errorKey()).toBe('androidUsage.errors.gameTaken');
     expect(panel.links()).toEqual(new Map([['com.example.game', 1]]));

@@ -70,20 +70,26 @@
         @for (row of rows(); track row.packageName) {
           <li class="flex flex-col gap-2 py-2.5 md:flex-row md:items-center md:gap-4" [attr.data-app]="row.packageName">
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-medium">{{ row.label }}</p>
+              <p class="truncate text-sm font-medium" [id]="'android-app-' + row.packageName">{{ row.label }}</p>
               <p class="truncate font-mono text-[11px] text-faint">{{ row.packageName }}</p>
-            </div>
-            <select
-              class="w-full rounded-lg border border-border bg-bg px-2.5 py-2 text-[13px] md:w-64"
-              [attr.aria-label]="'androidUsage.gameFor' | translate: { app: row.label }"
-              [disabled]="isBusy(row.packageName)"
-              (change)="changeLink(row.packageName, $any($event.target).value)"
-            >
-              <option value="" [selected]="row.gameId === null">{{ 'androidUsage.notLinked' | translate }}</option>
-              @for (game of sortedGames(); track game.id) {
-                <option [value]="game.id" [selected]="game.id === row.gameId">{{ game.name }}</option>
+              @if (row.gameId !== null && hasPermission()) {
+                <p class="mt-0.5 text-xs text-muted" data-week-usage>
+                  {{ 'androidUsage.weekUsage' | translate: { hours: ((weekMinutes().get(row.packageName) ?? 0) / 60 | hours) } }}
+                </p>
               }
-            </select>
+            </div>
+            <!-- Searchable game picker (accent-insensitive), like the game form's saga field. -->
+            <app-combobox
+              class="w-full md:w-72"
+              [labelledBy]="'android-app-' + row.packageName"
+              [options]="gameOptions()"
+              [selected]="row.gameId === null ? [] : [row.gameId]"
+              (selectedChange)="changeLink(row.packageName, $event[0] ?? null)"
+              [busy]="isBusy(row.packageName)"
+              [limit]="30"
+              placeholder="androidUsage.searchGame"
+              noneLabel="androidUsage.notLinked"
+            />
           </li>
         }
       </ul>
