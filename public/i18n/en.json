@@ -417,9 +417,14 @@
       "load": "Could not load the linked apps.",
       "link": "Could not save the link.",
       "gameTaken": "That game is already linked to another app.",
-      "sync": "Could not sync the Android play time."
+      "sync": "Could not sync the Android play time.",
+      "reset": "Could not redo the import."
     },
-    "weekUsage": "On the phone, last 7 days: {{hours}}"
+    "weekUsage": "On the phone, last 7 days: {{hours}}",
+    "reset": "Redo the import",
+    "resetting": "Redoing…",
+    "resetConfirm": "Every hour and diary line Android added will be taken back and the last 7 days imported again with the current calculation. Your runs and the diary lines you wrote stay as they are.",
+    "resetDone": "Import redone. Days imported: {{count}}"
   },
   "steam": {
     "title": "Steam",

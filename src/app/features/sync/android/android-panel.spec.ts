@@ -51,6 +51,7 @@ describe('AndroidPanel', () => {
       getLinks: vi.fn(() => of([{ packageName: 'com.example.game', gameId: 1 }])),
       link: vi.fn((packageName: string, gameId: number) => of({ packageName, gameId })),
       unlink: vi.fn(() => of(undefined)),
+      reset: vi.fn(() => of({ links: 1, minutesRemoved: 1440 })),
     };
     const syncService = {
       lastSyncAt: signal<Date | null>(null),
@@ -123,6 +124,23 @@ describe('AndroidPanel', () => {
     expect(usageStats.getDailyUsage).toHaveBeenCalledWith(expect.any(String), expect.any(String), ['com.example.game']);
     expect(panel.weekMinutes().get('com.example.game')).toBe(120);
     expect(fixture.nativeElement.querySelector('[data-week-usage]')).not.toBeNull();
+  });
+
+  it('redoes the import after a confirmation: reset, then a fresh sync', async () => {
+    const { fixture, panel, api, syncService, toast } = setup();
+    await render(fixture);
+
+    (fixture.nativeElement.querySelector('[data-reset]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(api.reset).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('[data-reset-confirm]')).not.toBeNull();
+
+    await panel.resetAndResync();
+
+    expect(api.reset).toHaveBeenCalled();
+    expect(syncService.syncNow).toHaveBeenCalled();
+    expect(toast.success).toHaveBeenCalled();
+    expect(panel.resetting()).toBe(false);
   });
 
   it('moves a link to another game and unlinks with the empty choice', async () => {

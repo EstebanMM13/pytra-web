@@ -61,6 +61,8 @@ export class AndroidPanel {
   /** Packages with a link change in flight. */
   readonly busy = signal<ReadonlySet<string>>(new Set());
   readonly errorKey = signal<string | null>(null);
+  readonly confirmingReset = signal(false);
+  readonly resetting = signal(false);
   /** Foreground minutes the phone reports per linked package over the last 7 days (what a sync sends). */
   readonly weekMinutes = signal<ReadonlyMap<string, number>>(new Map());
 
@@ -169,6 +171,23 @@ export class AndroidPanel {
       }
     } catch {
       this.errorKey.set('androidUsage.errors.sync');
+    }
+  }
+
+  /** Takes back everything Android added, then syncs again from scratch. */
+  async resetAndResync(): Promise<void> {
+    if (this.demoMode.blockWrite()) return;
+    this.confirmingReset.set(false);
+    this.errorKey.set(null);
+    this.resetting.set(true);
+    try {
+      await firstValueFrom(this.api.reset());
+      const result = await this.syncService.syncNow();
+      this.toast.success(this.translate.instant('androidUsage.resetDone', { count: result?.recorded ?? 0 }));
+    } catch {
+      this.errorKey.set('androidUsage.errors.reset');
+    } finally {
+      this.resetting.set(false);
     }
   }
 

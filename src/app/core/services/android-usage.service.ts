@@ -17,6 +17,12 @@ export interface AndroidUsageSyncResult {
   ignored: number;
 }
 
+/** Outcome of a reset: links restarted and minutes taken back from the games. */
+export interface AndroidUsageResetResult {
+  links: number;
+  minutesRemoved: number;
+}
+
 /** Android play time sync API: app links and the daily usage upload. */
 @Injectable({ providedIn: 'root' })
 export class AndroidUsageService {
@@ -34,6 +40,13 @@ export class AndroidUsageService {
 
   unlink(packageName: string): Observable<void> {
     return this.http.delete<void>(`${this.linksUrl}/${encodeURIComponent(packageName)}`);
+  }
+
+  /** Takes back every hour and diary minute Android added; the next sync imports the days again. */
+  reset(): Observable<AndroidUsageResetResult> {
+    return this.http
+      .post<AndroidUsageResetResult>(`${API_BASE_URL}/android-usage/reset`, {})
+      .pipe(this.cache.invalidateOnWrite());
   }
 
   /** Uploads the daily totals; new play changes runs, online hours and the diary, so caches are dropped. */

@@ -419,9 +419,14 @@
       "load": "No se pudieron cargar las apps vinculadas.",
       "link": "No se pudo guardar el vínculo.",
       "gameTaken": "Ese juego ya está vinculado a otra app.",
-      "sync": "No se pudo sincronizar el tiempo de juego de Android."
+      "sync": "No se pudo sincronizar el tiempo de juego de Android.",
+      "reset": "No se pudo rehacer la importación."
     },
-    "weekUsage": "En el móvil, últimos 7 días: {{hours}}"
+    "weekUsage": "En el móvil, últimos 7 días: {{hours}}",
+    "reset": "Rehacer la importación",
+    "resetting": "Rehaciendo…",
+    "resetConfirm": "Se quitarán todas las horas y líneas del diario que haya sumado Android y se volverán a importar los últimos 7 días con el cálculo actual. Tus partidas y líneas escritas a mano no se tocan.",
+    "resetDone": "Importación rehecha. Días importados: {{count}}"
   },
   "steam": {
     "title": "Steam",
