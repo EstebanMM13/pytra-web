@@ -40,6 +40,15 @@ public class UsageStatsPlugin extends Plugin {
     /** Events of an app already in the foreground at the range start are looked for this far back. */
     private static final long LOOKBACK_MS = 24L * 60 * 60 * 1000;
 
+    // UsageEvents.Event types, as raw values: the same on every API level (newer types are simply never
+    // reported by older systems). ACTIVITY_RESUMED/PAUSED were MOVE_TO_FOREGROUND/BACKGROUND before Android 10.
+    private static final int EVENT_RESUMED = 1;
+    private static final int EVENT_PAUSED = 2;
+    private static final int EVENT_SCREEN_OFF = 16; // SCREEN_NON_INTERACTIVE
+    private static final int EVENT_KEYGUARD_SHOWN = 17;
+    private static final int EVENT_STOPPED = 23; // ACTIVITY_STOPPED
+    private static final int EVENT_DEVICE_SHUTDOWN = 26;
+
     /** Whether Pytra has "Usage access". */
     @PluginMethod
     public void hasPermission(PluginCall call) {
@@ -125,11 +134,22 @@ public class UsageStatsPlugin extends Plugin {
             UsageEvents.Event event = new UsageEvents.Event();
             while (events != null && events.hasNextEvent()) {
                 events.getNextEvent(event);
-                int type = event.getEventType();
-                if (type == foregroundEvent()) {
-                    calculator.onEvent(event.getPackageName(), true, event.getTimeStamp());
-                } else if (type == backgroundEvent()) {
-                    calculator.onEvent(event.getPackageName(), false, event.getTimeStamp());
+                // Every app's events: another app taking the screen ends the current session.
+                switch (event.getEventType()) {
+                    case EVENT_RESUMED:
+                        calculator.onResumed(event.getPackageName(), event.getTimeStamp());
+                        break;
+                    case EVENT_PAUSED:
+                    case EVENT_STOPPED:
+                        calculator.onPaused(event.getPackageName(), event.getTimeStamp());
+                        break;
+                    case EVENT_SCREEN_OFF:
+                    case EVENT_KEYGUARD_SHOWN:
+                    case EVENT_DEVICE_SHUTDOWN:
+                        calculator.onScreenGone(event.getTimeStamp());
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -166,19 +186,6 @@ public class UsageStatsPlugin extends Plugin {
         return (application.flags & ApplicationInfo.FLAG_IS_GAME) != 0;
     }
 
-    @SuppressWarnings("deprecation")
-    private static int foregroundEvent() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-            ? UsageEvents.Event.ACTIVITY_RESUMED
-            : UsageEvents.Event.MOVE_TO_FOREGROUND;
-    }
-
-    @SuppressWarnings("deprecation")
-    private static int backgroundEvent() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-            ? UsageEvents.Event.ACTIVITY_PAUSED
-            : UsageEvents.Event.MOVE_TO_BACKGROUND;
-    }
 
     /** yyyy-MM-dd of the day after {@code date} (calendar arithmetic, no time zone involved). */
     private static String nextDay(String date) {
