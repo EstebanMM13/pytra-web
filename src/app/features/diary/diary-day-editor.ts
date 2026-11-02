@@ -329,17 +329,19 @@ type PlatformOptions = PlatformRef[] | 'loading';
                     <p class="text-xs text-danger">{{ 'diary.editor.hoursError' | translate }}</p>
                   }
                 </div>
-                <input
-                  type="text"
+                <!-- A comment like the day note: starts at two lines, the user drags its height. -->
+                <textarea
+                  rows="2"
                   maxlength="500"
-                  class="rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
+                  data-game-note
+                  class="min-h-[2.75rem] resize-y rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text"
                   [placeholder]="'diary.editor.gameNote' | translate"
                   [attr.aria-label]="
                     'diary.editor.gameNoteLabel' | translate: { name: game.gameName }
                   "
                   [value]="game.note"
                   (input)="setNote(i, $any($event.target).value)"
-                />
+                ></textarea>
               </div>
             } @empty {
               <p
@@ -360,6 +362,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
             <span class="text-muted">{{ 'diary.editor.dayNote' | translate }}</span>
             <textarea
               rows="3"
+              data-day-note
               maxlength="1000"
               class="rounded-lg border border-border bg-bg px-3 py-2 text-[15px] text-text"
               [placeholder]="'diary.editor.dayNotePlaceholder' | translate"

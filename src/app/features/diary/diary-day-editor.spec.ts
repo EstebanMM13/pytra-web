@@ -213,7 +213,7 @@ describe('DiaryDayEditor', () => {
 
   it('loads a saved day and keeps it when saved again', () => {
     const { diary, root } = setup({ day: savedDay() });
-    expect(root().querySelector<HTMLTextAreaElement>('textarea')!.value).toBe('Late night');
+    expect(root().querySelector<HTMLTextAreaElement>('[data-day-note]')!.value).toBe('Late night');
     expect(root().querySelector('[data-delete-day]')).not.toBeNull();
 
     save(root());
@@ -221,6 +221,28 @@ describe('DiaryDayEditor', () => {
     expect(diary.saveDay).toHaveBeenCalledWith(DATE, {
       note: 'Late night',
       games: [{ gameId: 2, hours: 2, note: null }],
+    });
+  });
+
+  it('takes each game note in a vertically resizable comment box and saves it', () => {
+    const { fixture, diary, root } = setup();
+    root().querySelector<HTMLButtonElement>('[data-playing-chips] button')!.click();
+    fixture.detectChanges();
+    const note = root().querySelector<HTMLTextAreaElement>('[data-diary-row] textarea[data-game-note]')!;
+    expect(note.classList).toContain('resize-y');
+    note.value = 'Boss final\npor fin';
+    note.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    const [hours] = [...root().querySelectorAll<HTMLInputElement>('[data-diary-row] app-hours-input input')];
+    hours.value = '1';
+    hours.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    save(root());
+
+    expect(diary.saveDay).toHaveBeenCalledWith(DATE, {
+      note: null,
+      games: [{ gameId: 1, hours: 1, note: 'Boss final\npor fin' }],
     });
   });
 
