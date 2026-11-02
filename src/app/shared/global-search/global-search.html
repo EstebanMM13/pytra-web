@@ -61,16 +61,16 @@
                 @case ('game') {
                   @let game = entry.item.game;
                   <app-game-cover decorative size="xs" [url]="game.coverImageUrl" [name]="game.name" />
-                  <span class="min-w-0 flex-1 truncate" [class]="active ? 'text-brand-lighter' : 'text-text-2'" [title]="game.name">
+                  <span class="min-w-0 flex-1 wrap-break-word" [class]="active ? 'text-brand-lighter' : 'text-text-2'" [title]="game.name">
                     {{ game.name }}
                   </span>
                   @let year = releaseYear(game);
                   @if (entry.item.match; as match) {
-                    <span class="max-w-[45%] shrink-0 truncate text-xs text-faint" [title]="match.value">
+                    <span class="max-w-[45%] shrink-0 wrap-break-word text-xs text-faint" [title]="match.value">
                       {{ (match.field === 'developer' ? 'search.matchedDeveloper' : 'search.matchedPublisher') | translate: { name: match.value } }}
                     </span>
                   } @else if (year || game.platforms?.length) {
-                    <span class="max-w-[45%] shrink-0 truncate text-xs text-faint">
+                    <span class="max-w-[45%] shrink-0 wrap-break-word text-xs text-faint">
                       @if (year) {
                         <span class="tabular-nums">{{ year }}</span>
                       }
@@ -87,7 +87,7 @@
                   <span class="flex h-5 w-[43px] shrink-0 items-center justify-center text-brand-light">
                     <svg [lucideIcon]="sagaIcon" [size]="16"></svg>
                   </span>
-                  <span class="min-w-0 flex-1 truncate" [class]="active ? 'text-brand-lighter' : 'text-text-2'" [title]="entry.item.saga.name">
+                  <span class="min-w-0 flex-1 wrap-break-word" [class]="active ? 'text-brand-lighter' : 'text-text-2'" [title]="entry.item.saga.name">
                     {{ entry.item.saga.name }}
                   </span>
                 }

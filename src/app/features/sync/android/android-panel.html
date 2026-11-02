@@ -100,7 +100,7 @@
         @for (row of rows(); track row.packageName) {
           <li class="flex flex-col gap-2 py-2.5 md:flex-row md:items-center md:gap-4" [attr.data-app]="row.packageName">
             <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-medium" [id]="'android-app-' + row.packageName">{{ row.label }}</p>
+              <p class="text-sm font-medium wrap-break-word" [id]="'android-app-' + row.packageName">{{ row.label }}</p>
               <p class="truncate font-mono text-[11px] text-faint">{{ row.packageName }}</p>
               @if (row.gameId !== null && hasPermission()) {
                 <p class="mt-0.5 text-xs text-muted" data-week-usage>

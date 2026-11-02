@@ -258,9 +258,9 @@
             <div class="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
               <app-game-cover decorative size="md" class="shadow-md shadow-black/20" [url]="hero.coverImageUrl" [name]="hero.gameName" />
               <div class="min-w-0 flex-1">
-                <p class="truncate text-base font-semibold" [attr.title]="hero.gameName">{{ hero.gameName }}</p>
+                <p class="text-base font-semibold wrap-break-word" [attr.title]="hero.gameName">{{ hero.gameName }}</p>
                 <!-- The meta wraps on phones instead of cutting the start date -->
-                <p class="mt-1 text-[13px] text-text-3 wrap-break-word sm:truncate" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
+                <p class="mt-1 text-[13px] text-text-3 wrap-break-word" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
                 @if (hero.postgame) {
                   <span
                     class="mt-2 mr-1.5 inline-block rounded-full bg-brand-tint px-2 py-0.5 text-[11px] font-medium text-brand-lighter"
@@ -369,12 +369,12 @@
             >
               <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
               @if (item.online) {
-                <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
+                <span class="min-w-0 flex-1 wrap-break-word text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
                 <span class="shrink-0 rounded-full bg-hover px-2 py-0.5 text-[11px] text-text-3">
                   {{ 'dashboard.topRatedOnline' | translate }}
                 </span>
               } @else {
-                <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.gameName + ' · ' + item.runLabel">
+                <span class="min-w-0 flex-1 wrap-break-word text-text-2" [title]="item.gameName + ' · ' + item.runLabel">
                   {{ item.gameName }} <span class="text-faint">· {{ item.runLabel }}</span>
                 </span>
               }
@@ -403,7 +403,7 @@
           @for (item of items; track item.gameId) {
             <a [routerLink]="['/games', item.gameId]" [class.flex-1]="spreadRows" class="flex flex-col justify-center hover-lift border-t border-divider py-[9px] text-sm hover:bg-hover">
               <span class="flex justify-between gap-3">
-                <span class="min-w-0 truncate text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
+                <span class="min-w-0 wrap-break-word text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
                 <span class="shrink-0 font-mono">{{ item.totalHours | hours }}</span>
               </span>
               <span class="mt-[7px] block h-[3px] rounded-sm bg-bg">
@@ -435,7 +435,7 @@
               [class.flex-1]="spreadRows"
             >
               <span class="flex items-center gap-3">
-                <span class="min-w-0 flex-1 truncate text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
+                <span class="min-w-0 flex-1 wrap-break-word text-text-2" [title]="item.sagaName">{{ item.sagaName }}</span>
                 <span class="shrink-0 text-xs text-faint">{{ 'common.games' | translatePlural: item.gameCount }}</span>
                 <span class="w-16 shrink-0 text-right font-mono">{{ item.totalHours | hours }}</span>
               </span>

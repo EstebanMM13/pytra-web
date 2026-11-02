@@ -100,14 +100,14 @@ import { ICONS } from './icons';
     <div class="min-w-0 flex-1">
       <p class="flex items-center gap-2 text-[15px] font-semibold">
         <!-- Phones: up to two lines (narrow rows, large system font sizes); one line from sm up -->
-        <span class="min-w-0 wrap-break-word max-sm:line-clamp-2 sm:truncate" [attr.title]="title()">{{ title() }}</span>
+        <span class="min-w-0 wrap-break-word" [attr.title]="title()">{{ title() }}</span>
         @if (best()) {
           <!-- From sm up only: on phones it moves to the status line so the title keeps the room -->
           <ng-container [ngTemplateOutlet]="bestPill" [ngTemplateOutletContext]="{ $implicit: 'hidden py-0.5 sm:inline-flex' }" />
         }
       </p>
       @if (meta()) {
-        <p class="mt-1 text-xs text-muted wrap-break-word max-sm:line-clamp-2 sm:truncate md:text-[13px]" [attr.title]="meta()">{{ meta() }}</p>
+        <p class="mt-1 text-xs text-muted wrap-break-word md:text-[13px]" [attr.title]="meta()">{{ meta() }}</p>
       }
       <!-- Status line under the meta: optional projected content (e.g. the status pill on narrow
            screens), then on phones the best pill and the platinum / 100% badges. Each item carries

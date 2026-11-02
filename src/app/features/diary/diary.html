@@ -147,7 +147,7 @@
         >
           <div class="min-w-0 flex-1">
             <p class="text-sm font-semibold capitalize">{{ dayTitle(day.date) }}</p>
-            <p class="truncate text-xs text-text-3">{{ gameNames(day) || day.note }}</p>
+            <p class="text-xs text-text-3 wrap-break-word">{{ gameNames(day) || day.note }}</p>
           </div>
           <span class="shrink-0 font-mono text-sm font-semibold">{{ hours(day.totalHours) }}</span>
           <svg

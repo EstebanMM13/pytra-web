@@ -150,7 +150,7 @@ let nextId = 0;
             data-combobox-chip
             class="inline-flex max-w-full items-center gap-1 rounded-full border border-brand/25 bg-brand-tint py-1 pr-1 pl-2.5 text-[13px] text-brand-lighter"
           >
-            <span class="truncate">{{ option.label }}</span>
+            <span class="min-w-0 wrap-break-word">{{ option.label }}</span>
             <button
               type="button"
               (click)="remove(option.id)"
@@ -189,7 +189,7 @@ let nextId = 0;
           >
             @switch (entry.kind) {
               @case ('option') {
-                <span class="min-w-0 flex-1 truncate">{{ entry.option.label }}</span>
+                <span class="min-w-0 flex-1 wrap-break-word">{{ entry.option.label }}</span>
                 @if (isSelected(entry)) {
                   <svg [lucideIcon]="icons.check" [size]="14" class="shrink-0 text-brand-light"></svg>
                 }
@@ -202,7 +202,7 @@ let nextId = 0;
               }
               @case ('create') {
                 <svg [lucideIcon]="icons.plus" [size]="14" class="shrink-0 text-brand-light"></svg>
-                <span class="min-w-0 flex-1 truncate">{{ createLabel() | translate: { name: entry.name } }}</span>
+                <span class="min-w-0 flex-1 wrap-break-word">{{ createLabel() | translate: { name: entry.name } }}</span>
               }
             }
           </li>

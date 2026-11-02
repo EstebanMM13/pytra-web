@@ -18,7 +18,7 @@
             [attr.aria-readonly]="true"
           >
             @if (lockedGame(); as g) {
-              <span class="min-w-0 flex-1 truncate text-text" [title]="g.name">{{ g.name }}</span>
+              <span class="min-w-0 flex-1 wrap-break-word text-text" [title]="g.name">{{ g.name }}</span>
               @if (g.sagaName) {
                 <span class="hidden max-w-[40%] shrink-0 truncate text-xs text-brand-light sm:inline">
                   {{ 'game.saga' | translate: { saga: g.sagaName } }}
@@ -80,13 +80,13 @@
                     [class.bg-brand-tint]="i === activeIndex()"
                   >
                     <span
-                      class="min-w-0 flex-1 truncate"
+                      class="min-w-0 flex-1 wrap-break-word"
                       [class]="i === activeIndex() ? 'text-brand-lighter' : 'text-text-2'"
                     >
                       {{ game.name }}
                     </span>
                     @if (game.sagaName) {
-                      <span class="max-w-[40%] shrink-0 truncate text-xs text-faint" [title]="game.sagaName">{{ game.sagaName }}</span>
+                      <span class="max-w-[40%] shrink-0 wrap-break-word text-xs text-faint" [title]="game.sagaName">{{ game.sagaName }}</span>
                     }
                   </li>
                 } @empty {

@@ -70,8 +70,8 @@
               <app-game-cover decorative size="sm" class="shadow-md shadow-black/20" [url]="coverOf(run.gameId)" [name]="run.gameName" />
               <span class="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span class="text-xs text-text-3">{{ entry.label | translate }}</span>
-                <span class="line-clamp-2 text-[15px] font-semibold wrap-break-word text-text" [attr.title]="run.gameName">{{ run.gameName }}</span>
-                <span class="line-clamp-2 text-xs text-muted">{{ run.runLabel }}</span>
+                <span class="text-[15px] font-semibold wrap-break-word text-text" [attr.title]="run.gameName">{{ run.gameName }}</span>
+                <span class="text-xs text-muted wrap-break-word">{{ run.runLabel }}</span>
               </span>
               <!-- The dashboard's days pill. -->
               <app-stats-pill data-run-days>{{ 'stats.days' | translatePlural: run.days }}</app-stats-pill>

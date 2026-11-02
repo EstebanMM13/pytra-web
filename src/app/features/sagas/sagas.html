@@ -185,7 +185,7 @@
             </span>
             <div class="min-w-0 flex-1">
               <div class="flex items-baseline justify-between gap-3 text-[15px] font-semibold">
-                <span class="line-clamp-2 wrap-break-word" [title]="s.saga.name" data-saga-name>{{ s.saga.name }}</span>
+                <span class="wrap-break-word" [title]="s.saga.name" data-saga-name>{{ s.saga.name }}</span>
                 <span
                   class="flex shrink-0 items-center gap-1 font-mono text-[13px] font-medium"
                   [class]="s.avgRating | ratingTone"
@@ -296,7 +296,7 @@
               @let years = yearRange(s);
               <p class="mt-1.5 flex items-baseline gap-1.5 text-[13px] text-text-3 md:mt-2 md:text-[15px]" [title]="metaLine(s)" data-saga-meta>
                 @if (studios) {
-                  <span class="line-clamp-2 min-w-0 wrap-break-word" data-saga-studios>{{ studios }}</span>
+                  <span class="min-w-0 wrap-break-word" data-saga-studios>{{ studios }}</span>
                 }
                 @if (studios && years) {
                   <span class="shrink-0" aria-hidden="true">·</span>

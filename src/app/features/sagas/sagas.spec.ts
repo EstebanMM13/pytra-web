@@ -212,7 +212,9 @@ describe('Sagas detail', () => {
     ]);
     const meta = el.querySelector('[data-saga-hero] [data-saga-meta]') as HTMLElement;
     expect(meta.querySelector('[data-saga-studios]')!.textContent!.trim()).toBe('Santa Monica Studio, Ready at Dawn');
-    expect(meta.querySelector('[data-saga-studios]')!.classList).toContain('line-clamp-2');
+    // Shown whole on narrow phones: it wraps, never cut.
+    expect(meta.querySelector('[data-saga-studios]')!.classList).not.toContain('line-clamp-2');
+    expect(meta.querySelector('[data-saga-studios]')!.classList).toContain('wrap-break-word');
     expect(meta.querySelector('[data-saga-years]')!.textContent!.trim()).toBe('2008–2022');
     expect(meta.getAttribute('title')).toBe('Santa Monica Studio, Ready at Dawn · 2008–2022');
   });

@@ -54,7 +54,7 @@ const FOCUSABLE =
           <button type="button" (click)="cancel()" [disabled]="saving()" class="text-[15px] text-text-3 disabled:opacity-50">
             {{ (viewOnly() ? 'common.close' : 'common.cancel') | translate }}
           </button>
-          <h2 class="truncate text-base font-semibold">{{ title() }}</h2>
+          <h2 class="min-w-0 text-base font-semibold wrap-break-word">{{ title() }}</h2>
           @if (viewOnly()) {
             <!-- Keeps the title centred -->
             <span class="invisible text-[15px]" aria-hidden="true">{{ 'common.close' | translate }}</span>
@@ -73,7 +73,7 @@ const FOCUSABLE =
 
         <!-- Web header -->
         <header class="hidden shrink-0 items-center justify-between gap-4 border-b border-border px-[26px] py-5 md:flex">
-          <h2 class="min-w-0 truncate text-[19px] font-semibold" [attr.title]="title()">{{ title() }}</h2>
+          <h2 class="min-w-0 wrap-break-word text-[19px] font-semibold" [attr.title]="title()">{{ title() }}</h2>
           <button
             type="button"
             (click)="cancel()" [disabled]="saving()"

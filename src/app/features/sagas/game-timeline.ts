@@ -51,13 +51,13 @@ import { isPlayed, releaseYear, sagaGameStatus } from './saga.logic';
           </span>
           @let st = gameStatus(g);
           <div class="min-w-0 flex-1">
-            <p class="line-clamp-2 text-[15px] font-medium wrap-break-word md:text-sm" [class]="played ? '' : 'text-text-3'" [title]="g.name">
+            <p class="text-[15px] font-medium wrap-break-word md:text-sm" [class]="played ? '' : 'text-text-3'" [title]="g.name">
               {{ g.name }}
               @if (g.hasPlatinum) {
                 <span class="text-xs">🏆</span>
               }
             </p>
-            <p class="mt-0.5 truncate text-xs md:hidden" [class]="played ? 'text-muted' : 'text-faint'">
+            <p class="mt-0.5 wrap-break-word text-xs md:hidden" [class]="played ? 'text-muted' : 'text-faint'">
               {{ releaseYear(g) ?? '—' }} ·
               {{ (st.kind === 'run' ? 'status.' + st.status : st.kind === 'online' ? 'library.online' : 'game.notPlayed') | translate }}
             </p>

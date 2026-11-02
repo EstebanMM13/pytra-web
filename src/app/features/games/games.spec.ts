@@ -148,6 +148,17 @@ describe('Games library filters', () => {
     return { harness, router, navigations, el, pick, chips, listed };
   }
 
+  it('shows whole game names on posters: they wrap instead of being cut on narrow phones', async () => {
+    const { el } = await setup();
+    const titles = [...el.querySelectorAll('[data-poster-title]')];
+    expect(titles.length).toBeGreaterThan(0);
+    for (const title of titles) {
+      expect(title.classList).not.toContain('line-clamp-2');
+      expect(title.classList).not.toContain('truncate');
+      expect(title.classList).toContain('wrap-break-word');
+    }
+  });
+
   it('marks platinum posters with the platinum icon, not an emoji', async () => {
     const { el } = await setup();
     const badges = [...el.querySelectorAll('[data-poster-platinum]')];

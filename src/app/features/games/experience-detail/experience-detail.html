@@ -10,7 +10,7 @@
       class="tap-area flex min-w-0 items-center gap-1.5 rounded-md text-[13px] text-muted hover:text-text"
     >
       <svg [lucideIcon]="icons.chevronLeft" [size]="16" class="shrink-0"></svg>
-      <span class="truncate">{{ game()?.name ?? ('game.breadcrumb' | translate) }}</span>
+      <span class="min-w-0 wrap-break-word">{{ game()?.name ?? ('game.breadcrumb' | translate) }}</span>
     </a>
     @if (experience()) {
       <div class="flex items-center gap-1 text-text-3 md:hidden">

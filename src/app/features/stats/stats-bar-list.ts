@@ -133,7 +133,7 @@ export const STATS_LIST_PREVIEW = 6;
           @if (bar.dot) {
             <span class="mt-1.5 size-2 shrink-0 rounded-full" [style.background-color]="bar.color" aria-hidden="true"></span>
           }
-          <span class="line-clamp-2 min-w-0 wrap-break-word" [attr.title]="bar.label">{{ bar.label }}</span>
+          <span class="min-w-0 wrap-break-word" [attr.title]="bar.label">{{ bar.label }}</span>
         </span>
         <span class="shrink-0 font-mono text-sm" [class]="bar.figureClass ?? ''">{{ bar.figure }}</span>
       </span>

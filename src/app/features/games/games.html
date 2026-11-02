@@ -282,7 +282,7 @@
                   <div class="min-w-0 px-0.5">
                     <!-- Always two lines tall (2 × leading-snug), so the meta lines up across a row -->
                     <p
-                      class="line-clamp-2 min-h-[2.75em] text-[13px] leading-snug font-medium group-hover:text-brand-lighter md:text-sm"
+                      class="min-h-[2.75em] wrap-break-word text-[13px] leading-snug font-medium group-hover:text-brand-lighter md:text-sm"
                       [title]="game.name"
                       data-poster-title
                     >
@@ -358,7 +358,7 @@
               >
                 <span class="flex min-w-0 items-center gap-3 font-medium">
                   <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
-                  <span class="truncate" [title]="game.name">{{ game.name }}</span>
+                  <span class="wrap-break-word" [title]="game.name">{{ game.name }}</span>
                   @if (game.hasPlatinum) {
                     <span class="text-xs" [attr.aria-label]="'library.platinum' | translate">🏆</span>
                   }
@@ -369,7 +369,7 @@
                     <app-upcoming-badge />
                   }
                 </span>
-                <span class="truncate text-text-3" [title]="game.sagaName ?? ''">{{ game.sagaName ?? '—' }}</span>
+                <span class="wrap-break-word text-text-3" [title]="game.sagaName ?? ''">{{ game.sagaName ?? '—' }}</span>
                 <span class="text-right font-mono text-text-3">{{ game.experienceCount ?? 0 }}</span>
                 <span class="text-right font-mono">{{ game.totalHours ? (game.totalHours | hours) : '—' }}</span>
                 <span class="text-right font-mono" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
@@ -419,7 +419,7 @@
                   <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
                   <div class="min-w-0 flex-1">
                     <!-- Name and status line wrap to two lines (narrow rows, large system font sizes) -->
-                    <p class="line-clamp-2 text-[15px] font-medium wrap-break-word" [title]="game.name">
+                    <p class="text-[15px] font-medium wrap-break-word" [title]="game.name">
                       {{ game.name }}
                       @if (game.hasPlatinum) {
                         <span class="text-xs">🏆</span>

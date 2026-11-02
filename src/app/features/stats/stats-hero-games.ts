@@ -16,7 +16,7 @@ import { CoverRef } from './stats.logic';
     <ol class="flex flex-col gap-1 text-xs">
       @for (game of games(); track game.id) {
         <li class="flex items-baseline justify-between gap-3">
-          <span class="truncate text-text-2" [attr.title]="game.name">{{ game.name }}</span>
+          <span class="min-w-0 wrap-break-word text-text-2" [attr.title]="game.name">{{ game.name }}</span>
           @if (game.hours) {
             <span class="shrink-0 font-mono text-muted">{{ game.hours | hours }}</span>
           }

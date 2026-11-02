@@ -140,11 +140,11 @@ type SearchState = 'idle' | 'loading' | 'ready' | 'error';
               <!-- Box art: IGDB's small cover, or the Steam library capsule the game would be saved with. -->
               <app-game-cover decorative size="sm" [url]="result.imageUrl" [name]="result.name" />
               <span class="flex min-w-0 flex-1 flex-col">
-                <span class="truncate" [class]="i === activeIndex() ? 'text-brand-lighter' : 'text-text-2'">
+                <span class="wrap-break-word" [class]="i === activeIndex() ? 'text-brand-lighter' : 'text-text-2'">
                   {{ result.name }}
                 </span>
                 @if (details(result); as line) {
-                  <span class="truncate text-xs text-muted">{{ line }}</span>
+                  <span class="text-xs text-muted wrap-break-word">{{ line }}</span>
                 }
               </span>
               @if (loadingId() === result.id) {

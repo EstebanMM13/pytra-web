@@ -153,7 +153,7 @@
                 <div class="flex min-w-0 flex-1 flex-col gap-2 md:gap-2.5">
                   <a
                     [routerLink]="['/games', g.gameId]"
-                    class="mt-1 line-clamp-2 text-[22px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word hover:underline md:mt-1.5 md:text-[28px]"
+                    class="mt-1 text-[22px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word hover:underline md:mt-1.5 md:text-[28px]"
                     [title]="g.gameName"
                   >
                     {{ g.gameName }}
@@ -185,7 +185,7 @@
                 class="hover-lift -mx-2 flex items-center gap-2.5 rounded-lg border border-transparent px-2 py-1 hover:bg-hover"
               >
                 <app-game-cover decorative size="xs" [url]="coverOf(g.gameId)" [name]="g.gameName" />
-                <span class="min-w-0 flex-1 text-[15px] font-semibold wrap-break-word max-sm:line-clamp-2 sm:truncate md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
+                <span class="min-w-0 flex-1 text-[15px] font-semibold wrap-break-word md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="shrink-0 font-mono text-xs md:text-sm" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
@@ -210,7 +210,7 @@
                 class="hover-lift -mx-2 flex items-center gap-2.5 rounded-lg border border-transparent px-2 py-1 hover:bg-hover"
               >
                 <app-game-cover decorative size="xs" [url]="coverOf(g.gameId)" [name]="g.gameName" />
-                <span class="min-w-0 flex-1 text-[15px] font-semibold wrap-break-word max-sm:line-clamp-2 sm:truncate md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
+                <span class="min-w-0 flex-1 text-[15px] font-semibold wrap-break-word md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="shrink-0 font-mono text-xs md:text-sm" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
@@ -309,7 +309,7 @@
                   <span class="w-5 shrink-0 text-center font-mono text-xs text-faint">{{ i + 1 }}</span>
                 }
                 <app-game-cover decorative size="xs" [url]="g.coverImageUrl || coverOf(g.gameId)" [name]="g.gameName" />
-                <span class="min-w-0 flex-1 truncate text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
+                <span class="min-w-0 flex-1 wrap-break-word text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="hidden shrink-0 text-xs text-faint sm:inline">
                   {{ 'years.runsCount' | translatePlural: g.experienceCount }} · {{ g.totalHours | hours }}
                 </span>
@@ -332,7 +332,7 @@
                 <span class="flex min-w-0 flex-1 flex-col justify-center">
                   <span class="flex justify-between gap-3">
                     <span class="flex min-w-0 items-baseline gap-2">
-                      <span class="min-w-0 truncate text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
+                      <span class="min-w-0 wrap-break-word text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
                       @if (g.online) {
                         <span class="shrink-0 text-[11px] text-faint">{{ 'years.onlineTag' | translate }}</span>
                       }
@@ -357,7 +357,7 @@
                 class="flex flex-wrap items-center gap-x-3 border-t border-divider py-[9px] text-sm hover:bg-hover sm:flex-nowrap"
               >
                 <!-- Below sm the counts drop to a second line so the saga name keeps the row -->
-                <span class="min-w-0 flex-1 truncate text-text-2" [title]="saga.sagaName">{{ saga.sagaName }}</span>
+                <span class="min-w-0 flex-1 wrap-break-word text-text-2" [title]="saga.sagaName">{{ saga.sagaName }}</span>
                 <span class="order-last w-full text-xs text-faint sm:order-none sm:w-auto sm:shrink-0">
                   {{ 'common.games' | translatePlural: saga.gameCount }} ·
                   {{ 'years.runsCount' | translatePlural: saga.experienceCount }}
@@ -374,7 +374,7 @@
             @for (genre of s.topGenres; track genre.genreId) {
               <div class="flex flex-wrap items-center gap-x-3 border-t border-divider py-[9px] text-sm sm:flex-nowrap">
                 <!-- Below sm the counts drop to a second line so the genre name keeps the row (as top sagas) -->
-                <span class="min-w-0 flex-1 truncate text-text-2" [title]="genre.genreName | genreName">{{ genre.genreName | genreName }}</span>
+                <span class="min-w-0 flex-1 wrap-break-word text-text-2" [title]="genre.genreName | genreName">{{ genre.genreName | genreName }}</span>
                 <span class="order-last w-full text-xs text-faint sm:order-none sm:w-auto sm:shrink-0">
                   {{ 'common.games' | translatePlural: genre.gameCount }} ·
                   {{ 'years.runsCount' | translatePlural: genre.experienceCount }}

@@ -111,7 +111,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                       class="shrink-0"
                       aria-hidden="true"
                     ></svg>
-                    <span class="truncate">{{ chip.name }}</span>
+                    <span class="min-w-0 text-left wrap-break-word">{{ chip.name }}</span>
                   </button>
                 }
               </div>
@@ -151,7 +151,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                         [url]="game.coverImageUrl"
                         [name]="game.name"
                       />
-                      <span class="min-w-0 flex-1 truncate">{{ game.name }}</span>
+                      <span class="min-w-0 flex-1 wrap-break-word">{{ game.name }}</span>
                       <svg
                         [lucideIcon]="icons.plus"
                         [size]="16"
@@ -184,7 +184,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                     [name]="game.gameName"
                   />
                   <div class="min-w-0 flex-1">
-                    <p class="truncate text-[15px] font-medium">{{ game.gameName }}</p>
+                    <p class="text-[15px] font-medium wrap-break-word">{{ game.gameName }}</p>
                     @if (game.synced) {
                       <span
                         class="mt-1 inline-flex items-center gap-1 rounded-full bg-hover px-2 py-0.5 text-[11px] text-text-2"
@@ -194,11 +194,11 @@ type PlatformOptions = PlatformRef[] | 'loading';
                         {{ 'diary.syncedTag' | translate }}
                       </span>
                     } @else if (game.category === 'ONLINE') {
-                      <p class="truncate text-xs text-muted">
+                      <p class="text-xs text-muted wrap-break-word">
                         {{ 'diary.editor.toOnline' | translate }}
                       </p>
                     } @else if (game.runLabel) {
-                      <p class="truncate text-xs text-muted">
+                      <p class="text-xs text-muted wrap-break-word">
                         {{ 'diary.editor.toRun' | translate: { run: game.runLabel } }}
                         @if (!runOptions()[game.gameId]) {
                           <button
