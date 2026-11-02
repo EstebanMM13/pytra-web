@@ -733,8 +733,11 @@ export class GameDetail {
     this.router.navigate(['/games']);
   }
 
-  /** Classes of the h and min fields of the online hours rows. */
+  /** Classes of the h field of the online hours rows: wide enough for 4-5 digit totals (e.g. 1281 h). */
   protected readonly onlineHoursFieldClass =
+    'h-8 w-16 min-w-0 rounded-md border border-border bg-surface px-1.5 text-right font-mono text-sm text-text md:w-20';
+  /** Classes of the min field of the online hours rows (2 digits). */
+  protected readonly onlineMinutesFieldClass =
     'h-8 w-10 min-w-0 rounded-md border border-border bg-surface px-1.5 text-right font-mono text-sm text-text md:w-12';
 
   protected setOnlinePlatformHours(platformId: number, text: string): void {

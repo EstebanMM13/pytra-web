@@ -45,6 +45,7 @@ describe('joinHours', () => {
   template: `
     <app-hours-input inputId="form-hours" label="Hours" [formControl]="control" />
     <app-hours-input inputId="bound-hours" label="Bound" [(value)]="text" />
+    <app-hours-input inputId="sized-hours" label="Sized" fieldClass="w-16" minutesFieldClass="w-10" />
   `,
 })
 class Host {
@@ -72,6 +73,13 @@ describe('HoursInput', () => {
     };
     return { fixture, host: fixture.componentInstance, fields, type };
   }
+
+  it('gives both fields the field class unless the minutes have their own', () => {
+    const { fields } = setup();
+    expect(fields('form-hours').minutes.className).toBe(fields('form-hours').hours.className);
+    expect(fields('sized-hours').hours.className).toBe('w-16');
+    expect(fields('sized-hours').minutes.className).toBe('w-10');
+  });
 
   it('loads a form value split into hours and minutes', () => {
     const { fields } = setup();

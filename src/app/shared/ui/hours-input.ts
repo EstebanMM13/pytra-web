@@ -86,7 +86,7 @@ export function joinHours(hoursText: string, minutesText: string): number | null
       inputmode="numeric"
       autocomplete="off"
       [attr.id]="inputId() ? inputId() + '-min' : null"
-      [class]="fieldClass()"
+      [class]="minutesFieldClass() ?? fieldClass()"
       [placeholder]="placeholder()"
       [value]="minutes()"
       [disabled]="isDisabled()"
@@ -111,6 +111,8 @@ export class HoursInput implements ControlValueAccessor {
   readonly placeholder = input('0');
   /** Classes of each field. */
   readonly fieldClass = input('min-w-0 w-full');
+  /** Classes of the minutes field when it should differ (e.g. narrower than a field holding 4-digit hours). */
+  readonly minutesFieldClass = input<string | null>(null);
   readonly invalid = input(false, { transform: booleanAttribute });
   /** Id of an error or hint that describes both fields. */
   readonly describedBy = input<string | null>(null);
