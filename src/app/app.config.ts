@@ -43,6 +43,14 @@ export const appConfig: ApplicationConfig = {
         .then(({ DiaryReminderService }) => injector.get(DiaryReminderService).init())
         .catch((error: unknown) => console.error('Diary reminder unavailable', error));
     }),
+    // Android app: play time of linked phone games, synced on launch and on return to the foreground.
+    provideAppInitializer(() => {
+      if (!isNativePlatform()) return;
+      const injector = inject(Injector);
+      void import('./core/services/android-usage-sync.service')
+        .then(({ AndroidUsageSyncService }) => injector.get(AndroidUsageSyncService).init())
+        .catch((error: unknown) => console.error('Android usage sync unavailable', error));
+    }),
     // The install prompt is caught by a tiny listener in main.ts; its service loads with the screens using it.
     provideAppInitializer(() => {
       inject(ThemeService);

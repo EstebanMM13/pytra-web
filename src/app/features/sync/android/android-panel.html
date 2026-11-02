@@ -1,0 +1,92 @@
+@if (available()) {
+  @if (errorKey(); as key) {
+    <p class="rounded-xl border border-danger/40 bg-danger-bg px-4 py-3 text-sm text-danger" role="alert">
+      {{ key | translate }}
+    </p>
+  }
+
+  <app-platform-card platform="android" [name]="'androidUsage.title' | translate" [subtitle]="'androidUsage.subtitle' | translate">
+    <!-- Decorative phone mark (the card title names the platform). -->
+    <svg platformIcon viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M7 2.5h10v19H7z M11 18h2" stroke-linecap="square" stroke-linejoin="miter" />
+    </svg>
+    @if (hasPermission()) {
+      <span platformBadge class="rounded-full bg-success-bg px-[9px] py-[3px] text-xs font-medium whitespace-nowrap text-success">
+        {{ 'androidUsage.permissionGranted' | translate }}
+      </span>
+    } @else {
+      <span platformBadge class="rounded-full bg-hover px-[9px] py-[3px] text-xs font-medium whitespace-nowrap text-muted">
+        {{ 'androidUsage.permissionMissing' | translate }}
+      </span>
+    }
+
+    @if (!hasPermission()) {
+      <div class="flex flex-col gap-3 md:flex-row md:items-center">
+        <p class="flex-1 text-sm text-text-2">{{ 'androidUsage.permissionHint' | translate }}</p>
+        <button
+          type="button"
+          (click)="grantPermission()"
+          class="rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-medium text-white hover:bg-brand-dark"
+          data-grant-permission
+        >
+          {{ 'androidUsage.grantPermission' | translate }}
+        </button>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-3 md:flex-row md:items-center">
+        <p class="flex-1 text-sm text-muted" data-last-sync>
+          @if (lastSync(); as when) {
+            {{ 'androidUsage.lastSync' | translate: { when } }}
+          } @else {
+            {{ 'androidUsage.neverSynced' | translate }}
+          }
+        </p>
+        <button
+          type="button"
+          (click)="syncNow()"
+          [disabled]="syncService.syncing() || linkedCount() === 0"
+          class="flex items-center justify-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong disabled:opacity-50"
+          data-sync-now
+        >
+          <span class="grid place-items-center" [class.animate-spin]="syncService.syncing()"><svg [lucideIcon]="icons.refreshCw" [size]="14"></svg></span>
+          {{ (syncService.syncing() ? 'androidUsage.syncing' : 'androidUsage.syncNow') | translate }}
+        </button>
+      </div>
+    }
+
+    <div class="mt-5 flex items-center justify-between gap-3">
+      <h3 class="text-sm font-semibold">{{ 'androidUsage.appsTitle' | translate }}</h3>
+      <label class="flex items-center gap-2 text-xs text-muted">
+        <input type="checkbox" [checked]="showAll()" (change)="showAll.set($any($event.target).checked)" data-show-all />
+        {{ 'androidUsage.showAllApps' | translate }}
+      </label>
+    </div>
+    <p class="mt-1 text-xs text-muted">{{ 'androidUsage.appsHint' | translate }}</p>
+
+    @if (rows().length === 0) {
+      <p class="mt-3 text-sm text-muted">{{ 'androidUsage.noApps' | translate }}</p>
+    } @else {
+      <ul class="mt-3 flex flex-col divide-y divide-divider">
+        @for (row of rows(); track row.packageName) {
+          <li class="flex flex-col gap-2 py-2.5 md:flex-row md:items-center md:gap-4" [attr.data-app]="row.packageName">
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium">{{ row.label }}</p>
+              <p class="truncate font-mono text-[11px] text-faint">{{ row.packageName }}</p>
+            </div>
+            <select
+              class="w-full rounded-lg border border-border bg-bg px-2.5 py-2 text-[13px] md:w-64"
+              [attr.aria-label]="'androidUsage.gameFor' | translate: { app: row.label }"
+              [disabled]="isBusy(row.packageName)"
+              (change)="changeLink(row.packageName, $any($event.target).value)"
+            >
+              <option value="" [selected]="row.gameId === null">{{ 'androidUsage.notLinked' | translate }}</option>
+              @for (game of sortedGames(); track game.id) {
+                <option [value]="game.id" [selected]="game.id === row.gameId">{{ game.name }}</option>
+              }
+            </select>
+          </li>
+        }
+      </ul>
+    }
+  </app-platform-card>
+}

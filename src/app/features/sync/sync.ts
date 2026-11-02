@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Navbar } from '../../shared/navbar/navbar';
+import { AndroidPanel } from './android/android-panel';
 import { PsnPanel } from './psn/psn-panel';
 import { SteamPanel } from './steam/steam-panel';
 
@@ -10,7 +11,7 @@ import { SteamPanel } from './steam/steam-panel';
  */
 @Component({
   selector: 'app-sync',
-  imports: [Navbar, TranslatePipe, SteamPanel, PsnPanel],
+  imports: [Navbar, TranslatePipe, SteamPanel, PsnPanel, AndroidPanel],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sync.html',
 })

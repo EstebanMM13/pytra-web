@@ -397,6 +397,31 @@
       "progress": "Completando datos desde IGDB… {{processed}}/{{total}}"
     }
   },
+  "androidUsage": {
+    "title": "Android",
+    "subtitle": "Tiempo de juego en Android",
+    "permissionGranted": "Acceso concedido",
+    "permissionMissing": "Sin acceso",
+    "permissionHint": "Pytra necesita el «Acceso a datos de uso» para saber cuánto tiempo juegas a cada juego. Actívalo para Pytra en los ajustes del sistema.",
+    "grantPermission": "Conceder acceso",
+    "lastSync": "Última sincronización: {{when}}",
+    "neverSynced": "Aún no se ha sincronizado",
+    "syncNow": "Sincronizar ahora",
+    "syncing": "Sincronizando…",
+    "synced": "Sincronizado. Días con tiempo nuevo: {{count}}",
+    "appsTitle": "Apps instaladas",
+    "appsHint": "Vincula cada juego del móvil con un juego de tu biblioteca. Las horas se suman a tu partida en curso en Móvil (o al tiempo online en Móvil) desde el día en que lo vinculas, y se apuntan en el diario.",
+    "showAllApps": "Mostrar todas las apps",
+    "noApps": "No hay juegos instalados. Activa «Mostrar todas las apps» si tu juego no aparece.",
+    "notLinked": "Sin vincular",
+    "gameFor": "Juego de {{app}}",
+    "errors": {
+      "load": "No se pudieron cargar las apps vinculadas.",
+      "link": "No se pudo guardar el vínculo.",
+      "gameTaken": "Ese juego ya está vinculado a otra app.",
+      "sync": "No se pudo sincronizar el tiempo de juego de Android."
+    }
+  },
   "steam": {
     "title": "Steam",
     "loading": "Cargando...",
