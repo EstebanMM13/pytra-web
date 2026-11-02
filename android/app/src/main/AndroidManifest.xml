@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -44,4 +45,15 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- In-app updater: hands the downloaded APK to the package installer (ApkInstallerPlugin). -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Android play time sync: daily foreground time of linked games (UsageStatsPlugin). Special access the
+         user grants in the system settings ("Usage access"). -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
+
+    <!-- Package visibility (Android 11+): the apps with a launcher icon, to link them to games. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
 </manifest>
