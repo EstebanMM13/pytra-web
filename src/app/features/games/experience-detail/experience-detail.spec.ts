@@ -14,7 +14,7 @@ import { RunFormLauncher } from '../../../core/services/run-form-launcher.servic
 import { StatsService } from '../../../core/services/stats.service';
 import { Navbar } from '../../../shared/navbar/navbar';
 import { ToastService } from '../../../shared/toast/toast.service';
-import { ExperienceDetail, ratingFontSize } from './experience-detail';
+import { ExperienceDetail, hoursFontSize, ratingFontSize, splitHoursFigure } from './experience-detail';
 
 @Component({ selector: 'app-navbar', template: '' })
 class NavbarStub {}
@@ -307,6 +307,20 @@ describe('ExperienceDetail inline edit', () => {
     expect(card.className).toContain('[--rating-reserve:42px]');
     expect(card.className).toContain('md:[--rating-reserve:72px]');
     expect(el.querySelector('[data-rating-pencil]')!.className).toContain('max-md:absolute');
+  });
+
+  it('draws the hours at figure size with the minutes smaller beside them', () => {
+    expect(splitHoursFigure('32 h 29 min')).toEqual({ main: '32 h', rest: '29 min' });
+    expect(splitHoursFigure('84 h')).toEqual({ main: '84 h', rest: null });
+    expect(splitHoursFigure('45 min')).toEqual({ main: '45 min', rest: null });
+    expect(hoursFontSize({ main: '32 h', rest: '29 min' })).toBe(
+      'min(var(--fig-max), calc((100cqi - var(--hours-reserve) - 66px) / 2.48))',
+    );
+
+    const el = setup(run({ hours: 32 + 29 / 60 })).el;
+    expect(el.querySelector('[data-hours-figure] > span')!.textContent!.trim()).toBe('32 h');
+    expect(el.querySelector('[data-hours-rest]')!.textContent!.trim()).toBe('29 min');
+    expect(el.querySelector('[data-hours-pencil]')!.className).toContain('max-md:absolute');
   });
 
   it('marks the platinum pill with the platinum icon', () => {

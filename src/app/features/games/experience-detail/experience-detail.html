@@ -222,7 +222,8 @@
       </div>
 
       <div class="min-w-0 rounded-xl border border-card-border card-glass" data-stat="hours">
-        <div class="@container flex h-full flex-col p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]">
+        <!-- Phones: the pencil moves to the top-right corner, as on the rating tile. -->
+        <div class="@container relative flex h-full flex-col p-4 [--fig-max:30px] [--hours-reserve:0px] md:px-5 md:[--fig-max:36px] md:[--hours-reserve:48px]">
           <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
             <svg [lucideIcon]="icons.clock" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
             <span class="truncate">{{ 'run.hours' | translate }}</span>
@@ -259,7 +260,8 @@
               }
             </div>
           } @else {
-            <p class="my-auto pt-2 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="editableFigureSize(e.hours | hours)">
+            @let figure = hoursFigure(e.hours | hours);
+            <p class="my-auto pt-2 leading-tight font-bold tracking-[-0.03em] whitespace-nowrap">
               <button
                 id="run-inline-hours-trigger"
                 type="button"
@@ -269,8 +271,14 @@
                 [attr.aria-label]="'run.inlineEditHours' | translate: { value: e.hours | hours }"
                 (click)="startEdit('hours')"
               >
-                <span>{{ e.hours | hours }}</span>
-                <span class="run-inline-pencil" aria-hidden="true"><svg [lucideIcon]="icons.pencil" [size]="14"></svg></span>
+                <!-- "32 h" at figure size, the minutes smaller beside it -->
+                <span class="inline-flex items-baseline gap-1.5" data-hours-figure>
+                  <span [style.font-size]="hoursFontSize(figure)">{{ figure.main }}</span>
+                  @if (figure.rest) {
+                    <span class="text-base font-semibold text-text-2 md:text-lg" data-hours-rest>{{ figure.rest }}</span>
+                  }
+                </span>
+                <span class="run-inline-pencil max-md:absolute max-md:top-3 max-md:right-3" aria-hidden="true" data-hours-pencil><svg [lucideIcon]="icons.pencil" [size]="14"></svg></span>
               </button>
             </p>
           }

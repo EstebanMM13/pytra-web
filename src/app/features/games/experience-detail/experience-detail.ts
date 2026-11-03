@@ -67,8 +67,9 @@ export class ExperienceDetail {
   protected readonly icons = ICONS;
   /** Figure font size that fits its tile (see `figureFontSize`). */
   protected readonly figureSize = (value: string | number): string => figureFontSize(String(value));
-  /** Inline-editable figures share their row with the pencil chip (26px chip + 8px gap + 12px padding, 2px slack). */
-  protected readonly editableFigureSize = (value: string | number): string => figureFontSize(String(value), 48);
+  /** Hours tile: the hours at figure size, the minutes smaller beside them. */
+  protected readonly hoursFigure = splitHoursFigure;
+  protected readonly hoursFontSize = hoursFontSize;
   /** The rating figure also shares its line with the "/ 10" scale. */
   protected readonly ratingFigureSize = (value: string | number): string => ratingFontSize(String(value));
 
@@ -341,4 +342,23 @@ export class ExperienceDetail {
 export function ratingFontSize(text: string): string {
   const ems = Math.round(Math.max(1, Array.from(text).length) * 0.62 * 100) / 100;
   return `min(var(--fig-max), calc((100cqi - var(--rating-reserve)) / ${ems}))`;
+}
+
+/** An hour count split for the hours tile: "32 h 29 min" -> "32 h" + "29 min" (minutes drawn smaller). */
+export function splitHoursFigure(text: string): { main: string; rest: string | null } {
+  const match = /^(.+? h) (.+)$/.exec(text);
+  return match ? { main: match[1], rest: match[2] } : { main: text, rest: null };
+}
+
+/** Approximate width of the smaller minutes text plus its gap, in px (16-18 px semibold). */
+const HOURS_REST_PX_PER_CHAR = 10;
+
+/**
+ * Hours figure size: the card's `--fig-max`, shrunk so the hours, the minutes beside them and (from
+ * md) the pencil fit the line; `--hours-reserve` is the pencil's width on each breakpoint.
+ */
+export function hoursFontSize(figure: { main: string; rest: string | null }): string {
+  const ems = Math.round(Math.max(1, Array.from(figure.main).length) * 0.62 * 100) / 100;
+  const rest = figure.rest ? Array.from(figure.rest).length * HOURS_REST_PX_PER_CHAR + 6 : 0;
+  return `min(var(--fig-max), calc((100cqi - var(--hours-reserve) - ${rest}px) / ${ems}))`;
 }
