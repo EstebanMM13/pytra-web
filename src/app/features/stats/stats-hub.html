@@ -3,7 +3,7 @@
 <main class="mx-auto flex max-w-7xl flex-col gap-5 px-5 pt-3 pb-8 md:gap-7 md:px-6 md:pt-8 md:pb-12 lg:px-10">
   <header class="min-w-0">
     <!-- Title with its key word in the brand gradient, as the dashboard greeting and the year page. -->
-    <h1 class="font-display text-[30px] leading-tight font-bold tracking-[-0.035em] md:text-[40px]">
+    <h1 class="font-display text-h1 leading-tight font-bold tracking-[-0.035em] md:text-display">
       {{ 'stats.heading.lead' | translate }} <span class="text-figure text-brand-light">{{ 'stats.heading.key' | translate }}</span>
     </h1>
     <p class="mt-1 text-sm text-text-3">{{ 'stats.subtitle' | translate }}</p>
@@ -18,7 +18,7 @@
       <div class="flex items-center gap-4 p-[18px] md:gap-6 md:p-7">
         <div class="min-w-0 flex-1">
           <app-stats-eyebrow class="mb-2">{{ 'stats.allTime' | translate }}</app-stats-eyebrow>
-          <p class="font-display text-[34px] leading-none font-bold tracking-[-0.04em] whitespace-nowrap md:text-5xl" data-hub-total>
+          <p class="font-display text-hero leading-none font-bold tracking-[-0.04em] whitespace-nowrap md:text-5xl" data-hub-total>
             <span class="text-figure text-brand-light">{{ h.hours !== null ? (h.hours | hours) : '—' }}</span>
           </p>
           @if (h.since !== null) {

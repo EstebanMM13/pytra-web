@@ -128,7 +128,7 @@ let nextId = 0;
         (focus)="openList()"
         (click)="openList()"
         (keydown)="onKeydown($event)"
-        class="h-9 min-w-0 flex-1 border-0 bg-transparent px-1.5 text-[16px] text-text shadow-none outline-none focus:border-0 focus:shadow-none md:text-[15px]"
+        class="h-9 min-w-0 flex-1 border-0 bg-transparent px-1.5 text-lead text-text shadow-none outline-none focus:border-0 focus:shadow-none md:text-body"
         [class]="!multiple() && selectedOptions().length ? 'placeholder:text-text-2' : ''"
       />
       @if (!multiple() && selectedOptions().length) {
@@ -148,7 +148,7 @@ let nextId = 0;
         @for (option of selectedOptions(); track option.id) {
           <li
             data-combobox-chip
-            class="inline-flex max-w-full items-center gap-1 rounded-full border border-brand/25 bg-brand-tint py-1 pr-1 pl-2.5 text-[13px] text-brand-lighter"
+            class="inline-flex max-w-full items-center gap-1 rounded-full border border-brand/25 bg-brand-tint py-1 pr-1 pl-2.5 text-label text-brand-lighter"
           >
             <span class="min-w-0 wrap-break-word">{{ option.label }}</span>
             <button
@@ -181,7 +181,7 @@ let nextId = 0;
             [attr.aria-selected]="isSelected(entry)"
             [attr.aria-disabled]="(entry.kind === 'create' && busy()) || null"
             [class.opacity-50]="entry.kind === 'create' && busy()"
-            class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm md:text-[13px]"
+            class="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm md:text-label"
             [class]="i === activeIndex() ? 'bg-hover text-text' : isSelected(entry) ? 'text-brand-lighter' : 'text-text-2'"
             (mouseenter)="activeIndex.set(i)"
             (mousedown)="$event.preventDefault()"
@@ -207,7 +207,7 @@ let nextId = 0;
             }
           </li>
         } @empty {
-          <li class="px-3 py-2 text-[13px] text-muted">{{ emptyLabel() | translate }}</li>
+          <li class="px-3 py-2 text-label text-muted">{{ emptyLabel() | translate }}</li>
         }
       </ul>
     }

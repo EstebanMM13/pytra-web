@@ -14,12 +14,12 @@
       />
     </div>
     <div class="min-w-0">
-      <p class="mb-2 flex items-center gap-2 font-mono text-[10px] tracking-[0.14em] text-muted uppercase md:text-[11px] md:tracking-[0.16em]">
+      <p class="mb-2 flex items-center gap-2 font-mono text-micro tracking-[0.14em] text-muted uppercase md:text-caption md:tracking-[0.16em]">
         <span class="size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true"></span>
         {{ today() }}
       </p>
       @if (displayName(); as name) {
-        <h1 class="truncate pb-0.5 font-display text-[30px] leading-tight font-bold tracking-[-0.035em] md:text-[42px]">
+        <h1 class="truncate pb-0.5 font-display text-h1 leading-tight font-bold tracking-[-0.035em] md:text-display">
           {{ 'dashboard.greetingHello' | translate }}
           <span class="text-figure text-brand-light">{{ name }}</span>
         </h1>
@@ -51,8 +51,8 @@
               <svg [lucideIcon]="icons.notebookPen" [size]="20"></svg>
             </span>
             <span class="min-w-0 flex-1">
-              <span class="block text-[15px] font-semibold">{{ 'dashboard.diary.title' | translate }}</span>
-              <span class="block text-[13px] text-text-3">{{ 'dashboard.diary.text' | translate }}</span>
+              <span class="block text-body font-semibold">{{ 'dashboard.diary.title' | translate }}</span>
+              <span class="block text-label text-text-3">{{ 'dashboard.diary.text' | translate }}</span>
             </span>
             <svg [lucideIcon]="icons.arrowRight" [size]="18" class="shrink-0 text-brand-light" aria-hidden="true"></svg>
           </a>
@@ -60,7 +60,7 @@
         @if (pending().count > 0) {
           <a
             routerLink="/sync"
-            class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-[13px] text-gold-tint-fg hover:opacity-90 md:self-end"
+            class="flex items-center gap-2.5 self-start rounded-lg bg-gold-tint px-3 py-2 text-label text-gold-tint-fg hover:opacity-90 md:self-end"
           >
             <svg [lucideIcon]="icons.import" [size]="14"></svg>
             {{ pendingBannerKey() | translatePlural: pending().count }}
@@ -73,7 +73,7 @@
 
   @if (installPrompt.showBanner()) {
     <div
-      class="flex items-center gap-3 rounded-xl border border-border bg-surface px-3.5 py-2.5 text-[13px]"
+      class="flex items-center gap-3 rounded-xl border border-border bg-surface px-3.5 py-2.5 text-label"
       role="region"
       [attr.aria-label]="'dashboard.install.title' | translate"
     >
@@ -215,11 +215,11 @@
       <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:px-[22px] md:py-4">
         <app-section-header collapseKey="dashboard.achievements" tone="gold" class="mb-3" [label]="'dashboard.achievements' | translate">
           @if (achievementCount(); as c) {
-            <span class="shrink-0 font-mono text-[13px] text-text-3" data-achievement-count>
+            <span class="shrink-0 font-mono text-label text-text-3" data-achievement-count>
               {{ 'dashboard.achievementsCount' | translate: c }}
             </span>
           }
-          <a routerLink="/profile" [queryParams]="{ section: 'achievements' }" class="tap-area flex shrink-0 items-center gap-1 text-[13px] font-medium text-text hover:underline">
+          <a routerLink="/profile" [queryParams]="{ section: 'achievements' }" class="tap-area flex shrink-0 items-center gap-1 text-label font-medium text-text hover:underline">
             {{ 'dashboard.achievementsAll' | translate }}
             <svg [lucideIcon]="icons.arrowRight" [size]="14" class="text-brand-light" aria-hidden="true"></svg>
           </a>
@@ -260,10 +260,10 @@
               <div class="min-w-0 flex-1">
                 <p class="text-base font-semibold wrap-break-word" [attr.title]="hero.gameName">{{ hero.gameName }}</p>
                 <!-- The meta wraps on phones instead of cutting the start date -->
-                <p class="mt-1 text-[13px] text-text-3 wrap-break-word" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
+                <p class="mt-1 text-label text-text-3 wrap-break-word" [attr.title]="playingMeta(hero)">{{ playingMeta(hero) }}</p>
                 @if (hero.postgame) {
                   <span
-                    class="mt-2 mr-1.5 inline-block rounded-full bg-brand-tint px-2 py-0.5 text-[11px] font-medium text-brand-lighter"
+                    class="mt-2 mr-1.5 inline-block rounded-full bg-brand-tint px-2 py-0.5 text-caption font-medium text-brand-lighter"
                     [attr.title]="'run.postgameAria' | translate"
                     data-postgame
                   >
@@ -272,7 +272,7 @@
                 }
                 <!-- Days pill under the meta on phones, where the title needs the width -->
                 @if (daysPlaying(hero); as days) {
-                  <span class="mt-2 inline-block rounded-full bg-hover px-2 py-0.5 font-mono text-[11px] text-text-3 ring-1 ring-gold/70 ring-inset sm:hidden">
+                  <span class="mt-2 inline-block rounded-full bg-hover px-2 py-0.5 font-mono text-caption text-text-3 ring-1 ring-gold/70 ring-inset sm:hidden">
                     {{ days }}
                   </span>
                 }
@@ -301,7 +301,7 @@
                 [postgame]="!!run.postgame"
               >
                 @if (daysPlaying(run); as days) {
-                  <span runRowBelow class="mt-1.5 inline-block rounded-full bg-hover px-2 py-0.5 font-mono text-[11px] text-text-3 ring-1 ring-gold/70 ring-inset sm:hidden">
+                  <span runRowBelow class="mt-1.5 inline-block rounded-full bg-hover px-2 py-0.5 font-mono text-caption text-text-3 ring-1 ring-gold/70 ring-inset sm:hidden">
                     {{ days }}
                   </span>
                 }
@@ -319,7 +319,7 @@
             } @else {
               <div class="flex flex-col items-center gap-1 rounded-xl border border-dashed border-border px-4 py-8 text-center">
                 <p class="text-sm font-medium text-text-2">{{ 'dashboard.nothingPlaying' | translate }}</p>
-                <button type="button" (click)="newRun()" class="text-[13px] text-brand-light hover:underline">
+                <button type="button" (click)="newRun()" class="text-label text-brand-light hover:underline">
                   {{ 'dashboard.startRun' | translate }}
                 </button>
               </div>
@@ -370,7 +370,7 @@
               <span class="w-[18px] font-mono text-xs text-faint">{{ i + 1 }}</span>
               @if (item.online) {
                 <span class="min-w-0 flex-1 wrap-break-word text-text-2" [title]="item.gameName">{{ item.gameName }}</span>
-                <span class="shrink-0 rounded-full bg-hover px-2 py-0.5 text-[11px] text-text-3">
+                <span class="shrink-0 rounded-full bg-hover px-2 py-0.5 text-caption text-text-3">
                   {{ 'dashboard.topRatedOnline' | translate }}
                 </span>
               } @else {
@@ -472,7 +472,7 @@
 
 <!-- "See all" under the top rated and most played lists: their full rankings live in the stats Games section. -->
 <ng-template #seeAllGames>
-  <a routerLink="/stats/games" class="tap-area mt-3 flex items-center gap-1 self-end text-[13px] text-text-2 hover:text-text hover:underline" data-see-all-games>
+  <a routerLink="/stats/games" class="tap-area mt-3 flex items-center gap-1 self-end text-label text-text-2 hover:text-text hover:underline" data-see-all-games>
     {{ 'dashboard.seeAll' | translate }}
     <svg [lucideIcon]="icons.arrowRight" [size]="14" class="text-brand-light" aria-hidden="true"></svg>
   </a>
@@ -480,7 +480,7 @@
 
 <ng-template #sectionError>
   <div
-    class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-dashed border-border px-3.5 py-3 text-[13px] text-muted"
+    class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-dashed border-border px-3.5 py-3 text-label text-muted"
     role="alert"
   >
     {{ 'dashboard.sectionError' | translate }}
@@ -499,7 +499,7 @@
 <ng-template #stepText let-title="title" let-hint="hint">
   <span class="min-w-0 flex-1">
     <span class="block text-sm font-medium text-text">{{ title | translate }}</span>
-    <span class="mt-0.5 block text-[13px] text-muted">{{ hint | translate }}</span>
+    <span class="mt-0.5 block text-label text-muted">{{ hint | translate }}</span>
   </span>
   <svg [lucideIcon]="icons.arrowRight" [size]="16" class="shrink-0 text-faint" aria-hidden="true"></svg>
 </ng-template>

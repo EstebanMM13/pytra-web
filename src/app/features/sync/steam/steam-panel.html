@@ -44,11 +44,11 @@
             {{ avatarInitial() }}
           </span>
           <div class="min-w-0 flex-1">
-            <p class="truncate text-[17px] font-semibold" [title]="s.personaName || s.steamId || ('steam.accountFallback' | translate)">
+            <p class="truncate text-lead font-semibold" [title]="s.personaName || s.steamId || ('steam.accountFallback' | translate)">
               {{ s.personaName || s.steamId || ('steam.accountFallback' | translate) }}
             </p>
             <!-- Separators come from CSS so none is left dangling when the Steam id is hidden (demo) or a line wraps. -->
-            <div class="mt-[5px] overflow-hidden font-mono text-xs text-muted md:text-[13px]">
+            <div class="mt-[5px] overflow-hidden font-mono text-xs text-muted md:text-label">
               <p class="account-meta">
               @if (maskedSteamId()) {
                 <span>{{ maskedSteamId() }}</span>
@@ -84,7 +84,7 @@
             <button
               type="button"
               (click)="askUnlink()"
-              class="rounded-lg px-2.5 py-[9px] text-[13px] text-muted hover:text-danger"
+              class="rounded-lg px-2.5 py-[9px] text-label text-muted hover:text-danger"
             >
               {{ 'steam.unlink' | translate }}
             </button>
@@ -100,7 +100,7 @@
               type="button"
               (click)="unlink()"
               [disabled]="unlinking()"
-              class="rounded-lg bg-danger-solid px-3.5 py-2 text-[13px] font-semibold text-white hover:opacity-90 disabled:opacity-50"
+              class="rounded-lg bg-danger-solid px-3.5 py-2 text-label font-semibold text-white hover:opacity-90 disabled:opacity-50"
             >
               {{ 'steam.unlinkYes' | translate }}
             </button>
@@ -117,8 +117,8 @@
     } @else {
       <!-- Not linked -->
       <div class="flex flex-col gap-3.5">
-        <h3 class="text-[19px] font-semibold tracking-[-0.01em] md:text-xl">{{ 'steam.linkTitle' | translate }}</h3>
-        <p class="max-w-[60ch] text-[15px] leading-normal text-text-3">{{ 'steam.linkText' | translate }}</p>
+        <h3 class="text-title font-semibold tracking-[-0.01em] md:text-xl">{{ 'steam.linkTitle' | translate }}</h3>
+        <p class="max-w-[60ch] text-body leading-normal text-text-3">{{ 'steam.linkText' | translate }}</p>
         <button
           type="button"
           (click)="connect()"
@@ -172,7 +172,7 @@
 @if (status()?.linked || pending().length > 0) {
   <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
     <app-section-header collapseKey="steam.pending" [label]="('steam.pendingHeader' | translate: { count: pendingTotal() })" class="mb-1.5">
-      <span class="hidden text-[13px] text-muted md:inline">{{ 'steam.pendingHint' | translate }}</span>
+      <span class="hidden text-label text-muted md:inline">{{ 'steam.pendingHint' | translate }}</span>
     </app-section-header>
     <p class="mb-1 text-xs text-muted md:hidden">{{ 'steam.pendingHint' | translate }}</p>
     @if (enriching()) {
@@ -203,7 +203,7 @@
             <div class="flex min-w-0 items-center justify-between gap-3">
               <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
               <div class="min-w-0 flex-1">
-                <p class="text-[15px] font-semibold break-words">{{ game.name }}</p>
+                <p class="text-body font-semibold break-words">{{ game.name }}</p>
                 @if (lastSession(game); as when) {
                   <p class="mt-1 text-xs text-muted">{{ 'steam.lastSession' | translate: { when } }}</p>
                 }
@@ -258,13 +258,13 @@
 <!-- Ignored apps -->
 @if (ignoredTotal() > 0 || ignoredApps().length > 0 || (linkedGamesCount() ?? 0) > 0) {
   <div class="flex flex-col gap-3">
-    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-label text-muted">
     <button
       type="button"
       (click)="showIgnored.set(!showIgnored())"
       [disabled]="ignoredApps().length === 0"
       [attr.aria-expanded]="showIgnored()"
-      class="tap-area flex w-fit items-center gap-2 rounded-md text-[13px] text-muted hover:text-text-2"
+      class="tap-area flex w-fit items-center gap-2 rounded-md text-label text-muted hover:text-text-2"
     >
       <svg [lucideIcon]="icons.eyeOff" [size]="15"></svg>
       {{ 'steam.ignoredCount' | translatePlural: ignoredTotal() }}
@@ -278,7 +278,7 @@
 
     @if (showIgnored()) {
       <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
-        <p class="mb-2 text-[13px] text-muted">{{ 'steam.ignoredHint' | translate }}</p>
+        <p class="mb-2 text-label text-muted">{{ 'steam.ignoredHint' | translate }}</p>
         <!-- Secondary list: ~6 rows then internal scroll on every size. -->
         <ul class="scroll-list max-h-[346px]">
           @for (app of ignoredApps(); track app.appId) {

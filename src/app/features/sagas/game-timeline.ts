@@ -51,7 +51,7 @@ import { isPlayed, releaseYear, sagaGameStatus } from './saga.logic';
           </span>
           @let st = gameStatus(g);
           <div class="min-w-0 flex-1">
-            <p class="text-[15px] font-medium wrap-break-word md:text-sm" [class]="played ? '' : 'text-text-3'" [title]="g.name">
+            <p class="text-body font-medium wrap-break-word md:text-sm" [class]="played ? '' : 'text-text-3'" [title]="g.name">
               {{ g.name }}
               @if (g.hasPlatinum) {
                 <span class="text-xs">🏆</span>

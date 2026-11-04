@@ -32,14 +32,14 @@ import { LibraryStatusFilter } from './library.logic';
       #trigger
       type="button"
       (click)="openSheet()"
-      class="flex h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 text-[13px] font-medium whitespace-nowrap text-text-2"
+      class="flex h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 text-label font-medium whitespace-nowrap text-text-2"
       aria-haspopup="dialog"
       [attr.aria-expanded]="open()"
       data-status-trigger
     >
       <span class="text-muted">{{ 'library.statusShort' | translate }}:</span>
       <span class="text-brand-lighter">{{ 'library.status.' + status() | translate }}</span>
-      <span class="font-mono text-[11px] opacity-70">({{ counts()?.[status()] ?? '…' }})</span>
+      <span class="font-mono text-caption opacity-70">({{ counts()?.[status()] ?? '…' }})</span>
       <svg [lucideIcon]="icons.chevronDown" [size]="14" class="text-faint"></svg>
     </button>
 
@@ -54,7 +54,7 @@ import { LibraryStatusFilter } from './library.logic';
         [attr.aria-label]="'library.statusLabel' | translate"
         class="fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] animate-modal-in flex-col overflow-y-auto rounded-t-2xl border-t border-border bg-surface px-3 pt-3 pb-[max(env(safe-area-inset-bottom),16px)]"
       >
-        <h2 class="px-2 pb-2 text-[15px] font-semibold">{{ 'library.statusLabel' | translate }}</h2>
+        <h2 class="px-2 pb-2 text-body font-semibold">{{ 'library.statusLabel' | translate }}</h2>
         <div role="radiogroup" [attr.aria-label]="'library.statusLabel' | translate" class="flex flex-col">
           @for (s of statuses(); track s) {
             <button
@@ -62,11 +62,11 @@ import { LibraryStatusFilter } from './library.logic';
               role="radio"
               [attr.aria-checked]="s === status()"
               (click)="pick(s)"
-              class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-[15px]"
+              class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-body"
               [class]="s === status() ? 'bg-brand-tint text-brand-lighter' : 'text-text-2'"
             >
               <span class="flex-1">{{ 'library.status.' + s | translate }}</span>
-              <span class="font-mono text-[13px] opacity-70">{{ counts()?.[s] ?? '…' }}</span>
+              <span class="font-mono text-label opacity-70">{{ counts()?.[s] ?? '…' }}</span>
               <svg
                 [lucideIcon]="icons.check"
                 [size]="16"

@@ -1,8 +1,8 @@
 <app-auth-shell>
-  <h1 class="text-[30px] font-semibold tracking-[-0.02em] md:text-[28px]">{{ 'auth.verifyEmail.title' | translate }}</h1>
+  <h1 class="text-h1 font-semibold tracking-[-0.02em] md:text-stat">{{ 'auth.verifyEmail.title' | translate }}</h1>
   @switch (status()) {
     @case ('verifying') {
-      <p class="text-[15px] text-muted" role="status">{{ 'auth.verifyEmail.verifying' | translate }}</p>
+      <p class="text-body text-muted" role="status">{{ 'auth.verifyEmail.verifying' | translate }}</p>
     }
     @case ('success') {
       <p class="rounded-[10px] border border-border bg-surface px-4 py-3 text-sm leading-relaxed text-success">

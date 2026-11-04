@@ -5,15 +5,15 @@
 >
   <!-- Identity + sub-nav (web) / identity header (mobile) -->
   <aside class="flex flex-col gap-1.5 lg:sticky lg:top-8 lg:self-start">
-    <h1 class="font-display mb-2 text-[28px] font-bold tracking-[-0.03em] lg:sr-only">{{ 'profile.title' | translate }}</h1>
+    <h1 class="font-display mb-2 text-stat font-bold tracking-[-0.03em] lg:sr-only">{{ 'profile.title' | translate }}</h1>
     <div class="flex items-center gap-3.5 lg:flex-col lg:items-start lg:gap-1.5">
       <app-avatar class="lg:mb-3.5" size="lg" [avatar]="user()?.avatar" [name]="displayName()" />
       <div class="flex min-w-0 flex-col gap-0.5 lg:gap-1.5">
         @if (user(); as u) {
-          <span class="truncate text-[21px] font-bold tracking-[-0.02em] lg:text-[26px]" [attr.title]="displayName()">{{ displayName() }}</span>
-          <span class="truncate text-[13px] text-muted lg:text-sm" [title]="u.email">{{ u.email }}</span>
+          <span class="truncate text-title font-bold tracking-[-0.02em] lg:text-stat" [attr.title]="displayName()">{{ displayName() }}</span>
+          <span class="truncate text-label text-muted lg:text-sm" [title]="u.email">{{ u.email }}</span>
           @if (memberSince(); as since) {
-            <span class="mt-1 text-xs text-faint lg:text-[13px]">{{ 'profile.memberSince' | translate: { date: since } }}</span>
+            <span class="mt-1 text-xs text-faint lg:text-label">{{ 'profile.memberSince' | translate: { date: since } }}</span>
           }
         } @else {
           <app-skeleton class="h-6 w-40 rounded-md" />
@@ -46,7 +46,7 @@
     <nav class="mt-4 overflow-hidden rounded-xl border border-card-border card-glass lg:hidden" [attr.aria-label]="'profile.sectionsLabel' | translate" data-profile-rows>
       @for (row of mobileRows; track row.labelKey; let last = $last) {
         @if (row.kind === 'route') {
-          <a [routerLink]="row.route" class="flex items-center gap-3 border-border px-3.5 py-[15px] text-[15px]" [class.border-b]="!last">
+          <a [routerLink]="row.route" class="flex items-center gap-3 border-border px-3.5 py-[15px] text-body" [class.border-b]="!last">
             <svg [lucideIcon]="row.icon" [size]="18" class="shrink-0 text-brand-light"></svg>
             {{ row.labelKey | translate }}
             <svg [lucideIcon]="icons.chevronRight" [size]="18" class="ml-auto shrink-0 text-faint"></svg>
@@ -55,7 +55,7 @@
           <button
             type="button"
             (click)="logout()"
-            class="flex w-full items-center gap-3 border-border px-3.5 py-[15px] text-left text-[15px] text-danger"
+            class="flex w-full items-center gap-3 border-border px-3.5 py-[15px] text-left text-body text-danger"
             [class.border-b]="!last"
           >
             <svg [lucideIcon]="row.icon" [size]="18" class="shrink-0 text-danger"></svg>
@@ -65,7 +65,7 @@
           <button
             type="button"
             (click)="scrollTo(row.anchor)"
-            class="flex w-full items-center gap-3 border-border px-3.5 py-[15px] text-left text-[15px]"
+            class="flex w-full items-center gap-3 border-border px-3.5 py-[15px] text-left text-body"
             [class.border-b]="!last"
           >
             <svg [lucideIcon]="row.icon" [size]="18" class="shrink-0 text-brand-light"></svg>
@@ -92,7 +92,7 @@
                 formControlName="username"
                 autocomplete="username"
                 autocapitalize="off"
-                class="h-[46px] w-full rounded-[10px] border border-border bg-bg px-3.5 text-[16px] text-text md:text-[15px]"
+                class="h-[46px] w-full rounded-[10px] border border-border bg-bg px-3.5 text-lead text-text md:text-body"
               />
               @if (form.controls.username.touched && form.controls.username.hasError('required')) {
                 <p class="text-xs text-danger">{{ 'profile.usernameRequired' | translate }}</p>
@@ -154,7 +154,7 @@
           <span class="flex min-w-0 items-center gap-2">
             <span class="truncate" [title]="u.email">{{ u.email }}</span>
             @if (u.googleLinked) {
-              <span class="shrink-0 rounded-full border border-border px-2 py-0.5 text-[11px] text-text-3">Google</span>
+              <span class="shrink-0 rounded-full border border-border px-2 py-0.5 text-caption text-text-3">Google</span>
             }
           </span>
         </div>
@@ -236,7 +236,7 @@
                 />
               </div>
               @for (group of achievementGroups(); track group.category) {
-                <h3 class="mt-5 mb-2.5 flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-faint uppercase">
+                <h3 class="mt-5 mb-2.5 flex items-center gap-2 text-caption font-semibold tracking-[0.08em] text-faint uppercase">
                   {{ 'achievements.categories.' + group.category | translate }}
                   <span class="h-px flex-1 bg-divider" aria-hidden="true"></span>
                   <span class="font-mono tracking-normal normal-case">{{ group.unlocked }}/{{ group.items.length }}</span>
@@ -255,7 +255,7 @@
               type="button"
               (click)="showAllAchievements.set(!showAllAchievements())"
               [attr.aria-expanded]="showAllAchievements()"
-              class="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border py-2.5 text-[13px] text-text-2 hover:border-border-strong"
+              class="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border py-2.5 text-label text-text-2 hover:border-border-strong"
             >
               {{ (showAllAchievements() ? 'achievements.showLess' : 'achievements.showAll') | translate: { total: list.length } }}
               <svg [lucideIcon]="icons.chevronDown" [size]="16" class="transition-transform" [class.rotate-180]="showAllAchievements()"></svg>
@@ -340,7 +340,7 @@
         <select
           id="pref-platform"
           (change)="setPlatform($any($event.target).value)"
-          class="max-w-[55%] rounded-lg border border-border bg-bg px-3 py-[7px] text-[13px] text-text"
+          class="max-w-[55%] rounded-lg border border-border bg-bg px-3 py-[7px] text-label text-text"
         >
           @for (group of platformGroups(); track group.family) {
             <optgroup [label]="'platformFamily.' + group.family | translate">
@@ -376,7 +376,7 @@
               <span class="text-muted">{{ 'profile.reminder.time' | translate }}</span>
               <input
                 type="time"
-                class="rounded-lg border border-border bg-bg px-3 py-[7px] font-mono text-[13px] text-text"
+                class="rounded-lg border border-border bg-bg px-3 py-[7px] font-mono text-label text-text"
                 [value]="preferences.diaryReminderTime()"
                 [disabled]="reminderBusy()"
                 (change)="setReminderTime($any($event.target).value)"
@@ -401,7 +401,7 @@
           } @else if (installPrompt.showIosHint()) {
             <span class="text-right text-xs text-text-3">{{ 'profile.installIosHint' | translate }}</span>
           } @else {
-            <span class="text-[13px] text-faint">{{ 'profile.appInstalled' | translate }}</span>
+            <span class="text-label text-faint">{{ 'profile.appInstalled' | translate }}</span>
           }
           <p class="w-full text-xs text-faint">{{ 'profile.appHint' | translate }}</p>
         </div>
@@ -415,7 +415,7 @@
             target="_blank"
             rel="noopener"
             (click)="androidApp.open($event)"
-            class="press flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-[7px] text-[13px] font-semibold text-text hover:bg-hover"
+            class="press flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-[7px] text-label font-semibold text-text hover:bg-hover"
           >
             <svg [lucideIcon]="icons.install" [size]="14"></svg>
             {{ androidApp.labelKey | translate }}
@@ -467,7 +467,7 @@
     <button
       type="button"
       (click)="logout()"
-      class="rounded-xl border border-border py-[15px] text-[15px] text-danger hover:bg-danger-bg lg:hidden"
+      class="rounded-xl border border-border py-[15px] text-body text-danger hover:bg-danger-bg lg:hidden"
     >
       {{ 'nav.logout' | translate }}
     </button>

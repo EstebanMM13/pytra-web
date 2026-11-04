@@ -80,7 +80,7 @@ import { StatStrip } from './stat-strip';
     <ng-template #body>
     <div class="@container flex h-full flex-col" [class]="layout().body">
       <p
-        class="flex min-w-0 items-center gap-1.5 leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5"
+        class="flex min-w-0 items-center gap-1.5 leading-4 text-text-3 md:gap-2 md:text-label md:leading-5"
         [class]="layout().label"
         [class.justify-center]="centered()"
       >
@@ -103,7 +103,7 @@ import { StatStrip } from './stat-strip';
         <span data-figure [class]="valueClass()">{{ display() }}</span>
       </p>
       @if (hint()) {
-        <p class="mt-1.5 line-clamp-2 text-[11px] leading-snug text-muted md:text-xs" [class.text-center]="centered()" [attr.title]="hint()">{{ hint() }}</p>
+        <p class="mt-1.5 line-clamp-2 text-caption leading-snug text-muted md:text-xs" [class.text-center]="centered()" [attr.title]="hint()">{{ hint() }}</p>
       }
       @switch (visual()) {
         @case ('trend') {
@@ -222,8 +222,8 @@ const COUNT_UP_MS = 600;
 const STAT_CARD_LAYOUT = {
   default: {
     body: 'p-3 [--fig-max:22px] md:px-[18px] md:py-4 md:[--fig-max:26px] lg:[--fig-max:28px]',
-    label: 'text-[11px]',
-    figure: 'mt-1.5 text-[22px] leading-[28px] md:mt-2 md:leading-[34px]',
+    label: 'text-caption',
+    figure: 'mt-1.5 text-title leading-[28px] md:mt-2 md:leading-[34px]',
   },
   large: {
     body: 'justify-center p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]',

@@ -81,7 +81,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
           <input
             type="date"
             data-diary-date
-            class="rounded-lg border border-border bg-bg px-3 py-2.5 text-[15px] text-text"
+            class="rounded-lg border border-border bg-bg px-3 py-2.5 text-body text-text"
             [min]="minDate"
             [max]="maxDate"
             [value]="currentDate()"
@@ -103,7 +103,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                   <button
                     type="button"
                     (click)="addGame(chip)"
-                    class="press flex max-w-full items-center gap-1.5 rounded-full border border-brand-line bg-brand-tint px-3 py-1.5 text-[13px] font-medium text-brand-light"
+                    class="press flex max-w-full items-center gap-1.5 rounded-full border border-brand-line bg-brand-tint px-3 py-1.5 text-label font-medium text-brand-light"
                   >
                     <svg
                       [lucideIcon]="icons.plus"
@@ -130,7 +130,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                 id="diary-game-search"
                 type="search"
                 autocomplete="off"
-                class="w-full rounded-lg border border-border bg-bg py-2.5 pr-3 pl-9 text-[15px] text-text"
+                class="w-full rounded-lg border border-border bg-bg py-2.5 pr-3 pl-9 text-body text-text"
                 [placeholder]="'diary.editor.searchPlaceholder' | translate"
                 [value]="query()"
                 (input)="query.set($any($event.target).value)"
@@ -184,10 +184,10 @@ type PlatformOptions = PlatformRef[] | 'loading';
                     [name]="game.gameName"
                   />
                   <div class="min-w-0 flex-1">
-                    <p class="text-[15px] font-medium wrap-break-word">{{ game.gameName }}</p>
+                    <p class="text-body font-medium wrap-break-word">{{ game.gameName }}</p>
                     @if (game.synced) {
                       <span
-                        class="mt-1 inline-flex items-center gap-1 rounded-full bg-hover px-2 py-0.5 text-[11px] text-text-2"
+                        class="mt-1 inline-flex items-center gap-1 rounded-full bg-hover px-2 py-0.5 text-caption text-text-2"
                         data-synced-tag
                       >
                         <svg [lucideIcon]="icons.refreshCw" [size]="11" aria-hidden="true"></svg>
@@ -235,7 +235,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                     }
                     <span class="text-xs text-muted">{{ 'diary.editor.whichPlatform' | translate }}</span>
                     <select
-                      class="rounded-lg border border-border bg-bg px-3 py-2 text-[15px] text-text"
+                      class="rounded-lg border border-border bg-bg px-3 py-2 text-body text-text"
                       (change)="pickPlatform(i, $any($event.target).value)"
                     >
                       <option value="" [selected]="game.platformId === null" disabled>
@@ -271,7 +271,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                             'diary.editor.whichRun' | translate
                           }}</span>
                           <select
-                            class="rounded-lg border border-border bg-bg px-3 py-2 text-[15px] text-text"
+                            class="rounded-lg border border-border bg-bg px-3 py-2 text-body text-text"
                             (change)="pickRun(i, $any($event.target).value)"
                           >
                             <option value="" [selected]="game.experienceId === null" disabled>
@@ -289,7 +289,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                       }
                       <button
                         type="button"
-                        class="self-start text-[13px] font-semibold text-brand-light hover:underline"
+                        class="self-start text-label font-semibold text-brand-light hover:underline"
                         (click)="newRun(game.gameId)"
                       >
                         + {{ 'diary.editor.newRun' | translate }}
@@ -314,7 +314,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                     @for (step of hourSteps; track step) {
                       <button
                         type="button"
-                        class="min-h-11 min-w-0 flex-1 rounded-lg border border-brand-line bg-brand-tint font-mono text-[13px] font-semibold text-brand-light hover:bg-brand-tint/80"
+                        class="min-h-11 min-w-0 flex-1 rounded-lg border border-brand-line bg-brand-tint font-mono text-label font-semibold text-brand-light hover:bg-brand-tint/80"
                         [attr.aria-label]="
                           'run.inlineAddHours' | translate: { hours: stepLabel(step) }
                         "
@@ -364,7 +364,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
               rows="3"
               data-day-note
               maxlength="1000"
-              class="rounded-lg border border-border bg-bg px-3 py-2 text-[15px] text-text"
+              class="rounded-lg border border-border bg-bg px-3 py-2 text-body text-text"
               [placeholder]="'diary.editor.dayNotePlaceholder' | translate"
               [value]="note()"
               (input)="note.set($any($event.target).value)"
@@ -377,7 +377,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
               data-delete-day
               (click)="deleteDay()"
               [disabled]="saving()"
-              class="flex items-center justify-center gap-2 self-start rounded-lg border border-border px-3.5 py-2 text-[13px] font-semibold text-danger hover:bg-hover disabled:opacity-50"
+              class="flex items-center justify-center gap-2 self-start rounded-lg border border-border px-3.5 py-2 text-label font-semibold text-danger hover:bg-hover disabled:opacity-50"
             >
               <svg [lucideIcon]="icons.trash" [size]="15" aria-hidden="true"></svg>
               {{

@@ -76,7 +76,7 @@ export function fitLabels(bars: readonly MiniBar[], maxFull = FULL_LABELS_MAX): 
       <button
         type="button"
         (click)="expanded.set(true)"
-        class="tap-area mt-2 self-end text-[13px] font-medium text-brand-light hover:underline"
+        class="tap-area mt-2 self-end text-label font-medium text-brand-light hover:underline"
         aria-haspopup="dialog"
         data-show-all
       >

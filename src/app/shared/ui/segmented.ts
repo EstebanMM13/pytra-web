@@ -60,7 +60,7 @@ export class Segmented<T extends string = string> {
       // a longer label takes the room it needs at a large system font size). Touch hit area: they
       // grow to 40px on coarse pointers instead of taking the invisible tap-area overlay.
       this.stretch() ? 'flex-1 pointer-coarse:min-h-10' : 'tap-area',
-      this.size() === 'sm' ? 'rounded-[5px] px-2 py-[3px] text-xs' : 'rounded-md py-1.5 text-[13px]',
+      this.size() === 'sm' ? 'rounded-[5px] px-2 py-[3px] text-xs' : 'rounded-md py-1.5 text-label',
       // Stretched options share narrow widths (4 statuses on a phone): tighter padding keeps labels whole.
       this.size() === 'sm' ? '' : this.stretch() ? 'px-2' : 'px-3',
       active

@@ -156,7 +156,7 @@ export class GenreChips {
     splitGenres(this.genres(), this.fit() ? this.fitCount() : HERO_GENRE_LIMIT),
   );
   protected readonly chipClass = computed(() =>
-    this.size() === 'md' ? 'px-3 py-1 text-[13px]' : 'px-2.5 py-0.5 text-xs',
+    this.size() === 'md' ? 'px-3 py-1 text-label' : 'px-2.5 py-0.5 text-xs',
   );
   protected readonly popover = signal(false);
   /** Phones: the folded genres shown in place. */

@@ -21,7 +21,7 @@ const CATEGORY_ICONS = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
-      'inline-flex shrink-0 items-center rounded-full border border-border px-1.5 py-px text-[11px] leading-4 font-medium whitespace-nowrap text-text-3',
+      'inline-flex shrink-0 items-center rounded-full border border-border px-1.5 py-px text-caption leading-4 font-medium whitespace-nowrap text-text-3',
   },
   template: `
     <span class="inline-flex items-center gap-1" [title]="'category.' + category() | translate">
@@ -43,7 +43,7 @@ export class CategoryBadge {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
-      'inline-flex shrink-0 items-center gap-1 rounded-full bg-gold-tint px-1.5 py-px text-[11px] leading-4 font-medium whitespace-nowrap text-gold-tint-fg',
+      'inline-flex shrink-0 items-center gap-1 rounded-full bg-gold-tint px-1.5 py-px text-caption leading-4 font-medium whitespace-nowrap text-gold-tint-fg',
   },
   template: `
     <svg [lucideIcon]="icons.calendar" [size]="11" class="shrink-0" aria-hidden="true"></svg>

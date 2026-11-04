@@ -7,7 +7,7 @@
 >
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-4 md:gap-[18px]">
     @if (reviewIntro(); as intro) {
-      <p class="text-[13px] leading-relaxed text-muted" data-review-intro>{{ intro | translate }}</p>
+      <p class="text-label leading-relaxed text-muted" data-review-intro>{{ intro | translate }}</p>
     }
 
     @if (autofillOpen()) {
@@ -30,7 +30,7 @@
     }
 
     <div class="flex flex-col gap-2">
-      <label for="game-edit-name" class="text-[13px] text-text-3">{{ 'game.form.name' | translate }}</label>
+      <label for="game-edit-name" class="text-label text-text-3">{{ 'game.form.name' | translate }}</label>
       <input
         id="game-edit-name"
         [attr.data-autofocus]="autofocusName ? '' : null"
@@ -46,19 +46,19 @@
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-3.5">
       <div class="flex flex-col gap-2">
-        <label for="game-edit-developer" class="text-[13px] text-text-3">{{ 'game.form.developer' | translate }}</label>
+        <label for="game-edit-developer" class="text-label text-text-3">{{ 'game.form.developer' | translate }}</label>
         <input id="game-edit-developer" type="text" formControlName="developer" class="game-edit-input" />
       </div>
       <div class="flex flex-col gap-2">
-        <label for="game-edit-publisher" class="text-[13px] text-text-3">{{ 'game.form.publisher' | translate }}</label>
+        <label for="game-edit-publisher" class="text-label text-text-3">{{ 'game.form.publisher' | translate }}</label>
         <input id="game-edit-publisher" type="text" formControlName="publisher" class="game-edit-input" />
       </div>
       <div class="flex flex-col gap-2">
-        <label for="game-edit-release" class="text-[13px] text-text-3">{{ 'game.form.releaseDate' | translate }}</label>
+        <label for="game-edit-release" class="text-label text-text-3">{{ 'game.form.releaseDate' | translate }}</label>
         <input id="game-edit-release" type="date" formControlName="releaseDate" class="game-edit-input font-mono" />
       </div>
       <div class="flex flex-col gap-2">
-        <label id="game-edit-saga-label" for="game-edit-saga" class="text-[13px] text-text-3">{{
+        <label id="game-edit-saga-label" for="game-edit-saga" class="text-label text-text-3">{{
           'game.form.saga' | translate
         }}</label>
         <app-combobox
@@ -79,7 +79,7 @@
     </div>
 
     <div class="flex flex-col gap-2">
-      <label for="game-edit-cover" class="text-[13px] text-text-3">{{ 'game.form.coverUrl' | translate }}</label>
+      <label for="game-edit-cover" class="text-label text-text-3">{{ 'game.form.coverUrl' | translate }}</label>
       <div class="flex items-center gap-3">
         <input
           id="game-edit-cover"
@@ -125,7 +125,7 @@
     </div>
 
     <div class="flex flex-col gap-2">
-      <span id="game-edit-category" class="text-[13px] text-text-3">{{ 'game.form.category' | translate }}</span>
+      <span id="game-edit-category" class="text-label text-text-3">{{ 'game.form.category' | translate }}</span>
       <app-segmented
         stretch
         aria-labelledby="game-edit-category"
@@ -162,7 +162,7 @@
     </div>
 
     <div class="flex flex-col gap-2">
-      <span id="game-edit-genres" class="text-[13px] text-text-3">{{ 'game.form.genres' | translate }}</span>
+      <span id="game-edit-genres" class="text-label text-text-3">{{ 'game.form.genres' | translate }}</span>
       <app-combobox
         multiple
         creatable
@@ -186,7 +186,7 @@
                 (click)="addSuggestedGenre(name)"
                 [disabled]="creatingGenre()"
                 [attr.aria-label]="'game.autofill.addGenre' | translate: { name }"
-                class="flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-[6px] text-[13px] text-text-2 hover:border-border-strong disabled:opacity-50"
+                class="flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-[6px] text-label text-text-2 hover:border-border-strong disabled:opacity-50"
               >
                 <svg [lucideIcon]="icons.plus" [size]="13"></svg>
                 {{ name }}
@@ -203,7 +203,7 @@
           type="button"
           (click)="remove()"
           [disabled]="deleting()"
-          class="flex items-center gap-2 rounded-md text-[13px] font-medium text-danger hover:underline disabled:opacity-50"
+          class="flex items-center gap-2 rounded-md text-label font-medium text-danger hover:underline disabled:opacity-50"
         >
           <svg [lucideIcon]="icons.trash" [size]="15"></svg>
           {{ 'game.delete' | translate }}

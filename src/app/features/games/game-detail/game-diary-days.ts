@@ -38,7 +38,7 @@ const VISIBLE_DAYS = 8;
           class="mb-3"
           [label]="'game.diaryDays' | translate"
         >
-          <span class="font-mono text-[13px] text-text-3">{{ total() }}</span>
+          <span class="font-mono text-label text-text-3">{{ total() }}</span>
         </app-section-header>
         <ul class="text-sm">
           @for (day of visible(); track day.date) {
@@ -62,7 +62,7 @@ const VISIBLE_DAYS = 8;
           <button
             type="button"
             (click)="expanded.set(true)"
-            class="tap-area mt-2 text-[13px] font-semibold text-brand-light hover:underline"
+            class="tap-area mt-2 text-label font-semibold text-brand-light hover:underline"
           >
             {{ 'common.showAll' | translate }} ({{ days()!.length }})
           </button>

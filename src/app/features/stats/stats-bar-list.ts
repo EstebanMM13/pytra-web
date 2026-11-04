@@ -100,7 +100,7 @@ export const STATS_LIST_PREVIEW = 6;
         type="button"
         (click)="expanded.set(!expanded())"
         [attr.aria-expanded]="expanded()"
-        class="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border py-2.5 text-[13px] text-text-2 hover:border-border-strong"
+        class="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border py-2.5 text-label text-text-2 hover:border-border-strong"
         data-bar-toggle
       >
         {{ (expanded() ? 'stats.showLess' : 'stats.showAll') | translate: { total: bars().length } }}
@@ -114,7 +114,7 @@ export const STATS_LIST_PREVIEW = 6;
         @let rank = reverses() ? bars().length - index : index + 1;
         @if (rank === 1) {
           <span
-            class="mr-1 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-gold-tint font-mono text-[11px] font-semibold text-gold-tint-fg ring-1 ring-gold/45 ring-inset"
+            class="mr-1 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-gold-tint font-mono text-caption font-semibold text-gold-tint-fg ring-1 ring-gold/45 ring-inset"
             data-rank-first
             >1</span
           >

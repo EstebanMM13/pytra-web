@@ -52,7 +52,7 @@ let nextTitleId = 0;
         </span>
         <div class="min-w-0">
           <h2 [id]="titleId" class="text-lg font-semibold tracking-[-0.01em]">{{ name() }}</h2>
-          <p class="text-[13px] text-muted">{{ subtitle() }}</p>
+          <p class="text-label text-muted">{{ subtitle() }}</p>
         </div>
         <div class="platform-badge empty:hidden"><ng-content select="[platformBadge]" /></div>
       </header>

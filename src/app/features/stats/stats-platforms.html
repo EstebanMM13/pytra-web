@@ -20,15 +20,15 @@
         </app-section-header>
         <div class="flex items-center gap-4 md:gap-8">
           <app-stats-donut class="size-32 md:size-40" [slices]="hero.slices">
-            <span class="font-mono text-[22px] leading-none font-bold tracking-[-0.03em] md:text-3xl" data-platform-top-share>{{
+            <span class="font-mono text-title leading-none font-bold tracking-[-0.03em] md:text-3xl" data-platform-top-share>{{
               hero.slices[0].percent
             }}</span>
-            <span class="mt-1 text-[11px] leading-tight wrap-break-word text-text-3 md:text-xs">{{ hero.slices[0].name }}</span>
+            <span class="mt-1 text-caption leading-tight wrap-break-word text-text-3 md:text-xs">{{ hero.slices[0].name }}</span>
           </app-stats-donut>
           <!-- Capped width: on wide screens the percentages stay next to their names. -->
           <ul class="flex min-w-0 flex-1 flex-col gap-2 md:max-w-80" data-platform-share-legend>
             @for (slice of hero.slices; track slice.key) {
-              <li class="flex items-start gap-2 text-[13px] leading-5 md:text-sm">
+              <li class="flex items-start gap-2 text-label leading-5 md:text-sm">
                 <span class="mt-1.5 size-2.5 shrink-0 rounded-full" [style.background-color]="slice.color" aria-hidden="true"></span>
                 <span class="min-w-0 flex-1 wrap-break-word text-text-2">{{ slice.name }}</span>
                 <span class="shrink-0 font-mono text-xs leading-5 text-muted">{{ slice.percent }}</span>

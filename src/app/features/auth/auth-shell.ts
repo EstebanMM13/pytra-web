@@ -55,7 +55,7 @@ import { ThemeToggle } from './theme-toggle';
           <p class="tagline tagline--panel max-w-[480px] text-text-2">{{ 'auth.panel.tagline' | translate }}</p>
         </div>
 
-        <ul class="relative flex flex-wrap gap-2.5 text-[13px] text-text-2">
+        <ul class="relative flex flex-wrap gap-2.5 text-label text-text-2">
           @for (key of panelPoints; track key) {
             <li class="rounded-full border border-card-border bg-surface/60 px-3.5 py-1.5 backdrop-blur-sm">
               {{ key | translate }}
@@ -72,7 +72,7 @@ import { ThemeToggle } from './theme-toggle';
           <div class="mb-5 flex flex-col gap-3 md:hidden">
             <div class="flex items-center gap-3 self-start">
               <app-pytra-mark class="size-12 drop-shadow-[0_6px_18px_rgba(114,77,206,0.4)]" />
-              <app-pytra-wordmark class="text-[36px] font-bold tracking-[-0.04em]" />
+              <app-pytra-wordmark class="text-hero font-bold tracking-[-0.04em]" />
             </div>
             <ng-container *ngTemplateOutlet="slogan; context: { $implicit: 'hero--compact' }" />
             <p class="tagline text-text-2">{{ 'auth.panel.tagline' | translate }}</p>

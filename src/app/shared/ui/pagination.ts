@@ -38,7 +38,7 @@ export function pageSlots(current: number, total: number): PageSlot[] {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (total() > 1) {
-      <nav class="flex items-center gap-1 text-[13px]" [attr.aria-label]="'pagination.label' | translate">
+      <nav class="flex items-center gap-1 text-label" [attr.aria-label]="'pagination.label' | translate">
         <button
           type="button"
           class="rounded-md p-1 text-muted hover:text-text disabled:opacity-40"

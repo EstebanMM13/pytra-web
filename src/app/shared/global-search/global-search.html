@@ -42,7 +42,7 @@
         <div role="group" [attr.aria-labelledby]="'global-search-group-' + group.kind" class="not-first:mt-1">
           <p
             [id]="'global-search-group-' + group.kind"
-            class="px-3 pt-2 pb-1 text-[11px] font-semibold tracking-wider text-faint uppercase"
+            class="px-3 pt-2 pb-1 text-caption font-semibold tracking-wider text-faint uppercase"
           >
             {{ (query().trim() || group.kind !== 'game' ? groupLabelKeys[group.kind] : 'search.groups.recent') | translate }}
           </p>

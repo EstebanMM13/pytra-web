@@ -10,11 +10,11 @@
     <!-- Phones: the game takes the full row so its name is not cut by the run field -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_96px] sm:gap-3 md:grid-cols-[minmax(0,1fr)_120px] md:gap-3.5">
       <div class="relative flex min-w-0 flex-col gap-2">
-        <label for="run-form-game" class="text-[13px] text-text-3">{{ 'runForm.game' | translate }}</label>
+        <label for="run-form-game" class="text-label text-text-3">{{ 'runForm.game' | translate }}</label>
         @if (locked()) {
           <div
             id="run-form-game"
-            class="flex min-h-[50px] items-center gap-2.5 rounded-xl border border-border bg-surface px-3.5 text-base md:min-h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+            class="flex min-h-[50px] items-center gap-2.5 rounded-xl border border-border bg-surface px-3.5 text-base md:min-h-[46px] md:rounded-[10px] md:bg-bg md:text-body"
             [attr.aria-readonly]="true"
           >
             @if (lockedGame(); as g) {
@@ -51,7 +51,7 @@
               (blur)="listOpen.set(false); form.controls.gameId.markAsTouched()"
               (keydown)="onGameKeydown($event)"
               [placeholder]="'runForm.gamePlaceholder' | translate"
-              class="h-[50px] min-w-0 flex-1 border-0 bg-transparent text-base text-text focus:shadow-none md:h-[46px] md:text-[15px]"
+              class="h-[50px] min-w-0 flex-1 border-0 bg-transparent text-base text-text focus:shadow-none md:h-[46px] md:text-body"
             />
             @if (selectedGame()?.sagaName; as saga) {
               <span class="hidden max-w-[40%] shrink-0 truncate text-xs text-brand-light sm:inline">
@@ -102,14 +102,14 @@
       </div>
 
       <div class="flex min-w-0 flex-col gap-2">
-        <label for="run-form-label" class="text-[13px] text-text-3">{{ 'runForm.run' | translate }}</label>
+        <label for="run-form-label" class="text-label text-text-3">{{ 'runForm.run' | translate }}</label>
         <input
           id="run-form-label"
           type="text"
           formControlName="runLabel"
           [attr.data-autofocus]="locked() ? '' : null"
           [attr.aria-invalid]="showError('runLabel')"
-          class="h-[50px] w-full rounded-xl border bg-surface px-3.5 font-mono text-base text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+          class="h-[50px] w-full rounded-xl border bg-surface px-3.5 font-mono text-base text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-body"
           [class]="showError('runLabel') ? 'border-danger' : 'border-border'"
         />
         @if (showError('runLabel')) {
@@ -120,7 +120,7 @@
 
     <!-- Status -->
     <div class="flex flex-col gap-2">
-      <span id="run-form-status" class="text-[13px] text-text-3">{{ 'runForm.status' | translate }}</span>
+      <span id="run-form-status" class="text-label text-text-3">{{ 'runForm.status' | translate }}</span>
       <app-segmented
         stretch
         aria-labelledby="run-form-status"
@@ -132,7 +132,7 @@
 
     <!-- Platform -->
     <div class="flex flex-col gap-2">
-      <label for="run-form-platform" class="text-[13px] text-text-3">{{ 'runForm.platform' | translate }}</label>
+      <label for="run-form-platform" class="text-label text-text-3">{{ 'runForm.platform' | translate }}</label>
       <div class="flex flex-wrap items-center gap-2">
         <div class="relative min-w-0 flex-1">
           <span
@@ -146,7 +146,7 @@
             formControlName="platformId"
             [attr.aria-invalid]="showError('platformId')"
             [attr.aria-busy]="platformGroups() === null"
-            class="h-[50px] w-full rounded-xl border bg-surface pr-3.5 pl-8 text-base text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+            class="h-[50px] w-full rounded-xl border bg-surface pr-3.5 pl-8 text-base text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-body"
             [class]="showError('platformId') ? 'border-danger' : 'border-border'"
           >
             @if (platformGroups() === null) {
@@ -166,7 +166,7 @@
         @if (!addingPlatform()) {
           <button
             type="button"
-            class="shrink-0 rounded-full border border-dashed border-border px-3.5 py-[9px] text-sm text-text-2 hover:border-border-strong md:py-[7px] md:text-[13px]"
+            class="shrink-0 rounded-full border border-dashed border-border px-3.5 py-[9px] text-sm text-text-2 hover:border-border-strong md:py-[7px] md:text-label"
             (click)="startAddPlatform()"
           >
             {{ 'runForm.addPlatform' | translate }}
@@ -186,12 +186,12 @@
             (keydown.enter)="$event.preventDefault(); createPlatform()"
             (keydown.escape)="$event.preventDefault(); $event.stopPropagation(); cancelAddPlatform()"
             [attr.aria-invalid]="newPlatformInvalid()"
-            class="h-[46px] min-w-0 flex-1 rounded-[10px] border bg-surface px-3.5 text-base text-text md:h-[42px] md:bg-bg md:text-[15px]"
+            class="h-[46px] min-w-0 flex-1 rounded-[10px] border bg-surface px-3.5 text-base text-text md:h-[42px] md:bg-bg md:text-body"
             [class]="newPlatformInvalid() ? 'border-danger' : 'border-border'"
           />
           <button
             type="button"
-            class="rounded-full border border-brand bg-brand-tint px-3.5 py-[9px] text-sm text-brand-lighter disabled:opacity-60 md:py-[7px] md:text-[13px]"
+            class="rounded-full border border-brand bg-brand-tint px-3.5 py-[9px] text-sm text-brand-lighter disabled:opacity-60 md:py-[7px] md:text-label"
             [disabled]="creatingPlatform()"
             (click)="createPlatform()"
           >
@@ -199,7 +199,7 @@
           </button>
           <button
             type="button"
-            class="rounded-full border border-border px-3.5 py-[9px] text-sm text-text-2 hover:border-border-strong md:py-[7px] md:text-[13px]"
+            class="rounded-full border border-border px-3.5 py-[9px] text-sm text-text-2 hover:border-border-strong md:py-[7px] md:text-label"
             (click)="cancelAddPlatform()"
           >
             {{ 'runForm.cancelAddPlatform' | translate }}
@@ -368,7 +368,7 @@
 
     <!-- Summary -->
     <div class="flex flex-col gap-2">
-      <label for="run-form-summary" class="text-[13px] text-text-3">{{ 'runForm.summary' | translate }}</label>
+      <label for="run-form-summary" class="text-label text-text-3">{{ 'runForm.summary' | translate }}</label>
       <textarea
         id="run-form-summary"
         formControlName="summary"
@@ -402,7 +402,7 @@
     @if (showMore()) {
       <div id="run-form-more" class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-3.5">
         <div class="flex flex-col gap-2">
-          <label for="run-form-pros" class="text-[13px] text-success">{{ 'runForm.pros' | translate }}</label>
+          <label for="run-form-pros" class="text-label text-success">{{ 'runForm.pros' | translate }}</label>
           <textarea
             id="run-form-pros"
             formControlName="pros"
@@ -412,7 +412,7 @@
           ></textarea>
         </div>
         <div class="flex flex-col gap-2">
-          <label for="run-form-cons" class="text-[13px] text-danger">{{ 'runForm.cons' | translate }}</label>
+          <label for="run-form-cons" class="text-label text-danger">{{ 'runForm.cons' | translate }}</label>
           <textarea
             id="run-form-cons"
             formControlName="cons"
@@ -422,7 +422,7 @@
           ></textarea>
         </div>
         <div class="flex flex-col gap-2 md:col-span-2">
-          <label for="run-form-notes" class="text-[13px] text-text-3">{{ 'runForm.notes' | translate }}</label>
+          <label for="run-form-notes" class="text-label text-text-3">{{ 'runForm.notes' | translate }}</label>
           <textarea id="run-form-notes" formControlName="notes" rows="3" class="run-form-textarea"></textarea>
         </div>
       </div>

@@ -51,19 +51,19 @@ const FOCUSABLE =
         <header
           class="flex shrink-0 items-center justify-between gap-3 border-b border-border px-5 pt-[calc(env(safe-area-inset-top)+16px)] pb-4 md:hidden"
         >
-          <button type="button" (click)="cancel()" [disabled]="saving()" class="text-[15px] text-text-3 disabled:opacity-50">
+          <button type="button" (click)="cancel()" [disabled]="saving()" class="text-body text-text-3 disabled:opacity-50">
             {{ (viewOnly() ? 'common.close' : 'common.cancel') | translate }}
           </button>
           <h2 class="min-w-0 text-base font-semibold wrap-break-word">{{ title() }}</h2>
           @if (viewOnly()) {
             <!-- Keeps the title centred -->
-            <span class="invisible text-[15px]" aria-hidden="true">{{ 'common.close' | translate }}</span>
+            <span class="invisible text-body" aria-hidden="true">{{ 'common.close' | translate }}</span>
           } @else {
             <button
               type="button"
               (click)="onSave()"
               [disabled]="saving() || saveDisabled()"
-              class="text-[15px] font-semibold disabled:opacity-50"
+              class="text-body font-semibold disabled:opacity-50"
               [class]="danger() ? 'text-danger' : 'text-brand-lighter'"
             >
               {{ danger() ? saveLabel() : ('common.save' | translate) }}
@@ -73,7 +73,7 @@ const FOCUSABLE =
 
         <!-- Web header -->
         <header class="hidden shrink-0 items-center justify-between gap-4 border-b border-border px-[26px] py-5 md:flex">
-          <h2 class="min-w-0 wrap-break-word text-[19px] font-semibold" [attr.title]="title()">{{ title() }}</h2>
+          <h2 class="min-w-0 wrap-break-word text-title font-semibold" [attr.title]="title()">{{ title() }}</h2>
           <button
             type="button"
             (click)="cancel()" [disabled]="saving()"

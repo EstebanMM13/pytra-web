@@ -38,10 +38,10 @@ import { REAUTH_REQUIRED_KEY, confirmsUsername, deleteAccountErrorKey } from './
         <div class="rounded-[10px] border border-danger/40 bg-danger-bg px-4 py-3 text-sm leading-relaxed text-danger">
           {{ 'profile.delete.warning' | translate }}
         </div>
-        <p class="text-[13px] leading-relaxed text-muted">{{ 'profile.delete.exportHint' | translate }}</p>
+        <p class="text-label leading-relaxed text-muted">{{ 'profile.delete.exportHint' | translate }}</p>
 
         <div class="flex flex-col gap-2">
-          <label for="delete-confirm" class="text-[13px] wrap-break-word text-text-3">
+          <label for="delete-confirm" class="text-label wrap-break-word text-text-3">
             {{ 'profile.delete.confirmLabel' | translate: { username: user().username } }}
           </label>
           <input
@@ -54,20 +54,20 @@ import { REAUTH_REQUIRED_KEY, confirmsUsername, deleteAccountErrorKey } from './
             [value]="confirm()"
             (input)="confirm.set($any($event.target).value)"
             [placeholder]="user().username"
-            class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-[16px] text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+            class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-lead text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-body"
           />
         </div>
 
         @if (user().hasPassword) {
           <div class="flex flex-col gap-2">
-            <label for="delete-password" class="text-[13px] text-text-3">{{ 'profile.delete.password' | translate }}</label>
+            <label for="delete-password" class="text-label text-text-3">{{ 'profile.delete.password' | translate }}</label>
             <input
               id="delete-password"
               type="password"
               autocomplete="current-password"
               [value]="password()"
               (input)="password.set($any($event.target).value)"
-              class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-[16px] text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+              class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-lead text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-body"
             />
           </div>
         }

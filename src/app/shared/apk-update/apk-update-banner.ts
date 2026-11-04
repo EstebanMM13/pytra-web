@@ -20,7 +20,7 @@ import { ApkUpdateService } from '../../core/services/apk-update.service';
     @let s = state();
     @if (s.step !== 'idle') {
       <div
-        class="pointer-events-auto flex w-full max-w-sm animate-modal-in flex-col gap-2.5 rounded-xl border border-border bg-surface px-3.5 py-3 text-[13px] text-text-2 shadow-[0_12px_32px_#0006]"
+        class="pointer-events-auto flex w-full max-w-sm animate-modal-in flex-col gap-2.5 rounded-xl border border-border bg-surface px-3.5 py-3 text-label text-text-2 shadow-[0_12px_32px_#0006]"
       >
         <div class="flex items-center gap-2.5">
           @if (s.step === 'error') {

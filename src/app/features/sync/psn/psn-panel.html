@@ -50,11 +50,11 @@
             {{ avatarInitial() }}
           </span>
           <div class="min-w-0 flex-1">
-            <p class="truncate text-[17px] font-semibold" [title]="s.onlineId || ('psn.accountFallback' | translate)">
+            <p class="truncate text-lead font-semibold" [title]="s.onlineId || ('psn.accountFallback' | translate)">
               {{ s.onlineId || ('psn.accountFallback' | translate) }}
             </p>
             <!-- Separators come from CSS so none is left dangling when a part is missing or a line wraps. -->
-            <div class="mt-[5px] overflow-hidden font-mono text-xs text-muted md:text-[13px]">
+            <div class="mt-[5px] overflow-hidden font-mono text-xs text-muted md:text-label">
               <p class="account-meta">
               @if (linkedGamesCount(); as linked) {
                 <span>{{ 'common.games' | translatePlural: linked }}</span>
@@ -87,7 +87,7 @@
             <button
               type="button"
               (click)="askUnlink()"
-              class="rounded-lg px-2.5 py-[9px] text-[13px] text-muted hover:text-danger"
+              class="rounded-lg px-2.5 py-[9px] text-label text-muted hover:text-danger"
             >
               {{ 'psn.unlink' | translate }}
             </button>
@@ -103,7 +103,7 @@
               type="button"
               (click)="unlink()"
               [disabled]="unlinking()"
-              class="rounded-lg bg-danger-solid px-3.5 py-2 text-[13px] font-semibold text-white hover:opacity-90 disabled:opacity-50"
+              class="rounded-lg bg-danger-solid px-3.5 py-2 text-label font-semibold text-white hover:opacity-90 disabled:opacity-50"
             >
               {{ 'psn.unlinkYes' | translate }}
             </button>
@@ -120,10 +120,10 @@
     } @else {
       <!-- Not linked: PSN has no OAuth, the user types their public online ID. -->
       <form class="flex flex-col gap-3.5" novalidate (submit)="$event.preventDefault(); link()">
-        <h3 class="text-[19px] font-semibold tracking-[-0.01em] md:text-xl">{{ 'psn.linkTitle' | translate }}</h3>
-        <p class="max-w-[60ch] text-[15px] leading-normal text-text-3">{{ 'psn.linkText' | translate }}</p>
+        <h3 class="text-title font-semibold tracking-[-0.01em] md:text-xl">{{ 'psn.linkTitle' | translate }}</h3>
+        <p class="max-w-[60ch] text-body leading-normal text-text-3">{{ 'psn.linkText' | translate }}</p>
         <div class="flex flex-col gap-2">
-          <label for="psn-online-id" class="text-[13px] text-text-3">{{ 'psn.onlineIdLabel' | translate }}</label>
+          <label for="psn-online-id" class="text-label text-text-3">{{ 'psn.onlineIdLabel' | translate }}</label>
           <div class="flex flex-col gap-2.5 md:flex-row">
             <input
               id="psn-online-id"
@@ -138,7 +138,7 @@
               [attr.aria-invalid]="onlineIdInvalid()"
               [attr.aria-describedby]="onlineIdInvalid() ? 'psn-online-id-error' : null"
               [placeholder]="'psn.onlineIdPlaceholder' | translate"
-              class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-[16px] text-text disabled:opacity-50 md:h-[42px] md:max-w-[320px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+              class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-lead text-text disabled:opacity-50 md:h-[42px] md:max-w-[320px] md:rounded-[10px] md:bg-bg md:text-body"
             />
             <button
               type="submit"
@@ -202,7 +202,7 @@
 @if (status()?.linked || pending().length > 0) {
   <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
     <app-section-header collapseKey="psn.pending" [label]="('steam.pendingHeader' | translate: { count: pendingTotal() })" class="mb-1.5">
-      <span class="hidden text-[13px] text-muted md:inline">{{ 'psn.pendingHint' | translate }}</span>
+      <span class="hidden text-label text-muted md:inline">{{ 'psn.pendingHint' | translate }}</span>
     </app-section-header>
     <p class="mb-1 text-xs text-muted md:hidden">{{ 'psn.pendingHint' | translate }}</p>
     @if (enriching()) {
@@ -233,9 +233,9 @@
             <div class="flex min-w-0 items-center justify-between gap-3">
               <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
               <div class="min-w-0 flex-1">
-                <p class="text-[15px] font-semibold break-words">
+                <p class="text-body font-semibold break-words">
                   {{ game.name }}
-                  <span class="ml-1 inline-block rounded-full bg-hover px-2 py-px align-middle font-mono text-[11px] font-medium text-text-3">{{ game.psnPlatform }}</span>
+                  <span class="ml-1 inline-block rounded-full bg-hover px-2 py-px align-middle font-mono text-caption font-medium text-text-3">{{ game.psnPlatform }}</span>
                 </p>
                 @if (lastSession(game); as when) {
                   <p class="mt-1 text-xs text-muted">{{ 'steam.lastSession' | translate: { when } }}</p>
@@ -291,13 +291,13 @@
 <!-- Ignored titles -->
 @if (ignoredTotal() > 0 || ignoredTitles().length > 0 || (linkedGamesCount() ?? 0) > 0) {
   <div class="flex flex-col gap-3">
-    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-label text-muted">
       <button
         type="button"
         (click)="showIgnored.set(!showIgnored())"
         [disabled]="ignoredTitles().length === 0"
         [attr.aria-expanded]="showIgnored()"
-        class="tap-area flex w-fit items-center gap-2 rounded-md text-[13px] text-muted hover:text-text-2"
+        class="tap-area flex w-fit items-center gap-2 rounded-md text-label text-muted hover:text-text-2"
       >
         <svg [lucideIcon]="icons.eyeOff" [size]="15"></svg>
         {{ 'steam.ignoredCount' | translatePlural: ignoredTotal() }}
@@ -311,14 +311,14 @@
 
     @if (showIgnored()) {
       <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
-        <p class="mb-2 text-[13px] text-muted">{{ 'psn.ignoredHint' | translate }}</p>
+        <p class="mb-2 text-label text-muted">{{ 'psn.ignoredHint' | translate }}</p>
         <!-- Secondary list: ~6 rows then internal scroll on every size. -->
         <ul class="scroll-list max-h-[346px]">
           @for (title of ignoredTitles(); track title.titleId) {
             <li class="flex items-center justify-between gap-3 border-t border-divider py-3">
               <span class="min-w-0 text-sm break-words text-text-3">
                 {{ title.name }}
-                <span class="ml-1 font-mono text-[11px] text-muted">{{ title.platform }}</span>
+                <span class="ml-1 font-mono text-caption text-muted">{{ title.platform }}</span>
               </span>
               <button
                 type="button"

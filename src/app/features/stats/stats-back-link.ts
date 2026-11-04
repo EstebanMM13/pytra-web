@@ -17,7 +17,7 @@ import { ICONS } from '../../shared/ui/icons';
     <a
       [routerLink]="link()"
       [queryParams]="queryParams()"
-      class="tap-area -ml-1 inline-flex items-center gap-0.5 rounded-md text-[13px] text-text-3 hover:text-text"
+      class="tap-area -ml-1 inline-flex items-center gap-0.5 rounded-md text-label text-text-3 hover:text-text"
       [attr.aria-label]="aria() | translate"
       data-stats-back
     >

@@ -21,7 +21,7 @@ import { StatsEyebrow } from './stats-eyebrow';
         <app-stats-eyebrow class="mt-3 mb-1" data-stats-eyebrow>{{ text }}</app-stats-eyebrow>
       }
       <h1
-        class="font-display text-[30px] leading-tight font-bold tracking-[-0.035em] wrap-break-word md:text-[40px]"
+        class="font-display text-h1 leading-tight font-bold tracking-[-0.035em] wrap-break-word md:text-display"
         [class.mt-1]="!eyebrow()"
       >
         {{ title() }}

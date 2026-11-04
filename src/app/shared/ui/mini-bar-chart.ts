@@ -61,7 +61,7 @@ export type BarOrientation = 'vertical' | 'horizontal';
     @if (!vertical()) {
       @for (bar of normalized(); track bar.key) {
         <div
-          class="flex items-center gap-3 text-[13px]"
+          class="flex items-center gap-3 text-label"
           [class.relative]="!!bar.link"
           role="listitem"
           [attr.aria-label]="bar.title ?? bar.label"
@@ -104,7 +104,7 @@ export type BarOrientation = 'vertical' | 'horizontal';
             @if (bar.topLabel) {
               <span
                 class="shrink-0 font-mono leading-none"
-                [class]="(large() ? 'text-[13px] ' : 'text-[10px] md:text-[11px] ') + (topTone() === 'gold' ? 'text-gold' : 'text-muted')"
+                [class]="(large() ? 'text-label ' : 'text-micro md:text-caption ') + (topTone() === 'gold' ? 'text-gold' : 'text-muted')"
               >{{ bar.topLabel }}</span>
             }
             <!-- The bar fills its share of the plot left after the top labels' row. -->
@@ -121,7 +121,7 @@ export type BarOrientation = 'vertical' | 'horizontal';
                    sides (the end bars align it to their outer edge), so nothing clips or scrolls. -->
               <span
                 class="mbc-hint inline-flex items-center rounded-md border border-card-border bg-surface px-1.5 font-mono leading-none whitespace-nowrap text-text"
-                [class]="large() ? 'h-[18px] text-xs' : 'h-[17px] text-[11px]'"
+                [class]="large() ? 'h-[18px] text-xs' : 'h-[17px] text-caption'"
                 [class.mbc-hint-start]="$first && !$last"
                 [class.mbc-hint-end]="$last && !$first"
                 [style.bottom]="
@@ -134,12 +134,12 @@ export type BarOrientation = 'vertical' | 'horizontal';
           </div>
           <span
             class="shrink-0 whitespace-nowrap"
-            [class]="(bar.top ? 'text-text ' : 'text-muted ') + (bar.top && large() ? 'font-semibold ' : '') + (dense() ? 'text-[10px]' : large() ? 'text-sm' : 'text-xs')"
+            [class]="(bar.top ? 'text-text ' : 'text-muted ') + (bar.top && large() ? 'font-semibold ' : '') + (dense() ? 'text-micro' : large() ? 'text-sm' : 'text-xs')"
           >
             {{ bar.label }}
           </span>
           @if (bar.subLabel) {
-            <span class="-mt-1 shrink-0 font-mono text-faint" [class]="large() ? 'text-[13px]' : 'text-[10px] md:text-[11px]'">{{
+            <span class="-mt-1 shrink-0 font-mono text-faint" [class]="large() ? 'text-label' : 'text-micro md:text-caption'">{{
               bar.subLabel
             }}</span>
           }

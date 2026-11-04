@@ -34,7 +34,7 @@ export interface DropdownOption<T extends string = string> {
   template: `
     <button
       type="button"
-      class="flex items-center gap-2 rounded-lg border px-3 py-[9px] text-[13px] transition-colors hover:border-border-strong"
+      class="flex items-center gap-2 rounded-lg border px-3 py-[9px] text-label transition-colors hover:border-border-strong"
       [class]="highlighted() ? 'border-brand text-brand-lighter' : 'border-border text-text-3'"
       aria-haspopup="listbox"
       [attr.aria-expanded]="open()"
@@ -60,7 +60,7 @@ export interface DropdownOption<T extends string = string> {
           <li
             role="option"
             [attr.aria-selected]="option.value === value()"
-            class="flex cursor-pointer items-center justify-between gap-6 rounded-md px-3 py-2 text-[13px] whitespace-nowrap"
+            class="flex cursor-pointer items-center justify-between gap-6 rounded-md px-3 py-2 text-label whitespace-nowrap"
             [class]="
               option.value === value()
                 ? 'bg-brand-tint text-brand-lighter'

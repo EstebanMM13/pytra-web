@@ -108,7 +108,7 @@ interface LibraryState {
             <a
               routerLink="/games"
               [queryParams]="publisher() ? { pub: displayName() } : { dev: displayName() }"
-              class="tap-area mt-3 inline-flex items-center gap-1 self-start text-[13px] font-medium text-brand-light hover:underline"
+              class="tap-area mt-3 inline-flex items-center gap-1 self-start text-label font-medium text-brand-light hover:underline"
               data-studio-library
             >
               {{ 'stats.studio.inLibrary' | translate }}

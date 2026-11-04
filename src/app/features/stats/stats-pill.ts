@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class:
-      'inline-block shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-[11px] text-text-3 ring-1 ring-gold/70 ring-inset md:text-xs',
+      'inline-block shrink-0 rounded-full bg-hover px-2.5 py-1 font-mono text-caption text-text-3 ring-1 ring-gold/70 ring-inset md:text-xs',
   },
   template: `<ng-content />`,
 })

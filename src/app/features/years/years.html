@@ -4,12 +4,12 @@
   <!-- Years hang off the stats hub: the way back to it (deep links keep working, it is only a link). -->
   <app-stats-back-link class="-mb-2 md:-mb-4" />
   @if (noYears()) {
-    <h1 class="font-display text-[28px] font-bold tracking-[-0.03em] md:text-[34px]">{{ 'years.title' | translate }}</h1>
+    <h1 class="font-display text-stat font-bold tracking-[-0.03em] md:text-hero">{{ 'years.title' | translate }}</h1>
     <div
       class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-14 text-center"
     >
       <svg [lucideIcon]="icons.chartColumn" [size]="28" class="text-brand-light"></svg>
-      <p class="text-[15px] font-medium text-text-2">{{ 'years.empty.title' | translate }}</p>
+      <p class="text-body font-medium text-text-2">{{ 'years.empty.title' | translate }}</p>
       <p class="max-w-sm text-sm text-muted">{{ 'years.empty.text' | translate }}</p>
       <button
         type="button"
@@ -32,7 +32,7 @@
 
     <!-- Year tabs (md+) -->
     <nav
-      class="hidden gap-1 overflow-x-auto border-b border-border font-mono text-[13px] [scrollbar-width:none] md:flex"
+      class="hidden gap-1 overflow-x-auto border-b border-border font-mono text-label [scrollbar-width:none] md:flex"
       [attr.aria-label]="'years.tabsLabel' | translate"
     >
       @if (years() === null) {
@@ -84,7 +84,7 @@
             />
           }
         </div>
-        <h1 class="font-display text-[42px] leading-none font-bold tracking-[-0.045em] md:text-[64px]">
+        <h1 class="font-display text-display leading-none font-bold tracking-[-0.045em] md:text-[64px]">
           {{ 'years.yearLabel' | translate }} <span class="text-figure text-brand-light">{{ y }}</span>
         </h1>
         @if (highlight(); as h) {
@@ -100,7 +100,7 @@
           data-empty-year
         >
           <svg [lucideIcon]="icons.calendarDays" [size]="28" class="text-brand-light" aria-hidden="true"></svg>
-          <p class="text-[15px] font-medium text-text-2">{{ 'years.emptyYear' | translate: { year: s.year } }}</p>
+          <p class="text-body font-medium text-text-2">{{ 'years.emptyYear' | translate: { year: s.year } }}</p>
           <button
             type="button"
             (click)="newRun()"
@@ -136,7 +136,7 @@
             class="gold-border relative isolate flex min-w-0 sm:col-span-2 flex-col gap-2 rounded-[14px] p-[18px] md:gap-2.5 md:p-6 lg:col-span-1"
           >
             <span class="goty-aura" aria-hidden="true"></span>
-            <h2 class="text-xs font-semibold tracking-[0.08em] text-gold md:text-[13px]">
+            <h2 class="text-xs font-semibold tracking-[0.08em] text-gold md:text-label">
               🏆 {{ 'years.goty' | translate: { year: s.year } }}
             </h2>
             @if (s.goty; as g) {
@@ -153,12 +153,12 @@
                 <div class="flex min-w-0 flex-1 flex-col gap-2 md:gap-2.5">
                   <a
                     [routerLink]="['/games', g.gameId]"
-                    class="mt-1 text-[22px] leading-tight font-semibold tracking-[-0.02em] wrap-break-word hover:underline md:mt-1.5 md:text-[28px]"
+                    class="mt-1 text-title leading-tight font-semibold tracking-[-0.02em] wrap-break-word hover:underline md:mt-1.5 md:text-stat"
                     [title]="g.gameName"
                   >
                     {{ g.gameName }}
                   </a>
-                  <p class="text-[13px] leading-relaxed text-text-3 md:text-sm">
+                  <p class="text-label leading-relaxed text-text-3 md:text-sm">
                     {{ g.totalHours | hours }} · <span class="font-mono" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span> ·
                     {{ 'years.runsCount' | translatePlural: g.experienceCount }}
                   </p>
@@ -173,7 +173,7 @@
             class="tone-edge tone-edge-success flex min-w-0 flex-col gap-2 rounded-xl border border-card-border card-glass p-3.5 md:gap-2.5 md:rounded-[14px] md:p-6"
           >
             <h2
-              class="flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-success uppercase md:text-[13px]"
+              class="flex items-center gap-2 text-caption font-semibold tracking-[0.08em] text-success uppercase md:text-label"
             >
               <svg [lucideIcon]="icons.sparkles" [size]="15" class="hidden md:block"></svg>
               {{ 'years.surprises' | translate }}
@@ -185,11 +185,11 @@
                 class="hover-lift -mx-2 flex items-center gap-2.5 rounded-lg border border-transparent px-2 py-1 hover:bg-hover"
               >
                 <app-game-cover decorative size="xs" [url]="coverOf(g.gameId)" [name]="g.gameName" />
-                <span class="min-w-0 flex-1 text-[15px] font-semibold wrap-break-word md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
+                <span class="min-w-0 flex-1 text-body font-semibold wrap-break-word md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="shrink-0 font-mono text-xs md:text-sm" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
-              <p class="text-xs text-muted md:text-[13px]">{{ 'years.noSurprises' | translate }}</p>
+              <p class="text-xs text-muted md:text-label">{{ 'years.noSurprises' | translate }}</p>
             }
             </div>
           </section>
@@ -198,7 +198,7 @@
             class="tone-edge tone-edge-danger flex min-w-0 flex-col gap-2 rounded-xl border border-card-border card-glass p-3.5 md:gap-2.5 md:rounded-[14px] md:p-6"
           >
             <h2
-              class="flex items-center gap-2 text-[11px] font-semibold tracking-[0.08em] text-danger uppercase md:text-[13px]"
+              class="flex items-center gap-2 text-caption font-semibold tracking-[0.08em] text-danger uppercase md:text-label"
             >
               <svg [lucideIcon]="icons.trendingDown" [size]="15" class="hidden md:block"></svg>
               {{ 'years.disappointments' | translate }}
@@ -210,11 +210,11 @@
                 class="hover-lift -mx-2 flex items-center gap-2.5 rounded-lg border border-transparent px-2 py-1 hover:bg-hover"
               >
                 <app-game-cover decorative size="xs" [url]="coverOf(g.gameId)" [name]="g.gameName" />
-                <span class="min-w-0 flex-1 text-[15px] font-semibold wrap-break-word md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
+                <span class="min-w-0 flex-1 text-body font-semibold wrap-break-word md:text-lg" [title]="g.gameName">{{ g.gameName }}</span>
                 <span class="shrink-0 font-mono text-xs md:text-sm" [class]="g.avgRating | ratingTone">{{ g.avgRating | rating }}</span>
               </a>
             } @empty {
-              <p class="text-xs text-muted md:text-[13px]">{{ 'years.noDisappointments' | translate }}</p>
+              <p class="text-xs text-muted md:text-label">{{ 'years.noDisappointments' | translate }}</p>
             }
             </div>
           </section>
@@ -283,7 +283,7 @@
               <button
                 type="button"
                 (click)="showAllRuns.set(!showAllRuns())"
-                class="tap-area mt-2 text-[13px] text-brand-light hover:underline"
+                class="tap-area mt-2 text-label text-brand-light hover:underline"
               >
                 {{ (showAllRuns() ? 'years.showLess' : 'years.showAll') | translate: { count: s.experiences.length } }}
               </button>
@@ -304,7 +304,7 @@
                 [class.flex-1]="spreadRankings"
               >
                 @if (i === 0) {
-                  <span class="rank-chip shrink-0 font-mono text-[11px] font-semibold" data-rank-first>{{ i + 1 }}</span>
+                  <span class="rank-chip shrink-0 font-mono text-caption font-semibold" data-rank-first>{{ i + 1 }}</span>
                 } @else {
                   <span class="w-5 shrink-0 text-center font-mono text-xs text-faint">{{ i + 1 }}</span>
                 }
@@ -334,7 +334,7 @@
                     <span class="flex min-w-0 items-baseline gap-2">
                       <span class="min-w-0 wrap-break-word text-text-2" [title]="g.gameName">{{ g.gameName }}</span>
                       @if (g.online) {
-                        <span class="shrink-0 text-[11px] text-faint">{{ 'years.onlineTag' | translate }}</span>
+                        <span class="shrink-0 text-caption text-faint">{{ 'years.onlineTag' | translate }}</span>
                       }
                     </span>
                     <span class="shrink-0 font-mono">{{ g.totalHours | hours }}</span>
@@ -400,10 +400,10 @@
               (input)="noteSummary.set($any($event.target).value)"
               [placeholder]="'years.note.summaryPlaceholder' | translate"
               [attr.aria-label]="'years.note.summary' | translate"
-              class="min-h-[160px] w-full resize-y rounded-[10px] border border-border bg-bg px-3.5 py-3 text-[16px] leading-relaxed text-text-2 md:text-[15px]"
+              class="min-h-[160px] w-full resize-y rounded-[10px] border border-border bg-bg px-3.5 py-3 text-lead leading-relaxed text-text-2 md:text-body"
             ></textarea>
             <p
-              class="text-right font-mono text-[11px]"
+              class="text-right font-mono text-caption"
               [class]="noteSummary().length > noteMax ? 'text-danger' : 'text-faint'"
             >
               {{ formatCount(noteSummary().length) }} / {{ formatCount(noteMax) }}
@@ -418,10 +418,10 @@
               (input)="noteHighlights.set($any($event.target).value)"
               [placeholder]="'years.note.highlightsPlaceholder' | translate"
               [attr.aria-label]="'years.note.highlights' | translate"
-              class="min-h-[160px] w-full resize-y rounded-[10px] border border-border bg-bg px-3.5 py-3 text-[16px] leading-relaxed text-text-2 md:text-[15px]"
+              class="min-h-[160px] w-full resize-y rounded-[10px] border border-border bg-bg px-3.5 py-3 text-lead leading-relaxed text-text-2 md:text-body"
             ></textarea>
             <p
-              class="text-right font-mono text-[11px]"
+              class="text-right font-mono text-caption"
               [class]="noteHighlights().length > noteMax ? 'text-danger' : 'text-faint'"
             >
               {{ formatCount(noteHighlights().length) }} / {{ formatCount(noteMax) }}

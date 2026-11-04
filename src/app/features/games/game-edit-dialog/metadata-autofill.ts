@@ -92,7 +92,7 @@ type SearchState = 'idle' | 'loading' | 'ready' | 'error';
             [value]="query()"
             (input)="onQuery($any($event.target).value)"
             (keydown)="onKeydown($event)"
-            class="h-11 min-w-0 flex-1 border-0 bg-transparent text-base text-text focus:shadow-none md:h-10 md:text-[15px]"
+            class="h-11 min-w-0 flex-1 border-0 bg-transparent text-base text-text focus:shadow-none md:h-10 md:text-body"
           />
         </div>
         <button

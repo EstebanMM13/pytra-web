@@ -8,7 +8,7 @@ const VARIANTS = {
   /** A glass card of its own (a row of callouts under a hero). */
   card: {
     frame: 'hover-lift rounded-[14px] border border-card-border card-glass p-3.5 md:p-4',
-    name: 'text-[15px] wrap-break-word',
+    name: 'text-body wrap-break-word',
     cover: 'sm',
     figure: 'text-lg font-bold',
   },

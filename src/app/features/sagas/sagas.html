@@ -10,15 +10,15 @@
     <app-stats-back-link class="-mb-1.5 md:px-2" />
     <div class="mb-1.5 flex items-center justify-between gap-3 md:px-2 md:pb-2.5">
       <div class="flex items-baseline gap-2.5">
-        <h1 class="font-display text-[28px] font-bold tracking-[-0.03em] md:text-[30px]">{{ 'sagas.title' | translate }}</h1>
+        <h1 class="font-display text-stat font-bold tracking-[-0.03em] md:text-h1">{{ 'sagas.title' | translate }}</h1>
         @if (!loading()) {
-          <span class="text-[13px] text-muted">{{ summaries().length }}</span>
+          <span class="text-label text-muted">{{ summaries().length }}</span>
         }
       </div>
       <button
         type="button"
         (click)="dialog.set(null)"
-        class="tap-area flex items-center gap-1 rounded-lg p-2 text-[13px] font-medium text-brand-light hover:text-brand-lighter md:border md:border-border md:px-2.5 md:py-1.5 md:text-text-2 md:hover:border-border-strong md:hover:text-text"
+        class="tap-area flex items-center gap-1 rounded-lg p-2 text-label font-medium text-brand-light hover:text-brand-lighter md:border md:border-border md:px-2.5 md:py-1.5 md:text-text-2 md:hover:border-border-strong md:hover:text-text"
         [attr.aria-label]="'sagas.new' | translate"
       >
         <svg [lucideIcon]="icons.plus" [size]="18" class="md:size-[15px]"></svg>
@@ -78,7 +78,7 @@
         <svg [lucideIcon]="icons.search" [size]="15" class="shrink-0" aria-hidden="true"></svg>
         <input
           type="search"
-          class="min-w-0 flex-1 bg-transparent text-[16px] text-text outline-none focus:shadow-none md:text-[13px]"
+          class="min-w-0 flex-1 bg-transparent text-lead text-text outline-none focus:shadow-none md:text-label"
           [value]="searchText()"
           (input)="setText($any($event.target).value)"
           [placeholder]="'sagas.searchPlaceholder' | translate"
@@ -125,7 +125,7 @@
         <div class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-5 py-8 text-center" data-saga-no-matches>
           <svg [lucideIcon]="icons.search" [size]="26" class="text-brand-light" aria-hidden="true"></svg>
           <p class="text-sm text-muted">{{ 'sagas.noMatches' | translate }}</p>
-          <button type="button" (click)="clearSearch()" class="text-[13px] font-medium text-brand-light hover:underline">
+          <button type="button" (click)="clearSearch()" class="text-label font-medium text-brand-light hover:underline">
             {{ 'sagas.clearSearch' | translate }}
           </button>
         </div>
@@ -184,10 +184,10 @@
               }
             </span>
             <div class="min-w-0 flex-1">
-              <div class="flex items-baseline justify-between gap-3 text-[15px] font-semibold">
+              <div class="flex items-baseline justify-between gap-3 text-body font-semibold">
                 <span class="wrap-break-word" [title]="s.saga.name" data-saga-name>{{ s.saga.name }}</span>
                 <span
-                  class="flex shrink-0 items-center gap-1 font-mono text-[13px] font-medium"
+                  class="flex shrink-0 items-center gap-1 font-mono text-label font-medium"
                   [class]="s.avgRating | ratingTone"
                   [attr.title]="'sagas.stats.avgRating' | translate"
                 >
@@ -287,14 +287,14 @@
             </span>
           }
           <div class="min-w-0 flex-1">
-            <h2 class="font-display text-[30px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:text-[40px] md:tracking-[-0.035em]">
+            <h2 class="font-display text-h1 leading-tight font-bold tracking-[-0.03em] wrap-break-word md:text-display md:tracking-[-0.035em]">
               {{ s.saga.name }}
             </h2>
             @if (metaLine(s)) {
               <!-- Every developer (clamped to two lines, full list on hover) and the year range, kept whole -->
               @let studios = studiosLine(s);
               @let years = yearRange(s);
-              <p class="mt-1.5 flex items-baseline gap-1.5 text-[13px] text-text-3 md:mt-2 md:text-[15px]" [title]="metaLine(s)" data-saga-meta>
+              <p class="mt-1.5 flex items-baseline gap-1.5 text-label text-text-3 md:mt-2 md:text-body" [title]="metaLine(s)" data-saga-meta>
                 @if (studios) {
                   <span class="min-w-0 wrap-break-word" data-saga-studios>{{ studios }}</span>
                 }
@@ -310,7 +310,7 @@
           <button
             type="button"
             (click)="dialog.set(s.saga)"
-            class="press hidden shrink-0 items-center gap-1.5 self-start rounded-lg border border-border bg-bg/60 px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong hover:text-text md:flex"
+            class="press hidden shrink-0 items-center gap-1.5 self-start rounded-lg border border-border bg-bg/60 px-3.5 py-[9px] text-label font-medium text-text-2 hover:border-border-strong hover:text-text md:flex"
           >
             <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
             {{ 'sagas.edit' | translate }}
@@ -350,7 +350,7 @@
         <app-game-timeline [games]="s.games" />
       </section>
     } @else if (routeId() !== null) {
-      <a routerLink="/sagas" queryParamsHandling="preserve" class="flex w-fit items-center gap-1.5 text-[13px] text-muted hover:text-text md:hidden">
+      <a routerLink="/sagas" queryParamsHandling="preserve" class="flex w-fit items-center gap-1.5 text-label text-muted hover:text-text md:hidden">
         <svg [lucideIcon]="icons.chevronLeft" [size]="16"></svg>
         {{ 'sagas.back' | translate }}
       </a>

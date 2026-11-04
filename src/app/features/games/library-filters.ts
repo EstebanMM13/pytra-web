@@ -42,7 +42,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
       #trigger
       type="button"
       (click)="toggle()"
-      class="relative flex h-11 items-center gap-2 rounded-full border px-3.5 text-[13px] font-medium whitespace-nowrap sm:px-4 md:h-9 md:px-3.5"
+      class="relative flex h-11 items-center gap-2 rounded-full border px-3.5 text-label font-medium whitespace-nowrap sm:px-4 md:h-9 md:px-3.5"
       [class]="count() ? 'border-brand-line bg-brand-tint text-text' : 'border-border bg-surface text-text-2 hover:border-border-strong'"
       aria-haspopup="dialog"
       [attr.aria-expanded]="open()"
@@ -54,7 +54,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
       <!-- Icon only on phones so the search placeholder fits; the aria-label keeps the name. -->
       <span class="hidden sm:inline">{{ 'library.filters.button' | translate }}</span>
       @if (count()) {
-        <span class="grid min-w-5 place-items-center rounded-full bg-brand px-1.5 font-mono text-[11px] leading-5 text-white">
+        <span class="grid min-w-5 place-items-center rounded-full bg-brand px-1.5 font-mono text-caption leading-5 text-white">
           {{ count() }}
         </span>
       }
@@ -79,7 +79,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
         class="fixed inset-x-0 bottom-0 z-50 flex outline-none max-h-[85dvh] animate-modal-in flex-col overflow-y-auto rounded-t-2xl border-t border-border bg-surface px-5 pt-4 pb-[max(env(safe-area-inset-bottom),20px)] md:absolute md:inset-x-auto md:top-full md:right-0 md:bottom-auto md:mt-2 md:max-h-[70vh] md:w-[380px] md:rounded-xl md:border md:p-4 md:shadow-[0_12px_32px_#0006]"
       >
         <div class="mb-3 flex items-center justify-between gap-3">
-          <h2 class="text-[15px] font-semibold">{{ 'library.filters.title' | translate }}</h2>
+          <h2 class="text-body font-semibold">{{ 'library.filters.title' | translate }}</h2>
           <button
             type="button"
             (click)="close()"
@@ -91,7 +91,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
         </div>
 
         <section class="flex flex-col gap-2 border-t border-divider py-3.5">
-          <h3 id="library-filter-sort" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+          <h3 id="library-filter-sort" class="text-caption font-medium tracking-[0.08em] text-muted uppercase">
             {{ 'library.sortLabel' | translate }}
           </h3>
           <div class="flex flex-wrap gap-1.5" role="radiogroup" aria-labelledby="library-filter-sort">
@@ -101,7 +101,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
                 role="radio"
                 [attr.aria-checked]="sort() === option"
                 (click)="sortChange.emit(option)"
-                class="rounded-full border px-3 py-1.5 text-[13px]"
+                class="rounded-full border px-3 py-1.5 text-label"
                 [class]="sort() === option ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
               >
                 {{ 'library.sort.' + option | translate }}
@@ -111,7 +111,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
         </section>
 
         <section class="flex flex-col gap-2 border-t border-divider py-3.5">
-          <h3 id="library-filter-type" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+          <h3 id="library-filter-type" class="text-caption font-medium tracking-[0.08em] text-muted uppercase">
             {{ 'library.filters.type' | translate }}
           </h3>
           <div class="flex flex-wrap gap-1.5" role="radiogroup" aria-labelledby="library-filter-type">
@@ -121,7 +121,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
                 role="radio"
                 [attr.aria-checked]="category() === c"
                 (click)="categoryChange.emit(c)"
-                class="rounded-full border px-3 py-1.5 text-[13px]"
+                class="rounded-full border px-3 py-1.5 text-label"
                 [class]="category() === c ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
               >
                 {{ (c === 'ALL' ? 'library.categoryAllShort' : 'category.' + c) | translate }}
@@ -131,7 +131,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
         </section>
 
         <section class="flex flex-col gap-2 border-t border-divider py-3.5">
-          <h3 id="library-filter-achievements" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+          <h3 id="library-filter-achievements" class="text-caption font-medium tracking-[0.08em] text-muted uppercase">
             {{ 'library.filters.achievements' | translate }}
           </h3>
           <div class="flex flex-wrap gap-1.5" role="group" aria-labelledby="library-filter-achievements">
@@ -139,7 +139,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
               type="button"
               [attr.aria-pressed]="platinum()"
               (click)="platinumChange.emit(!platinum())"
-              class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px]"
+              class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-label"
               [class]="platinum() ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
               data-filter-platinum
             >
@@ -150,7 +150,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
               type="button"
               [attr.aria-pressed]="fullCompletion()"
               (click)="fullCompletionChange.emit(!fullCompletion())"
-              class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px]"
+              class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-label"
               [class]="fullCompletion() ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
               data-filter-full-completion
             >
@@ -162,7 +162,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
 
         @if (years().length) {
           <section class="flex flex-col gap-2 border-t border-divider py-3.5">
-            <h3 id="library-filter-year" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+            <h3 id="library-filter-year" class="text-caption font-medium tracking-[0.08em] text-muted uppercase">
               {{ 'library.filters.year' | translate }}
             </h3>
             <div class="flex flex-wrap gap-1.5" role="radiogroup" aria-labelledby="library-filter-year" data-filter-years>
@@ -172,7 +172,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
                   role="radio"
                   [attr.aria-checked]="playedYear() === y"
                   (click)="playedYearChange.emit(y)"
-                  class="rounded-full border px-3 py-1.5 text-[13px]"
+                  class="rounded-full border px-3 py-1.5 text-label"
                   [class]="playedYear() === y ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
                   [class.font-mono]="y !== null"
                 >
@@ -186,7 +186,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
 
         @if (platforms().length) {
           <section class="flex flex-col gap-2 border-t border-divider py-3.5">
-            <h3 id="library-filter-platforms" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+            <h3 id="library-filter-platforms" class="text-caption font-medium tracking-[0.08em] text-muted uppercase">
               {{ 'library.filters.platforms' | translate }}
             </h3>
             <div class="flex flex-wrap gap-1.5" role="group" aria-labelledby="library-filter-platforms">
@@ -195,7 +195,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
                   type="button"
                   [attr.aria-pressed]="isPlatformPicked(p.id)"
                   (click)="togglePlatform(p.id)"
-                  class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px]"
+                  class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-label"
                   [class]="isPlatformPicked(p.id) ? 'border-brand-line bg-brand-tint text-text' : 'border-border text-text-2 hover:border-border-strong'"
                 >
                   <span
@@ -212,7 +212,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
 
         @if (genreOptions().length) {
           <section class="flex flex-col gap-2 border-t border-divider py-3.5">
-            <h3 id="library-filter-genres" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+            <h3 id="library-filter-genres" class="text-caption font-medium tracking-[0.08em] text-muted uppercase">
               {{ 'library.filters.genres' | translate }}
             </h3>
             <app-combobox
@@ -229,7 +229,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
 
         @if (developerOptions().length) {
           <section class="flex flex-col gap-2 border-t border-divider py-3.5">
-            <h3 id="library-filter-developers" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+            <h3 id="library-filter-developers" class="text-caption font-medium tracking-[0.08em] text-muted uppercase">
               {{ 'library.filters.developers' | translate }}
             </h3>
             <app-combobox
@@ -246,7 +246,7 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
 
         @if (publisherOptions().length) {
           <section class="flex flex-col gap-2 border-t border-divider py-3.5">
-            <h3 id="library-filter-publishers" class="text-[11px] font-medium tracking-[0.08em] text-muted uppercase">
+            <h3 id="library-filter-publishers" class="text-caption font-medium tracking-[0.08em] text-muted uppercase">
               {{ 'library.filters.publishers' | translate }}
             </h3>
             <app-combobox
@@ -266,14 +266,14 @@ import { GAME_CATEGORIES, LIBRARY_SORTS, LibraryCategoryFilter, LibrarySort } fr
             type="button"
             (click)="cleared.emit()"
             [disabled]="!count()"
-            class="text-[13px] font-medium text-brand-light hover:underline disabled:opacity-40 disabled:hover:no-underline"
+            class="text-label font-medium text-brand-light hover:underline disabled:opacity-40 disabled:hover:no-underline"
           >
             {{ 'library.filters.clear' | translate }}
           </button>
           <button
             type="button"
             (click)="close()"
-            class="press rounded-lg bg-brand px-4 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark"
+            class="press rounded-lg bg-brand px-4 py-2 text-label font-semibold text-white hover:bg-brand-dark"
           >
             {{ 'library.filters.done' | translate }}
           </button>

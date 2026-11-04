@@ -7,7 +7,7 @@
   <div class="flex items-center justify-between gap-4">
     <a
       [routerLink]="['/games', gameId()]"
-      class="tap-area flex min-w-0 items-center gap-1.5 rounded-md text-[13px] text-muted hover:text-text"
+      class="tap-area flex min-w-0 items-center gap-1.5 rounded-md text-label text-muted hover:text-text"
     >
       <svg [lucideIcon]="icons.chevronLeft" [size]="16" class="shrink-0"></svg>
       <span class="min-w-0 wrap-break-word">{{ game()?.name ?? ('game.breadcrumb' | translate) }}</span>
@@ -55,14 +55,14 @@
         </div>
       }
       <div class="min-w-0">
-        <p class="mb-1 text-[13px] font-medium wrap-break-word text-brand-light md:mb-2 md:text-sm">
+        <p class="mb-1 text-label font-medium wrap-break-word text-brand-light md:mb-2 md:text-sm">
           @if (game()?.sagaName; as saga) {
             {{ 'game.saga' | translate: { saga } }} ·
           }
           {{ e.runLabel }}
         </p>
         <h1
-          class="font-display min-w-0 line-clamp-3 text-[28px] leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-[44px] md:tracking-[-0.035em]"
+          class="font-display min-w-0 line-clamp-3 text-stat leading-tight font-bold tracking-[-0.03em] wrap-break-word md:line-clamp-2 md:text-display md:tracking-[-0.035em]"
           [attr.title]="game()?.name ?? null"
         >
           @if (game(); as g) {
@@ -142,7 +142,7 @@
       <div class="relative min-w-0 overflow-hidden rounded-xl border border-gold-card-border bg-gold-tint" data-stat="rating">
         <!-- Phones: the pencil moves to the top-right corner so the rating takes the whole line. -->
         <div class="@container relative flex h-full flex-col p-4 [--fig-max:40px] [--rating-reserve:42px] md:px-5 md:[--fig-max:36px] md:[--rating-reserve:72px]">
-          <p class="flex items-center gap-1.5 text-xs leading-4 text-gold md:gap-2 md:text-[13px] md:leading-5">
+          <p class="flex items-center gap-1.5 text-xs leading-4 text-gold md:gap-2 md:text-label md:leading-5">
             <svg [lucideIcon]="icons.star" [size]="15" class="size-3.5 shrink-0 md:size-[15px]"></svg>
             {{ 'run.rating' | translate }}
           </p>
@@ -199,7 +199,7 @@
                 <div class="bar-fill h-1.5 rounded-full bg-gold" [style.width.%]="e.rating * 10"></div>
               </div>
               @if (rank(); as r) {
-                <p class="mt-2 text-xs text-muted md:text-[13px]">{{ 'run.rank' | translate: { rank: r } }}</p>
+                <p class="mt-2 text-xs text-muted md:text-label">{{ 'run.rank' | translate: { rank: r } }}</p>
               }
             </div>
           } @else {
@@ -224,7 +224,7 @@
       <div class="min-w-0 rounded-xl border border-card-border card-glass" data-stat="hours">
         <!-- Phones: the pencil moves to the top-right corner, as on the rating tile. -->
         <div class="@container relative flex h-full flex-col p-4 [--fig-max:30px] [--hours-reserve:0px] md:px-5 md:[--fig-max:36px] md:[--hours-reserve:48px]">
-          <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
+          <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-label md:leading-5">
             <svg [lucideIcon]="icons.clock" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
             <span class="truncate">{{ 'run.hours' | translate }}</span>
           </p>
@@ -287,7 +287,7 @@
 
       <div class="min-w-0 rounded-xl border border-card-border card-glass" data-stat="duration">
         <div class="@container flex h-full flex-col p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]">
-          <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-[13px] md:leading-5">
+          <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-label md:leading-5">
             <svg [lucideIcon]="icons.hourglass" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
             <span class="truncate">{{ 'run.duration' | translate }}</span>
           </p>
@@ -303,7 +303,7 @@
       <!-- Dates: start -> end on one line when the card is wide enough, stacked when it is narrow (phones, tablets) -->
       <div class="@container min-w-0 rounded-xl border border-card-border card-glass" data-stat="dates">
         <div class="flex h-full flex-col gap-2 p-4 md:px-5">
-          <div class="flex items-center justify-between gap-3 text-xs text-text-3 md:text-[13px]">
+          <div class="flex items-center justify-between gap-3 text-xs text-text-3 md:text-label">
             <span class="flex items-center gap-1.5 md:gap-2">
               <svg [lucideIcon]="icons.calendar" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
               {{ 'run.start' | translate }}
@@ -316,9 +316,9 @@
             <span class="whitespace-nowrap">{{ date(e.endDate) }}</span>
           </div>
           <div class="my-auto flex flex-col gap-1 @[18rem]:hidden" data-dates-stacked>
-            <span class="font-mono text-[15px] font-semibold whitespace-nowrap text-text">{{ date(e.startDate) }}</span>
+            <span class="font-mono text-body font-semibold whitespace-nowrap text-text">{{ date(e.startDate) }}</span>
             <span class="mt-1 text-xs text-text-3">{{ 'run.end' | translate }}</span>
-            <span class="font-mono text-[15px] font-semibold whitespace-nowrap text-text">{{ date(e.endDate) }}</span>
+            <span class="font-mono text-body font-semibold whitespace-nowrap text-text">{{ date(e.endDate) }}</span>
           </div>
         </div>
       </div>
@@ -331,7 +331,7 @@
     >
       <app-section-header collapseKey="run.review" [label]="'run.summary' | translate" />
       @if (e.summary) {
-        <p class="text-[15px] leading-[1.55] whitespace-pre-line wrap-break-word text-text-2 md:text-base md:leading-[1.65]">
+        <p class="text-body leading-[1.55] whitespace-pre-line wrap-break-word text-text-2 md:text-base md:leading-[1.65]">
           {{ e.summary }}
         </p>
       } @else {
@@ -342,7 +342,7 @@
         <!-- Two sub-cards, side by side from md -->
         <div class="mt-1 grid grid-cols-1 gap-3 md:mt-2.5 md:grid-cols-2 md:gap-4" data-best-worst>
           <div class="rounded-[10px] border border-border bg-bg p-4 md:p-[18px]">
-            <h3 class="mb-3 text-[13px] font-semibold tracking-[0.06em] text-success uppercase">
+            <h3 class="mb-3 text-label font-semibold tracking-[0.06em] text-success uppercase">
               {{ 'run.best' | translate }}
             </h3>
             <ul class="flex flex-col gap-2.5 text-sm wrap-anywhere text-text-2">
@@ -356,7 +356,7 @@
             </ul>
           </div>
           <div class="rounded-[10px] border border-border bg-bg p-4 md:p-[18px]">
-            <h3 class="mb-3 text-[13px] font-semibold tracking-[0.06em] text-danger uppercase">
+            <h3 class="mb-3 text-label font-semibold tracking-[0.06em] text-danger uppercase">
               {{ 'run.worst' | translate }}
             </h3>
             <ul class="flex flex-col gap-2.5 text-sm wrap-anywhere text-text-2">
@@ -374,7 +374,7 @@
 
       @if (e.notes) {
         <app-section-header class="mt-2" [label]="'run.notes' | translate" />
-        <p class="text-[15px] leading-[1.6] whitespace-pre-line wrap-break-word text-text-2">{{ e.notes }}</p>
+        <p class="text-body leading-[1.6] whitespace-pre-line wrap-break-word text-text-2">{{ e.notes }}</p>
       }
     </section>
   } @else {

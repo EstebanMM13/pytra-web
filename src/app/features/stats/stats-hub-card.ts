@@ -28,7 +28,7 @@ const MIN_FIGURE_PX = 14;
       [style.--hub-accent]="accent()"
       data-hub-card
     >
-      <span class="flex min-w-0 items-center gap-2 text-[13px] leading-5 font-semibold text-text-2 md:text-sm">
+      <span class="flex min-w-0 items-center gap-2 text-label leading-5 font-semibold text-text-2 md:text-sm">
         <span
           class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--hub-accent)_16%,transparent)] text-(--hub-accent) md:size-8"
           aria-hidden="true"

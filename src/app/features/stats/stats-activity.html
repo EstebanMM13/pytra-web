@@ -23,7 +23,7 @@
         data-activity-empty
       >
         <svg [lucideIcon]="icons.notebookPen" [size]="28" class="text-brand-light" aria-hidden="true"></svg>
-        <p class="text-[15px] font-medium text-text-2">{{ 'stats.activity.emptyTitle' | translate: { year: a.year } }}</p>
+        <p class="text-body font-medium text-text-2">{{ 'stats.activity.emptyTitle' | translate: { year: a.year } }}</p>
         <p class="max-w-sm text-sm text-muted">{{ 'stats.activity.emptyText' | translate }}</p>
         <a
           routerLink="/diary"
@@ -118,14 +118,14 @@
 <!-- One heatmap strip: weekday labels, month labels over their first week, Monday-first week columns. -->
 <ng-template #heat let-map>
   <div class="flex gap-1.5">
-    <div class="grid shrink-0 grid-rows-7 gap-[2px] pt-4 text-[10px] leading-none text-faint" aria-hidden="true">
+    <div class="grid shrink-0 grid-rows-7 gap-[2px] pt-4 text-micro leading-none text-faint" aria-hidden="true">
       <!-- Zero-height labels centred on their row: the cell squares alone set the strip height. -->
       @for (label of rowLabels(); track $index) {
         <span class="flex h-0 items-center self-center">{{ label }}</span>
       }
     </div>
     <div class="min-w-0 flex-1">
-      <div class="relative h-4 text-[10px] leading-none text-faint" aria-hidden="true">
+      <div class="relative h-4 text-micro leading-none text-faint" aria-hidden="true">
         @for (m of map.months; track m.month) {
           <span class="absolute top-0 whitespace-nowrap" [style.left.%]="(m.column / map.columns) * 100">{{ months()[m.month] }}</span>
         }

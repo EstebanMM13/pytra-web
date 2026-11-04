@@ -5,10 +5,10 @@
 >
   <a routerLink="/dashboard" class="flex shrink-0 items-center gap-2.5 rounded-md" aria-label="Pytra">
     <app-pytra-mark class="size-[30px]" />
-    <app-pytra-wordmark class="text-[22px] font-semibold tracking-[-0.035em]" />
+    <app-pytra-wordmark class="text-title font-semibold tracking-[-0.035em]" />
     <!-- Brand slogan (same in every language), only from xl: at lg the tabs, search and Add leave no room. P/T/R take the brand purple like the wordmark, the words the text colour, the dots stay muted. Decorative: the link is named "Pytra" -->
     <span
-      class="ml-1 hidden border-l border-border pl-3 text-[14px] tracking-[0.02em] whitespace-nowrap text-text-3 xl:inline"
+      class="ml-1 hidden border-l border-border pl-3 text-ui tracking-[0.02em] whitespace-nowrap text-text-3 xl:inline"
       aria-hidden="true"
       data-slogan
       ><span class="text-text"><span class="font-semibold text-brand-light">P</span>lay</span> ·
@@ -43,12 +43,12 @@
     <button
       type="button"
       (click)="searchOpen.set(true)"
-      class="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-[13px] text-faint hover:border-border-strong lg:w-[200px]"
+      class="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-label text-faint hover:border-border-strong lg:w-[200px]"
       [attr.aria-label]="'nav.search' | translate"
     >
       <svg [lucideIcon]="icons.search" [size]="15" class="shrink-0"></svg>
       <span class="hidden lg:inline">{{ 'nav.search' | translate }}</span>
-      <kbd class="ml-auto hidden font-mono text-[11px] lg:inline">{{ shortcutLabel }}</kbd>
+      <kbd class="ml-auto hidden font-mono text-caption lg:inline">{{ shortcutLabel }}</kbd>
     </button>
 
     <div class="relative" data-add-menu>
@@ -73,7 +73,7 @@
               type="button"
               role="menuitem"
               (click)="add(item.kind)"
-              class="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-[13px] text-text-2 hover:bg-hover hover:text-text"
+              class="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-label text-text-2 hover:bg-hover hover:text-text"
             >
               <svg [lucideIcon]="item.icon" [size]="15" class="shrink-0 text-brand-light"></svg>
               {{ item.labelKey | translate }}
@@ -100,10 +100,10 @@
 >
   <a routerLink="/dashboard" class="flex h-10 min-w-0 items-center gap-2 rounded-md" aria-label="Pytra">
     <app-pytra-mark class="size-[26px] shrink-0" />
-    <app-pytra-wordmark class="shrink-0 text-[21px] font-semibold tracking-[-0.035em]" />
+    <app-pytra-wordmark class="shrink-0 text-title font-semibold tracking-[-0.035em]" />
     <!-- Brand slogan in the free space of the phone bar (same colouring as the web one); dropped below 360px where it would crowd the buttons -->
     <span
-      class="ml-0.5 hidden truncate border-l border-border pl-2 text-[11px] leading-4 whitespace-nowrap text-text-3 min-[360px]:inline"
+      class="ml-0.5 hidden truncate border-l border-border pl-2 text-caption leading-4 whitespace-nowrap text-text-3 min-[360px]:inline"
       aria-hidden="true"
       data-slogan-mobile
       ><span class="text-text"><span class="font-semibold text-brand-light">P</span>lay</span> ·
@@ -178,7 +178,7 @@
 
 @if (isDemo()) {
   <div
-    class="relative z-20 flex items-center justify-center gap-x-3 border-b border-gold-card-border bg-gold-tint px-4 py-1.5 text-xs whitespace-nowrap text-gold-tint-fg sm:text-[13px]"
+    class="relative z-20 flex items-center justify-center gap-x-3 border-b border-gold-card-border bg-gold-tint px-4 py-1.5 text-xs whitespace-nowrap text-gold-tint-fg sm:text-label"
     role="status"
   >
     <span class="flex min-w-0 items-center gap-1.5 font-medium">
@@ -199,7 +199,7 @@
 
 <!-- Mobile tab bar (< md) -->
 <nav
-  class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 items-start border-t border-border nav-glass pt-2.5 pb-[max(env(safe-area-inset-bottom),12px)] text-[11px] text-muted md:hidden"
+  class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 items-start border-t border-border nav-glass pt-2.5 pb-[max(env(safe-area-inset-bottom),12px)] text-caption text-muted md:hidden"
   [attr.aria-label]="'nav.mainNav' | translate"
 >
   @for (tab of mobileTabsLeft; track tab.path) {
@@ -226,7 +226,7 @@
             type="button"
             role="menuitem"
             (click)="add(item.kind)"
-            class="flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-left text-[15px] text-text-2 active:bg-hover"
+            class="flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-left text-body text-text-2 active:bg-hover"
           >
             <svg [lucideIcon]="item.icon" [size]="18" class="shrink-0 text-brand-light"></svg>
             {{ item.labelKey | translate }}

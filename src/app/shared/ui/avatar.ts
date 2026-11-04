@@ -9,9 +9,9 @@ export function avatarInitial(name: string | null | undefined): string {
 export type AvatarSize = 'sm' | 'md' | 'lg';
 
 const SIZE_CLASS: Record<AvatarSize, string> = {
-  sm: 'size-[34px] text-[13px]',
+  sm: 'size-[34px] text-label',
   md: 'size-11 text-base',
-  lg: 'size-14 text-[22px] lg:size-[72px] lg:text-[28px]',
+  lg: 'size-14 text-title lg:size-[72px] lg:text-stat',
 };
 
 /**

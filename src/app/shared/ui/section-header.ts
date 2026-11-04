@@ -25,7 +25,7 @@ let nextRegionId = 0;
   host: { class: 'flex items-center gap-3' },
   template: `
     <h2
-      class="shrink-0 text-xs font-semibold tracking-[0.08em] uppercase md:text-[13px]"
+      class="shrink-0 text-xs font-semibold tracking-[0.08em] uppercase md:text-label"
       [class]="tone() === 'gold' ? 'text-gold' : 'text-section-gradient'"
     >
       {{ label() }}

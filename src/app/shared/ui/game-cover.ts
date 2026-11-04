@@ -45,7 +45,7 @@ export type FixedCoverSize = keyof typeof COVER_BOX_PX;
 
 const INITIALS_TEXT: Record<GameCoverSize, string> = {
   xs: 'text-[8px]',
-  sm: 'text-[10px]',
+  sm: 'text-micro',
   md: 'text-sm',
   lg: 'text-3xl md:text-4xl',
   hero: 'text-3xl md:text-4xl',

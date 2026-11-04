@@ -191,6 +191,23 @@
 }
 
 @theme {
+  /*
+   * Type scale (text-micro … text-jumbo). Font size only: no paired line-height, so each element keeps
+   * the line height it inherits. Use these instead of arbitrary text-[Npx] values.
+   */
+  --text-micro: 10px;
+  --text-caption: 11px;
+  --text-label: 13px;
+  --text-ui: 14px;
+  --text-body: 15px;
+  --text-lead: 16px;
+  --text-title: 22px;
+  --text-stat: 28px;
+  --text-h1: 30px;
+  --text-hero: 36px;
+  --text-display: 40px;
+  --text-jumbo: 48px;
+
   /* Modal entrance: fade + 8px rise, 200ms. */
   --animate-modal-in: modal-in 200ms ease-out;
 

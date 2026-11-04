@@ -67,7 +67,7 @@ const CHART_HEIGHT_PX = 132;
           ></span>
           @if (column.value > 0) {
             <span
-              class="absolute inset-x-0 text-center font-mono text-[11px] leading-4 text-text-2"
+              class="absolute inset-x-0 text-center font-mono text-caption leading-4 text-text-2"
               [style.bottom]="'calc(' + column.height + '% + 2px)'"
               >{{ column.figure }}</span
             >
@@ -75,7 +75,7 @@ const CHART_HEIGHT_PX = 132;
         </span>
       </span>
       <span
-        class="block truncate py-1.5 text-center font-mono text-[10px] leading-tight tracking-tighter text-faint group-hover:text-text-2"
+        class="block truncate py-1.5 text-center font-mono text-micro leading-tight tracking-tighter text-faint group-hover:text-text-2"
         aria-hidden="true"
         >{{ column.label }}</span
       >

@@ -46,7 +46,7 @@ import { adjacentYears } from './years.logic';
         type="button"
         (click)="openSheet()"
         [disabled]="years().length < 2"
-        class="flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-4 text-[17px] font-semibold text-brand-lighter"
+        class="flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-4 text-lead font-semibold text-brand-lighter"
         aria-haspopup="dialog"
         [attr.aria-expanded]="open()"
         [attr.aria-label]="('years.pickYear' | translate) + ': ' + (year() ?? '')"
@@ -81,7 +81,7 @@ import { adjacentYears } from './years.logic';
         [attr.aria-label]="'years.pickYear' | translate"
         class="fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] animate-modal-in flex-col overflow-y-auto rounded-t-2xl border-t border-border bg-surface px-3 pt-3 pb-[max(env(safe-area-inset-bottom),16px)]"
       >
-        <h2 class="px-2 pb-2 text-[15px] font-semibold">{{ 'years.pickYear' | translate }}</h2>
+        <h2 class="px-2 pb-2 text-body font-semibold">{{ 'years.pickYear' | translate }}</h2>
         <div role="radiogroup" [attr.aria-label]="'years.pickYear' | translate" class="flex flex-col font-mono">
           @for (y of years(); track y) {
             <button
@@ -89,7 +89,7 @@ import { adjacentYears } from './years.logic';
               role="radio"
               [attr.aria-checked]="y === year()"
               (click)="pick(y)"
-              class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-[15px]"
+              class="flex min-h-12 items-center gap-3 rounded-lg px-3 text-left text-body"
               [class]="y === year() ? 'bg-brand-tint text-brand-lighter' : 'text-text-2'"
             >
               <span class="flex-1">{{ y }}</span>

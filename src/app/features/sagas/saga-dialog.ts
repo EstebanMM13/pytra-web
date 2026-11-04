@@ -24,13 +24,13 @@ import { toastApiError } from '../../shared/utils/api-error';
     >
       <form (ngSubmit)="submit()" novalidate class="flex flex-col gap-4">
         <div class="flex flex-col gap-2">
-          <label for="saga-name" class="text-[13px] text-text-3">{{ 'sagas.form.name' | translate }}</label>
+          <label for="saga-name" class="text-label text-text-3">{{ 'sagas.form.name' | translate }}</label>
           <input
             id="saga-name"
             data-autofocus
             type="text"
             [formControl]="name"
-            class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-[16px] text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-[15px]"
+            class="h-[50px] w-full rounded-xl border border-border bg-surface px-3.5 text-lead text-text md:h-[46px] md:rounded-[10px] md:bg-bg md:text-body"
             [class.border-danger]="name.invalid && name.touched"
             [attr.aria-invalid]="name.invalid && name.touched"
           />
@@ -46,7 +46,7 @@ import { toastApiError } from '../../shared/utils/api-error';
               type="button"
               (click)="remove()"
               [disabled]="deleting()"
-              class="flex items-center gap-2 rounded-md text-[13px] font-medium text-danger hover:underline disabled:opacity-50"
+              class="flex items-center gap-2 rounded-md text-label font-medium text-danger hover:underline disabled:opacity-50"
             >
               <svg [lucideIcon]="icons.trash" [size]="15"></svg>
               {{ 'sagas.delete' | translate }}

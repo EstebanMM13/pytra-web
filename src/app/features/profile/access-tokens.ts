@@ -65,7 +65,7 @@ import {
             [value]="name()"
             (input)="name.set($any($event.target).value)"
             [placeholder]="'profile.tokens.nameLabel' | translate"
-            class="h-[42px] min-w-0 flex-1 rounded-[10px] border border-border bg-surface px-3 text-[16px] text-text md:bg-bg md:text-[14px]"
+            class="h-[42px] min-w-0 flex-1 rounded-[10px] border border-border bg-surface px-3 text-lead text-text md:bg-bg md:text-ui"
           />
           <div class="flex gap-2">
             <button
@@ -94,7 +94,7 @@ import {
           data-token-created
           role="status"
         >
-          <p class="text-[13px] leading-relaxed text-gold-tint-fg">
+          <p class="text-label leading-relaxed text-gold-tint-fg">
             {{ 'profile.tokens.copyWarning' | translate }}
           </p>
           <div class="flex flex-col gap-2 sm:flex-row">
@@ -105,7 +105,7 @@ import {
               [attr.aria-label]="'profile.tokens.tokenLabel' | translate: { name: c.name }"
               [value]="c.token"
               (focus)="$any($event.target).select()"
-              class="h-[40px] min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 font-mono text-[13px] text-text"
+              class="h-[40px] min-w-0 flex-1 rounded-lg border border-border bg-bg px-3 font-mono text-label text-text"
             />
             <div class="flex gap-2">
               <button
@@ -161,7 +161,7 @@ import {
                   data-token-revoke
                   (click)="revoke(token)"
                   [disabled]="revoking() === token.id"
-                  class="shrink-0 text-[13px] text-danger hover:underline disabled:opacity-50"
+                  class="shrink-0 text-label text-danger hover:underline disabled:opacity-50"
                 >
                   {{ 'profile.tokens.revoke' | translate }}
                 </button>

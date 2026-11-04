@@ -57,7 +57,7 @@ import { ICONS } from './icons';
     }
     <ng-template #bestPill let-size>
       <span
-        class="shrink-0 items-center rounded-full bg-gold-tint px-2 text-[11px] font-medium text-gold-tint-fg"
+        class="shrink-0 items-center rounded-full bg-gold-tint px-2 text-caption font-medium text-gold-tint-fg"
         [class]="size"
         data-best
       >
@@ -89,7 +89,7 @@ import { ICONS } from './icons';
       }
       @if (postgame()) {
         <span
-          class="inline-flex h-6 shrink-0 items-center rounded-full bg-brand-tint px-2 text-[11px] font-medium text-brand-lighter"
+          class="inline-flex h-6 shrink-0 items-center rounded-full bg-brand-tint px-2 text-caption font-medium text-brand-lighter"
           [attr.title]="'run.postgameAria' | translate"
           data-postgame
         >
@@ -98,7 +98,7 @@ import { ICONS } from './icons';
       }
     </ng-template>
     <div class="min-w-0 flex-1">
-      <p class="flex items-center gap-2 text-[15px] font-semibold">
+      <p class="flex items-center gap-2 text-body font-semibold">
         <!-- Phones: up to two lines (narrow rows, large system font sizes); one line from sm up -->
         <span class="min-w-0 wrap-break-word" [attr.title]="title()">{{ title() }}</span>
         @if (best()) {
@@ -107,7 +107,7 @@ import { ICONS } from './icons';
         }
       </p>
       @if (meta()) {
-        <p class="mt-1 text-xs text-muted wrap-break-word md:text-[13px]" [attr.title]="meta()">{{ meta() }}</p>
+        <p class="mt-1 text-xs text-muted wrap-break-word md:text-label" [attr.title]="meta()">{{ meta() }}</p>
       }
       <!-- Status line under the meta: optional projected content (e.g. the status pill on narrow
            screens), then on phones the best pill and the platinum / 100% badges. Each item carries
@@ -135,12 +135,12 @@ import { ICONS } from './icons';
       <!-- Figures: hours over rating on phones (the title keeps the width), side by side from sm up -->
       <span class="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-3.5" data-figures>
         @if (hours() !== null) {
-          <span class="font-mono text-sm whitespace-nowrap md:text-[15px]">{{ hours() | hours }}</span>
+          <span class="font-mono text-sm whitespace-nowrap md:text-body">{{ hours() | hours }}</span>
         }
         @if (rating() !== null) {
           <!-- A minimum width keeps ratings aligned across rows; wider values (10,00) still fit -->
           <span
-            class="min-w-10 text-right font-mono text-[15px] font-medium"
+            class="min-w-10 text-right font-mono text-body font-medium"
             [class]="rating() | ratingTone"
           >
             {{ rating() | rating }}

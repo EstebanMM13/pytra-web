@@ -40,7 +40,7 @@ interface PickerCategory {
       <section [attr.aria-labelledby]="'avatar-cat-' + category.id">
         <h3
           [id]="'avatar-cat-' + category.id"
-          class="mb-2 text-[11px] font-semibold tracking-[0.08em] text-faint uppercase"
+          class="mb-2 text-caption font-semibold tracking-[0.08em] text-faint uppercase"
         >
           {{ 'profile.avatar.categories.' + category.id | translate }}
         </h3>

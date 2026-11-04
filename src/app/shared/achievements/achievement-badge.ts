@@ -41,13 +41,13 @@ const TIER_TONE: Record<AchievementTier, string> = {
     <span class="min-w-0 flex-1">
       <span
         class="block font-medium"
-        [class]="(compact() ? 'line-clamp-2 text-[13px] leading-tight wrap-break-word ' : 'truncate text-sm ') + (a().unlocked ? 'text-text' : 'text-text-3')"
+        [class]="(compact() ? 'line-clamp-2 text-label leading-tight wrap-break-word ' : 'truncate text-sm ') + (a().unlocked ? 'text-text' : 'text-text-3')"
         [attr.title]="'achievements.items.' + a().id + '.title' | translate"
       >
         {{ 'achievements.items.' + a().id + '.title' | translate }}
       </span>
       @if (compact()) {
-        <span class="mt-0.5 line-clamp-2 block text-[11px] leading-snug text-muted">
+        <span class="mt-0.5 line-clamp-2 block text-caption leading-snug text-muted">
           {{ 'achievements.items.' + a().id + '.desc' | translate: descParams() }}
         </span>
       }
@@ -57,7 +57,7 @@ const TIER_TONE: Record<AchievementTier, string> = {
             <span class="bar-fill block h-full rounded-full bg-brand-light/60" [style.width.%]="percent()"></span>
           </span>
           @if (a().target > 1) {
-            <span class="shrink-0 font-mono text-[10px] leading-none text-faint" data-progress-count>{{ shown() }}/{{ a().target }}</span>
+            <span class="shrink-0 font-mono text-micro leading-none text-faint" data-progress-count>{{ shown() }}/{{ a().target }}</span>
           }
         </span>
       }
@@ -78,13 +78,13 @@ const TIER_TONE: Record<AchievementTier, string> = {
               <span class="bar-fill block h-full rounded-full bg-brand-light/60" [style.width.%]="percent()"></span>
             </span>
             @if (a().target > 1) {
-              <span class="shrink-0 font-mono text-[11px] text-faint" data-progress-count>{{ shown() }}/{{ a().target }}</span>
+              <span class="shrink-0 font-mono text-caption text-faint" data-progress-count>{{ shown() }}/{{ a().target }}</span>
             }
           </span>
         }
       }
       @if (a().unlocked && unlockedOn()) {
-        <span class="mt-0.5 block text-[11px] text-faint">{{ 'achievements.unlockedOn' | translate: { date: unlockedOn() } }}</span>
+        <span class="mt-0.5 block text-caption text-faint">{{ 'achievements.unlockedOn' | translate: { date: unlockedOn() } }}</span>
       }
     </span>
   `,
