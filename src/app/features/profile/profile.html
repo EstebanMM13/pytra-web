@@ -111,14 +111,14 @@
                 <button
                   type="button"
                   (click)="cancelEditName()"
-                  class="rounded-lg border border-border px-3.5 py-2 text-[13px] text-text-2 hover:border-border-strong"
+                  class="btn btn-secondary btn-md"
                 >
                   {{ 'common.cancel' | translate }}
                 </button>
                 <button
                   type="submit"
                   [disabled]="submitting()"
-                  class="press rounded-lg bg-brand px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
+                  class="btn btn-primary btn-md"
                 >
                   {{ 'profile.submit' | translate }}
                 </button>
@@ -393,7 +393,7 @@
             <button
               type="button"
               (click)="installPrompt.install()"
-              class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+              class="btn btn-primary btn-sm flex"
             >
               <svg [lucideIcon]="icons.install" [size]="14"></svg>
               {{ 'profile.installApp' | translate }}
@@ -436,7 +436,7 @@
             type="button"
             (click)="exportData('csv')"
             [disabled]="exporting() !== null"
-            class="flex-1 rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong disabled:opacity-60 sm:flex-none"
+            class="btn btn-secondary btn-sm flex-1 sm:flex-none"
           >
             {{ (exporting() === 'csv' ? 'profile.export.exporting' : 'profile.export.csv') | translate }}
           </button>
@@ -444,7 +444,7 @@
             type="button"
             (click)="exportData('markdown')"
             [disabled]="exporting() !== null"
-            class="flex-1 rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong disabled:opacity-60 sm:flex-none"
+            class="btn btn-secondary btn-sm flex-1 sm:flex-none"
           >
             {{ (exporting() === 'markdown' ? 'profile.export.exporting' : 'profile.export.markdown') | translate }}
           </button>

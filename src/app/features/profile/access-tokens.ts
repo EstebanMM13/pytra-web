@@ -34,7 +34,7 @@ import {
             data-token-new
             (click)="startCreate()"
             [disabled]="tokens() === null || atLimit()"
-            class="shrink-0 rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong disabled:opacity-60"
+            class="btn btn-secondary btn-sm shrink-0"
           >
             {{ 'profile.tokens.new' | translate }}
           </button>
@@ -72,7 +72,7 @@ import {
               type="submit"
               data-token-create
               [disabled]="saving() || !canCreate()"
-              class="flex-1 rounded-lg bg-brand px-3 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-60 sm:flex-none"
+              class="btn btn-primary btn-sm flex-1 sm:flex-none"
             >
               {{ (saving() ? 'profile.tokens.creating' : 'profile.tokens.create') | translate }}
             </button>
@@ -80,7 +80,7 @@ import {
               type="button"
               (click)="creating.set(false)"
               [disabled]="saving()"
-              class="flex-1 rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong disabled:opacity-60 sm:flex-none"
+              class="btn btn-secondary btn-sm flex-1 sm:flex-none"
             >
               {{ 'common.cancel' | translate }}
             </button>
@@ -112,7 +112,7 @@ import {
                 type="button"
                 data-token-copy
                 (click)="copy(c.token)"
-                class="flex-1 rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong sm:flex-none"
+                class="btn btn-secondary btn-sm flex-1 sm:flex-none"
               >
                 {{ (copied() ? 'profile.tokens.copied' : 'profile.tokens.copy') | translate }}
               </button>
@@ -120,7 +120,7 @@ import {
                 type="button"
                 data-token-done
                 (click)="created.set(null)"
-                class="flex-1 rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong sm:flex-none"
+                class="btn btn-secondary btn-sm flex-1 sm:flex-none"
               >
                 {{ 'profile.tokens.done' | translate }}
               </button>

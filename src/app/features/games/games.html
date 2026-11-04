@@ -36,7 +36,7 @@
     <button
       type="button"
       (click)="creating.set(true)"
-      class="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong md:flex"
+      class="btn btn-secondary btn-md hidden shrink-0 md:flex"
     >
       <svg [lucideIcon]="icons.plus" [size]="15"></svg>
       {{ 'library.addGame' | translate }}
@@ -65,7 +65,7 @@
       <div class="flex flex-wrap justify-center gap-2.5">
         <a
           routerLink="/sync"
-          class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+          class="btn btn-primary btn-md flex"
         >
           <svg [lucideIcon]="icons.import" [size]="15"></svg>
           {{ 'library.empty.steam' | translate }}
@@ -73,7 +73,7 @@
         <button
           type="button"
           (click)="creating.set(true)"
-          class="flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong"
+          class="btn btn-secondary btn-md flex"
         >
           <svg [lucideIcon]="icons.plus" [size]="15"></svg>
           {{ 'library.addGame' | translate }}
@@ -220,7 +220,7 @@
           <button
             type="button"
             (click)="loadPlayFacts()"
-            class="press rounded-lg bg-brand px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-brand-dark"
+            class="btn btn-primary btn-md"
             data-play-retry
           >
             {{ 'stats.retry' | translate }}

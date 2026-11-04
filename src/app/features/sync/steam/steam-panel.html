@@ -76,7 +76,7 @@
               type="button"
               (click)="sync()"
               [disabled]="syncing() || !s.configured"
-              class="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong disabled:opacity-50 md:flex-none"
+              class="btn btn-secondary btn-md flex flex-1 md:flex-none"
             >
               <span class="grid place-items-center" [class.animate-spin]="syncing()"><svg [lucideIcon]="icons.refreshCw" [size]="14"></svg></span>
               {{ (syncing() ? 'steam.syncing' : 'steam.sync') | translate }}
@@ -107,7 +107,7 @@
             <button
               type="button"
               (click)="cancelUnlink()"
-              class="rounded-lg border border-border px-3.5 py-2 text-[13px] font-medium text-text-2 hover:border-border-strong"
+              class="btn btn-secondary btn-md"
             >
               {{ 'steam.cancel' | translate }}
             </button>
@@ -221,14 +221,14 @@
                 type="button"
                 (click)="ignore(game)"
                 [disabled]="busyGameId() === game.id"
-                class="rounded-lg border border-border px-3 py-[7px] text-[13px] text-muted hover:border-border-strong hover:text-text-2 disabled:opacity-50"
+                class="btn btn-secondary btn-sm text-muted hover:text-text-2"
               >
                 {{ 'steam.ignore' | translate }}
               </button>
               <button
                 type="button"
                 (click)="openConfirm(game, 'confirm')"
-                class="rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong"
+                class="btn btn-secondary btn-sm"
               >
                 {{ 'steam.confirmOnly' | translate }}
               </button>
@@ -238,7 +238,7 @@
                 (click)="openConfirm(game, 'run')"
                 [disabled]="game.category === 'ONLINE'"
                 [attr.title]="game.category === 'ONLINE' ? ('game.onlineNoRuns' | translate) : null"
-                class="press rounded-lg bg-brand px-3 py-[7px] text-[13px] font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
+                class="btn btn-primary btn-sm"
                 data-create-run
               >
                 {{ 'steam.createRun' | translate }}
@@ -287,7 +287,7 @@
               <button
                 type="button"
                 (click)="unignore(app)"
-                class="shrink-0 rounded-lg border border-border px-3 py-[7px] text-[13px] text-text-2 hover:border-border-strong"
+                class="btn btn-secondary btn-sm shrink-0"
               >
                 {{ 'steam.unignore' | translate }}
               </button>

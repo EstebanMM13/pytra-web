@@ -119,7 +119,7 @@
               type="button"
               (click)="remove()"
               [disabled]="deleting()"
-              class="flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong hover:text-danger disabled:opacity-60"
+              class="btn btn-secondary btn-md flex hover:text-danger"
             >
               <svg [lucideIcon]="icons.trash" [size]="14"></svg>
               {{ 'run.delete' | translate }}
@@ -127,7 +127,7 @@
             <button
               type="button"
               (click)="edit()"
-              class="press flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-semibold text-white hover:bg-brand-dark"
+              class="btn btn-primary btn-md flex"
             >
               <svg [lucideIcon]="icons.pencil" [size]="14"></svg>
               {{ 'run.edit' | translate }}

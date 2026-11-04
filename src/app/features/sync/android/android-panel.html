@@ -26,7 +26,7 @@
         <button
           type="button"
           (click)="grantPermission()"
-          class="rounded-lg bg-brand px-3.5 py-[9px] text-[13px] font-medium text-white hover:bg-brand-dark"
+          class="btn btn-primary btn-md"
           data-grant-permission
         >
           {{ 'androidUsage.grantPermission' | translate }}
@@ -45,7 +45,7 @@
           type="button"
           (click)="syncNow()"
           [disabled]="syncService.syncing() || linkedCount() === 0"
-          class="flex items-center justify-center gap-1.5 rounded-lg border border-border px-3.5 py-[9px] text-[13px] font-medium text-text-2 hover:border-border-strong disabled:opacity-50"
+          class="btn btn-secondary btn-md flex"
           data-sync-now
         >
           <span class="grid place-items-center" [class.animate-spin]="syncService.syncing()"><svg [lucideIcon]="icons.refreshCw" [size]="14"></svg></span>
