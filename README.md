@@ -45,7 +45,7 @@ npm start          # ng serve on http://localhost:4200
 | Auth | Register, mandatory email verification (with resend), login with username or email, forgot/reset password, Google login |
 | Demo | Read-only demo session from the login screen; write actions are hidden or blocked |
 | Dashboard | Stats summary, achievements, games in progress, hours per year (linked to each year page), top-rated runs, most-played singleplayer and online games |
-| Library ("Biblioteca") | Games with cover, saga, genres, developer/publisher and release date. Collapsible sections (En curso, Completado...), with postgame games under both En curso and Completado; filters by status, platinum, 100%, played year, release decade and run buckets; search, sorting, list and grid views |
+| Library ("Biblioteca") | Games with cover, saga, genres, developer/publisher and release date. Status tabs (En curso, Completado...), with postgame games under both En curso and Completado; filters by status, platinum, 100%, played year, release decade and run buckets; search, sorting, list and grid views |
 | Backlog | "Pendiente" is a per-game backlog switch, not a run status; starting a run takes the game out of the backlog |
 | Runs | Log, edit and delete runs (experiences) per game: platform, dates, hours, status (En curso, Completado, Abandonado), rating, platinum, 100% and postgame (with its end date). Hours and rating are editable inline on the run page, and several runs can be queued to edit one after another. Play time is shown and entered as hours and minutes |
 | Online playtime | For `ONLINE`/`HYBRID` games: hours per online platform (the total is their sum), rating, platinum and 100% |

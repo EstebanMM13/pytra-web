@@ -1057,11 +1057,6 @@
     "online": "Online",
     "noRuns": "Sin partidas",
     "backlog": "Pendiente",
-    "section": {
-      "dated": "Con fechas",
-      "undated": "Sin fechas",
-      "online": "Online"
-    },
     "showing": "Mostrando {{shown}} de {{total}}",
     "runsCount": "{{count}} partidas",
     "runsCount_one": "{{count}} partida",

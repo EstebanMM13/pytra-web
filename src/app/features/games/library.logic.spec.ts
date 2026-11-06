@@ -2,12 +2,10 @@ import { Game } from '../../core/models/game.model';
 import {
   countByStatus,
   filterGames,
-  groupLibrarySections,
+  orderLibraryResults,
   isInPostgame,
   noRunsLabel,
   librarySectionOf,
-  parseCollapsedSections,
-  serializeCollapsedSections,
   isLibraryGame,
   isOnlineOnly,
   isUpcoming,
@@ -523,7 +521,7 @@ describe('pendingSummary', () => {
   });
 });
 
-describe('library sections', () => {
+describe('library order', () => {
   const dated = game({
     id: 1,
     name: 'Saros',
@@ -553,7 +551,7 @@ describe('library sections', () => {
     lastPlayedAt: '2025-01-01',
   });
 
-  it('puts dated games (a year is enough) first, then games without dates or runs, then online ones', () => {
+  it('tells dated games (a year is enough), online games and games without dates or runs apart', () => {
     expect(librarySectionOf(dated)).toBe('dated');
     expect(librarySectionOf(yearOnly)).toBe('dated');
     expect(librarySectionOf(undatedRun)).toBe('undated');
@@ -563,22 +561,9 @@ describe('library sections', () => {
     expect(librarySectionOf(hybridDated)).toBe('dated');
   });
 
-  it('groups in section order, keeps the sorted order inside each and drops empty sections', () => {
-    const sections = groupLibrarySections([online, undatedRun, dated, noRuns, yearOnly]);
-    expect(sections.map((s) => [s.id, s.games.map((g) => g.id)])).toEqual([
-      ['dated', [1, 2]],
-      ['undated', [3, 4]],
-      ['online', [5]],
-    ]);
-    expect(groupLibrarySections([dated, yearOnly]).map((s) => s.id)).toEqual(['dated']);
-    expect(groupLibrarySections([])).toEqual([]);
-  });
-
-  it('reads and writes the collapsed sections, ignoring unknown or broken values', () => {
-    expect(parseCollapsedSections('["online","undated"]')).toEqual(['undated', 'online']);
-    expect(parseCollapsedSections('["online","nope",3]')).toEqual(['online']);
-    expect(parseCollapsedSections('not json')).toEqual([]);
-    expect(parseCollapsedSections(null)).toEqual([]);
-    expect(serializeCollapsedSections(['undated'])).toBe('["undated"]');
+  it('orders dated games, then online ones, then undated ones, keeping the sorted order inside each', () => {
+    const ordered = orderLibraryResults([online, undatedRun, dated, noRuns, yearOnly]);
+    expect(ordered.map((g) => g.id)).toEqual([1, 2, 5, 3, 4]);
+    expect(orderLibraryResults([])).toEqual([]);
   });
 });

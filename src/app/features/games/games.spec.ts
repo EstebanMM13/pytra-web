@@ -592,7 +592,7 @@ describe('Games library postgame', () => {
   });
 });
 
-describe('Games library sections', () => {
+describe('Games library order', () => {
   const dated: Game = { ...game(1, [], 'A'), name: 'Saros', lastExperienceStatus: 'COMPLETADO', lastPlayedAt: '2026-10-20' };
   const undated: Game = { ...game(2, [], 'B'), name: 'Hades', lastExperienceStatus: 'EN_CURSO' };
   const online: Game = { ...game(3, [], 'C'), name: 'Fortnite', category: 'ONLINE' };
@@ -600,7 +600,7 @@ describe('Games library sections', () => {
 
   afterEach(() => localStorage.clear());
 
-  async function setup(games: Game[], { wide = false, view = 'grid' } = {}) {
+  async function setup(games: Game[], { wide = false, view = 'grid', url = '/games' } = {}) {
     localStorage.setItem('pytra_library_view', view);
     TestBed.configureTestingModule({
       providers: [
@@ -612,68 +612,35 @@ describe('Games library sections', () => {
       ],
     });
     TestBed.overrideComponent(Games, { remove: { imports: [Navbar] }, add: { imports: [NavbarStub] } });
-    const harness = await RouterTestingHarness.create('/games');
+    const harness = await RouterTestingHarness.create(url);
     const el = harness.routeNativeElement!;
     const headers = () => [...el.querySelectorAll<HTMLButtonElement>('[data-library-section]')];
     const listed = () => [...new Set([...el.querySelectorAll('a[href^="/games/"]')].map((a) => a.getAttribute('href')))];
     return { harness, el, headers, listed };
   }
 
-  it('splits the results into dated, undated and online sections, in that order, with their counts', async () => {
-    const { headers, listed } = await setup([online, undated, dated]);
-    expect(headers().map((h) => h.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
-      'library.section.dated1',
-      'library.section.undated1',
-      'library.section.online1',
-    ]);
-    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3']);
-  });
-
-  it('shows no section headers when every result falls in one section', async () => {
-    const { headers, listed } = await setup([dated, { ...dated, id: 9 }]);
+  it('lists dated games, then online ones, then undated ones, in one list without section headers', async () => {
+    const { headers, listed } = await setup([undated, online, dated]);
     expect(headers()).toEqual([]);
-    expect(listed().length).toBe(2);
+    expect(listed()).toEqual(['/games/1', '/games/3', '/games/2']);
   });
 
-  it('folds and unfolds a section, remembering it on the device', async () => {
-    const { harness, headers, listed } = await setup([online, undated, dated]);
-    const onlineHeader = headers()[2];
-    expect(onlineHeader.getAttribute('aria-expanded')).toBe('true');
-
-    onlineHeader.click();
-    await harness.fixture.whenStable();
-    expect(listed()).toEqual(['/games/1', '/games/2']);
-    expect(headers()[2].getAttribute('aria-expanded')).toBe('false');
-    expect(localStorage.getItem('pytra_library_collapsed')).toBe('["online"]');
-
-    headers()[2].click();
-    await harness.fixture.whenStable();
-    expect(listed()).toEqual(['/games/1', '/games/2', '/games/3']);
-    expect(localStorage.getItem('pytra_library_collapsed')).toBe('[]');
+  it('keeps that order in search results', async () => {
+    const hades: Game = { ...dated, id: 4, name: 'Hades II' };
+    const onlineHades: Game = { ...online, id: 5, name: 'Hades Online' };
+    const { listed } = await setup([undated, onlineHades, hades], { url: '/games?q=hades' });
+    expect(listed()).toEqual(['/games/4', '/games/5', '/games/2']);
   });
 
-  it('starts with the sections folded on a previous visit', async () => {
-    localStorage.setItem('pytra_library_collapsed', '["undated"]');
-    const { listed } = await setup([online, undated, dated]);
-    expect(listed()).toEqual(['/games/1', '/games/3']);
-  });
-
-  it('points the arrow of a section folded on a previous visit sideways, and the others down', async () => {
-    localStorage.setItem('pytra_library_collapsed', '["undated"]');
-    const { headers } = await setup([online, undated, dated]);
-    const turned = headers().map((h) => h.querySelector('[data-section-chevron]')!.classList.contains('-rotate-90'));
-    expect(turned).toEqual([false, true, false]);
-  });
-
-  it('lists every game in the desktop table when there are sections, without pages', async () => {
-    const { el, listed } = await setup([...many, online], { wide: true, view: 'list' });
-    expect(listed().length).toBe(13);
-    expect(el.querySelector('app-pagination')).toBeNull();
-  });
-
-  it('keeps the desktop table paged when there is a single section', async () => {
-    const { el, listed } = await setup(many, { wide: true, view: 'list' });
+  it('pages the desktop table over the ordered results', async () => {
+    const { el, listed } = await setup([online, ...many], { wide: true, view: 'list' });
     expect(listed().length).toBe(10);
+    expect(listed()).not.toContain('/games/3');
     expect(el.querySelector('app-pagination')).not.toBeNull();
+  });
+
+  it('shows every result in the grid', async () => {
+    const { listed } = await setup([online, ...many]);
+    expect(listed().length).toBe(13);
   });
 });

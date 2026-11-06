@@ -1057,11 +1057,6 @@
     "online": "Online",
     "noRuns": "No runs",
     "backlog": "Backlog",
-    "section": {
-      "dated": "With dates",
-      "undated": "Without dates",
-      "online": "Online"
-    },
     "showing": "Showing {{shown}} of {{total}}",
     "runsCount": "{{count}} runs",
     "runsCount_one": "{{count}} run",
