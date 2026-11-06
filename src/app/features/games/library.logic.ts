@@ -399,8 +399,12 @@ export function librarySectionOf(game: Game): LibrarySectionId {
   return lastPlayedKey(game) !== null ? 'dated' : 'undated';
 }
 
-/** Results in LIBRARY_SECTIONS order, each group keeping the incoming order. */
-export function orderLibraryResults(games: readonly Game[]): Game[] {
+/**
+ * Results in LIBRARY_SECTIONS order, each group keeping the incoming order. Only the default sort
+ * groups them: a sort the user picks (name, rating, hours) rules the whole list.
+ */
+export function orderLibraryResults(games: readonly Game[], sort: LibrarySort): Game[] {
+  if (sort !== 'recent') return [...games];
   return LIBRARY_SECTIONS.flatMap((id) => games.filter((game) => librarySectionOf(game) === id));
 }
 

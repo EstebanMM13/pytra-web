@@ -360,7 +360,7 @@ export class Games {
       : countByStatus(this.libraryGames().filter((g) => matchesPanelFilters(g, this.query(), this.playIndex()))),
   );
   protected readonly filtered = computed(() =>
-    orderLibraryResults(filterGames(this.libraryGames(), this.query(), this.playIndex())),
+    orderLibraryResults(filterGames(this.libraryGames(), this.query(), this.playIndex()), this.query().sort),
   );
   protected readonly page = computed(() => paginate(this.filtered(), this.query().page));
   protected readonly hasFilters = computed(

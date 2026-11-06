@@ -561,9 +561,14 @@ describe('library order', () => {
     expect(librarySectionOf(hybridDated)).toBe('dated');
   });
 
+  it.each(['name', 'rating', 'hours'] as const)('keeps the order of the %s sort, without grouping', (sort) => {
+    const ordered = orderLibraryResults([online, undatedRun, dated], sort);
+    expect(ordered.map((g) => g.id)).toEqual([5, 3, 1]);
+  });
+
   it('orders dated games, then online ones, then undated ones, keeping the sorted order inside each', () => {
-    const ordered = orderLibraryResults([online, undatedRun, dated, noRuns, yearOnly]);
+    const ordered = orderLibraryResults([online, undatedRun, dated, noRuns, yearOnly], 'recent');
     expect(ordered.map((g) => g.id)).toEqual([1, 2, 5, 3, 4]);
-    expect(orderLibraryResults([])).toEqual([]);
+    expect(orderLibraryResults([], 'recent')).toEqual([]);
   });
 });

@@ -632,6 +632,13 @@ describe('Games library order', () => {
     expect(listed()).toEqual(['/games/4', '/games/5', '/games/2']);
   });
 
+  it('lets a chosen sort rule over the groups', async () => {
+    const short: Game = { ...dated, totalHours: 5 };
+    const long: Game = { ...online, totalHours: 900 };
+    const { listed } = await setup([short, long], { url: '/games?sort=hours' });
+    expect(listed()).toEqual(['/games/3', '/games/1']);
+  });
+
   it('pages the desktop table over the ordered results', async () => {
     const { el, listed } = await setup([online, ...many], { wide: true, view: 'list' });
     expect(listed().length).toBe(10);
