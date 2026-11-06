@@ -17,6 +17,7 @@ import { RunFormLauncher } from '../../../core/services/run-form-launcher.servic
 import { Navbar } from '../../../shared/navbar/navbar';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { GameDetail } from './game-detail';
+import { OnlinePlaytimeStore } from './online-playtime.store';
 
 @Component({ selector: 'app-navbar', template: '' })
 class NavbarStub {}
@@ -309,7 +310,8 @@ describe('GameDetail online rating', () => {
     const fixture = TestBed.createComponent(GameDetail);
     fixture.detectChanges();
     const detail = fixture.componentInstance;
-    return { detail, form: detail.onlinePlaytimeForm, upsert, submit: () => detail['submitOnlinePlaytime']() };
+    const store = fixture.debugElement.injector.get(OnlinePlaytimeStore);
+    return { detail, form: store.onlinePlaytimeForm, upsert, submit: () => store.submitOnlinePlaytime() };
   }
 
   it('shows the stored rating on the scale and saves typed values on 0–10', () => {
@@ -571,7 +573,7 @@ describe('GameDetail online platinum / 100%', () => {
       (el.querySelector(`[data-online-switch="${flag}"]`) as HTMLButtonElement).click();
       fixture.detectChanges();
     };
-    return { fixture, el, upsert, toggle, detail: fixture.componentInstance };
+    return { fixture, el, upsert, toggle, store: fixture.debugElement.injector.get(OnlinePlaytimeStore) };
   }
 
   it('shows the stored flags on the switches', () => {
@@ -635,12 +637,12 @@ describe('GameDetail online platinum / 100%', () => {
   });
 
   it('keeps switches pending without a record and sends them with the first save', () => {
-    const { el, upsert, toggle, detail } = render(null);
+    const { el, upsert, toggle, store } = render(null);
     toggle('platinum');
     expect(upsert).not.toHaveBeenCalled();
     expect(el.textContent).toContain('game.online.platformsPending');
 
-    detail['submitOnlinePlaytime']();
+    store.submitOnlinePlaytime();
     expect(upsert).toHaveBeenCalledWith(7, expect.objectContaining({ platinum: true, fullCompletion: false }));
   });
 

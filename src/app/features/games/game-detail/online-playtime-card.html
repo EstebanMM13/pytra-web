@@ -1,0 +1,211 @@
+<section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
+  <app-section-header collapseKey="game.online" class="mb-3" [label]="'game.online.title' | translate">
+    @if (store.onlinePlaytime()?.platinum) {
+      <span
+        class="platinum-glow platinum-pill relative inline-flex h-6 shrink-0 items-center rounded-full px-1.5"
+        role="img"
+        [attr.aria-label]="'game.stats.platinum' | translate"
+        [attr.title]="'game.stats.platinum' | translate"
+        data-online-platinum
+      >
+        <svg [lucideIcon]="statIcons.platinum" [size]="13" aria-hidden="true"></svg>
+      </span>
+    }
+    @if (store.onlinePlaytime()?.fullCompletion) {
+      <span
+        class="completion-pill inline-flex h-6 shrink-0 items-center rounded-full px-1.5"
+        role="img"
+        [attr.aria-label]="'run.fullCompletionAria' | translate"
+        [attr.title]="'run.fullCompletionAria' | translate"
+        data-online-full-completion
+      >
+        <svg [lucideIcon]="statIcons.fullCompletion" [size]="13" aria-hidden="true"></svg>
+      </span>
+    }
+    <span class="font-mono text-body">{{ store.onlinePlaytime()?.totalHours | hours }}</span>
+  </app-section-header>
+  <p class="-mt-1 mb-3 text-xs text-muted">{{ 'game.online.explain' | translate }}</p>
+  @if (store.onlineLoadState() === 'error') {
+    <p class="mb-3 rounded-lg bg-danger-bg px-3 py-2 text-xs text-danger" role="alert">
+      {{ 'game.online.loadError' | translate }}
+    </p>
+  }
+  <!-- Platforms played online; with two or more each one is a row with its share of the hours. -->
+  @let split = store.onlinePlatformSplit();
+  <div class="mb-3 flex flex-col gap-1.5 text-xs text-muted">
+    <div class="flex items-baseline justify-between gap-3">
+      <span id="game-online-platforms">{{ 'game.online.platforms' | translate }}</span>
+      @if (split) {
+        <span class="font-mono text-faint" data-online-total>{{ split.assigned | hours }}</span>
+      }
+    </div>
+    @if (split) {
+      <ul
+        class="divide-y divide-divider overflow-hidden rounded-lg border border-border bg-bg"
+        role="group"
+        aria-labelledby="game-online-platforms"
+        data-online-platform-hours
+      >
+        @for (p of store.onlinePlatforms(); track p.id) {
+          <li class="flex items-center gap-2 py-1.5 pr-1.5 pl-3">
+            <app-platform-label class="min-w-0 flex-1 truncate text-sm text-text-2" [platform]="p" />
+            <app-hours-input
+              class="shrink-0 font-mono text-xs"
+              placeholder="—"
+              [fieldClass]="onlineHoursFieldClass"
+              [minutesFieldClass]="onlineMinutesFieldClass"
+              [value]="store.onlinePlatformHours()[p.id] ?? ''"
+              (valueChange)="store.setOnlinePlatformHours(p.id, $event)"
+              [disabled]="store.savingOnline() || store.onlineLoadState() === 'error' || store.onlineLoadState() === 'loading'"
+              [label]="'game.online.platformHoursFor' | translate: { name: p.name }"
+            />
+            <button
+              type="button"
+              (click)="store.removeOnlinePlatform(p.id)"
+              [disabled]="store.savingOnlinePlatforms() || store.onlineLoadState() === 'error'"
+              class="grid size-8 shrink-0 place-items-center rounded-md text-faint hover:bg-hover hover:text-text disabled:opacity-50"
+              [attr.aria-label]="'game.online.removePlatform' | translate: { name: p.name }"
+            >
+              <svg [lucideIcon]="icons.x" [size]="14"></svg>
+            </button>
+          </li>
+        }
+        @if (store.showUnassignedRow()) {
+          <li class="flex items-center gap-2 py-1.5 pr-1.5 pl-3" data-online-unassigned>
+            <span class="min-w-0 flex-1 truncate text-sm text-faint">{{ 'game.online.unassignedRow' | translate }}</span>
+            <app-hours-input
+              class="shrink-0 font-mono text-xs"
+              placeholder="—"
+              [fieldClass]="onlineHoursFieldClass"
+              [minutesFieldClass]="onlineMinutesFieldClass"
+              [value]="store.onlineUnassignedHours()"
+              (valueChange)="store.setOnlineUnassignedHours($event)"
+              [disabled]="store.savingOnline() || store.onlineLoadState() === 'error' || store.onlineLoadState() === 'loading'"
+              [label]="'game.online.unassignedRow' | translate"
+            />
+            <span class="size-8 shrink-0"></span>
+          </li>
+        }
+      </ul>
+      <div class="flex items-center justify-between gap-3">
+        <ng-container *ngTemplateOutlet="addOnlinePlatformSelect" />
+        <span class="text-faint">{{ 'game.online.platformHoursHint' | translate }}</span>
+      </div>
+    } @else {
+      <div class="flex flex-wrap items-center gap-1.5" role="group" aria-labelledby="game-online-platforms">
+        @for (p of store.onlinePlatforms(); track p.id) {
+          <span
+            class="inline-flex items-center gap-1 rounded-full border border-border bg-bg py-0.5 pr-1 pl-2 text-xs text-text-2"
+          >
+            <app-platform-label [platform]="p" />
+            <button
+              type="button"
+              (click)="store.removeOnlinePlatform(p.id)"
+              [disabled]="store.savingOnlinePlatforms() || store.onlineLoadState() === 'error'"
+              class="rounded-full p-0.5 text-faint hover:text-text disabled:opacity-50"
+              [attr.aria-label]="'game.online.removePlatform' | translate: { name: p.name }"
+            >
+              <svg [lucideIcon]="icons.x" [size]="12"></svg>
+            </button>
+          </span>
+        }
+        <ng-container *ngTemplateOutlet="addOnlinePlatformSelect" />
+        @if (!store.onlinePlatforms().length && !store.onlinePlatformGroups()) {
+          <span class="text-faint">—</span>
+        }
+      </div>
+    }
+    @if (store.onlinePlatformHoursError(); as error) {
+      <p class="text-xs text-danger" data-online-platform-hours-error>
+        {{ (error === 'exceedsTotal' ? 'game.online.platformHoursExceed' : 'game.online.platformHoursInvalid') | translate }}
+      </p>
+    }
+  </div>
+  <ng-template #addOnlinePlatformSelect>
+  @if (store.onlinePlatformGroups(); as groups) {
+    @if (groups.length) {
+      <select
+        #platformSelect
+        class="h-8 max-w-full rounded-lg border border-border bg-bg px-2 text-xs text-text-2 disabled:opacity-50"
+        [disabled]="store.savingOnlinePlatforms() || store.onlineLoadState() === 'error'"
+        [attr.aria-label]="'game.online.addPlatform' | translate"
+        (change)="store.addOnlinePlatform(platformSelect)"
+      >
+        <option value="" selected>{{ 'game.online.addPlatform' | translate }}</option>
+        @for (group of groups; track group.family) {
+          <optgroup [label]="'platformFamily.' + group.family | translate">
+            @for (p of group.platforms; track p.id) {
+              <option [value]="p.id">{{ platformLabel(p.name) | translate }}</option>
+            }
+          </optgroup>
+        }
+      </select>
+    }
+  }
+  </ng-template>
+  <!-- Platinum / 100% switches, like the run form's (saved right away once a record exists) -->
+  @let flags = store.onlineFlags();
+  @let flagsLocked = store.savingOnlineFlags() || store.onlineLoadState() === 'error' || store.onlineLoadState() === 'loading';
+  <div class="mb-3 flex flex-wrap items-center gap-x-6 gap-y-3" data-online-flags>
+    <button
+      type="button"
+      role="switch"
+      [attr.aria-checked]="flags.platinum"
+      [disabled]="flagsLocked"
+      (click)="store.toggleOnlineFlag('platinum')"
+      class="online-switch"
+      data-online-switch="platinum"
+    >
+      <span class="online-switch-track" [class]="flags.platinum ? 'bg-brand' : 'bg-border'">
+        <span class="online-switch-thumb" [class]="flags.platinum ? 'translate-x-4 bg-white' : 'bg-muted'"></span>
+      </span>
+      <span>{{ 'runForm.platinum' | translate }}</span>
+    </button>
+    <button
+      type="button"
+      role="switch"
+      [attr.aria-checked]="flags.fullCompletion"
+      [attr.aria-label]="'run.fullCompletionAria' | translate"
+      [disabled]="flagsLocked"
+      (click)="store.toggleOnlineFlag('fullCompletion')"
+      class="online-switch"
+      data-online-switch="fullCompletion"
+    >
+      <span class="online-switch-track" [class]="flags.fullCompletion ? 'bg-brand' : 'bg-border'">
+        <span class="online-switch-thumb" [class]="flags.fullCompletion ? 'translate-x-4 bg-white' : 'bg-muted'"></span>
+      </span>
+      <span>{{ 'runForm.fullCompletion' | translate }}</span>
+    </button>
+    <form
+      [formGroup]="store.onlinePlaytimeForm"
+      (ngSubmit)="store.submitOnlinePlaytime()"
+      novalidate
+      class="ml-auto flex items-center gap-2"
+    >
+      <label class="flex items-center gap-2 text-sm text-text-2">
+        {{ 'game.online.rating' | translate }}
+        <input
+          type="text"
+          inputmode="decimal"
+          autocomplete="off"
+          formControlName="generalRating"
+          placeholder="—"
+          class="h-10 w-20 rounded-lg border border-border bg-bg px-3 font-mono text-sm text-gold"
+        />
+      </label>
+      <button
+        type="submit"
+        [disabled]="store.savingOnline() || store.onlineLoadState() === 'error' || store.onlineLoadState() === 'loading'"
+        class="btn btn-primary btn-md h-10"
+      >
+        {{ 'game.online.save' | translate }}
+      </button>
+    </form>
+  </div>
+  @if (store.onlineLoadState() === 'missing' && (store.onlinePlatforms().length || flags.platinum || flags.fullCompletion)) {
+    <p class="-mt-1 mb-3 text-xs text-faint">{{ 'game.online.platformsPending' | translate }}</p>
+  }
+  @if (store.onlinePlaytimeForm.invalid && store.onlinePlaytimeForm.touched) {
+    <p class="mt-2 text-xs text-danger">{{ 'game.online.invalid' | translate: { max: preferences.ratingMax() } }}</p>
+  }
+</section>
