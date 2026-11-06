@@ -105,8 +105,10 @@
         "inProgress": "{{count}} in progress",
         "topSaga": "Most played: {{name}}",
         "completed": "{{count}} completed",
+        "completed_one": "{{count}} completed",
         "shareOfTotal": "{{percent}}% of total",
-        "rated": "{{count}} rated"
+        "rated": "{{count}} rated",
+        "rated_one": "{{count}} rated"
       }
     },
     "playingNow": "Playing now",
