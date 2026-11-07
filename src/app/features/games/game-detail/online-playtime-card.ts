@@ -1,8 +1,9 @@
-import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe } from '@ngx-translate/core';
+import { PlatformRef } from '../../../core/models/platform.model';
 import { platformNameKey } from '../../../core/services/platform.logic';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { HoursPipe } from '../../../shared/pipes/hours.pipe';
@@ -16,6 +17,7 @@ import { OnlinePlaytimeStore } from './online-playtime.store';
 @Component({
   selector: 'app-online-playtime-card',
   imports: [
+    DecimalPipe,
     HoursInput,
     HoursPipe,
     LucideDynamicIcon,
@@ -36,6 +38,20 @@ export class OnlinePlaytimeCard {
   protected readonly statIcons = { platinum: ICONS.platinum, fullCompletion: ICONS.badgeCheck };
 
   protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
+
+  /** Share of the online total per platform id, in %; only with two or more platforms (one is always 100 %). */
+  protected readonly shares = computed(() => {
+    const split = this.store.onlinePlatformSplit();
+    if (!split || this.store.onlinePlatforms().length < 2 || !(split.assigned > 0)) return null;
+    return Object.fromEntries(
+      Object.entries(split.hours).map(([id, hours]) => [id, (hours / split.assigned) * 100]),
+    ) as Record<number, number>;
+  });
+
+  /** The platform's catalog colour for its tile; null (neutral) when it has none or it is not a hex colour. */
+  protected colorOf(platform: PlatformRef): string | null {
+    return platform.color && /^#[0-9a-f]{6}$/i.test(platform.color) ? platform.color : null;
+  }
 
   /** Classes of the h field of the online hours rows: wide enough for 4-5 digit totals (e.g. 1281 h). */
   protected readonly onlineHoursFieldClass =

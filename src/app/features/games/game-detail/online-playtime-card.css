@@ -37,3 +37,48 @@
     transform 150ms ease-out,
     background-color 150ms ease-out;
 }
+
+/*
+ * One tile per platform played online: a strip and a share bar in the platform's catalog colour
+ * (--row-color, neutral when it has none), the hours on the right.
+ */
+.online-platform-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  border: 1px solid var(--pt-border);
+  border-radius: 12px;
+  background-color: var(--pt-bg);
+  padding: 10px 6px 10px 16px;
+  --row-tint: var(--row-color, var(--pt-platform-neutral));
+}
+
+.online-platform-row:hover {
+  border-color: var(--pt-border-strong);
+}
+
+.online-platform-accent {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 3px;
+  background-color: var(--row-tint);
+}
+
+.online-platform-row-muted {
+  border-style: dashed;
+  --row-tint: var(--pt-border-strong);
+}
+
+.online-platform-share {
+  background-color: var(--row-tint);
+}
+
+.online-add-platform {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--pt-text-3);
+}

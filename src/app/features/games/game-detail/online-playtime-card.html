@@ -30,25 +30,31 @@
       {{ 'game.online.loadError' | translate }}
     </p>
   }
-  <!-- Platforms played online; with two or more each one is a row with its share of the hours. -->
+  <!-- Platforms played online: one tile each with its hours; with two or more, its share of the total. -->
   @let split = store.onlinePlatformSplit();
-  <div class="mb-3 flex flex-col gap-1.5 text-xs text-muted">
+  <div class="mb-4 flex flex-col gap-2 text-xs text-muted">
     <div class="flex items-baseline justify-between gap-3">
-      <span id="game-online-platforms">{{ 'game.online.platforms' | translate }}</span>
+      <span id="game-online-platforms" class="font-medium tracking-[0.06em] uppercase">{{ 'game.online.platforms' | translate }}</span>
       @if (split) {
-        <span class="font-mono text-faint" data-online-total>{{ split.assigned | hours }}</span>
+        <span class="font-mono text-text-3" data-online-total>{{ split.assigned | hours }}</span>
       }
     </div>
     @if (split) {
-      <ul
-        class="divide-y divide-divider overflow-hidden rounded-lg border border-border bg-bg"
-        role="group"
-        aria-labelledby="game-online-platforms"
-        data-online-platform-hours
-      >
+      <ul class="flex flex-col gap-2" role="group" aria-labelledby="game-online-platforms" data-online-platform-hours>
         @for (p of store.onlinePlatforms(); track p.id) {
-          <li class="flex items-center gap-2 py-1.5 pr-1.5 pl-3">
-            <app-platform-label class="min-w-0 flex-1 truncate text-sm text-text-2" [platform]="p" />
+          <li class="online-platform-row group" [style.--row-color]="colorOf(p)">
+            <span class="online-platform-accent" aria-hidden="true"></span>
+            <div class="min-w-0 flex-1">
+              <app-platform-label class="max-w-full truncate text-sm font-medium text-text" [platform]="p" />
+              @if (shares(); as s) {
+                <div class="mt-1.5 flex items-center gap-2" data-online-share>
+                  <span class="h-1 flex-1 overflow-hidden rounded-full bg-hover" aria-hidden="true">
+                    <span class="online-platform-share block h-full rounded-full" [style.width.%]="s[p.id] ?? 0"></span>
+                  </span>
+                  <span class="w-9 shrink-0 text-right font-mono text-caption text-faint">{{ s[p.id] ?? 0 | number: '1.0-0' }} %</span>
+                </div>
+              }
+            </div>
             <app-hours-input
               class="shrink-0 font-mono text-xs"
               placeholder="—"
@@ -63,7 +69,7 @@
               type="button"
               (click)="store.removeOnlinePlatform(p.id)"
               [disabled]="store.savingOnlinePlatforms() || store.onlineLoadState() === 'error'"
-              class="grid size-8 shrink-0 place-items-center rounded-md text-faint hover:bg-hover hover:text-text disabled:opacity-50"
+              class="grid size-8 shrink-0 place-items-center rounded-md text-faint transition-opacity hover:bg-hover hover:text-danger disabled:opacity-50 pointer-fine:opacity-40 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100"
               [attr.aria-label]="'game.online.removePlatform' | translate: { name: p.name }"
             >
               <svg [lucideIcon]="icons.x" [size]="14"></svg>
@@ -71,7 +77,8 @@
           </li>
         }
         @if (store.showUnassignedRow()) {
-          <li class="flex items-center gap-2 py-1.5 pr-1.5 pl-3" data-online-unassigned>
+          <li class="online-platform-row online-platform-row-muted" data-online-unassigned>
+            <span class="online-platform-accent" aria-hidden="true"></span>
             <span class="min-w-0 flex-1 truncate text-sm text-faint">{{ 'game.online.unassignedRow' | translate }}</span>
             <app-hours-input
               class="shrink-0 font-mono text-xs"
@@ -87,30 +94,14 @@
           </li>
         }
       </ul>
-      <div class="flex items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <ng-container *ngTemplateOutlet="addOnlinePlatformSelect" />
         <span class="text-faint">{{ 'game.online.platformHoursHint' | translate }}</span>
       </div>
     } @else {
       <div class="flex flex-wrap items-center gap-1.5" role="group" aria-labelledby="game-online-platforms">
-        @for (p of store.onlinePlatforms(); track p.id) {
-          <span
-            class="inline-flex items-center gap-1 rounded-full border border-border bg-bg py-0.5 pr-1 pl-2 text-xs text-text-2"
-          >
-            <app-platform-label [platform]="p" />
-            <button
-              type="button"
-              (click)="store.removeOnlinePlatform(p.id)"
-              [disabled]="store.savingOnlinePlatforms() || store.onlineLoadState() === 'error'"
-              class="rounded-full p-0.5 text-faint hover:text-text disabled:opacity-50"
-              [attr.aria-label]="'game.online.removePlatform' | translate: { name: p.name }"
-            >
-              <svg [lucideIcon]="icons.x" [size]="12"></svg>
-            </button>
-          </span>
-        }
         <ng-container *ngTemplateOutlet="addOnlinePlatformSelect" />
-        @if (!store.onlinePlatforms().length && !store.onlinePlatformGroups()) {
+        @if (!store.onlinePlatformGroups()) {
           <span class="text-faint">—</span>
         }
       </div>
@@ -124,22 +115,26 @@
   <ng-template #addOnlinePlatformSelect>
   @if (store.onlinePlatformGroups(); as groups) {
     @if (groups.length) {
-      <select
-        #platformSelect
-        class="h-8 max-w-full rounded-lg border border-border bg-bg px-2 text-xs text-text-2 disabled:opacity-50"
-        [disabled]="store.savingOnlinePlatforms() || store.onlineLoadState() === 'error'"
-        [attr.aria-label]="'game.online.addPlatform' | translate"
-        (change)="store.addOnlinePlatform(platformSelect)"
-      >
-        <option value="" selected>{{ 'game.online.addPlatform' | translate }}</option>
-        @for (group of groups; track group.family) {
-          <optgroup [label]="'platformFamily.' + group.family | translate">
-            @for (p of group.platforms; track p.id) {
-              <option [value]="p.id">{{ platformLabel(p.name) | translate }}</option>
-            }
-          </optgroup>
-        }
-      </select>
+      <!-- A native select (keyboard, screen readers, phone pickers) dressed as an "add" chip. -->
+      <span class="online-add-platform">
+        <svg [lucideIcon]="icons.plus" [size]="13" class="pointer-events-none absolute left-2.5" aria-hidden="true"></svg>
+        <select
+          #platformSelect
+          class="h-8 max-w-full cursor-pointer appearance-none rounded-full border border-dashed border-border-strong bg-transparent pr-3 pl-7 text-xs font-medium text-text-2 hover:border-brand-light hover:text-text disabled:cursor-default disabled:opacity-50"
+          [disabled]="store.savingOnlinePlatforms() || store.onlineLoadState() === 'error'"
+          [attr.aria-label]="'game.online.addPlatform' | translate"
+          (change)="store.addOnlinePlatform(platformSelect)"
+        >
+          <option value="" selected>{{ 'game.online.addPlatform' | translate }}</option>
+          @for (group of groups; track group.family) {
+            <optgroup [label]="'platformFamily.' + group.family | translate">
+              @for (p of group.platforms; track p.id) {
+                <option [value]="p.id">{{ platformLabel(p.name) | translate }}</option>
+              }
+            </optgroup>
+          }
+        </select>
+      </span>
     }
   }
   </ng-template>
