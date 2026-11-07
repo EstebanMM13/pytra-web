@@ -147,112 +147,24 @@
       <p class="mt-2">{{ 'steam.private.retry' | translate }}</p>
     </section>
   } @else {
-    <section class="rounded-[14px] border border-card-border card-glass p-4 text-sm text-text-3 md:p-[22px]">
-      <app-section-header collapseKey="steam.result" [label]="'steam.result.title' | translate" class="mb-3" />
-      <ul class="grid grid-cols-1 gap-1 sm:grid-cols-2">
-        <li>{{ 'steam.result.scanned' | translatePlural: result.gamesScanned }}</li>
-        <li>{{ 'steam.result.newPending' | translatePlural: result.newGamesPending }}</li>
-        <li>{{ 'steam.result.linkedExisting' | translatePlural: result.linkedExisting }}</li>
-        <li>{{ 'steam.result.updated' | translatePlural: result.gamesUpdated }}</li>
-        @if (result.ignored > 0) {
-          <li>{{ 'steam.result.ignored' | translatePlural: result.ignored }}</li>
-        }
-        @if (result.skipped > 0) {
-          <li class="text-gold">{{ 'steam.result.skipped' | translatePlural: result.skipped }}</li>
-        }
-        @if (result.errored > 0) {
-          <li class="text-danger">{{ 'steam.result.errored' | translatePlural: result.errored }}</li>
-        }
-      </ul>
-    </section>
+    <app-sync-result source="steam" [result]="result" />
   }
 }
 
 <!-- Pending review -->
 @if (status()?.linked || pending().length > 0) {
-  <section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
-    <app-section-header collapseKey="steam.pending" [label]="('steam.pendingHeader' | translate: { count: pendingTotal() })" class="mb-1.5">
-      <span class="hidden text-label text-muted md:inline">{{ 'steam.pendingHint' | translate }}</span>
-    </app-section-header>
-    <p class="mb-1 text-xs text-muted md:hidden">{{ 'steam.pendingHint' | translate }}</p>
-    @if (enriching()) {
-      <p class="mb-1 flex items-center gap-1.5 text-xs text-muted" role="status">
-        <span class="grid place-items-center animate-spin"><svg [lucideIcon]="icons.refreshCw" [size]="12"></svg></span>
-        @if (enrichmentCount(); as count) {
-          {{ 'sync.enrichment.progress' | translate: count }}
-        } @else {
-          {{ 'sync.enrichment.filling' | translate }}
-        }
-      </p>
-    }
-
-    @if (loading()) {
-      <div class="flex flex-col gap-2 pt-2">
-        <app-skeleton class="h-14 rounded-[10px]" />
-        <app-skeleton class="h-14 rounded-[10px]" />
-      </div>
-    } @else if (pending().length === 0) {
-      <p class="border-t border-divider pt-4 pb-1 text-sm text-muted">{{ 'steam.noPending' | translate }}</p>
-    } @else {
-      <!-- Web: ~8 rows then internal scroll; phones keep page scroll (it is the page's main list). -->
-      <ul class="md:scroll-list md:max-h-[562px]">
-        @for (game of pending(); track game.id) {
-          <li
-            class="flex flex-col gap-3 border-t border-divider py-3.5 text-sm md:grid md:grid-cols-[minmax(0,1fr)_110px_72px_auto] md:items-center md:gap-4"
-          >
-            <div class="flex min-w-0 items-center justify-between gap-3">
-              <app-game-cover decorative size="sm" [url]="game.coverImageUrl" [name]="game.name" />
-              <div class="min-w-0 flex-1">
-                <p class="text-body font-semibold break-words">{{ game.name }}</p>
-                @if (lastSession(game); as when) {
-                  <p class="mt-1 text-xs text-muted">{{ 'steam.lastSession' | translate: { when } }}</p>
-                }
-              </div>
-              <span class="shrink-0 font-mono text-sm md:hidden">{{ steamHours(game.steamPlaytimeMinutes) | hours }}</span>
-            </div>
-            <span class="hidden text-xs text-text-3 md:block">
-              {{ game.category ? ('category.' + game.category | translate) : '' }}
-            </span>
-            <span class="hidden text-right font-mono text-sm md:block">
-              {{ steamHours(game.steamPlaytimeMinutes) | hours }}
-            </span>
-            <div class="flex flex-wrap gap-2">
-              <button
-                type="button"
-                (click)="ignore(game)"
-                [disabled]="busyGameId() === game.id"
-                class="btn btn-secondary btn-sm text-muted hover:text-text-2"
-              >
-                {{ 'steam.ignore' | translate }}
-              </button>
-              <button
-                type="button"
-                (click)="openConfirm(game, 'confirm')"
-                class="btn btn-secondary btn-sm"
-              >
-                {{ 'steam.confirmOnly' | translate }}
-              </button>
-              <!-- ONLINE games have no runs: they are tracked through online playtime. -->
-              <button
-                type="button"
-                (click)="openConfirm(game, 'run')"
-                [disabled]="game.category === 'ONLINE'"
-                [attr.title]="game.category === 'ONLINE' ? ('game.onlineNoRuns' | translate) : null"
-                class="btn btn-primary btn-sm"
-                data-create-run
-              >
-                {{ 'steam.createRun' | translate }}
-              </button>
-            </div>
-            <!-- Own grid row: inside the actions cell its text width would widen the auto column and crush the title. -->
-            @if (game.category === 'ONLINE') {
-              <p class="text-xs text-muted md:col-span-full md:-mt-2" data-online-hint>{{ 'game.onlineNoRuns' | translate }}</p>
-            }
-          </li>
-        }
-      </ul>
-    }
-  </section>
+  <app-pending-games
+    source="steam"
+    [items]="pendingItems()"
+    [total]="pendingTotal()"
+    [loading]="loading()"
+    [enriching]="enriching()"
+    [enrichmentCount]="enrichmentCount()"
+    [busyGameId]="busyGameId()"
+    (createRun)="openConfirm($event, 'run')"
+    (addGame)="openConfirm($event, 'confirm')"
+    (ignoreGame)="ignore($event)"
+  />
 }
 
 <!-- Ignored apps -->

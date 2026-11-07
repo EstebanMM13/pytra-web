@@ -1,0 +1,135 @@
+<section class="rounded-[14px] border border-card-border card-glass p-4 md:p-[22px]">
+  <app-section-header [collapseKey]="source() + '.pending'" [label]="'steam.pendingHeader' | translate: { count: total() }" class="mb-1.5">
+    <span class="hidden text-label text-muted md:inline">{{ source() + '.pendingHint' | translate }}</span>
+  </app-section-header>
+  <p class="mb-1 text-xs text-muted md:hidden">{{ source() + '.pendingHint' | translate }}</p>
+
+  @if (enriching()) {
+    <div class="mt-2 mb-1" role="status">
+      <p class="flex items-center gap-1.5 text-xs text-muted">
+        <span class="grid place-items-center animate-spin"><svg [lucideIcon]="icons.refreshCw" [size]="12"></svg></span>
+        @if (enrichmentCount(); as count) {
+          {{ 'sync.enrichment.progress' | translate: count }}
+        } @else {
+          {{ 'sync.enrichment.filling' | translate }}
+        }
+      </p>
+      @if (enrichmentCount(); as count) {
+        <div class="mt-1.5 h-1 overflow-hidden rounded-full bg-hover" aria-hidden="true">
+          <div data-progress class="bar-fill h-full rounded-full bg-brand-light" [style.width.%]="(count.processed / count.total) * 100"></div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="grid grid-cols-2 gap-x-3 gap-y-5 pt-3 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 lg:grid-cols-5 xl:grid-cols-6">
+      @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+        <app-skeleton class="aspect-[3/4] rounded-lg" />
+      }
+    </div>
+  } @else if (items().length === 0) {
+    <div class="flex flex-col items-center gap-2 border-t border-divider px-4 pt-6 pb-3 text-center">
+      <span class="grid size-10 place-items-center rounded-full bg-success-bg text-success" aria-hidden="true">
+        <svg [lucideIcon]="icons.check" [size]="18"></svg>
+      </span>
+      <p class="text-sm text-muted">{{ 'steam.noPending' | translate }}</p>
+    </div>
+  } @else {
+    @if (showToolbar()) {
+      <div class="mt-2 mb-4 flex items-center gap-2">
+        <label
+          class="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full border border-border bg-surface px-4 text-faint focus-within:border-brand-light md:h-9 md:max-w-[300px] md:px-3.5"
+        >
+          <svg [lucideIcon]="icons.search" [size]="15" class="shrink-0"></svg>
+          <input
+            type="search"
+            class="min-w-0 flex-1 bg-transparent text-lead text-text outline-none focus:shadow-none md:text-label"
+            [value]="query()"
+            (input)="query.set($any($event.target).value)"
+            [placeholder]="'sync.pending.searchPlaceholder' | translate"
+            [attr.aria-label]="'sync.pending.searchPlaceholder' | translate"
+          />
+        </label>
+        <app-dropdown class="shrink-0" align="end" [options]="sortOptions" [(value)]="sort" [ariaLabel]="'sync.pending.sortLabel' | translate" />
+      </div>
+    }
+
+    @if (matches().length === 0) {
+      <div class="flex flex-col items-center gap-3 border-t border-divider px-4 pt-6 pb-3 text-center">
+        <p class="text-sm text-muted">{{ 'sync.pending.noMatches' | translate: { query: query() } }}</p>
+        <button type="button" (click)="query.set('')" class="btn btn-secondary btn-sm">{{ 'sync.pending.clearSearch' | translate }}</button>
+      </div>
+    } @else {
+      <ul class="grid grid-cols-2 gap-x-3 gap-y-5 pt-2 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 lg:grid-cols-5 xl:grid-cols-6">
+        @for (item of shown(); track item.game.id) {
+          <li data-pending-game class="flex min-w-0 flex-col gap-2.5">
+            <div class="relative">
+              <app-game-cover decorative noReveal size="fill" [url]="item.game.coverImageUrl" [name]="item.game.name" />
+              @if (item.badge; as badge) {
+                <span class="absolute top-1.5 right-1.5 rounded-full bg-black/70 px-2 py-px font-mono text-caption font-medium text-white">{{ badge }}</span>
+              }
+              @if (item.hours > 0) {
+                <!-- The hours are what makes one game stand out from another while reviewing. -->
+                <span class="absolute inset-x-0 bottom-0 rounded-b-lg bg-linear-to-t from-black/85 to-transparent px-2.5 pt-7 pb-2 font-mono text-sm font-medium text-white">
+                  {{ item.hours | hours }}
+                </span>
+              }
+            </div>
+
+            <div class="min-w-0">
+              <p class="line-clamp-2 text-body leading-snug font-semibold wrap-break-word" [title]="item.game.name">{{ item.game.name }}</p>
+              @if (item.game.category) {
+                <p class="mt-0.5 text-xs text-text-3">{{ 'category.' + item.game.category | translate }}</p>
+              }
+              @if (lastSession(item); as when) {
+                <p class="mt-0.5 text-xs text-muted">{{ 'steam.lastSession' | translate: { when } }}</p>
+              }
+            </div>
+
+            <div class="mt-auto flex flex-col gap-1.5">
+              <!-- ONLINE games have no runs: they are tracked through online playtime. -->
+              <button
+                type="button"
+                (click)="createRun.emit(item.game)"
+                [disabled]="item.game.category === 'ONLINE'"
+                [attr.title]="item.game.category === 'ONLINE' ? ('game.onlineNoRuns' | translate) : null"
+                class="btn btn-primary btn-sm w-full"
+                data-create-run
+              >
+                {{ 'steam.createRun' | translate }}
+              </button>
+              @if (item.game.category === 'ONLINE') {
+                <p class="text-xs text-muted" data-online-hint>{{ 'game.onlineNoRuns' | translate }}</p>
+              }
+              <div class="flex items-center justify-between gap-2 px-1">
+                <button
+                  type="button"
+                  (click)="addGame.emit(item.game)"
+                  [title]="'sync.pending.addOnlyHint' | translate"
+                  class="tap-area rounded-md py-1 text-xs font-medium text-text-2 hover:text-text"
+                >
+                  {{ 'sync.pending.addOnly' | translate }}
+                </button>
+                <button
+                  type="button"
+                  (click)="ignoreGame.emit(item.game)"
+                  [disabled]="busyGameId() === item.game.id"
+                  class="tap-area rounded-md py-1 text-xs text-muted hover:text-danger disabled:opacity-50"
+                >
+                  {{ 'steam.ignore' | translate }}
+                </button>
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+
+      @if (remaining() > 0) {
+        <button type="button" (click)="showMore()" class="btn btn-secondary btn-md mt-5 w-full">
+          {{ 'sync.pending.showMore' | translate: { count: remaining() } }}
+        </button>
+      }
+    }
+  }
+</section>

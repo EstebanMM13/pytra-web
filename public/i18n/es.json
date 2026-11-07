@@ -395,6 +395,26 @@
     "enrichment": {
       "filling": "Completando datos desde IGDB…",
       "progress": "Completando datos desde IGDB… {{processed}}/{{total}}"
+    },
+    "result": {
+      "scanned": "Revisados",
+      "newPending": "Nuevos por revisar",
+      "linkedExisting": "Ya los tenías",
+      "updated": "Horas actualizadas"
+    },
+    "pending": {
+      "searchPlaceholder": "Buscar juego…",
+      "sortLabel": "Ordenar juegos",
+      "sort": {
+        "hours": "Más horas",
+        "recent": "Más reciente",
+        "name": "Nombre"
+      },
+      "noMatches": "Ningún juego coincide con «{{query}}».",
+      "clearSearch": "Limpiar búsqueda",
+      "showMore": "Mostrar más ({{count}})",
+      "addOnly": "Solo añadir",
+      "addOnlyHint": "Añadir a tu biblioteca sin crear una partida"
     }
   },
   "androidUsage": {
@@ -508,7 +528,6 @@
     "publicNote": "Tu perfil y los detalles de juego deben estar en público.",
     "pendingHeader": "Por revisar · {{count}}",
     "pendingHint": "Juegos de Steam que aún no están en tu biblioteca",
-    "confirmOnly": "Confirmar sin partida",
     "createRun": "Crear partida",
     "confirmed": "«{{name}}» añadido a tu biblioteca.",
     "ignoredCount": "{{count}} ignorados",

@@ -395,6 +395,26 @@
     "enrichment": {
       "filling": "Filling details from IGDB…",
       "progress": "Filling details from IGDB… {{processed}}/{{total}}"
+    },
+    "result": {
+      "scanned": "Scanned",
+      "newPending": "New to review",
+      "linkedExisting": "Already yours",
+      "updated": "Hours updated"
+    },
+    "pending": {
+      "searchPlaceholder": "Search games…",
+      "sortLabel": "Sort games",
+      "sort": {
+        "hours": "Most hours",
+        "recent": "Most recent",
+        "name": "Name"
+      },
+      "noMatches": "No game matches “{{query}}”.",
+      "clearSearch": "Clear search",
+      "showMore": "Show more ({{count}})",
+      "addOnly": "Add only",
+      "addOnlyHint": "Add to your library without creating a run"
     }
   },
   "androidUsage": {
@@ -508,7 +528,6 @@
     "publicNote": "Your profile and game details must be public.",
     "pendingHeader": "To review · {{count}}",
     "pendingHint": "Steam games not in your library yet",
-    "confirmOnly": "Confirm without run",
     "createRun": "Create run",
     "confirmed": "\"{{name}}\" added to your library.",
     "ignoredCount": "{{count}} ignored",

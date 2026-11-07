@@ -18,15 +18,15 @@ import { DemoModeService } from '../../../core/services/demo-mode.service';
 import { ExperienceService } from '../../../core/services/experience.service';
 import { PsnService } from '../../../core/services/psn.service';
 import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
-import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 import { TranslatePluralPipe } from '../../../shared/pipes/translate-plural.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
-import { GameCover } from '../../../shared/ui/game-cover';
 import { ICONS } from '../../../shared/ui/icons';
+import { Skeleton } from '../../../shared/ui/skeleton';
 import { PlatformCard } from '../../../shared/ui/platform-card';
 import { BrandLogo } from '../shared/brand-logo';
-import { SectionHeader } from '../../../shared/ui/section-header';
-import { Skeleton } from '../../../shared/ui/skeleton';
+import { PendingGames } from '../shared/pending-games';
+import { PendingItem } from '../shared/pending-games.logic';
+import { SyncResult } from '../shared/sync-result';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
 import { pollWhileEnriching } from '../shared/enrichment-poll';
@@ -44,16 +44,15 @@ const STATUS_ERROR_KEY = 'psn.errors.generic';
 @Component({
   selector: 'app-psn-panel',
   imports: [
-    HoursPipe,
     TranslatePipe,
     TranslatePluralPipe,
-    SectionHeader,
     Skeleton,
     GameEditDialog,
-    GameCover,
     LucideDynamicIcon,
     PlatformCard,
     BrandLogo,
+    PendingGames,
+    SyncResult,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './psn-panel.html',
@@ -132,6 +131,14 @@ export class PsnPanel {
     () => this.status()?.ignoredCount ?? this.ignoredTitles().length,
   );
   protected readonly linkedGamesCount = computed(() => this.status()?.linkedGamesCount ?? null);
+  protected readonly pendingItems = computed<PendingItem<PsnPendingGame>[]>(() =>
+    this.pending().map((game) => ({
+      game,
+      hours: psnHours(game.psnPlaytimeMinutes),
+      lastPlayedAt: game.lastPlayedAt,
+      badge: game.psnPlatform,
+    })),
+  );
   /** IGDB is filling the pending games in the background (after a sync). */
   protected readonly enriching = computed(() => !!this.status()?.enrichment?.active);
   protected readonly enrichmentCount = computed(() => enrichmentCount(this.status()?.enrichment));
@@ -140,7 +147,6 @@ export class PsnPanel {
     () => this.linkPrivate() || !!this.syncResult()?.profilePrivate,
   );
 
-  protected readonly psnHours = psnHours;
   protected readonly confirmPending: PendingConfirmFn = (gameId, request) =>
     this.psnService.confirmPending(gameId, request);
 
@@ -149,10 +155,6 @@ export class PsnPanel {
     this.loadStatus();
     this.loadPending();
     this.loadIgnored();
-  }
-
-  protected lastSession(game: PsnPendingGame): string | null {
-    return formatRelativeTime(game.lastPlayedAt, this.locale());
   }
 
   /** Keeps the status counters in step with local list changes (no refetch needed). */

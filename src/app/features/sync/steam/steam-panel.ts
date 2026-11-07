@@ -15,13 +15,13 @@ import { NativeOAuthService } from '../../../core/services/native-oauth.service'
 import { RunFormLauncher } from '../../../core/services/run-form-launcher.service';
 import { SteamService } from '../../../core/services/steam.service';
 import { ToastService } from '../../../shared/toast/toast.service';
-import { SectionHeader } from '../../../shared/ui/section-header';
-import { HoursPipe } from '../../../shared/pipes/hours.pipe';
 import { TranslatePluralPipe } from '../../../shared/pipes/translate-plural.pipe';
 import { Skeleton } from '../../../shared/ui/skeleton';
-import { GameCover } from '../../../shared/ui/game-cover';
 import { PlatformCard } from '../../../shared/ui/platform-card';
 import { BrandLogo } from '../shared/brand-logo';
+import { PendingGames } from '../shared/pending-games';
+import { PendingItem } from '../shared/pending-games.logic';
+import { SyncResult } from '../shared/sync-result';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
 import { pollWhileEnriching } from '../shared/enrichment-poll';
@@ -32,16 +32,15 @@ import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRuns, maskSteamId, steamHour
 @Component({
   selector: 'app-steam-panel',
   imports: [
-    HoursPipe,
     TranslatePipe,
     TranslatePluralPipe,
-    SectionHeader,
     Skeleton,
     GameEditDialog,
-    GameCover,
     LucideDynamicIcon,
     PlatformCard,
     BrandLogo,
+    PendingGames,
+    SyncResult,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './steam-panel.html',
@@ -104,17 +103,20 @@ export class SteamPanel {
   protected readonly pendingTotal = computed(() => this.status()?.pendingCount ?? this.pending().length);
   protected readonly ignoredTotal = computed(() => this.status()?.ignoredCount ?? this.ignoredApps().length);
   protected readonly linkedGamesCount = computed(() => this.status()?.linkedGamesCount ?? null);
+  protected readonly pendingItems = computed<PendingItem<SteamPendingGame>[]>(() =>
+    this.pending().map((game) => ({
+      game,
+      hours: steamHours(game.steamPlaytimeMinutes),
+      lastPlayedAt: game.lastPlayedAt,
+      badge: null,
+    })),
+  );
   /** IGDB is filling the pending games in the background (after a sync). */
   protected readonly enriching = computed(() => !!this.status()?.enrichment?.active);
   protected readonly enrichmentCount = computed(() => enrichmentCount(this.status()?.enrichment));
 
-  protected readonly steamHours = steamHours;
   protected readonly confirmPending: PendingConfirmFn = (gameId, request) =>
     this.steamService.confirmPending(gameId, request);
-
-  protected lastSession(game: SteamPendingGame): string | null {
-    return formatRelativeTime(game.lastPlayedAt, this.locale());
-  }
 
   /** Keeps the status counters in step with local list changes (no refetch needed). */
   private applyChange(change: PendingChange): void {
