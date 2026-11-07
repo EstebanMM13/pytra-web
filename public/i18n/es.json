@@ -414,7 +414,9 @@
       "clearSearch": "Limpiar búsqueda",
       "showMore": "Mostrar más ({{count}})",
       "addOnly": "Solo añadir",
-      "addOnlyHint": "Añadir a tu biblioteca sin crear una partida"
+      "addOnlyHint": "Añadir a tu biblioteca sin crear una partida",
+      "preparing": "Preparando tus juegos… {{ready}}/{{total}}",
+      "showNow": "Ver ya"
     }
   },
   "androidUsage": {

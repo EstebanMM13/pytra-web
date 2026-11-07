@@ -38,6 +38,8 @@ export interface SteamPendingGame extends Game {
   appId: string;
   steamPlaytimeMinutes: number;
   lastPlayedAt: string | null;
+  /** IGDB was not asked about it yet: its cover and data may still change. Absent from older APIs. */
+  metadataPending?: boolean;
 }
 
 export interface SteamIgnoredApp {

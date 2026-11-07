@@ -9,6 +9,8 @@ export interface PendingItem<G extends Game = Game> {
   lastPlayedAt: string | null;
   /** Console of the imported title, when the integration has several. */
   badge: string | null;
+  /** IGDB was not asked about it yet: its cover and data may still change. */
+  metadataPending: boolean;
 }
 
 export type PendingSort = 'hours' | 'recent' | 'name';
@@ -36,4 +38,22 @@ export function visiblePending<G extends Game>(
 ): PendingItem<G>[] {
   const needle = normalizeText(query);
   return items.filter((item) => normalizeText(item.game.name).includes(needle)).sort(COMPARE[sort]);
+}
+
+/**
+ * How ready the first page is while IGDB fills it; null once it can be shown. The API looks games up
+ * most played first, the default order here, so only that order is worth waiting for: any other would
+ * hold the list for most of the fill.
+ */
+export function firstPageProgress(
+  matches: readonly PendingItem[],
+  query: string,
+  sort: PendingSort,
+  pageSize: number,
+): { ready: number; total: number } | null {
+  if (query.trim() !== '' || sort !== 'hours') return null;
+  // Unplayed games have no place in the fill's order: any of them could be the last one looked up.
+  const page = matches.slice(0, pageSize).filter((item) => item.hours > 0);
+  const ready = page.filter((item) => !item.metadataPending).length;
+  return ready === page.length ? null : { ready, total: page.length };
 }

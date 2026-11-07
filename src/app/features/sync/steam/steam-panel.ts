@@ -26,7 +26,7 @@ import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
 import { pollWhileEnriching } from '../shared/enrichment-poll';
 import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
-import { PendingChange, apiCode, applyPendingChange, enrichmentCount, lookup, mergePending, mergePolledStatus } from '../sync.logic';
+import { PendingChange, apiCode, applyPendingChange, enrichmentCount, lookup, mergePending, mergePolledStatus, withFillStarting } from '../sync.logic';
 import { LINK_ERROR_KEYS, SYNC_ERROR_KEYS, findSteamRuns, maskSteamId, steamHours } from './steam.logic';
 
 @Component({
@@ -108,6 +108,7 @@ export class SteamPanel {
       game,
       hours: steamHours(game.steamPlaytimeMinutes),
       lastPlayedAt: game.lastPlayedAt,
+      metadataPending: !!game.metadataPending,
       badge: null,
     })),
   );
@@ -161,6 +162,7 @@ export class SteamPanel {
       next: (result) => {
         this.syncing.set(false);
         this.syncResult.set(result);
+        this.status.update((status) => (status ? withFillStarting(status) : status));
         this.loadStatus();
         this.loadPending();
       },

@@ -5,8 +5,8 @@ import { Game } from '../../../core/models/game.model';
 import { PENDING_PAGE_SIZE, PendingGames } from './pending-games';
 import { PendingItem } from './pending-games.logic';
 
-function item(id: number, name: string, hours = 1, category: Game['category'] = 'SINGLEPLAYER'): PendingItem {
-  return { game: { id, name, category } as Game, hours, lastPlayedAt: null, badge: null };
+function item(id: number, name: string, hours = 1, category: Game['category'] = 'SINGLEPLAYER', metadataPending = false): PendingItem {
+  return { game: { id, name, category } as Game, hours, lastPlayedAt: null, badge: null, metadataPending };
 }
 
 describe('PendingGames', () => {
@@ -130,6 +130,48 @@ describe('PendingGames', () => {
     setup([]);
     expect(el().textContent).toContain('steam.noPending');
     expect(search()).toBeNull();
+  });
+
+  describe('while IGDB fills the first page', () => {
+    const waiting = () => [item(1, 'Ready', 9), item(2, 'Waiting', 8, 'SINGLEPLAYER', true)];
+    const status = () => el().querySelector('[role="status"]') as HTMLElement;
+
+    it('waits with its progress instead of showing covers that are about to change', () => {
+      setup(waiting(), { enriching: true });
+
+      expect(cards()).toHaveLength(0);
+      expect(el().querySelector('[data-waiting]')).not.toBeNull();
+      expect(status().textContent).toContain('sync.pending.preparing');
+      expect(status().querySelector<HTMLElement>('[data-progress]')!.style.width).toBe('50%');
+    });
+
+    it('opens the list as soon as the page is ready', () => {
+      setup(waiting(), { enriching: true });
+
+      fixture.componentRef.setInput('items', [item(1, 'Ready', 9), item(2, 'Waiting', 8)]);
+      fixture.detectChanges();
+
+      expect(cards()).toHaveLength(2);
+      expect(el().querySelector('[data-waiting]')).toBeNull();
+    });
+
+    it('never holds the list once the fill stopped, even with games left without data', () => {
+      setup(waiting(), { enriching: false });
+
+      expect(cards()).toHaveLength(2);
+      expect(el().querySelector('[data-cover-loading]')).toBeNull();
+    });
+
+    it('lets the user see the list right away, with a placeholder for the covers still to come', () => {
+      setup(waiting(), { enriching: true });
+
+      button('sync.pending.showNow').click();
+      fixture.detectChanges();
+
+      expect(cards()).toHaveLength(2);
+      expect(cards()[0].querySelector('[data-cover-loading]')).toBeNull();
+      expect(cards()[1].querySelector('[data-cover-loading]')).not.toBeNull();
+    });
   });
 
   it('shows the IGDB fill with its progress', () => {

@@ -102,6 +102,14 @@ export function mergePolledStatus<S extends { enrichment?: EnrichmentProgress | 
   return stale && current ? { ...current, enrichment: polled.enrichment } : polled;
 }
 
+/**
+ * Status right after a sync, which queues the IGDB fill: the fresh pending list can arrive before the
+ * fresh status, and for that moment it must already be treated as filling. The next status has the last word.
+ */
+export function withFillStarting<S extends { enrichment?: EnrichmentProgress | null }>(status: S): S {
+  return status.enrichment?.active ? status : { ...status, enrichment: { active: true, processed: 0, total: 0 } };
+}
+
 /** Translation params of the "filling from IGDB" indicator; null while the fill has no count yet. */
 export function enrichmentCount(progress: EnrichmentProgress | null | undefined): { processed: number; total: number } | null {
   if (!progress?.active || !(progress.total > 0)) return null;

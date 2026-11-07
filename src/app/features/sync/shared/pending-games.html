@@ -4,7 +4,22 @@
   </app-section-header>
   <p class="mb-1 text-xs text-muted md:hidden">{{ source() + '.pendingHint' | translate }}</p>
 
-  @if (enriching()) {
+  @if (firstPage(); as page) {
+    <div class="mt-2 mb-3" role="status">
+      <div class="flex items-center justify-between gap-3">
+        <p class="flex items-center gap-1.5 text-xs text-muted">
+          <span class="grid place-items-center animate-spin"><svg [lucideIcon]="icons.refreshCw" [size]="12"></svg></span>
+          {{ 'sync.pending.preparing' | translate: page }}
+        </p>
+        <button type="button" (click)="skipWaiting.set(true)" class="tap-area shrink-0 rounded-md text-xs font-medium text-text-2 hover:text-text">
+          {{ 'sync.pending.showNow' | translate }}
+        </button>
+      </div>
+      <div class="mt-1.5 h-1 overflow-hidden rounded-full bg-hover" aria-hidden="true">
+        <div data-progress class="bar-fill h-full rounded-full bg-brand-light" [style.width.%]="(page.ready / page.total) * 100"></div>
+      </div>
+    </div>
+  } @else if (enriching()) {
     <div class="mt-2 mb-1" role="status">
       <p class="flex items-center gap-1.5 text-xs text-muted">
         <span class="grid place-items-center animate-spin"><svg [lucideIcon]="icons.refreshCw" [size]="12"></svg></span>
@@ -22,7 +37,13 @@
     </div>
   }
 
-  @if (loading()) {
+  @if (firstPage()) {
+    <div class="grid grid-cols-2 gap-x-3 gap-y-5 pt-1 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 lg:grid-cols-5 xl:grid-cols-6" data-waiting aria-hidden="true">
+      @for (tile of waitingTiles(); track tile) {
+        <app-skeleton class="aspect-[3/4] rounded-lg" />
+      }
+    </div>
+  } @else if (loading()) {
     <div class="grid grid-cols-2 gap-x-3 gap-y-5 pt-3 sm:grid-cols-3 md:grid-cols-4 md:gap-x-4 lg:grid-cols-5 xl:grid-cols-6">
       @for (placeholder of [1, 2, 3, 4]; track placeholder) {
         <app-skeleton class="aspect-[3/4] rounded-lg" />
@@ -65,7 +86,12 @@
         @for (item of shown(); track item.game.id) {
           <li data-pending-game class="flex min-w-0 flex-col gap-2.5">
             <div class="relative">
-              <app-game-cover decorative noReveal size="fill" [url]="item.game.coverImageUrl" [name]="item.game.name" />
+              <!-- A placeholder instead of the provisional cover: IGDB is about to replace it. -->
+              @if (enriching() && item.metadataPending) {
+                <app-skeleton class="aspect-[3/4] rounded-lg" data-cover-loading />
+              } @else {
+                <app-game-cover decorative noReveal size="fill" [url]="item.game.coverImageUrl" [name]="item.game.name" />
+              }
               @if (item.badge; as badge) {
                 <span class="absolute top-1.5 right-1.5 rounded-full bg-black/70 px-2 py-px font-mono text-caption font-medium text-white">{{ badge }}</span>
               }

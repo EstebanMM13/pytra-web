@@ -414,7 +414,9 @@
       "clearSearch": "Clear search",
       "showMore": "Show more ({{count}})",
       "addOnly": "Add only",
-      "addOnlyHint": "Add to your library without creating a run"
+      "addOnlyHint": "Add to your library without creating a run",
+      "preparing": "Getting your games ready… {{ready}}/{{total}}",
+      "showNow": "Show now"
     }
   },
   "androidUsage": {

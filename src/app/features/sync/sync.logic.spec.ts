@@ -1,4 +1,5 @@
 import {
+  withFillStarting,
   ENRICHMENT_POLL_MAX_MS,
   EnrichmentProgress,
   enrichmentCount,
@@ -78,5 +79,16 @@ describe('enrichmentCount', () => {
 
   it('never shows more processed than total', () => {
     expect(enrichmentCount(progress({ processed: 12, total: 10 }))).toEqual({ processed: 10, total: 10 });
+  });
+});
+
+describe('withFillStarting', () => {
+  it('marks the fill as active with no count yet', () => {
+    expect(withFillStarting({ enrichment: null }).enrichment).toEqual({ active: true, processed: 0, total: 0 });
+  });
+
+  it('keeps the progress of a fill already running', () => {
+    const enrichment = { active: true, processed: 3, total: 9 };
+    expect(withFillStarting({ enrichment }).enrichment).toBe(enrichment);
   });
 });

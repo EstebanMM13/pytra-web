@@ -31,7 +31,7 @@ import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { GameEditDialog } from '../../games/game-edit-dialog/game-edit-dialog';
 import { pollWhileEnriching } from '../shared/enrichment-poll';
 import { PendingConfirmFn, PendingConfirmMode } from '../shared/pending-review';
-import { PendingChange, applyPendingChange, enrichmentCount, mergePending, mergePolledStatus } from '../sync.logic';
+import { PendingChange, applyPendingChange, enrichmentCount, mergePending, mergePolledStatus, withFillStarting } from '../sync.logic';
 import { findPsnRuns, isProfilePrivate, isValidOnlineId, normalizeOnlineId, psnErrorKey, psnHours } from './psn.logic';
 
 /** Banner shown when GET /status fails. */
@@ -136,6 +136,7 @@ export class PsnPanel {
       game,
       hours: psnHours(game.psnPlaytimeMinutes),
       lastPlayedAt: game.lastPlayedAt,
+      metadataPending: !!game.metadataPending,
       badge: game.psnPlatform,
     })),
   );
@@ -210,6 +211,7 @@ export class PsnPanel {
       next: (result) => {
         this.syncing.set(false);
         this.syncResult.set(result);
+        this.status.update((status) => (status ? withFillStarting(status) : status));
         this.loadStatus();
         this.loadPending();
       },

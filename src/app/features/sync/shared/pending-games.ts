@@ -10,12 +10,14 @@ import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { formatRelativeTime } from '../../../shared/utils/relative-time';
 import { SyncSource } from '../sync.logic';
-import { PendingItem, PendingSort, visiblePending } from './pending-games.logic';
+import { PendingItem, PendingSort, firstPageProgress, visiblePending } from './pending-games.logic';
 
 /** Games rendered per "show more": whole libraries can arrive here, each game with its cover. */
 export const PENDING_PAGE_SIZE = 24;
 /** Below this, search and sort add noise: the whole list fits on screen. */
 const TOOLBAR_MIN_ITEMS = 7;
+/** Placeholders while the first page gets ready: one row on most screens. */
+const WAITING_TILES = 6;
 
 /** Games imported by a platform and waiting for review: a searchable grid of covers with their actions. */
 @Component({
@@ -62,6 +64,21 @@ export class PendingGames<G extends Game = Game> {
   protected readonly remaining = computed(() => this.matches().length - this.shown().length);
   /** Stays while searching, so a list that shrinks under an active search can still clear it. */
   protected readonly showToolbar = computed(() => this.items().length >= TOOLBAR_MIN_ITEMS || this.query() !== '');
+
+  /** The user chose not to wait for the first page. */
+  protected readonly skipWaiting = signal(false);
+  /**
+   * The list opens once its first page has its final covers and data, so they do not change under the
+   * user's eyes. Only while the fill runs: a failed or disabled lookup must not hold the list.
+   */
+  protected readonly firstPage = computed(() =>
+    this.enriching() && !this.skipWaiting() && !this.loading()
+      ? firstPageProgress(this.matches(), this.query(), this.sort(), PENDING_PAGE_SIZE)
+      : null,
+  );
+  protected readonly waitingTiles = computed(() =>
+    Array.from({ length: Math.min(this.firstPage()?.total ?? 0, WAITING_TILES) }, (_, index) => index),
+  );
 
   private readonly locale = computed(() => (this.translate.currentLang() === 'en' ? 'en-US' : 'es-ES'));
 
