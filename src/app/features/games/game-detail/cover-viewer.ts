@@ -60,35 +60,59 @@ const HISTORY_KEY = 'pytraCoverViewer';
       role="dialog"
       aria-modal="true"
       [attr.aria-label]="'game.coverOf' | translate: { name: name() }"
-      class="fixed inset-0 z-50 grid animate-modal-in grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)] cursor-zoom-out place-items-center bg-black/90 p-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-[calc(env(safe-area-inset-bottom)+16px)] backdrop-blur-sm md:p-8"
+      class="fixed inset-0 z-50 grid animate-viewer-in cursor-zoom-out place-items-center overflow-hidden bg-black/80 p-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-[calc(env(safe-area-inset-bottom)+16px)] backdrop-blur-md md:p-8"
       (click)="close()"
       (keydown.tab)="$event.preventDefault()"
       data-cover-viewer
     >
+      <!-- Ambient glow: the cover itself, blurred and enlarged behind the frame -->
       @if (baseSrc(); as base) {
-        <img
-          [src]="base"
-          alt=""
+        <div
           aria-hidden="true"
-          decoding="async"
-          referrerpolicy="no-referrer"
-          class="col-start-1 row-start-1 size-full object-contain select-none"
-          [class.invisible]="largeLoaded()"
-          (error)="onBaseError(base)"
-        />
+          class="pointer-events-none absolute inset-0 scale-125 bg-cover bg-center opacity-45 blur-3xl saturate-150"
+          [style.background-image]="cssUrl(base)"
+        ></div>
       }
-      @if (largeSrc(); as src) {
-        <img
-          [src]="src"
-          [alt]="name()"
-          decoding="async"
-          referrerpolicy="no-referrer"
-          class="col-start-1 row-start-1 size-full object-contain transition-opacity duration-200 select-none"
-          [class.opacity-0]="!largeLoaded()"
-          (load)="largeLoaded.set(true)"
-          (error)="onLargeError()"
-        />
-      }
+
+      <figure class="relative flex max-w-full animate-cover-pop flex-col items-center gap-4">
+        <div
+          class="cover-sheen relative grid overflow-hidden rounded-2xl bg-black/40 shadow-[0_40px_120px_-24px_rgba(0,0,0,0.9)] ring-1 ring-white/20 outline outline-6 outline-white/5 md:rounded-3xl"
+        >
+          @if (baseSrc(); as base) {
+            <img
+              [src]="base"
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              class="cover-viewer-size block object-contain select-none"
+              [class.invisible]="largeLoaded()"
+              (error)="onBaseError(base)"
+            />
+          }
+          @if (largeSrc(); as src) {
+            <img
+              [src]="src"
+              [alt]="name()"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              class="block object-contain transition-opacity duration-300 select-none"
+              [class.absolute]="!!baseSrc()"
+              [class.inset-0]="!!baseSrc()"
+              [class.size-full]="!!baseSrc()"
+              [class.cover-viewer-size]="!baseSrc()"
+              [class.opacity-0]="!largeLoaded()"
+              (load)="largeLoaded.set(true)"
+              (error)="onLargeError()"
+            />
+          }
+        </div>
+        <figcaption
+          class="max-w-[min(90vw,28rem)] truncate rounded-full bg-black/45 px-4 py-1.5 text-center text-sm font-semibold text-white/90 ring-1 ring-white/10"
+        >
+          {{ name() }}
+        </figcaption>
+      </figure>
       <button
         #closeButton
         type="button"
@@ -115,6 +139,8 @@ export class CoverViewer {
   /** The large variant fading in over the stored cover; null when there is none or it failed. */
   protected readonly largeSrc = linkedSignal<string | null>(() => (this.large() !== this.url() ? this.large() : null));
   protected readonly largeLoaded = signal(false);
+  /** A quoted CSS `url()` for the ambient backdrop (JSON escapes quotes and backslashes). */
+  protected readonly cssUrl = (url: string): string => `url(${JSON.stringify(url)})`;
 
   private readonly document = inject(DOCUMENT);
   private readonly closeButton = viewChild.required<ElementRef<HTMLButtonElement>>('closeButton');
