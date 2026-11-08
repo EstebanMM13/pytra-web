@@ -15,6 +15,26 @@ import {
 /** File name of the downloaded APK inside the app's cache directory. */
 export const APK_DOWNLOAD_FILE = 'pytra-update.apk';
 
+/** One place to download the APK from. */
+export interface ApkSource {
+  url: string;
+  headers?: Record<string, string>;
+}
+
+/**
+ * Download routes, most reliable first: the GitHub API asset URL (served from api.github.com, then
+ * GitHub's storage), then the github.com release download URL, which has been seen answering 504
+ * on its own while the API kept working.
+ */
+export function apkSources(release: LatestRelease): ApkSource[] {
+  const sources: ApkSource[] = [];
+  if (release.apiUrl) {
+    sources.push({ url: release.apiUrl, headers: { Accept: 'application/octet-stream' } });
+  }
+  sources.push({ url: release.apkUrl });
+  return sources;
+}
+
 /** Local native plugin (android/.../ApkInstallerPlugin.java). */
 export interface ApkInstallerPlugin {
   canInstall(): Promise<{ value: boolean }>;
@@ -210,15 +230,15 @@ export class ApkUpdateService {
           this.current.set({ step: 'downloading', release, percent: progressPercent(bytes, contentLength) });
         }
       });
-      const { path } = await Filesystem.downloadFile({
-        url: release.apkUrl,
-        path: APK_DOWNLOAD_FILE,
-        directory: Directory.Cache,
-        progress: true,
-      });
-      if (!path) {
-        throw new Error('Download finished without a file path');
-      }
+      const path = await this.downloadFirst(apkSources(release), (source) =>
+        Filesystem.downloadFile({
+          url: source.url,
+          ...(source.headers ? { headers: source.headers } : {}),
+          path: APK_DOWNLOAD_FILE,
+          directory: Directory.Cache,
+          progress: true,
+        }),
+      );
       await this.install(release, path);
     } catch (error) {
       console.error('APK update download failed', error);
@@ -226,6 +246,27 @@ export class ApkUpdateService {
     } finally {
       void listener?.remove();
     }
+  }
+
+  /** Tries each source in order; the first one that yields a file wins, else the last error is thrown. */
+  private async downloadFirst(
+    sources: readonly ApkSource[],
+    fetchSource: (source: ApkSource) => Promise<{ path?: string }>,
+  ): Promise<string> {
+    let lastError: unknown = new Error('No APK source');
+    for (const source of sources) {
+      try {
+        const { path } = await fetchSource(source);
+        if (path) {
+          return path;
+        }
+        lastError = new Error('Download finished without a file path');
+      } catch (error) {
+        console.error(`APK download from ${source.url} failed`, error);
+        lastError = error;
+      }
+    }
+    throw lastError;
   }
 
   /** Hands the APK to the system installer, or asks for the "unknown apps" permission first. */

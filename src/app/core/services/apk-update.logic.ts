@@ -10,7 +10,13 @@ export const UPDATE_SNOOZE_KEY = 'pytra.apkUpdate.snooze';
 export interface LatestRelease {
   /** Version without the leading "v" (e.g. "1.0.5"). */
   version: string;
+  /** github.com download URL of the asset (a redirect served by github.com). */
   apkUrl: string;
+  /**
+   * API URL of the same asset (Accept: application/octet-stream downloads it). A second route that
+   * does not depend on github.com's release download endpoint, which can fail on its own (504).
+   */
+  apiUrl?: string;
 }
 
 function versionParts(version: string): number[] {
@@ -38,11 +44,11 @@ export function compareVersions(a: string, b: string): number {
   return 0;
 }
 
-/** Reads the version and the APK asset URL from a GitHub "latest release" response, or null. */
+/** Reads the version and the APK asset URLs from a GitHub "latest release" response, or null. */
 export function parseLatestRelease(json: unknown): LatestRelease | null {
   const release = json as {
     tag_name?: unknown;
-    assets?: { name?: unknown; browser_download_url?: unknown }[];
+    assets?: { name?: unknown; browser_download_url?: unknown; url?: unknown }[];
   } | null;
   if (!release || typeof release.tag_name !== 'string' || !Array.isArray(release.assets)) {
     return null;
@@ -51,7 +57,11 @@ export function parseLatestRelease(json: unknown): LatestRelease | null {
   if (!asset || typeof asset.browser_download_url !== 'string') {
     return null;
   }
-  return { version: release.tag_name.trim().replace(/^v/i, ''), apkUrl: asset.browser_download_url };
+  const parsed: LatestRelease = { version: release.tag_name.trim().replace(/^v/i, ''), apkUrl: asset.browser_download_url };
+  if (typeof asset.url === 'string' && asset.url) {
+    parsed.apiUrl = asset.url;
+  }
+  return parsed;
 }
 
 /** Local calendar day as YYYY-MM-DD. */

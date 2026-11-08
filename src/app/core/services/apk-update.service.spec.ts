@@ -200,6 +200,54 @@ describe('ApkUpdateService', () => {
     expect(service.state().step).toBe('installing');
   });
 
+  describe('when the release exposes its API asset URL', () => {
+    const API_URL = 'https://api.github.com/repos/o/r/releases/assets/9';
+    const WITH_API = {
+      tag_name: 'v1.0.5',
+      assets: [{ name: 'pytra.apk', browser_download_url: RELEASE.apkUrl, url: API_URL }],
+    };
+
+    it('downloads through the GitHub API first', async () => {
+      const { service, Filesystem, installer } = setup({ fetchLatestRelease: vi.fn(() => Promise.resolve(WITH_API)) });
+
+      await service.update();
+      await flush();
+      expect(Filesystem.downloadFile).toHaveBeenCalledTimes(1);
+      expect(Filesystem.downloadFile).toHaveBeenCalledWith({
+        url: API_URL,
+        headers: { Accept: 'application/octet-stream' },
+        path: APK_DOWNLOAD_FILE,
+        directory: 'CACHE',
+        progress: true,
+      });
+      expect(installer.install).toHaveBeenCalledWith({ path: APK_PATH });
+      expect(service.state().step).toBe('installing');
+    });
+
+    it('falls back to the github.com download URL when the API download fails', async () => {
+      const { service, Filesystem, installer } = setup({ fetchLatestRelease: vi.fn(() => Promise.resolve(WITH_API)) });
+      Filesystem.downloadFile.mockRejectedValueOnce(new Error('HTTP 504'));
+
+      await service.update();
+      await flush();
+      expect(Filesystem.downloadFile).toHaveBeenCalledTimes(2);
+      expect(Filesystem.downloadFile).toHaveBeenLastCalledWith(expect.objectContaining({ url: RELEASE.apkUrl }));
+      expect(installer.install).toHaveBeenCalledWith({ path: APK_PATH });
+      expect(service.state().step).toBe('installing');
+    });
+
+    it('shows the error only when both routes fail', async () => {
+      const { service, Filesystem, installer } = setup({ fetchLatestRelease: vi.fn(() => Promise.resolve(WITH_API)) });
+      Filesystem.downloadFile.mockRejectedValue(new Error('HTTP 504'));
+
+      await service.update();
+      await flush();
+      expect(Filesystem.downloadFile).toHaveBeenCalledTimes(2);
+      expect(installer.install).not.toHaveBeenCalled();
+      expect(service.state().step).toBe('error');
+    });
+  });
+
   it('uses the stable APK URL when the release API fails from the settings entry', async () => {
     const { service, Filesystem } = setup({
       fetchLatestRelease: vi.fn(() => Promise.reject(new Error('rate limit'))),

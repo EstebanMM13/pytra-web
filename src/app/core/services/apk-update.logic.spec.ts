@@ -35,6 +35,15 @@ describe('parseLatestRelease', () => {
     });
   });
 
+  it('also reads the API URL of the asset, the download route that does not go through github.com', () => {
+    const withApi = { ...apk, url: 'https://api.github.com/repos/o/r/releases/assets/9' };
+    expect(parseLatestRelease({ tag_name: 'v1.0.5', assets: [withApi] })).toEqual({
+      version: '1.0.5',
+      apkUrl: 'https://example.test/pytra.apk',
+      apiUrl: 'https://api.github.com/repos/o/r/releases/assets/9',
+    });
+  });
+
   it('returns null for a release without the APK or an unexpected payload', () => {
     expect(parseLatestRelease({ tag_name: 'v1.0.5', assets: [{ name: 'other.zip' }] })).toBeNull();
     expect(parseLatestRelease({ assets: [apk] })).toBeNull();
