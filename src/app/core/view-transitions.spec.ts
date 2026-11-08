@@ -1,6 +1,6 @@
 import { ActivatedRouteSnapshot, UrlSegment, ViewTransitionInfo } from '@angular/router';
 import { setMotionPreference } from '../shared/utils/motion';
-import { markCoverTransition, posterTransitionName } from '../shared/utils/cover-transition';
+import { markCoverTransition, posterTransitionName, resetCoverTransition } from '../shared/utils/cover-transition';
 import { routePath, skipSamePageTransition } from './view-transitions';
 
 function snapshot(...paths: string[][]): ActivatedRouteSnapshot {
@@ -43,6 +43,8 @@ describe('view transitions', () => {
     delete document.documentElement.dataset['motion'];
   });
   describe('shared library cover', () => {
+    afterEach(() => resetCoverTransition());
+
     async function navigate(from: string[], to: string[]) {
       skipSamePageTransition(transitionInfo(snapshot([], from), snapshot([], to)).info);
       await Promise.resolve();
@@ -67,6 +69,22 @@ describe('view transitions', () => {
       markCoverTransition(7);
       await navigate(['games', '7'], ['games']);
       expect(posterTransitionName(7)).toBeNull();
+    });
+
+    it('leaves a newer tap alone when an older navigation finishes late', async () => {
+      markCoverTransition(7);
+      // Back to the library: its transition is still running...
+      let finishBack!: () => void;
+      const back = transitionInfo(snapshot([], ['games', '7']), snapshot([], ['games']));
+      (back.info.transition as { finished: Promise<void> }).finished = new Promise<void>((resolve) => (finishBack = resolve));
+      skipSamePageTransition(back.info);
+      // ...when poster 9 is tapped and its game opens.
+      markCoverTransition(9);
+      skipSamePageTransition(transitionInfo(snapshot([], ['games']), snapshot([], ['games', '9'])).info);
+      finishBack();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(posterTransitionName(9)).toBe('game-cover');
     });
   });
 });

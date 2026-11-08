@@ -1,6 +1,6 @@
 import { ActivatedRouteSnapshot, ViewTransitionInfo, ViewTransitionsFeatureOptions } from '@angular/router';
 import { prefersReducedMotion } from '../shared/utils/motion';
-import { beginCoverTransition, settleCoverTransition } from '../shared/utils/cover-transition';
+import { beginCoverTransition, coverSelection, settleCoverTransition } from '../shared/utils/cover-transition';
 
 /** Path of the primary route chain (`games/7`), without query params or fragment. */
 export function routePath(root: ActivatedRouteSnapshot): string {
@@ -24,10 +24,11 @@ export function skipSamePageTransition({ transition, from, to }: ViewTransitionI
     transition.skipTransition();
   }
   // Shared library cover (shared/utils/cover-transition.ts): never let a stale poster name linger.
+  const startedAt = coverSelection();
   beginCoverTransition(toPath);
   transition.finished.then(
-    () => settleCoverTransition(toPath),
-    () => settleCoverTransition(toPath),
+    () => settleCoverTransition(toPath, startedAt),
+    () => settleCoverTransition(toPath, startedAt),
   );
 }
 

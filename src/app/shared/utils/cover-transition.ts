@@ -15,20 +15,41 @@ import { signal } from '@angular/core';
 export const COVER_TRANSITION_NAME = 'game-cover';
 
 const activeGameId = signal<string | null>(null);
+/** Bumped on every tap: a navigation only clears the selection that was current when it started. */
+let selection = 0;
+/** The poster named by hand on the last tap (the template binding names it on later renders). */
+let namedCover: HTMLElement | null = null;
+
+function clearCover(): void {
+  activeGameId.set(null);
+  namedCover?.style.removeProperty('view-transition-name');
+  namedCover = null;
+}
 
 /**
  * Names the tapped poster at once (the router snapshots the old page before the next render, so a
- * template binding alone could be too late) and remembers its game for the way back.
+ * template binding alone could be too late), unnames the previously tapped one, and remembers its
+ * game for the way back.
  */
 export function markCoverTransition(gameId: number | string, link?: EventTarget | null): void {
+  clearCover();
+  selection++;
   activeGameId.set(String(gameId));
   const cover = link instanceof Element ? link.querySelector<HTMLElement>('app-game-cover') : null;
-  cover?.style.setProperty('view-transition-name', COVER_TRANSITION_NAME);
+  if (cover) {
+    cover.style.setProperty('view-transition-name', COVER_TRANSITION_NAME);
+    namedCover = cover;
+  }
 }
 
 /** The `view-transition-name` of a library poster: the shared name for the tapped game, else none. */
 export function posterTransitionName(gameId: number | string): string | null {
   return activeGameId() === String(gameId) ? COVER_TRANSITION_NAME : null;
+}
+
+/** The current tap, to hand back to `settleCoverTransition` when that navigation finishes. */
+export function coverSelection(): number {
+  return selection;
 }
 
 /** Whether `path` (`games/7`, `games/7/runs/3`) belongs to the game whose poster was tapped. */
@@ -39,10 +60,18 @@ function onActiveGame(path: string): boolean {
 
 /** A navigation to `toPath` starts: opening a different game drops the old poster's name right away. */
 export function beginCoverTransition(toPath: string): void {
-  if (/^games\/[^/]+/.test(toPath) && !onActiveGame(toPath)) activeGameId.set(null);
+  if (/^games\/[^/]+/.test(toPath) && !onActiveGame(toPath)) clearCover();
 }
 
-/** A navigation to `toPath` finished: outside the tapped game, the name has served its way back. */
-export function settleCoverTransition(toPath: string): void {
-  if (!onActiveGame(toPath)) activeGameId.set(null);
+/**
+ * A navigation to `toPath`, started during tap `startedAt`, finished: outside the tapped game the
+ * name has served its way back. A newer tap since then is left alone.
+ */
+export function settleCoverTransition(toPath: string, startedAt: number): void {
+  if (startedAt === selection && !onActiveGame(toPath)) clearCover();
+}
+
+/** Forgets any tapped poster (tests). */
+export function resetCoverTransition(): void {
+  clearCover();
 }
