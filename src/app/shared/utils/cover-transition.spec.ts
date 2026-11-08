@@ -15,6 +15,19 @@ describe('cover transition', () => {
     expect(posterTransitionName(8)).toBe(COVER_TRANSITION_NAME);
   });
 
+  it('names the tapped poster immediately, before any re-render', () => {
+    const link = document.createElement('a');
+    const cover = document.createElement('app-game-cover');
+    link.appendChild(cover);
+    markCoverTransition(7, link);
+    expect(cover.style.getPropertyValue('view-transition-name')).toBe(COVER_TRANSITION_NAME);
+  });
+
+  it('matches route ids given as strings', () => {
+    markCoverTransition(7);
+    expect(posterTransitionName('7')).toBe(COVER_TRANSITION_NAME);
+  });
+
   it('matches the name the game detail hero uses', () => {
     expect(COVER_TRANSITION_NAME).toBe('game-cover');
   });

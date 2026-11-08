@@ -1,5 +1,6 @@
 import { ActivatedRouteSnapshot, ViewTransitionInfo, ViewTransitionsFeatureOptions } from '@angular/router';
 import { prefersReducedMotion } from '../shared/utils/motion';
+import { beginCoverTransition, settleCoverTransition } from '../shared/utils/cover-transition';
 
 /** Path of the primary route chain (`games/7`), without query params or fragment. */
 export function routePath(root: ActivatedRouteSnapshot): string {
@@ -18,9 +19,16 @@ export function routePath(root: ActivatedRouteSnapshot): string {
  * Animations preference) every transition is skipped: the new page shows at once.
  */
 export function skipSamePageTransition({ transition, from, to }: ViewTransitionInfo): void {
-  if (prefersReducedMotion() || routePath(from) === routePath(to)) {
+  const toPath = routePath(to);
+  if (prefersReducedMotion() || routePath(from) === toPath) {
     transition.skipTransition();
   }
+  // Shared library cover (shared/utils/cover-transition.ts): never let a stale poster name linger.
+  beginCoverTransition(toPath);
+  transition.finished.then(
+    () => settleCoverTransition(toPath),
+    () => settleCoverTransition(toPath),
+  );
 }
 
 /** The app's `withViewTransitions` options (shared with the tests). */
