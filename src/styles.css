@@ -321,6 +321,25 @@
   animation: pt-pop-reveal 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+/*
+ * Navigation bars (navbar.html names them): they never move. The new bar shows in place at once
+ * (active tab already updated) while the page slides under it; a bar scrolled off screen on the old
+ * page just appears, instead of sliding down from above.
+ */
+::view-transition-group(pt-top-nav),
+::view-transition-group(pt-top-header),
+::view-transition-group(pt-bottom-nav),
+::view-transition-new(pt-top-nav),
+::view-transition-new(pt-top-header),
+::view-transition-new(pt-bottom-nav) {
+  animation: none;
+}
+::view-transition-old(pt-top-nav),
+::view-transition-old(pt-top-header),
+::view-transition-old(pt-bottom-nav) {
+  display: none;
+}
+
 @keyframes pt-tab-out-left {
   to {
     opacity: 0;
