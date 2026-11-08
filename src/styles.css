@@ -282,49 +282,9 @@
 }
 
 /*
- * Directional page transitions, by <html data-nav-transition> (core/view-transitions.ts):
- * tab-forward / tab-back slide towards the picked main tab; push / pop slide a deeper page in from
- * the right over the old one (dimmed) and back out. The overlay paints the page colour so the live
- * page underneath never shows through the gaps of a slide. Reduced motion skips every transition.
- * Only transform and opacity animate: the page snapshots are full-screen layers, and a filter or a
- * blurred shadow on them repaints every frame, which stutters on phones (Android WebView).
- */
-:root[data-nav-transition]::view-transition {
-  background: var(--pt-bg);
-}
-
-:root[data-nav-transition='tab-forward']::view-transition-old(root) {
-  animation: pt-tab-out-left 280ms cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-:root[data-nav-transition='tab-forward']::view-transition-new(root) {
-  animation: pt-tab-in-right 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-:root[data-nav-transition='tab-back']::view-transition-old(root) {
-  animation: pt-tab-out-right 280ms cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-:root[data-nav-transition='tab-back']::view-transition-new(root) {
-  animation: pt-tab-in-left 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-:root[data-nav-transition='push']::view-transition-old(root) {
-  animation: pt-push-under 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-:root[data-nav-transition='push']::view-transition-new(root) {
-  animation: pt-push-over 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-/* Pop: the leaving page stays on top and slides away, uncovering the previous one. */
-:root[data-nav-transition='pop']::view-transition-old(root) {
-  z-index: 1;
-  animation: pt-pop-away 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-:root[data-nav-transition='pop']::view-transition-new(root) {
-  animation: pt-pop-reveal 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-/*
- * Navigation bars (navbar.html names them): they never move. The new bar shows in place at once
- * (active tab already updated) while the page slides under it; a bar scrolled off screen on the old
- * page just appears, instead of sliding down from above.
+ * Navigation bars (navbar.html names them): they never move or fade. The new bar shows in place at
+ * once (active tab already updated) while the page cross-fades under it; a bar scrolled off screen
+ * on the old page just appears, instead of sliding down from above.
  */
 ::view-transition-group(pt-top-nav),
 ::view-transition-group(pt-top-header),
@@ -338,54 +298,6 @@
 ::view-transition-old(pt-top-header),
 ::view-transition-old(pt-bottom-nav) {
   display: none;
-}
-
-@keyframes pt-tab-out-left {
-  to {
-    opacity: 0;
-    transform: translateX(-12%);
-  }
-}
-@keyframes pt-tab-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(12%);
-  }
-}
-@keyframes pt-tab-out-right {
-  to {
-    opacity: 0;
-    transform: translateX(12%);
-  }
-}
-@keyframes pt-tab-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-12%);
-  }
-}
-/* Dimmed by fading towards the overlay's page colour (opacity stays on the compositor). */
-@keyframes pt-push-under {
-  to {
-    transform: translateX(-25%);
-    opacity: 0.4;
-  }
-}
-@keyframes pt-push-over {
-  from {
-    transform: translateX(100%);
-  }
-}
-@keyframes pt-pop-away {
-  to {
-    transform: translateX(100%);
-  }
-}
-@keyframes pt-pop-reveal {
-  from {
-    transform: translateX(-25%);
-    opacity: 0.4;
-  }
 }
 
 /*
