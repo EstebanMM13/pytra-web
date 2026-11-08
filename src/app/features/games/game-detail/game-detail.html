@@ -61,6 +61,7 @@
               priority
               size="hero"
               class="shadow-lg ring-1 shadow-black/25 ring-border"
+              style="view-transition-name: game-cover"
               [url]="g.coverImageUrl"
               [name]="g.name"
             />
@@ -69,7 +70,7 @@
             <app-cover-viewer [url]="g.coverImageUrl" [name]="g.name" (closed)="coverOpen.set(false)" />
           }
         } @else {
-          <app-game-cover decorative priority size="hero" class="shadow-lg ring-1 shadow-black/25 ring-border" [name]="g.name" />
+          <app-game-cover decorative priority size="hero" class="shadow-lg ring-1 shadow-black/25 ring-border" style="view-transition-name: game-cover" [name]="g.name" />
         }
 
         <!-- Over a cover backdrop the text gets a halo in the page colour, so any cover keeps it readable -->

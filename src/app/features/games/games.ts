@@ -25,6 +25,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusPill } from '../../shared/ui/status-pill';
 import { CategoryBadge, UpcomingBadge } from '../../shared/ui/game-badges';
 import { todayIso } from '../../shared/utils/run-dates';
+import { markCoverTransition, posterTransitionName } from '../../shared/utils/cover-transition';
 import { GameEditDialog } from './game-edit-dialog/game-edit-dialog';
 import {
   isUpcoming,
@@ -160,6 +161,8 @@ export class Games {
 
   protected readonly statusFilters = LIBRARY_STATUS_FILTERS;
   protected readonly isOnlineOnly = isOnlineOnly;
+  protected readonly markCoverTransition = markCoverTransition;
+  protected readonly posterTransitionName = posterTransitionName;
   protected readonly noRunsLabel = noRunsLabel;
   protected readonly statusLine = libraryStatusLine;
   /** Fixed when the page loads: good enough for a "coming soon" badge. */

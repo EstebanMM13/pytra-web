@@ -282,6 +282,22 @@
 }
 
 /*
+ * Shared cover (shared/utils/cover-transition.ts): the tapped library poster grows into the game
+ * detail hero, and shrinks back on Back, above the page cross-fade.
+ */
+::view-transition-group(game-cover) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(game-cover),
+::view-transition-new(game-cover) {
+  animation-duration: 380ms;
+  height: 100%;
+  object-fit: cover;
+}
+
+/*
  * Collapsible cards (SectionHeader with collapseKey): the header marks its parent with
  * data-collapsed; every sibling after the header is hidden. Unlayered, so it beats utilities.
  */
