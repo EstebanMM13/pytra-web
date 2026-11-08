@@ -16,6 +16,7 @@ import { SteamService } from '../../core/services/steam.service';
 import { VIEW_TRANSITION_OPTIONS } from '../../core/view-transitions';
 import { Navbar } from '../../shared/navbar/navbar';
 import { Games } from './games';
+import { resetCoverTransition } from '../../shared/utils/cover-transition';
 
 @Component({ selector: 'app-navbar', template: '' })
 class NavbarStub {}
@@ -604,7 +605,7 @@ describe('Games library order', () => {
     localStorage.setItem('pytra_library_view', view);
     TestBed.configureTestingModule({
       providers: [
-        provideRouter([{ path: 'games', component: Games }]),
+        provideRouter([{ path: 'games', component: Games }, { path: 'games/:id', component: Games }]),
         provideTranslateService(),
         { provide: GameService, useValue: { findAll: () => of(games) } },
         { provide: CollapseStateService, useValue: { atLeast: () => signal(wide) } },
@@ -646,6 +647,18 @@ describe('Games library order', () => {
     expect(el.querySelector('app-pagination')).not.toBeNull();
   });
 
+  it('names the tapped poster for the shared cover transition before the router snapshots the page', async () => {
+    const { el } = await setup([dated, undated]);
+    const link = el.querySelector<HTMLAnchorElement>('a.cover-card[href="/games/1"]')!;
+    const tapped = link.querySelector<HTMLElement>('app-game-cover')!;
+    const other = el.querySelector<HTMLElement>('a.cover-card[href="/games/2"] app-game-cover')!;
+    // A tap lands on the cover inside the link, so the handler must use the link (currentTarget).
+    tapped.click();
+    // Synchronously, in the click itself: no change detection has run yet.
+    expect(tapped.style.getPropertyValue('view-transition-name')).toBe('game-cover');
+    expect(other.style.getPropertyValue('view-transition-name')).toBe('');
+    resetCoverTransition();
+  });
   it('shows every result in the grid', async () => {
     const { listed } = await setup([online, ...many]);
     expect(listed().length).toBe(13);
