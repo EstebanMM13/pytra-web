@@ -286,6 +286,8 @@
  * tab-forward / tab-back slide towards the picked main tab; push / pop slide a deeper page in from
  * the right over the old one (dimmed) and back out. The overlay paints the page colour so the live
  * page underneath never shows through the gaps of a slide. Reduced motion skips every transition.
+ * Only transform and opacity animate: the page snapshots are full-screen layers, and a filter or a
+ * blurred shadow on them repaints every frame, which stutters on phones (Android WebView).
  */
 :root[data-nav-transition]::view-transition {
   background: var(--pt-bg);
@@ -309,13 +311,11 @@
 }
 :root[data-nav-transition='push']::view-transition-new(root) {
   animation: pt-push-over 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  box-shadow: -12px 0 32px rgb(0 0 0 / 0.25);
 }
 /* Pop: the leaving page stays on top and slides away, uncovering the previous one. */
 :root[data-nav-transition='pop']::view-transition-old(root) {
   z-index: 1;
   animation: pt-pop-away 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
-  box-shadow: -12px 0 32px rgb(0 0 0 / 0.25);
 }
 :root[data-nav-transition='pop']::view-transition-new(root) {
   animation: pt-pop-reveal 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -345,10 +345,11 @@
     transform: translateX(-12%);
   }
 }
+/* Dimmed by fading towards the overlay's page colour (opacity stays on the compositor). */
 @keyframes pt-push-under {
   to {
     transform: translateX(-25%);
-    filter: brightness(0.6);
+    opacity: 0.4;
   }
 }
 @keyframes pt-push-over {
@@ -364,7 +365,7 @@
 @keyframes pt-pop-reveal {
   from {
     transform: translateX(-25%);
-    filter: brightness(0.6);
+    opacity: 0.4;
   }
 }
 
