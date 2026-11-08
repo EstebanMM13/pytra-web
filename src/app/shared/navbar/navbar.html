@@ -198,7 +198,9 @@
 }
 
 <!-- Mobile tab bar (< md) -->
+<!-- Named for view transitions: the bottom tab bar stays put while the page slides under it -->
 <nav
+  style="view-transition-name: pt-bottom-nav"
   class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 items-start border-t border-border nav-glass pt-2.5 pb-[max(env(safe-area-inset-bottom),12px)] text-caption text-muted md:hidden"
   [attr.aria-label]="'nav.mainNav' | translate"
 >

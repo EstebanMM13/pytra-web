@@ -1,7 +1,7 @@
 import { ActivatedRouteSnapshot, UrlSegment, ViewTransitionInfo } from '@angular/router';
 import { setMotionPreference } from '../shared/utils/motion';
 import { markCoverTransition, posterTransitionName, resetCoverTransition } from '../shared/utils/cover-transition';
-import { routePath, skipSamePageTransition } from './view-transitions';
+import { NAV_TRANSITION_ATTR, navTransitionKind, routePath, skipSamePageTransition } from './view-transitions';
 
 function snapshot(...paths: string[][]): ActivatedRouteSnapshot {
   let child: ActivatedRouteSnapshot | null = null;
@@ -85,6 +85,68 @@ describe('view transitions', () => {
       await Promise.resolve();
       await Promise.resolve();
       expect(posterTransitionName(9)).toBe('game-cover');
+    });
+  });
+
+  describe('navTransitionKind', () => {
+    it('slides between main tabs towards the picked one', () => {
+      expect(navTransitionKind('dashboard', 'games')).toBe('tab-forward');
+      expect(navTransitionKind('games', 'stats')).toBe('tab-forward');
+      expect(navTransitionKind('diary', 'dashboard')).toBe('tab-back');
+      expect(navTransitionKind('sync', 'diary')).toBe('tab-back');
+    });
+
+    it('treats every page of a tab as that tab (years and sagas live under stats)', () => {
+      expect(navTransitionKind('games/7', 'diary')).toBe('tab-forward');
+      expect(navTransitionKind('years/2023', 'games')).toBe('tab-back');
+      expect(navTransitionKind('stats/activity', 'dashboard')).toBe('tab-back');
+    });
+
+    it('pushes when going deeper inside a tab and pops on the way back', () => {
+      expect(navTransitionKind('games', 'games/7')).toBe('push');
+      expect(navTransitionKind('games/7', 'games/7/experiences/3')).toBe('push');
+      expect(navTransitionKind('games/7/experiences/3', 'games/7')).toBe('pop');
+      expect(navTransitionKind('games/7', 'games')).toBe('pop');
+      expect(navTransitionKind('stats', 'stats/activity')).toBe('push');
+    });
+
+    it('cross-fades everything else', () => {
+      expect(navTransitionKind('games/7', 'games/9')).toBe('fade');
+      expect(navTransitionKind('stats/activity', 'stats/platforms')).toBe('fade');
+      expect(navTransitionKind('dashboard', 'profile')).toBe('fade');
+      expect(navTransitionKind('login', 'dashboard')).toBe('fade');
+    });
+  });
+
+  describe('transition attribute', () => {
+    const root = document.documentElement;
+    afterEach(() => delete root.dataset[NAV_TRANSITION_ATTR]);
+
+    it('marks <html> with the kind while the transition runs and clears it when it finishes', async () => {
+      let finish!: () => void;
+      const { info } = transitionInfo(snapshot([], ['games', '7']), snapshot([], ['games', '7', 'experiences', '3']));
+      (info.transition as { finished: Promise<void> }).finished = new Promise<void>((resolve) => (finish = resolve));
+      skipSamePageTransition(info);
+      expect(root.dataset[NAV_TRANSITION_ATTR]).toBe('push');
+      finish();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(root.dataset[NAV_TRANSITION_ATTR]).toBeUndefined();
+    });
+
+    it('lets a newer transition keep its own mark when an older one finishes late', async () => {
+      let finishOld!: () => void;
+      const older = transitionInfo(snapshot([], ['dashboard']), snapshot([], ['games']));
+      (older.info.transition as { finished: Promise<void> }).finished = new Promise<void>((resolve) => (finishOld = resolve));
+      skipSamePageTransition(older.info);
+      // The newer transition is still running when the older one settles.
+      const newer = transitionInfo(snapshot([], ['games']), snapshot([], ['games', '7']));
+      (newer.info.transition as { finished: Promise<void> }).finished = new Promise<void>(() => {});
+      skipSamePageTransition(newer.info);
+      finishOld();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(root.dataset[NAV_TRANSITION_ATTR]).toBe('push');
     });
   });
 });
