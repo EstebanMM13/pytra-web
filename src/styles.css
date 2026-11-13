@@ -931,9 +931,9 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: color-mix(in srgb, var(--pt-nav) 80%, transparent);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    background: color-mix(in srgb, var(--pt-nav) 92%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
   }
 
   /* Native shell (Android WebView): solid bar, no blur (same reasoning as card-glass below). */
@@ -1005,29 +1005,6 @@ select optgroup {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   &:where([data-theme='light'] *, [data-theme='light']) {
-    background-image: none;
-    -webkit-text-fill-color: currentColor;
-  }
-}
-
-/*
- * Section titles: the gold -> brand blend formerly used on the rating figures (gold 35%, then
- * 60% gold + 40% brand-light at 100%). Solid brand-light where text clipping is unsupported or in
- * forced-colors mode. Light theme uses the same stops with its darker gold / brand (AA on paper).
- */
-@utility text-section-gradient {
-  color: var(--pt-brand-light);
-  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-    background-image: linear-gradient(
-      120deg,
-      var(--pt-gold) 35%,
-      color-mix(in srgb, var(--pt-gold) 60%, var(--pt-brand-light)) 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  @media (forced-colors: active) {
     background-image: none;
     -webkit-text-fill-color: currentColor;
   }

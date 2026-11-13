@@ -9,6 +9,7 @@ import {
   statHints,
   taglineCandidates,
   TaglineInput,
+  bestPerGame,
   topRatedKey,
   topRatedLink,
 } from './dashboard.logic';
@@ -121,6 +122,26 @@ describe('top rated links', () => {
     const run = topRatedKey({ gameId: 3, gameName: 'G', runLabel: 'Run 1', rating: 9, experienceId: 42, online: false });
     const online = topRatedKey({ gameId: 3, gameName: 'G', runLabel: null, rating: 9, experienceId: null, online: true });
     expect(run).not.toEqual(online);
+  });
+});
+
+describe('bestPerGame', () => {
+  const entry = (gameId: number, rating: number, experienceId: number | null, online = false) => ({
+    gameId,
+    gameName: `G${gameId}`,
+    runLabel: online ? null : 'Run',
+    rating,
+    experienceId,
+    online,
+  });
+
+  it('keeps only the highest rated entry of each game, in order, up to the limit', () => {
+    const items = [entry(1, 10, 11), entry(1, 9.7, 12), entry(2, 9.7, 21), entry(1, 9.5, null, true), entry(3, 9.5, 31), entry(4, 9, 41)];
+    expect(bestPerGame(items, 3).map((i) => i.experienceId)).toEqual([11, 21, 31]);
+  });
+
+  it('returns fewer entries when there are not enough distinct games', () => {
+    expect(bestPerGame([entry(1, 10, 11), entry(1, 9, 12)], 5)).toEqual([entry(1, 10, 11)]);
   });
 });
 

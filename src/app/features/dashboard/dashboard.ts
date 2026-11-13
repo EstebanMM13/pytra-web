@@ -42,11 +42,13 @@ import { AchievementBadge } from '../../shared/achievements/achievement-badge';
 import { applyStoredUnlocks, computeAchievements, topUnlocked } from '../../shared/achievements/achievements';
 import { AchievementService } from '../../core/services/achievement.service';
 import { UnlockedAchievement } from '../../core/models/achievement.model';
-import { pickTagline, STAT_LINKS, statHints, topRatedKey, topRatedLink } from './dashboard.logic';
+import { bestPerGame, pickTagline, STAT_LINKS, statHints, topRatedKey, topRatedLink } from './dashboard.logic';
 
 type PlayMode = 'single' | 'online';
 
 const RANKING_SIZE = 5;
+/** Rated entries requested for the top-rated card, enough to fill it after one entry per game. */
+const TOP_RATED_FETCH = 30;
 
 /** Sections that show an inline error (with retry) when their request fails. */
 type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated' | 'mostPlayed';
@@ -279,7 +281,10 @@ export class Dashboard {
     });
     this.orEmpty('byYear', this.statsService.getByYear()).subscribe((s) => this.byYear.set(s));
     this.orEmpty('bySaga', this.statsService.getBySaga()).subscribe((s) => this.bySaga.set(s));
-    this.orEmpty('topRated', this.statsService.getTopRated(RANKING_SIZE)).subscribe((s) => this.topRated.set(s));
+    // Over-fetched: runs of the same game collapse to one entry, the best (see bestPerGame).
+    this.orEmpty('topRated', this.statsService.getTopRated(TOP_RATED_FETCH)).subscribe((s) =>
+      this.topRated.set(bestPerGame(s, RANKING_SIZE)),
+    );
     this.orEmpty('mostPlayed', this.statsService.getMostPlayedSingleplayer(RANKING_SIZE)).subscribe((s) =>
       this.mostPlayedSingleplayer.set(s),
     );

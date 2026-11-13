@@ -98,6 +98,15 @@ export function topRatedLink(item: TopRatedExperience): (string | number)[] {
     : ['/games', item.gameId];
 }
 
+/**
+ * One entry per game: the API ranks runs, so a game played several times could fill the ranking.
+ * Expects `items` best first (as the API sends them) and keeps each game's first entry.
+ */
+export function bestPerGame(items: readonly TopRatedExperience[], limit: number): TopRatedExperience[] {
+  const seen = new Set<number>();
+  return items.filter((item) => !seen.has(item.gameId) && !!seen.add(item.gameId)).slice(0, limit);
+}
+
 /** Stable `@for` key: the run id, else the game (a game has at most one online entry). */
 export function topRatedKey(item: TopRatedExperience): string {
   return item.online ? `online-${item.gameId}` : `run-${item.experienceId ?? `${item.gameId}-${item.runLabel}`}`;
