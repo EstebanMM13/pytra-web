@@ -26,7 +26,7 @@ let nextRegionId = 0;
   template: `
     <h2
       class="shrink-0 text-xs font-semibold tracking-[0.08em] uppercase md:text-label"
-      [class]="tone() === 'gold' ? 'text-gold' : 'text-text-3'"
+      [class]="tone() === 'gold' ? 'text-gold' : 'text-text-2'"
     >
       {{ label() }}
     </h2>
