@@ -15,15 +15,24 @@ import {
 import { TokenStorageService } from './token-storage.service';
 
 /**
+ * How long a cached value is served without revalidating. Writes from this client invalidate the
+ * cache at once, so the window only delays changes made elsewhere (another device, a scheduled
+ * sync); it spares screens that share resources (dashboard, games, stats) a full refetch on every
+ * navigation.
+ */
+export const FRESH_FOR_MS = 30_000;
+
+/**
  * One cached GET of the signed-in user's data, with stale-while-revalidate reads:
  * - no cached value: the request result (concurrent reads share one request);
- * - cached value: emits it synchronously, then refreshes in the background and emits the fresh
- *   value only if it differs. A failed background refresh keeps the cached value silently.
+ * - cached value younger than `FRESH_FOR_MS`: emits it synchronously, with no request;
+ * - older cached value: emits it synchronously, then refreshes in the background and emits the
+ *   fresh value only if it differs. A failed background refresh keeps the cached value silently.
  * Values are tagged with the session token they were fetched with and never served to another
  * session (logout, login as someone else, demo switch). Created through `UserDataCache.resource`.
  */
 export class CachedResource<T> {
-  private entry: { token: string | null; value: T } | null = null;
+  private entry: { token: string | null; value: T; fetchedAt: number } | null = null;
   private inFlight: { token: string | null; request$: Observable<T> } | null = null;
   /** Bumped on invalidation so a request started before a mutation never fills the cache. */
   private generation = 0;
@@ -39,6 +48,9 @@ export class CachedResource<T> {
       const cached = this.entry?.token === token ? this.entry : null;
       if (!cached) {
         return this.fetch(token);
+      }
+      if (Date.now() - cached.fetchedAt < FRESH_FOR_MS) {
+        return of(cached.value);
       }
       const stale = cached.value;
       const generation = this.generation;
@@ -86,7 +98,7 @@ export class CachedResource<T> {
       const request$: Observable<T> = this.fetcher().pipe(
         tap((value) => {
           if (generation === this.generation && token === this.currentToken()) {
-            this.entry = { token, value };
+            this.entry = { token, value, fetchedAt: Date.now() };
           }
         }),
         finalize(() => {

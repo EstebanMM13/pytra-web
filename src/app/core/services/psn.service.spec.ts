@@ -7,6 +7,7 @@ import { GameRequest } from '../models/game.model';
 import { PsnPendingGame } from '../models/psn.model';
 import { PsnService } from './psn.service';
 import { TokenStorageService } from './token-storage.service';
+import { FRESH_FOR_MS } from './user-data-cache';
 
 const base = `${API_BASE_URL}/integrations/psn`;
 const tokenFor = (user: string): string => `h.${btoa(JSON.stringify({ sub: user }))}.s`;
@@ -18,6 +19,7 @@ describe('PsnService', () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
     localStorage.clear();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
@@ -29,6 +31,7 @@ describe('PsnService', () => {
   afterEach(() => {
     http.verify();
     localStorage.clear();
+    vi.useRealTimers();
   });
 
   it('calls the PSN endpoints', () => {
@@ -56,6 +59,7 @@ describe('PsnService', () => {
     service.getPending().subscribe();
     http.expectOne(`${base}/pending`).flush([pendingGame(1, 'Astro Bot')]);
 
+    vi.setSystemTime(Date.now() + FRESH_FOR_MS + 1);
     const values: PsnPendingGame[][] = [];
     service.getPending().subscribe((list) => values.push(list));
     expect(values.map((list) => list.map((g) => g.name))).toEqual([['Astro Bot']]);

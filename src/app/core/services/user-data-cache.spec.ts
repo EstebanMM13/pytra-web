@@ -8,7 +8,7 @@ import { ExperienceService } from './experience.service';
 import { GameService } from './game.service';
 import { StatsService } from './stats.service';
 import { TokenStorageService } from './token-storage.service';
-import { UserDataCache } from './user-data-cache';
+import { FRESH_FOR_MS, UserDataCache } from './user-data-cache';
 
 const gamesUrl = `${API_BASE_URL}/games`;
 
@@ -27,7 +27,13 @@ describe('UserDataCache (through the cached services)', () => {
     return values;
   }
 
+  /** Ages the cached values past the freshness window, so the next read revalidates. */
+  function outlive(): void {
+    vi.setSystemTime(Date.now() + FRESH_FOR_MS + 1);
+  }
+
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
     localStorage.clear();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
@@ -40,12 +46,36 @@ describe('UserDataCache (through the cached services)', () => {
   afterEach(() => {
     http.verify();
     localStorage.clear();
+    vi.useRealTimers();
+  });
+
+  it('serves a fresh cached value without any request', () => {
+    read();
+    http.expectOne(gamesUrl).flush(games('Hades'));
+
+    vi.setSystemTime(Date.now() + FRESH_FOR_MS - 1);
+    expect(read()).toEqual([games('Hades')]);
+    http.expectNone(gamesUrl);
+  });
+
+  it('revalidates once the cached value is older than the freshness window', () => {
+    read();
+    http.expectOne(gamesUrl).flush(games('Hades'));
+
+    outlive();
+    const revisit = read();
+    http.expectOne(gamesUrl).flush(games('Hades', 'Celeste'));
+    expect(revisit).toEqual([games('Hades'), games('Hades', 'Celeste')]);
+
+    expect(read()).toEqual([games('Hades', 'Celeste')]);
+    http.expectNone(gamesUrl);
   });
 
   it('serves the cached list at once on a revisit and refreshes it in the background', () => {
     read();
     http.expectOne(gamesUrl).flush(games('Hades'));
 
+    outlive();
     const revisit = read();
     expect(revisit).toEqual([games('Hades')]);
     http.expectOne(gamesUrl).flush(games('Hades', 'Celeste'));
@@ -56,6 +86,7 @@ describe('UserDataCache (through the cached services)', () => {
     read();
     http.expectOne(gamesUrl).flush(games('Hades'));
 
+    outlive();
     const revisit = read();
     http.expectOne(gamesUrl).flush(games('Hades'));
     expect(revisit).toEqual([games('Hades')]);
@@ -65,12 +96,14 @@ describe('UserDataCache (through the cached services)', () => {
     read();
     http.expectOne(gamesUrl).flush(games('Hades'));
 
+    outlive();
     const errors: unknown[] = [];
     const values: Game[][] = [];
     gameService.findAll().subscribe({ next: (v) => values.push(v), error: (e) => errors.push(e) });
     http.expectOne(gamesUrl).flush('boom', { status: 500, statusText: 'Server Error' });
     expect(values).toEqual([games('Hades')]);
     expect(errors).toEqual([]);
+    outlive();
     expect(read()).toEqual([games('Hades')]);
     http.expectOne(gamesUrl).flush(games('Hades'));
   });
@@ -119,6 +152,7 @@ describe('UserDataCache (through the cached services)', () => {
     read();
     http.expectOne(gamesUrl).flush(games('Hades'));
 
+    outlive();
     const revisit = read();
     const refresh = http.expectOne(gamesUrl);
     gameService.create({ name: 'Celeste' } as GameRequest).subscribe();
@@ -202,6 +236,7 @@ describe('UserDataCache (through the cached services)', () => {
     stats.getTopRated(50).subscribe();
     http.expectOne(`${topUrl}?limit=50`).flush([]);
 
+    outlive();
     const revisit: unknown[] = [];
     stats.getTopRated(5).subscribe((value) => revisit.push(value));
     expect(revisit).toEqual([[]]);
@@ -228,6 +263,7 @@ describe('UserDataCache (through the cached services)', () => {
     stats.getRatings(2024).subscribe();
     http.expectOne(`${ratingsUrl}?year=2024`).flush({ ratedCount: 1 });
 
+    outlive();
     const revisit: unknown[] = [];
     stats.getRatings().subscribe((value) => revisit.push(value));
     expect(revisit).toEqual([{ ratedCount: 3 }]);

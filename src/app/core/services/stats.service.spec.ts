@@ -5,6 +5,7 @@ import { API_BASE_URL } from '../api-base-url';
 import { GenreStat } from '../models/stats.model';
 import { StatsService } from './stats.service';
 import { TokenStorageService } from './token-storage.service';
+import { FRESH_FOR_MS } from './user-data-cache';
 
 const byGenreUrl = `${API_BASE_URL}/stats/by-genre`;
 const tokenFor = (user: string): string => `h.${btoa(JSON.stringify({ sub: user }))}.s`;
@@ -21,6 +22,7 @@ describe('StatsService.getByGenre (cached)', () => {
   }
 
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
     localStorage.clear();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
@@ -32,12 +34,14 @@ describe('StatsService.getByGenre (cached)', () => {
   afterEach(() => {
     http.verify();
     localStorage.clear();
+    vi.useRealTimers();
   });
 
   it('serves the cached genres at once on a revisit (the hub and the genres section share them)', () => {
     read();
     http.expectOne(byGenreUrl).flush(genres(10));
 
+    vi.setSystemTime(Date.now() + FRESH_FOR_MS + 1);
     const revisit = read();
     expect(revisit).toEqual([genres(10)]);
     // Refreshed in the background; an unchanged answer emits nothing new.
