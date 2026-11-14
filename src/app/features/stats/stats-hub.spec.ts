@@ -101,8 +101,8 @@ describe('Stats hub', () => {
     expect(links).toEqual([
       '/stats/activity',
       '/stats/games',
-      '/stats/genres',
       '/years',
+      '/stats/genres',
       '/sagas',
       '/stats/platforms',
       '/stats/studios',
@@ -118,8 +118,8 @@ describe('Stats hub', () => {
     expect(figures).toEqual([
       'stats.days',
       'Elden Ring',
-      'RPG',
       '12 h 30 min',
+      'RPG',
       'stats.hub.sagasFigure',
       'PlayStation 5',
       'FromSoftware',

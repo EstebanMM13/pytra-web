@@ -79,6 +79,18 @@
       }
     </app-stats-hub-card>
 
+    @let y = latestYear();
+    <app-stats-hub-card
+      link="/years"
+      [icon]="icons.years"
+      [title]="'stats.hub.years' | translate"
+      [loading]="y === undefined"
+      [figure]="y ? (y.totalHours | hours) : null"
+      [hint]="y ? ('stats.hub.yearsHint' | translate: { year: y.year }) : ('common.noData' | translate)"
+    >
+      <ng-container *ngTemplateOutlet="columns; context: { $implicit: yearBars() }" />
+    </app-stats-hub-card>
+
     @let g = topGenre();
     <app-stats-hub-card
       link="/stats/genres"
@@ -97,18 +109,6 @@
           <ng-container *ngTemplateOutlet="shareBar; context: { $implicit: genreSlices() }" />
         </span>
       </span>
-    </app-stats-hub-card>
-
-    @let y = latestYear();
-    <app-stats-hub-card
-      link="/years"
-      [icon]="icons.years"
-      [title]="'stats.hub.years' | translate"
-      [loading]="y === undefined"
-      [figure]="y ? (y.totalHours | hours) : null"
-      [hint]="y ? ('stats.hub.yearsHint' | translate: { year: y.year }) : ('common.noData' | translate)"
-    >
-      <ng-container *ngTemplateOutlet="columns; context: { $implicit: yearBars() }" />
     </app-stats-hub-card>
 
     @let s = sagas();
