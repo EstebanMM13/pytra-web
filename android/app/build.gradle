@@ -65,7 +65,11 @@ android {
             if (releaseSigning) {
                 signingConfig signingConfigs.release
             }
-            minifyEnabled false
+            // R8 strips unused AndroidX/Kotlin code (classes.dex was ~55% of the APK). Capacitor's
+            // consumer rules keep every class extending com.getcapacitor.Plugin, which covers the
+            // npm plugins and the app's own (loaded by name from capacitor.plugins.json).
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
