@@ -127,7 +127,14 @@ export interface YearExperience {
   month: number | null;
   startDate: string | null;
   endDate: string | null;
+  /** What the run was in the year. Optional: absent from an API deployed before it existed. */
+  yearRole?: YearRunRole;
+  /** The run's hours in this year; `hours` is the run's total. Optional like `yearRole`. */
+  yearHours?: number;
 }
+
+/** Credits or abandonment in the year, its postgame, or played before the credits / still in progress. */
+export type YearRunRole = 'COMPLETED' | 'ABANDONED' | 'POSTGAME' | 'PLAYING';
 
 /** A game ranked by its average rating over the year's completed runs. */
 export interface RatedGame {

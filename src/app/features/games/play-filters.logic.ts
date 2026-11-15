@@ -127,10 +127,15 @@ function inHalfOpen(value: number, range: NumberRange): boolean {
   return value >= range.min && (range.max === null || value < range.max);
 }
 
+/** The run's credits year, or any year it was played in (`hoursByYear`: before the credits, its postgame). */
+function playedInYear(run: RunFact, year: number): boolean {
+  return run.year === year || (run.hoursByYear ?? []).some((y) => y.year === year && y.hours > 0);
+}
+
 /** The run satisfies every active run filter (and, when platforms are picked, is on one of them). */
 export function runMatches(run: RunFact, filters: PlayFilters, platforms: readonly string[] = []): boolean {
   return (
-    (filters.year === null || run.year === filters.year) &&
+    (filters.year === null || playedInYear(run, filters.year)) &&
     (!platforms.length || (run.platformId !== null && platforms.includes(String(run.platformId)))) &&
     (!filters.days || (run.daysToFinish !== null && run.daysToFinish !== undefined && inClosed(run.daysToFinish, filters.days))) &&
     (!filters.runHours || (run.status === 'COMPLETADO' && inHalfOpen(run.hours ?? 0, filters.runHours)))

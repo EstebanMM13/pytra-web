@@ -5,12 +5,13 @@ import { LucideDynamicIcon } from '@lucide/angular';
 import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subject, catchError, map, of, switchMap } from 'rxjs';
-import { YearStat, YearSummary } from '../../core/models/stats.model';
+import { YearExperience, YearStat, YearSummary } from '../../core/models/stats.model';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { Navbar } from '../../shared/navbar/navbar';
 import { GenreNamePipe } from '../../shared/pipes/genre-name.pipe';
-import { HoursPipe } from '../../shared/pipes/hours.pipe';
+import { HoursPipe, formatHours } from '../../shared/pipes/hours.pipe';
+import { ratingLocale } from '../../shared/utils/rating-format';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
 import { TranslatePluralPipe } from '../../shared/pipes/translate-plural.pipe';
@@ -29,6 +30,7 @@ import { StatsBackLink } from '../stats/stats-back-link';
 import { YearSelector } from './year-selector';
 import { toastApiError } from '../../shared/utils/api-error';
 import {
+  ROLE_TEXT,
   STATUS_TEXT,
   latestYear,
   gotyCoverUrl,
@@ -39,6 +41,7 @@ import {
   yearCoverMap,
   yearHighlight,
   yearMostPlayed,
+  yearRunRole,
   yearTabs,
 } from './years.logic';
 
@@ -93,6 +96,22 @@ export class Years {
 
   protected readonly noteMax = NOTE_MAX_LENGTH;
   protected readonly statusText = STATUS_TEXT;
+  protected readonly roleText = ROLE_TEXT;
+  protected readonly runRole = yearRunRole;
+
+  /** The run's hours in the year (its total on an older API). */
+  protected runYearHours(run: YearExperience): number | null {
+    return run.yearHours ?? run.hours;
+  }
+
+  /** "Run 1", plus "· de 40 h en total" when the year holds only part of the run's hours. */
+  protected runMeta(run: YearExperience): string {
+    if (run.yearHours === undefined || run.hours === null || Math.abs(run.yearHours - run.hours) < 0.01) {
+      return run.runLabel;
+    }
+    const total = formatHours(run.hours, ratingLocale(this.translate.currentLang()));
+    return `${run.runLabel} · ${this.translate.instant('years.ofTotal', { hours: total })}`;
+  }
   protected readonly highlightLimit = HIGHLIGHT_LIMIT;
 
   /** Years with data (most recent first); null while loading. */

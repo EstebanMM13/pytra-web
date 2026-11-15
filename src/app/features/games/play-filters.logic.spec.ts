@@ -108,6 +108,16 @@ describe('matchesPlay', () => {
     expect(matchesPlay(index.get(3), filters({ year: 2024 }))).toBe(true);
   });
 
+  it('matches a year the run was played in after (or before) its credits year', () => {
+    const silksong = buildPlayIndex({
+      runs: [run({ experienceId: 9, gameId: 9, year: 2025, hours: 40, hoursByYear: [{ year: 2025, hours: 30 }, { year: 2026, hours: 10 }] })],
+      onlineYears: [],
+    }).get(9);
+    expect(matchesPlay(silksong, filters({ year: 2026 }))).toBe(true);
+    expect(matchesPlay(silksong, filters({ year: 2025 }))).toBe(true);
+    expect(matchesPlay(silksong, filters({ year: 2024 }))).toBe(false);
+  });
+
   it('checks the platform on the same run (or online year) as the year', () => {
     // Game 1 has a platform-20 run, but in 2023: not "platform 20 in 2024".
     expect(matchesPlay(index.get(1), filters({ year: 2024 }), ['20'])).toBe(false);

@@ -94,7 +94,8 @@
     }
 
     @if (summary(); as s) {
-      @if (s.experienceCount === 0 && !s.onlineHours && !noteSummary() && !noteHighlights()) {
+      <!-- A year with only hours (a postgame, a run across years) is not empty -->
+      @if (s.experienceCount === 0 && !s.totalHours && !s.onlineHours && !noteSummary() && !noteHighlights()) {
         <div
           class="flex flex-col items-center gap-3 rounded-[14px] border border-card-border card-glass px-6 py-12 text-center"
           data-empty-year
@@ -111,9 +112,9 @@
           </button>
         </div>
       } @else {
-        <!-- Stats: 2 x 3 on phones (whole labels at a large font size), 3 x 2 on tablet, one row on desktop -->
-        <section class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-3 lg:grid-cols-6" [attr.aria-label]="'years.statsLabel' | translate">
-          <app-stat-card [icon]="icons.clock" [label]="'years.stats.hours' | translate" [value]="s.totalHours | hours" [trend]="hoursTrend()" />
+        <!-- Stats: hours across the row and 2 x 3 below on phones, 2 rows of 4 on tablet (hours twice as wide), one row on desktop -->
+        <section class="grid grid-cols-2 gap-2 sm:grid-cols-4 md:gap-3 lg:grid-cols-7" [attr.aria-label]="'years.statsLabel' | translate">
+          <app-stat-card class="col-span-2 lg:col-span-1" [icon]="icons.clock" [label]="'years.stats.hours' | translate" [value]="s.totalHours | hours" [trend]="hoursTrend()" />
           <app-stat-card [icon]="icons.play" [label]="'years.stats.runs' | translate" [value]="s.experienceCount" />
           <app-stat-card [icon]="icons.circleCheck" tone="completion" [label]="'years.stats.completed' | translate" [value]="s.completedCount" />
           <app-stat-card [icon]="icons.x" tone="abandoned" [label]="'years.stats.abandoned' | translate" [value]="s.abandonedCount" />
@@ -126,6 +127,7 @@
             [valueClass]="'font-mono ' + (s.averageRating | ratingTone)"
           />
           <app-stat-card [icon]="icons.platinum" tone="platinum" [label]="'years.stats.platinums' | translate" [value]="s.platinumCount" />
+          <app-stat-card [icon]="icons.badgeCheck" tone="completion" [label]="'years.stats.fullCompletions' | translate" [value]="s.fullCompletionCount" />
         </section>
 
         <!-- GOTY · surprises · disappointments -->
@@ -260,8 +262,8 @@
                   <app-run-row
                     class="year-run hover-lift"
                     [title]="run.gameName"
-                    [meta]="run.runLabel"
-                    [hours]="run.hours"
+                    [meta]="runMeta(run)"
+                    [hours]="runYearHours(run)"
                     [rating]="run.rating"
                     [platinum]="run.platinum"
                     [fullCompletion]="run.fullCompletion"
@@ -269,9 +271,11 @@
                     [coverName]="run.gameName"
                     [backdropUrl]="run.coverImageUrl"
                   >
-                    <span runRowBelow class="mt-1 block text-xs sm:hidden" [class]="statusText[run.status]">{{ 'status.' + run.status | translate }}</span>
-                    <span class="hidden shrink-0 text-xs whitespace-nowrap sm:block" [class]="statusText[run.status]">
-                      {{ 'status.' + run.status | translate }}
+                    <!-- What the run was this year: credits, abandonment, postgame or still playing -->
+                    @let role = runRole(run);
+                    <span runRowBelow class="mt-1 block text-xs sm:hidden" [class]="roleText[role]">{{ 'years.role.' + role | translate }}</span>
+                    <span class="hidden shrink-0 text-xs whitespace-nowrap sm:block" [class]="roleText[role]" data-year-role>
+                      {{ 'years.role.' + role | translate }}
                     </span>
                   </app-run-row>
                 </a>

@@ -130,4 +130,28 @@ describe('Years page', () => {
     const el = setup(summary({ experienceCount: 0, totalHours: 0, completedCount: 0 }));
     expect(el.querySelector('[data-empty-year]')).not.toBeNull();
   });
+
+  it('keeps a year that only has hours (a postgame) out of the empty state', () => {
+    const el = setup(summary({ experienceCount: 0, totalHours: 9.6, completedCount: 0 }));
+    expect(el.querySelector('[data-empty-year]')).toBeNull();
+  });
+
+  it("tags each run with what it was in the year and shows that year's hours with the total", () => {
+    const postgame = { ...run(1, 'Silksong', null), yearRole: 'POSTGAME', yearHours: 9.62, hours: 40, fullCompletion: true } as YearExperience;
+    const credits = { ...run(2, 'Hades', null), yearRole: 'COMPLETED', yearHours: 20, hours: 20 } as YearExperience;
+    const el = setup(summary({ experiences: [postgame, credits] }));
+    const [first, second] = [...el.querySelectorAll('[data-year-run]')];
+    expect(first.querySelector('[data-year-role]')!.textContent).toContain('years.role.POSTGAME');
+    expect(first.textContent).toContain('years.ofTotal');
+    expect(second.querySelector('[data-year-role]')!.textContent).toContain('years.role.COMPLETED');
+    expect(second.textContent).not.toContain('years.ofTotal');
+  });
+
+  it('shows the 100% of the year next to the platinums', () => {
+    const el = setup(summary({ platinumCount: 2, fullCompletionCount: 3 }));
+    const labels = [...el.querySelectorAll('app-stat-card')].map((c) => c.textContent!);
+    const platinum = labels.findIndex((t) => t.includes('years.stats.platinums'));
+    expect(labels[platinum + 1]).toContain('years.stats.fullCompletions');
+    expect(labels[platinum + 1]).toContain('3');
+  });
 });

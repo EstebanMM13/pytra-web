@@ -717,6 +717,7 @@
       "avgRating": "Nota media",
       "avg": "Media",
       "platinums": "Platinos",
+      "fullCompletions": "100%",
       "avgRatingShort": "Media"
     },
     "goty": "GOTY {{year}}",
@@ -734,6 +735,13 @@
     "onlineTag": "Online",
     "runsOfYear": "Partidas del año",
     "byRating": "por nota",
+    "ofTotal": "de {{hours}} en total",
+    "role": {
+      "COMPLETED": "Créditos",
+      "ABANDONED": "Abandonada",
+      "POSTGAME": "Postgame",
+      "PLAYING": "En curso"
+    },
     "showAll": "Ver las {{count}} partidas",
     "showLess": "Ver menos",
     "topRated": "Top 5 mejor valorados",

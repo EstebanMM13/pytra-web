@@ -1,5 +1,5 @@
 import { ExperienceStatus } from '../../core/models/experience.model';
-import { YearStat, YearSummary } from '../../core/models/stats.model';
+import { YearExperience, YearRunRole, YearStat, YearSummary } from '../../core/models/stats.model';
 import { MiniBar } from '../../shared/ui/mini-bar-chart';
 
 /** Pure helpers behind the yearly summary page. */
@@ -206,6 +206,22 @@ export const STATUS_TEXT: Record<ExperienceStatus, string> = {
   COMPLETADO: 'text-success',
   ABANDONADO: 'text-danger',
 };
+
+/** Text tone of a run's role in the year (the postgame in the brand's light tone). */
+export const ROLE_TEXT: Record<YearRunRole, string> = {
+  COMPLETED: STATUS_TEXT.COMPLETADO,
+  ABANDONED: STATUS_TEXT.ABANDONADO,
+  PLAYING: STATUS_TEXT.EN_CURSO,
+  POSTGAME: 'text-brand-light',
+};
+
+/** The run's role in the year; an older API without it falls back on the run's status. */
+export function yearRunRole(run: Pick<YearExperience, 'yearRole' | 'status'>): YearRunRole {
+  if (run.yearRole) {
+    return run.yearRole;
+  }
+  return run.status === 'COMPLETADO' ? 'COMPLETED' : run.status === 'ABANDONADO' ? 'ABANDONED' : 'PLAYING';
+}
 
 /** Compact whole hours under a month bar ("12h"): "" for empty months, "<1h" for a few minutes. */
 export function monthValueLabel(hours: number): string {

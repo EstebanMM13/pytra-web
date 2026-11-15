@@ -717,6 +717,7 @@
       "avgRating": "Average rating",
       "avg": "Average",
       "platinums": "Platinums",
+      "fullCompletions": "100%",
       "avgRatingShort": "Avg"
     },
     "goty": "GOTY {{year}}",
@@ -734,6 +735,13 @@
     "onlineTag": "Online",
     "runsOfYear": "Runs of the year",
     "byRating": "by rating",
+    "ofTotal": "of {{hours}} in total",
+    "role": {
+      "COMPLETED": "Credits",
+      "ABANDONED": "Dropped",
+      "POSTGAME": "Postgame",
+      "PLAYING": "Playing"
+    },
     "showAll": "Show all {{count}} runs",
     "showLess": "Show less",
     "topRated": "Top 5 best rated",
