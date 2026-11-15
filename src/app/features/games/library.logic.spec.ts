@@ -39,6 +39,7 @@ import {
   parseNameList,
   pruneNames,
   serializeNameList,
+  gameRating,
 } from './library.logic';
 
 const PC = { id: 1, name: 'PC', color: '#8A857C' };
@@ -199,6 +200,13 @@ describe('library logic', () => {
 
     it('sorts by rating, highest first and unrated last', () => {
       expect(sortGames(all, 'rating').map((g) => g.id)).toEqual([1, 3, 2, 4, 5]);
+    });
+
+    it("sorts by the game's average rating when the API sends it, not its best run", () => {
+      const replayed = { ...pokemon, bestRating: 10, averageRating: 7 };
+      expect(sortGames([replayed, hollow, celeste], 'rating').map((g) => g.id)).toEqual([1, 3, 2]);
+      expect(gameRating(replayed)).toBe(7);
+      expect(gameRating(hollow)).toBe(9.5);
     });
 
     it('sorts by hours, games without hours last', () => {

@@ -258,11 +258,13 @@
                   [style.view-transition-name]="posterTransitionName(game.id)"
                 />
                 <span class="cover-shine cover-lift" aria-hidden="true"></span>
-                @if (game.bestRating !== null && game.bestRating !== undefined) {
+                @let rating = gameRating(game);
+                @if (rating !== null) {
                   <span
                     class="absolute right-1.5 bottom-1.5 rounded-md border border-border bg-bg/85 px-1.5 py-0.5 font-mono text-xs font-medium backdrop-blur-sm cover-lift"
-                    [class]="game.bestRating | ratingTone"
-                    >{{ game.bestRating | rating }}</span
+                    [class]="rating | ratingTone"
+                    data-poster-rating
+                    >{{ rating | rating }}</span
                   >
                 }
                 <!-- Achievement marks, top left: 100% first, then the platinum -->
@@ -375,7 +377,7 @@
             <span class="wrap-break-word text-text-3" [title]="game.sagaName ?? ''">{{ game.sagaName ?? '—' }}</span>
             <span class="text-right font-mono text-text-3">{{ game.experienceCount ?? 0 }}</span>
             <span class="text-right font-mono">{{ game.totalHours ? (game.totalHours | hours) : '—' }}</span>
-            <span class="text-right font-mono" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
+            <span class="text-right font-mono" [class]="gameRating(game) | ratingTone">{{ gameRating(game) | rating }}</span>
             <span>
               @if (game.lastExperienceStatus; as status) {
                 <app-status-pill [status]="status" />
@@ -439,7 +441,7 @@
                   </span>
                 </p>
               </div>
-              <span class="shrink-0 font-mono text-body" [class]="game.bestRating | ratingTone">{{ game.bestRating | rating }}</span>
+              <span class="shrink-0 font-mono text-body" [class]="gameRating(game) | ratingTone">{{ gameRating(game) | rating }}</span>
             </a>
           </li>
         }

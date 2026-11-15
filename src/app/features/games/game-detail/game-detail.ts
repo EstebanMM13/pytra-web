@@ -38,7 +38,7 @@ import { OnlinePlaytimeCard } from './online-playtime-card';
 import { OnlinePlaytimeStore } from './online-playtime.store';
 import { CategoryBadge, UpcomingBadge } from '../../../shared/ui/game-badges';
 import { figureFontSize } from '../../../shared/ui/stat-card';
-import { isUpcoming } from '../library.logic';
+import { gameRating, isUpcoming } from '../library.logic';
 
 /** Newest run first: end date, else start date, else stored year; ties by id. */
 function byRecencyDesc(a: Experience, b: Experience): number {
@@ -177,10 +177,11 @@ export class GameDetail {
   readonly loadError = signal(false);
   readonly editing = signal(false);
   /** The hero cover is open in the fullscreen viewer. */
+  protected readonly gameRating = gameRating;
   readonly coverOpen = signal(false);
   protected readonly runs = computed(() => [...(this.experiences() ?? [])].sort(byRecencyDesc));
 
-  /** Run ratings plus the online general rating: the same set the library's bestRating uses. */
+  /** Run ratings plus the online general rating: the same set the library's ratings use. */
   protected readonly ratings = computed(() =>
     [...this.runs().map((r) => r.rating), this.onlinePlaytime()?.generalRating ?? null].filter(
       (r): r is number => r !== null,

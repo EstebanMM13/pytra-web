@@ -540,13 +540,13 @@
                 <li class="flex items-center justify-between gap-4 border-t border-divider py-[9px]">
                   @if (sg.id === g.id) {
                     <span class="wrap-break-word text-brand-lighter" aria-current="page" [title]="sg.name">{{ sg.name }}</span>
-                    @if (stats().bestRating !== null) {
-                      <span class="shrink-0 font-mono" [class]="stats().bestRating | ratingTone">{{ stats().bestRating | rating }}</span>
+                    @if (stats().avgRating !== null) {
+                      <span class="shrink-0 font-mono" [class]="stats().avgRating | ratingTone">{{ stats().avgRating | rating }}</span>
                     }
                   } @else {
                     <a [routerLink]="['/games', sg.id]" class="wrap-break-word hover:underline" [title]="sg.name">{{ sg.name }}</a>
-                    @if (sg.bestRating != null) {
-                      <span class="shrink-0 font-mono" [class]="sg.bestRating | ratingTone">{{ sg.bestRating | rating }}</span>
+                    @if (gameRating(sg) !== null) {
+                      <span class="shrink-0 font-mono" [class]="gameRating(sg) | ratingTone">{{ gameRating(sg) | rating }}</span>
                     } @else if (sg.lastExperienceStatus) {
                       <span class="shrink-0 text-xs text-brand-lighter">
                         {{ 'status.' + sg.lastExperienceStatus | translate }}

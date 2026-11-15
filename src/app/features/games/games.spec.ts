@@ -43,7 +43,13 @@ const RPG = { id: 20, name: 'RPG' };
 const PUZZLE = { id: 30, name: 'Puzzle' };
 
 const GAMES = [
-  { ...game(1, [ACTION, RPG, PUZZLE], 'Capcom'), hasPlatinum: true, platformRefs: [{ id: 1, name: 'PS5', color: null }] },
+  {
+    ...game(1, [ACTION, RPG, PUZZLE], 'Capcom'),
+    hasPlatinum: true,
+    bestRating: 9.5,
+    averageRating: 8,
+    platformRefs: [{ id: 1, name: 'PS5', color: null }],
+  },
   {
     ...game(2, [ACTION, RPG], 'FromSoftware'),
     hasPlatinum: true,
@@ -169,6 +175,12 @@ describe('Games library filters', () => {
       expect(badge.textContent).not.toContain('🏆');
       expect(badge.getAttribute('aria-label')).toBe('library.platinum');
     }
+  });
+
+  it("shows the game's average rating on its poster, not its best run", async () => {
+    const { el } = await setup();
+    // Best run 9.5, average 8: the poster shows 8.
+    expect(el.querySelector('a[href="/games/1"] [data-poster-rating]')!.textContent!.trim()).toMatch(/^8([,.]0+)?$/);
   });
 
   it('marks 100% posters next to the platinum one, the 100% first', async () => {

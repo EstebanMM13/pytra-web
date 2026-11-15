@@ -147,7 +147,7 @@
       "bestYear": "{{year}}: your year with the most hours",
       "platinums": "{{count}} platinums and counting 🏆",
       "platinums_one": "{{count}} platinum and counting 🏆",
-      "bestRating": "Your top rating: {{rating}} for {{game}}",
+      "bestRating": "Your best rated game: {{game}}, at {{rating}}",
       "thisYear": "You've played {{hours}} this year",
       "fallback": "What are we playing today?"
     },

@@ -1,6 +1,6 @@
 import { Game } from '../../core/models/game.model';
 import { Saga } from '../../core/models/saga.model';
-import { normalizeText } from '../games/library.logic';
+import { gameRating, normalizeText } from '../games/library.logic';
 
 /** Saga figures computed on the client from the games list (one request, no N+1). */
 export interface SagaSummary {
@@ -91,11 +91,11 @@ export type GameGroupFigures = Omit<SagaSummary, 'saga' | 'studios' | 'lastActiv
 
 /**
  * Release-ordered confirmed games of a group with their figures: how many were played, hours,
- * mean of the best ratings, platinums and release year range.
+ * mean of the games' ratings (see `gameRating`), platinums and release year range.
  */
 export function gameGroupFigures(group: readonly Game[]): GameGroupFigures {
   const games = group.filter((g) => g.reviewStatus !== 'PENDING_REVIEW').sort(byRelease);
-  const ratings = games.map((g) => g.bestRating).filter((r): r is number => r !== null && r !== undefined);
+  const ratings = games.map(gameRating).filter((r): r is number => r !== null);
   const years = games.map(releaseYear).filter((y): y is number => y !== null);
   return {
     games,

@@ -64,6 +64,7 @@ import {
   serializeFlag,
   serializeIdList,
   serializeNameList,
+  gameRating,
 } from './library.logic';
 import { LibraryFilters } from './library-filters';
 import { LibraryStatusPicker } from './library-status-picker';
@@ -148,6 +149,7 @@ const STATS_FILTER_PARAMS: Params = { year: null, decade: null, released: null, 
 })
 export class Games {
   protected readonly icons = ICONS;
+  protected readonly gameRating = gameRating;
 
   private readonly gameService = inject(GameService);
   private readonly route = inject(ActivatedRoute);

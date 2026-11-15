@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Game } from '../../core/models/game.model';
+import { gameRating } from '../games/library.logic';
 import { HoursPipe } from '../../shared/pipes/hours.pipe';
 import { RatingPipe } from '../../shared/pipes/rating.pipe';
 import { RatingTonePipe } from '../../shared/pipes/rating-tone.pipe';
@@ -73,7 +74,7 @@ import { isPlayed, releaseYear, sagaGameStatus } from './saga.logic';
             }
           </span>
           <span class="hidden text-right font-mono md:block" [class]="played ? '' : 'text-faint'">{{ g.totalHours ? (g.totalHours | hours) : '—' }}</span>
-          <span class="shrink-0 text-right font-mono" [class]="g.bestRating | ratingTone">{{ g.bestRating | rating }}</span>
+          <span class="shrink-0 text-right font-mono" [class]="gameRating(g) | ratingTone">{{ gameRating(g) | rating }}</span>
         </a>
       }
     </div>
@@ -84,4 +85,5 @@ export class GameTimeline {
   protected readonly isPlayed = isPlayed;
   protected readonly gameStatus = sagaGameStatus;
   protected readonly releaseYear = releaseYear;
+  protected readonly gameRating = gameRating;
 }

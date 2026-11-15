@@ -333,7 +333,7 @@ const COMPARATORS: Record<LibrarySort, (a: Game, b: Game) => number> = {
     return (b.updatedAt ?? '').localeCompare(a.updatedAt ?? '') || byName(a, b);
   },
   name: byName,
-  rating: byNumberDesc((g) => g.bestRating),
+  rating: byNumberDesc(gameRating),
   hours: byNumberDesc((g) => (g.totalHours ? g.totalHours : null)),
 };
 
@@ -524,4 +524,12 @@ export function libraryStatusLine(game: Game): LibraryStatusLine {
 /** The status a library row shows: the game's last run, or null when it has none. */
 export function rowStatus(game: Game): ExperienceStatus | null {
   return game.lastExperienceStatus ?? null;
+}
+
+/**
+ * A game's rating wherever the app shows or ranks games: the mean of its rated runs and online
+ * rating. An older API without `averageRating` falls back on the best one.
+ */
+export function gameRating(game: Pick<Game, 'averageRating' | 'bestRating'>): number | null {
+  return game.averageRating ?? game.bestRating ?? null;
 }

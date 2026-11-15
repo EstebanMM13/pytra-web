@@ -27,6 +27,11 @@ export interface Game {
   totalHours?: number | null;
   /** Best of the run ratings and the online general rating. */
   bestRating?: number | null;
+  /**
+   * Mean of every run rating and the online general rating, each once: the game's rating in the
+   * library (see `gameRating`). Absent from older APIs.
+   */
+  averageRating?: number | null;
   /** In the backlog ("Pendiente"): the user plans to play it. Absent from older APIs. */
   backlog?: boolean | null;
   lastExperienceStatus?: ExperienceStatus | null;
