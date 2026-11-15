@@ -231,3 +231,32 @@ export function monthValueLabel(hours: number): string {
   const rounded = Math.round(hours);
   return rounded === 0 ? '<1h' : `${rounded}h`;
 }
+
+/**
+ * When a run enters the year: its start, or January 1st when it started in an earlier year (a run
+ * carried over, a postgame); its end when it has no start; null when it has neither.
+ */
+export function yearRunStart(run: Pick<YearExperience, 'startDate' | 'endDate'>, year: number): string | null {
+  const firstDay = `${year}-01-01`;
+  if (run.startDate) {
+    return run.startDate < firstDay ? firstDay : run.startDate;
+  }
+  return run.endDate ?? null;
+}
+
+/**
+ * The year's runs in the order they were played: oldest first (newest first on demand), ties by
+ * end date then name. Runs without dates always go last.
+ */
+export function sortYearRuns(runs: readonly YearExperience[], year: number, newestFirst: boolean): YearExperience[] {
+  const dated = runs
+    .filter((r) => yearRunStart(r, year) !== null)
+    .sort(
+      (a, b) =>
+        yearRunStart(a, year)!.localeCompare(yearRunStart(b, year)!) ||
+        (a.endDate ?? '9999').localeCompare(b.endDate ?? '9999') ||
+        a.gameName.localeCompare(b.gameName),
+    );
+  const undated = runs.filter((r) => yearRunStart(r, year) === null);
+  return [...(newestFirst ? dated.reverse() : dated), ...undated];
+}

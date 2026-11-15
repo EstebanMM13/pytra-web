@@ -41,6 +41,7 @@ import {
   yearCoverMap,
   yearHighlight,
   yearMostPlayed,
+  sortYearRuns,
   yearRunRole,
   yearTabs,
 } from './years.logic';
@@ -155,10 +156,18 @@ export class Years {
   protected readonly hasMonthHours = computed(() => this.monthBars().some((b) => b.value > 0));
 
   protected readonly showAllRuns = signal(false);
+  /** Played-in-the-year list order: oldest first unless the viewer flips it. */
+  protected readonly runsNewestFirst = signal(false);
+  private readonly orderedRuns = computed(() => {
+    const s = this.summary();
+    return s ? sortYearRuns(s.experiences, s.year, this.runsNewestFirst()) : [];
+  });
   protected readonly visibleRuns = computed(() => {
-    const runs = this.summary()?.experiences ?? [];
+    const runs = this.orderedRuns();
     return this.showAllRuns() ? runs : runs.slice(0, RUNS_PREVIEW);
   });
+  /** Runs of the year that replay a game, in the order they were played. */
+  protected readonly replays = computed(() => this.orderedRuns().filter((run) => run.replay));
   protected readonly hiddenRuns = computed(() =>
     Math.max(0, (this.summary()?.experiences.length ?? 0) - RUNS_PREVIEW),
   );

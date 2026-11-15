@@ -143,6 +143,8 @@ export interface YearExperience {
   yearRole?: YearRunRole;
   /** The run's hours in this year; `hours` is the run's total. Optional like `yearRole`. */
   yearHours?: number;
+  /** The run replays a game already played. Optional like `yearRole`. */
+  replay?: boolean;
 }
 
 /** Credits or abandonment in the year, its postgame, or played before the credits / still in progress. */

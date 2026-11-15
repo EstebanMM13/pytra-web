@@ -734,7 +734,13 @@
     "onlineHours": "Incluye {{hours}} online registradas en el diario.",
     "onlineTag": "Online",
     "runsOfYear": "Partidas del año",
-    "byRating": "por nota",
+    "playedIn": "Jugados en {{year}}",
+    "order": {
+      "oldest": "Más antiguos primero",
+      "newest": "Más recientes primero"
+    },
+    "replays": "Rejugados",
+    "noReplays": "No rejugaste nada este año.",
     "ofTotal": "de {{hours}} en total",
     "role": {
       "COMPLETED": "Créditos",

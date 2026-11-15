@@ -107,3 +107,13 @@
     padding: 0.625rem 0.75rem;
   }
 }
+
+/* Breakdown rows (sagas, genres, replays): name over its counts, figures on one line at the right. */
+.year-breakdown-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--pt-divider);
+  font-size: 14px;
+}

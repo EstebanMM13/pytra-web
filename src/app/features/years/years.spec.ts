@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -145,6 +146,52 @@ describe('Years page', () => {
     expect(first.textContent).toContain('years.ofTotal');
     expect(second.querySelector('[data-year-role]')!.textContent).toContain('years.role.COMPLETED');
     expect(second.textContent).not.toContain('years.ofTotal');
+  });
+
+  it('lists the runs played in the year oldest first, and newest first on demand', () => {
+    const dated = (id: number, name: string, startDate: string | null, endDate: string | null) =>
+      ({ ...run(id, name, null), startDate, endDate }) as YearExperience;
+    const el = setup(
+      summary({
+        experiences: [
+          dated(1, 'Saros', '2025-10-01', '2025-11-02'),
+          // Carried over from 2024: it counts from January 1st.
+          dated(2, 'Silksong', '2024-12-20', '2025-02-01'),
+          dated(3, 'Hades', '2025-03-10', null),
+        ],
+      }),
+    );
+    const names = () => [...el.querySelectorAll('[data-year-run]')].map((r) => r.textContent!.match(/Saros|Silksong|Hades/)![0]);
+    expect(names()).toEqual(['Silksong', 'Hades', 'Saros']);
+    expect(el.textContent).not.toContain('years.byRating');
+
+    const toggle = el.querySelector<HTMLButtonElement>('[data-run-order]')!;
+    expect(toggle.textContent).toContain('years.order.oldest');
+    toggle.click();
+    TestBed.inject(ApplicationRef).tick();
+    expect(names()).toEqual(['Saros', 'Hades', 'Silksong']);
+    expect(toggle.textContent).toContain('years.order.newest');
+  });
+
+  it("lists the year's replays in their own card", () => {
+    const replay = { ...run(1, 'Silksong', null), runLabel: 'Run 2', replay: true } as YearExperience;
+    const el = setup(summary({ experiences: [replay, run(2, 'Hades', null)] }));
+    const rows = [...el.querySelectorAll('[data-year-replay]')];
+    expect(rows).toHaveLength(1);
+    expect(rows[0].textContent).toContain('Silksong');
+    expect(rows[0].textContent).toContain('Run 2');
+  });
+
+  it('keeps every breakdown figure on one line', () => {
+    const el = setup(
+      summary({
+        topSagas: [{ sagaId: 1, sagaName: 'Spider-Man', gameCount: 1, experienceCount: 1, totalHours: 66.25 }],
+        topGenres: [{ genreId: 1, genreName: 'Acción', gameCount: 3, experienceCount: 3, totalHours: 66.25 }],
+      } as Partial<YearSummary>),
+    );
+    const figures = [...el.querySelectorAll('[data-breakdown-hours]')];
+    expect(figures).toHaveLength(2);
+    for (const figure of figures) expect(figure.classList).toContain('whitespace-nowrap');
   });
 
   it('shows the 100% of the year next to the platinums', () => {

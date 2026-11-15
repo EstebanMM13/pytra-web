@@ -734,7 +734,13 @@
     "onlineHours": "Includes {{hours}} of online play logged in the diary.",
     "onlineTag": "Online",
     "runsOfYear": "Runs of the year",
-    "byRating": "by rating",
+    "playedIn": "Played in {{year}}",
+    "order": {
+      "oldest": "Oldest first",
+      "newest": "Newest first"
+    },
+    "replays": "Replays",
+    "noReplays": "No replays this year.",
     "ofTotal": "of {{hours}} in total",
     "role": {
       "COMPLETED": "Credits",

@@ -252,8 +252,18 @@
           </section>
 
           <section class="flex flex-col rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
-            <app-section-header collapseKey="years.runsOfYear" collapseGroup="years.activity" collapseGroupFrom="lg" class="mb-2" [label]="'years.runsOfYear' | translate">
-              <span class="text-xs text-muted">{{ 'years.byRating' | translate }}</span>
+            <app-section-header collapseKey="years.runsOfYear" collapseGroup="years.activity" collapseGroupFrom="lg" class="mb-2" [label]="'years.playedIn' | translate: { year: s.year }">
+              <!-- In the order they were played; one tap flips it -->
+              <button
+                type="button"
+                class="tap-area flex items-center gap-1 text-xs text-muted hover:text-text"
+                [attr.aria-pressed]="runsNewestFirst()"
+                (click)="runsNewestFirst.set(!runsNewestFirst())"
+                data-run-order
+              >
+                <svg [lucideIcon]="icons.arrowUpDown" [size]="13" aria-hidden="true"></svg>
+                {{ (runsNewestFirst() ? 'years.order.newest' : 'years.order.oldest') | translate }}
+              </button>
             </app-section-header>
             <!-- Web: about six rows, then internal scroll (the list holds the 10-run preview, or all of them). -->
             <div class="flex flex-1 flex-col gap-2 md:scroll-list md:max-h-[496px]">
@@ -352,21 +362,21 @@
               <p class="text-sm text-muted">{{ 'common.noData' | translate }}</p>
             }
           </section>
+        </div>
 
+        <!-- Breakdown: sagas, genres and replays as three cards of the same rows (name, counts, hours on one line) -->
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3">
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="years.topSagas" collapseGroup="years.breakdown" class="mb-3.5" [label]="'years.topSagas' | translate" />
             @for (saga of s.topSagas; track saga.sagaId) {
-              <a
-                [routerLink]="['/sagas', saga.sagaId]"
-                class="flex flex-wrap items-center gap-x-3 border-t border-divider py-[9px] text-sm hover:bg-hover sm:flex-nowrap"
-              >
-                <!-- Below sm the counts drop to a second line so the saga name keeps the row -->
-                <span class="min-w-0 flex-1 wrap-break-word text-text-2" [title]="saga.sagaName">{{ saga.sagaName }}</span>
-                <span class="order-last w-full text-xs text-faint sm:order-none sm:w-auto sm:shrink-0">
-                  {{ 'common.games' | translatePlural: saga.gameCount }} ·
-                  {{ 'years.runsCount' | translatePlural: saga.experienceCount }}
+              <a [routerLink]="['/sagas', saga.sagaId]" class="year-breakdown-row hover:bg-hover">
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="wrap-break-word text-text-2" [title]="saga.sagaName">{{ saga.sagaName }}</span>
+                  <span class="text-xs text-faint">
+                    {{ 'common.games' | translatePlural: saga.gameCount }} · {{ 'years.runsCount' | translatePlural: saga.experienceCount }}
+                  </span>
                 </span>
-                <span class="w-16 shrink-0 text-right font-mono">{{ saga.totalHours | hours }}</span>
+                <span class="shrink-0 font-mono whitespace-nowrap" data-breakdown-hours>{{ saga.totalHours | hours }}</span>
               </a>
             } @empty {
               <p class="text-sm text-muted">{{ 'years.noCompleted' | translate }}</p>
@@ -376,17 +386,35 @@
           <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px]">
             <app-section-header collapseKey="years.topGenres" collapseGroup="years.breakdown" class="mb-3.5" [label]="'years.topGenres' | translate" />
             @for (genre of s.topGenres; track genre.genreId) {
-              <div class="flex flex-wrap items-center gap-x-3 border-t border-divider py-[9px] text-sm sm:flex-nowrap">
-                <!-- Below sm the counts drop to a second line so the genre name keeps the row (as top sagas) -->
-                <span class="min-w-0 flex-1 wrap-break-word text-text-2" [title]="genre.genreName | genreName">{{ genre.genreName | genreName }}</span>
-                <span class="order-last w-full text-xs text-faint sm:order-none sm:w-auto sm:shrink-0">
-                  {{ 'common.games' | translatePlural: genre.gameCount }} ·
-                  {{ 'years.runsCount' | translatePlural: genre.experienceCount }}
+              <div class="year-breakdown-row">
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="wrap-break-word text-text-2" [title]="genre.genreName | genreName">{{ genre.genreName | genreName }}</span>
+                  <span class="text-xs text-faint">
+                    {{ 'common.games' | translatePlural: genre.gameCount }} · {{ 'years.runsCount' | translatePlural: genre.experienceCount }}
+                  </span>
                 </span>
-                <span class="w-16 shrink-0 text-right font-mono">{{ genre.totalHours | hours }}</span>
+                <span class="shrink-0 font-mono whitespace-nowrap" data-breakdown-hours>{{ genre.totalHours | hours }}</span>
               </div>
             } @empty {
               <p class="text-sm text-muted">{{ 'years.noCompleted' | translate }}</p>
+            }
+          </section>
+
+          <section class="rounded-[14px] border border-card-border card-glass p-[18px] md:p-[22px] md:col-span-2 lg:col-span-1">
+            <app-section-header collapseKey="years.replays" collapseGroup="years.breakdown" class="mb-3.5" [label]="'years.replays' | translate" />
+            @for (run of replays(); track run.experienceId) {
+              <a [routerLink]="['/games', run.gameId, 'experiences', run.experienceId]" class="year-breakdown-row hover:bg-hover" data-year-replay>
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="wrap-break-word text-text-2" [title]="run.gameName">{{ run.gameName }}</span>
+                  <span class="text-xs text-faint">{{ run.runLabel }}</span>
+                </span>
+                <span class="shrink-0 font-mono whitespace-nowrap">{{ runYearHours(run) | hours }}</span>
+                @if (run.rating !== null) {
+                  <span class="w-10 shrink-0 text-right font-mono" [class]="run.rating | ratingTone">{{ run.rating | rating }}</span>
+                }
+              </a>
+            } @empty {
+              <p class="text-sm text-muted">{{ 'years.noReplays' | translate }}</p>
             }
           </section>
         </div>
