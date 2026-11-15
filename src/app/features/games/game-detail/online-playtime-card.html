@@ -101,7 +101,7 @@
     } @else {
       <div class="flex flex-wrap items-center gap-1.5" role="group" aria-labelledby="game-online-platforms">
         <ng-container *ngTemplateOutlet="addOnlinePlatformSelect" />
-        @if (!store.onlinePlatformGroups()) {
+        @if (!platformOptions()) {
           <span class="text-faint">—</span>
         }
       </div>
@@ -113,28 +113,36 @@
     }
   </div>
   <ng-template #addOnlinePlatformSelect>
-  @if (store.onlinePlatformGroups(); as groups) {
-    @if (groups.length) {
-      <!-- A native select (keyboard, screen readers, phone pickers) dressed as an "add" chip. -->
-      <span class="online-add-platform">
-        <svg [lucideIcon]="icons.plus" [size]="13" class="pointer-events-none absolute left-2.5" aria-hidden="true"></svg>
-        <select
-          #platformSelect
-          class="h-8 max-w-full cursor-pointer appearance-none rounded-full border border-dashed border-border-strong bg-transparent pr-3 pl-7 text-xs font-medium text-text-2 hover:border-brand-light hover:text-text disabled:cursor-default disabled:opacity-50"
-          [disabled]="store.savingOnlinePlatforms() || store.onlineLoadState() === 'error'"
-          [attr.aria-label]="'game.online.addPlatform' | translate"
-          (change)="store.addOnlinePlatform(platformSelect)"
+  @if (platformOptions(); as options) {
+    @if (options.length) {
+      @if (addingPlatform()) {
+        <!-- Searchable list instead of a native select: long catalogs are easy to find on phones. -->
+        <div
+          class="w-full md:w-72"
+          data-online-add-platform-search
+          (keydown.escape)="$event.stopPropagation(); closePlatformSearch()"
+          (focusout)="onPlatformSearchFocusOut($event)"
         >
-          <option value="" selected>{{ 'game.online.addPlatform' | translate }}</option>
-          @for (group of groups; track group.family) {
-            <optgroup [label]="'platformFamily.' + group.family | translate">
-              @for (p of group.platforms; track p.id) {
-                <option [value]="p.id">{{ platformLabel(p.name) | translate }}</option>
-              }
-            </optgroup>
-          }
-        </select>
-      </span>
+          <app-combobox
+            [options]="options"
+            [selected]="noPick"
+            (selectedChange)="pickPlatform($event)"
+            ariaLabel="game.online.addPlatform"
+            placeholder="game.online.searchPlatform"
+          />
+        </div>
+      } @else {
+        <button
+          type="button"
+          class="inline-flex h-8 max-w-full cursor-pointer items-center gap-1.5 rounded-full border border-dashed border-border-strong bg-transparent pr-3 pl-2.5 text-xs font-medium text-text-2 hover:border-brand-light hover:text-text disabled:cursor-default disabled:opacity-50"
+          data-online-add-platform
+          [disabled]="store.savingOnlinePlatforms() || store.onlineLoadState() === 'error'"
+          (click)="openPlatformSearch()"
+        >
+          <svg [lucideIcon]="icons.plus" [size]="13" aria-hidden="true"></svg>
+          {{ 'game.online.addPlatform' | translate }}
+        </button>
+      }
     }
   }
   </ng-template>

@@ -163,10 +163,8 @@ export class OnlinePlaytimeStore {
     return this.translate.currentLang() === 'en' ? 'en' : 'es';
   }
 
-  /** Picks a catalog platform from the online card's select, then resets the select to its prompt. */
-  addOnlinePlatform(select: HTMLSelectElement): void {
-    const id = Number(select.value);
-    select.value = '';
+  /** Adds a catalog platform picked in the online card's platform search. */
+  addOnlinePlatform(id: number): void {
     const catalog = this.platformService.platforms() ?? [];
     const platform = catalog.find((p) => p.id === id);
     if (!platform || this.onlinePlatforms().some((p) => p.id === id)) {

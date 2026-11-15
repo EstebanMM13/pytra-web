@@ -225,6 +225,13 @@ export interface DiaryDraftGame {
   synced: boolean;
   /** Online platform the hours were played on (asked for online games played on two or more). */
   platformId: number | null;
+  /** HYBRID games: the hours go to the online playtime instead of a run. */
+  online: boolean;
+}
+
+/** The row's hours go to the online playtime: an ONLINE game, or a HYBRID one sent to online. */
+export function draftGoesOnline(game: Pick<DiaryDraftGame, 'category' | 'online'>): boolean {
+  return game.category === 'ONLINE' || (game.category === 'HYBRID' && game.online);
 }
 
 /** Editor rows for a saved day (names and categories completed from the library when known). */
@@ -247,6 +254,8 @@ export function draftFromDay(
       note: line.note ?? '',
       synced: line.synced,
       platformId: line.platformId ?? null,
+      // Counted without a run: the hours went to the online playtime.
+      online: line.countsHours && line.experienceId === null,
     };
   });
 }
@@ -267,6 +276,7 @@ export function draftForGame(
     note: '',
     synced: false,
     platformId: null,
+    online: false,
   };
 }
 
@@ -287,10 +297,14 @@ export function toDayRequest(note: string, games: readonly DiaryDraftGame[]): Di
     }
     request.games.push({
       gameId: game.gameId,
-      ...(game.experienceId !== null ? { experienceId: game.experienceId } : {}),
+      // A HYBRID row sent to online drops the run it may have had picked before.
+      ...(game.experienceId !== null && !(game.category === 'HYBRID' && game.online)
+        ? { experienceId: game.experienceId }
+        : {}),
       hours,
       note: game.note.trim() || null,
       ...(game.platformId !== null ? { platformId: game.platformId } : {}),
+      ...(game.category === 'HYBRID' ? { online: game.online } : {}),
     });
   });
   return invalid.length ? { ok: false, invalid } : { ok: true, request };

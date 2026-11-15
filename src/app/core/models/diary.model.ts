@@ -32,6 +32,8 @@ export interface DiaryGameRequest {
   note?: string | null;
   /** Online platform the hours were played on: required for an online game played on two or more. */
   platformId?: number | null;
+  /** HYBRID games: true sends the hours to the online playtime, false to a run. */
+  online?: boolean;
 }
 
 /** The whole day (PUT replaces it). No games and no note deletes the day. */

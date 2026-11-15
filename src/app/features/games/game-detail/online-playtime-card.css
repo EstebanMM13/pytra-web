@@ -76,9 +76,3 @@
   background-color: var(--row-tint);
 }
 
-.online-add-platform {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  color: var(--pt-text-3);
-}

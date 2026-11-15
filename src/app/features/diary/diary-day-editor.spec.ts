@@ -34,6 +34,13 @@ const library = [
     coverImageUrl: null,
     reviewStatus: 'CONFIRMED',
   },
+  {
+    id: 3,
+    name: 'Grand Theft Auto V',
+    category: 'HYBRID',
+    coverImageUrl: null,
+    reviewStatus: 'CONFIRMED',
+  },
 ] as Game[];
 
 const playing = [
@@ -136,6 +143,69 @@ describe('DiaryDayEditor', () => {
     { id: 4, name: 'PC' },
     { id: 5, name: 'PS5' },
   ];
+
+  function hybridDay(line: Partial<DiaryDay['games'][number]> = {}): DiaryDay {
+    return {
+      date: DATE,
+      note: null,
+      totalHours: 2,
+      games: [
+        {
+          gameId: 3,
+          gameName: 'Grand Theft Auto V',
+          coverImageUrl: null,
+          experienceId: 31,
+          runLabel: 'Story',
+          hours: 2,
+          note: null,
+          countsHours: true,
+          synced: false,
+          ...line,
+        },
+      ],
+    };
+  }
+
+  it('lets a hybrid game send its hours to online, asking the platform when played on several', () => {
+    const { fixture, diary, root } = setup({ day: hybridDay(), onlinePlatforms: twoPlatforms });
+    fixture.detectChanges();
+    expect(root().querySelector('[data-target-chooser]')).not.toBeNull();
+    // Campaign by default for a line counted on a run: no platform asked.
+    expect(root().querySelector('[data-platform-chooser]')).toBeNull();
+
+    clickButton(root(), 'diary.editor.toOnlineOption');
+    fixture.detectChanges();
+    expect(root().textContent).toContain('diary.editor.toOnline');
+    const select = root().querySelector<HTMLSelectElement>('[data-platform-chooser] select')!;
+    select.value = '5';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    save(root());
+
+    const request = diary.saveDay.mock.calls[0][1] as { games: Record<string, unknown>[] };
+    expect(request.games[0]).toEqual(expect.objectContaining({ gameId: 3, online: true, platformId: 5 }));
+    expect('experienceId' in request.games[0]).toBe(false);
+  });
+
+  it('keeps a hybrid line saved to online on online, and sends a campaign line as such', () => {
+    const online = setup({ day: hybridDay({ experienceId: null, runLabel: null, platformId: 4 }), onlinePlatforms: twoPlatforms });
+    online.fixture.detectChanges();
+    save(online.root());
+    expect(online.diary.saveDay).toHaveBeenCalledWith(
+      DATE,
+      expect.objectContaining({ games: [expect.objectContaining({ online: true, platformId: 4 })] }),
+    );
+    TestBed.resetTestingModule();
+    document.body.innerHTML = '';
+
+    const campaign = setup({ day: hybridDay() });
+    campaign.fixture.detectChanges();
+    save(campaign.root());
+    expect(campaign.diary.saveDay).toHaveBeenCalledWith(
+      DATE,
+      expect.objectContaining({ games: [expect.objectContaining({ experienceId: 31, online: false })] }),
+    );
+  });
 
   it('asks the platform of an online game played on several and saves it', () => {
     const { fixture, diary, root } = setup({ day: savedDay(), onlinePlatforms: twoPlatforms });

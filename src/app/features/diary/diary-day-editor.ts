@@ -8,6 +8,7 @@ import {
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -30,6 +31,7 @@ import { ToastService } from '../../shared/toast/toast.service';
 import { GameCover } from '../../shared/ui/game-cover';
 import { ICONS } from '../../shared/ui/icons';
 import { ModalSheet } from '../../shared/ui/modal-sheet';
+import { Segmented, SegmentedOption } from '../../shared/ui/segmented';
 import { toastApiError } from '../../shared/utils/api-error';
 import { formatHours } from '../../shared/pipes/hours.pipe';
 import { formatDecimalInput } from '../../shared/utils/decimal-input';
@@ -41,6 +43,7 @@ import {
   DiaryDraftGame,
   dayLabel,
   draftForGame,
+  draftGoesOnline,
   draftFromDay,
   draftTotal,
   isValidDiaryDate,
@@ -64,7 +67,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
  */
 @Component({
   selector: 'app-diary-day-editor',
-  imports: [ModalSheet, TranslatePipe, LucideDynamicIcon, GameCover, HoursInput],
+  imports: [ModalSheet, TranslatePipe, LucideDynamicIcon, GameCover, HoursInput, Segmented],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-modal-sheet
@@ -193,7 +196,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                         <svg [lucideIcon]="icons.refreshCw" [size]="11" aria-hidden="true"></svg>
                         {{ 'diary.syncedTag' | translate }}
                       </span>
-                    } @else if (game.category === 'ONLINE') {
+                    } @else if (goesOnline(game)) {
                       <p class="text-xs text-muted wrap-break-word">
                         {{ 'diary.editor.toOnline' | translate }}
                       </p>
@@ -222,6 +225,21 @@ type PlatformOptions = PlatformRef[] | 'loading';
                   </button>
                 </div>
 
+                @if (game.category === 'HYBRID' && !game.synced) {
+                  <div
+                    role="group"
+                    [attr.aria-label]="'diary.editor.targetLabel' | translate: { name: game.gameName }"
+                    data-target-chooser
+                  >
+                    <app-segmented
+                      stretch
+                      size="sm"
+                      [options]="targetOptions"
+                      [value]="game.online ? 'online' : 'campaign'"
+                      (valueChange)="setTarget(i, $event === 'online')"
+                    />
+                  </div>
+                }
                 @if (platformChoices(game); as platforms) {
                   <label
                     class="flex flex-col gap-1 rounded-lg border p-2.5 text-sm"
@@ -249,7 +267,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                     </select>
                   </label>
                 }
-                @if (runOptions()[game.gameId]; as options) {
+                @if (!goesOnline(game) && runOptions()[game.gameId]; as options) {
                   <div
                     class="flex flex-col gap-2 rounded-lg border p-2.5 text-sm"
                     [class]="runMissing().has(game.gameId) ? 'border-danger' : 'border-border'"
@@ -476,20 +494,52 @@ export class DiaryDayEditor implements OnInit {
       });
       this.updateGame(gameId, { experienceId: experience.id, runLabel: experience.runLabel });
     });
+    // A day opened before the library loaded has rows without category: complete them once it arrives.
+    effect(() => {
+      const library = this.library();
+      if (!library.length) return;
+      const categories = new Map(library.map((g) => [g.id, g.category]));
+      untracked(() => {
+        if (!this.games().some((g) => g.category === null && categories.has(g.gameId))) return;
+        this.games.update((games) =>
+          games.map((g) => (g.category === null ? { ...g, category: categories.get(g.gameId) ?? null } : g)),
+        );
+      });
+    });
     // Online games (their category may only be known once the library loads) need their platforms.
     effect(() => {
       const known = this.platformOptions();
       for (const game of this.games()) {
-        if (game.category === 'ONLINE' && !game.synced && !(game.gameId in known)) {
+        if (draftGoesOnline(game) && !game.synced && !(game.gameId in known)) {
           this.loadPlatforms(game.gameId);
         }
       }
     });
   }
 
+  /** Where a HYBRID game's hours go: its campaign (a run) or its online playtime. */
+  protected readonly targetOptions: readonly SegmentedOption<'campaign' | 'online'>[] = [
+    { value: 'campaign', label: 'diary.editor.toCampaignOption' },
+    { value: 'online', label: 'diary.editor.toOnlineOption' },
+  ];
+
+  protected goesOnline(game: DiaryDraftGame): boolean {
+    return draftGoesOnline(game);
+  }
+
+  /** Sends a HYBRID row's hours to the online playtime or to a run; the other side's error is moot. */
+  protected setTarget(index: number, online: boolean): void {
+    const game = this.games()[index];
+    if (!game || game.online === online) return;
+    this.updateAt(index, { online });
+    const drop = (ids: ReadonlySet<number>) => new Set([...ids].filter((id) => id !== game.gameId));
+    if (online) this.runMissing.update(drop);
+    else this.platformMissing.update(drop);
+  }
+
   /** The platforms to pick from for a row: only for an online game played on two or more. */
   protected platformChoices(game: DiaryDraftGame): PlatformRef[] | null {
-    if (game.category !== 'ONLINE' || game.synced) return null;
+    if (!draftGoesOnline(game) || game.synced) return null;
     const options = this.platformOptions()[game.gameId];
     return Array.isArray(options) && options.length >= 2 ? options : null;
   }

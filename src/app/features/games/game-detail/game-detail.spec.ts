@@ -548,7 +548,7 @@ describe('GameDetail hero', () => {
 });
 
 describe('GameDetail online platinum / 100%', () => {
-  function render(stored: object | null, demo = false) {
+  function render(stored: object | null, demo = false, catalog: object[] = []) {
     const upsert = vi.fn((_id: number, body: unknown) => of({ id: 1, gameId: 7, platforms: [], ...(body as object) }));
     const findByGame = stored
       ? () => of({ id: 1, gameId: 7, totalHours: 20, generalRating: null, platforms: [], ...stored })
@@ -563,7 +563,7 @@ describe('GameDetail online platinum / 100%', () => {
         { provide: ExperienceService, useValue: { findAllByGame: () => of([]) } },
         { provide: DiaryService, useValue: { findByGame: () => of([]) } },
         { provide: OnlinePlaytimeService, useValue: { findByGame, upsert } },
-        { provide: PlatformService, useValue: { platforms: signal([]), load: () => of([]) } },
+        { provide: PlatformService, useValue: { platforms: signal(catalog), load: () => of(catalog) } },
         { provide: RunFormLauncher, useValue: { saved$: EMPTY, openNewRun: vi.fn() } },
         { provide: DemoModeService, useValue: { isDemo: signal(demo), blockWrite: () => false } },
         { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
@@ -579,6 +579,35 @@ describe('GameDetail online platinum / 100%', () => {
     };
     return { fixture, el, upsert, toggle, store: fixture.debugElement.injector.get(OnlinePlaytimeStore) };
   }
+
+  it('adds an online platform from a search list instead of a native select', async () => {
+    const catalog = [
+      { id: 2, name: 'PC', color: null, family: 'PC' },
+      { id: 5, name: 'PlayStation 5', color: null, family: 'PLAYSTATION' },
+      { id: 6, name: 'Xbox Series X|S', color: null, family: 'XBOX' },
+    ];
+    const { el, fixture, upsert } = render(
+      { totalHours: 10, platforms: [{ id: 2, name: 'PC', color: null }], platformHours: { '2': 10 } },
+      false,
+      catalog,
+    );
+    expect(el.querySelector('[data-online-platforms] select, app-online-playtime-card select')).toBeNull();
+    (el.querySelector('[data-online-add-platform]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const search = el.querySelector<HTMLInputElement>('[data-online-add-platform-search] input')!;
+    expect(document.activeElement).toBe(search);
+    search.value = 'play';
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    const options = [...el.querySelectorAll<HTMLElement>('[data-online-add-platform-search] [role="option"]')];
+    // Already-picked PC is not offered; the query narrows the rest.
+    expect(options.map((o) => o.textContent!.trim())).toEqual(['PlayStation 5']);
+    options[0].click();
+    fixture.detectChanges();
+    expect(el.querySelector('[data-online-add-platform-search]')).toBeNull();
+    expect(upsert).toHaveBeenCalledWith(7, expect.objectContaining({ platformIds: [2, 5] }));
+  });
 
   it('shows the stored flags on the switches', () => {
     const { el } = render({ fullCompletion: true });

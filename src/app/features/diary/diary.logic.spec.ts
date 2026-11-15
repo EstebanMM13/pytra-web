@@ -216,6 +216,7 @@ describe('day editor payload', () => {
         note: '',
         synced: true,
         platformId: null,
+        online: false,
       },
     ]);
   });

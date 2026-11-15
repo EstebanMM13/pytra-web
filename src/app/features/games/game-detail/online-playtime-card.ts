@@ -1,12 +1,22 @@
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Injector,
+  afterNextRender,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { LucideDynamicIcon } from '@lucide/angular';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PlatformRef } from '../../../core/models/platform.model';
 import { platformNameKey } from '../../../core/services/platform.logic';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { HoursPipe } from '../../../shared/pipes/hours.pipe';
+import { Combobox, ComboboxOption } from '../../../shared/ui/combobox';
 import { HoursInput } from '../../../shared/ui/hours-input';
 import { ICONS } from '../../../shared/ui/icons';
 import { PlatformLabel } from '../../../shared/ui/platform-label';
@@ -17,6 +27,7 @@ import { OnlinePlaytimeStore } from './online-playtime.store';
 @Component({
   selector: 'app-online-playtime-card',
   imports: [
+    Combobox,
     DecimalPipe,
     HoursInput,
     HoursPipe,
@@ -38,6 +49,53 @@ export class OnlinePlaytimeCard {
   protected readonly statIcons = { platinum: ICONS.platinum, fullCompletion: ICONS.badgeCheck };
 
   protected readonly platformLabel = (name: string): string => platformNameKey(name) ?? name;
+
+  private readonly translate = inject(TranslateService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly injector = inject(Injector);
+
+  protected readonly noPick: readonly number[] = [];
+
+  /** The "add platform" chip is showing its search field. */
+  protected readonly addingPlatform = signal(false);
+
+  /** Platforms not yet picked, as search options in catalog family order; null while the catalog loads. */
+  protected readonly platformOptions = computed<ComboboxOption[] | null>(() => {
+    const groups = this.store.onlinePlatformGroups();
+    if (!groups) return null;
+    this.translate.currentLang();
+    return groups.flatMap((group) =>
+      group.platforms.map((p) => ({ id: p.id, label: this.translate.instant(this.platformLabel(p.name)) })),
+    );
+  });
+
+  protected openPlatformSearch(): void {
+    this.addingPlatform.set(true);
+    afterNextRender(
+      () => this.host.querySelector<HTMLInputElement>('[data-online-add-platform-search] input')?.focus(),
+      { injector: this.injector },
+    );
+  }
+
+  protected closePlatformSearch(): void {
+    if (!this.addingPlatform()) return;
+    this.addingPlatform.set(false);
+    afterNextRender(() => this.host.querySelector<HTMLButtonElement>('[data-online-add-platform]')?.focus(), {
+      injector: this.injector,
+    });
+  }
+
+  /** Closes the search once focus leaves it (a tap elsewhere), not when it moves inside it. */
+  protected onPlatformSearchFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget as Node | null;
+    if (!next || !(event.currentTarget as HTMLElement).contains(next)) this.addingPlatform.set(false);
+  }
+
+  protected pickPlatform(ids: readonly number[]): void {
+    const id = ids[0];
+    this.addingPlatform.set(false);
+    if (id !== undefined) this.store.addOnlinePlatform(id);
+  }
 
   /** Share of the online total per platform id, in %; only with two or more platforms (one is always 100 %). */
   protected readonly shares = computed(() => {
