@@ -87,25 +87,11 @@ describe('Stats games page', () => {
               limits.push(limit);
               return of([{ gameId: 5, gameName: 'Fortnite', totalHours: 300 }]);
             },
-            getTopRated: (limit: number) => {
+            getTopRatedGames: (limit: number) => {
               limits.push(limit);
               return of([
-                {
-                  gameId: 1,
-                  gameName: 'Elden Ring',
-                  runLabel: 'NG',
-                  rating: 9.5,
-                  experienceId: 11,
-                  online: false,
-                },
-                {
-                  gameId: 5,
-                  gameName: 'Fortnite',
-                  runLabel: null,
-                  rating: 7,
-                  experienceId: null,
-                  online: true,
-                },
+                { gameId: 1, gameName: 'Elden Ring', rating: 9.5, ratedCount: 2, hours: 200 },
+                { gameId: 5, gameName: 'Fortnite', rating: 8, ratedCount: 1, hours: 300 },
               ]);
             },
             getGameRankings: () => of(RANKINGS),
@@ -163,9 +149,14 @@ describe('Stats games page', () => {
     expect(rows(el, 'mostPlayed')).toEqual([expect.stringContaining('Fortnite')]);
   });
 
+  it('ranks each game once, averaged over its rated runs, and links it to its game page', () => {
+    const { el } = setup();
+    expect(rows(el, 'topRated')).toEqual([expect.stringContaining('stats.games.ratedRuns'), expect.not.stringContaining('stats.games.ratedRuns')]);
+  });
+
   it('links runs to their run page and games to their game page', () => {
     const { el } = setup();
-    expect(links(el, 'topRated')).toEqual(['/games/1/experiences/11', '/games/5']);
+    expect(links(el, 'topRated')).toEqual(['/games/1', '/games/5']);
     expect(links(el, 'longestRuns')).toEqual([
       '/games/1/experiences/11',
       '/games/2/experiences/21',

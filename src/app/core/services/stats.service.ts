@@ -17,6 +17,7 @@ import {
   SagaStat,
   StatsSummary,
   TopRatedExperience,
+  TopRatedGame,
   YearNote,
   YearNoteRequest,
   YearStat,
@@ -53,6 +54,7 @@ export class StatsService {
   private readonly bySaga = this.cache.resource(() => this.http.get<SagaStat[]>(`${this.baseUrl}/by-saga`));
   /** One cached resource per limit (callers use a few fixed limits: the dashboard, the run rank). */
   private readonly topRated = new Map<number, CachedResource<TopRatedExperience[]>>();
+  private readonly topRatedGames = new Map<number, CachedResource<TopRatedGame[]>>();
   private readonly mostPlayedSingleplayer = new Map<number, CachedResource<MostPlayedGame[]>>();
   private readonly mostPlayedOnline = new Map<number, CachedResource<MostPlayedGame[]>>();
   /** Per-year resources of the stats hub sections; the key `all` is the request without a year. */
@@ -111,9 +113,14 @@ export class StatsService {
     return this.byGenre.get();
   }
 
-  /** Cached per limit (see `UserDataCache`). */
+  /** Rated runs (and online ratings), one entry each: the run rank of a run's page. Cached per limit. */
   getTopRated(limit = 5): Observable<TopRatedExperience[]> {
     return this.perLimit(this.topRated, limit, 'top-rated').get();
+  }
+
+  /** Best rated games, one per game (all its rated runs and its online rating averaged). Cached per limit. */
+  getTopRatedGames(limit = 5): Observable<TopRatedGame[]> {
+    return this.perLimit(this.topRatedGames, limit, 'top-rated-games').get();
   }
 
   /** Cached per limit (see `UserDataCache`). */

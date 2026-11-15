@@ -1744,6 +1744,7 @@
       "online": "Online",
       "topRated": "Mejor valorados",
       "noRated": "Aún no has valorado ningún juego.",
+      "ratedRuns": "Media de {{count}} notas",
       "mostReplayed": "Más rejugados",
       "noReplays": "Ningún juego tiene dos partidas o más.",
       "longestRuns": "Partidas más largas",

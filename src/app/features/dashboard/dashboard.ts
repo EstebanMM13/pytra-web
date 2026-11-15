@@ -6,7 +6,7 @@ import { ICONS } from '../../shared/ui/icons';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, catchError, of } from 'rxjs';
-import { InProgressExperience, MostPlayedGame, SagaStat, StatsSummary, TopRatedExperience, YearStat } from '../../core/models/stats.model';
+import { InProgressExperience, MostPlayedGame, SagaStat, StatsSummary, TopRatedGame, YearStat } from '../../core/models/stats.model';
 import { RunFormLauncher } from '../../core/services/run-form-launcher.service';
 import { StatsService } from '../../core/services/stats.service';
 import { PsnService } from '../../core/services/psn.service';
@@ -42,13 +42,11 @@ import { AchievementBadge } from '../../shared/achievements/achievement-badge';
 import { applyStoredUnlocks, computeAchievements, topUnlocked } from '../../shared/achievements/achievements';
 import { AchievementService } from '../../core/services/achievement.service';
 import { UnlockedAchievement } from '../../core/models/achievement.model';
-import { bestPerGame, pickTagline, STAT_LINKS, statHints, topRatedKey, topRatedLink } from './dashboard.logic';
+import { pickTagline, STAT_LINKS, statHints } from './dashboard.logic';
 
 type PlayMode = 'single' | 'online';
 
 const RANKING_SIZE = 5;
-/** Rated entries requested for the top-rated card, enough to fill it after one entry per game. */
-const TOP_RATED_FETCH = 30;
 
 /** Sections that show an inline error (with retry) when their request fails. */
 type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated' | 'mostPlayed';
@@ -80,9 +78,7 @@ type DashboardSection = 'playing' | 'summary' | 'byYear' | 'bySaga' | 'topRated'
 })
 export class Dashboard {
   protected readonly icons = ICONS;
-  protected readonly topRatedLink = topRatedLink;
   protected readonly statLinks = STAT_LINKS;
-  protected readonly topRatedKey = topRatedKey;
   /** Today's diary day, opened by the "What did you play today?" card. */
   protected readonly diaryToday = { date: todayIso() };
 
@@ -114,7 +110,7 @@ export class Dashboard {
   protected readonly failedSections = signal<ReadonlySet<DashboardSection>>(new Set());
   readonly byYear = signal<YearStat[] | null>(null);
   readonly bySaga = signal<SagaStat[] | null>(null);
-  readonly topRated = signal<TopRatedExperience[] | null>(null);
+  readonly topRated = signal<TopRatedGame[] | null>(null);
   readonly mostPlayedSingleplayer = signal<MostPlayedGame[] | null>(null);
   readonly mostPlayedOnline = signal<MostPlayedGame[] | null>(null);
   private readonly steamPending = signal<readonly Game[]>([]);
@@ -281,9 +277,9 @@ export class Dashboard {
     });
     this.orEmpty('byYear', this.statsService.getByYear()).subscribe((s) => this.byYear.set(s));
     this.orEmpty('bySaga', this.statsService.getBySaga()).subscribe((s) => this.bySaga.set(s));
-    // Over-fetched: runs of the same game collapse to one entry, the best (see bestPerGame).
-    this.orEmpty('topRated', this.statsService.getTopRated(TOP_RATED_FETCH)).subscribe((s) =>
-      this.topRated.set(bestPerGame(s, RANKING_SIZE)),
+    // One entry per game: its rated runs and online rating averaged.
+    this.orEmpty('topRated', this.statsService.getTopRatedGames(RANKING_SIZE)).subscribe((s) =>
+      this.topRated.set(s),
     );
     this.orEmpty('mostPlayed', this.statsService.getMostPlayedSingleplayer(RANKING_SIZE)).subscribe((s) =>
       this.mostPlayedSingleplayer.set(s),

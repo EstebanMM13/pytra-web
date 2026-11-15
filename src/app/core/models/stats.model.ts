@@ -52,6 +52,18 @@ export interface TopRatedExperience {
   online?: boolean;
 }
 
+/**
+ * A game of the all-time best rated ranking, once per game: the mean of every rated run and the
+ * online rating (`ratedCount` ratings averaged), with all its hours (runs and online).
+ */
+export interface TopRatedGame {
+  gameId: number;
+  gameName: string;
+  rating: number;
+  ratedCount: number;
+  hours: number;
+}
+
 export interface MostPlayedGame {
   gameId: number;
   gameName: string;

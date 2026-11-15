@@ -1,5 +1,5 @@
 import type { LibraryCategoryFilter, LibrarySort, LibraryStatusFilter } from '../games/library.logic';
-import { InProgressExperience, SagaStat, StatsSummary, TopRatedExperience, YearStat } from '../../core/models/stats.model';
+import { InProgressExperience, SagaStat, StatsSummary, TopRatedGame, YearStat } from '../../core/models/stats.model';
 
 /** One contextual line under the dashboard greeting: i18n key under `dashboard.tagline.*` + params. */
 export interface Tagline {
@@ -11,7 +11,7 @@ export interface TaglineInput {
   playing: readonly InProgressExperience[] | null;
   byYear: readonly YearStat[] | null;
   summary: StatsSummary | null;
-  topRated: readonly TopRatedExperience[] | null;
+  topRated: readonly TopRatedGame[] | null;
   today: Date;
 }
 
@@ -87,30 +87,6 @@ export const STAT_LINKS: Readonly<Record<StatLinkKey, StatLink>> = {
   onlineHours: { link: '/games', queryParams: { status: 'ONLINE', sort: 'hours' } },
   rating: { link: '/games', queryParams: { sort: 'rating' } },
 };
-
-/**
- * Where a top-rated entry leads: the run's own page, or the game page for online entries (and for
- * runs from an API that does not send `experienceId` yet).
- */
-export function topRatedLink(item: TopRatedExperience): (string | number)[] {
-  return !item.online && item.experienceId != null
-    ? ['/games', item.gameId, 'experiences', item.experienceId]
-    : ['/games', item.gameId];
-}
-
-/**
- * One entry per game: the API ranks runs, so a game played several times could fill the ranking.
- * Expects `items` best first (as the API sends them) and keeps each game's first entry.
- */
-export function bestPerGame(items: readonly TopRatedExperience[], limit: number): TopRatedExperience[] {
-  const seen = new Set<number>();
-  return items.filter((item) => !seen.has(item.gameId) && !!seen.add(item.gameId)).slice(0, limit);
-}
-
-/** Stable `@for` key: the run id, else the game (a game has at most one online entry). */
-export function topRatedKey(item: TopRatedExperience): string {
-  return item.online ? `online-${item.gameId}` : `run-${item.experienceId ?? `${item.gameId}-${item.runLabel}`}`;
-}
 
 /** The small line under each dashboard stat card ("4 en curso", "64 % del total"...). */
 export interface StatHints {

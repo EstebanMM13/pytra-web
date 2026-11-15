@@ -75,7 +75,7 @@ export class StatsGames {
     combineLatest([
       this.stats.getMostPlayedSingleplayer(STATS_RANKING_LIMIT),
       this.stats.getMostPlayedOnline(STATS_RANKING_LIMIT),
-      this.stats.getTopRated(STATS_RANKING_LIMIT),
+      this.stats.getTopRatedGames(STATS_RANKING_LIMIT),
       this.stats.getGameRankings(),
     ]),
   );
@@ -145,17 +145,16 @@ export class StatsGames {
         hint: null,
         tone: 'gold',
         empty: format.text('stats.games.noRated'),
-        rows: topRated.map((r, i) => ({
-          key: `${r.gameId}-${r.experienceId ?? 'online'}-${i}`,
-          label: r.gameName,
-          share: ratingShare(r.rating),
-          figure: format.rating(r.rating),
-          figureClass: ratingTone(r.rating),
-          sub: subLine(r.online ? format.text('stats.games.online') : r.runLabel),
-          link: r.experienceId
-            ? ['/games', r.gameId, 'experiences', r.experienceId]
-            : ['/games', r.gameId],
-          cover: this.cover(r.gameId, r.gameName),
+        // One row per game: the mean of its rated runs and online rating.
+        rows: topRated.map((g) => ({
+          key: g.gameId,
+          label: g.gameName,
+          share: ratingShare(g.rating),
+          figure: format.rating(g.rating),
+          figureClass: ratingTone(g.rating),
+          sub: subLine(g.ratedCount > 1 ? format.text('stats.games.ratedRuns', { count: g.ratedCount }) : null),
+          link: ['/games', g.gameId],
+          cover: this.cover(g.gameId, g.gameName),
         })),
       },
       {

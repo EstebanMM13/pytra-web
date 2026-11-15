@@ -9,9 +9,6 @@ import {
   statHints,
   taglineCandidates,
   TaglineInput,
-  bestPerGame,
-  topRatedKey,
-  topRatedLink,
 } from './dashboard.logic';
 
 const summary = (partial: Partial<StatsSummary> = {}): StatsSummary => ({
@@ -75,7 +72,7 @@ describe('dashboard tagline', () => {
         playing: [run('Recent', '2026-10-08'), run('Elden Ring', '2026-09-01'), run('Undated', null)],
         byYear: [year(2024, 300), year(2026, 120)],
         summary: summary({ totalPlatinums: 3 }),
-        topRated: [{ gameId: 1, gameName: 'Hades', runLabel: 'Run', rating: 9.5 }],
+        topRated: [{ gameId: 1, gameName: 'Hades', rating: 9.5, ratedCount: 1, hours: 40 }],
       }),
     );
     expect(keys.map((t) => t.key)).toEqual(['longRun', 'bestYear', 'platinums', 'bestRating', 'thisYear']);
@@ -97,51 +94,6 @@ describe('dashboard tagline', () => {
     expect(day1.key).toBe('platinums');
     expect(day2.key).toBe('thisYear');
     expect(pickTagline({ ...input, today: new Date(2026, 0, 1) })).toEqual(day1);
-  });
-});
-
-describe('top rated links', () => {
-  it('lead to the run page for runs and to the game page for online entries', () => {
-    expect(topRatedLink({ gameId: 3, gameName: 'Hades', runLabel: 'Run 1', rating: 9, experienceId: 42, online: false })).toEqual([
-      '/games',
-      3,
-      'experiences',
-      42,
-    ]);
-    expect(topRatedLink({ gameId: 7, gameName: 'Fortnite', runLabel: null, rating: 8, experienceId: null, online: true })).toEqual([
-      '/games',
-      7,
-    ]);
-  });
-
-  it('fall back to the game page when the API sends no experience id', () => {
-    expect(topRatedLink({ gameId: 3, gameName: 'Hades', runLabel: 'Run 1', rating: 9 })).toEqual(['/games', 3]);
-  });
-
-  it('give runs and online entries of the same game distinct keys', () => {
-    const run = topRatedKey({ gameId: 3, gameName: 'G', runLabel: 'Run 1', rating: 9, experienceId: 42, online: false });
-    const online = topRatedKey({ gameId: 3, gameName: 'G', runLabel: null, rating: 9, experienceId: null, online: true });
-    expect(run).not.toEqual(online);
-  });
-});
-
-describe('bestPerGame', () => {
-  const entry = (gameId: number, rating: number, experienceId: number | null, online = false) => ({
-    gameId,
-    gameName: `G${gameId}`,
-    runLabel: online ? null : 'Run',
-    rating,
-    experienceId,
-    online,
-  });
-
-  it('keeps only the highest rated entry of each game, in order, up to the limit', () => {
-    const items = [entry(1, 10, 11), entry(1, 9.7, 12), entry(2, 9.7, 21), entry(1, 9.5, null, true), entry(3, 9.5, 31), entry(4, 9, 41)];
-    expect(bestPerGame(items, 3).map((i) => i.experienceId)).toEqual([11, 21, 31]);
-  });
-
-  it('returns fewer entries when there are not enough distinct games', () => {
-    expect(bestPerGame([entry(1, 10, 11), entry(1, 9, 12)], 5)).toEqual([entry(1, 10, 11)]);
   });
 });
 
