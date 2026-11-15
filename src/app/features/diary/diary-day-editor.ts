@@ -15,7 +15,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, of } from 'rxjs';
-import { DiaryDay } from '../../core/models/diary.model';
+import { DiaryDay, DiaryLinkedGame, SyncSource } from '../../core/models/diary.model';
 import { Experience } from '../../core/models/experience.model';
 import { Game } from '../../core/models/game.model';
 import { InProgressExperience } from '../../core/models/stats.model';
@@ -188,13 +188,13 @@ type PlatformOptions = PlatformRef[] | 'loading';
                   />
                   <div class="min-w-0 flex-1">
                     <p class="text-body font-medium wrap-break-word">{{ game.gameName }}</p>
-                    @if (game.synced) {
+                    @if (syncTag(game)) {
                       <span
                         class="mt-1 inline-flex items-center gap-1 rounded-full bg-hover px-2 py-0.5 text-caption text-text-2"
                         data-synced-tag
                       >
                         <svg [lucideIcon]="icons.refreshCw" [size]="11" aria-hidden="true"></svg>
-                        {{ 'diary.syncedTag' | translate }}
+                        {{ syncTag(game) }}
                       </span>
                     } @else if (goesOnline(game)) {
                       <p class="text-xs text-muted wrap-break-word">
@@ -225,7 +225,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
                   </button>
                 </div>
 
-                @if (game.category === 'HYBRID' && !game.synced) {
+                @if (game.category === 'HYBRID' && !game.autoSynced) {
                   <div
                     role="group"
                     [attr.aria-label]="'diary.editor.targetLabel' | translate: { name: game.gameName }"
@@ -265,6 +265,17 @@ type PlatformOptions = PlatformRef[] | 'loading';
                         </option>
                       }
                     </select>
+                  </label>
+                }
+                @if (outsideSyncSource(game); as source) {
+                  <label class="flex items-center gap-2 text-sm text-text-2" data-outside-sync>
+                    <input
+                      type="checkbox"
+                      class="size-4 accent-brand"
+                      [checked]="game.outsideSync"
+                      (change)="setOutsideSync(i, $any($event.target).checked)"
+                    />
+                    {{ 'diary.editor.outsideSync' | translate: { source: sourceLabel(source) } }}
                   </label>
                 }
                 @if (!goesOnline(game) && runOptions()[game.gameId]; as options) {
@@ -444,6 +455,8 @@ export class DiaryDayEditor implements OnInit {
   protected readonly runOptions = signal<Record<number, RunOptions>>({});
   /** Online platforms per online game, loaded once the game is in the day. */
   private readonly platformOptions = signal<Record<number, PlatformOptions>>({});
+  /** Games linked to a playtime sync, by game id (empty until loaded or when it fails). */
+  private readonly linkedGames = signal<Record<number, DiaryLinkedGame>>({});
   /** Online games played on several platforms whose platform is still missing. */
   protected readonly platformMissing = signal<ReadonlySet<number>>(new Set());
 
@@ -481,6 +494,13 @@ export class DiaryDayEditor implements OnInit {
         catchError(() => of([] as InProgressExperience[])),
       )
       .subscribe((runs) => this.playing.set(runs));
+    this.diaryService
+      .findLinkedGames()
+      .pipe(
+        takeUntilDestroyed(),
+        catchError(() => of([] as DiaryLinkedGame[])),
+      )
+      .subscribe((games) => this.linkedGames.set(Object.fromEntries(games.map((g) => [g.gameId, g]))));
     this.runFormLauncher.saved$.pipe(takeUntilDestroyed()).subscribe(({ experience, created }) => {
       const gameId = this.newRunFor;
       if (!created || gameId === null || experience.gameId !== gameId) return;
@@ -510,7 +530,7 @@ export class DiaryDayEditor implements OnInit {
     effect(() => {
       const known = this.platformOptions();
       for (const game of this.games()) {
-        if (draftGoesOnline(game) && !game.synced && !(game.gameId in known)) {
+        if (draftGoesOnline(game) && !game.autoSynced && !(game.gameId in known)) {
           this.loadPlatforms(game.gameId);
         }
       }
@@ -537,9 +557,55 @@ export class DiaryDayEditor implements OnInit {
     else this.platformMissing.update(drop);
   }
 
+  /** Online platform a row's hours go to: the picked one, or the only one the game is played on. */
+  private onlinePlatformOf(game: DiaryDraftGame): number | null {
+    if (!draftGoesOnline(game)) return null;
+    if (game.platformId !== null) return game.platformId;
+    const options = this.platformOptions()[game.gameId];
+    return Array.isArray(options) && options.length === 1 ? options[0].id : null;
+  }
+
+  /** The sync that already counts a row's hours (its online platform is covered by the game's link). */
+  private coveringSource(game: DiaryDraftGame): SyncSource | null {
+    const link = this.linkedGames()[game.gameId];
+    const platformId = this.onlinePlatformOf(game);
+    if (!link || platformId === null) return null;
+    return link.covered.find((c) => c.platformId === platformId)?.source ?? null;
+  }
+
+  /**
+   * Header tag of a row whose hours a sync counts: a sync-written line, or a line on a platform the link
+   * covers (unless played outside the store). Null when the row adds its hours.
+   */
+  protected syncTag(game: DiaryDraftGame): string | null {
+    if (game.autoSynced) return this.translate.instant('diary.syncedTag');
+    const link = this.linkedGames()[game.gameId];
+    if (link && !draftGoesOnline(game)) {
+      // The run's platform decides; it is only known to the API.
+      const sources = link.sources.map((s) => this.sourceLabel(s)).join('/');
+      return this.translate.instant('diary.editor.linkedRun', { sources });
+    }
+    const source = this.coveringSource(game);
+    if (!source || (source === 'STEAM' && game.outsideSync)) return null;
+    return this.translate.instant('diary.editor.coveredBy', { source: this.sourceLabel(source) });
+  }
+
+  /** Steam on PC is ambiguous (Epic, GOG… are PC too): ask whether it was played outside Steam. */
+  protected outsideSyncSource(game: DiaryDraftGame): SyncSource | null {
+    return !game.autoSynced && this.coveringSource(game) === 'STEAM' ? 'STEAM' : null;
+  }
+
+  protected sourceLabel(source: SyncSource): string {
+    return source === 'STEAM' ? 'Steam' : source === 'PSN' ? 'PSN' : 'Android';
+  }
+
+  protected setOutsideSync(index: number, outsideSync: boolean): void {
+    this.updateAt(index, { outsideSync });
+  }
+
   /** The platforms to pick from for a row: only for an online game played on two or more. */
   protected platformChoices(game: DiaryDraftGame): PlatformRef[] | null {
-    if (!draftGoesOnline(game) || game.synced) return null;
+    if (!draftGoesOnline(game) || game.autoSynced) return null;
     const options = this.platformOptions()[game.gameId];
     return Array.isArray(options) && options.length >= 2 ? options : null;
   }

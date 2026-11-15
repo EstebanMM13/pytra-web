@@ -217,6 +217,8 @@ describe('day editor payload', () => {
         synced: true,
         platformId: null,
         online: false,
+        autoSynced: false,
+        outsideSync: false,
       },
     ]);
   });

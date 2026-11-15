@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideTranslateService } from '@ngx-translate/core';
 import { EMPTY, of, throwError } from 'rxjs';
-import { DiaryDay } from '../../core/models/diary.model';
+import { DiaryDay, DiaryLinkedGame } from '../../core/models/diary.model';
 import { Experience } from '../../core/models/experience.model';
 import { Game } from '../../core/models/game.model';
 import { InProgressExperience } from '../../core/models/stats.model';
@@ -69,7 +69,12 @@ function savedDay(): DiaryDay {
 }
 
 function setup(
-  options: { day?: DiaryDay | null; save?: () => unknown; onlinePlatforms?: { id: number; name: string }[] } = {},
+  options: {
+    day?: DiaryDay | null;
+    save?: () => unknown;
+    onlinePlatforms?: { id: number; name: string }[];
+    linked?: DiaryLinkedGame[];
+  } = {},
 ) {
   const diary = {
     findDay: vi.fn(() =>
@@ -79,6 +84,7 @@ function setup(
       options.save ?? ((_date: string, request: unknown) => of({ ...savedDay(), request })),
     ),
     deleteDay: vi.fn(() => of(undefined)),
+    findLinkedGames: vi.fn(() => of(options.linked ?? [])),
   };
   const toast = { success: vi.fn(), error: vi.fn() };
   const experiences = {
@@ -205,6 +211,60 @@ describe('DiaryDayEditor', () => {
       DATE,
       expect.objectContaining({ games: [expect.objectContaining({ experienceId: 31, online: false })] }),
     );
+  });
+
+  it('adds the PC hours of a PSN-linked game and only records the PS5 ones', () => {
+    const linked: DiaryLinkedGame[] = [{ gameId: 3, sources: ['PSN'], covered: [{ platformId: 5, source: 'PSN' }] }];
+    const { fixture, diary, root } = setup({ day: hybridDay(), onlinePlatforms: twoPlatforms, linked });
+    fixture.detectChanges();
+    clickButton(root(), 'diary.editor.toOnlineOption');
+    fixture.detectChanges();
+    const select = root().querySelector<HTMLSelectElement>('[data-platform-chooser] select')!;
+
+    select.value = '5';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(root().querySelector('[data-synced-tag]')!.textContent).toContain('diary.editor.coveredBy');
+
+    select.value = '4';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(root().querySelector('[data-synced-tag]')).toBeNull();
+    expect(root().querySelector('[data-outside-sync]')).toBeNull();
+    save(root());
+    expect(diary.saveDay).toHaveBeenCalledWith(
+      DATE,
+      expect.objectContaining({ games: [expect.objectContaining({ online: true, platformId: 4 })] }),
+    );
+  });
+
+  it('asks whether a Steam-linked game on PC was played outside Steam, and counts it when so', () => {
+    const linked: DiaryLinkedGame[] = [{ gameId: 2, sources: ['STEAM'], covered: [{ platformId: 4, source: 'STEAM' }] }];
+    const { fixture, diary, root } = setup({ day: savedDay(), onlinePlatforms: [{ id: 4, name: 'PC' }], linked });
+    fixture.detectChanges();
+    expect(root().querySelector('[data-synced-tag]')).not.toBeNull();
+
+    const box = root().querySelector<HTMLInputElement>('[data-outside-sync] input')!;
+    box.checked = true;
+    box.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(root().querySelector('[data-synced-tag]')).toBeNull();
+    save(root());
+    expect(diary.saveDay).toHaveBeenCalledWith(
+      DATE,
+      expect.objectContaining({ games: [expect.objectContaining({ gameId: 2, outsideSync: true })] }),
+    );
+  });
+
+  it('keeps a sync-written line as a record without choosers', () => {
+    const { fixture, root } = setup({
+      day: hybridDay({ experienceId: null, runLabel: null, countsHours: false, synced: true, autoSynced: true }),
+      onlinePlatforms: twoPlatforms,
+    });
+    fixture.detectChanges();
+    expect(root().querySelector('[data-synced-tag]')!.textContent).toContain('diary.syncedTag');
+    expect(root().querySelector('[data-target-chooser]')).toBeNull();
+    expect(root().querySelector('[data-platform-chooser]')).toBeNull();
   });
 
   it('asks the platform of an online game played on several and saves it', () => {

@@ -227,6 +227,10 @@ export interface DiaryDraftGame {
   platformId: number | null;
   /** HYBRID games: the hours go to the online playtime instead of a run. */
   online: boolean;
+  /** Written by the platform sync: a record only, no run or platform to pick. */
+  autoSynced: boolean;
+  /** Linked game played outside the linked store on a platform it covers: count the hours anyway. */
+  outsideSync: boolean;
 }
 
 /** The row's hours go to the online playtime: an ONLINE game, or a HYBRID one sent to online. */
@@ -256,6 +260,8 @@ export function draftFromDay(
       platformId: line.platformId ?? null,
       // Counted without a run: the hours went to the online playtime.
       online: line.countsHours && line.experienceId === null,
+      autoSynced: line.autoSynced ?? false,
+      outsideSync: false,
     };
   });
 }
@@ -277,6 +283,8 @@ export function draftForGame(
     synced: false,
     platformId: null,
     online: false,
+    autoSynced: false,
+    outsideSync: false,
   };
 }
 
@@ -305,6 +313,7 @@ export function toDayRequest(note: string, games: readonly DiaryDraftGame[]): Di
       note: game.note.trim() || null,
       ...(game.platformId !== null ? { platformId: game.platformId } : {}),
       ...(game.category === 'HYBRID' ? { online: game.online } : {}),
+      ...(game.outsideSync ? { outsideSync: true } : {}),
     });
   });
   return invalid.length ? { ok: false, invalid } : { ok: true, request };

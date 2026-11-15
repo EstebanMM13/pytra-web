@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../api-base-url';
-import { DiaryDay, DiaryDayRequest, GameDiaryDay } from '../models/diary.model';
+import { DiaryDay, DiaryDayRequest, DiaryLinkedGame, GameDiaryDay } from '../models/diary.model';
 import { UserDataCache } from './user-data-cache';
 
 /** The play diary. Saving or deleting a day changes run / online hours, so writes invalidate the cache. */
@@ -17,6 +17,11 @@ export class DiaryService {
   }
 
   /** 404 means the day has no entry yet. */
+  /** Games linked to Steam/PSN/Android, with the platforms whose hours their sync already counts. */
+  findLinkedGames(): Observable<DiaryLinkedGame[]> {
+    return this.http.get<DiaryLinkedGame[]>(`${API_BASE_URL}/diary/linked-games`);
+  }
+
   findDay(date: string): Observable<DiaryDay> {
     return this.http.get<DiaryDay>(`${API_BASE_URL}/diary/${date}`);
   }

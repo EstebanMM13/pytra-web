@@ -14,6 +14,21 @@ export interface DiaryGame {
   synced: boolean;
   /** Online platform the counted online hours were played on (absent from older API versions). */
   platformId?: number | null;
+  /** Written by the platform sync: a record only, its hours are never counted. */
+  autoSynced?: boolean;
+}
+
+/** A sync that counts a linked game's playtime. */
+export type SyncSource = 'STEAM' | 'PSN' | 'ANDROID';
+
+/**
+ * A game linked to a playtime sync: a diary line on a `covered` platform is only recorded (the sync counts
+ * it); on any other platform its hours are added.
+ */
+export interface DiaryLinkedGame {
+  gameId: number;
+  sources: SyncSource[];
+  covered: { platformId: number; source: SyncSource }[];
 }
 
 /** A diary day (`date` is `yyyy-mm-dd`): its note, the hours played in total and its games. */
@@ -34,6 +49,8 @@ export interface DiaryGameRequest {
   platformId?: number | null;
   /** HYBRID games: true sends the hours to the online playtime, false to a run. */
   online?: boolean;
+  /** Linked games: played outside the linked store on a platform it covers (Epic on PC for Steam). */
+  outsideSync?: boolean;
 }
 
 /** The whole day (PUT replaces it). No games and no note deletes the day. */
