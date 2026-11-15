@@ -5,6 +5,7 @@ import {
   isWithinRunDateLimits,
   runDateMax,
   runDuration,
+  runSpan,
   runYear,
   splitLines,
   todayIso,
@@ -55,6 +56,21 @@ describe('run dates', () => {
   it('splits list text into items, dropping bullets and blank lines', () => {
     expect(splitLines('- Combate\n\n* Arte \r\n+ Música\n• Final')).toEqual(['Combate', 'Arte', 'Música', 'Final']);
     expect(splitLines(null)).toEqual([]);
+  });
+});
+
+describe('runSpan', () => {
+  it('counts whole months and the days left over', () => {
+    expect(runSpan('2026-10-07', '2026-11-15')).toEqual({ months: 1, days: 8 });
+    expect(runSpan('2026-01-10', '2026-05-01')).toEqual({ months: 3, days: 21 });
+    expect(runSpan('2026-02-01', '2026-05-01')).toEqual({ months: 3, days: 0 });
+    expect(runSpan('2026-10-07', '2026-10-31')).toEqual({ months: 0, days: 24 });
+  });
+
+  it('keeps the day inside short months and refuses a missing or reversed range', () => {
+    expect(runSpan('2026-01-31', '2026-03-01')).toEqual({ months: 1, days: 1 });
+    expect(runSpan(null, '2026-03-01')).toBeNull();
+    expect(runSpan('2026-03-02', '2026-03-01')).toBeNull();
   });
 });
 

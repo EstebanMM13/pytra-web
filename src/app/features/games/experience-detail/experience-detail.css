@@ -116,23 +116,27 @@
   outline-offset: 2px;
 }
 
-/* Run timeline: points stacked with the time between them on narrow cards; one row once every point fits. */
+/*
+ * Run timeline. Narrow cards: a list, one row per point (dot, label, date on the right) with the gap's
+ * length on a row of its own beside the vertical line. Wide cards: a track, the gaps' lengths above the
+ * line, each point's label and date under its dot (first left, middle centred, last right). The <li>s use
+ * display: contents so their parts sit on the card's grid; --col places them in the track.
+ */
 .run-timeline {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: center;
 }
 
-.run-timeline-point {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 10px;
+.run-timeline > li {
+  display: contents;
 }
 
 .run-timeline-dot {
+  grid-column: 1;
   width: 10px;
   height: 10px;
-  flex-shrink: 0;
   border-radius: 999px;
   background: var(--pt-brand);
 }
@@ -143,60 +147,143 @@
   background: transparent;
 }
 
-.run-timeline-gap {
-  display: flex;
-  min-height: 26px;
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 14px;
+.run-timeline-label {
+  grid-column: 2;
+  min-width: 0;
+  font-size: var(--text-label);
+  color: var(--pt-text-2);
+}
+
+.run-timeline-date {
+  grid-column: 3;
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--pt-text);
+  text-align: right;
 }
 
 .run-timeline-line {
+  grid-column: 1;
+  justify-self: center;
   width: 1px;
-  align-self: stretch;
-  margin-left: 4.5px;
+  height: 100%;
+  min-height: 30px;
   background: var(--pt-border-strong);
 }
 
-@container (min-width: 17rem) {
+.run-timeline-span {
+  grid-column: 2 / 4;
+  font-size: 12px;
+  color: var(--pt-text-3);
+}
+
+@container (min-width: 20rem) {
   .run-timeline[data-points='2'] {
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
+    position: relative;
+    grid-template-columns: auto minmax(4rem, 1fr) auto;
+    grid-template-rows: auto 10px auto auto;
+    row-gap: 6px;
+    align-items: start;
   }
 
-  .run-timeline[data-points='2'] .run-timeline-gap {
-    flex: 1 1 0;
-    min-width: 3rem;
-    flex-direction: column;
-    gap: 4px;
+  /* The track, from the first dot to the last. */
+  .run-timeline[data-points='2']::before {
+    content: '';
+    grid-row: 2;
+    grid-column: 1 / -1;
+    align-self: center;
+    height: 1px;
+    margin: 0 5px;
+    background: var(--pt-border-strong);
   }
 
   .run-timeline[data-points='2'] .run-timeline-line {
-    width: 100%;
-    height: 1px;
-    margin-left: 0;
+    display: none;
+  }
+
+  .run-timeline[data-points='2'] .run-timeline-span {
+    grid-row: 1;
+    grid-column: var(--col);
+    justify-self: center;
+    white-space: nowrap;
+  }
+
+  .run-timeline[data-points='2'] .run-timeline-dot {
+    position: relative;
+    grid-row: 2;
+    grid-column: var(--col);
+    justify-self: var(--align);
+  }
+
+  .run-timeline[data-points='2'] .run-timeline-label,
+  .run-timeline[data-points='2'] .run-timeline-date {
+    grid-column: var(--col);
+    justify-self: var(--align);
+    text-align: var(--align);
+    white-space: nowrap;
+  }
+
+  .run-timeline[data-points='2'] .run-timeline-label {
+    grid-row: 3;
+  }
+
+  .run-timeline[data-points='2'] .run-timeline-date {
+    grid-row: 4;
   }
 }
 
-@container (min-width: 27rem) {
+@container (min-width: 31rem) {
   .run-timeline[data-points='3'] {
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
+    position: relative;
+    grid-template-columns: auto minmax(4rem, 1fr) auto minmax(4rem, 1fr) auto;
+    grid-template-rows: auto 10px auto auto;
+    row-gap: 6px;
+    align-items: start;
   }
 
-  .run-timeline[data-points='3'] .run-timeline-gap {
-    flex: 1 1 0;
-    min-width: 3rem;
-    flex-direction: column;
-    gap: 4px;
+  .run-timeline[data-points='3']::before {
+    content: '';
+    grid-row: 2;
+    grid-column: 1 / -1;
+    align-self: center;
+    height: 1px;
+    margin: 0 5px;
+    background: var(--pt-border-strong);
   }
 
   .run-timeline[data-points='3'] .run-timeline-line {
-    width: 100%;
-    height: 1px;
-    margin-left: 0;
+    display: none;
+  }
+
+  .run-timeline[data-points='3'] .run-timeline-span {
+    grid-row: 1;
+    grid-column: var(--col);
+    justify-self: center;
+    white-space: nowrap;
+  }
+
+  .run-timeline[data-points='3'] .run-timeline-dot {
+    position: relative;
+    grid-row: 2;
+    grid-column: var(--col);
+    justify-self: var(--align);
+  }
+
+  .run-timeline[data-points='3'] .run-timeline-label,
+  .run-timeline[data-points='3'] .run-timeline-date {
+    grid-column: var(--col);
+    justify-self: var(--align);
+    text-align: var(--align);
+    white-space: nowrap;
+  }
+
+  .run-timeline[data-points='3'] .run-timeline-label {
+    grid-row: 3;
+  }
+
+  .run-timeline[data-points='3'] .run-timeline-date {
+    grid-row: 4;
   }
 }

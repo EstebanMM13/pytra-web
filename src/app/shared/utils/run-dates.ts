@@ -66,6 +66,36 @@ export function runDuration(start: string | null | undefined, end: string | null
   return days >= 0 ? { unit: 'days', count: days } : null;
 }
 
+export type RunSpan = { months: number; days: number };
+
+/**
+ * Whole months from `start` to `end` and the days left over ("1 mes y 8 días"). A start day the end month
+ * lacks counts as that month's last day (31 Jan + 1 month = 28 Feb). Null when a date is missing or the
+ * range is reversed.
+ */
+export function runSpan(start: string | null | undefined, end: string | null | undefined): RunSpan | null {
+  const a = parseIsoDate(start);
+  const b = parseIsoDate(end);
+  if (!a || !b) {
+    return null;
+  }
+  const endUtc = Date.UTC(b.year, b.month - 1, b.day);
+  if (endUtc < Date.UTC(a.year, a.month - 1, a.day)) {
+    return null;
+  }
+  const monthsAfterStart = (months: number) => {
+    const year = a.year + Math.floor((a.month - 1 + months) / 12);
+    const month = (a.month - 1 + months) % 12;
+    const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    return Date.UTC(year, month, Math.min(a.day, lastDay));
+  };
+  let months = (b.year - a.year) * 12 + (b.month - a.month);
+  if (monthsAfterStart(months) > endUtc) {
+    months -= 1;
+  }
+  return { months, days: Math.round((endUtc - monthsAfterStart(months)) / 86_400_000) };
+}
+
 /**
  * Compact period for run rows: `ene – abr 2025` or `mar 2020 – may 2021`.
  * With a single date it renders just that month and year.

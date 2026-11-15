@@ -286,7 +286,7 @@ describe('ExperienceDetail inline edit', () => {
     expect(pill.querySelector('.sr-only')!.textContent).toContain('run.fullCompletionAria');
   });
 
-  it('shows the postgame pill while it lasts, then when it ended', () => {
+  it('shows the postgame pill only while it lasts (its end is on the timeline)', () => {
     expect(setup(run({ status: 'COMPLETADO' })).el.querySelector('[data-postgame], [data-postgame-ended]')).toBeNull();
     TestBed.resetTestingModule();
 
@@ -297,7 +297,8 @@ describe('ExperienceDetail inline edit', () => {
 
     const ended = setup(run({ status: 'COMPLETADO', postgameEndDate: '2026-10-20' })).el;
     expect(ended.querySelector('[data-postgame]')).toBeNull();
-    expect(ended.querySelector('[data-postgame-ended]')!.textContent).toContain('run.postgameEnded');
+    expect(ended.querySelector('[data-postgame-ended]')).toBeNull();
+    expect(ended.querySelector('[data-point="postgame"]')!.textContent).toContain('20/10/2026');
   });
 
   it('shows the dates as one timeline, with the postgame end and the total only when there is a postgame', () => {

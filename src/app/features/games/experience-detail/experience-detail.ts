@@ -23,7 +23,7 @@ import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { translatePlural } from '../../../shared/utils/plural';
-import { RunDuration, formatDayMonthYear, splitLines, todayIso } from '../../../shared/utils/run-dates';
+import { RunSpan, formatDayMonthYear, splitLines, todayIso } from '../../../shared/utils/run-dates';
 import { toastApiError } from '../../../shared/utils/api-error';
 import { HoursInput } from '../../../shared/ui/hours-input';
 import { ratingInputParams } from '../../../shared/utils/rating-scale';
@@ -177,9 +177,17 @@ export class ExperienceDetail {
     return formatDayMonthYear(value);
   }
 
-  /** "3 meses" / "12 días"; a dash when a date is missing. */
-  protected periodLabel(d: RunDuration | null): string {
-    return d ? translatePlural(this.translate, d.unit === 'months' ? 'run.months' : 'run.days', d.count) : '—';
+  /** "1 mes y 8 días", "3 meses", "12 días"; a dash when a date is missing. */
+  protected spanLabel(span: RunSpan | null): string {
+    if (!span) {
+      return '—';
+    }
+    const months = translatePlural(this.translate, 'run.months', span.months);
+    const days = translatePlural(this.translate, 'run.days', span.days);
+    if (span.months > 0 && span.days > 0) {
+      return this.translate.instant('run.monthsAndDays', { months, days });
+    }
+    return span.months > 0 ? months : days;
   }
 
   protected timelineLabel(key: TimelinePointKey): string {

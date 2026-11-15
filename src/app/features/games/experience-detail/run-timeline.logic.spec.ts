@@ -12,7 +12,7 @@ describe('runTimeline', () => {
       { key: 'start', date: '2026-10-01', ongoing: false },
       { key: 'credits', date: '2026-10-21', ongoing: false },
     ]);
-    expect(t.gaps).toEqual([{ unit: 'days', count: 20 }]);
+    expect(t.gaps).toEqual([{ months: 0, days: 20 }]);
     expect(t.total).toBeNull();
   });
 
@@ -23,10 +23,10 @@ describe('runTimeline', () => {
     );
     expect(t.points.map((p) => p.key)).toEqual(['start', 'credits', 'postgame']);
     expect(t.gaps).toEqual([
-      { unit: 'days', count: 22 },
-      { unit: 'months', count: 3 },
+      { months: 0, days: 22 },
+      { months: 3, days: 0 },
     ]);
-    expect(t.total).toEqual({ unit: 'months', count: 3 });
+    expect(t.total).toEqual({ months: 3, days: 21 });
   });
 
   it('runs an ongoing postgame until today', () => {
@@ -35,14 +35,14 @@ describe('runTimeline', () => {
       TODAY,
     );
     expect(t.points[2]).toEqual({ key: 'postgame', date: null, ongoing: true });
-    expect(t.gaps[1]).toEqual({ unit: 'days', count: 10 });
-    expect(t.total).toEqual({ unit: 'days', count: 14 });
+    expect(t.gaps[1]).toEqual({ months: 0, days: 10 });
+    expect(t.total).toEqual({ months: 0, days: 14 });
   });
 
   it('marks the credits ongoing while in progress and names an abandoned end', () => {
     const playing = runTimeline({ status: 'EN_CURSO', startDate: '2026-11-10', endDate: null }, TODAY);
     expect(playing.points[1]).toEqual({ key: 'credits', date: null, ongoing: true });
-    expect(playing.gaps).toEqual([{ unit: 'days', count: 5 }]);
+    expect(playing.gaps).toEqual([{ months: 0, days: 5 }]);
 
     const dropped = runTimeline({ status: 'ABANDONADO', startDate: null, endDate: '2026-03-01' }, TODAY);
     expect(dropped.points).toEqual([

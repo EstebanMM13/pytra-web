@@ -1,5 +1,5 @@
 import { Experience } from '../../../core/models/experience.model';
-import { RunDuration, runDuration } from '../../../shared/utils/run-dates';
+import { RunSpan, runSpan } from '../../../shared/utils/run-dates';
 
 /** `credits` while beaten or still being played, `abandoned` for a dropped run, `postgame` for its end. */
 export type TimelinePointKey = 'start' | 'credits' | 'abandoned' | 'postgame';
@@ -15,9 +15,9 @@ export interface TimelinePoint {
 export interface RunTimeline {
   points: TimelinePoint[];
   /** Time between each point and the next (`points.length - 1` entries); null when a date is missing. */
-  gaps: (RunDuration | null)[];
+  gaps: (RunSpan | null)[];
   /** Start to the end of the postgame, only when the run has a postgame. */
-  total: RunDuration | null;
+  total: RunSpan | null;
 }
 
 /** A run's dates as one timeline: start → credits (or abandonment) → end of the postgame, when it has one. */
@@ -40,7 +40,7 @@ export function runTimeline(
   const at = (point: TimelinePoint) => point.date ?? (point.ongoing ? today : null);
   return {
     points,
-    gaps: points.slice(1).map((point, i) => runDuration(at(points[i]), at(point))),
-    total: hasPostgame ? runDuration(at(points[0]), at(points[points.length - 1])) : null,
+    gaps: points.slice(1).map((point, i) => runSpan(at(points[i]), at(point))),
+    total: hasPostgame ? runSpan(at(points[0]), at(points[points.length - 1])) : null,
   };
 }

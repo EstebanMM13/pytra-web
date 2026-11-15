@@ -99,10 +99,6 @@
             >
               {{ 'run.postgame' | translate }}
             </span>
-          } @else if (e.postgameEndDate) {
-            <span class="rounded-full border border-border px-2.5 py-[3px] text-xs text-text-3" data-postgame-ended>
-              {{ 'run.postgameEnded' | translate: { date: date(e.postgameEndDate) } }}
-            </span>
           }
           <app-platform-label
             class="rounded-full border border-border px-2.5 py-[3px] text-xs text-text-3"
@@ -286,7 +282,7 @@
       </div>
 
       <!-- Dates as one timeline: start -> credits (or abandonment) -> end of the postgame, with the time between
-           them. Stacked on narrow cards, one row once every point fits (see .run-timeline). -->
+           them. A list (point: label and date; gap: its length) on narrow cards, a track once it fits. -->
       @let timeline = runTimeline();
       <div class="@container col-span-2 min-w-0 rounded-xl border border-card-border card-glass" data-stat="timeline">
         <div class="flex h-full flex-col gap-3 p-4 md:px-5">
@@ -296,26 +292,29 @@
               <span class="truncate">{{ 'run.timeline' | translate }}</span>
             </span>
             @if (timeline.total; as total) {
-              <span class="shrink-0 whitespace-nowrap" data-timeline-total>
-                {{ 'run.timelineTotal' | translate: { duration: periodLabel(total) } }}
+              <span class="shrink-0 rounded-full bg-brand-tint px-2.5 py-0.5 whitespace-nowrap text-brand-lighter" data-timeline-total>
+                {{ 'run.timelineTotal' | translate: { duration: spanLabel(total) } }}
               </span>
             }
           </div>
           <ol class="run-timeline my-auto" [attr.data-points]="timeline.points.length" data-timeline>
-            @for (point of timeline.points; track point.key; let i = $index) {
+            @for (point of timeline.points; track point.key; let i = $index, first = $first, last = $last) {
               @if (i > 0) {
-                <li class="run-timeline-gap" data-timeline-gap>
-                  <span class="text-xs whitespace-nowrap text-text-3">{{ periodLabel(timeline.gaps[i - 1]) }}</span>
+                <li class="run-timeline-gap" [style.--col]="i * 2" data-timeline-gap>
                   <span class="run-timeline-line" aria-hidden="true"></span>
+                  <span class="run-timeline-span">{{ spanLabel(timeline.gaps[i - 1]) }}</span>
                 </li>
               }
-              <li class="run-timeline-point" [attr.data-point]="point.key">
+              <li
+                class="run-timeline-point"
+                [style.--col]="i * 2 + 1"
+                [style.--align]="first ? 'start' : last ? 'end' : 'center'"
+                [attr.data-point]="point.key"
+              >
                 <span class="run-timeline-dot" [attr.data-ongoing]="point.ongoing || null" aria-hidden="true"></span>
-                <span class="flex min-w-0 flex-col">
-                  <span class="text-xs leading-4 text-text-3">{{ timelineLabel(point.key) | translate }}</span>
-                  <span class="font-mono text-body font-semibold whitespace-nowrap text-text">
-                    {{ point.date ? date(point.date) : point.ongoing ? ('run.ongoing' | translate) : '—' }}
-                  </span>
+                <span class="run-timeline-label">{{ timelineLabel(point.key) | translate }}</span>
+                <span class="run-timeline-date">
+                  {{ point.date ? date(point.date) : point.ongoing ? ('run.ongoing' | translate) : '—' }}
                 </span>
               </li>
             }
