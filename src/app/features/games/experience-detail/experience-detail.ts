@@ -21,14 +21,14 @@ import { RatingTonePipe } from '../../../shared/pipes/rating-tone.pipe';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { SectionHeader } from '../../../shared/ui/section-header';
 import { Skeleton } from '../../../shared/ui/skeleton';
-import { figureFontSize } from '../../../shared/ui/stat-card';
 import { StatusPill } from '../../../shared/ui/status-pill';
 import { translatePlural } from '../../../shared/utils/plural';
-import { formatDayMonthYear, runDuration, splitLines } from '../../../shared/utils/run-dates';
+import { RunDuration, formatDayMonthYear, splitLines, todayIso } from '../../../shared/utils/run-dates';
 import { toastApiError } from '../../../shared/utils/api-error';
 import { HoursInput } from '../../../shared/ui/hours-input';
 import { ratingInputParams } from '../../../shared/utils/rating-scale';
 import { HOUR_STEPS, InlineField, bumpHoursDraft, inlineDraft, parseInlineEdit } from './inline-edit.logic';
+import { TimelinePointKey, runTimeline } from './run-timeline.logic';
 
 /** `/stats/top-rated` caps `limit` at 50 server-side. */
 const RANK_WINDOW = 50;
@@ -65,8 +65,6 @@ export function ratingRank(rating: number, topRatings: readonly number[], window
 })
 export class ExperienceDetail {
   protected readonly icons = ICONS;
-  /** Figure font size that fits its tile (see `figureFontSize`). */
-  protected readonly figureSize = (value: string | number): string => figureFontSize(String(value));
   /** Hours tile: the hours at figure size, the minutes smaller beside them. */
   protected readonly hoursFigure = splitHoursFigure;
   protected readonly hoursFontSize = hoursFontSize;
@@ -116,15 +114,9 @@ export class ExperienceDetail {
     return rating === null || rating === undefined || top === null ? null : ratingRank(rating, top);
   });
 
-  protected readonly duration = computed(() => {
+  protected readonly runTimeline = computed(() => {
     const e = this.experience();
-    return e ? runDuration(e.startDate, e.endDate) : null;
-  });
-
-  /** Start to the end of the postgame, when the run has one. */
-  protected readonly postgameDuration = computed(() => {
-    const e = this.experience();
-    return e?.postgameEndDate ? runDuration(e.startDate, e.postgameEndDate) : null;
+    return e ? runTimeline(e, todayIso()) : { points: [], gaps: [], total: null };
   });
 
   constructor() {
@@ -185,14 +177,13 @@ export class ExperienceDetail {
     return formatDayMonthYear(value);
   }
 
-  protected durationLabel(short: boolean, d = this.duration()): string {
-    if (!d) {
-      return '—';
-    }
-    if (short) {
-      return this.translate.instant(d.unit === 'months' ? 'run.monthsShort' : 'run.daysShort', { count: d.count });
-    }
-    return translatePlural(this.translate, d.unit === 'months' ? 'run.months' : 'run.days', d.count);
+  /** "3 meses" / "12 días"; a dash when a date is missing. */
+  protected periodLabel(d: RunDuration | null): string {
+    return d ? translatePlural(this.translate, d.unit === 'months' ? 'run.months' : 'run.days', d.count) : '—';
+  }
+
+  protected timelineLabel(key: TimelinePointKey): string {
+    return { start: 'run.start', credits: 'run.credits', abandoned: 'run.abandonedAt', postgame: 'run.postgameEnd' }[key];
   }
 
   /** Scale bound and examples for the inline rating placeholder, labels and error. */

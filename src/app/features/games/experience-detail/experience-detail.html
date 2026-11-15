@@ -137,7 +137,7 @@
       </div>
     </div>
 
-    <!-- Run figures: rating, hours, duration and dates; 2 x 2 on phones, one row of four from md -->
+    <!-- Run figures: rating and hours side by side, then the dates timeline across both columns (one row from md) -->
     <section class="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-3" [attr.aria-label]="'run.data' | translate">
       <div class="relative min-w-0 overflow-hidden rounded-xl border border-gold-card-border bg-gold-tint" data-stat="rating">
         <!-- Phones: the pencil moves to the top-right corner so the rating takes the whole line. -->
@@ -285,46 +285,41 @@
         </div>
       </div>
 
-      <div class="min-w-0 rounded-xl border border-card-border card-glass" data-stat="duration">
-        <div class="@container flex h-full flex-col p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]">
-          <p class="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-text-3 md:gap-2 md:text-label md:leading-5">
-            <svg [lucideIcon]="icons.hourglass" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
-            <span class="truncate">{{ 'run.duration' | translate }}</span>
-          </p>
-          <p
-            class="my-auto flex min-h-11 pt-2 items-center leading-tight font-bold tracking-[-0.03em] whitespace-nowrap"
-            [style.font-size]="figureSize(durationLabel(false))"
-          >
-            <span>{{ durationLabel(false) }}</span>
-          </p>
-          @if (postgameDuration(); as pg) {
-            <p class="mt-1 truncate text-xs text-text-3 md:text-label" data-postgame-duration>
-              {{ 'run.withPostgame' | translate: { duration: durationLabel(false, pg) } }}
-            </p>
-          }
-        </div>
-      </div>
-
-      <!-- Dates: start -> end on one line when the card is wide enough, stacked when it is narrow (phones, tablets) -->
-      <div class="@container min-w-0 rounded-xl border border-card-border card-glass" data-stat="dates">
-        <div class="flex h-full flex-col gap-2 p-4 md:px-5">
-          <div class="flex items-center justify-between gap-3 text-xs text-text-3 md:text-label">
-            <span class="flex items-center gap-1.5 md:gap-2">
+      <!-- Dates as one timeline: start -> credits (or abandonment) -> end of the postgame, with the time between
+           them. Stacked on narrow cards, one row once every point fits (see .run-timeline). -->
+      @let timeline = runTimeline();
+      <div class="@container col-span-2 min-w-0 rounded-xl border border-card-border card-glass" data-stat="timeline">
+        <div class="flex h-full flex-col gap-3 p-4 md:px-5">
+          <div class="flex items-center justify-between gap-3 text-xs leading-4 text-text-3 md:text-label md:leading-5">
+            <span class="flex min-w-0 items-center gap-1.5 md:gap-2">
               <svg [lucideIcon]="icons.calendar" [size]="15" class="size-3.5 shrink-0 text-brand-vivid md:size-[15px]"></svg>
-              {{ 'run.start' | translate }}
+              <span class="truncate">{{ 'run.timeline' | translate }}</span>
             </span>
-            <span class="hidden @[18rem]:inline">{{ 'run.end' | translate }}</span>
+            @if (timeline.total; as total) {
+              <span class="shrink-0 whitespace-nowrap" data-timeline-total>
+                {{ 'run.timelineTotal' | translate: { duration: periodLabel(total) } }}
+              </span>
+            }
           </div>
-          <div class="my-auto hidden items-center gap-2.5 font-mono text-base font-semibold text-text @[18rem]:flex" data-dates-row>
-            <span class="whitespace-nowrap">{{ date(e.startDate) }}</span>
-            <span class="h-px min-w-3 flex-1 bg-border-strong" aria-hidden="true"></span>
-            <span class="whitespace-nowrap">{{ date(e.endDate) }}</span>
-          </div>
-          <div class="my-auto flex flex-col gap-1 @[18rem]:hidden" data-dates-stacked>
-            <span class="font-mono text-body font-semibold whitespace-nowrap text-text">{{ date(e.startDate) }}</span>
-            <span class="mt-1 text-xs text-text-3">{{ 'run.end' | translate }}</span>
-            <span class="font-mono text-body font-semibold whitespace-nowrap text-text">{{ date(e.endDate) }}</span>
-          </div>
+          <ol class="run-timeline my-auto" [attr.data-points]="timeline.points.length" data-timeline>
+            @for (point of timeline.points; track point.key; let i = $index) {
+              @if (i > 0) {
+                <li class="run-timeline-gap" data-timeline-gap>
+                  <span class="text-xs whitespace-nowrap text-text-3">{{ periodLabel(timeline.gaps[i - 1]) }}</span>
+                  <span class="run-timeline-line" aria-hidden="true"></span>
+                </li>
+              }
+              <li class="run-timeline-point" [attr.data-point]="point.key">
+                <span class="run-timeline-dot" [attr.data-ongoing]="point.ongoing || null" aria-hidden="true"></span>
+                <span class="flex min-w-0 flex-col">
+                  <span class="text-xs leading-4 text-text-3">{{ timelineLabel(point.key) | translate }}</span>
+                  <span class="font-mono text-body font-semibold whitespace-nowrap text-text">
+                    {{ point.date ? date(point.date) : point.ongoing ? ('run.ongoing' | translate) : '—' }}
+                  </span>
+                </span>
+              </li>
+            }
+          </ol>
         </div>
       </div>
       <p class="sr-only" aria-live="polite">{{ inlineStatus() }}</p>

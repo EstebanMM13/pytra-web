@@ -300,14 +300,23 @@ describe('ExperienceDetail inline edit', () => {
     expect(ended.querySelector('[data-postgame-ended]')!.textContent).toContain('run.postgameEnded');
   });
 
-  it('shows the duration with postgame only when the postgame has ended', () => {
+  it('shows the dates as one timeline, with the postgame end and the total only when there is a postgame', () => {
     const plain = setup(run({ status: 'COMPLETADO', endDate: '2024-01-21' })).el;
-    expect(plain.querySelector('[data-postgame-duration]')).toBeNull();
+    expect([...plain.querySelectorAll('[data-point]')].map((p) => p.getAttribute('data-point'))).toEqual([
+      'start',
+      'credits',
+    ]);
+    expect(plain.querySelectorAll('[data-timeline-gap]')).toHaveLength(1);
+    expect(plain.querySelector('[data-timeline-total]')).toBeNull();
     TestBed.resetTestingModule();
 
     const ended = setup(run({ status: 'COMPLETADO', endDate: '2024-01-21', postgameEndDate: '2024-03-15' })).el;
-    expect(ended.querySelector('[data-stat="duration"]')!.textContent).toContain('run.days');
-    expect(ended.querySelector('[data-postgame-duration]')!.textContent).toContain('run.withPostgame');
+    const points = ended.querySelectorAll('[data-point]');
+    expect(points[2].getAttribute('data-point')).toBe('postgame');
+    expect(points[2].textContent).toContain('15/03/2024');
+    expect(ended.querySelectorAll('[data-timeline-gap]')).toHaveLength(2);
+    expect(ended.querySelector('[data-timeline-total]')!.textContent).toContain('run.timelineTotal');
+    expect(ended.querySelector('[data-stat="duration"], [data-stat="dates"]')).toBeNull();
   });
 
   it('sizes the rating from the reserve each breakpoint keeps for the scale and pencil', () => {
@@ -348,13 +357,15 @@ describe('ExperienceDetail inline edit', () => {
     expect(el.textContent).not.toContain('run.bestWorst');
   });
 
-  it('shows both dates in the wide row and in the stacked layout for narrow cards', () => {
-    const el = setup(run({ startDate: '2018-09-08', endDate: '2018-10-28' })).el;
-    for (const selector of ['[data-dates-row]', '[data-dates-stacked]']) {
-      const text = el.querySelector(selector)!.textContent!;
-      expect(text).toContain('08/09/2018');
-      expect(text).toContain('28/10/2018');
-    }
+  it('shows the start and credits dates and marks unreached points as ongoing', () => {
+    const done = setup(run({ status: 'COMPLETADO', startDate: '2018-09-08', endDate: '2018-10-28' })).el;
+    expect(done.querySelector('[data-point="start"]')!.textContent).toContain('08/09/2018');
+    expect(done.querySelector('[data-point="credits"]')!.textContent).toContain('28/10/2018');
+    TestBed.resetTestingModule();
+
+    const playing = setup(run({ status: 'EN_CURSO', startDate: '2018-09-08', endDate: null })).el;
+    expect(playing.querySelector('[data-point="credits"]')!.textContent).toContain('run.ongoing');
+    expect(playing.querySelector('[data-point="credits"] [data-ongoing]')).not.toBeNull();
   });
 
   it('never sends the change in the read-only demo', () => {
