@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { provideTranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { EMPTY, Subject, of } from 'rxjs';
 import { Experience } from '../../../core/models/experience.model';
 import { DemoModeService } from '../../../core/services/demo-mode.service';
@@ -356,6 +356,38 @@ describe('ExperienceDetail inline edit', () => {
     expect(cards[0].querySelectorAll('li')).toHaveLength(2);
     expect(cards[1].querySelectorAll('li')).toHaveLength(1);
     expect(el.textContent).not.toContain('run.bestWorst');
+  });
+
+  it('writes the gaps and the total as months and days, one of them, or a dash', () => {
+    const spans = (r: Experience) => {
+      const t = setup(r);
+      const translate = TestBed.inject(TranslateService);
+      translate.setTranslation('es', {
+        run: {
+          months: '{{count}} meses',
+          months_one: '{{count}} mes',
+          days: '{{count}} días',
+          days_one: '{{count}} día',
+          monthsAndDays: '{{months}} y {{days}}',
+          timelineTotal: 'Total: {{duration}}',
+        },
+      });
+      translate.use('es');
+      t.fixture.detectChanges();
+      const text = (selector: string) => [...t.el.querySelectorAll(selector)].map((n) => n.textContent!.trim());
+      const result = { gaps: text('[data-timeline-gap]'), total: text('[data-timeline-total]') };
+      TestBed.resetTestingModule();
+      return result;
+    };
+
+    expect(
+      spans(run({ status: 'COMPLETADO', startDate: '2026-01-10', endDate: '2026-02-01', postgameEndDate: '2026-05-01' })),
+    ).toEqual({ gaps: ['22 días', '3 meses'], total: ['Total: 3 meses y 21 días'] });
+    expect(spans(run({ status: 'COMPLETADO', startDate: '2026-03-01', endDate: '2026-04-02' }))).toEqual({
+      gaps: ['1 mes y 1 día'],
+      total: [],
+    });
+    expect(spans(run({ status: 'COMPLETADO', startDate: null, endDate: '2026-03-02' }))).toEqual({ gaps: ['—'], total: [] });
   });
 
   it('shows the start and credits dates and marks unreached points as ongoing', () => {
