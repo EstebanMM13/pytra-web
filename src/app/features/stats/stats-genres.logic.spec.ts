@@ -138,6 +138,20 @@ describe('genresOfTheYear', () => {
     expect(year).toMatchObject({ genreId: 20, hours: 30, share: 0.3 });
   });
 
+  it('credits the hours of every year a run was played when the API sends them', () => {
+    const years = genresOfTheYear(
+      [
+        { gameId: 2, year: 2026, hours: 30, hoursByYear: [{ year: 2025, hours: 12 }, { year: 2026, hours: 18 }] },
+        { gameId: 1, year: 2026, hours: 4, hoursByYear: [] },
+      ],
+      games,
+    );
+    expect(years).toEqual([
+      { year: 2026, genreId: 20, name: 'Action', hours: 18, share: 1 },
+      { year: 2025, genreId: 20, name: 'Action', hours: 12, share: 1 },
+    ]);
+  });
+
   it('names the genre as displayed', () => {
     expect(genresOfTheYear([{ gameId: 2, year: 2025, hours: 1 }], games, (n) => n.toLowerCase())[0].name).toBe('action');
   });

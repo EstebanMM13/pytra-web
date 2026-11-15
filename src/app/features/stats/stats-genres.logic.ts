@@ -118,13 +118,14 @@ export interface GenreOfYear {
 
 /**
  * Each year's genre with the most run hours, newest year first: the runs' hours (`/stats/play-facts`)
- * credited to every genre of their game (from the library list). Runs without a year, without
+ * credited to every genre of their game (from the library list), in each year they were played
+ * (`hoursByYear`; an older API without it puts all of them in `year`). Runs without a year, without
  * hours or of games the library does not list are left out; a listed game without genres counts
  * in the year's total only. Online playtime is not a run. Ties go to the displayed name, then
  * the id.
  */
 export function genresOfTheYear(
-  runs: readonly Pick<RunFact, 'gameId' | 'year' | 'hours'>[],
+  runs: readonly Pick<RunFact, 'gameId' | 'year' | 'hours' | 'hoursByYear'>[],
   games: readonly Pick<Game, 'id' | 'genres'>[],
   displayName: (name: string) => string = (name) => name,
 ): GenreOfYear[] {
@@ -132,15 +133,19 @@ export function genresOfTheYear(
   const years = new Map<number, { total: number; byGenre: Map<number, { name: string; hours: number }> }>();
   for (const run of runs) {
     const genres = genresOf.get(run.gameId);
-    if (run.year === null || run.hours <= 0 || !genres) continue;
-    const entry = years.get(run.year) ?? { total: 0, byGenre: new Map() };
-    entry.total += run.hours;
-    for (const genre of genres) {
-      const acc = entry.byGenre.get(genre.id) ?? { name: displayName(genre.name), hours: 0 };
-      acc.hours += run.hours;
-      entry.byGenre.set(genre.id, acc);
+    if (!genres) continue;
+    const played = run.hoursByYear ?? (run.year === null ? [] : [{ year: run.year, hours: run.hours }]);
+    for (const { year, hours } of played) {
+      if (hours <= 0) continue;
+      const entry = years.get(year) ?? { total: 0, byGenre: new Map() };
+      entry.total += hours;
+      for (const genre of genres) {
+        const acc = entry.byGenre.get(genre.id) ?? { name: displayName(genre.name), hours: 0 };
+        acc.hours += hours;
+        entry.byGenre.set(genre.id, acc);
+      }
+      years.set(year, entry);
     }
-    years.set(run.year, entry);
   }
   const result: GenreOfYear[] = [];
   for (const [year, entry] of years) {

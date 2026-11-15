@@ -440,6 +440,16 @@ export interface RunFact {
   hours: number;
   /** Days from start to end of a completed run with both dates; null otherwise. */
   daysToFinish: number | null;
+  /**
+   * Hours per year played (diary days, the rest spread from start to credits or postgame end), oldest
+   * first. Optional: absent from an API deployed before it existed.
+   */
+  hoursByYear?: YearHours[];
+}
+
+export interface YearHours {
+  year: number;
+  hours: number;
 }
 
 /** A year with counted online diary hours of a game, and its online playtime's platforms. */
