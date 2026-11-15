@@ -120,6 +120,9 @@ describe('StatCard', () => {
     const figureRow = (card.querySelector('span[data-figure]') as HTMLElement).parentElement as HTMLElement;
     expect(figureRow.classList).toContain('mt-2');
     expect(figureRow.classList).toContain('whitespace-nowrap');
+    // A figure shrunk to fit keeps the full row height, so the label lines up with its neighbours.
+    expect(figureRow.classList).toContain('min-h-[var(--fig-max)]');
+    expect(figureRow.classList).toContain('content-center');
     expect(figureRow.style.fontSize).toContain('var(--fig-max)');
   });
 

@@ -231,6 +231,10 @@ describe('GameDetail stats', () => {
     expect(el.querySelectorAll('app-stat-card').length).toBe(5);
     expect(hours.parentElement!.children.length).toBe(6);
     expect(hours.parentElement!.className).toContain('lg:grid-cols-6');
+    // "36 h 15 min" shrinks to fit: its row keeps the full figure height, like the other cards.
+    const figureRow = hours.querySelector('[data-figure]')!.parentElement!;
+    expect(figureRow.classList).toContain('min-h-[var(--fig-max)]');
+    expect(figureRow.classList).toContain('content-center');
   });
 
   it('shows total hours, the online rating, 100% and platinum for ONLINE games, two by two on phones', () => {

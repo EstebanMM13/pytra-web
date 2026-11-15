@@ -228,7 +228,8 @@ const STAT_CARD_LAYOUT = {
   large: {
     body: 'justify-center p-4 [--fig-max:30px] md:px-5 md:[--fig-max:36px]',
     label: 'text-xs',
-    figure: 'mt-2 leading-none',
+    // Full figure height even when the figure shrinks to fit, so labels line up across a row.
+    figure: 'mt-2 min-h-[var(--fig-max)] content-center leading-none',
   },
 } as const;
 

@@ -265,7 +265,7 @@
               <span class="truncate">{{ 'game.stats.totalHours' | translate }}</span>
             </p>
             @if (grid.wideHours) {
-              <div class="mt-2 flex items-center gap-4">
+              <div class="mt-2 flex min-h-[var(--fig-max)] items-center gap-4">
                 <p
                   class="shrink-0 leading-none font-bold tracking-[-0.03em] whitespace-nowrap"
                   [style.font-size]="figureSize(s.totalHours | hours, hoursLegendPx)"
@@ -293,7 +293,10 @@
                 </div>
               </div>
             } @else {
-              <p class="mt-2 leading-none font-bold tracking-[-0.03em] whitespace-nowrap" [style.font-size]="figureSize(s.totalHours | hours)">
+              <p
+                class="mt-2 min-h-[var(--fig-max)] content-center leading-none font-bold tracking-[-0.03em] whitespace-nowrap"
+                [style.font-size]="figureSize(s.totalHours | hours)"
+              >
                 <span data-figure>{{ s.totalHours | hours }}</span>
               </p>
             }
