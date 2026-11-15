@@ -171,6 +171,22 @@ describe('Games library filters', () => {
     }
   });
 
+  it('marks 100% posters next to the platinum one, the 100% first', async () => {
+    const { el } = await setup();
+    const badges = (id: number) => {
+      const poster = el.querySelector(`a[href="/games/${id}"]`)!;
+      return [...poster.querySelectorAll('[data-poster-badges] > [data-poster-platinum], [data-poster-badges] > [data-poster-full-completion]')]
+        .map((b) => (b.hasAttribute('data-poster-platinum') ? 'platinum' : '100%'));
+    };
+    expect(badges(1)).toEqual(['platinum']);
+    expect(badges(2)).toEqual(['100%', 'platinum']);
+    expect(badges(3)).toEqual(['100%']);
+    expect(badges(4)).toEqual([]);
+    const full = el.querySelector('a[href="/games/3"] [data-poster-full-completion]')!;
+    expect(full.getAttribute('aria-label')).toBe('library.fullCompletion');
+    expect(full.querySelector('svg')).not.toBeNull();
+  });
+
   it('filters by played year from the panel, loading the run facts only then', async () => {
     const { harness, router, el, listed } = await setup();
     expect(getPlayFacts).not.toHaveBeenCalled();

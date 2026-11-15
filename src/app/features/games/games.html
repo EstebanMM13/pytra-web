@@ -265,14 +265,28 @@
                     >{{ game.bestRating | rating }}</span
                   >
                 }
-                @if (game.hasPlatinum) {
-                  <span
-                    class="platinum-glow absolute top-1.5 left-1.5 grid place-items-center rounded-md bg-bg/85 p-1 text-platinum backdrop-blur-sm cover-lift"
-                    role="img"
-                    [attr.aria-label]="'library.platinum' | translate"
-                    data-poster-platinum
-                    ><svg [lucideIcon]="icons.platinum" [size]="14" aria-hidden="true"></svg></span
-                  >
+                <!-- Achievement marks, top left: 100% first, then the platinum -->
+                @if (game.hasFullCompletion || game.hasPlatinum) {
+                  <span class="absolute top-1.5 left-1.5 flex gap-1 cover-lift" data-poster-badges>
+                    @if (game.hasFullCompletion) {
+                      <span
+                        class="grid place-items-center rounded-md bg-bg/85 p-1 text-completion backdrop-blur-sm"
+                        role="img"
+                        [attr.aria-label]="'library.fullCompletion' | translate"
+                        data-poster-full-completion
+                        ><svg [lucideIcon]="icons.badgeCheck" [size]="14" aria-hidden="true"></svg></span
+                      >
+                    }
+                    @if (game.hasPlatinum) {
+                      <span
+                        class="platinum-glow relative grid place-items-center rounded-md bg-bg/85 p-1 text-platinum backdrop-blur-sm"
+                        role="img"
+                        [attr.aria-label]="'library.platinum' | translate"
+                        data-poster-platinum
+                        ><svg [lucideIcon]="icons.platinum" [size]="14" aria-hidden="true"></svg></span
+                      >
+                    }
+                  </span>
                 }
               </div>
               <div class="min-w-0 px-0.5">
