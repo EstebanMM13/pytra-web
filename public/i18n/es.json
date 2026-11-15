@@ -939,6 +939,7 @@
     "start": "Inicio",
     "end": "Fin",
     "duration": "Duración",
+    "withPostgame": "Con postgame: {{duration}}",
     "hours": "Horas",
     "months": "{{count}} meses",
     "months_one": "{{count}} mes",

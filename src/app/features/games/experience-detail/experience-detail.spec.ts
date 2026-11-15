@@ -300,6 +300,16 @@ describe('ExperienceDetail inline edit', () => {
     expect(ended.querySelector('[data-postgame-ended]')!.textContent).toContain('run.postgameEnded');
   });
 
+  it('shows the duration with postgame only when the postgame has ended', () => {
+    const plain = setup(run({ status: 'COMPLETADO', endDate: '2024-01-21' })).el;
+    expect(plain.querySelector('[data-postgame-duration]')).toBeNull();
+    TestBed.resetTestingModule();
+
+    const ended = setup(run({ status: 'COMPLETADO', endDate: '2024-01-21', postgameEndDate: '2024-03-15' })).el;
+    expect(ended.querySelector('[data-stat="duration"]')!.textContent).toContain('run.days');
+    expect(ended.querySelector('[data-postgame-duration]')!.textContent).toContain('run.withPostgame');
+  });
+
   it('sizes the rating from the reserve each breakpoint keeps for the scale and pencil', () => {
     expect(ratingFontSize('8,75')).toBe('min(var(--fig-max), calc((100cqi - var(--rating-reserve)) / 2.48))');
     const el = setup(run({ rating: 8.75 })).el;

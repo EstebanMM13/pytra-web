@@ -297,6 +297,11 @@
           >
             <span>{{ durationLabel(false) }}</span>
           </p>
+          @if (postgameDuration(); as pg) {
+            <p class="mt-1 truncate text-xs text-text-3 md:text-label" data-postgame-duration>
+              {{ 'run.withPostgame' | translate: { duration: durationLabel(false, pg) } }}
+            </p>
+          }
         </div>
       </div>
 

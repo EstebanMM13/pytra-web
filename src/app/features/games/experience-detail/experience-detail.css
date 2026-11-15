@@ -67,6 +67,15 @@
   color-scheme: inherit;
 }
 
+/* Narrow hours card (phones): hours and minutes on their own rows so 3-4 digits fit. */
+@container (max-width: 12rem) {
+  .run-inline-hours {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1.75rem;
+    row-gap: 6px;
+  }
+}
+
 .run-inline-input:focus,
 .run-inline-hours ::ng-deep .run-inline-input:focus {
   border-color: var(--pt-brand);

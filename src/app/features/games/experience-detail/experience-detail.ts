@@ -121,6 +121,12 @@ export class ExperienceDetail {
     return e ? runDuration(e.startDate, e.endDate) : null;
   });
 
+  /** Start to the end of the postgame, when the run has one. */
+  protected readonly postgameDuration = computed(() => {
+    const e = this.experience();
+    return e?.postgameEndDate ? runDuration(e.startDate, e.postgameEndDate) : null;
+  });
+
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       this.load(Number(params.get('gameId')), Number(params.get('id')));
@@ -179,8 +185,7 @@ export class ExperienceDetail {
     return formatDayMonthYear(value);
   }
 
-  protected durationLabel(short: boolean): string {
-    const d = this.duration();
+  protected durationLabel(short: boolean, d = this.duration()): string {
     if (!d) {
       return '—';
     }
