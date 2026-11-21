@@ -1,7 +1,8 @@
 /**
- * In-app splash timeline (native cold start only). The native Android 12+ splash can only show a
- * centered icon on a flat background, so it stays minimal and hands over to this overlay, which
- * plays the brand intro and is gone after SPLASH_TOTAL_MS.
+ * In-app splash timeline: native cold start, and once per session on the web (see SplashGate).
+ * The native Android 12+ splash can only show a centered icon on a flat background, so it stays
+ * minimal and hands over to this overlay, which plays the brand intro and is gone after
+ * SPLASH_TOTAL_MS.
  */
 
 /** Same deep brand purple as the native splash (android colors.xml `splash_background`). */
@@ -66,10 +67,22 @@ export interface SloganToken {
   delayMs: number;
 }
 
-/** Only inside the native shell, and never with reduced motion (the app shows at once). */
+/** Native shell: on every cold start, never with reduced motion (the app shows at once). */
 export function shouldShowSplash(native: boolean, reducedMotion: boolean): boolean {
   return native && !reducedMotion;
 }
+
+/**
+ * Web: once per browser session, when the user gets into the app (already signed in on load, or
+ * right after logging in); never on the login screen and never with reduced motion.
+ */
+export function shouldShowWebSplash(authenticated: boolean, reducedMotion: boolean, seen: boolean): boolean {
+  return authenticated && !reducedMotion && !seen;
+}
+
+/** Shine sweep over the settled mark, ms from the intro start (ends before the fade-out). */
+export const SHINE_DELAY_MS = 640;
+export const SHINE_MS = 440;
 
 /** "Play · Track · Remember", revealed word by word; each dot arrives with the next word. */
 export function sloganTokens(): SloganToken[] {

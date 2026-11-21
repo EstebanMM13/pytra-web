@@ -3,10 +3,8 @@ import { RouterOutlet } from '@angular/router';
 import { LaunchSplash } from './core/services/launch-splash.service';
 import { RunFormLauncher } from './core/services/run-form-launcher.service';
 import { RunForm } from './features/games/run-form/run-form';
-import { isNativePlatform } from './core/native-platform';
 import { SplashOverlay } from './shared/splash/splash-overlay';
-import { shouldShowSplash } from './shared/splash/splash.logic';
-import { prefersReducedMotion } from './shared/utils/motion';
+import { SplashGate } from './shared/splash/splash-gate';
 import { ToastHost } from './shared/toast/toast-host';
 
 @Component({
@@ -18,8 +16,8 @@ import { ToastHost } from './shared/toast/toast-host';
 export class App {
   private readonly runFormLauncher = inject(RunFormLauncher);
 
-  /** Cold start inside the native shell: play the brand intro (see SplashOverlay). */
-  protected readonly showSplash = shouldShowSplash(isNativePlatform(), prefersReducedMotion());
+  /** Brand intro: native cold start, or once per web session on getting into the app (SplashGate). */
+  protected readonly showSplash = inject(SplashGate).show;
 
   /** One-item list so each new open request gets a fresh form instance (tracked by identity). */
   protected readonly runFormRequests = computed(() => {

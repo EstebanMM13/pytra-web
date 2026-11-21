@@ -6,15 +6,25 @@ import {
   MARK_CONTENT_CENTER,
   NATIVE_MARK_SCALE,
   SETTLED_MARK_PX,
+  SHINE_DELAY_MS,
+  SHINE_MS,
   SLOGAN_WORD_MS,
   SPLASH_FADE_OUT_START_MS,
   SPLASH_TOTAL_MS,
   emblemBox,
   shouldShowSplash,
+  shouldShowWebSplash,
   sloganTokens,
 } from './splash.logic';
 
 describe('splash logic', () => {
+  it('on the web, shows once per session and only when signed in', () => {
+    expect(shouldShowWebSplash(true, false, false)).toBe(true);
+    expect(shouldShowWebSplash(false, false, false)).toBe(false);
+    expect(shouldShowWebSplash(true, false, true)).toBe(false);
+    expect(shouldShowWebSplash(true, true, false)).toBe(false);
+  });
+
   it('shows only inside the native shell and never with reduced motion', () => {
     expect(shouldShowSplash(true, false)).toBe(true);
     expect(shouldShowSplash(false, false)).toBe(false);
@@ -69,20 +79,24 @@ describe('SplashOverlay', () => {
     vi.useRealTimers();
   });
 
-  function render(): HTMLElement {
+  it('sweeps a light over the mark, clipped to its silhouette, before the fade-out', () => {
+    win.androidBridge = {};
     const fixture = TestBed.createComponent(SplashOverlay);
     fixture.detectChanges();
-    return fixture.nativeElement as HTMLElement;
-  }
-
-  it('renders nothing on the web', () => {
-    expect(render().querySelector('[data-splash]')).toBeNull();
+    const shine = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('[data-splash-shine]')!;
+    expect(shine.style.getPropertyValue('mask-image')).toContain('data:image/svg+xml');
+    expect(shine.style.animationDelay).toBe(`${SHINE_DELAY_MS}ms`);
+    expect(SHINE_DELAY_MS + SHINE_MS).toBeLessThanOrEqual(SPLASH_FADE_OUT_START_MS);
   });
 
-  it('renders nothing on native with reduced motion', () => {
-    win.androidBridge = {};
-    setMotionPreference('reduce');
-    expect(render().querySelector('[data-splash]')).toBeNull();
+  it('on the web fades itself in (no system splash in front) and plays at once', () => {
+    TestBed.overrideProvider(LAUNCH_SPLASH_DEPS, { useValue: { native: false, hideNative: () => Promise.resolve() } });
+    const fixture = TestBed.createComponent(SplashOverlay);
+    fixture.detectChanges();
+    const splash = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('[data-splash]')!;
+    expect(splash.classList).toContain('pt-splash-web');
+    expect(splash.classList).not.toContain('pt-splash-held');
+    expect(splash.style.animationDelay).toBe(`0ms, ${SPLASH_FADE_OUT_START_MS}ms`);
   });
 
   it('holds its first frame while the system splash is up', () => {
