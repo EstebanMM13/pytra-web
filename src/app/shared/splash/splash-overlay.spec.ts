@@ -1,10 +1,15 @@
 import { TestBed } from '@angular/core/testing';
+import { LAUNCH_SPLASH_DEPS, LaunchSplash } from '../../core/services/launch-splash.service';
 import { setMotionPreference } from '../utils/motion';
 import { SplashOverlay } from './splash-overlay';
 import {
+  MARK_CONTENT_CENTER,
+  NATIVE_MARK_SCALE,
+  SETTLED_MARK_PX,
   SLOGAN_WORD_MS,
   SPLASH_FADE_OUT_START_MS,
   SPLASH_TOTAL_MS,
+  emblemBox,
   shouldShowSplash,
   sloganTokens,
 } from './splash.logic';
@@ -25,6 +30,22 @@ describe('splash logic', () => {
     expect(tokens[2].delayMs).toBeLessThan(tokens[4].delayMs);
   });
 
+  it('starts the mark at the native splash icon: same size, content centred on the screen', () => {
+    const box = emblemBox();
+    expect(box.size).toBeCloseTo(100 * NATIVE_MARK_SCALE);
+    // The content centre lands on the screen centre (offset 0, 0).
+    expect(box.left + (MARK_CONTENT_CENTER.x / 100) * box.size).toBeCloseTo(0);
+    expect(box.top + (MARK_CONTENT_CENTER.y / 100) * box.size).toBeCloseTo(0);
+    expect(box.origin).toBe('54% 50%');
+  });
+
+  it('settles the mark to 88 px with the text block below it', () => {
+    const box = emblemBox();
+    expect(box.size * box.settleScale).toBeCloseTo(SETTLED_MARK_PX);
+    // Settled mark bottom = rise above centre + half the settled size; the text starts below it.
+    expect(box.textTop).toBeGreaterThan(-45 + SETTLED_MARK_PX / 2);
+  });
+
   it('finishes the slogan before the fade-out and the whole intro within 1.4 s', () => {
     const lastWordEnd = Math.max(...sloganTokens().map((t) => t.delayMs)) + SLOGAN_WORD_MS;
     expect(lastWordEnd).toBeLessThanOrEqual(SPLASH_FADE_OUT_START_MS);
@@ -34,6 +55,12 @@ describe('splash logic', () => {
 
 describe('SplashOverlay', () => {
   const win = globalThis as { androidBridge?: unknown };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: LAUNCH_SPLASH_DEPS, useValue: { native: true, hideNative: () => Promise.resolve() } }],
+    });
+  });
 
   afterEach(() => {
     delete win.androidBridge;
@@ -58,14 +85,33 @@ describe('SplashOverlay', () => {
     expect(render().querySelector('[data-splash]')).toBeNull();
   });
 
-  it('plays on native and removes itself after the intro', () => {
+  it('holds its first frame while the system splash is up', () => {
     vi.useFakeTimers();
     win.androidBridge = {};
     const fixture = TestBed.createComponent(SplashOverlay);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[data-splash]')!.classList).toContain('pt-splash-held');
+
+    vi.advanceTimersByTime(SPLASH_TOTAL_MS * 2);
+    fixture.detectChanges();
+    expect(el.querySelector('[data-splash]')).not.toBeNull();
+  });
+
+  it('plays on native once released and removes itself after the intro', async () => {
+    vi.useFakeTimers();
+    win.androidBridge = {};
+    const fixture = TestBed.createComponent(SplashOverlay);
+    fixture.detectChanges();
+    await TestBed.inject(LaunchSplash).release();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-splash]').classList).not.toContain('pt-splash-held');
+    const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('[data-splash]')).not.toBeNull();
     expect(el.textContent).toContain('Remember');
+    const emblem = el.querySelector<HTMLElement>('[data-splash-emblem]')!;
+    expect(emblem.style.width).toBe(`${emblemBox().size}px`);
+    expect(emblem.style.getPropertyValue('--pt-splash-settle')).toContain('translateY(-45px)');
 
     vi.advanceTimersByTime(SPLASH_TOTAL_MS - 1);
     fixture.detectChanges();

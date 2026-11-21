@@ -12,6 +12,47 @@ export const SPLASH_TOTAL_MS = 1400;
 export const SPLASH_FADE_OUT_MS = 300;
 export const SPLASH_FADE_OUT_START_MS = SPLASH_TOTAL_MS - SPLASH_FADE_OUT_MS;
 
+/**
+ * Handoff geometry: the overlay's mark starts exactly where the native splash drew it
+ * (android drawable/splash_icon.xml: mark viewBox scaled 1.15, its content box centred on the
+ * screen), then settles up and shrinks to make room for the wordmark and slogan.
+ */
+export const NATIVE_MARK_SCALE = 1.15;
+/** Centre of the mark's drawn content in its 100x100 viewBox (x 14-94, y 8-92). */
+export const MARK_CONTENT_CENTER = { x: 54, y: 50 } as const;
+/** Mark size once settled, in px. */
+export const SETTLED_MARK_PX = 88;
+/** How far the mark's centre rises above the screen centre once settled, in px. */
+export const SETTLED_RISE_PX = 45;
+
+export interface EmblemBox {
+  /** Side of the emblem box at native size, px. */
+  size: number;
+  /** Offsets from the screen centre to the box's top-left corner, px. */
+  left: number;
+  top: number;
+  /** transform-origin on the content centre, so the settle scales around it. */
+  origin: string;
+  settleScale: number;
+  /** Offset from the screen centre to the top of the wordmark + slogan block, px. */
+  textTop: number;
+}
+
+/** Space between the settled mark and the wordmark, px. */
+const TEXT_GAP_PX = 20;
+
+export function emblemBox(): EmblemBox {
+  const size = 100 * NATIVE_MARK_SCALE;
+  return {
+    size,
+    left: -MARK_CONTENT_CENTER.x * NATIVE_MARK_SCALE,
+    top: -MARK_CONTENT_CENTER.y * NATIVE_MARK_SCALE,
+    origin: `${MARK_CONTENT_CENTER.x}% ${MARK_CONTENT_CENTER.y}%`,
+    settleScale: SETTLED_MARK_PX / size,
+    textTop: -SETTLED_RISE_PX + SETTLED_MARK_PX / 2 + TEXT_GAP_PX,
+  };
+}
+
 export const SLOGAN_WORDS = ['Play', 'Track', 'Remember'] as const;
 const SLOGAN_START_MS = 620;
 const SLOGAN_STEP_MS = 110;

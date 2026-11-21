@@ -1,5 +1,6 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, afterNextRender, computed, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { LaunchSplash } from './core/services/launch-splash.service';
 import { RunFormLauncher } from './core/services/run-form-launcher.service';
 import { RunForm } from './features/games/run-form/run-form';
 import { isNativePlatform } from './core/native-platform';
@@ -25,4 +26,10 @@ export class App {
     const request = this.runFormLauncher.request();
     return request ? [request] : [];
   });
+
+  constructor() {
+    // First frame painted: the native shell can drop its system splash (see LaunchSplash).
+    const launchSplash = inject(LaunchSplash);
+    afterNextRender(() => void launchSplash.release());
+  }
 }
