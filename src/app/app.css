@@ -1,0 +1,7 @@
+/* Splash placeholder while the intro chunk loads: same purple as SPLASH_BACKGROUND. */
+.splash-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: #1e1833;
+}

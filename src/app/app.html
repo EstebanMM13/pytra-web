@@ -4,11 +4,14 @@
 <router-outlet />
 
 <!-- Brand intro (SplashGate: native cold start, once per web session; never with reduced
-     motion). Deferred so its chunk stays out of the initial bundle; on native the system splash
-     stays up meanwhile. The routed screen keeps loading its data underneath. -->
+     motion). Deferred so its chunk stays out of the initial bundle; the placeholder paints the
+     same purple in the very first frame, so the routed screen (which keeps loading its data
+     underneath) is never seen before the intro. -->
 @if (showSplash()) {
   @defer (on immediate) {
     <app-splash-overlay />
+  } @placeholder {
+    <div class="splash-cover" aria-hidden="true" data-splash-cover></div>
   }
 }
 

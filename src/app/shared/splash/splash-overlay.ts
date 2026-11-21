@@ -3,6 +3,7 @@ import {
   Component,
   DestroyRef,
   ViewEncapsulation,
+  afterNextRender,
   effect,
   inject,
   signal,
@@ -28,8 +29,9 @@ import {
  * drew it (same size and centre, fully visible, so the handoff does not jump), then settles up and
  * shrinks over a soft glow while the wordmark and the slogan rise in word by word, then everything
  * fades out to the app. A light sweep crosses the mark once it has settled. Held on its first frame (animations and timer paused) while the system
- * splash is still up, so it starts from the exact frame the system splash showed. On the web
- * there is no system splash in front, so the overlay and the mark fade in instead. Renders nothing
+ * splash is still up (it releases it after its first paint), so it starts from the exact frame
+ * the system splash showed. On the web there is no system splash in front, so the mark fades in
+ * on the purple instead (App's placeholder already covers the screen while this chunk loads). Renders nothing
  * Always on the dark brand purple, whatever the theme, so it
  * continues the native splash. Transform / opacity only; a tap skips it.
  */
@@ -58,7 +60,7 @@ const MARK_MASK = `url("data:image/svg+xml,${encodeURIComponent(
         [class.pt-splash-held]="!released()"
         [class.pt-splash-web]="!native"
         [style.background-color]="background"
-        [style.animation-delay]="animationDelay"
+        [style.animation-delay.ms]="fadeOutStart"
         (pointerdown)="dismiss()"
       >
         <div
@@ -96,16 +98,10 @@ const MARK_MASK = `url("data:image/svg+xml,${encodeURIComponent(
       inset: 0;
       z-index: 1000;
       color: #f7f3ea;
-      /* Delay(s) bound from SPLASH_FADE_OUT_START_MS. */
+      /* Delay bound from SPLASH_FADE_OUT_START_MS. */
       animation: pt-splash-out 300ms cubic-bezier(0.4, 0, 1, 1) forwards;
     }
 
-    /* Web: fade in over the app (no system splash in front), then the usual fade-out. */
-    .pt-splash.pt-splash-web {
-      animation:
-        pt-splash-in 200ms ease-out,
-        pt-splash-out 300ms cubic-bezier(0.4, 0, 1, 1) forwards;
-    }
 
     /* System splash still up: hold the first frame. */
     .pt-splash-held,
@@ -233,12 +229,6 @@ const MARK_MASK = `url("data:image/svg+xml,${encodeURIComponent(
       }
     }
 
-    @keyframes pt-splash-in {
-      from {
-        opacity: 0;
-      }
-    }
-
     @keyframes pt-splash-glow {
       from {
         opacity: 0;
@@ -268,10 +258,7 @@ const MARK_MASK = `url("data:image/svg+xml,${encodeURIComponent(
 export class SplashOverlay {
   protected readonly visible = signal(true);
   protected readonly native = isNativePlatform();
-  /** Web runs the fade-in first (no delay), native only the fade-out. */
-  protected readonly animationDelay = this.native
-    ? `${SPLASH_FADE_OUT_START_MS}ms`
-    : `0ms, ${SPLASH_FADE_OUT_START_MS}ms`;
+  protected readonly fadeOutStart = SPLASH_FADE_OUT_START_MS;
   protected readonly shineStyle = {
     'mask-image': MARK_MASK,
     '-webkit-mask-image': MARK_MASK,
@@ -283,9 +270,12 @@ export class SplashOverlay {
   protected readonly box = emblemBox();
   protected readonly settleTransform = `translateY(${-SETTLED_RISE_PX}px) scale(${this.box.settleScale})`;
 
-  protected readonly released = inject(LaunchSplash).released;
+  private readonly launchSplash = inject(LaunchSplash);
+  protected readonly released = this.launchSplash.released;
 
   constructor() {
+    // Painted at the native icon's spot: the system splash can leave now.
+    afterNextRender(() => void this.launchSplash.release());
     let timer: ReturnType<typeof setTimeout> | undefined;
     // The intro clock starts when the system splash leaves, like the CSS animations.
     effect(() => {

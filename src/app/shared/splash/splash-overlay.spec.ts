@@ -89,17 +89,30 @@ describe('SplashOverlay', () => {
     expect(SHINE_DELAY_MS + SHINE_MS).toBeLessThanOrEqual(SPLASH_FADE_OUT_START_MS);
   });
 
-  it('on the web fades itself in (no system splash in front) and plays at once', () => {
+  it('on the web fades the mark in and plays at once, without fading the cover in', () => {
     TestBed.overrideProvider(LAUNCH_SPLASH_DEPS, { useValue: { native: false, hideNative: () => Promise.resolve() } });
     const fixture = TestBed.createComponent(SplashOverlay);
     fixture.detectChanges();
     const splash = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('[data-splash]')!;
     expect(splash.classList).toContain('pt-splash-web');
     expect(splash.classList).not.toContain('pt-splash-held');
-    expect(splash.style.animationDelay).toBe(`0ms, ${SPLASH_FADE_OUT_START_MS}ms`);
+    expect(splash.style.animationDelay).toBe(`${SPLASH_FADE_OUT_START_MS}ms`);
+  });
+
+  it('asks the native shell to drop the system splash once it has painted', async () => {
+    const hideNative = vi.fn(() => Promise.resolve());
+    TestBed.overrideProvider(LAUNCH_SPLASH_DEPS, { useValue: { native: true, hideNative } });
+    win.androidBridge = {};
+    const fixture = TestBed.createComponent(SplashOverlay);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(hideNative).toHaveBeenCalledTimes(1);
+    expect(TestBed.inject(LaunchSplash).released()).toBe(true);
   });
 
   it('holds its first frame while the system splash is up', () => {
+    // The native side never answers: the intro stays on its first frame.
+    TestBed.overrideProvider(LAUNCH_SPLASH_DEPS, { useValue: { native: true, hideNative: () => new Promise(() => {}) } });
     vi.useFakeTimers();
     win.androidBridge = {};
     const fixture = TestBed.createComponent(SplashOverlay);

@@ -26,8 +26,13 @@ export class App {
   });
 
   constructor() {
-    // First frame painted: the native shell can drop its system splash (see LaunchSplash).
+    // No intro: the first frame is the app itself, so the native shell can drop its system
+    // splash now. With an intro, SplashOverlay releases it once it has painted (see LaunchSplash).
     const launchSplash = inject(LaunchSplash);
-    afterNextRender(() => void launchSplash.release());
+    afterNextRender(() => {
+      if (!this.showSplash()) {
+        void launchSplash.release();
+      }
+    });
   }
 }

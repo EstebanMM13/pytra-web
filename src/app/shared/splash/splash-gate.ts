@@ -53,18 +53,25 @@ export class SplashGate {
     if (this.deps.native) {
       return;
     }
+    // Already signed in on load: decide now, so the very first frame is already covered.
+    if (this.auth.isAuthenticated()) {
+      this.enterApp();
+      return;
+    }
     const watcher = effect(() => {
       if (!this.auth.isAuthenticated()) {
         return;
       }
-      untracked(() => {
-        if (shouldShowWebSplash(true, this.deps.reducedMotion(), this.deps.readSeen())) {
-          this.showState.set(true);
-        }
-        // Signed in once in this session: the intro never plays again (even if skipped by motion).
-        this.deps.writeSeen();
-      });
+      untracked(() => this.enterApp());
       watcher.destroy();
     });
+  }
+
+  private enterApp(): void {
+    if (shouldShowWebSplash(true, this.deps.reducedMotion(), this.deps.readSeen())) {
+      this.showState.set(true);
+    }
+    // Signed in once in this session: the intro never plays again (even if skipped by motion).
+    this.deps.writeSeen();
   }
 }

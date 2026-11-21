@@ -63,6 +63,21 @@ describe('SplashGate', () => {
     expect(writeSeen).toHaveBeenCalledTimes(1);
   });
 
+  it('web: decides synchronously when already signed in, so the first frame is covered', () => {
+    const authenticated = signal(true);
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: { isAuthenticated: authenticated } },
+        {
+          provide: SPLASH_GATE_DEPS,
+          useValue: { native: false, reducedMotion: () => false, readSeen: () => false, writeSeen: () => {} },
+        },
+      ],
+    });
+    // No TestBed.tick(): no effect has run yet.
+    expect(TestBed.inject(SplashGate).show()).toBe(true);
+  });
+
   it('web: does not play when it already played in this session', () => {
     expect(setup({ authenticated: true, seen: true }).gate.show()).toBe(false);
   });
