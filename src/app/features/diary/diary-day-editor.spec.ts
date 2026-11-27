@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { EMPTY, of, throwError } from 'rxjs';
 import { DiaryDay, DiaryLinkedGame } from '../../core/models/diary.model';
@@ -106,6 +107,7 @@ function setup(
     imports: [DiaryDayEditor],
     providers: [
       provideTranslateService(),
+      provideRouter([]),
       { provide: DiaryService, useValue: diary },
       { provide: GameService, useValue: { findAll: () => of(library) } },
       { provide: StatsService, useValue: { getInProgress: () => of(playing) } },
@@ -352,6 +354,14 @@ describe('DiaryDayEditor', () => {
       note: 'Late night',
       games: [{ gameId: 2, hours: 2, note: null }],
     });
+  });
+
+  it('links each game of the day to its game page', () => {
+    const { root } = setup({ day: savedDay() });
+    const link = root().querySelector<HTMLAnchorElement>('[data-diary-row] a[data-game-link]');
+    expect(link).not.toBeNull();
+    expect(link!.textContent!.trim()).toBe('Apex Legends');
+    expect(link!.getAttribute('href')).toBe('/games/2');
   });
 
   it('takes each game note in a vertically resizable comment box and saves it', () => {

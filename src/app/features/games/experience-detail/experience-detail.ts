@@ -29,6 +29,7 @@ import { HoursInput } from '../../../shared/ui/hours-input';
 import { ratingInputParams } from '../../../shared/utils/rating-scale';
 import { HOUR_STEPS, InlineField, bumpHoursDraft, inlineDraft, parseInlineEdit } from './inline-edit.logic';
 import { TimelinePointKey, runTimeline } from './run-timeline.logic';
+import { GameDiaryDays } from '../game-detail/game-diary-days';
 
 /** `/stats/top-rated` caps `limit` at 50 server-side. */
 const RANK_WINDOW = 50;
@@ -58,6 +59,7 @@ export function ratingRank(rating: number, topRatings: readonly number[], window
     Skeleton,
     StatusPill,
     LucideDynamicIcon,
+    GameDiaryDays,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './experience-detail.html',

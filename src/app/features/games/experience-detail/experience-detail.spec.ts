@@ -4,7 +4,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { EMPTY, Subject, of } from 'rxjs';
+import { GameDiaryDay } from '../../../core/models/diary.model';
 import { Experience } from '../../../core/models/experience.model';
+import { DiaryService } from '../../../core/services/diary.service';
 import { DemoModeService } from '../../../core/services/demo-mode.service';
 import { ExperienceService } from '../../../core/services/experience.service';
 import { GameService } from '../../../core/services/game.service';
@@ -51,7 +53,7 @@ describe('ExperienceDetail inline edit', () => {
   let toastError: ReturnType<typeof vi.fn>;
   let blockWrite: ReturnType<typeof vi.fn>;
 
-  function setup(experience = run(), demo = false, scale: RatingScale = '10') {
+  function setup(experience = run(), demo = false, scale: RatingScale = '10', diaryDays: GameDiaryDay[] = []) {
     patch = vi.fn();
     toastError = vi.fn();
     blockWrite = vi.fn(() => demo);
@@ -67,6 +69,7 @@ describe('ExperienceDetail inline edit', () => {
         { provide: ExperienceService, useValue: { findById: () => of(experience), patch, delete: vi.fn() } },
         { provide: GameService, useValue: { cachedById: () => null, findById: () => EMPTY } },
         { provide: StatsService, useValue: { getTopRated: () => of([]) } },
+        { provide: DiaryService, useValue: { findByGame: () => of(diaryDays) } },
         { provide: RunFormLauncher, useValue: { saved$: EMPTY, openEditRun: vi.fn() } },
         {
           provide: PreferencesService,
@@ -99,6 +102,15 @@ describe('ExperienceDetail inline edit', () => {
     t.fixture.detectChanges();
     return t.byId<HTMLInputElement>('run-inline-hours')!;
   }
+
+  it('shows the diary days of this run only, each linking to its diary day', () => {
+    const t = setup(run(), false, '10', [
+      { date: '2026-10-22', hours: 2, note: null, experienceId: 11, countsHours: true },
+      { date: '2026-10-21', hours: 1, note: null, experienceId: 12, countsHours: true },
+    ]);
+    const links = [...t.el.querySelectorAll<HTMLAnchorElement>('[data-diary-days] a')];
+    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/diary?date=2026-10-22']);
+  });
 
   it('turns the hours into a labelled input that saves on Enter', () => {
     const t = setup();

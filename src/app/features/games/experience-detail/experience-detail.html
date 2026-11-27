@@ -376,6 +376,9 @@
         <p class="text-body leading-[1.6] whitespace-pre-line wrap-break-word text-text-2">{{ e.notes }}</p>
       }
     </section>
+
+    <!-- Diary days of this run (hidden without any) -->
+    <app-game-diary-days [gameId]="gameId()" [experienceId]="e.id" />
   } @else {
     <div class="flex flex-col gap-3">
       <app-skeleton class="h-5 w-40 rounded-md" />

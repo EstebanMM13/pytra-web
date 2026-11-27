@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, of } from 'rxjs';
@@ -67,7 +68,7 @@ type PlatformOptions = PlatformRef[] | 'loading';
  */
 @Component({
   selector: 'app-diary-day-editor',
-  imports: [ModalSheet, TranslatePipe, LucideDynamicIcon, GameCover, HoursInput, Segmented],
+  imports: [ModalSheet, TranslatePipe, LucideDynamicIcon, GameCover, HoursInput, Segmented, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-modal-sheet
@@ -187,7 +188,13 @@ type PlatformOptions = PlatformRef[] | 'loading';
                     [name]="game.gameName"
                   />
                   <div class="min-w-0 flex-1">
-                    <p class="text-body font-medium wrap-break-word">{{ game.gameName }}</p>
+                    <!-- Leaving the sheet drops unsaved edits, like closing it; the URL keeps the day. -->
+                    <a
+                      [routerLink]="['/games', game.gameId]"
+                      class="block text-body font-medium wrap-break-word hover:text-brand-light hover:underline"
+                      data-game-link
+                      >{{ game.gameName }}</a
+                    >
                     @if (syncTag(game)) {
                       <span
                         class="mt-1 inline-flex items-center gap-1 rounded-full bg-hover px-2 py-0.5 text-caption text-text-2"
