@@ -70,6 +70,14 @@ describe('Diary', () => {
     expect(el.querySelector('app-diary-day-editor')).toBeNull();
   });
 
+  it('keeps the days of the month in a list that scrolls inside past six rows', () => {
+    const { el } = setup();
+    const list = el.querySelector('[data-month-days]')!;
+    expect(list.classList).toContain('scroll-list');
+    expect(list.classList).toContain('max-h-[424px]');
+    expect(list.querySelectorAll('[data-month-day]')).toHaveLength(1);
+  });
+
   it('labels the legend colours with their hour ranges', () => {
     const { fixture, el } = setup();
     const translate = TestBed.inject(TranslateService);

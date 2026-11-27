@@ -138,6 +138,8 @@
   <section class="flex flex-col gap-2.5" [attr.aria-label]="'diary.monthDays' | translate">
     <app-section-header class="mb-1" [label]="'diary.monthDays' | translate" />
     @if (days() !== null) {
+      <!-- Past six rows the list scrolls inside (6 x 62px rows + 5 x 10px gaps + the scroll-list 2px). -->
+      <div class="scroll-list flex max-h-[424px] flex-col gap-2.5" data-month-days>
       @for (day of monthDays(); track day.date) {
         <button
           type="button"
@@ -164,6 +166,7 @@
           {{ 'diary.emptyMonth' | translate }}
         </p>
       }
+      </div>
     }
   </section>
   </div>

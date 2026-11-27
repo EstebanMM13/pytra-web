@@ -48,7 +48,7 @@ describe('GameDiaryDays', () => {
     expect(el.querySelector('app-section-header')!.textContent).not.toContain('6');
   });
 
-  it('keeps every day in a list that scrolls inside the card past ten rows', () => {
+  it('keeps every day in a list that scrolls inside the card past six rows', () => {
     const many = Array.from({ length: 12 }, (_, i) => ({
       date: `2026-10-${String(30 - i).padStart(2, '0')}`,
       hours: 1,
@@ -60,7 +60,7 @@ describe('GameDiaryDays', () => {
     expect(dates()).toHaveLength(12);
     const list = el.querySelector('[data-diary-days] ul')!;
     expect(list.classList).toContain('scroll-list');
-    expect(list.classList).toContain('max-h-[392px]');
+    expect(list.classList).toContain('max-h-[236px]');
     expect(el.textContent).not.toContain('common.showAll');
   });
 

@@ -18,8 +18,8 @@ import { formatHours } from '../../../shared/pipes/hours.pipe';
 
 /**
  * "Days played" card: the diary days of the game, latest first, each linking to that day in the diary.
- * Given a run (`experienceId`), only the days of that run. Past ten rows the list scrolls inside the card
- * (10 x 39px rows + the scroll-list 2px). Hidden while there are no days to show.
+ * Given a run (`experienceId`), only the days of that run. Past six rows the list scrolls inside the card
+ * (6 x 39px rows + the scroll-list 2px). Hidden while there are no days to show.
  */
 @Component({
   selector: 'app-game-diary-days',
@@ -38,7 +38,7 @@ import { formatHours } from '../../../shared/pipes/hours.pipe';
         >
           <span class="font-mono text-label text-text-3">{{ total() }}</span>
         </app-section-header>
-        <ul class="scroll-list max-h-[392px] text-sm">
+        <ul class="scroll-list max-h-[236px] text-sm">
           @for (day of shown(); track day.date) {
             <li class="border-t border-divider">
               <a
