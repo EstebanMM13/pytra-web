@@ -12,13 +12,13 @@ const DAYS: GameDiaryDay[] = [
   { date: '2026-10-20', hours: 3, note: null, experienceId: null, countsHours: true },
 ];
 
-function setup(experienceId?: number) {
+function setup(experienceId?: number, days: GameDiaryDay[] = DAYS) {
   TestBed.configureTestingModule({
     imports: [GameDiaryDays],
     providers: [
       provideRouter([]),
       provideTranslateService(),
-      { provide: DiaryService, useValue: { findByGame: () => of(DAYS) } },
+      { provide: DiaryService, useValue: { findByGame: () => of(days) } },
     ],
   });
   const fixture = TestBed.createComponent(GameDiaryDays);
@@ -46,6 +46,22 @@ describe('GameDiaryDays', () => {
     expect(dates()).toEqual(['2026-10-21']);
     expect(el.querySelector('app-section-header')!.textContent).toContain('1');
     expect(el.querySelector('app-section-header')!.textContent).not.toContain('6');
+  });
+
+  it('keeps every day in a list that scrolls inside the card past ten rows', () => {
+    const many = Array.from({ length: 12 }, (_, i) => ({
+      date: `2026-10-${String(30 - i).padStart(2, '0')}`,
+      hours: 1,
+      note: null,
+      experienceId: 11,
+      countsHours: true,
+    }));
+    const { el, dates } = setup(undefined, many);
+    expect(dates()).toHaveLength(12);
+    const list = el.querySelector('[data-diary-days] ul')!;
+    expect(list.classList).toContain('scroll-list');
+    expect(list.classList).toContain('max-h-[392px]');
+    expect(el.textContent).not.toContain('common.showAll');
   });
 
   it('stays hidden when the run has no diary days', () => {

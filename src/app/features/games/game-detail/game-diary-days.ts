@@ -16,12 +16,10 @@ import { ratingLocale } from '../../../shared/utils/rating-format';
 import { dayLabel } from '../../diary/diary.logic';
 import { formatHours } from '../../../shared/pipes/hours.pipe';
 
-/** Days shown before "show all". */
-const VISIBLE_DAYS = 8;
-
 /**
  * "Days played" card: the diary days of the game, latest first, each linking to that day in the diary.
- * Given a run (`experienceId`), only the days of that run. Hidden while there are no days to show.
+ * Given a run (`experienceId`), only the days of that run. Past ten rows the list scrolls inside the card
+ * (10 x 39px rows + the scroll-list 2px). Hidden while there are no days to show.
  */
 @Component({
   selector: 'app-game-diary-days',
@@ -40,8 +38,8 @@ const VISIBLE_DAYS = 8;
         >
           <span class="font-mono text-label text-text-3">{{ total() }}</span>
         </app-section-header>
-        <ul class="text-sm">
-          @for (day of visible(); track day.date) {
+        <ul class="scroll-list max-h-[392px] text-sm">
+          @for (day of shown(); track day.date) {
             <li class="border-t border-divider">
               <a
                 [routerLink]="['/diary']"
@@ -58,15 +56,6 @@ const VISIBLE_DAYS = 8;
             </li>
           }
         </ul>
-        @if (hiddenCount() > 0) {
-          <button
-            type="button"
-            (click)="expanded.set(true)"
-            class="tap-area mt-2 text-label font-semibold text-brand-light hover:underline"
-          >
-            {{ 'common.showAll' | translate }} ({{ shown().length }})
-          </button>
-        }
       </section>
     }
   `,
@@ -80,7 +69,6 @@ export class GameDiaryDays {
   readonly experienceId = input<number | null>(null);
 
   protected readonly days = signal<GameDiaryDay[] | null>(null);
-  protected readonly expanded = signal(false);
 
   private readonly locale = computed(() => ratingLocale(this.translate.currentLang() ?? 'es'));
   protected readonly shown = computed(() => {
@@ -88,13 +76,6 @@ export class GameDiaryDays {
     const run = this.experienceId();
     return run === null ? days : days.filter((d) => d.experienceId === run);
   });
-  protected readonly visible = computed(() => {
-    const days = this.shown();
-    return this.expanded() ? days : days.slice(0, VISIBLE_DAYS);
-  });
-  protected readonly hiddenCount = computed(
-    () => this.shown().length - this.visible().length,
-  );
   protected readonly total = computed(() =>
     formatHours(
       this.shown().reduce((sum, d) => sum + d.hours, 0),
@@ -106,7 +87,6 @@ export class GameDiaryDays {
     effect((onCleanup) => {
       const id = this.gameId();
       this.days.set(null);
-      this.expanded.set(false);
       const subscription = this.diaryService.findByGame(id).subscribe({
         next: (days) => this.days.set(days),
         // Optional card: a failure just leaves it hidden.
