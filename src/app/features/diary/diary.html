@@ -26,7 +26,7 @@
   <!-- Calendar on the left and the month's logged days beside it from lg up (stacked below on smaller screens) -->
   <div class="grid grid-cols-1 items-start gap-5 md:gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,390px)]">
   <section
-    class="rounded-[14px] border border-card-border card-glass p-3 sm:p-[18px] md:p-[22px]"
+    class="rounded-[14px] border border-card-border card-glass p-3 sm:p-[18px] md:p-[22px] lg:self-stretch"
     [attr.aria-label]="title()"
   >
     <div class="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 md:mb-4">
@@ -135,11 +135,24 @@
     </ul>
   </section>
 
-  <section class="flex flex-col gap-2.5" [attr.aria-label]="'diary.monthDays' | translate">
-    <app-section-header class="mb-1" [label]="'diary.monthDays' | translate" />
+  <!-- From lg the card is as tall as the calendar: h-0 keeps its list out of the row's height and
+       min-h-full stretches it to the row, so the list scrolls in what is left. Stacked below it, the list
+       scrolls past six rows (6 x 62px rows + 5 x 10px gaps + the scroll-list 2px). -->
+  <section
+    class="flex flex-col gap-2.5 rounded-[14px] border border-card-border card-glass p-3 sm:p-[18px] md:p-[22px] lg:h-0 lg:min-h-full"
+    [attr.aria-label]="'diary.monthDays' | translate"
+    data-month-days-card
+  >
+    <app-section-header class="mb-1" [label]="'diary.monthDays' | translate">
+      @if (days() !== null) {
+        <span class="font-mono text-label text-text-3">{{ monthDays().length }}</span>
+      }
+    </app-section-header>
     @if (days() !== null) {
-      <!-- Past six rows the list scrolls inside (6 x 62px rows + 5 x 10px gaps + the scroll-list 2px). -->
-      <div class="scroll-list flex max-h-[424px] flex-col gap-2.5" data-month-days>
+      <div
+        class="scroll-list flex max-h-[424px] flex-col gap-2.5 lg:max-h-none lg:min-h-0 lg:flex-1"
+        data-month-days
+      >
       @for (day of monthDays(); track day.date) {
         <button
           type="button"

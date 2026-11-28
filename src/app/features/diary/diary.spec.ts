@@ -78,6 +78,17 @@ describe('Diary', () => {
     expect(list.querySelectorAll('[data-month-day]')).toHaveLength(1);
   });
 
+  it('frames the days of the month in a card as tall as the calendar beside it, with their count', () => {
+    const { el } = setup();
+    const card = el.querySelector('section[data-month-days-card]')!;
+    expect(card.classList).toContain('card-glass');
+    // From lg the card fills the calendar's row without growing it; its list scrolls in the rest.
+    expect(card.classList).toContain('lg:h-0');
+    expect(card.classList).toContain('lg:min-h-full');
+    expect(card.querySelector('[data-month-days]')!.classList).toContain('lg:flex-1');
+    expect(card.querySelector('app-section-header')!.textContent).toContain('1');
+  });
+
   it('labels the legend colours with their hour ranges', () => {
     const { fixture, el } = setup();
     const translate = TestBed.inject(TranslateService);
